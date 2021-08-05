@@ -10,6 +10,12 @@ import net.momostudios.coldsweat.temperature.modifier.TempModifier;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+/**
+ * This is the basis for nearly all things relating to temperature in this mod.
+ * While {@code Temperature} is not stored onto the player directly, it is very commonly used for calculations
+ *
+ * It is highly recommended to use Temperature in your code and convert it to Doubles or Integers when needed via {@code get()}
+ */
 public class Temperature
 {
     // Internal variable representing the actual value of the Temperature

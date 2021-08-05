@@ -26,7 +26,7 @@ public class ApplyTempEffectsTest
 {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
-    {
+    {/*
         PlayerEntity player = event.player;
         PlayerTempHandler pth = new PlayerTempHandler();
 
@@ -43,6 +43,6 @@ public class ApplyTempEffectsTest
         {
             data.setCoreTemperature(new Temperature(data.getCoreTemperature().get() + 0.1));
         });
-        //System.out.println("hello world");
+        System.out.println("hello world");*/
     }
 }

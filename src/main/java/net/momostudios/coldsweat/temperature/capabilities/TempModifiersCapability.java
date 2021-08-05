@@ -80,13 +80,12 @@ public class TempModifiersCapability
             ListNBT modList = new ListNBT();
             if (instance.getModifiers() != null)
             {
-                for (TempModifier iter : instance.getModifiers()) {
-                    modList.add(new ObjectNBT(iter));
-                    System.out.println("Object is " + new ObjectNBT(iter) + "of type " + iter);
+                for (TempModifier iter : instance.getModifiers())
+                {
+                    modList.add(modList.size(), new ObjectNBT(iter));
+                    //System.out.println("Object is " + new ObjectNBT(iter) + "of type " + iter);
                 }
                 compound.put("tempModifiers", modList);
-                //System.err.println("The CompoundNBT is " + compound.get("temperature_modifiers"));
-                //System.err.println("The CompoundNBT should be " + modList);
             }
             return compound;
         }
@@ -96,12 +95,11 @@ public class TempModifiersCapability
         {
             if (((CompoundNBT) nbt).get("tempModifiers") != null)
             {
-                List<INBT> nbtList = ((ListNBT) ((CompoundNBT) nbt).get("tempModifiers")).subList(0, ((CompoundNBT) nbt).size());
+                List<INBT> nbtList = ((ListNBT) ((CompoundNBT) nbt).get("tempModifiers"));
                 List<TempModifier> modifiers = new ArrayList<>();
-                for (INBT iter : nbtList) {
-                    if (iter instanceof ObjectNBT && ((ObjectNBT) iter).object.getClass().equals(TempModifier.class)) {
-                        modifiers.add((TempModifier) ((ObjectNBT) iter).object);
-                    }
+                for (INBT iter : nbtList)
+                {
+                    modifiers.add((TempModifier) ((ObjectNBT) iter).object);
                 }
                 instance.set(modifiers);
             }

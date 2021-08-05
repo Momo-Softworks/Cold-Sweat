@@ -6,9 +6,11 @@ import net.minecraft.world.World;
 
 public class WorldInfo
 {
-    //Iterates through every other block until it reaches minecraft:air, then returns the Y value
-    //Ignores minecraft:cave_air
-    //This is different from world.getHeight() because it attemps to ignore blocks that are floating in the air
+    /**
+     * Iterates through every other block until it reaches minecraft:air, then returns the Y value
+     * Ignores minecraft:cave_air
+     * This is different from {@code world.getHeight()} because it attempts to ignore blocks that are floating in the air
+     */
     public static int getGroundLevel(BlockPos pos, World world)
     {
         int iterateY = 0;
@@ -24,24 +26,29 @@ public class WorldInfo
         return 0;
     }
 
-    //Gets the average biome temperature in a grid of BlockPos 3 blocks apart
-    //Search area scales with the number of samples
-    public static float getBiomeTemperature(BlockPos pos, World world, int samples)
+    /**
+     * Gets the average biome temperature in a grid of BlockPos 3 blocks apart
+     * Search area scales with the number of samples
+     * @param pos is the center of the search box
+     * @param samples is the number of checks performed. Higher samples = more accurate but more resource-intensive too
+     * @param interval is how far apart each check is. Higher values means less dense and larger search area
+     */
+    public static float getBiomeTemperature(BlockPos pos, World world, int samples, int interval)
     {
-        samples = (int) Math.pow(samples, 0.25);
         pos = new BlockPos(pos.getX() / 2, pos.getY(), pos.getZ() / 2);
         double totalTemp = 0;
 
-        int lx = pos.getX() - (int) samples;
-        for (int sx = 0; sx < samples; sx++)
+        int lx = (int) (pos.getX() - (Math.sqrt(samples) * interval) / 2);
+        for (int sx = 0; sx < Math.sqrt(samples); sx++)
         {
-            int lz = pos.getZ() - (int) samples;
-            for (int sz = 0; sz < samples; sz++)
+            int lz = (int) (pos.getZ() - (Math.sqrt(samples) * interval) / 2);
+            for (int sz = 0; sz < Math.sqrt(samples); sz++)
             {
                 totalTemp += world.getBiome(pos.add(lx, 0, lz)).getTemperature(pos.add(lx, 0, lz));
-                lz += 4;
+                //Just for testing... world.setBlockState(pos.add(lx, 0, lz), Blocks.GLASS.getDefaultState(), 2);
+                lz += interval;
             }
-            lx += 4;
+            lx += interval;
         }
         return (float) (totalTemp / samples);
     }

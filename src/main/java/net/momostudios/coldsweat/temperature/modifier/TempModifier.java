@@ -9,8 +9,8 @@ import net.momostudios.coldsweat.temperature.Temperature;
  *
  * It is up to you to apply and remove these modifiers manually.
  *
- * If you want a modifier to be instant (like the waterskin), you can remove it
- * from the player in {@code calculate()} via
+ *
+ *
  */
 public class TempModifier
 {
