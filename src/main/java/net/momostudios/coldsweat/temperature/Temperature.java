@@ -68,7 +68,6 @@ public class Temperature
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull PlayerEntity player)
     {
-        PlayerTempHandler pth = new PlayerTempHandler();
         return new Temperature(temp + modifier.calculate(new Temperature(temp), player));
     }
 

@@ -1,10 +1,10 @@
 package net.momostudios.coldsweat.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.momostudios.coldsweat.util.world.WorldInfo;
 import net.momostudios.coldsweat.temperature.Temperature;
+import net.momostudios.coldsweat.util.world.WorldInfo;
 
-public class BiomeTempModifier extends TempModifier
+public class TimeTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

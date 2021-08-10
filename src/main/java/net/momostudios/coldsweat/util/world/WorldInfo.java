@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.helpers;
+package net.momostudios.coldsweat.util.world;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;

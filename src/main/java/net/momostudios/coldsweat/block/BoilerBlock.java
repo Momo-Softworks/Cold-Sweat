@@ -2,30 +2,36 @@ package net.momostudios.coldsweat.block;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.momostudios.coldsweat.tileentity.BoilerTileEntity;
+import net.minecraftforge.fml.network.NetworkHooks;
+import net.momostudios.coldsweat.block.tileentity.BoilerTileEntity;
+import net.momostudios.coldsweat.gui.ColdSweatGroup;
+import net.momostudios.coldsweat.util.init.TileEntityInit;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class BoilerBlock extends Block
@@ -43,24 +49,33 @@ public class BoilerBlock extends Block
                 .harvestLevel(1);
     }
 
+    public static Item.Properties getItemProperties()
+    {
+        return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+    }
+
     public BoilerBlock(Properties properties)
     {
         super(BoilerBlock.getProperties());
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(LIT, Boolean.valueOf(false)));
-        FMLJavaModLoadingContext.get().getModEventBus().register(new TileEntityRegisterHandler());
     }
 
-    //Register TileEntity
-    private static class TileEntityRegisterHandler
+    @SuppressWarnings("deprecation")
+    @Override
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        @SubscribeEvent
-        public void registerTileEntity(RegistryEvent.Register<TileEntityType<?>> event)
+        if (!worldIn.isRemote)
         {
-            event.getRegistry().register(TileEntityType.Builder.create(BoilerTileEntity::new, new BoilerBlock(getProperties())).build(null).setRegistryName("boiler"));
+            TileEntity te = worldIn.getTileEntity(pos);
+            if (te instanceof BoilerTileEntity)
+            {
+                NetworkHooks.openGui((ServerPlayerEntity) player, (BoilerTileEntity) te, pos);
+            }
         }
+        return ActionResultType.SUCCESS;
     }
 
-
+    @SuppressWarnings("deprecation")
     @Override
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
@@ -74,13 +89,31 @@ public class BoilerBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new BoilerTileEntity();
+        return TileEntityInit.BOILER_TILE_ENTITY_TYPE.get().create();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public BlockState mirror(BlockState state, Mirror mirrorIn)
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+        List<ItemStack> dropsOriginal = super.getDrops(state, builder);
+        if (!dropsOriginal.isEmpty())
+            return dropsOriginal;
+        return Collections.singletonList(new ItemStack(this, 1));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+        if (!state.matchesBlock(newState.getBlock()))
+        {
+            TileEntity tileentity = world.getTileEntity(pos);
+            if (tileentity instanceof BoilerTileEntity) {
+                InventoryHelper.dropInventoryItems(world, pos, (BoilerTileEntity) tileentity);
+                world.updateComparatorOutputLevel(pos, this);
+            }
+        }
+        super.onReplaced(state, world, pos, newState, isMoving);
     }
 
     @Override
@@ -98,7 +131,6 @@ public class BoilerBlock extends Block
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite()).with(LIT, false);
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand)
