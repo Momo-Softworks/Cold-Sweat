@@ -11,7 +11,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.util.init.*;
+import net.momostudios.coldsweat.core.init.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +30,7 @@ public class ColdSweat
         TileEntityInit.TILE_ENTITY_TYPE.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ModItems.ITEMS.register(bus);
+        bus.addListener(this::commonSetup);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ColdSweatConfig.SPEC, "cold-sweat_common.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FuelItemsConfig.SPEC, "cold-sweat_fuel-items.toml");
@@ -39,5 +40,10 @@ public class ColdSweat
     public void onCommandRegister(final RegisterCommandsEvent event)
     {
         CommandInit.registerCommands(event);
+    }
+
+    public void commonSetup(final FMLCommonSetupEvent event)
+    {
+        ColdSweatNetwork.init();
     }
 }
