@@ -1,17 +1,12 @@
 package net.momostudios.coldsweat.events;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.nbt.ListNBTHelper;
 import net.momostudios.coldsweat.temperature.PlayerTempHandler;
 import net.momostudios.coldsweat.temperature.Temperature;
-import net.momostudios.coldsweat.temperature.modifier.BiomeTempModifier;
-import net.momostudios.coldsweat.temperature.modifier.DepthTempModifier;
 import net.momostudios.coldsweat.temperature.modifier.TempModifier;
 import java.util.List;
 
@@ -27,6 +22,6 @@ public class PlayerTempUpdater
          * Runs the calculate() method for every TempModifier on the player
          */
         List<TempModifier> modList = PlayerTempHandler.getAmbientModifiers(player);
-        PlayerTempHandler.setAmbient(player, new Temperature(new Temperature().with(modList, player).get() - PlayerTempHandler.getAmbient(player).get() / 10));
+        PlayerTempHandler.setAmbient(player, new Temperature(new Temperature().with(modList, player).get()));
     }
 }

@@ -1,8 +1,15 @@
 package net.momostudios.coldsweat.util.world;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.common.BiomeDictionary;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WorldInfo
 {
@@ -33,8 +40,9 @@ public class WorldInfo
      * @param samples is the number of checks performed. Higher samples = more accurate but more resource-intensive too
      * @param interval is how far apart each check is. Higher values means less dense and larger search area
      */
-    public static float getBiomeTemperature(BlockPos pos, World world, int samples, int interval)
+    public static List<BlockPos> getNearbyPositions(BlockPos pos, World world, int samples, int interval)
     {
+        List<BlockPos> posList = new ArrayList<>();
         pos = new BlockPos(pos.getX() / 2, pos.getY(), pos.getZ() / 2);
         double totalTemp = 0;
 
@@ -44,12 +52,11 @@ public class WorldInfo
             int lz = (int) (pos.getZ() - (Math.sqrt(samples) * interval) / 2);
             for (int sz = 0; sz < Math.sqrt(samples); sz++)
             {
-                totalTemp += world.getBiome(pos.add(lx, 0, lz)).getTemperature(pos.add(lx, 0, lz));
-                //Just for testing... world.setBlockState(pos.add(lx, 0, lz), Blocks.GLASS.getDefaultState(), 2);
+                posList.add(pos.add(lx, 0, lz));
                 lz += interval;
             }
             lx += interval;
         }
-        return (float) (totalTemp / samples);
+        return posList;
     }
 }
