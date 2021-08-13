@@ -15,8 +15,8 @@ public class ModItems
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ColdSweat.MOD_ID);
 
     //Items
-    public static final RegistryObject<Item> WATERSKIN = ITEMS.register("waterskin", () -> new WaterskinItem());
-    public static final RegistryObject<Item> FILLED_WATERSKIN = ITEMS.register("filled_waterskin", () -> new Item(FilledWaterskinItem.getProperties()));
+    public static final RegistryObject<Item> WATERSKIN = ITEMS.register("waterskin", WaterskinItem::new);
+    public static final RegistryObject<Item> FILLED_WATERSKIN = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
 
     //BlockItems
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(ModBlocks.BOILER.get(), BoilerBlock.getItemProperties()));

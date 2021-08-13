@@ -1,12 +1,17 @@
 package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.*;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.momostudios.coldsweat.core.init.TempModifierInit;
 
 import javax.annotation.Nullable;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ListNBTHelper
@@ -22,7 +27,7 @@ public class ListNBTHelper
             }
             catch(ClassCastException e)
             {
-                System.err.println("ListNBTHelper.createIfNull threw " + e);
+                System.err.println("ListNBTHelper.createIfNull already has nbt \"" + key + "\" as a different type");
             }
         }
         else player.getPersistentData().put(key, listNBT);
@@ -33,42 +38,55 @@ public class ListNBTHelper
     {
         for (INBT iterator : nbt)
         {
-            try
+            if (iterator instanceof ListNBT)
             {
-                if (iterator instanceof StringNBT && Class.forName(iterator.getString()).equals(object.getClass()))
+
+                try
                 {
-                    return true;
+                    if (Class.forName(((ListNBT) iterator).get(0).getString()).equals(object.getClass()))
+                    {
+                        return true;
+                    }
                 }
-            } catch (Exception e) { System.err.println("ListNBTHelper threw " + e); }
+                catch (Exception e)
+                {
+                    System.err.println("ListNBTHelper threw " + e);
+                }
+            }
         }
         return false;
     }
 
     /**
-     * Converts the specified ListNBT into a List
-     * @param cast attempts to cast every object in the new List to the specified class
-     * Only accepts ObjectNBT types
+     * Converts the specified ListNBT into a List of TempModifiers
      */
-    public static <T> List<T> asList(ListNBT nbt, @Nullable Class<T> cast)
+    public static List<TempModifier> getModifierList(ListNBT nbt)
     {
-        List<T> returnList = new ArrayList<T>();
+        List<TempModifier> returnList = new ArrayList<TempModifier>();
         try
         {
-            for (INBT iterator : nbt)
+            for (INBT inbt : nbt)
             {
-                if (iterator instanceof StringNBT)
+                if (inbt instanceof ListNBT)
                 {
-                    Class clazz = Class.forName(iterator.getString());
-                    Object instance = clazz.newInstance();
-
-                    if (cast == null || cast.isInstance(instance))
+                    TempModifier modifier = (TempModifier) Class.forName(((ListNBT) inbt).get(0).getString()).newInstance();
+                    if (((ListNBT) inbt).size() > 1)
                     {
-                        returnList.add((T) instance);
+                        List<Object> args = new ArrayList<>();
+                        int index = 0;
+                        for (INBT inbt1 : ((ListNBT) inbt))
+                        {
+                            if (index != 0)
+                                args.add(inbt1 instanceof StringNBT ? inbt1.getString() : ((NumberNBT) inbt1).getFloat());
+                            index++;
+                        }
+                        modifier = modifier.with(args);
                     }
+                    returnList.add(modifier);
                 }
             }
         }
-        catch (Exception e) { System.err.println("ListNBTHelper.asList threw " + e); }
+        catch (Exception e) { System.err.println("ListNBTHelper.getModifierList threw " + e); }
         return returnList;
     }
 }

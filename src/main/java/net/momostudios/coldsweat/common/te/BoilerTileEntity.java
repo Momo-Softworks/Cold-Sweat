@@ -82,17 +82,19 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
             world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, false));
         }
 
-        if (this.getFuel() < 1000 && !getFuelItem(this.getItemInSlot(9)).isEmpty())
+        if (!getFuelItem(this.getItemInSlot(9)).isEmpty())
         {
             ItemStack fuel = this.getItemInSlot(9);
             int amount = (int) getFuelItem(this.getItemInSlot(9)).get(1);
-
-            if (fuel.hasContainerItem())
+            if (this.getFuel() <= 1000 - (Math.min(amount, 100)))
             {
-                this.setItemInSlot(9, fuel.getContainerItem());
+                if (fuel.hasContainerItem())
+                {
+                    this.setItemInSlot(9, fuel.getContainerItem());
+                }
+                else this.getItemInSlot(9).shrink(1);
+                this.setFuel(this.getFuel() + amount);
             }
-            else this.getItemInSlot(9).shrink(1);
-            this.setFuel(this.getFuel() + amount);
         }
     }
 

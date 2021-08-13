@@ -44,9 +44,9 @@ public class Temperature
     /**
     * Adds to the actual value of the temperature
     */
-    public void add(double amount)
+    public Temperature add(double amount)
     {
-        temp += amount;
+        return new Temperature(temp + amount);
     }
 
     /**

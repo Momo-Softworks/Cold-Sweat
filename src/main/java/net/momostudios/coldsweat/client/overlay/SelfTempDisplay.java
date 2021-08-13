@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.ResourceLocation;
-import net.momostudios.coldsweat.common.temperature.PlayerTempHandler;
+import net.momostudios.coldsweat.common.temperature.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay
@@ -31,7 +31,7 @@ public class SelfTempDisplay
             double y = entity.getPosY();
             double z = entity.getPosZ();
 
-            double temp = PlayerTempHandler.getBody(Minecraft.getInstance().getIntegratedServer().getPlayerList().getPlayerByUUID(entity.getUniqueID())).get();
+            double temp = PlayerTemp.getTemperature(Minecraft.getInstance().getIntegratedServer().getPlayerList().getPlayerByUUID(entity.getUniqueID()), PlayerTemp.Types.COMPOSITE).get();
 
 
             int threatLevel = 0;

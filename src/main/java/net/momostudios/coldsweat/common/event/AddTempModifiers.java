@@ -6,7 +6,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.common.temperature.PlayerTempHandler;
+import net.momostudios.coldsweat.common.temperature.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.modifier.BiomeTempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.TimeTempModifier;
 
@@ -23,12 +23,12 @@ public class AddTempModifiers
          */
         if (player.ticksExisted % 20 == 0)
         {
-            PlayerTempHandler.applyToAmbient(player, new BiomeTempModifier(), false);
-            PlayerTempHandler.applyToAmbient(player, new TimeTempModifier(), false);
+            PlayerTemp.applyModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
         }
 
-        double ambientTemp = PlayerTempHandler.getAmbient(player).get();
-        double bodyTemp = PlayerTempHandler.getBody(player).get();
+        double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
+        //double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
 
         player.sendStatusMessage(new StringTextComponent((int) (ambientTemp * 40 + 40) + ""), true);
     }

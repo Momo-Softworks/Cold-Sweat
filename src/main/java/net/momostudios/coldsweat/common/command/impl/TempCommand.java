@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
@@ -14,7 +13,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.momostudios.coldsweat.common.command.BaseCommand;
-import net.momostudios.coldsweat.common.temperature.PlayerTempHandler;
+import net.momostudios.coldsweat.common.temperature.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 
@@ -112,7 +111,7 @@ public class TempCommand extends BaseCommand
             if (players.contains(source.asPlayer()))
             {
                 //Set the sender's body temperature
-                PlayerTempHandler.setBody(players.iterator().next().inventory.player, new Temperature(amount));
+                PlayerTemp.setTemperature(players.iterator().next().inventory.player, new Temperature(amount), PlayerTemp.Types.BODY);
 
                 //Print success message to all players
                 for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -126,13 +125,13 @@ public class TempCommand extends BaseCommand
                     player.sendStatusMessage(new StringTextComponent(
                     "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
                     message.getString()  +
-                    " \u00a7f" + PlayerTempHandler.getBody(source.asPlayer()).get() + "\u00a7r"), false);
+                    " \u00a7f" + PlayerTemp.getTemperature(source.asPlayer(), PlayerTemp.Types.BODY).get() + "\u00a7r"), false);
                 }
             }
             else
             {
                 //Set the target player's temperature
-                PlayerTempHandler.setBody((PlayerEntity) Arrays.asList(players).get(0), new Temperature(amount));
+                PlayerTemp.setTemperature((PlayerEntity) Arrays.asList(players).get(0), new Temperature(amount), PlayerTemp.Types.BODY);
 
                 //Print success message to all players
                 for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -141,7 +140,7 @@ public class TempCommand extends BaseCommand
                     player.sendStatusMessage(new StringTextComponent(
                     "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
                     new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", source.asPlayer().getScoreboardName()).getString()  +
-                    " \u00a7f" + PlayerTempHandler.getBody((PlayerEntity) Arrays.asList(players).get(0)).get() + "\u00a7r"), false);
+                    " \u00a7f" + PlayerTemp.getTemperature((PlayerEntity) Arrays.asList(players).get(0), PlayerTemp.Types.BODY).get() + "\u00a7r"), false);
                 }
             }
         }
@@ -150,7 +149,7 @@ public class TempCommand extends BaseCommand
             int playerCount = 0;
             for (ServerPlayerEntity player : players)
             {
-                PlayerTempHandler.setBody(player, new Temperature(amount));
+                PlayerTemp.setTemperature(player, new Temperature(amount), PlayerTemp.Types.BODY);
                 playerCount++;
             }
 

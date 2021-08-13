@@ -30,7 +30,7 @@ public class ColdSweat
         TileEntityInit.TILE_ENTITY_TYPE.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ModItems.ITEMS.register(bus);
-        bus.addListener(this::commonSetup);
+        //TempModifierInit.TEMP_MODIFIERS.register(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ColdSweatConfig.SPEC, "cold-sweat_common.toml");
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FuelItemsConfig.SPEC, "cold-sweat_fuel-items.toml");
@@ -40,10 +40,5 @@ public class ColdSweat
     public void onCommandRegister(final RegisterCommandsEvent event)
     {
         CommandInit.registerCommands(event);
-    }
-
-    public void commonSetup(final FMLCommonSetupEvent event)
-    {
-        ColdSweatNetwork.init();
     }
 }
