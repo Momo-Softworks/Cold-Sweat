@@ -13,6 +13,7 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class ListNBTHelper
 {
@@ -38,12 +39,11 @@ public class ListNBTHelper
     {
         for (INBT iterator : nbt)
         {
-            if (iterator instanceof ListNBT)
+            if (iterator instanceof CompoundNBT)
             {
-
                 try
                 {
-                    if (Class.forName(((ListNBT) iterator).get(0).getString()).equals(object.getClass()))
+                    if (Class.forName(((CompoundNBT) iterator).get("modifier_name").getString()).equals(object.getClass()))
                     {
                         return true;
                     }
@@ -65,23 +65,35 @@ public class ListNBTHelper
         List<TempModifier> returnList = new ArrayList<TempModifier>();
         try
         {
-            for (INBT inbt : nbt)
+            for (INBT modifierInstance : nbt)
             {
-                if (inbt instanceof ListNBT)
+                if (modifierInstance instanceof CompoundNBT)
                 {
-                    TempModifier modifier = (TempModifier) Class.forName(((ListNBT) inbt).get(0).getString()).newInstance();
-                    if (((ListNBT) inbt).size() > 1)
+                    //Get the class of the TempModifier
+                    TempModifier modifier = (TempModifier) Class.forName(((StringNBT) ((CompoundNBT) modifierInstance).get("modifier_name")).getString()).newInstance();
+                    //Get the list of argument keys (including the TempModifier class)
+                    Set<String> modifierArguments = ((CompoundNBT) modifierInstance).keySet();
+
+                    //Does the TempModifier have arguments?
+                    if (modifierArguments.size() > 1)
                     {
-                        List<Object> args = new ArrayList<>();
-                        int index = 0;
-                        for (INBT inbt1 : ((ListNBT) inbt))
+                        List<INBT> args = new ArrayList<>();
+
+                        //Iterate through the set of argument keys
+                        int iter = 0;
+                        for (String modifierArgument : modifierArguments)
                         {
-                            if (index != 0)
-                                args.add(inbt1 instanceof StringNBT ? inbt1.getString() : ((NumberNBT) inbt1).getFloat());
-                            index++;
+                            //Gets the actual value of the argument from the key
+                            if (iter > 0)
+                            {
+                                args.add(((CompoundNBT) modifierInstance).get(modifierArgument));
+                            }
+                            iter++;
                         }
+                        //Apply the arguments (if any)
                         modifier = modifier.with(args);
                     }
+                    //Add the TempModifier with all its arguments to the return list of TempModifiers
                     returnList.add(modifier);
                 }
             }

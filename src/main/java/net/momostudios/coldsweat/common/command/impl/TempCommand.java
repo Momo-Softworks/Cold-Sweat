@@ -38,12 +38,12 @@ public class TempCommand extends BaseCommand
                 .then(Commands.literal("range")
                         .then(Commands.literal("min")
                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, 100))
-                                        .executes(source -> executeSetMinRange(source.getSource(), IntegerArgumentType.getInteger(source, "amount")))
+                                        .executes(source -> executeSetMinRange(source.getSource(), DoubleArgumentType.getDouble(source, "amount")))
                                 )
                         )
                         .then(Commands.literal("max")
                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, 100))
-                                        .executes(source -> executeSetMaxRange(source.getSource(), IntegerArgumentType.getInteger(source, "amount")))
+                                        .executes(source -> executeSetMaxRange(source.getSource(), DoubleArgumentType.getDouble(source, "amount")))
                                 )
                         )
                 )
@@ -54,20 +54,27 @@ public class TempCommand extends BaseCommand
                                         source.getSource(), EntityArgument.getPlayers(source, "players"), IntegerArgumentType.getInteger(source, "amount")))
                                 )
                         )
+                )
+                .then(Commands.literal("get")
+                        .then(Commands.argument("players", EntityArgument.players())
+                                .executes(source -> executeGetPlayerTemp(
+                                source.getSource(), EntityArgument.getPlayers(source, "players")))
+                        )
                 );
     }
 
     private int executeSetRate(CommandSource source, double multiplier) throws CommandSyntaxException
     {
         //Set the option in the config
-        ColdSweatConfig.rateMultiplier.set(multiplier);
+        ColdSweatConfig.getInstance().setRateMultiplier(multiplier);
+        ColdSweatConfig.getInstance().save();
 
         //Print success message to all players
         for (PlayerEntity player : source.asPlayer().world.getPlayers()) {
             player.sendStatusMessage(new StringTextComponent(
-                    "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-                    new TranslationTextComponent("commands.cold_sweat.temperature.rate.result").getString() +
-                    " \u00a7f" + (multiplier * 100) + "%\u00a7r"), false);
+            "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
+            new TranslationTextComponent("commands.cold_sweat.temperature.rate.result").getString() +
+            " \u00a7f" + (multiplier * 100) + "%\u00a7r"), false);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -75,7 +82,9 @@ public class TempCommand extends BaseCommand
     private int executeSetMinRange(CommandSource source, double amount) throws CommandSyntaxException
     {
         //Set the option in the config
-        ColdSweatConfig.minHabitable.set(amount);
+        ColdSweatConfig.getInstance().setMinHabitable(amount);
+        ColdSweatConfig.getInstance().save();
+        System.out.println(ColdSweatConfig.getInstance().minHabitable());
 
         //Print success message to all players
         for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -91,7 +100,9 @@ public class TempCommand extends BaseCommand
     private int executeSetMaxRange(CommandSource source, double amount) throws CommandSyntaxException
     {
         //Set the option in the config
-        ColdSweatConfig.maxHabitable.set(amount);
+        ColdSweatConfig.getInstance().setMaxHabitable(amount);
+        ColdSweatConfig.getInstance().save();
+        System.out.println(ColdSweatConfig.getInstance().maxHabitable());
 
         //Print success message to all players
         for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -111,7 +122,7 @@ public class TempCommand extends BaseCommand
             if (players.contains(source.asPlayer()))
             {
                 //Set the sender's body temperature
-                PlayerTemp.setTemperature(players.iterator().next().inventory.player, new Temperature(amount), PlayerTemp.Types.BODY);
+                PlayerTemp.setTemperature(players.iterator().next(), new Temperature(amount), PlayerTemp.Types.BODY);
 
                 //Print success message to all players
                 for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -162,6 +173,19 @@ public class TempCommand extends BaseCommand
                 new TranslationTextComponent("commands.cold_sweat.temperature.set.all.result", playerCount).getString()  +
                 " \u00a7f" + amount + "\u00a7r"), false);
             }
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int executeGetPlayerTemp(CommandSource source, Collection<ServerPlayerEntity> players) throws CommandSyntaxException
+    {
+        for (ServerPlayerEntity player : players)
+        {
+            //Compose the message
+            source.asPlayer().sendStatusMessage(new StringTextComponent(
+            "\u00a77" +
+            new TranslationTextComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
+            " \u00a7f" + (int) PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() + "\u00a7r"), false);
         }
         return Command.SINGLE_SUCCESS;
     }

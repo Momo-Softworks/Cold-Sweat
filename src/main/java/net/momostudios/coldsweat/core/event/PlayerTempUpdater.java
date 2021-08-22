@@ -9,6 +9,7 @@ import net.momostudios.coldsweat.common.temperature.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.core.util.CustomDamageTypes;
 
 import java.util.List;
 
@@ -28,8 +29,9 @@ public class PlayerTempUpdater
 
         double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
         double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
-        double maxTemp = ColdSweatConfig.maxHabitable.get();
-        double minTemp = ColdSweatConfig.minHabitable.get();
+        ColdSweatConfig config = ColdSweatConfig.getInstance();
+        double maxTemp = config.maxHabitable();
+        double minTemp = config.minHabitable();
 
         //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
         if (ambientTemp > maxTemp)
@@ -40,19 +42,19 @@ public class PlayerTempUpdater
                 new Temperature
                 (
                     Math.min(bodyTemp +
-                    new Temperature((maxTemp - ambientTemp) / 75)
+                    new Temperature((ambientTemp - maxTemp) / 40)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), 150)
                 ),
                 PlayerTemp.Types.BODY
             );
         }
         //Return the player's temperature back to 0
-        else if (bodyTemp > 0)
+        else if (bodyTemp > 0 && player.ticksExisted % 10 == 0)
         {
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp - Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), bodyTemp)),
+                new Temperature(bodyTemp).add(-Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }
@@ -65,33 +67,65 @@ public class PlayerTempUpdater
                 player,
                 new Temperature
                 (
-                    Math.max(bodyTemp - new Temperature((maxTemp - ambientTemp) / 75)
+                    Math.max(bodyTemp - new Temperature((Math.abs(minTemp - ambientTemp)) / 40)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), -150)
                 ),
                 PlayerTemp.Types.BODY
             );
         }
         //Return the player's temperature back to 0
-        else if (bodyTemp < 0)
+        else if (bodyTemp < 0 && player.ticksExisted % 10 == 0)
         {
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp + Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), -bodyTemp)),
+                new Temperature(bodyTemp).add(Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), -bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }
 
-        //Sets the player's overall temperature (base + modifiers)
+        //Calculates the player's temperature
         PlayerTemp.setTemperature
         (
             player,
-            new Temperature
-            (
-                PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player).get() +
-                PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player).get()
-            ),
+            PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
+            PlayerTemp.Types.BODY
+        );
+        PlayerTemp.setTemperature
+        (
+            player,
+            new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player),
+            PlayerTemp.Types.BASE
+        );
+        PlayerTemp.setTemperature
+        (
+            player,
+            PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player).add(
+            PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player)),
             PlayerTemp.Types.COMPOSITE
         );
+
+        //Ensure a maximum and minimum cap of 150 or -150 for body temperature (does not include base offset)
+        if (PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get() > 150)
+        {
+            PlayerTemp.setTemperature(player, new Temperature(150), PlayerTemp.Types.BODY);
+        }
+        if (PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get() < -150)
+        {
+            PlayerTemp.setTemperature(player, new Temperature(-150), PlayerTemp.Types.BODY);
+        }
+
+        //Deal damage to the player if temperature is critical
+        if (player.ticksExisted % 40 == 0)
+        {
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100)
+            {
+                player.attackEntityFrom(CustomDamageTypes.HOT, 2);
+            }
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100)
+            {
+                player.attackEntityFrom(CustomDamageTypes.COLD, 2);
+            }
+        }
     }
 }

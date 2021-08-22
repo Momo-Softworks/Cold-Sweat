@@ -48,6 +48,13 @@ public class Temperature
     {
         return new Temperature(temp + amount);
     }
+    /**
+     * Adds to the actual value of the temperature
+     */
+    public Temperature add(Temperature amount)
+    {
+        return new Temperature(temp + amount.get());
+    }
 
     /**
     * Returns a double representing the actual value of the Temperature
@@ -82,6 +89,6 @@ public class Temperature
                 modTemp = modifier.calculate(new Temperature(modTemp), player);
             }
         }
-        return new Temperature(temp + modTemp);
+        return new Temperature(modTemp);
     }
 }

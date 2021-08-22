@@ -86,7 +86,7 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
         {
             ItemStack fuel = this.getItemInSlot(9);
             int amount = (int) getFuelItem(this.getItemInSlot(9)).get(1);
-            if (this.getFuel() <= 1000 - (Math.min(amount, 100)))
+            if (this.getFuel() <= Math.max(1000 - amount, 900))
             {
                 if (fuel.hasContainerItem())
                 {

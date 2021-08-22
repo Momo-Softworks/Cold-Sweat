@@ -21,7 +21,7 @@ public class ItemTooltipInfo
     {
         if (event.getItemStack().getItem() == ModItems.FILLED_WATERSKIN.get() && event.getPlayer() != null)
         {
-            boolean celsius = ColdSweatConfig.celsius.get();
+            boolean celsius = ColdSweatConfig.getInstance().celsius();
             double temp = event.getItemStack().getOrCreateTag().getDouble("temperature");
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";

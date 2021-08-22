@@ -13,6 +13,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.ResourceLocation;
 import net.momostudios.coldsweat.common.temperature.PlayerTemp;
+import net.momostudios.coldsweat.config.ColdSweatConfig;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay
@@ -52,7 +53,8 @@ public class SelfTempDisplay
             if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
 
             Minecraft.getInstance().getTextureManager().bindTexture(icon);
-            Minecraft.getInstance().ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5, scaleY - 48 + threatOffset, 0, 0, 10, 10, 10, 10);
+            Minecraft.getInstance().ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + ColdSweatConfig.getInstance().steveHeadX(),
+                scaleY - 51 + threatOffset + ColdSweatConfig.getInstance().steveHeadY(), 0, 0, 10, 10, 10, 10);
         }
     }
 }

@@ -9,6 +9,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class PlayerTemp
@@ -42,16 +43,18 @@ public class PlayerTemp
         ListNBT nbt = ListNBTHelper.createIfNull(getModifierTag(type), player);
         if (!ListNBTHelper.doesNBTContain(nbt, modifier) || duplicates)
         {
-            ListNBT modifierData = new ListNBT();
+            CompoundNBT modifierData = new CompoundNBT();
             //System.out.println("The modifier is " + modifier + " and the key is " + modifier.getRegistryName());
-            modifierData.add(StringNBT.valueOf(modifier.getClass().toString().replaceFirst("class ", "")));
+            modifierData.putString("modifier_name", modifier.getClass().toString().replaceFirst("class ", ""));
 
             if (arguments != null)
+            {
+                int modifierIndex = 0;
                 for (INBT argument : arguments)
                 {
-                    modifierData.add(argument);
-                    System.out.println(argument);
+                    modifierData.put("argument_" + modifierIndex, argument);
                 }
+            }
             nbt.add(modifierData);
         }
         player.getPersistentData().put(getModifierTag(type), nbt);
@@ -74,20 +77,34 @@ public class PlayerTemp
      * Removes the specified number of TempModifiers of the specified type from the player
      * @param player is the player being sampled
      * @param type determines which TempModifier list to pull from
+     * @param count is the number of modifiers of the given type to be removed (use Integer.MAX_VALUE to remove all instances)
      */
     public static <T> void removeModifier(PlayerEntity player, Class<T> modClass, Types type, int count)
     {
-        CompoundNBT nbt = player.getPersistentData();
-        List<TempModifier> modifiers = ListNBTHelper.getModifierList(ListNBTHelper.createIfNull(getModifierTag(type), player));
-
-        int modsLeft = 0;
-        for (TempModifier modifier : modifiers)
+        ListNBT modifierList = ListNBTHelper.createIfNull(getModifierTag(type), player);
         {
-            if (modifier.getClass().equals(modClass) && modsLeft < count)
+            if (!modifierList.isEmpty())
             {
-                modifiers.remove(modifier);
+                if (count > modifierList.size()) count = modifierList.size();
+                for (int i = 0; i < count; i++)
+                {
+                    for (INBT inbt : modifierList)
+                    {
+                        try
+                        {
+                            if (Class.forName(((CompoundNBT) inbt).get("modifier_name").getString()).equals(modClass))
+                            {
+                                modifierList.remove(inbt);
+                                break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            System.err.println("PlayerTemp.removeModifier threw " + e);
+                        }
+                    }
+                }
             }
-            modsLeft++;
         }
     }
 

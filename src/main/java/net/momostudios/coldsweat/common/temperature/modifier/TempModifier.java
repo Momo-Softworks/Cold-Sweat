@@ -2,12 +2,14 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,11 +20,21 @@ import java.util.List;
  * It is up to you to apply and remove these modifiers manually.
  * To make an instant modifier that does not stay on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}
  */
-public class TempModifier extends ForgeRegistryEntry<TempModifier> {
+public class TempModifier extends ForgeRegistryEntry<TempModifier>
+{
     /**
-     * Use this if your TempModifier has arguments
+     * This default constructor is important!
      */
-    public TempModifier with(List<Object> args) { return null; }
+    public TempModifier() {}
+
+    /**
+     * Use these if your TempModifier has arguments
+     */
+    public TempModifier(List<INBT> args) {}
+    public TempModifier with(List<INBT> args)
+    {
+        return this;
+    }
 
     /**
      * Determines what the provided temperature would be, given the player it is being applied to
