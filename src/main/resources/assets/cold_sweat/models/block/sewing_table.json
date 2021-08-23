@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cold_sweat:blocks/sewing_table_bottom",
+    "up": "cold_sweat:blocks/sewing_table_top",
+    "north": "cold_sweat:blocks/sewing_table_side",
+    "east": "cold_sweat:blocks/sewing_table_front",
+    "south": "cold_sweat:blocks/sewing_table_side",
+    "west": "cold_sweat:blocks/sewing_table_front",
+    "particle": "cold_sweat:blocks/sewing_table_side"
+  }
+}

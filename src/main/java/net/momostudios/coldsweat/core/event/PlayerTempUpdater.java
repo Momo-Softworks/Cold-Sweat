@@ -25,7 +25,7 @@ public class PlayerTempUpdater
          * Runs the calculate() method for every TempModifier on the player
          */
         List<TempModifier> modList = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
-        PlayerTemp.setTemperature(player, new Temperature(new Temperature().with(modList, player).get()), PlayerTemp.Types.AMBIENT);
+        PlayerTemp.setTemperature(player, new Temperature().with(modList, player), PlayerTemp.Types.AMBIENT);
 
         double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
         double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
@@ -41,20 +41,19 @@ public class PlayerTempUpdater
                 player,
                 new Temperature
                 (
-                    Math.min(bodyTemp +
-                    new Temperature((ambientTemp - maxTemp) / 40)
+                    Math.min(bodyTemp + new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), 150)
                 ),
                 PlayerTemp.Types.BODY
             );
         }
         //Return the player's temperature back to 0
-        else if (bodyTemp > 0 && player.ticksExisted % 10 == 0)
+        else if (bodyTemp > 0)
         {
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp).add(-Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), bodyTemp)),
+                new Temperature(bodyTemp).add(-Math.min(Math.max(0.02, Math.abs(ambientTemp - maxTemp) / 10), bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }
@@ -67,19 +66,19 @@ public class PlayerTempUpdater
                 player,
                 new Temperature
                 (
-                    Math.max(bodyTemp - new Temperature((Math.abs(minTemp - ambientTemp)) / 40)
+                    Math.max(bodyTemp - new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), -150)
                 ),
                 PlayerTemp.Types.BODY
             );
         }
         //Return the player's temperature back to 0
-        else if (bodyTemp < 0 && player.ticksExisted % 10 == 0)
+        else if (bodyTemp < 0)
         {
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp).add(Math.min(Math.max(0.15, Math.abs(ambientTemp - maxTemp)), -bodyTemp)),
+                new Temperature(bodyTemp).add(Math.min(Math.max(0.02, Math.abs(ambientTemp - minTemp) / 10), -bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }

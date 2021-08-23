@@ -19,7 +19,7 @@ public class ColdSweatConfig
 
     private static final ColdSweatConfig INSTANCE;
     private static final ForgeConfigSpec SPEC;
-    private static final Path CONFIG_PATH = Paths.get("cold-sweat_main.toml");
+    private static final Path CONFIG_PATH = Paths.get("config/cold-sweat_main.toml");
 
     static
     {
@@ -124,7 +124,7 @@ public class ColdSweatConfig
                 .defineInRange("Maximum Habitable Temperature", 1.75, 0, Double.POSITIVE_INFINITY);
         rateMultiplier = configSpecBuilder
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
-                .defineInRange("Minimum Habitable Temperature", 1.0, 0, Double.POSITIVE_INFINITY);
+                .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
         configSpecBuilder.pop();
     }
 

@@ -10,20 +10,19 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
-import net.momostudios.coldsweat.common.te.BoilerTileEntity;
-import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModItems;
+import net.momostudios.coldsweat.core.init.ModBlocks;
 
 import java.util.Objects;
 
-public class BoilerContainer extends Container
+public class IceboxContainer extends Container
 {
-    public final BoilerTileEntity te;
+    public final IceboxTileEntity te;
     private final IWorldPosCallable canInteractWithCallable;
-    public BoilerContainer(final int windowId, final PlayerInventory playerInv, final BoilerTileEntity te)
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te)
     {
-        super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
+        super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
         int slotIndex = 0;
@@ -58,7 +57,7 @@ public class BoilerContainer extends Container
         }
     }
 
-    public BoilerContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
     {
         this(windowId, playerInv, getTileEntity(playerInv, data));
     }
@@ -69,14 +68,14 @@ public class BoilerContainer extends Container
     }
 
 
-    private static BoilerTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static IceboxTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final TileEntity te = playerInv.player.world.getTileEntity(data.readBlockPos());
-        if (te instanceof BoilerTileEntity)
+        if (te instanceof IceboxTileEntity)
         {
-            return (BoilerTileEntity) te;
+            return (IceboxTileEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
@@ -84,7 +83,7 @@ public class BoilerContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.BOILER.get());
+        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.ICEBOX.get());
     }
 
     @Override
@@ -96,11 +95,11 @@ public class BoilerContainer extends Container
         {
             ItemStack stack1 = slot.getStack();
             stack = stack1.copy();
-            if (index < 36 && !this.mergeItemStack(stack1, BoilerTileEntity.slots, this.inventorySlots.size(), true))
+            if (index < 36 && !this.mergeItemStack(stack1, IceboxTileEntity.slots, this.inventorySlots.size(), true))
             {
                 return ItemStack.EMPTY;
             }
-            if (!this.mergeItemStack(stack1, 0, BoilerTileEntity.slots, false))
+            if (!this.mergeItemStack(stack1, 0, IceboxTileEntity.slots, false))
             {
                 return ItemStack.EMPTY;
             }

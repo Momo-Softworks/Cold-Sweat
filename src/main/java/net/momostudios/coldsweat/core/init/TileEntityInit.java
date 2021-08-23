@@ -6,6 +6,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
+import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 
 public class TileEntityInit
 {
@@ -13,4 +14,6 @@ public class TileEntityInit
 
     public static final RegistryObject<TileEntityType<BoilerTileEntity>> BOILER_TILE_ENTITY_TYPE =
             TILE_ENTITY_TYPE.register("boiler", () -> TileEntityType.Builder.create(BoilerTileEntity::new, ModBlocks.BOILER.get()).build(null));
+    public static final RegistryObject<TileEntityType<IceboxTileEntity>> ICEBOX_TILE_ENTITY_TYPE =
+        TILE_ENTITY_TYPE.register("icebox", () -> TileEntityType.Builder.create(IceboxTileEntity::new, ModBlocks.ICEBOX.get()).build(null));
 }

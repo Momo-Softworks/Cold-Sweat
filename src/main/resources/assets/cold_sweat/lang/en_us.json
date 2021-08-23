@@ -1,12 +1,16 @@
 {
   "block.cold_sweat.boiler": "Boiler",
+  "block.cold_sweat.icebox": "Icebox",
+  "block.cold_sweat.sewing_table": "Sewing Table",
 
   "item.cold_sweat.waterskin": "Waterskin",
   "item.cold_sweat.filled_waterskin": "Waterskin",
 
   "modifier.cold_sweat.insulated": "Insulated",
 
-  "screen.cold_sweat.boiler": "Boiler",
+  "container.cold_sweat.boiler": "Boiler",
+  "container.cold_sweat.icebox": "Icebox",
+  "container.cold_sweat.sewing_table": "Sewing Table",
 
   "itemGroup.cold_sweat": "Cold Sweat",
 

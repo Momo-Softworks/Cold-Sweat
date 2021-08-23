@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "WWW",
+    "PPP",
+    "PPP"
+  ],
+  "key":
+  {
+    "W":
+    {
+      "tag": "minecraft:wool"
+    },
+    "P":
+    {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result":
+  {
+    "item": "cold_sweat:sewing_table",
+    "count": 1
+  }
+}

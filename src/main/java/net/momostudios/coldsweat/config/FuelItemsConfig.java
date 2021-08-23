@@ -15,6 +15,7 @@ public final class FuelItemsConfig
 
     public static final ForgeConfigSpec.ConfigValue<List> boilerItems;
     public static final ForgeConfigSpec.ConfigValue<List> iceBoxItems;
+    public static final ForgeConfigSpec.ConfigValue<List<String>> insulatingItems;
 
     static
     {
@@ -47,6 +48,17 @@ public final class FuelItemsConfig
                     Arrays.asList("minecraft:water_bucket", "333"),
                     Arrays.asList("minecraft:ice", "333"),
                     Arrays.asList("minecraft:packed_ice", "1000")
+                ));
+        BUILDER.pop();
+        BUILDER.push("Defines the items that can be used for insulating armor");
+        insulatingItems = BUILDER
+            .comment("Format: {item-id, fuel-amount}")
+            .define("Ice Box", Arrays.asList
+                (
+                    "minecraft:leather_helmet",
+                    "minecraft:leather_chestplate",
+                    "minecraft:leather_leggings",
+                    "minecraft:leather_boots"
                 ));
         BUILDER.pop();
 

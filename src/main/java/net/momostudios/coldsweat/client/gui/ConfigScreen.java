@@ -176,7 +176,8 @@ public class ConfigScreen extends Screen
     }
 
     @Override
-    public void tick() {
+    public void tick()
+    {
         super.tick();
         tempOffsetInput.tick();
         maxTempInput.tick();
@@ -214,14 +215,14 @@ public class ConfigScreen extends Screen
 
         try
         {
-            double maxTemp = Integer.parseInt(maxTempInput.getText());
+            double maxTemp = Double.parseDouble(maxTempInput.getText());
             CMI.setMaxHabitable(celsius ? ((maxTemp * 1.8 + 32.0) - 32.0) / 42.0 : (maxTemp - 32.0) / 42.0);
         } catch (Exception e) {}
 
         try
         {
-            double minTemp = Integer.parseInt(minTempInput.getText());
-            CMI.setMinHabitable(celsius ? ((minTemp * 1.8 + 32.0) - 42.0) / 32.0 : (minTemp - 32.0) / 42.0);
+            double minTemp = Double.parseDouble(minTempInput.getText());
+            CMI.setMinHabitable(celsius ? ((minTemp * 1.8 + 32.0) - 32.0) / 42.0 : (minTemp - 32.0) / 42.0);
         } catch (Exception e) {}
 
         try

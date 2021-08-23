@@ -31,7 +31,7 @@ public class ItemTooltipInfo
         }
         else if (event.getItemStack().getItem() instanceof ArmorItem && event.getItemStack().getOrCreateTag().getBoolean("insulated"))
         {
-            event.getToolTip().add(1, new StringTextComponent("§d" + new TranslationTextComponent("modifier." + ColdSweat.MOD_ID + ".insulated") + "§r"));
+            event.getToolTip().add(1, new StringTextComponent("\u00a7d" + new TranslationTextComponent("modifier." + ColdSweat.MOD_ID + ".insulated").getString() + "\u00a7r"));
         }
     }
 }
