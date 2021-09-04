@@ -13,7 +13,8 @@ import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
 import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModItems;
+import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.Objects;
 
@@ -90,21 +91,40 @@ public class BoilerContainer extends Container
     @Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
     {
-        ItemStack stack = ItemStack.EMPTY;
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
         if (slot != null && slot.getHasStack())
         {
-            ItemStack stack1 = slot.getStack();
-            stack = stack1.copy();
-            if (index < 36 && !this.mergeItemStack(stack1, BoilerTileEntity.slots, this.inventorySlots.size(), true))
+            ItemStack itemstack1 = slot.getStack();
+            itemstack = itemstack1.copy();
+            if (index <= 9)
             {
-                return ItemStack.EMPTY;
+                if (!this.mergeItemStack(itemstack1, 10, 46, true))
+                {
+                    return ItemStack.EMPTY;
+                }
+
+                slot.onSlotChange(itemstack1, itemstack);
             }
-            if (!this.mergeItemStack(stack1, 0, BoilerTileEntity.slots, false))
+            else if (index > 9)
             {
-                return ItemStack.EMPTY;
+                if (itemstack.getItem() == ModItems.FILLED_WATERSKIN)
+                {
+                    if (!this.mergeItemStack(itemstack1, 0, 9, false))
+                    {
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (!this.te.getFuelItem(itemstack).isEmpty())
+                {
+                    if (!this.mergeItemStack(itemstack1, 9, 10, false))
+                    {
+                        return ItemStack.EMPTY;
+                    }
+                }
             }
-            if (stack1.isEmpty())
+
+            if (itemstack1.isEmpty())
             {
                 slot.putStack(ItemStack.EMPTY);
             }
@@ -113,7 +133,14 @@ public class BoilerContainer extends Container
                 slot.onSlotChanged();
             }
 
+            if (itemstack1.getCount() == itemstack.getCount())
+            {
+                return ItemStack.EMPTY;
+            }
+
+            slot.onTake(playerIn, itemstack1);
         }
-        return stack;
+
+        return itemstack;
     }
 }

@@ -13,7 +13,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.SewingContainer;
 
-@OnlyIn(Dist.CLIENT)
 public class SewingScreen extends ContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
@@ -43,17 +42,6 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
         //sewButton.setPosition(this.getGuiLeft() + 145, this.getGuiTop() + 39);
         //sewButton.render(matrixStack, mouseX, mouseY, partialTicks);
 
-        if (!container.getSlot(0).getHasStack())
-        {
-            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 0, 0, 16, 16);
-        }
-        if (!container.getSlot(1).getHasStack())
-        {
-            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 16, 0, 16, 16);
-        }
-
         this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
     }
 
@@ -81,5 +69,16 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
         int x = (this.width - this.xSize) / 2;
         int y = (this.height - this.ySize) / 2;
         this.blit(matrixStack, x ,y, 0, 0, this.xSize, this.ySize);
+
+        if (!container.getSlot(0).getHasStack())
+        {
+            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
+            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 0, 0, 16, 16);
+        }
+        if (!container.getSlot(1).getHasStack())
+        {
+            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
+            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 16, 0, 16, 16);
+        }
     }
 }

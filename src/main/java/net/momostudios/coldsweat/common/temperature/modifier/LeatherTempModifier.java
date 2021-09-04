@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.momostudios.coldsweat.common.temperature.PlayerTemp;
+import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 
 import java.util.List;
@@ -28,7 +28,8 @@ public class LeatherTempModifier extends TempModifier implements IForgeRegistryE
     @Override
     public double calculate(Temperature temp, PlayerEntity player)
     {
-        PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 2);
+        PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
+
         return temp.get() / Math.max(1, amount / 15);
     }
 }

@@ -5,7 +5,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.common.temperature.PlayerTemp;
+import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
@@ -41,8 +41,8 @@ public class PlayerTempUpdater
                 player,
                 new Temperature
                 (
-                    Math.min(bodyTemp + new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), 150)
+                    Math.min(bodyTemp + (new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
+                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get()) * config.rateMultiplier(), 150)
                 ),
                 PlayerTemp.Types.BODY
             );
@@ -53,7 +53,7 @@ public class PlayerTempUpdater
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp).add(-Math.min(Math.max(0.02, Math.abs(ambientTemp - maxTemp) / 10), bodyTemp)),
+                new Temperature(bodyTemp).add(-Math.min(Math.max(0.02, Math.abs(ambientTemp - maxTemp) / 10) * config.rateMultiplier(), bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }
@@ -66,8 +66,8 @@ public class PlayerTempUpdater
                 player,
                 new Temperature
                 (
-                    Math.max(bodyTemp - new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get(), -150)
+                    Math.max(bodyTemp - (new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
+                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get()) * config.rateMultiplier(), -150)
                 ),
                 PlayerTemp.Types.BODY
             );
@@ -78,7 +78,7 @@ public class PlayerTempUpdater
             PlayerTemp.setTemperature
             (
                 player,
-                new Temperature(bodyTemp).add(Math.min(Math.max(0.02, Math.abs(ambientTemp - minTemp) / 10), -bodyTemp)),
+                new Temperature(bodyTemp).add(Math.min(Math.max(0.02, Math.abs(ambientTemp - minTemp) / 10) * config.rateMultiplier(), -bodyTemp)),
                 PlayerTemp.Types.BODY
             );
         }
@@ -117,13 +117,14 @@ public class PlayerTempUpdater
         //Deal damage to the player if temperature is critical
         if (player.ticksExisted % 40 == 0)
         {
+            boolean scales = config.damageScaling();
             if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100)
             {
-                player.attackEntityFrom(CustomDamageTypes.HOT, 2);
+                player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);
             }
             if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100)
             {
-                player.attackEntityFrom(CustomDamageTypes.COLD, 2);
+                player.attackEntityFrom(scales ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2);
             }
         }
     }

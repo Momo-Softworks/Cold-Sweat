@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.BoilerContainer;
 
-@OnlyIn(Dist.CLIENT)
 public class BoilerScreen extends ContainerScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");

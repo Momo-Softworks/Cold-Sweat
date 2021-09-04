@@ -15,7 +15,7 @@ public class BiomeTempModifier extends TempModifier implements IForgeRegistryEnt
     public double calculate(Temperature temp, PlayerEntity player)
     {
         double worldTemp = 0;
-        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), player.world, 200, 6))
+        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
         {
             worldTemp += player.world.getBiome(iterator).getTemperature(iterator);
         }

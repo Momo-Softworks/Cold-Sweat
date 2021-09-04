@@ -10,7 +10,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.core.init.ModItems;
+import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.util.ModItems;
 
 @Mod.EventBusSubscriber
 public class ItemTooltipInfo
@@ -19,7 +20,7 @@ public class ItemTooltipInfo
     @SubscribeEvent
     public static void addTTInfo(ItemTooltipEvent event)
     {
-        if (event.getItemStack().getItem() == ModItems.FILLED_WATERSKIN.get() && event.getPlayer() != null)
+        if (event.getItemStack().getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
         {
             boolean celsius = ColdSweatConfig.getInstance().celsius();
             double temp = event.getItemStack().getOrCreateTag().getDouble("temperature");
@@ -27,11 +28,13 @@ public class ItemTooltipInfo
             String tempUnits = celsius ? "C" : "F";
             temp = celsius ? (int) (22 + ((temp - 32) * 5/8) / 2) : (int) (75 + temp / 2);
 
-            event.getToolTip().add(1, new StringTextComponent("\u00a77Filled (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)"));
+            event.getToolTip().add(1, new StringTextComponent("\u00a77" + new TranslationTextComponent(
+                "item." + ColdSweat.MOD_ID + ".waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)"));
         }
         else if (event.getItemStack().getItem() instanceof ArmorItem && event.getItemStack().getOrCreateTag().getBoolean("insulated"))
         {
-            event.getToolTip().add(1, new StringTextComponent("\u00a7d" + new TranslationTextComponent("modifier." + ColdSweat.MOD_ID + ".insulated").getString() + "\u00a7r"));
+            event.getToolTip().add(1, new StringTextComponent("\u00a7d" +
+                new TranslationTextComponent("modifier." + ColdSweat.MOD_ID + ".insulated").getString() + "\u00a7r"));
         }
     }
 }

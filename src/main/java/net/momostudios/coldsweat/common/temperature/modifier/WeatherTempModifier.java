@@ -19,12 +19,12 @@ public class WeatherTempModifier extends TempModifier implements IForgeRegistryE
         double weatherTemp = 0;
         if (player.world.canBlockSeeSky(player.getPosition()))
         {
-            if (player.world.isRaining())
+            if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
             {
                 if (player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15)
-                    weatherTemp = -0.2;
+                    weatherTemp = -0.25;
                 else
-                    weatherTemp = -0.1;
+                    weatherTemp = -0.15;
             }
         }
 

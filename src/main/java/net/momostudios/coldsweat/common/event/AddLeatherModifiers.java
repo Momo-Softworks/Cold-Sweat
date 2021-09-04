@@ -10,16 +10,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.common.temperature.PlayerTemp;
-import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.modifier.LeatherTempModifier;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.core.util.CustomDamageTypes;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddLeatherModifiers
@@ -39,10 +31,10 @@ public class AddLeatherModifiers
         leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
         leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
         leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
-        if (helmetItem.getOrCreateTag().getBoolean("insulated")     || helmetItem.getItem()     == Items.LEATHER_HELMET ||
+        if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetItem.getItem() == Items.LEATHER_HELMET ||
             chestplateItem.getOrCreateTag().getBoolean("insulated") || chestplateItem.getItem() == Items.LEATHER_CHESTPLATE ||
-            leggingsItem.getOrCreateTag().getBoolean("insulated")   || leggingsItem.getItem()   == Items.LEATHER_LEGGINGS ||
-            bootsItem.getOrCreateTag().getBoolean("insulated")      || bootsItem.getItem()      == Items.LEATHER_BOOTS)
+            leggingsItem.getOrCreateTag().getBoolean("insulated") || leggingsItem.getItem() == Items.LEATHER_LEGGINGS ||
+            bootsItem.getOrCreateTag().getBoolean("insulated") || bootsItem.getItem() == Items.LEATHER_BOOTS)
         {
             leatherMultiplier += 20;
         }

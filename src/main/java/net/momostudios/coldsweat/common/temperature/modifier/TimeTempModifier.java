@@ -18,7 +18,7 @@ public class TimeTempModifier extends TempModifier implements IForgeRegistryEntr
     {
         double timeTemp = 0;
         World world = player.world;
-        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), player.world, 200, 6))
+        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
         {
             RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, world.func_241828_r().getRegistry(Registry.BIOME_KEY).getKey(world.getBiome(iterator)));
             if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&

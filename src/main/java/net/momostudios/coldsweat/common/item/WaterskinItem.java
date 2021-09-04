@@ -10,7 +10,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -18,8 +17,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.BiomeTempModifier;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.init.ModItems;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.util.ModItems;
 
 public class WaterskinItem extends Item
 {
@@ -44,8 +43,8 @@ public class WaterskinItem extends Item
 
         if (lookingAt.getMaterial() == Material.WATER)
         {
-            ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.get().getDefaultInstance();
-            filledWaterskin.getOrCreateTag().putInt("temperature", (int) ((new BiomeTempModifier().calculate(new Temperature(), entity) - 1) * 25));
+            ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
+            filledWaterskin.getOrCreateTag().putDouble("temperature", (new BiomeTempModifier().calculate(new Temperature(), entity) - 1) * 25);
             //Replace 1 of the stack with a FilledWaterskinItem
             if (itemstack.getCount() > 1)
             {

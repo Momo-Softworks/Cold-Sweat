@@ -2,16 +2,9 @@ package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.*;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.core.init.TempModifierInit;
 
-import javax.annotation.Nullable;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 

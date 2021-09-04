@@ -217,18 +217,21 @@ public class SewingContainer extends Container
             playerinventory.setItemStack(ItemStack.EMPTY);
         }
 
-        for (ItemStack itemStack : inventory.stackList)
+        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
         {
-            if (!playerinventory.addItemStackToInventory(itemStack))
-            {
-                ItemEntity itementity = playerinventory.player.dropItem(itemStack, false);
-                if (itementity != null)
+            ItemStack itemStack = this.inventory.getStackInSlot(i);
+            if (i != 2)
+                if (!playerinventory.addItemStackToInventory(itemStack))
                 {
-                    itementity.setNoPickupDelay();
-                    itementity.setOwnerId(playerinventory.player.getUniqueID());
+                    ItemEntity itementity = playerinventory.player.dropItem(itemStack, false);
+                    if (itementity != null)
+                    {
+                        itementity.setNoPickupDelay();
+                        itementity.setOwnerId(playerinventory.player.getUniqueID());
+                    }
                 }
-            }
         }
+
     }
 
     @Override
@@ -237,13 +240,14 @@ public class SewingContainer extends Container
         return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.SEWING_TABLE.get());
     }
 
+    @Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
         if (slot != null && slot.getHasStack())
         {
-            itemstack = slot.getStack();
+            itemstack = slot.getStack().copy();
             if ((slot.getSlotIndex() >= 0 && slot.getSlotIndex() <= 2) && slot.inventory instanceof SewingInventory)
             {
                 if (playerIn.inventory.addItemStackToInventory(itemstack))
@@ -258,13 +262,21 @@ public class SewingContainer extends Container
                 this.inventory.setInventorySlotContents(1, itemstack);
                 this.getSlot(1).onSlotChanged();
             }
-            else if (itemstack.getItem() instanceof ArmorItem && !itemstack.getOrCreateTag().getBoolean("insulated") &&
+            else if (!itemstack.getOrCreateTag().getBoolean("insulated") && itemstack.getItem() instanceof ArmorItem &&
                 !SewingContainer.this.isInsulatingItem(itemstack) && this.inventory.getStackInSlot(0).isEmpty())
             {
                 slot.putStack(ItemStack.EMPTY);
                 this.inventory.setInventorySlotContents(0, itemstack);
                 this.getSlot(0).onSlotChanged();
             }
+            else
+            {
+                return ItemStack.EMPTY;
+            }
+        }
+        else
+        {
+            return ItemStack.EMPTY;
         }
         return itemstack;
     }

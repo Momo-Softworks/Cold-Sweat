@@ -1,15 +1,11 @@
-package net.momostudios.coldsweat.common.temperature;
+package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.*;
-import net.momostudios.coldsweat.core.init.TempModifierInit;
+import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.core.util.ListNBTHelper;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 public class PlayerTemp

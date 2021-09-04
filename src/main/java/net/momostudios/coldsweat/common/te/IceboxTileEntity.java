@@ -18,8 +18,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
-import net.momostudios.coldsweat.core.init.ModItems;
+import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
+import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +69,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
             {
                 boolean hasItemStacks = false;
                 for (int i = 0; i < 10; i++) {
-                    if (this.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN.get() && this.getItemInSlot(i).getOrCreateTag().getInt("temperature") > -50)
+                    if (this.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && this.getItemInSlot(i).getOrCreateTag().getInt("temperature") > -50)
                     {
                         hasItemStacks = true;
                         this.getItemInSlot(i).getOrCreateTag().putInt("temperature", this.getItemInSlot(i).getOrCreateTag().getInt("temperature") - 1);
@@ -96,6 +97,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
 
     public List getFuelItem(ItemStack item)
     {
+        List returnList = new ArrayList();
         for (Object iterator : FuelItemsConfig.iceBoxItems.get())
         {
             List<String> testIndex = (List<String>) iterator;
@@ -103,10 +105,10 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                return Arrays.asList(item, Integer.parseInt(testIndex.get(1)));
+                returnList = Arrays.asList(item, Integer.parseInt(testIndex.get(1)));
             }
         }
-        return new ArrayList();
+        return returnList;
     }
 
     public ItemStack getItemInSlot(int index)

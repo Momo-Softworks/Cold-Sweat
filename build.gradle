@@ -11,8 +11,8 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 
 group = 'net.momostudios'
-version = '2.0-BETA-1'
-archivesBaseName = 'coldsweat'
+version = 'b2.0-1'
+archivesBaseName = 'ColdSweat'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 

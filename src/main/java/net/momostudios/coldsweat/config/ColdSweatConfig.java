@@ -52,7 +52,12 @@ public class ColdSweatConfig
     private final ForgeConfigSpec.IntValue tempGaugeX;
     private final ForgeConfigSpec.IntValue tempGaugeY;
 
+    private final ForgeConfigSpec.BooleanValue customHotbarLayout;
+    private final ForgeConfigSpec.BooleanValue iconBobbing;
+
     public final ForgeConfigSpec.BooleanValue animalsTemperature;
+    public final ForgeConfigSpec.BooleanValue damageScaling;
+    public final ForgeConfigSpec.BooleanValue requireThermometer;
 
     private ColdSweatConfig(ForgeConfigSpec.Builder configSpecBuilder)
     {
@@ -72,13 +77,16 @@ public class ColdSweatConfig
         /*
           Potion effects affecting the player's temperature
          */
-        configSpecBuilder.push("Potion effects affecting the player's temperature");
+        configSpecBuilder.push("Item settings");
         fireResistanceEffect = configSpecBuilder
                 .comment("Fire Resistance blocks all hot temperatures")
                 .define("Fire Resistance Immunity", true);
         iceResistanceEffect = configSpecBuilder
                 .comment("Ice Resistance blocks all cold temperatures")
                 .define("Ice Resistance Immunity", true);
+        requireThermometer = configSpecBuilder
+            .comment("Thermometer item is required to see ambient temperature")
+            .define("Require Thermometer", true);
         configSpecBuilder.pop();
 
         /*
@@ -103,6 +111,14 @@ public class ColdSweatConfig
                 .defineInRange("Temp Gauge Y Offset", 0, 0, Integer.MAX_VALUE);
         configSpecBuilder.pop();
 
+        configSpecBuilder.push("UI Options");
+        customHotbarLayout = configSpecBuilder
+            .define("Custom hotbar layout", true);
+        iconBobbing = configSpecBuilder
+            .comment("Controls whether the temperature icon shakes when in critical condition")
+            .define("Icon Bobbing", true);
+        configSpecBuilder.pop();
+
         /*
           Misc. things that are affected by temperature
          */
@@ -110,6 +126,9 @@ public class ColdSweatConfig
         animalsTemperature = configSpecBuilder
                 .comment("Sets whether animals are affected by temperature")
                 .define("Animals Have Temperature", true);
+        damageScaling = configSpecBuilder
+            .comment("Sets whether damage scales with difficulty")
+            .define("Damage Scaling", true);
         configSpecBuilder.pop();
 
         /*
@@ -153,6 +172,10 @@ public class ColdSweatConfig
         return iceResistanceEffect.get();
     }
 
+    public boolean requireThermometer() {
+        return requireThermometer.get();
+    }
+
     public int steveHeadX() {
         return steveHeadX.get();
     }
@@ -162,15 +185,27 @@ public class ColdSweatConfig
     }
 
     public int tempGaugeX() {
-        return steveHeadX.get();
+        return tempGaugeX.get();
     }
 
     public int tempGaugeY() {
-        return steveHeadY.get();
+        return tempGaugeY.get();
+    }
+
+    public boolean customHotbar() {
+        return customHotbarLayout.get();
+    }
+
+    public boolean iconBobbing() {
+        return iconBobbing.get();
     }
 
     public boolean animalsTemperature() {
         return animalsTemperature.get();
+    }
+
+    public boolean damageScaling() {
+        return damageScaling.get();
     }
 
     public double minHabitable() {
@@ -189,8 +224,8 @@ public class ColdSweatConfig
     /*
      * Safe set methods for config values
      */
-    public void setCelsius(boolean isCelsius) {
-        celsius.set(isCelsius);
+    public void setCelsius(boolean enabled) {
+        celsius.set(enabled);
     }
 
     public void setTempOffset(int offset) {
@@ -217,6 +252,10 @@ public class ColdSweatConfig
         iceResistanceEffect.set(isEffective);
     }
 
+    public void setRequireThermometer(boolean required) {
+        requireThermometer.set(required);
+    }
+
     public void setAnimalsTemperature(boolean areAffected) {
         animalsTemperature.set(areAffected);
     }
@@ -235,6 +274,18 @@ public class ColdSweatConfig
 
     public void setSteveHeadY(int pos) {
         steveHeadY.set(pos);
+    }
+
+    public void setCustomHotbar(boolean enabled) {
+        customHotbarLayout.set(enabled);
+    }
+
+    public void setIconBobbing(boolean enabled) {
+        iconBobbing.set(enabled);
+    }
+
+    public void setDamageScaling(boolean enabled) {
+        damageScaling.set(enabled);
     }
 
     public void save() {

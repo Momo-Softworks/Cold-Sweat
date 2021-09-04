@@ -1,8 +1,8 @@
 package net.momostudios.coldsweat.core.init;
 
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
+import net.minecraft.item.*;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
@@ -10,15 +10,18 @@ import net.momostudios.coldsweat.common.block.BoilerBlock;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
 import net.momostudios.coldsweat.common.block.SewingTableBlock;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
+import net.momostudios.coldsweat.common.item.ThermometerItem;
 import net.momostudios.coldsweat.common.item.WaterskinItem;
 
-public class ModItems
+@Mod.EventBusSubscriber
+public class ItemInit
 {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ColdSweat.MOD_ID);
 
     //Items
-    public static final RegistryObject<Item> WATERSKIN = ITEMS.register("waterskin", WaterskinItem::new);
-    public static final RegistryObject<Item> FILLED_WATERSKIN = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
+    public static final RegistryObject<Item> WATERSKIN_REGISTRY = ITEMS.register("waterskin", WaterskinItem::new);
+    public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
+    public static final RegistryObject<Item> THERMOMETER_REGISTRY = ITEMS.register("thermometer", ThermometerItem::new);
 
     //BlockItems
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(ModBlocks.BOILER.get(), BoilerBlock.getItemProperties()));

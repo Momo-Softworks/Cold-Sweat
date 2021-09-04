@@ -18,17 +18,17 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.config.ColdSweatConfig;
 
 @Mod.EventBusSubscriber
 public class RearrangeHotbar
 {
-    public static Minecraft mc = Minecraft.getInstance();
-
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void eventHandler(RenderGameOverlayEvent event)
     {
-        if (!mc.gameSettings.hideGUI && !mc.player.isSpectator())
+        Minecraft mc = Minecraft.getInstance();
+        if (ColdSweatConfig.getInstance().customHotbar() && !mc.gameSettings.hideGUI && !mc.player.isSpectator())
         {
             MatrixStack matrixStack = event.getMatrixStack();
             int xPos = mc.getMainWindow().getScaledWidth() / 2 - 81;
@@ -75,25 +75,18 @@ public class RearrangeHotbar
 
                 //Draw Number
                 mc.getProfiler().endSection();
-                if (mc.player.experienceLevel > 0)
+                if (mc.player.experienceLevel > 0 && mc.playerController.gameIsSurvivalOrAdventure())
                 {
                     mc.getProfiler().startSection("expLevel");
                     String s = "" + mc.player.experienceLevel;
                     int i1;
                     int j1;
-                    // Get game mode for positioning
-                    if (mc.playerController.gameIsSurvivalOrAdventure())
-                    {
-                        if (fontRenderer.getStringWidth(s) < 8) i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 82;
-                        else if (fontRenderer.getStringWidth(s) < 13) i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 84;
-                        else i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) - 78;
-                        j1 = scaledHeight - 31 + 1;
-                    }
-                    else
-                    {
-                        i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2;
-                        j1 = scaledHeight - 31 - 4;
-                    }
+
+                    if (fontRenderer.getStringWidth(s) < 8) i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 82;
+                    else if (fontRenderer.getStringWidth(s) < 13) i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 84;
+                    else i1 = scaledWidth / 2 - fontRenderer.getStringWidth(s) - 78;
+                    j1 = scaledHeight - 31 + 1;
+
                     // Draw the number with outline
                     fontRenderer.drawString(matrixStack, s, (float) (i1 + 1), (float) j1, 0);
                     fontRenderer.drawString(matrixStack, s, (float) (i1 - 1), (float) j1, 0);

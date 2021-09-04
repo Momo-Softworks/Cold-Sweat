@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 
-@OnlyIn(Dist.CLIENT)
 public class IceboxScreen extends ContainerScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
