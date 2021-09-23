@@ -18,24 +18,33 @@ public class DepthTempModifier extends TempModifier implements IForgeRegistryEnt
         ColdSweatConfig config = ColdSweatConfig.getInstance();
         Temperature midTemp = new Temperature((config.maxHabitable() + config.minHabitable()) / 2);
 
-        // Samples the average height using 100 samples of nearby blocks
+        // The total height across all samples
         double weightedHeight = 0;
-        double surfaceNumber = 0.1;
-        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 100, 8))
-        {
-            int level = WorldInfo.getGroundLevel(iterator, player.world);
-            if (y > level)
-                surfaceNumber *= 1.5;
+        //
+        double surfaceNumber = 0.01;
 
-            weightedHeight += level;
+        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 100, 4))
+        {
+            // Get the surface height at the BlockPos
+            int level = WorldInfo.getGroundLevel(iterator, player.world);
+            // Arbitrary calculation that makes insulation less effective if the BlockPos is exposed to air
+            if (y > level)
+                surfaceNumber++;
+
+            // Add the height to the total
+            weightedHeight += Math.max(0, level - y);
         }
+        // Get the average depth from the samples
         weightedHeight /= 100;
 
-        double averageDepth = Math.max(0, weightedHeight - y);
+        // Gets the depth
+        double divisorSurface = Math.max(0, (weightedHeight * 3) / surfaceNumber);
 
-        double divisor = (averageDepth / 25 + 1);
-        double divisorSurface = Math.max(1, divisor - surfaceNumber);
-        divisorSurface = Math.max(1, (divisor + divisorSurface) / 2);
-        return midTemp.get() + ((temp.get() - midTemp.get()) / divisorSurface);
+        return midTemp.get() + ((temp.get() - midTemp.get()) / (1 + divisorSurface));
+    }
+
+    public String getID()
+    {
+        return "cold_sweat:depth";
     }
 }

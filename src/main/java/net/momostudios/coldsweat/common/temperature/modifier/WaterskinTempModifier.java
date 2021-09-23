@@ -31,4 +31,9 @@ public class WaterskinTempModifier extends TempModifier implements IForgeRegistr
         PlayerTemp.removeModifier(player, WaterskinTempModifier.class, PlayerTemp.Types.BODY, 2);
         return temp.get() + amount;
     }
+
+    public String getID()
+    {
+        return "cold_sweat:waterskin";
+    }
 }

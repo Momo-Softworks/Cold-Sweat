@@ -22,7 +22,7 @@ public class WorldInfo
         {
             BlockPos pos2 = new BlockPos(pos.getX(), c, pos.getZ());
             BlockState state = world.getBlockState(pos2);
-            if (state.getBlock() == Blocks.AIR)
+            if (!state.isSolid() && state.getBlock() != Blocks.CAVE_AIR)
             {
                 return c;
             }
@@ -50,6 +50,30 @@ public class WorldInfo
             {
                 posList.add(pos.add(lx, 0, lz));
                 lz += interval;
+            }
+            lx += interval;
+        }
+        return posList;
+    }
+
+    public static List<BlockPos> getNearbyPositionsCubed(BlockPos pos, int samples, int interval)
+    {
+        List<BlockPos> posList = new ArrayList<>();
+        pos = new BlockPos(pos.getX() / 2, pos.getY() / 2, pos.getZ() / 2);
+
+        int lx = (int) (pos.getX() - (Math.cbrt(samples) * interval) / 2);
+        for (int sx = 0; sx < Math.cbrt(samples); sx++)
+        {
+            int ly = (int) (pos.getY() - (Math.cbrt(samples) * interval) / 2);
+            for (int sy = 0; sy < Math.cbrt(samples); sy++)
+            {
+                int lz = (int) (pos.getZ() - (Math.cbrt(samples) * interval) / 2);
+                for (int sz = 0; sz < Math.cbrt(samples); sz++)
+                {
+                    posList.add(pos.add(lx, ly, lz));
+                    lz += interval;
+                }
+                ly += interval;
             }
             lx += interval;
         }

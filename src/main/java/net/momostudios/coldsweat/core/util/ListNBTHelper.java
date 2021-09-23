@@ -1,8 +1,10 @@
 package net.momostudios.coldsweat.core.util;
 
+import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.*;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.momostudios.coldsweat.common.world.TempModifierEntries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,77 +23,69 @@ public class ListNBTHelper
             }
             catch(ClassCastException e)
             {
-                System.err.println("ListNBTHelper.createIfNull already has nbt \"" + key + "\" as a different type");
+                throw new UnsupportedOperationException("ListNBTHelper.createIfNull already has nbt \"" + key + "\" as a different type");
             }
         }
         else player.getPersistentData().put(key, listNBT);
         return listNBT;
     }
 
-    public static boolean doesNBTContain(ListNBT nbt, Object object)
+    /**
+     * Returns true if the player has this {@link TempModifier} stored in their NBT data
+     * @param nbt should be a {@link PlayerTemp.Types}
+     */
+    public static boolean doesNBTContain(ListNBT nbt, TempModifier modifier)
     {
         for (INBT iterator : nbt)
         {
             if (iterator instanceof CompoundNBT)
             {
-                try
-                {
-                    if (Class.forName(((CompoundNBT) iterator).get("modifier_name").getString()).equals(object.getClass()))
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception e)
-                {
-                    System.err.println("ListNBTHelper threw " + e);
-                }
+                if (((CompoundNBT) iterator).get("modifier_name").getString().equals(TempModifierEntries.getEntries().getEntryName(modifier)))
+                    return true;
             }
         }
         return false;
     }
 
     /**
-     * Converts the specified ListNBT into a List of TempModifiers
+     * Returns the list of {@link TempModifier}s of the specified type
+     * @param nbt should be a {@link PlayerTemp.Types}
      */
     public static List<TempModifier> getModifierList(ListNBT nbt)
     {
         List<TempModifier> returnList = new ArrayList<TempModifier>();
-        try
+        for (INBT modifierInstance : nbt)
         {
-            for (INBT modifierInstance : nbt)
+            if (modifierInstance instanceof CompoundNBT)
             {
-                if (modifierInstance instanceof CompoundNBT)
+                //Get the class of the TempModifier
+                TempModifier modifier = TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) modifierInstance).getString("modifier_name"));
+                //Get the list of argument keys (including the TempModifier class)
+                Set<String> modifierArguments = ((CompoundNBT) modifierInstance).keySet();
+
+                //Does the TempModifier have arguments?
+                if (modifierArguments.size() > 1)
                 {
-                    //Get the class of the TempModifier
-                    TempModifier modifier = (TempModifier) Class.forName(((StringNBT) ((CompoundNBT) modifierInstance).get("modifier_name")).getString()).newInstance();
-                    //Get the list of argument keys (including the TempModifier class)
-                    Set<String> modifierArguments = ((CompoundNBT) modifierInstance).keySet();
+                    List<INBT> args = new ArrayList<>();
 
-                    //Does the TempModifier have arguments?
-                    if (modifierArguments.size() > 1)
+                    //Iterate through the set of argument keys
+                    int iter = 0;
+                    for (String modifierArgument : modifierArguments)
                     {
-                        List<INBT> args = new ArrayList<>();
-
-                        //Iterate through the set of argument keys
-                        int iter = 0;
-                        for (String modifierArgument : modifierArguments)
+                        //Gets the actual value of the argument from the key
+                        if (iter > 0)
                         {
-                            //Gets the actual value of the argument from the key
-                            if (iter > 0)
-                            {
-                                args.add(((CompoundNBT) modifierInstance).get(modifierArgument));
-                            }
-                            iter++;
+                            args.add(((CompoundNBT) modifierInstance).get(modifierArgument));
                         }
-                        //Apply the arguments (if any)
-                        modifier = modifier.with(args);
+                        iter++;
                     }
-                    //Add the TempModifier with all its arguments to the return list of TempModifiers
-                    returnList.add(modifier);
+                    //Apply the arguments (if any)
+                    modifier = modifier.with(args);
                 }
+                //Add the TempModifier with all its arguments to the return list of TempModifiers
+                returnList.add(modifier);
             }
         }
-        catch (Exception e) { System.err.println("ListNBTHelper.getModifierList threw " + e); }
         return returnList;
     }
 }

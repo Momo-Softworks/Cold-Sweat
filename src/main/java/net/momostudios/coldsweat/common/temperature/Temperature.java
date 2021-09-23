@@ -46,6 +46,7 @@ public class Temperature
     */
     public Temperature add(double amount)
     {
+        temp += amount;
         return new Temperature(temp + amount);
     }
     /**
@@ -86,7 +87,8 @@ public class Temperature
         {
             for (TempModifier modifier : modifiers)
             {
-                modTemp = modifier.calculate(new Temperature(modTemp), player);
+                if (modifier != null)
+                    modTemp = modifier.calculate(new Temperature(modTemp), player);
             }
         }
         return new Temperature(modTemp);

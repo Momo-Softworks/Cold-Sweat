@@ -1,5 +1,7 @@
 package net.momostudios.coldsweat.common.container;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -9,6 +11,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
@@ -20,6 +23,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.Objects;
 
@@ -39,8 +43,11 @@ public class SewingContainer extends Container
         this.addSlot(new Slot(inventory, 0, 43, 26)
         {
             @Override
-            public boolean isItemValid(ItemStack stack) {
-                return stack.getItem() instanceof ArmorItem;
+            public boolean isItemValid(ItemStack stack)
+            {
+                return stack.getItem() instanceof ArmorItem &&
+                       !SewingContainer.this.isInsulatingItem(stack) &&
+                       !stack.getOrCreateTag().getBoolean("insulated");
             }
             @Override
             public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack)
@@ -115,15 +122,17 @@ public class SewingContainer extends Container
     }
     private void takeOutput()
     {
-        this.getSlot(0).putStack(ItemStack.EMPTY);
-        this.getSlot(1).putStack(ItemStack.EMPTY);
+        this.getSlot(0).getStack().shrink(1);
+        this.getSlot(1).getStack().shrink(1);
     }
-    private void testForRecipe()
+    private ItemStack testForRecipe()
     {
         ItemStack slot0Item = this.getSlot(0).getStack();
         ItemStack slot1Item = this.getSlot(1).getStack();
         ItemStack slot2Item = this.getSlot(2).getStack();
+        ItemStack result = ItemStack.EMPTY;
 
+        // Insulated Armor
         if (slot0Item.getItem() instanceof ArmorItem && this.isInsulatingItem(slot1Item) &&
             ((slot1Item.getItem() instanceof ArmorItem && slot0Item.getEquipmentSlot() == slot1Item.getEquipmentSlot()) || !(slot1Item.getItem() instanceof ArmorItem)) &&
             slot2Item.isEmpty())
@@ -131,7 +140,9 @@ public class SewingContainer extends Container
             ItemStack processed = this.getSlot(0).getStack().copy();
             processed.getOrCreateTag().putBoolean("insulated", true);
             this.getSlot(2).putStack(processed);
+            result = processed;
         }
+        return result;
     }
 
     public SewingContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
@@ -248,7 +259,8 @@ public class SewingContainer extends Container
         if (slot != null && slot.getHasStack())
         {
             itemstack = slot.getStack().copy();
-            if ((slot.getSlotIndex() >= 0 && slot.getSlotIndex() <= 2) && slot.inventory instanceof SewingInventory)
+            // Take from either input
+            if (((slot.getSlotIndex() == 0 || slot.getSlotIndex() == 1)) && slot.inventory instanceof SewingInventory)
             {
                 if (playerIn.inventory.addItemStackToInventory(itemstack))
                 {
@@ -256,14 +268,29 @@ public class SewingContainer extends Container
                     slot.onTake(playerIn, itemstack);
                 }
             }
-            else if (SewingContainer.this.isInsulatingItem(itemstack) && this.inventory.getStackInSlot(1).isEmpty())
+            // Take from output
+            else if (slot.getSlotIndex() == 2 && slot.inventory instanceof SewingInventory)
+            {
+                for (int i = this.getSlot(0).getStack().getCount(); i > 0; i--)
+                {
+                    if (playerIn.addItemStackToInventory(itemstack))
+                    {
+                        slot.putStack(ItemStack.EMPTY);
+                        slot.onTake(playerIn, itemstack);
+                        this.testForRecipe();
+                    }
+                    else break;
+                }
+            }
+            // Put into slot 1 (insulation item)
+            else if (this.getSlot(1).isItemValid(itemstack) && this.inventory.getStackInSlot(1).isEmpty())
             {
                 slot.putStack(ItemStack.EMPTY);
                 this.inventory.setInventorySlotContents(1, itemstack);
                 this.getSlot(1).onSlotChanged();
             }
-            else if (!itemstack.getOrCreateTag().getBoolean("insulated") && itemstack.getItem() instanceof ArmorItem &&
-                !SewingContainer.this.isInsulatingItem(itemstack) && this.inventory.getStackInSlot(0).isEmpty())
+            // Put into slot 0 (base item)
+            else if (this.getSlot(0).isItemValid(itemstack) && this.inventory.getStackInSlot(0).isEmpty())
             {
                 slot.putStack(ItemStack.EMPTY);
                 this.inventory.setInventorySlotContents(0, itemstack);

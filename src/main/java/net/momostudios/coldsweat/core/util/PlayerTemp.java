@@ -3,6 +3,7 @@ package net.momostudios.coldsweat.core.util;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.*;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.util.ListNBTHelper;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 
@@ -32,28 +33,31 @@ public class PlayerTemp
      * This is used for instant temperature-changing items (i.e. Waterskins)
      *
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
-     * (You might use this for pieces of armor that have stacking effects, for example)
+     * (You might use this for things that have stacking effects, for example)
      */
     public static void applyModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates, INBT... arguments)
     {
         ListNBT nbt = ListNBTHelper.createIfNull(getModifierTag(type), player);
-        if (!ListNBTHelper.doesNBTContain(nbt, modifier) || duplicates)
+        if (TempModifierEntries.getEntries().getEntryName(modifier) != null)
         {
-            CompoundNBT modifierData = new CompoundNBT();
-            //System.out.println("The modifier is " + modifier + " and the key is " + modifier.getRegistryName());
-            modifierData.putString("modifier_name", modifier.getClass().toString().replaceFirst("class ", ""));
-
-            if (arguments != null)
+            if (!ListNBTHelper.doesNBTContain(nbt, modifier) || duplicates)
             {
-                int modifierIndex = 0;
-                for (INBT argument : arguments)
-                {
-                    modifierData.put("argument_" + modifierIndex, argument);
-                }
+                CompoundNBT modifierData = new CompoundNBT();
+                //System.out.println("The modifier is " + modifier + " and the key is " + modifier.getRegistryName());
+                    modifierData.putString("modifier_name", TempModifierEntries.getEntries().getEntryName(modifier));
+
+                    if (arguments != null)
+                    {
+                        int modifierIndex = 0;
+                        for (INBT argument : arguments)
+                        {
+                            modifierData.put("argument_" + modifierIndex, argument);
+                        }
+                    }
+                    nbt.add(modifierData);
             }
-            nbt.add(modifierData);
+            player.getPersistentData().put(getModifierTag(type), nbt);
         }
-        player.getPersistentData().put(getModifierTag(type), nbt);
     }
 
 
@@ -86,17 +90,10 @@ public class PlayerTemp
                 {
                     for (INBT inbt : modifierList)
                     {
-                        try
+                        if (TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) inbt).getString("modifier_name")).getClass().equals(modClass))
                         {
-                            if (Class.forName(((CompoundNBT) inbt).get("modifier_name").getString()).equals(modClass))
-                            {
-                                modifierList.remove(inbt);
-                                break;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            System.err.println("PlayerTemp.removeModifier threw " + e);
+                            modifierList.remove(inbt);
+                            break;
                         }
                     }
                 }

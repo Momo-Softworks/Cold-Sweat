@@ -1,9 +1,12 @@
-package net.momostudios.coldsweat.common.temperature.modifier.block;
+package net.momostudios.coldsweat.common.world;
 
 import net.minecraft.block.Block;
+import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BlockEffectEntries
@@ -16,17 +19,22 @@ public class BlockEffectEntries
         return master;
     }
 
-    public static void add(BlockEffect blockEffect)
+    public List<BlockEffect> getList()
+    {
+        return new ArrayList<>(entries);
+    }
+
+    public void add(BlockEffect blockEffect)
     {
         entries.add(blockEffect);
     }
 
-    public static void remove(BlockEffect blockEffect)
+    public void remove(BlockEffect blockEffect)
     {
         entries.remove(blockEffect);
     }
 
-    public static void flush()
+    public void flush()
     {
         entries.clear();
     }
@@ -34,9 +42,10 @@ public class BlockEffectEntries
     @Nullable
     public BlockEffect getEntryFor(Block block)
     {
-        for (BlockEffect entry : entries)
+        for (BlockEffect entry : getList())
         {
-            if (entry.hasBlock(block.getDefaultState())) return entry;
+            if (entry.hasBlock(block.getDefaultState()))
+                return entry;
         }
         return null;
     }

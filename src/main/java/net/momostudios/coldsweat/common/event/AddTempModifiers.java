@@ -19,7 +19,7 @@ public class AddTempModifiers
         PlayerEntity player = event.player;
 
         /*
-         * Add TempModifies if not present
+         * Add TempModifiers if not present
          */
         if (player.ticksExisted % 20 == 0)
         {
@@ -31,8 +31,5 @@ public class AddTempModifiers
         }
 
         double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
-        //double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
-
-        player.sendStatusMessage(new StringTextComponent((int) (ambientTemp * 42 + 32 + ColdSweatConfig.getInstance().tempOffset()) + ""), true);
     }
 }

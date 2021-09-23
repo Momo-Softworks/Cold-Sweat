@@ -10,9 +10,9 @@ public class FurnaceBlockEffect extends BlockEffect
     @Override
     public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
     {
-        if (state.getBlock() instanceof AbstractFurnaceBlock && state.get(AbstractFurnaceBlock.LIT))
+        if (this.hasBlock(state) && state.get(AbstractFurnaceBlock.LIT))
         {
-            double temp = 0.025;
+            double temp = 0.04;
             return Math.max(0, temp * (9 - distance));
         }
         return 0;

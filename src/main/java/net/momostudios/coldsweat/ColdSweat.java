@@ -1,11 +1,18 @@
 package net.momostudios.coldsweat;
 
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DeferredWorkQueue;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.init.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,10 +33,7 @@ public class ColdSweat
         ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
 
-        /*ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FuelItemsConfig.SPEC, "cold-sweat_fuel-items.toml");
-        ModLoadingContext context = ModLoadingContext.get();
-        context.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
-            () -> (mc, screen) -> new ConfigScreen.PageOne());*/
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FuelItemsConfig.SPEC, "cold-sweat_fuel-items.toml");
     }
 
     @SubscribeEvent

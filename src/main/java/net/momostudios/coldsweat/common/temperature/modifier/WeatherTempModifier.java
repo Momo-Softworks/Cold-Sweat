@@ -30,4 +30,9 @@ public class WeatherTempModifier extends TempModifier implements IForgeRegistryE
 
         return temp.get() + weatherTemp;
     }
+
+    public String getID()
+    {
+        return "cold_sweat:weather";
+    }
 }

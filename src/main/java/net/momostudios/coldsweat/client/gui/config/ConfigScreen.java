@@ -101,7 +101,7 @@ public class ConfigScreen
 
             // Temp Offset
             this.tempOffsetInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 20, 51, 22, new StringTextComponent(""));
-            this.tempOffsetInput.setText(String.valueOf(celsius ? (CMI.tempOffset() * 42) * 5/2 : CMI.tempOffset() * 42));
+            this.tempOffsetInput.setText(String.valueOf(CMI.tempOffset()));
 
             // Max Temperature
             this.maxTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 52, 51, 22, new StringTextComponent(""));

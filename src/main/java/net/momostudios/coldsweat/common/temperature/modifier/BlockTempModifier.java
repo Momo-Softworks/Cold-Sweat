@@ -3,11 +3,9 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffectEntries;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 
 public class BlockTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
 {
@@ -38,6 +36,11 @@ public class BlockTempModifier extends TempModifier implements IForgeRegistryEnt
             }
         }
 
-        return temp.get() + (totalTemp / Math.max(1, blocksDetected));
+        return temp.get() + totalTemp;
+    }
+
+    public String getID()
+    {
+        return "cold_sweat:nearby_blocks";
     }
 }

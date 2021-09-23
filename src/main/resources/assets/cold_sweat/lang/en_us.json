@@ -1,11 +1,14 @@
 {
   "block.cold_sweat.boiler":            "Boiler",
+  "block.cold_sweat.hearth":            "Hearth",
   "block.cold_sweat.icebox":            "Icebox",
   "block.cold_sweat.sewing_table":      "Sewing Table",
 
-  "item.cold_sweat.thermometer":        "Thermometer",
-  "item.cold_sweat.waterskin":          "Waterskin",
-  "item.cold_sweat.waterskin.filled":   "Filled",
+  "item.cold_sweat.minecart_insulation": "Minecart Insulation",
+  "item.cold_sweat.obsidian_shard":      "Obsidian Shard",
+  "item.cold_sweat.thermometer":         "Thermometer",
+  "item.cold_sweat.waterskin":           "Waterskin",
+  "item.cold_sweat.waterskin.filled":    "Filled",
 
   "modifier.cold_sweat.insulated":      "Insulated",
 

@@ -7,6 +7,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.BoilerContainer;
+import net.momostudios.coldsweat.common.container.HearthContainer;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.common.container.SewingContainer;
 
@@ -22,4 +23,7 @@ public class ContainerInit
 
     public static final RegistryObject<ContainerType<SewingContainer>> SEWING_CONTAINER_TYPE =
         CONTAINER_TYPES.register("sewing_table", () -> IForgeContainerType.create(SewingContainer::new));
+
+    public static final RegistryObject<ContainerType<HearthContainer>> HEARTH_CONTAINER_TYPE =
+        CONTAINER_TYPES.register("hearth", () -> IForgeContainerType.create(HearthContainer::new));
 }

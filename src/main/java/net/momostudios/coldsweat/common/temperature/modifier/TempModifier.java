@@ -44,4 +44,12 @@ public class TempModifier extends ForgeRegistryEntry<TempModifier>
     {
         return temp.get();
     }
+
+    /**
+     * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate names
+     */
+    public String getID()
+    {
+        return "cold_sweat:temp_modifier";
+    }
 }

@@ -1,15 +1,12 @@
 package net.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,7 +19,7 @@ public class AmbientGaugeDisplay
 {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void renderAmbientTemperature(RenderGameOverlayEvent event)
+    public static void renderAmbientTemperature(RenderGameOverlayEvent.Post event)
     {
         PlayerEntity player = Minecraft.getInstance().player;
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
@@ -67,8 +64,10 @@ public class AmbientGaugeDisplay
             }
 
             RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
 
             textureManager.bindTexture(gaugeTexture);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) + 94, scaleY - 19,
                 0, 0, 25, 16, 25, 16);
 
@@ -81,10 +80,10 @@ public class AmbientGaugeDisplay
             else if (temp < (mid + min) / 2 && temp >= min)
                 color = 8443135;
             else if (temp < min)
-                color = 3373055;
+                color = 4236031;
 
             int tempScaled = (int) (temp * 42 + 32);
-            int tempMeasurement = celsius ? ((tempScaled - 32) * 5) / 9 + ColdSweatConfig.getInstance().tempOffset() : tempScaled + ColdSweatConfig.getInstance().tempOffset();
+            int tempMeasurement = (celsius ? ((tempScaled - 32) * 5) / 9 + ColdSweatConfig.getInstance().tempOffset() : tempScaled) + ColdSweatConfig.getInstance().tempOffset();
 
             if (temp > max || temp < min)
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",

@@ -15,6 +15,7 @@ public final class FuelItemsConfig
 
     public static final ForgeConfigSpec.ConfigValue<List> boilerItems;
     public static final ForgeConfigSpec.ConfigValue<List> iceBoxItems;
+    public static final ForgeConfigSpec.ConfigValue<List> hearthItems;
     public static final ForgeConfigSpec.ConfigValue<List<String>> insulatingItems;
 
     static
@@ -34,6 +35,7 @@ public final class FuelItemsConfig
                     Arrays.asList("minecraft:lava_bucket", "1000")
                 ));
         BUILDER.pop();
+
         /*
           Ice Box Items
          */
@@ -48,6 +50,31 @@ public final class FuelItemsConfig
                     Arrays.asList("minecraft:water_bucket", "333"),
                     Arrays.asList("minecraft:ice", "333"),
                     Arrays.asList("minecraft:packed_ice", "1000")
+                ));
+        BUILDER.pop();
+
+        /*
+          Hearth Items
+         */
+        BUILDER.push("Defines the items that the Ice Box can use as fuel and their values");
+        hearthItems = BUILDER
+            .comment("Format: {item id, fuel amount} (cold items should be a negative number)")
+            .define("Ice Box", Arrays.asList
+                (
+                    // Hot
+                    Arrays.asList("minecraft:coal", "37"),
+                    Arrays.asList("minecraft:charcoal", "37"),
+                    Arrays.asList("minecraft:coal_block", "333"),
+                    Arrays.asList("minecraft:magma_block", "333"),
+                    Arrays.asList("minecraft:lava_bucket", "1000"),
+
+                    // Cold
+                    Arrays.asList("minecraft:snowball", "-37"),
+                    Arrays.asList("minecraft:clay", "-37"),
+                    Arrays.asList("minecraft:snow_block", "-333"),
+                    Arrays.asList("minecraft:water_bucket", "-333"),
+                    Arrays.asList("minecraft:ice", "-333"),
+                    Arrays.asList("minecraft:packed_ice", "-1000")
                 ));
         BUILDER.pop();
         BUILDER.push("Defines the items that can be used for insulating armor");

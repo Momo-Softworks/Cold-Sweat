@@ -34,4 +34,9 @@ public class TimeTempModifier extends TempModifier implements IForgeRegistryEntr
 
         return temp.get() + (timeTemp / 200);
     }
+
+    public String getID()
+    {
+        return "cold_sweat:time";
+    }
 }

@@ -33,61 +33,37 @@ public class PlayerTempUpdater
         double maxTemp = config.maxHabitable();
         double minTemp = config.minHabitable();
 
+        Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
+
         //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
         if (ambientTemp > maxTemp)
         {
-            PlayerTemp.setTemperature
-            (
-                player,
-                new Temperature
-                (
-                    Math.min(bodyTemp + (new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get()) * config.rateMultiplier(), 150)
-                ),
-                PlayerTemp.Types.BODY
-            );
+            temp.add(Math.min(new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
+                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), 150));
         }
         //Return the player's temperature back to 0
         else if (bodyTemp > 0)
         {
-            PlayerTemp.setTemperature
-            (
-                player,
-                new Temperature(bodyTemp).add(-Math.min(Math.max(0.02, Math.abs(ambientTemp - maxTemp) / 10) * config.rateMultiplier(), bodyTemp)),
-                PlayerTemp.Types.BODY
-            );
+            temp.add(-Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 10) * config.rateMultiplier(), bodyTemp));
         }
 
         //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
         if (ambientTemp < minTemp)
         {
-            PlayerTemp.setTemperature
-            (
-                player,
-                new Temperature
-                (
-                    Math.max(bodyTemp - (new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get()) * config.rateMultiplier(), -150)
-                ),
-                PlayerTemp.Types.BODY
-            );
+            temp.add(Math.max(-new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
+                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), -150));
         }
         //Return the player's temperature back to 0
         else if (bodyTemp < 0)
         {
-            PlayerTemp.setTemperature
-            (
-                player,
-                new Temperature(bodyTemp).add(Math.min(Math.max(0.02, Math.abs(ambientTemp - minTemp) / 10) * config.rateMultiplier(), -bodyTemp)),
-                PlayerTemp.Types.BODY
-            );
+            temp.add(Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 10) * config.rateMultiplier(), -bodyTemp));
         }
 
         //Calculates the player's temperature
         PlayerTemp.setTemperature
         (
             player,
-            PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
+            temp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
             PlayerTemp.Types.BODY
         );
         PlayerTemp.setTemperature

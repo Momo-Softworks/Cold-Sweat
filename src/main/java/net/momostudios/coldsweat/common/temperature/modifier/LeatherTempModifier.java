@@ -32,4 +32,9 @@ public class LeatherTempModifier extends TempModifier implements IForgeRegistryE
 
         return temp.get() / Math.max(1, amount / 15);
     }
+
+    public String getID()
+    {
+        return "cold_sweat:insulated_armor";
+    }
 }

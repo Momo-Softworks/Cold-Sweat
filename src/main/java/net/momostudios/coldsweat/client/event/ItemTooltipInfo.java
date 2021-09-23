@@ -1,6 +1,8 @@
 package net.momostudios.coldsweat.client.event;
 
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.Items;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,7 +33,8 @@ public class ItemTooltipInfo
             event.getToolTip().add(1, new StringTextComponent("\u00a77" + new TranslationTextComponent(
                 "item." + ColdSweat.MOD_ID + ".waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)"));
         }
-        else if (event.getItemStack().getItem() instanceof ArmorItem && event.getItemStack().getOrCreateTag().getBoolean("insulated"))
+        else if ((event.getItemStack().getItem() instanceof ArmorItem || event.getItemStack().getItem() instanceof BucketItem) &&
+                  event.getItemStack().getOrCreateTag().getBoolean("insulated"))
         {
             event.getToolTip().add(1, new StringTextComponent("\u00a7d" +
                 new TranslationTextComponent("modifier." + ColdSweat.MOD_ID + ".insulated").getString() + "\u00a7r"));
