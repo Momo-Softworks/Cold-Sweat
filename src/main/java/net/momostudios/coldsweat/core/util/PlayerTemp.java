@@ -33,6 +33,7 @@ public class PlayerTemp
      * This is used for instant temperature-changing items (i.e. Waterskins)
      *
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
+     * @param arguments are stored to NBT, then passed to the {@link TempModifier} when it is called from NBT. The argument(s) MUST be a supported {@link INBT} type.
      * (You might use this for things that have stacking effects, for example)
      */
     public static void applyModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates, INBT... arguments)

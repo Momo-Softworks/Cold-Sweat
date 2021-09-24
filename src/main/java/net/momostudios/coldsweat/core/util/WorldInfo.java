@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.Heightmap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class WorldInfo
@@ -78,5 +79,10 @@ public class WorldInfo
             lx += interval;
         }
         return posList;
+    }
+
+    public static List<BlockPos> adjacentPositions(BlockPos pos)
+    {
+        return new ArrayList<>(Arrays.asList(pos.up(), pos.down(), pos.east(), pos.west(), pos.north(), pos.south()));
     }
 }

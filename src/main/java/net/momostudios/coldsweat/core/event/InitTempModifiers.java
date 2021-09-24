@@ -40,5 +40,6 @@ public class InitTempModifiers
         TME.add(new TimeTempModifier());
         TME.add(new WaterskinTempModifier());
         TME.add(new WeatherTempModifier());
+        TME.add(new HearthTempModifier());
     }
 }

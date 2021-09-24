@@ -39,8 +39,7 @@ public class TempModifierEntries
 
     public String getEntryName(TempModifier modifier)
     {
-        List<TempModifier> tempEntries = entries;
-        for (TempModifier entry : tempEntries)
+        for (TempModifier entry : entries.subList(0, entries.size() - 1))
         {
             if (entry.getClass() == modifier.getClass())
                 return entry.getID();
