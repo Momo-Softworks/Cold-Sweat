@@ -18,7 +18,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
-import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 
@@ -98,7 +97,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = new ArrayList();
-        for (Object iterator : FuelItemsConfig.iceBoxItems.get())
+        for (Object iterator : FuelItemsConfig.getInstance().iceboxItems())
         {
             List<String> testIndex = (List<String>) iterator;
             String testItem = testIndex.get(0);

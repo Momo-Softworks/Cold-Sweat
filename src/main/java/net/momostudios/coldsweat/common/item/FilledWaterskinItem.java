@@ -13,18 +13,18 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.util.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
-import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 
 public class FilledWaterskinItem extends Item
 {
     public FilledWaterskinItem()
     {
-        super(new Item.Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1).containerItem(ItemInit.WATERSKIN_REGISTRY.get()));
+        super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1).containerItem(ItemInit.WATERSKIN_REGISTRY.get()));
     }
 
     @Override

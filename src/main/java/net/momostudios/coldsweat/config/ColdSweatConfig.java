@@ -2,21 +2,14 @@ package net.momostudios.coldsweat.config;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.momostudios.coldsweat.ColdSweat;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.UnexpectedException;
 
 public class ColdSweatConfig
 {
-    private static final int DEFAULT_HUD_X = 2;
-    private static final int DEFAULT_HUD_Y = 2;
-
     private static final ColdSweatConfig INSTANCE;
     private static final ForgeConfigSpec SPEC;
     private static final Path CONFIG_PATH = Paths.get("config/cold-sweat_main.toml");

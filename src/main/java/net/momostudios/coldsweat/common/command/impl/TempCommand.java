@@ -13,9 +13,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.momostudios.coldsweat.common.command.BaseCommand;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.Arrays;
 import java.util.Collection;

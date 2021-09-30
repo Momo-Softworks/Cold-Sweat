@@ -3,8 +3,6 @@ package net.momostudios.coldsweat.common.temperature.modifier.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.momostudios.coldsweat.common.block.BoilerBlock;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 

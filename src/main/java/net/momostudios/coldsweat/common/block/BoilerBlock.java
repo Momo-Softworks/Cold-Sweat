@@ -1,6 +1,8 @@
 package net.momostudios.coldsweat.common.block;
 
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -16,7 +18,10 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
@@ -27,8 +32,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
-import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
+import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +44,9 @@ public class BoilerBlock extends Block
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-    public static AbstractBlock.Properties getProperties()
+    public static Properties getProperties()
     {
-        return AbstractBlock.Properties
+        return Properties
                 .create(Material.ROCK)
                 .sound(SoundType.STONE)
                 .hardnessAndResistance(2f, 10f)

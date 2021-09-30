@@ -1,8 +1,8 @@
 package net.momostudios.coldsweat.common.temperature.modifier.block;
 
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractFurnaceBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.LavaFluid;
 import net.minecraft.util.math.BlockPos;
 
 public class FurnaceBlockEffect extends BlockEffect

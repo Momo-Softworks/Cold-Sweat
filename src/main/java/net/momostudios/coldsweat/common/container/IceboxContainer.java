@@ -11,7 +11,6 @@ import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.util.ModItems;
 

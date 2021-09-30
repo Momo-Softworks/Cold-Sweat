@@ -12,6 +12,8 @@
 
   "modifier.cold_sweat.insulated":      "Insulated",
 
+  "effect.insulated": "Insulated",
+
   "container.cold_sweat.boiler":        "Boiler",
   "container.cold_sweat.icebox":        "Icebox",
   "container.cold_sweat.sewing_table": "Sewing Table",
@@ -19,9 +21,9 @@
   "itemGroup.cold_sweat": "Cold Sweat",
 
   "death.attack.cold":          "%1$s froze to death",
-  "death.attack.cold.player":   "%1$s froze to death",
+  "death.attack.cold.player":   "%1$s froze to death while fighting %2$s",
   "death.attack.hot":           "%1$s died of heatstroke",
-  "death.attack.hot.player":    "%1$s died of heatstroke",
+  "death.attack.hot.player":    "%1$s died of heatstroke while fighting %2$s",
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.temperature_details":  "Temperature Management",

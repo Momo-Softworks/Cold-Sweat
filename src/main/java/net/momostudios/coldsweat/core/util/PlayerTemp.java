@@ -1,23 +1,35 @@
 package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.util.ListNBTHelper;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.momostudios.coldsweat.common.world.TempModifierEntries;
+import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
+import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayerTemp
 {
-    //Returns the player's temperature AFTER the modifiers are calculated.
+    /**
+     * Returns the player's temperature AFTER the modifiers are calculated.
+     */
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
-        return new Temperature(player.getPersistentData().getDouble(getTempTag(type)));
+        //return new Temperature(player.getPersistentData().getDouble(getTempTag(type)));
+        AtomicReference<Double> temp = new AtomicReference<>(0.0d);
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
+        {
+            temp.set(capability.get(type));
+        });
+        return new Temperature(temp.get());
     }
-
-
 
     /**
      * You should try to avoid using these unless you need to set the value to a fixed amount.
@@ -25,7 +37,11 @@ public class PlayerTemp
      */
     public static void setTemperature(PlayerEntity player, Temperature value, Types type)
     {
-        player.getPersistentData().putDouble(getTempTag(type), value.get());
+        //player.getPersistentData().putDouble(getTempTag(type), value.get());
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
+        {
+            capability.set(type, value.get());
+        });
     }
 
     /**

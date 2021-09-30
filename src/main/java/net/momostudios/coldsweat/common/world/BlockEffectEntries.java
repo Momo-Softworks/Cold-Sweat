@@ -1,12 +1,10 @@
 package net.momostudios.coldsweat.common.world;
 
 import net.minecraft.block.Block;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BlockEffectEntries

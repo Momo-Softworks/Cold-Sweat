@@ -6,7 +6,9 @@ import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.*;
+import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -17,7 +19,6 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.BoilerBlock;
 import net.momostudios.coldsweat.common.container.BoilerContainer;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
-import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 
@@ -102,7 +103,7 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = new ArrayList();
-        for (Object iterator : FuelItemsConfig.boilerItems.get())
+        for (Object iterator : FuelItemsConfig.getInstance().boilerItems())
         {
             List<String> testIndex = (List<String>) iterator;
             String testItem = testIndex.get(0);

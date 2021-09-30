@@ -1,14 +1,16 @@
 package net.momostudios.coldsweat.common.te;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.block.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
@@ -27,22 +29,26 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.HearthBlock;
 import net.momostudios.coldsweat.common.container.HearthContainer;
+import net.momostudios.coldsweat.common.effect.InsulatedEffect;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.HearthTempModifier;
+import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.core.init.EffectInit;
+import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
-import net.momostudios.coldsweat.core.util.ModItems;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.core.util.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
     public static int slots = 10;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
+    private int resetTimer;
+    private int insulationLevel;
     protected static int MAX_FUEL = 1000;
 
     public HearthTileEntity(TileEntityType<?> tileEntityTypeIn) {
@@ -73,98 +79,112 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public void tick()
     {
         this.ticksExisted = (this.ticksExisted + 1) % 1000;
+        resetTimer = this.getTileData().getInt("resetTimer");
+        insulationLevel = this.getTileData().getInt("insulationLevel");
 
-        List<PlayerEntity> affectedPlayers = new ArrayList<>();
+        if (resetTimer > 0)
+            this.getTileData().putInt("resetTimer", resetTimer - 1);
 
-        // Get master list of points (and add a dummy one if it is empty)
-        List<BlockPos> poss = this.getPoints();
-        if (poss.isEmpty()) {
-            poss.add(pos);
-            poss.add(pos.up());
-        }
+        if (insulationLevel < 2400)
+            this.getTileData().putInt("insulationLevel", insulationLevel + 1);
 
-        // Create temporary new list
-        List<BlockPos> positions2 = new ArrayList<>();
-
-        /*
-         Partition all points into multiple lists (max of 19)
-        */
-        List<List<BlockPos>> partitions = new ArrayList<>();
-
-        // Size of each partition
-        int partSize = 400;
-        // Number of partitions with 150 elements each
-        int partitionCount = Math.max(poss.size() / partSize, poss.size());
-
-        // Iterate through poss and divide into multiple lists
-        int index = 0;
-        for (int l = 0; l < partitionCount; l++)
+        if (this.getHotFuel() > 0 || this.getColdFuel() > 0)
         {
-            // break if the end is reached
-            if (index >= poss.size()) break;
+            List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
-            // Add a new partition to [partitions] and move on to the next set
-            partitions.add(poss.subList(index, Math.min(Math.max(0, poss.size() - 1), index + partSize)));
-            index += partSize;
-        }
+            // Represents the NBT list
+            List<BlockPos> poss = this.getPoints();
 
-        // The index of the partition being worked on (based on current world tick)
-        int scanningIndex = this.ticksExisted % partitions.size();
+            // Create temporary list to add back to the NBT
+            List<BlockPos> positions2 = new ArrayList<>();
 
-        /*
-         Iterate through the partition with index [scanningIndex]
-         */
-        if (!partitions.isEmpty())
-        {
-            for (BlockPos blockPos : partitions.get(scanningIndex))
+            /*
+             Partition all points into multiple lists (max of 19)
+            */
+            // Size of each partition
+            int partSize = 80;
+            // Number of partitions with 150 elements each
+            int partitionCount = (int) Math.ceil(poss.size() / (double) partSize);
+            // Index of the last point being worked on this tick
+            int lastIndex = Math.min(poss.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
+            // Index of the first point being worked on this tick
+            int firstIndex = Math.max(0, lastIndex - partSize);
+
+            boolean shouldReset = false;
+
+            /*
+             Iterate through the partition with index [scanningIndex]
+             */
+            for (BlockPos blockPos : poss.subList(firstIndex, lastIndex))
             {
+                // Get if any adjacent block is solid
+                boolean touchingSolid = WorldInfo.adjacentPositions(blockPos).stream().anyMatch(newPos -> world.getBlockState(pos).isSolid());
+
                 // Create detection box for PlayerEntities
-                AxisAlignedBB aabb = new AxisAlignedBB(blockPos.getX(), blockPos.getY(), blockPos.getZ(),
-                    blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
+                int x = blockPos.getX();
+                int y = blockPos.getY();
+                int z = blockPos.getZ();
+                AxisAlignedBB aabb = touchingSolid ? new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1) :
+                    new AxisAlignedBB(x - 1, y - 1, z - 1, x + 2, y + 2, z + 2);
 
-                // Apply insulation effect
-                affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
+                // Add players to list [affectedPlayers]
+                affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb).stream().filter(player ->
+                        !affectedPlayers.contains(player)).collect(Collectors.toList()));
 
-                //world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                // For testing purposes
+                world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+
+                // If a block has changed in the area, trigger a reset of the area shape
+                if (!isBlockSpreadable(blockPos) && resetTimer == 0 && !shouldReset) {
+                    shouldReset = true;
+                }
 
                 // Check in all 6 directions
                 for (Direction direction : Direction.values())
                 {
                     // Create new BlockPos with an offset of [direction] from [blockPos]
-                    BlockPos testpos = blockPos.add(direction.getDirectionVec());
-                    BlockPos testpos2 = blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
+                    BlockPos testpos = touchingSolid ?
+                            blockPos.add(direction.getDirectionVec()) :
+                            blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
 
-                    if (!world.getBlockState(testpos).isSolid() && !world.canBlockSeeSky(testpos) && !poss.contains(testpos) && !positions2.contains(testpos)
-                    &&  !world.getBlockState(testpos2).isSolid() && !world.canBlockSeeSky(testpos) && !poss.contains(testpos2) && !positions2.contains(testpos2))
+                    if (Math.sqrt(testpos.distanceSq(this.pos)) <= 18)
                     {
-                        // Returns true if [testpos] is adjacent to a solid on any side
-                        boolean touchingSolid = WorldInfo.adjacentPositions(testpos).stream().anyMatch(newPos -> world.getBlockState(newPos).isSolid());
-                        boolean touchingSolid2 = WorldInfo.adjacentPositions(testpos2).stream().anyMatch(newPos -> world.getBlockState(newPos).isSolid());
-
-                        // Test if [testpos] is within 24 blocks
-                        if (Math.sqrt(testpos.distanceSq(this.pos)) <= 24 &&
-                        (touchingSolid || (testpos.getX() % 2 == 0 && testpos.getY() % 2 == 0 && testpos.getZ() % 2 == 0)))
+                        if (isBlockSpreadable(testpos) && /*!world.canBlockSeeSky(testpos) &&*/ !poss.contains(testpos) && !positions2.contains(testpos) &&
+                                (touchingSolid || MathHelperCS.isEvenPosition(testpos)))
                         {
                             positions2.add(testpos);
-                        }
-                        if (Math.sqrt(testpos2.distanceSq(this.pos)) <= 24 &&
-                            (touchingSolid2 || (testpos2.getX() % 2 == 0 && testpos2.getY() % 2 == 0 && testpos2.getZ() % 2 == 0)))
-                        {
-                            positions2.add(testpos2);
                         }
                     }
                 }
             }
             // Add new positions to NBT
             this.addPoints(positions2);
+
+            // Reset points if a block has been added
+            if (shouldReset)
+            {
+                this.clearPoints();
+                this.getTileData().putInt("resetTimer", 1200);
+            }
+
+            ColdSweatConfig config = ColdSweatConfig.getInstance();
+            for (PlayerEntity player : affectedPlayers)
+            {
+                Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
+                if (playerTemp.get() < config.minHabitable() && this.getHotFuel() > 0 ||
+                    playerTemp.get() > config.maxHabitable() && this.getColdFuel() > 0 ||
+                   (playerTemp.get() > config.minHabitable() && playerTemp.get() < config.maxHabitable()))
+                {
+                    player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 200, Math.max(0, insulationLevel / 240 - 1),
+                            false, false));
+                }
+                /*else {
+                    player.removeActivePotionEffect(new InsulatedEffect());
+                }*/
+            }
         }
 
-        // Periodically reset points
-        if (this.ticksExisted % 400 == 0)
-        {
-            this.clearPoints();
-        }
-
+        // Input fuel types
         if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
         {
             ItemStack fuel = this.getItemInSlot(0);
@@ -189,19 +209,31 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 this.setColdFuel(this.getColdFuel() - amount);
             }
         }
+
+        // Drain fuel
+        if (this.ticksExisted % 40 == 0)
+        {
+            if (this.getColdFuel() > 0)
+            {
+                this.setColdFuel(this.getColdFuel() - 1);
+            }
+            if (this.getHotFuel() > 0)
+            {
+                this.setHotFuel(this.getHotFuel() - 1);
+            }
+        }
     }
 
     public List getFuelItem(ItemStack item)
     {
-        List returnList = new ArrayList();
-        for (Object iterator : FuelItemsConfig.hearthItems.get())
+        List returnList = Arrays.asList(item, 0);
+        for (List<String> iterator : FuelItemsConfig.getInstance().hearthItems())
         {
-            List<String> testIndex = (List<String>) iterator;
-            String testItem = testIndex.get(0);
+            String testItem = iterator.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                returnList = Arrays.asList(item, Integer.parseInt(testIndex.get(1)));
+                returnList = Arrays.asList(item, Integer.parseInt(iterator.get(1)));
             }
         }
         return returnList;
@@ -251,12 +283,35 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public List<BlockPos> getPoints()
     {
+        return this.getPoints(0, this.getTileData().getList("points", 11).size());
+    }
+
+    public boolean isBlockSpreadable(BlockPos pos)
+    {
+        BlockState state = world.getBlockState(pos);
+        boolean spreadable = !state.isSolid() &&
+                            !state.isNormalCube(world.getBlockReader(world.getChunk(pos).getPos().x, world.getChunk(pos).getPos().z), pos) &&
+                            (!(state.getBlock() instanceof PaneBlock) ||
+                            state.isReplaceable(Fluids.WATER) ||
+                            (state.hasProperty(DoorBlock.OPEN) && state.get(DoorBlock.OPEN)) ||
+                            (state.hasProperty(TrapDoorBlock.OPEN) && state.get(TrapDoorBlock.OPEN)) ||
+                            world.isAirBlock(pos) ||
+                            state.getBlock() == ModBlocks.HEARTH.get());
+        return spreadable;
+    }
+
+    public List<BlockPos> getPoints(int firstIndex, int lastIndex)
+    {
         List<BlockPos> pointList = new ArrayList<>();
 
-        for (INBT point : this.getTileData().getList("points", 11))
+        for (INBT point : this.getTileData().getList("points", 11).subList(firstIndex, lastIndex))
         {
             int[] values = ((IntArrayNBT) point).getIntArray();
             pointList.add(new BlockPos(values[0], values[1], values[2]));
+        }
+        if (pointList.isEmpty()) {
+            pointList.add(pos);
+            pointList.add(pos.up());
         }
         return pointList;
     }

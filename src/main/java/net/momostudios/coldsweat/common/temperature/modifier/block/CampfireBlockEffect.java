@@ -1,6 +1,5 @@
 package net.momostudios.coldsweat.common.temperature.modifier.block;
 
-import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;

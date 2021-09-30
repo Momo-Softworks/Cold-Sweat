@@ -11,6 +11,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -82,8 +83,8 @@ public class AmbientGaugeDisplay
             else if (temp < min)
                 color = 4236031;
 
-            int tempScaled = (int) (temp * 42 + 32);
-            int tempMeasurement = (celsius ? ((tempScaled - 32) * 5) / 9 + ColdSweatConfig.getInstance().tempOffset() : tempScaled) + ColdSweatConfig.getInstance().tempOffset();
+            int tempScaled = MathHelperCS.convertToF(temp);
+            int tempMeasurement = (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + ColdSweatConfig.getInstance().tempOffset();
 
             if (temp > max || temp < min)
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",

@@ -4,7 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +82,6 @@ public class WorldInfo
 
     public static List<BlockPos> adjacentPositions(BlockPos pos)
     {
-        return new ArrayList<>(Arrays.asList(pos.up(), pos.down(), pos.east(), pos.west(), pos.north(), pos.south()));
+        return new ArrayList<>(Arrays.asList(pos, pos.up(), pos.down(), pos.east(), pos.west(), pos.north(), pos.south()));
     }
 }

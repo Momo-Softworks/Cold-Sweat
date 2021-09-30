@@ -1,7 +1,5 @@
 package net.momostudios.coldsweat.common.container;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -11,9 +9,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -23,9 +19,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.ModBlocks;
-import net.momostudios.coldsweat.core.util.ModItems;
-
-import java.util.Objects;
 
 public class SewingContainer extends Container
 {
@@ -152,7 +145,7 @@ public class SewingContainer extends Container
 
     public boolean isInsulatingItem(ItemStack item)
     {
-        for (String iterator : FuelItemsConfig.insulatingItems.get())
+        for (String iterator : FuelItemsConfig.getInstance().insulatingItems())
         {
             if (new ResourceLocation(iterator).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {

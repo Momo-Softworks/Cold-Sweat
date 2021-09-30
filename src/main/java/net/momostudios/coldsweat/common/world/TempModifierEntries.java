@@ -1,10 +1,8 @@
 package net.momostudios.coldsweat.common.world;
 
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TempModifierEntries
@@ -39,10 +37,12 @@ public class TempModifierEntries
 
     public String getEntryName(TempModifier modifier)
     {
-        for (TempModifier entry : entries.subList(0, entries.size() - 1))
+        for (TempModifier entry : getList())
         {
             if (entry.getClass() == modifier.getClass())
+            {
                 return entry.getID();
+            }
         }
         return null;
     }

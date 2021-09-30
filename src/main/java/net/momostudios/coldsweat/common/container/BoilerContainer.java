@@ -11,9 +11,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
-import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.Objects;

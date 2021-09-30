@@ -3,9 +3,7 @@ package net.momostudios.coldsweat.common.temperature.modifier.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.LavaFluid;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.world.WorldEvent;
 
 public class FireBlockEffect extends BlockEffect
 {

@@ -1,14 +1,15 @@
 package net.momostudios.coldsweat.common.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
+import net.momostudios.coldsweat.config.ModifierLoadOrder;
+import net.momostudios.coldsweat.core.init.EffectInit;
+import net.momostudios.coldsweat.core.util.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddTempModifiers
@@ -29,7 +30,5 @@ public class AddTempModifiers
             PlayerTemp.applyModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
             PlayerTemp.applyModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
         }
-
-        double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
     }
 }

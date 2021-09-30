@@ -1,26 +1,21 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is the basis of all ways that a Temperature can be changed.
- * For example, biome temperature, time of day, depth, and waterskins are all TempModifiers
- *
- * It is up to you to apply and remove these modifiers manually.
- * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.
- *
- * TempModifiers must be REGISTERED to {@link net.momostudios.coldsweat.common.world.TempModifierEntries} to be used
- * (see {@link net.momostudios.coldsweat.core.event.InitTempModifiers} for an example)
+ * This is the basis of all ways that a Temperature can be changed.<br>
+ * For example, biome temperature, time of day, depth, and waterskins are all TempModifiers<br>
+ *<br>
+ * It is up to you to apply and remove these modifiers manually.<br>
+ * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.<br>
+ *<br>
+ * TempModifiers must be REGISTERED to {@link net.momostudios.coldsweat.common.world.TempModifierEntries} to be used<br>
+ * (see {@link net.momostudios.coldsweat.core.event.InitTempModifiers} for an example)<br>
  */
 public class TempModifier extends ForgeRegistryEntry<TempModifier>
 {
@@ -34,6 +29,11 @@ public class TempModifier extends ForgeRegistryEntry<TempModifier>
      * @param args types MUST extend {@link INBT}, as they must be able to be stored in the PlayerEntity's NBT data and recalled later.
      */
     public TempModifier(List<INBT> args) {}
+
+    /**
+     * Returns a new TempModifier with the specified {@code [args]} stored.<br>
+     * This is mainly used for processing.
+     */
     public TempModifier with(List<INBT> args)
     {
         return this;

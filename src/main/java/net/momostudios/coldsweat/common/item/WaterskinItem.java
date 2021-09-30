@@ -17,14 +17,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.BiomeTempModifier;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 
 public class WaterskinItem extends Item
 {
     public WaterskinItem()
     {
-        super(new Item.Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(16));
+        super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(16));
     }
 
     @Override
