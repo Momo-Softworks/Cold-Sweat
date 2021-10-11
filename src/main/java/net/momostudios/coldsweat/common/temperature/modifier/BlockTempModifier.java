@@ -2,40 +2,41 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BlockTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)
     {
-        final double[] totalTemp = {0};
+        double totalTemp = 0;
         int x = player.getPosition().getX();
         int y = player.getPosition().getY();
         int z = player.getPosition().getZ();
+        int blocksDetected = 0;
 
-        BlockPos.getAllInBox(new AxisAlignedBB(x - 7, y - 7, z - 7, x + 7, y + 7, z + 7)).forEach(blockpos ->
+        for (int x1 = -7; x1 < 14; x1++)
         {
-            BlockState state = player.world.getBlockState(blockpos);
-            BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
-            if (be != null)
+            for (int y1 = -7; y1 < 14; y1++)
             {
-                if (totalTemp[0] < be.maxTemp() && totalTemp[0] > be.minTemp())
+                for (int z1 = -7; z1 < 14; z1++)
                 {
-                    totalTemp[0] += be.getTemperature(player, state, blockpos, Math.sqrt(player.getDistanceSq(blockpos.getX(), blockpos.getY(), blockpos.getZ())));
+                    BlockPos blockpos = new BlockPos(x + x1, y + y1, z + z1);
+                    BlockState state = player.world.getBlockState(blockpos);
+                    if (BlockEffectEntries.getEntries().getEntryFor(state.getBlock()) != null)
+                    {
+                        totalTemp += BlockEffectEntries.getEntries().getEntryFor(state.getBlock()).getTemperature(player, state, blockpos,
+                            Math.sqrt(player.getDistanceSq(blockpos.getX(), blockpos.getY(), blockpos.getZ())));
+                        blocksDetected++;
+                    }
                 }
             }
-        });
+        }
 
-        return temp.get() + totalTemp[0];
+        return temp.get() + totalTemp;
     }
 
     public String getID()

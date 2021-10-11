@@ -12,9 +12,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
-import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.init.*;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import org.apache.logging.log4j.LogManager;
@@ -33,18 +31,11 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
-        BlockInit.BLOCKS.register(bus);
+        ModBlocks.BLOCKS.register(bus);
         TileEntityInit.TILE_ENTITY_TYPE.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
         EffectInit.EFFECTS.register(bus);
-        ParticleTypesInit.PARTICLES.register(bus);
-        PotionInit.POTIONS.register(bus);
-
-        // Setup configs
-        WorldTemperatureConfig.setup();
-        FuelItemsConfig.setup();
-        ColdSweatConfig.setup();
     }
 
     // Register Commands
@@ -61,6 +52,6 @@ public class ColdSweat
 
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        RenderTypeLookup.setRenderLayer(BlockInit.HEARTH.get(), RenderType.getCutoutMipped());
+        RenderTypeLookup.setRenderLayer(ModBlocks.HEARTH.get(), RenderType.getCutoutMipped());
     }
 }

@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
@@ -32,13 +33,12 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
-import net.momostudios.coldsweat.core.init.BlockInit;
+import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 
@@ -140,14 +140,14 @@ public class HearthBlock extends Block
     {
         if (worldIn.isAirBlock(pos.up()))
         {
-            worldIn.setBlockState(pos.up(), BlockInit.HEARTH_TOP.get().getDefaultState().with(HearthTopBlock.FACING, state.get(FACING)), 2);
+            worldIn.setBlockState(pos.up(), ModBlocks.HEARTH_TOP.get().getDefaultState().with(HearthTopBlock.FACING, state.get(FACING)), 2);
         }
     }
 
     @Override
     public boolean removedByPlayer(BlockState blockstate, World world, BlockPos pos, PlayerEntity entity, boolean willHarvest, FluidState fluid)
     {
-        if (world.getBlockState(pos.up()).getBlock() == BlockInit.HEARTH_TOP.get())
+        if (world.getBlockState(pos.up()).getBlock() == ModBlocks.HEARTH_TOP.get())
         {
             world.destroyBlock(pos, !entity.isCreative());
             world.destroyBlock(pos.up(), false);
@@ -161,7 +161,7 @@ public class HearthBlock extends Block
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
-        if (worldIn.getBlockState(pos.up()).getBlock() != BlockInit.HEARTH_TOP.get())
+        if (worldIn.getBlockState(pos.up()).getBlock() != ModBlocks.HEARTH_TOP.get())
         {
             worldIn.destroyBlock(pos, true);
         }
@@ -223,4 +223,24 @@ public class HearthBlock extends Block
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing()).with(WATER, 0).with(LAVA, 0);
     }
+
+    /*@OnlyIn(Dist.CLIENT)
+    public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        if (stateIn.get(LIT))
+        {
+            double d0 = (double)pos.getX() + 0.5D;
+            double d1 = (double)pos.getY();
+            double d2 = (double)pos.getZ() + 0.5D;
+            Direction direction = stateIn.get(FACING);
+            Direction.Axis direction$axis = direction.getAxis();
+            double d3 = 0.52D;
+            double d4 = rand.nextDouble() * 0.6D - 0.3D;
+            double d5 = direction$axis == Direction.Axis.X ? (double)direction.getXOffset() * 0.52D : d4;
+            double d6 = rand.nextDouble() * 6.0D / 16.0D + 0.2;
+            double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getZOffset() * 0.52D : d4;
+            worldIn.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+            worldIn.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+        }
+    }*/
 }

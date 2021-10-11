@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 
 group = 'net.momostudios'
-version = 'r2.0.3'
+version = 'b2.0-2'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -82,8 +82,23 @@ repositories {
 }
 
 dependencies {
+    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.5'
+
+    // Real mod deobf dependency examples - these get remapped to your current mappings
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")
+    //runtimeOnly fg.deobf("curse.maven:serene-291874:3429973")
+    //runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
+    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
+
+    // Examples using mod jars from ./libs
+    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
