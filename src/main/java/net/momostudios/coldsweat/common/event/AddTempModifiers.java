@@ -24,12 +24,11 @@ public class AddTempModifiers
          */
         if (player.ticksExisted % 20 == 0)
         {
-            PlayerTemp.applyModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new BiomeTempModifier(),   PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new TimeTempModifier(),    PlayerTemp.Types.AMBIENT, false);
             PlayerTemp.applyModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            // beuh
+            PlayerTemp.applyModifier(player, new DepthTempModifier(),   PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new BlockTempModifier(),   PlayerTemp.Types.AMBIENT, false);
         }
     }
 }
