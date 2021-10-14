@@ -35,6 +35,7 @@ public class AmbientGaugeDisplay
             double max = ColdSweatConfig.getInstance().maxHabitable();
             double mid = (min + max) / 2;
             boolean celsius = ColdSweatConfig.getInstance().celsius();
+            boolean bobbing = ColdSweatConfig.getInstance().iconBobbing();
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
             double temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
@@ -88,7 +89,7 @@ public class AmbientGaugeDisplay
 
             if (temp > max || temp < min)
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
-                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 ? 16 : 15), color);
+                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15), color);
             else
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
                     (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - 15, color);

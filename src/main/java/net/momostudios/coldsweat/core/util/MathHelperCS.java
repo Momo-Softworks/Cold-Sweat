@@ -38,4 +38,9 @@ public class MathHelperCS
     {
         return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
     }
+
+    public static int[] getCoordinates(BlockPos pos)
+    {
+        return new int[] {pos.getX(), pos.getY(), pos.getZ()};
+    }
 }

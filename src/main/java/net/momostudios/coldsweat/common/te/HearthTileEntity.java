@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.common.te;
 
 import net.minecraft.block.*;
+import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
@@ -10,8 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.potion.Effects;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -30,7 +29,8 @@ import net.momostudios.coldsweat.common.container.HearthContainer;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
-import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.core.init.BlockInit;
+import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.*;
 
@@ -83,7 +83,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         if (insulationLevel < 2400)
             this.getTileData().putInt("insulationLevel", insulationLevel + 1);
 
-        if ((this.getHotFuel() > 0 || this.getColdFuel() > 0) /*&& !world.canBlockSeeSky(pos)*/)
+        if ((this.getHotFuel() > 0 || this.getColdFuel() > 0) && !world.canBlockSeeSky(pos))
         {
             List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
@@ -126,8 +126,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
 
                 // Show radius if enabled
-                if (this.getTileData().getBoolean("showRadius"))
-                    world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                if (this.getTileData().getBoolean("showRadius") && world.isRemote && Math.random() < 0.2)
+                for (int p = 0; p < (touchingSolid ? 1 : Math.random() * 3); p++)
+                {
+                    double xr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                    double xm = Math.random() / 20 - 0.025;
+                    double yr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                    double zr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                    double zm = Math.random() / 20 - 0.025;
+
+                    world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                }
 
                 // If a block has changed in the area, trigger a reset of the area shape
                 if (!isBlockSpreadable(blockPos) && resetTimer == 0 && !shouldReset) {
@@ -142,10 +151,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             blockPos.add(direction.getDirectionVec()) :
                             blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
 
-                    if (Math.sqrt(testpos.distanceSq(this.pos)) <= 18)
+                    if (testpos.withinDistance(pos, 20))
                     {
-                        if (isBlockSpreadable(testpos) && /*!world.canBlockSeeSky(testpos) &&*/ !poss.contains(testpos) && !positions2.contains(testpos) &&
-                                (touchingSolid || MathHelperCS.isEvenPosition(testpos)))
+                        if (isBlockSpreadable(testpos) && !world.canBlockSeeSky(testpos) && !poss.contains(testpos) && !positions2.contains(testpos) &&
+                        (touchingSolid || MathHelperCS.isEvenPosition(testpos)))
                         {
                             positions2.add(testpos);
                         }
@@ -216,7 +225,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Update BlockState
-        if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == ModBlocks.HEARTH.get())
+        if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
         {
             BlockState state = world.getBlockState(pos);
             int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
@@ -227,6 +236,31 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             {
                 world.setBlockState(pos, desiredState);
             }
+        }
+
+        // Particles
+        int coldFuel = getColdFuel();
+        int hotFuel = getHotFuel();
+
+        if (Math.random() < coldFuel / 2000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 2d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 4;
+            double d4 = (Math.random() - 0.5) / 4;
+            double d5 = (Math.random() - 0.5) / 4;
+            world.addParticle(ParticleTypes.CLOUD, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
+        }
+        if (Math.random() < hotFuel / 2000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 2d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 2;
+            double d4 = (Math.random() - 0.5) / 2;
+            double d5 = (Math.random() - 0.5) / 2;
+            world.addParticle(ParticleTypes.SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
         }
     }
 
@@ -290,15 +324,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public boolean isBlockSpreadable(BlockPos pos)
     {
         BlockState state = world.getBlockState(pos);
-        boolean spreadable = !state.isSolid() &&
+        return !state.isSolid() &&
                             !state.isNormalCube(world.getBlockReader(world.getChunk(pos).getPos().x, world.getChunk(pos).getPos().z), pos) &&
                             (!(state.getBlock() instanceof PaneBlock) ||
                             state.isReplaceable(Fluids.WATER) ||
                             (state.hasProperty(DoorBlock.OPEN) && state.get(DoorBlock.OPEN)) ||
                             (state.hasProperty(TrapDoorBlock.OPEN) && state.get(TrapDoorBlock.OPEN)) ||
                             world.isAirBlock(pos) ||
-                            state.getBlock() == ModBlocks.HEARTH.get());
-        return spreadable;
+                            state.getBlock() == BlockInit.HEARTH.get());
     }
 
     public List<BlockPos> getPoints()
@@ -315,13 +348,20 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             int[] values = ((IntArrayNBT) point).getIntArray();
             pointList.add(new BlockPos(values[0], values[1], values[2]));
         }
-        if (pointList.isEmpty()) {
-            pointList.add(pos);
-            pointList.add(pos.up());
-            pointList.add(pos.north());
-            pointList.add(pos.south());
-            pointList.add(pos.east());
-            pointList.add(pos.west());
+        if (pointList.isEmpty())
+        {
+            pointList.addAll(Arrays.asList(
+                pos,
+                pos.up(),
+                pos.north(),
+                pos.north().east(),
+                pos.south(),
+                pos.south().west(),
+                pos.east(),
+                pos.east().north(),
+                pos.west(),
+                pos.west().south()
+            ));
         }
         return pointList;
     }

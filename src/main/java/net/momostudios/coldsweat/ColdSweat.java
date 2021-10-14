@@ -6,13 +6,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.momostudios.coldsweat.config.FuelItemsConfig;
 import net.momostudios.coldsweat.core.init.*;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import org.apache.logging.log4j.LogManager;
@@ -31,11 +28,12 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
-        ModBlocks.BLOCKS.register(bus);
+        BlockInit.BLOCKS.register(bus);
         TileEntityInit.TILE_ENTITY_TYPE.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
         EffectInit.EFFECTS.register(bus);
+        ParticleTypesInit.PARTICLES.register(bus);
     }
 
     // Register Commands
@@ -52,6 +50,6 @@ public class ColdSweat
 
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        RenderTypeLookup.setRenderLayer(ModBlocks.HEARTH.get(), RenderType.getCutoutMipped());
+        RenderTypeLookup.setRenderLayer(BlockInit.HEARTH.get(), RenderType.getCutoutMipped());
     }
 }

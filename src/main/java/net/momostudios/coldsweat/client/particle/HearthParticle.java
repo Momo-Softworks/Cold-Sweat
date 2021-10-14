@@ -1,6 +1,5 @@
 package net.momostudios.coldsweat.client.particle;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
@@ -44,9 +43,9 @@ public class HearthParticle extends SpriteTexturedParticle
         this.selectSpriteWithAge(this.ageSprite);
 
         if (this.age < 10)
-            this.particleAlpha += 0.02f;
-        else if (this.age > 32)
-            this.particleAlpha -= 0.02f;
+            this.particleAlpha += 0.05f;
+        else if (this.age > 35)
+            this.particleAlpha -= 0.06f;
 
         if (this.particleAlpha <= 0.06  && this.age > 10)
             this.setExpired();
