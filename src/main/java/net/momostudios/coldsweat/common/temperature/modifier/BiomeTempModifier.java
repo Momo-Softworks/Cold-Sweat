@@ -12,7 +12,7 @@ import net.momostudios.coldsweat.core.util.WorldInfo;
 import java.util.Arrays;
 import java.util.List;
 
-public class BiomeTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class BiomeTempModifier extends TempModifier
 {
     WorldTemperatureConfig config = WorldTemperatureConfig.getInstance();
 

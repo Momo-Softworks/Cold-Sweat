@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 
-public class WeatherTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class WeatherTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

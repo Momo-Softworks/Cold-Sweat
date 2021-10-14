@@ -7,7 +7,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 
-public class BlockTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class BlockTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

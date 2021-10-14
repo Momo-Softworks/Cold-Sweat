@@ -6,6 +6,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
+import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.config.ModifierLoadOrder;
 import net.momostudios.coldsweat.core.init.EffectInit;
 import net.momostudios.coldsweat.core.util.ModEffects;
@@ -24,11 +25,13 @@ public class AddTempModifiers
          */
         if (player.ticksExisted % 20 == 0)
         {
-            PlayerTemp.applyModifier(player, new BiomeTempModifier(),   PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new TimeTempModifier(),    PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
             PlayerTemp.applyModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new DepthTempModifier(),   PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.applyModifier(player, new BlockTempModifier(),   PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.applyModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
         }
     }
 }

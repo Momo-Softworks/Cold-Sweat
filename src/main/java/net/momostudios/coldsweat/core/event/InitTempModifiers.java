@@ -2,9 +2,12 @@ package net.momostudios.coldsweat.core.event;
 
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.temperature.modifier.block.*;
+import net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 
@@ -41,5 +44,10 @@ public class InitTempModifiers
         TME.add(new WaterskinTempModifier());
         TME.add(new WeatherTempModifier());
         TME.add(new HearthTempModifier());
+        try {
+            TME.add(ModList.get().isLoaded("sereneseasons") ?
+                    (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier").newInstance() :
+                    (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier").newInstance());
+        } catch (Exception e) {}
     }
 }

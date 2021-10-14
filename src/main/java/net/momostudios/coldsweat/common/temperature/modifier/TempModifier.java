@@ -17,11 +17,8 @@ import java.util.List;
  * TempModifiers must be REGISTERED to {@link net.momostudios.coldsweat.common.world.TempModifierEntries} to be used<br>
  * (see {@link net.momostudios.coldsweat.core.event.InitTempModifiers} for an example)<br>
  */
-public class TempModifier extends ForgeRegistryEntry<TempModifier>
+public abstract class TempModifier
 {
-    /**
-     * This default constructor is important!
-     */
     public TempModifier() {}
 
     /**
@@ -34,8 +31,7 @@ public class TempModifier extends ForgeRegistryEntry<TempModifier>
      * Returns a new TempModifier with the specified {@code [args]} stored.<br>
      * This is mainly used for processing.
      */
-    public TempModifier with(List<INBT> args)
-    {
+    public TempModifier with(List<INBT> args) {
         return this;
     }
 
@@ -44,17 +40,11 @@ public class TempModifier extends ForgeRegistryEntry<TempModifier>
      * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.
      * @param temp should usually represent the player's body temperature or ambient temperature.
      */
-    public double calculate(Temperature temp, PlayerEntity player)
-    {
-        return temp.get();
-    }
+    public abstract double calculate(Temperature temp, PlayerEntity player);
 
     /**
      * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate names.
      * The ID is used to mark the TempModifier when it is stored in NBT
      */
-    public String getID()
-    {
-        return "cold_sweat:temp_modifier";
-    }
+    public abstract String getID();
 }

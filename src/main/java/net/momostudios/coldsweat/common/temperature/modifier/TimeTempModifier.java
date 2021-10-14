@@ -11,7 +11,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.core.util.WorldInfo;
 
-public class TimeTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class TimeTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

@@ -30,8 +30,8 @@ public class ItemInit
     public static final RegistryObject<Item> OBSIDIAN_SHARD_REGISTRY = ITEMS.register("obsidian_shard", () -> new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT)));
 
     //BlockItems
-    public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(ModBlocks.BOILER.get(), BoilerBlock.getItemProperties()));
-    public static final RegistryObject<BlockItem> ICEBOX = ITEMS.register("icebox", () -> new BlockItem(ModBlocks.ICEBOX.get(), IceboxBlock.getItemProperties()));
-    public static final RegistryObject<BlockItem> SEWING_TABLE = ITEMS.register("sewing_table", () -> new BlockItem(ModBlocks.SEWING_TABLE.get(), SewingTableBlock.getItemProperties()));
-    public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(ModBlocks.HEARTH.get(), HearthBlock.getItemProperties()));
+    public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
+    public static final RegistryObject<BlockItem> ICEBOX = ITEMS.register("icebox", () -> new BlockItem(BlockInit.ICEBOX.get(), IceboxBlock.getItemProperties()));
+    public static final RegistryObject<BlockItem> SEWING_TABLE = ITEMS.register("sewing_table", () -> new BlockItem(BlockInit.SEWING_TABLE.get(), SewingTableBlock.getItemProperties()));
+    public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(BlockInit.HEARTH.get(), HearthBlock.getItemProperties()));
 }

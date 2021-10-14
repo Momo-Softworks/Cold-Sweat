@@ -9,7 +9,7 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
 
-public class LeatherTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class LeatherTempModifier extends TempModifier
 {
     public double amount = 0;
     public LeatherTempModifier() {}

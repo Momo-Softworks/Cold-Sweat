@@ -10,6 +10,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.client.config.ClientConfigSettings;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 
 @Mod.EventBusSubscriber
@@ -19,8 +20,10 @@ public class RearrangeHotbar
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void eventHandler(RenderGameOverlayEvent event)
     {
+        ClientConfigSettings CCS = ClientConfigSettings.getInstance();
         Minecraft mc = Minecraft.getInstance();
-        if (ColdSweatConfig.getInstance().customHotbar() && !mc.gameSettings.hideGUI && !mc.player.isSpectator())
+
+        if (CCS.customHotbar && !mc.gameSettings.hideGUI && !mc.player.isSpectator())
         {
             MatrixStack matrixStack = event.getMatrixStack();
             int xPos = mc.getMainWindow().getScaledWidth() / 2 - 81;

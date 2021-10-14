@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.client.config.ClientConfigSettings;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -23,7 +24,9 @@ public class SelfTempDisplay
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void eventHandler(RenderGameOverlayEvent event)
     {
+        ClientConfigSettings CCS = ClientConfigSettings.getInstance();
         Minecraft mc = Minecraft.getInstance();
+
         if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof PlayerEntity &&
         !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR && !((PlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode &&
         !mc.getRenderViewEntity().isSpectator())
@@ -57,15 +60,15 @@ public class SelfTempDisplay
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             int threatOffset = 0;
-            if (ColdSweatConfig.getInstance().iconBobbing())
+            if (CCS.iconBobbing)
             {
                 if (threatLevel == 1) threatOffset = entity.ticksExisted % 10 == 0 && Math.random() < 0.5 ? 1 : 0;
                 if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
             }
 
             mc.getTextureManager().bindTexture(icon);
-            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + ColdSweatConfig.getInstance().steveHeadX(),
-                scaleY - 51 + threatOffset + ColdSweatConfig.getInstance().steveHeadY(), 0, 0, 10, 10, 10, 10);
+            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX,
+                scaleY - 51 + threatOffset + CCS.steveHeadY, 0, 0, 10, 10, 10, 10);
 
 
             FontRenderer fontRenderer = mc.fontRenderer;
@@ -74,8 +77,8 @@ public class SelfTempDisplay
             MatrixStack matrixStack = event.getMatrixStack();
 
             String s = "" + (int) Math.abs(temp);
-            int i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2 + ColdSweatConfig.getInstance().tempGaugeX();
-            int j1 = scaledHeight - 31 - 7 + ColdSweatConfig.getInstance().tempGaugeY();
+            int i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2 + CCS.tempGaugeX;
+            int j1 = scaledHeight - 31 - 7 + CCS.tempGaugeY;
             fontRenderer.drawString(matrixStack, s, (float) (i1 + 1), (float) j1, colorBG);
             fontRenderer.drawString(matrixStack, s, (float) (i1 - 1), (float) j1, colorBG);
             fontRenderer.drawString(matrixStack, s, (float) i1, (float) (j1 + 1), colorBG);

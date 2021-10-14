@@ -6,7 +6,7 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.ModEffects;
 
-public class HearthTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class HearthTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)
@@ -18,9 +18,8 @@ public class HearthTempModifier extends TempModifier implements IForgeRegistryEn
         double mid = (min + max) / 2;
 
         int hearthEffect = player.isPotionActive(ModEffects.INSULATION) ?
-                player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() : 0;
-
-        return mid + ((temp.get() - mid) / (hearthEffect * 2));
+                (player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1) * 2 : 1;
+        return mid + ((temp.get() - mid) / hearthEffect);
     }
 
     public String getID()

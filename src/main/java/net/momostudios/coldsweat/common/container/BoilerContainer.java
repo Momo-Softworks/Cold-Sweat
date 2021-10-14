@@ -11,8 +11,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
+import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModBlocks;
 import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.Objects;
@@ -84,7 +84,7 @@ public class BoilerContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.BOILER.get());
+        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.BOILER.get());
     }
 
     @Override

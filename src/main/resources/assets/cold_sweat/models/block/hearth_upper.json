@@ -1,7 +1,7 @@
 {
     "textures": {
         "hearth_body": "cold_sweat:blocks/hearth_body",
-        "hearth_piping": "cold_sweat:blocks/hearth_piping",
+        "hearth_piping": "cold_sweat:blocks/hearth_piping_0_0",
         "particle": "cold_sweat:blocks/hearth_body"
     },
     "elements": [

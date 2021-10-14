@@ -10,8 +10,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
+import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModBlocks;
 
 import java.util.Objects;
 
@@ -84,7 +84,7 @@ public class HearthContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.HEARTH.get());
+        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.HEARTH.get());
     }
 
     @Override

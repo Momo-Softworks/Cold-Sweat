@@ -2,27 +2,45 @@ package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
-
 public class MathHelperCS
 {
-    public static int convertToF(double value)
+    public static double convertToF(double value)
     {
-        return (int) (value * 42 + 32);
+        return value * 42 + 32;
     }
 
-    public static int convertToC(double value)
+    public static double convertToC(double value)
     {
-        return (int) ((value * 210) / 9.0);
+        return (value * 210) / 9.0;
     }
 
-    public static int FtoC(int value)
+    public static double convertFromC(double value)
     {
-        return (int) (((value - 32) * 5) / 9.0);
+        return (value * 9.0) / 210;
+    }
+
+    public static double convertFromF(double value)
+    {
+        return (value - 32) / 42.0;
+    }
+
+    public static double FtoC(double value)
+    {
+        return ((value - 32) * 5) / 9.0;
+    }
+
+    public static double CtoF(double value)
+    {
+        return value * (9.0 / 5) + 32;
     }
 
     public static boolean isEvenPosition(BlockPos pos)
     {
         return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
+    }
+
+    public static int[] getCoordinates(BlockPos pos)
+    {
+        return new int[] {pos.getX(), pos.getY(), pos.getZ()};
     }
 }

@@ -9,7 +9,7 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
 
-public class WaterskinTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class WaterskinTempModifier extends TempModifier
 {
     public double amount = 0;
     public WaterskinTempModifier() {}

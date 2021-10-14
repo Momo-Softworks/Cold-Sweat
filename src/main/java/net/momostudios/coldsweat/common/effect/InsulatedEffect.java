@@ -24,19 +24,4 @@ public class InsulatedEffect extends Effect
     public boolean isInstant() {
         return false;
     }
-
-    @Override
-    public void applyAttributesModifiersToEntity(LivingEntity entity, AttributeModifierManager attributeMapIn, int amplifier)
-    {
-        if (entity instanceof PlayerEntity && !PlayerTemp.getModifiers((PlayerEntity) entity, PlayerTemp.Types.AMBIENT).contains(new HearthTempModifier()))
-        {
-            PlayerTemp.applyModifier((PlayerEntity) entity, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-        }
-    }
-
-    @Override
-    public void removeAttributesModifiersFromEntity(LivingEntity entity, AttributeModifierManager attributeMapIn, int amplifier)
-    {
-        PlayerTemp.removeModifier((PlayerEntity) entity, HearthTempModifier.class, PlayerTemp.Types.AMBIENT, 1);
-    }
 }

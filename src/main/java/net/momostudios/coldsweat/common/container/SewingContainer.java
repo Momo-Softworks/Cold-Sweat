@@ -18,7 +18,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.FuelItemsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.core.init.BlockInit;
 
 public class SewingContainer extends Container
 {
@@ -241,7 +241,7 @@ public class SewingContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.SEWING_TABLE.get());
+        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.SEWING_TABLE.get());
     }
 
     @Override

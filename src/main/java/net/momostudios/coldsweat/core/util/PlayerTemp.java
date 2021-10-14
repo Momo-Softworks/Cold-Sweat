@@ -82,7 +82,7 @@ public class PlayerTemp
      * Gets all TempModifiers of the specified type on the player
      * @param player is the player being sampled
      * @param type determines which TempModifier list to pull from
-     * @returns a list of all TempModifiers of the specified type
+     * @returns a NEW list of all TempModifiers of the specified type
      */
     public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
     {
@@ -102,16 +102,18 @@ public class PlayerTemp
         {
             if (!modifierList.isEmpty())
             {
-                if (count > modifierList.size()) count = modifierList.size();
+                count = Math.min(count, modifierList.size());
+                int removed = 0;
                 for (int i = 0; i < count; i++)
                 {
-                    for (INBT inbt : modifierList)
+                    INBT inbt = modifierList.get(i);
+                    if (TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) inbt).getString("modifier_name")).getClass().equals(modClass))
                     {
-                        if (TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) inbt).getString("modifier_name")).getClass().equals(modClass))
-                        {
-                            modifierList.remove(inbt);
+                        modifierList.remove(inbt);
+                        removed++;
+
+                        if (removed >= count)
                             break;
-                        }
                     }
                 }
             }

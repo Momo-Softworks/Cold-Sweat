@@ -7,7 +7,7 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.WorldInfo;
 
-public class DepthTempModifier extends TempModifier implements IForgeRegistryEntry<TempModifier>
+public class DepthTempModifier extends TempModifier
 {
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

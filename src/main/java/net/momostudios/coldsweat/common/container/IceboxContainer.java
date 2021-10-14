@@ -11,7 +11,7 @@ import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 
 import java.util.Objects;
@@ -89,7 +89,7 @@ public class IceboxContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, ModBlocks.ICEBOX.get());
+        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.ICEBOX.get());
     }
 
     @Override

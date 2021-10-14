@@ -31,8 +31,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
+import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ItemInit;
-import net.momostudios.coldsweat.core.init.ModBlocks;
 
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +121,7 @@ public class HearthTopBlock extends Block
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
-        if (worldIn.getBlockState(pos.down()).getBlock() != ModBlocks.HEARTH.get())
+        if (worldIn.getBlockState(pos.down()).getBlock() != BlockInit.HEARTH.get())
         {
             worldIn.destroyBlock(pos, false);
         }
@@ -130,7 +130,7 @@ public class HearthTopBlock extends Block
     @Override
     public boolean removedByPlayer(BlockState blockstate, World world, BlockPos pos, PlayerEntity entity, boolean willHarvest, FluidState fluid)
     {
-        if (world.getBlockState(pos.down()).getBlock() == ModBlocks.HEARTH.get())
+        if (world.getBlockState(pos.down()).getBlock() == BlockInit.HEARTH.get())
         {
             world.destroyBlock(pos.down(), !entity.isCreative());
         }

@@ -17,7 +17,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.modifier.MinecartTempModifier;
-import net.momostudios.coldsweat.core.init.ModBlocks;
+import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -46,7 +46,7 @@ public class MinecartEventHandler
             sourceentity.swing(Hand.MAIN_HAND, true);
             world.playSound(null, new BlockPos(x, y, z), ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.llama.swag")),
                 SoundCategory.NEUTRAL, 1f, (float) ((Math.random() / 5) + 0.9));
-            ((MinecartEntity) entity).setDisplayTile(ModBlocks.MINECART_INSULATION.get().getDefaultState());
+            ((MinecartEntity) entity).setDisplayTile(BlockInit.MINECART_INSULATION.get().getDefaultState());
             ((MinecartEntity) entity).setDisplayTileOffset(5);
         }
     }
@@ -61,7 +61,7 @@ public class MinecartEventHandler
             double y = entity.getPosY();
             double z = entity.getPosZ();
             World world = entity.world;
-            if (entity instanceof MinecartEntity && ((MinecartEntity) entity).getDisplayTile().getBlock() == ModBlocks.MINECART_INSULATION.get())
+            if (entity instanceof MinecartEntity && ((MinecartEntity) entity).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
             {
                 if (world instanceof World && !world.isRemote())
                 {
@@ -77,7 +77,7 @@ public class MinecartEventHandler
     public static void playerRidingMinecart(TickEvent.PlayerTickEvent event)
     {
         PlayerEntity player = event.player;
-        if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == ModBlocks.MINECART_INSULATION.get())
+        if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
         {
             PlayerTemp.applyModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
         }

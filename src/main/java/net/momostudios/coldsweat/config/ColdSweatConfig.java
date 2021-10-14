@@ -29,6 +29,8 @@ public class ColdSweatConfig
         SPEC.setConfig(config);
     }
 
+    private final ForgeConfigSpec.IntValue difficulty;
+
     private final ForgeConfigSpec.BooleanValue celsius;
     private final ForgeConfigSpec.IntValue tempOffset;
 
@@ -48,27 +50,33 @@ public class ColdSweatConfig
     private final ForgeConfigSpec.BooleanValue customHotbarLayout;
     private final ForgeConfigSpec.BooleanValue iconBobbing;
 
-    public final ForgeConfigSpec.BooleanValue animalsTemperature;
-    public final ForgeConfigSpec.BooleanValue damageScaling;
-    public final ForgeConfigSpec.BooleanValue requireThermometer;
+    private final ForgeConfigSpec.BooleanValue animalsTemperature;
+    private final ForgeConfigSpec.BooleanValue damageScaling;
+    private final ForgeConfigSpec.BooleanValue requireThermometer;
 
     private ColdSweatConfig(ForgeConfigSpec.Builder configSpecBuilder)
     {
         /*
-          Temperature display preferences
+         Difficulty
+         */
+        difficulty = configSpecBuilder
+                .comment("Overrides all other config options for easy difficulty management")
+                .defineInRange("Difficulty", 3, 1, 5);
+
+        /*
+         Temperature display preferences
          */
         configSpecBuilder.push("Temperature display preferences");
         celsius = configSpecBuilder
                 .comment("Sets all temperatures to be displayed in Celsius")
                 .define("Celsius", false);
-
         tempOffset = configSpecBuilder
                 .comment("(Visually) offsets the temperature for personalization (default: 0, so a Plains biome is 75 \u00b0F or 21 \u00b0C)")
                 .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
         configSpecBuilder.pop();
 
         /*
-          Potion effects affecting the player's temperature
+         Potion effects affecting the player's temperature
          */
         configSpecBuilder.push("Item settings");
         fireResistanceEffect = configSpecBuilder
@@ -83,25 +91,25 @@ public class ColdSweatConfig
         configSpecBuilder.pop();
 
         /*
-          Position of the "Steve Head" temperature gauge above the hotbar
+         Position of the "Steve Head" temperature gauge above the hotbar
          */
         configSpecBuilder.push("Position of the 'Steve Head' temperature gauge above the hotbar");
         steveHeadX = configSpecBuilder
                 .comment("The x position of the gauge relative to its normal position")
-                .defineInRange("Steve Head X Offset", 0, 0, Integer.MAX_VALUE);
+                .defineInRange("Steve Head X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         steveHeadY = configSpecBuilder
                 .comment("The y position of the gauge relative to its normal position")
-                .defineInRange("Steve Head Y Offset", 0, 0, Integer.MAX_VALUE);
+                .defineInRange("Steve Head Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         configSpecBuilder.pop();
 
 
         configSpecBuilder.push("Position of the actual number temperature gauge above the hotbar");
         tempGaugeX = configSpecBuilder
                 .comment("The x position of the temperature gauge relative to default")
-                .defineInRange("Temp Gauge X Offset", 0, 0, Integer.MAX_VALUE);
+                .defineInRange("Temp Gauge X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         tempGaugeY = configSpecBuilder
                 .comment("The y position of the temperature gauge relative to default")
-                .defineInRange("Temp Gauge Y Offset", 0, 0, Integer.MAX_VALUE);
+                .defineInRange("Temp Gauge Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         configSpecBuilder.pop();
 
         configSpecBuilder.push("UI Options");
@@ -113,7 +121,7 @@ public class ColdSweatConfig
         configSpecBuilder.pop();
 
         /*
-          Misc. things that are affected by temperature
+         Misc. things that are affected by temperature
          */
         configSpecBuilder.push("Misc things that are affected by temperature");
         animalsTemperature = configSpecBuilder
@@ -125,7 +133,7 @@ public class ColdSweatConfig
         configSpecBuilder.pop();
 
         /*
-          Details about how the player is affected by temperature
+         Details about how the player is affected by temperature
          */
         configSpecBuilder.push("Details about how the player is affected by temperature");
         minHabitable = configSpecBuilder
@@ -149,6 +157,10 @@ public class ColdSweatConfig
     /*
      * Non-private values for use elsewhere
      */
+    public int difficulty() {
+        return difficulty.get();
+    }
+
     public boolean celsius() {
         return celsius.get();
     }
@@ -217,6 +229,10 @@ public class ColdSweatConfig
     /*
      * Safe set methods for config values
      */
+    public void setDifficulty(int difficulty) {
+        this.difficulty.set(difficulty);
+    }
+
     public void setCelsius(boolean enabled) {
         celsius.set(enabled);
     }

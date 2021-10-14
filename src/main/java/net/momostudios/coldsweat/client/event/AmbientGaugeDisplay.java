@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.client.config.ClientConfigSettings;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.ModItems;
@@ -22,7 +23,10 @@ public class AmbientGaugeDisplay
     @SubscribeEvent
     public static void renderAmbientTemperature(RenderGameOverlayEvent.Post event)
     {
+        ClientConfigSettings CCS = ClientConfigSettings.getInstance();
+
         PlayerEntity player = Minecraft.getInstance().player;
+
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
            (player.getHeldItemMainhand().getItem() == ModItems.THERMOMETER ||
             player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER ||
@@ -34,7 +38,8 @@ public class AmbientGaugeDisplay
             double min = ColdSweatConfig.getInstance().minHabitable();
             double max = ColdSweatConfig.getInstance().maxHabitable();
             double mid = (min + max) / 2;
-            boolean celsius = ColdSweatConfig.getInstance().celsius();
+            boolean celsius = CCS.celsius;
+            boolean bobbing = CCS.iconBobbing;
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
             double temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
@@ -83,12 +88,12 @@ public class AmbientGaugeDisplay
             else if (temp < min)
                 color = 4236031;
 
-            int tempScaled = MathHelperCS.convertToF(temp);
-            int tempMeasurement = (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + ColdSweatConfig.getInstance().tempOffset();
+            int tempScaled = (int) MathHelperCS.convertToF(temp);
+            int tempMeasurement = (int) (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + CCS.tempOffset;
 
             if (temp > max || temp < min)
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
-                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 ? 16 : 15), color);
+                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15), color);
             else
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
                     (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - 15, color);

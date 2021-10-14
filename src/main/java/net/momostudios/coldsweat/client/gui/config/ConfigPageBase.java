@@ -95,7 +95,7 @@ public abstract class ConfigPageBase extends Screen
             // Section 2 Title
             drawString(matrixStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
 
-            Minecraft.getInstance().getTextureManager().bindTexture(divider);
+            mc.getTextureManager().bindTexture(divider);
             this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
