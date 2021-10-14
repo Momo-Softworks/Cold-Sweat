@@ -1,0 +1,24 @@
+{
+  "variants":
+  {
+    "facing=north":
+    {
+      "model": "cold_sweat:block/hearth_upper"
+    },
+    "facing=east":
+    {
+      "model": "cold_sweat:block/hearth_upper",
+      "y": 90
+    },
+    "facing=south":
+    {
+      "model": "cold_sweat:block/hearth_upper",
+      "y": 180
+    },
+    "facing=west":
+    {
+      "model": "cold_sweat:block/hearth_upper",
+      "y": 270
+    }
+  }
+}

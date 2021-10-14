@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:obsidian"
+    }
+  ],
+  "result":
+  {
+    "item": "cold_sweat:obsidian_shard",
+    "count": 4
+  }
+}

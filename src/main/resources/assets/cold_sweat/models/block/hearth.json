@@ -1,0 +1,176 @@
+{
+    "textures": {
+        "hearth_body": "cold_sweat:blocks/hearth_body",
+        "hearth_piping": "cold_sweat:blocks/hearth_piping"
+    },
+    "elements": [
+        {
+            "name": "Shell",
+            "from": [ 3, 1, 4 ], 
+            "to": [ 13, 19, 12 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 9, 4, 14, 13 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 4, 13 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 4, 4, 9, 13 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 4, 13 ] },
+                "up": { "texture": "#hearth_body", "uv": [ 4, 0, 9, 4 ], "rotation": 180 },
+                "down": { "texture": "#hearth_body", "uv": [ 9, 0, 14, 4 ] }
+            }
+        },
+        {
+            "name": "Grate",
+            "from": [ 4.5, 4.5, 12 ], 
+            "to": [ 11.5, 9.5, 13 ], 
+            "faces": {
+                "east": { "texture": "#hearth_body", "uv": [ 0, 13.5, 0.5, 16 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0.5, 13.5, 4, 16 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 4.5, 13.5, 4, 16 ] },
+                "up": { "texture": "#hearth_body", "uv": [ 0.5, 13, 4, 13.5 ] },
+                "down": { "texture": "#hearth_body", "uv": [ 4, 13, 7.5, 13.5 ] }
+            }
+        },
+        {
+            "name": "Exhaust1",
+            "from": [ 8, 19, 6 ], 
+            "to": [ 12, 31, 10 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 9, 9.5, 11, 15.5 ] },
+                "east": { "texture": "#hearth_piping", "uv": [ 13, 9.5, 15, 15.5 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 7, 9.5, 9, 15.5 ] },
+                "west": { "texture": "#hearth_piping", "uv": [ 11, 9.5, 13, 15.5 ] },
+                "up": { "texture": "#hearth_piping", "uv": [ 9, 7.5, 11, 9.5 ] }
+            }
+        },
+        {
+            "name": "Exhaust2",
+            "from": [ 6, 27.5, 5.5 ], 
+            "to": [ 8, 31.5, 10.5 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 15, 5.5, 16, 7.5 ] },
+                "east": { "texture": "#hearth_piping", "uv": [ 9, 5.5, 11.5, 7.5 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 11.5, 5.5, 12.5, 7.5 ] },
+                "west": { "texture": "#hearth_piping", "uv": [ 12.5, 5.5, 15, 7.5 ] },
+                "up": { "texture": "#hearth_piping", "uv": [ 11.5, 3, 12.5, 5.5 ] },
+                "down": { "texture": "#hearth_piping", "uv": [ 12.5, 3, 13.5, 5.5 ] }
+            }
+        },
+        {
+            "name": "WaterCanister",
+            "from": [ 13, 5, 6 ], 
+            "to": [ 16, 13, 10 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 0, 2, 1.5, 6 ] },
+                "east": { "texture": "#hearth_piping", "uv": [ 1.5, 2, 3.5, 6 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 0, 2, 1.5, 6 ] },
+                "up": { "texture": "#hearth_piping", "uv": [ 0, 0, 1.5, 2 ] }
+            }
+        },
+        {
+            "name": "WaterConnector",
+            "from": [ 0, 4, 6 ], 
+            "to": [ 4, 5, 10 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 2.5 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 2.5 ], "rotation": 180 },
+                "west": { "texture": "#hearth_piping", "uv": [ 6, 2, 8, 2.5 ] },
+                "up": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 4 ] },
+                "down": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 4 ] }
+            }
+        },
+        {
+            "name": "LavaCanister",
+            "from": [ 0, 5, 6 ], 
+            "to": [ 3, 13, 10 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 0, 8, 1.5, 12 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 0, 8, 1.5, 12 ] },
+                "west": { "texture": "#hearth_piping", "uv": [ 1.5, 8, 3.5, 12 ] },
+                "up": { "texture": "#hearth_piping", "uv": [ 0, 6, 1.5, 8 ] }
+            }
+        },
+        {
+            "name": "LavaConnector",
+            "from": [ 12, 4, 6 ], 
+            "to": [ 16, 5, 10 ], 
+            "faces": {
+                "north": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 2.5 ] },
+                "east": { "texture": "#hearth_piping", "uv": [ 6, 2, 8, 2.5 ] },
+                "south": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 2.5 ], "rotation": 180 },
+                "up": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 4 ] },
+                "down": { "texture": "#hearth_piping", "uv": [ 4, 2, 6, 4 ] }
+            }
+        },
+        {
+            "name": "Foot1",
+            "from": [ 10, 0, 9 ], 
+            "to": [ 12, 1, 11 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "down": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        },
+        {
+            "name": "Foot2",
+            "from": [ 4, 0, 5 ], 
+            "to": [ 6, 1, 7 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "down": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        },
+        {
+            "name": "Foot3",
+            "from": [ 4, 0, 9 ], 
+            "to": [ 6, 1, 11 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "down": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        },
+        {
+            "name": "Foot4",
+            "from": [ 10, 0, 5 ], 
+            "to": [ 12, 1, 7 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "down": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        },
+        {
+            "name": "Knob1",
+            "from": [ 5, 19, 9 ], 
+            "to": [ 7, 20, 11 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "up": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        },
+        {
+            "name": "Knob2",
+            "from": [ 5, 19, 5 ], 
+            "to": [ 7, 20, 7 ], 
+            "faces": {
+                "north": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "east": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "south": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "west": { "texture": "#hearth_body", "uv": [ 0, 4, 1, 3.5 ] },
+                "up": { "texture": "#hearth_body", "uv": [ 1, 2, 2, 3 ] }
+            }
+        }
+    ]
+}
