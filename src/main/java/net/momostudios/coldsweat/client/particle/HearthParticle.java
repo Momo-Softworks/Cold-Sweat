@@ -43,7 +43,7 @@ public class HearthParticle extends SpriteTexturedParticle
         this.selectSpriteWithAge(this.ageSprite);
 
         if (this.age < 10)
-            this.particleAlpha += 0.05f;
+            this.particleAlpha += 0.02f;
         else if (this.age > 35)
             this.particleAlpha -= 0.06f;
 
