@@ -9,6 +9,5 @@ public class ModItems
     public static final Item FILLED_WATERSKIN = ItemInit.FILLED_WATERSKIN_REGISTRY.get();
     public static final Item THERMOMETER = ItemInit.THERMOMETER_REGISTRY.get();
     public static final Item MINECART_INSULATION = ItemInit.MINECART_INSULATION_REGISTRY.get();
-    public static final Item OBSIDIAN_SHARD = ItemInit.OBSIDIAN_SHARD_REGISTRY.get();
 }
 

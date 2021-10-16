@@ -304,7 +304,11 @@ public class ConfigScreen
             celsiusButton = new ConfigButton(this.width / 2 - 185, this.height / 4 - 8, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.units.name").getString() + ": " +
                         (this.celsius ? new TranslationTextComponent("cold_sweat.config.celsius.name").getString() :
-                                        new TranslationTextComponent("cold_sweat.config.fahrenheit.name").getString())), button -> this.toggleCelsius());
+                                        new TranslationTextComponent("cold_sweat.config.fahrenheit.name").getString())), button -> this.toggleCelsius())
+            {
+                @Override
+                public boolean setsCustomDifficulty() { return false; }
+            };
             this.addButton(celsiusButton);
 
             // Temp Offset
@@ -335,23 +339,19 @@ public class ConfigScreen
                 public boolean setsCustomDifficulty() { return false; }
             };
 
-            this.addButton(difficultyButton);
 
             // Misc. Temp Effects
             iceResButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 2, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.ice_resistance.name").getString() + ": " + (this.iceRes ? ON : OFF)),
                 button -> this.toggleIceRes());
-            this.addButton(iceResButton);
 
             fireResButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 3, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.fire_resistance.name").getString() + ": " + (this.fireRes ? ON : OFF)),
                 button -> this.toggleFireRes());
-            this.addButton(fireResButton);
 
             requireThermometerButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 4, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (this.requireThermometer ? ON : OFF)),
                 button -> this.toggleRequireThermometer());
-            this.addButton(requireThermometerButton);
 
             /*animalTempButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 3, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.animal_temperature.name").getString() + ": " + (this.animalTemp ? ON : OFF)),
@@ -361,12 +361,22 @@ public class ConfigScreen
             damageScalingButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 5, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (this.damageScaling ? ON : OFF)),
                 button -> this.toggleDamageScaling());
-            this.addButton(damageScalingButton);
+
+            if (mc.player.hasPermissionLevel(3))
+            {
+                this.addButton(difficultyButton);
+
+                this.addButton(iceResButton);
+                this.addButton(fireResButton);
+                this.addButton(requireThermometerButton);
+                this.addButton(damageScalingButton);
+
+                this.children.add(this.maxTempInput);
+                this.children.add(this.minTempInput);
+                this.children.add(this.rateMultInput);
+            }
 
             this.children.add(this.tempOffsetInput);
-            this.children.add(this.maxTempInput);
-            this.children.add(this.minTempInput);
-            this.children.add(this.rateMultInput);
         }
 
         @Override
@@ -382,17 +392,20 @@ public class ConfigScreen
             this.tempOffsetInput.render(matrixStack, mouseX, mouseY, partialTicks);
             drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, 16777215);
 
-            // Max Temp
-            this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.max_temperature.name"), this.width / 2 - 185, maxTempInput.y + 6, 16777215);
+            if (mc.player.hasPermissionLevel(3))
+            {
+                // Max Temp
+                this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
+                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.max_temperature.name"), this.width / 2 - 185, maxTempInput.y + 6, 16777215);
 
-            // Min Temp
-            this.minTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.min_temperature.name"), this.width / 2 - 185, minTempInput.y + 6, 16777215);
+                // Min Temp
+                this.minTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
+                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.min_temperature.name"), this.width / 2 - 185, minTempInput.y + 6, 16777215);
 
-            // Rate Multiplier
-            this.rateMultInput.render(matrixStack, mouseX, mouseY, partialTicks);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.rate_multiplier.name"), this.width / 2 - 185, rateMultInput.y + 6, 16777215);
+                // Rate Multiplier
+                this.rateMultInput.render(matrixStack, mouseX, mouseY, partialTicks);
+                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.rate_multiplier.name"), this.width / 2 - 185, rateMultInput.y + 6, 16777215);
+            }
         }
 
         @Override
@@ -553,36 +566,26 @@ public class ConfigScreen
             // Direction Buttons: Steve Head
             leftSteveButton = new ImageButton(this.width / 2 + 140, this.height / 4 - 8, 14, 20, 0, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeSelfIndicatorPos(0, -1));
-            this.addButton(leftSteveButton);
             upSteveButton = new ImageButton(this.width / 2 + 154, this.height / 4 - 8, 20, 10, 14, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeSelfIndicatorPos(1, -1));
-            this.addButton(upSteveButton);
             downSteveButton = new ImageButton(this.width / 2 + 154, this.height / 4 + 2, 20, 10, 14, 10, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeSelfIndicatorPos(1, 1));
-            this.addButton(downSteveButton);
             rightSteveButton = new ImageButton(this.width / 2 + 174, this.height / 4 - 8, 14, 20, 34, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeSelfIndicatorPos(0, 1));
-            this.addButton(rightSteveButton);
             resetSteveButton = new ImageButton(this.width / 2 + 192, this.height / 4 - 8, 20, 20, 0, 128, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> resetSelfIndicatorPos());
-            this.addButton(resetSteveButton);
 
             // Direction Buttons: Temp Readout
             leftTempReadoutButton = new ImageButton(this.width / 2 + 140, this.height / 4 - 8 + (int) (OPTION_SIZE * 1.5), 14, 20, 0, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeTempReadoutPos(0, -1));
-            this.addButton(leftTempReadoutButton);
             upTempReadoutButton = new ImageButton(this.width / 2 + 154, this.height / 4 - 8 + (int) (OPTION_SIZE * 1.5), 20, 10, 14, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeTempReadoutPos(1, -1));
-            this.addButton(upTempReadoutButton);
             downTempReadoutButton = new ImageButton(this.width / 2 + 154, this.height / 4 + 2 + (int) (OPTION_SIZE * 1.5), 20, 10, 14, 10, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeTempReadoutPos(1, 1));
-            this.addButton(downTempReadoutButton);
             rightTempReadoutButton = new ImageButton(this.width / 2 + 174, this.height / 4 - 8 + (int) (OPTION_SIZE * 1.5), 14, 20, 34, 0, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> changeTempReadoutPos(0, 1));
-            this.addButton(rightTempReadoutButton);
             resetTempReadoutButton = new ImageButton(this.width / 2 + 192, this.height / 4 - 8 + (int) (OPTION_SIZE * 1.5), 20, 20, 0, 128, 20,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> resetTempReadoutPos());
-            this.addButton(resetTempReadoutButton);
 
             // Custom Hotbar
             customHotbarButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 3, 152, 20,
@@ -594,6 +597,18 @@ public class ConfigScreen
             iconBobbingButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 4, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " + (this.iconBobbing ? ON : OFF)),
                 button -> this.toggleIconBobbing());
+
+            this.addButton(upSteveButton);
+            this.addButton(downSteveButton);
+            this.addButton(leftSteveButton);
+            this.addButton(rightSteveButton);
+            this.addButton(resetSteveButton);
+
+            this.addButton(upTempReadoutButton);
+            this.addButton(downTempReadoutButton);
+            this.addButton(leftTempReadoutButton);
+            this.addButton(rightTempReadoutButton);
+            this.addButton(resetTempReadoutButton);
             this.addButton(iconBobbingButton);
         }
 

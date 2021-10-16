@@ -34,6 +34,7 @@ public class ColdSweat
         ItemInit.ITEMS.register(bus);
         EffectInit.EFFECTS.register(bus);
         ParticleTypesInit.PARTICLES.register(bus);
+        PotionInit.POTIONS.register(bus);
     }
 
     // Register Commands

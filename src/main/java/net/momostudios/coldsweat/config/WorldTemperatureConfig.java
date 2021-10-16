@@ -57,6 +57,8 @@ public class WorldTemperatureConfig
             .comment("Override their respective offset values",
                 "Also override ALL biome temperatures")
             .define("Dimension Temperatures", Arrays.asList(
+                    Arrays.asList("minecraft:the_nether", "2.0"),
+                    Arrays.asList("minecraft:the_end", "0.4")
             ));
         configSpecBuilder.pop();
 

@@ -102,7 +102,6 @@ public class TempCommand extends BaseCommand
         //Set the option in the config
         ColdSweatConfig.getInstance().setMaxHabitable(amount);
         ColdSweatConfig.getInstance().save();
-        System.out.println(ColdSweatConfig.getInstance().maxHabitable());
 
         //Print success message to all players
         for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -142,7 +141,7 @@ public class TempCommand extends BaseCommand
             else
             {
                 //Set the target player's temperature
-                PlayerTemp.setTemperature((PlayerEntity) Arrays.asList(players).get(0), new Temperature(amount), PlayerTemp.Types.BODY);
+                PlayerTemp.setTemperature(players.iterator().next(), new Temperature(amount), PlayerTemp.Types.BODY);
 
                 //Print success message to all players
                 for (PlayerEntity player : source.asPlayer().world.getPlayers())
@@ -151,7 +150,7 @@ public class TempCommand extends BaseCommand
                     player.sendStatusMessage(new StringTextComponent(
                     "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
                     new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", source.asPlayer().getScoreboardName()).getString()  +
-                    " \u00a7f" + PlayerTemp.getTemperature((PlayerEntity) Arrays.asList(players).get(0), PlayerTemp.Types.BODY).get() + "\u00a7r"), false);
+                    " \u00a7f" + PlayerTemp.getTemperature(players.iterator().next(), PlayerTemp.Types.BODY).get() + "\u00a7r"), false);
                 }
             }
         }

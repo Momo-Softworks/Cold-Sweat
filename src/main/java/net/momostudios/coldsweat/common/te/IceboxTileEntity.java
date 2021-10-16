@@ -1,11 +1,13 @@
 package net.momostudios.coldsweat.common.te;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -91,6 +93,20 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
                 else this.getItemInSlot(9).shrink(1);
                 this.setFuel(this.getFuel() + amount);
             }
+        }
+
+        if (getFuel() > 0 && Math.random() < 0.1)
+        {
+            double x = Math.random() * 1.15;
+            double y = 0.7 + Math.random() * 0.3;
+            double z = Math.random() * 1.15;
+
+            if (Math.random() < 0.5)
+                z = Math.random() < 0.5 ? 1.15 : -0.15;
+            else
+                x = Math.random() < 0.5 ? 1.15 : -0.15;
+
+            world.addParticle(ParticleTypes.CLOUD, pos.getX() + x, pos.getY() + y, pos.getZ() + z, 0, -0.05, 0);
         }
     }
 

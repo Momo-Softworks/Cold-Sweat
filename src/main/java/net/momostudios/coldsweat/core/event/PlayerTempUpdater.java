@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.core.event;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.Effects;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -8,6 +9,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.core.init.EffectInit;
 import net.momostudios.coldsweat.core.util.CustomDamageTypes;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -94,11 +96,11 @@ public class PlayerTempUpdater
         if (player.ticksExisted % 40 == 0)
         {
             boolean scales = config.damageScaling();
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100)
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !player.isPotionActive(Effects.FIRE_RESISTANCE))
             {
                 player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);
             }
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100)
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !player.isPotionActive(EffectInit.ICE_RESISTANCE_EFFECT_REGISTRY.get()))
             {
                 player.attackEntityFrom(scales ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2);
             }

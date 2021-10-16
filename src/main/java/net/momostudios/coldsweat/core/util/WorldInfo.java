@@ -2,9 +2,19 @@ package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.TrapDoorBlock;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.momostudios.coldsweat.common.te.HearthTileEntity;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,8 +90,34 @@ public class WorldInfo
         return posList;
     }
 
+    /**
+     * Returns the adjacent 6 positions to the BlockPos
+     */
     public static List<BlockPos> adjacentPositions(BlockPos pos)
     {
         return new ArrayList<>(Arrays.asList(pos, pos.up(), pos.down(), pos.east(), pos.west(), pos.north(), pos.south()));
+    }
+
+    public static boolean canSeeSky(World world, BlockPos pos)
+    {
+        for (int i = 0; i < 255 - pos.getY(); i++)
+        {
+            if (!isBlockSpreadable(world, pos.up(i), Direction.UP) && !isBlockSpreadable(world, pos.up(i), Direction.DOWN))
+            {
+                //if (Math.random() < 0.01) System.out.println(world.getBlockState(pos).getBlock());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isBlockSpreadable(World world, BlockPos pos, @Nullable Direction dir)
+    {
+        BlockState state = world.getBlockState(pos);
+
+        return (dir == null || (!state.isSolidSide(world, pos, dir) && !state.isSolidSide(world, pos, dir.getOpposite()))) &&
+                (world.isAirBlock(pos) || (state.isSolid() && !state.getShape(world, pos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
+                        (state.hasProperty(DoorBlock.OPEN) && state.get(DoorBlock.OPEN)) ||
+                        (state.hasProperty(TrapDoorBlock.OPEN) && state.get(TrapDoorBlock.OPEN)));
     }
 }

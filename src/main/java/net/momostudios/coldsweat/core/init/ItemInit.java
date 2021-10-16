@@ -23,11 +23,14 @@ public class ItemInit
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ColdSweat.MOD_ID);
 
     //Items
-    public static final RegistryObject<Item> WATERSKIN_REGISTRY = ITEMS.register("waterskin", WaterskinItem::new);
-    public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
-    public static final RegistryObject<Item> THERMOMETER_REGISTRY = ITEMS.register("thermometer", () -> new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
-    public static final RegistryObject<Item> OBSIDIAN_SHARD_REGISTRY = ITEMS.register("obsidian_shard", () -> new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> WATERSKIN_REGISTRY =
+            ITEMS.register("waterskin", WaterskinItem::new);
+    public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY =
+            ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
+    public static final RegistryObject<Item> THERMOMETER_REGISTRY =
+            ITEMS.register("thermometer", () -> new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON).maxStackSize(1)));
+    public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY =
+            ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
 
     //BlockItems
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
