@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 public class FireBlockEffect extends BlockEffect
 {
@@ -22,5 +23,10 @@ public class FireBlockEffect extends BlockEffect
     public boolean hasBlock(BlockState block)
     {
         return block.getBlock() == Blocks.FIRE;
+    }
+
+    @Override
+    public double maxTemp() {
+        return MathHelperCS.convertFromF(400);
     }
 }

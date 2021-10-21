@@ -7,7 +7,7 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 public class PlayerTempCapability implements ITemperatureCapability
 {
-    public static Capability<ITemperatureCapability> TEMPERATURE = null;
+    public static Capability<ITemperatureCapability> TEMPERATURE;
 
     @CapabilityInject(ITemperatureCapability.class)
     private static void onTempInit(Capability<ITemperatureCapability> capability)

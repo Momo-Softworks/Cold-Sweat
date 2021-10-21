@@ -1,10 +1,17 @@
 package net.momostudios.coldsweat.config;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -12,109 +19,100 @@ import java.util.List;
 
 public class WorldTemperatureConfig
 {
-    private static final WorldTemperatureConfig INSTANCE;
     private static final ForgeConfigSpec SPEC;
-    private static final Path CONFIG_PATH = Paths.get("config/cold-sweat_world_temperatures.toml");
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> biomeOffsets;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> biomeTemperatures;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> dimensionOffsets;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> dimensionTemperatures;
 
     static
-    {
-        Pair<WorldTemperatureConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(WorldTemperatureConfig::new);
-        INSTANCE = specPair.getLeft();
-        SPEC = specPair.getRight();
-        CommentedFileConfig config = CommentedFileConfig.builder(CONFIG_PATH)
-            .sync()
-            .autoreload()
-            .writingMode(WritingMode.REPLACE)
-            .build();
-        config.load();
-        config.save();
-        SPEC.setConfig(config);
-    }
-
-    private final ForgeConfigSpec.ConfigValue<List<List<String>>> biomeOffsets;
-    private final ForgeConfigSpec.ConfigValue<List<List<String>>> biomeTemperatures;
-    private final ForgeConfigSpec.ConfigValue<List<List<String>>> dimensionOffsets;
-    private final ForgeConfigSpec.ConfigValue<List<List<String>>> dimensionTemperatures;
-
-    private WorldTemperatureConfig(ForgeConfigSpec.Builder configSpecBuilder)
     {
         /*
          Dimensions
          */
-        configSpecBuilder.comment("Notation: [[\"dimension1\", \"temperature1\"], [\"dimension2\", \"temperature2\"]... etc]",
+        BUILDER.comment("Notation: [[\"dimension1\", \"temperature1\"], [\"dimension2\", \"temperature2\"]... etc]",
             "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end",
             "Note: all temperatures are in Minecraft units")
             .push("Dimensions");
 
-        configSpecBuilder.push("Temperature offsets for dimensions");
-        dimensionOffsets = configSpecBuilder
-            .define("Dimension Temperature Offsets", Arrays.asList(
-            ));
-        configSpecBuilder.pop();
+        BUILDER.push("DimensionTemperatureOffset");
+        dimensionOffsets = BUILDER
+            .defineList("Dimension Temperature Offsets", Arrays.asList(
+                    Arrays.asList("minecraft:the_nether", "1.5"),
+                    Arrays.asList("minecraft:the_end", "-0.2")
+            ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
 
-        configSpecBuilder.push("Static temperature for dimensions");
-        dimensionTemperatures = configSpecBuilder
+        BUILDER.push("DimensionTemperatures");
+        dimensionTemperatures = BUILDER
             .comment("Override their respective offset values",
                 "Also override ALL biome temperatures")
-            .define("Dimension Temperatures", Arrays.asList(
-                    Arrays.asList("minecraft:the_nether", "2.0"),
-                    Arrays.asList("minecraft:the_end", "0.4")
-            ));
-        configSpecBuilder.pop();
+            .defineList("Dimension Temperatures", Arrays.asList(
+                    // No default values
+            ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
 
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
         /*
          Biomes
          */
-        configSpecBuilder.comment("Notation: [[\"biome1\", \"temperature1\"], [\"biome2\", \"temperature2\"]... etc]",
+        BUILDER.comment("Notation: [[\"biome1\", \"temperature1\"], [\"biome2\", \"temperature2\"]... etc]",
             "Note: all temperatures are in Minecraft units")
         .push("Biomes");
 
-        configSpecBuilder.push("Temperature offsets for individual biomes");
-        biomeOffsets = configSpecBuilder
-            .define("Biome Temperature Offsets", Arrays.asList(
-            ));
-        configSpecBuilder.pop();
+        BUILDER.push("BiomeTemperatureOffsets");
+        biomeOffsets = BUILDER
+            .defineList("Biome Temperature Offsets", Arrays.asList(
+                    // No default values
+            ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
 
-        configSpecBuilder.push("Temperatures for individual biomes");
-        biomeTemperatures = configSpecBuilder
-            .comment("Override their respective offset values")
-            .define("Biome Temperatures", Arrays.asList(
-            ));
-        configSpecBuilder.pop();
+        BUILDER.push("BiomeTemperatures");
+        biomeTemperatures = BUILDER
+            .comment("Temperatures for individual biomes")
+            .defineList("Biome Temperatures", Arrays.asList(
+                    // No default values
+            ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
+
+        SPEC = BUILDER.build();
     }
 
-    public static WorldTemperatureConfig getInstance() {
-        return INSTANCE;
-    }
+    public static void setup()
+    {
+        Path configPath = FMLPaths.CONFIGDIR.get();
+        Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
 
+        // Create the config folder
+        try
+        {
+            Files.createDirectory(csConfigPath);
+        }
+        catch (Exception e)
+        {
+            // Do nothing
+        }
+
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/world_temperatures.toml");
+    }
 
     /*
      * Non-private values for use elsewhere
      */
-    public List<List<String>> biomeOffsets() {
+    public List<? extends List<String>> biomeOffsets() {
         return biomeOffsets.get();
     }
-    public List<List<String>> biomeTemperatures() {
+    public List<? extends List<String>> biomeTemperatures() {
         return biomeTemperatures.get();
     }
 
-    public List<List<String>> dimensionOffsets() {
+    public List<? extends List<String>> dimensionOffsets() {
         return dimensionOffsets.get();
     }
-    public List<List<String>> dimensionTemperatures() {
+    public List<? extends List<String>> dimensionTemperatures() {
         return dimensionTemperatures.get();
-    }
-
-    /*
-     * Safe set methods for config values
-     */
-    public void setBiomeTemperatures(List<List<String>> list) {
-        biomeOffsets.set(list);
-    }
-
-    public void save() {
-        SPEC.save();
     }
 }

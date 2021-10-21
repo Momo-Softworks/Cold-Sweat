@@ -3,156 +3,162 @@ package net.momostudios.coldsweat.config;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class ColdSweatConfig
 {
-    private static final ColdSweatConfig INSTANCE;
     private static final ForgeConfigSpec SPEC;
-    private static final Path CONFIG_PATH = Paths.get("config/cold-sweat_main.toml");
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    static
-    {
-        Pair<ColdSweatConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ColdSweatConfig::new);
-        INSTANCE = specPair.getLeft();
-        SPEC = specPair.getRight();
-        CommentedFileConfig config = CommentedFileConfig.builder(CONFIG_PATH)
-                .sync()
-                .autoreload()
-                .writingMode(WritingMode.REPLACE)
-                .build();
-        config.load();
-        config.save();
-        SPEC.setConfig(config);
-    }
+    private static final ForgeConfigSpec.IntValue difficulty;
 
-    private final ForgeConfigSpec.IntValue difficulty;
+    private static final ForgeConfigSpec.BooleanValue celsius;
+    private static final ForgeConfigSpec.IntValue tempOffset;
 
-    private final ForgeConfigSpec.BooleanValue celsius;
-    private final ForgeConfigSpec.IntValue tempOffset;
+    private static final ForgeConfigSpec.DoubleValue maxHabitable;
+    private static final ForgeConfigSpec.DoubleValue minHabitable;
+    private static final ForgeConfigSpec.DoubleValue rateMultiplier;
 
-    private final ForgeConfigSpec.DoubleValue maxHabitable;
-    private final ForgeConfigSpec.DoubleValue minHabitable;
-    private final ForgeConfigSpec.DoubleValue rateMultiplier;
+    private static final ForgeConfigSpec.BooleanValue fireResistanceEffect;
+    private static final ForgeConfigSpec.BooleanValue iceResistanceEffect;
 
-    private final ForgeConfigSpec.BooleanValue fireResistanceEffect;
-    private final ForgeConfigSpec.BooleanValue iceResistanceEffect;
+    private static final ForgeConfigSpec.IntValue steveHeadX;
+    private static final ForgeConfigSpec.IntValue steveHeadY;
 
-    private final ForgeConfigSpec.IntValue steveHeadX;
-    private final ForgeConfigSpec.IntValue steveHeadY;
+    private static final ForgeConfigSpec.IntValue tempGaugeX;
+    private static final ForgeConfigSpec.IntValue tempGaugeY;
 
-    private final ForgeConfigSpec.IntValue tempGaugeX;
-    private final ForgeConfigSpec.IntValue tempGaugeY;
+    private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
+    private static final ForgeConfigSpec.BooleanValue iconBobbing;
 
-    private final ForgeConfigSpec.BooleanValue customHotbarLayout;
-    private final ForgeConfigSpec.BooleanValue iconBobbing;
+    private static final ForgeConfigSpec.BooleanValue damageScaling;
+    private static final ForgeConfigSpec.BooleanValue requireThermometer;
 
-    private final ForgeConfigSpec.BooleanValue animalsTemperature;
-    private final ForgeConfigSpec.BooleanValue damageScaling;
-    private final ForgeConfigSpec.BooleanValue requireThermometer;
 
-    private ColdSweatConfig(ForgeConfigSpec.Builder configSpecBuilder)
+    static 
     {
         /*
          Difficulty
          */
-        difficulty = configSpecBuilder
+        difficulty = BUILDER
                 .comment("Overrides all other config options for easy difficulty management")
                 .defineInRange("Difficulty", 3, 1, 5);
 
         /*
          Temperature display preferences
          */
-        configSpecBuilder.push("Temperature display preferences");
-        celsius = configSpecBuilder
+        BUILDER.push("Temperature display preferences");
+        celsius = BUILDER
                 .comment("Sets all temperatures to be displayed in Celsius")
                 .define("Celsius", false);
-        tempOffset = configSpecBuilder
+        tempOffset = BUILDER
                 .comment("(Visually) offsets the temperature for personalization (default: 0, so a Plains biome is 75 \u00b0F or 21 \u00b0C)")
                 .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
         /*
          Potion effects affecting the player's temperature
          */
-        configSpecBuilder.push("Item settings");
-        fireResistanceEffect = configSpecBuilder
+        BUILDER.push("Item settings");
+        fireResistanceEffect = BUILDER
                 .comment("Fire Resistance blocks all hot temperatures")
                 .define("Fire Resistance Immunity", true);
-        iceResistanceEffect = configSpecBuilder
+        iceResistanceEffect = BUILDER
                 .comment("Ice Resistance blocks all cold temperatures")
                 .define("Ice Resistance Immunity", true);
-        requireThermometer = configSpecBuilder
+        requireThermometer = BUILDER
             .comment("Thermometer item is required to see ambient temperature")
             .define("Require Thermometer", true);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
         /*
          Position of the "Steve Head" temperature gauge above the hotbar
          */
-        configSpecBuilder.push("Position of the 'Steve Head' temperature gauge above the hotbar");
-        steveHeadX = configSpecBuilder
+        BUILDER.push("Position of the 'Steve Head' temperature gauge above the hotbar");
+        steveHeadX = BUILDER
                 .comment("The x position of the gauge relative to its normal position")
                 .defineInRange("Steve Head X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        steveHeadY = configSpecBuilder
+        steveHeadY = BUILDER
                 .comment("The y position of the gauge relative to its normal position")
                 .defineInRange("Steve Head Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
 
-        configSpecBuilder.push("Position of the actual number temperature gauge above the hotbar");
-        tempGaugeX = configSpecBuilder
+        BUILDER.push("Position of the actual number temperature gauge above the hotbar");
+        tempGaugeX = BUILDER
                 .comment("The x position of the temperature gauge relative to default")
                 .defineInRange("Temp Gauge X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        tempGaugeY = configSpecBuilder
+        tempGaugeY = BUILDER
                 .comment("The y position of the temperature gauge relative to default")
                 .defineInRange("Temp Gauge Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
-        configSpecBuilder.push("UI Options");
-        customHotbarLayout = configSpecBuilder
+        BUILDER.push("UI Options");
+        customHotbarLayout = BUILDER
             .define("Custom hotbar layout", true);
-        iconBobbing = configSpecBuilder
+        iconBobbing = BUILDER
             .comment("Controls whether the temperature icon shakes when in critical condition")
             .define("Icon Bobbing", true);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
         /*
          Misc. things that are affected by temperature
          */
-        configSpecBuilder.push("Misc things that are affected by temperature");
-        animalsTemperature = configSpecBuilder
-                .comment("Sets whether animals are affected by temperature")
-                .define("Animals Have Temperature", true);
-        damageScaling = configSpecBuilder
+        BUILDER.push("Misc things that are affected by temperature");
+        damageScaling = BUILDER
             .comment("Sets whether damage scales with difficulty")
             .define("Damage Scaling", true);
-        configSpecBuilder.pop();
+        BUILDER.pop();
 
         /*
          Details about how the player is affected by temperature
          */
-        configSpecBuilder.push("Details about how the player is affected by temperature");
-        minHabitable = configSpecBuilder
+        BUILDER.push("Details about how the player is affected by temperature");
+        minHabitable = BUILDER
                 .comment("Minimum habitable temperature (default: 0.25, on a scale of 0 - 2)")
-                .defineInRange("Minimum Habitable Temperature", 0.25, 0, Double.POSITIVE_INFINITY);
-        maxHabitable = configSpecBuilder
+                .defineInRange("Minimum Habitable Temperature", 0.25, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        maxHabitable = BUILDER
                 .comment("Maximum habitable temperature (default: 1.75, on a scale of 0 - 2)")
-                .defineInRange("Maximum Habitable Temperature", 1.75, 0, Double.POSITIVE_INFINITY);
-        rateMultiplier = configSpecBuilder
+                .defineInRange("Maximum Habitable Temperature", 1.75, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
-        configSpecBuilder.pop();
+        BUILDER.pop();
+
+        SPEC = BUILDER.build();
+    }
+
+    public static void setup()
+    {
+        Path configPath = FMLPaths.CONFIGDIR.get();
+        Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
+
+        // Create the config folder
+        try
+        {
+            Files.createDirectory(csConfigPath);
+        }
+        catch (Exception e)
+        {
+            // Do nothing
+        }
+
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
     }
 
     public static ColdSweatConfig getInstance()
     {
-        return INSTANCE;
+        return new ColdSweatConfig();
     }
-
 
     /*
      * Non-private values for use elsewhere
@@ -205,10 +211,6 @@ public class ColdSweatConfig
         return iconBobbing.get();
     }
 
-    public boolean animalsTemperature() {
-        return animalsTemperature.get();
-    }
-
     public boolean damageScaling() {
         return damageScaling.get();
     }
@@ -229,8 +231,8 @@ public class ColdSweatConfig
     /*
      * Safe set methods for config values
      */
-    public void setDifficulty(int difficulty) {
-        this.difficulty.set(difficulty);
+    public void setDifficulty(int value) {
+        difficulty.set(value);
     }
 
     public void setCelsius(boolean enabled) {
@@ -263,10 +265,6 @@ public class ColdSweatConfig
 
     public void setRequireThermometer(boolean required) {
         requireThermometer.set(required);
-    }
-
-    public void setAnimalsTemperature(boolean areAffected) {
-        animalsTemperature.set(areAffected);
     }
 
     public void setTempGaugeX(int pos) {

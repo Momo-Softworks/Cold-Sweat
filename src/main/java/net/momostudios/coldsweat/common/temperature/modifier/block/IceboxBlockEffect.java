@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 public class IceboxBlockEffect extends BlockEffect
 {
@@ -23,5 +24,10 @@ public class IceboxBlockEffect extends BlockEffect
     public boolean hasBlock(BlockState block)
     {
         return block.getBlock() instanceof IceboxBlock;
+    }
+
+    @Override
+    public double minTemp() {
+        return MathHelperCS.convertFromF(32);
     }
 }

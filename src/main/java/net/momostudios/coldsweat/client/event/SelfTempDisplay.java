@@ -38,16 +38,30 @@ public class SelfTempDisplay
             double y = entity.getPosY();
             double z = entity.getPosZ();
 
-            double temp = PlayerTemp.getTemperature(entity, PlayerTemp.Types.COMPOSITE).get();
+            double temp = (int) PlayerTemp.getTemperature(entity, PlayerTemp.Types.COMPOSITE).get();
 
             int threatLevel = 0;
 
             ResourceLocation icon;
-            int color;
-            int colorBG;
-            if (temp >= 1)       {color=16744509;colorBG=5376516;}
-            else if (temp <= -1) {color=4299519; colorBG=1122644;}
-            else                 {color=11513775;colorBG=0;}
+            int color =
+                    temp > 0 ? 16744509 :
+                    temp < 0 ? 4233468 :
+                    11513775;
+            int colorBG =
+                    temp < 0 ? 1122643 :
+                    temp > 0 ? 5376516 :
+                    0;
+            int colorBG2 =
+                    temp < -100 && temp >= -110 ? 6866175 :
+                    temp < -110 && temp >= -120 ? 7390719 :
+                    temp < -120 && temp >= -130 ? 9824511 :
+                    temp < -130 && temp >= -140 ? 12779519 :
+                    temp < - 140 ?                16777215 :
+                    temp > 100 && temp <= 110 ? 16744509 :
+                    temp > 110 && temp <= 120 ? 16755544 :
+                    temp > 120 && temp <= 130 ? 16766325 :
+                    temp > 130 && temp <= 140 ? 16771509 :
+                    temp > 140 ? 16777215 : 0;
 
             if      (temp >= 100)   {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");   threatLevel = 2;}
             else if (temp >= 66)    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");   threatLevel = 1;}
@@ -76,14 +90,25 @@ public class SelfTempDisplay
             int scaledHeight = mc.getMainWindow().getScaledHeight();
             MatrixStack matrixStack = event.getMatrixStack();
 
-            String s = "" + (int) Math.abs(temp);
-            int i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2 + CCS.tempGaugeX;
-            int j1 = scaledHeight - 31 - 7 + CCS.tempGaugeY;
-            fontRenderer.drawString(matrixStack, s, (float) (i1 + 1), (float) j1, colorBG);
-            fontRenderer.drawString(matrixStack, s, (float) (i1 - 1), (float) j1, colorBG);
-            fontRenderer.drawString(matrixStack, s, (float) i1, (float) (j1 + 1), colorBG);
-            fontRenderer.drawString(matrixStack, s, (float) i1, (float) (j1 - 1), colorBG);
-            fontRenderer.drawString(matrixStack, s, (float) i1, (float) j1, color);
+            String s = "" + (int) Math.min(Math.abs(temp), 100);
+            float i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2f + CCS.tempGaugeX;
+            float j1 = scaledHeight - 31f - 7f + CCS.tempGaugeY;
+            if (temp > 100 || temp < -100)
+            {
+                fontRenderer.drawString(matrixStack, s, i1 + 2f, j1, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1 - 2f, j1, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1, j1 + 2f, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1, j1 - 2f, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1 + 1f, j1 + 1f, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1 + 1f, j1 - 1f, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1 - 1f, j1 - 1f, colorBG2);
+                fontRenderer.drawString(matrixStack, s, i1 - 1f, j1 + 1f, colorBG2);
+            }
+            fontRenderer.drawString(matrixStack, s, i1 + 1, j1, colorBG);
+            fontRenderer.drawString(matrixStack, s, i1 - 1, j1, colorBG);
+            fontRenderer.drawString(matrixStack, s, i1, j1 + 1, colorBG);
+            fontRenderer.drawString(matrixStack, s, i1, j1 - 1, colorBG);
+            fontRenderer.drawString(matrixStack, s, i1, j1, color);
         }
     }
 }

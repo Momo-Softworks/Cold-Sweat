@@ -14,7 +14,7 @@ import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
 {
-    WorldTemperatureConfig config = WorldTemperatureConfig.getInstance();
+    WorldTemperatureConfig config = new WorldTemperatureConfig();
 
     @Override
     public double calculate(Temperature temp, PlayerEntity player)

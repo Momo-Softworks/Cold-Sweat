@@ -40,10 +40,10 @@ public abstract class ConfigPageBase extends Screen
         return new TranslationTextComponent("cold_sweat.config.section.other");
     }
 
-    public ConfigPageBase()
+    public ConfigPageBase(Screen parentScreen)
     {
         super(new TranslationTextComponent("cold_sweat.config.title"));
-        this.parentScreen = ConfigScreen.INSTANCE.parentScreen;
+        this.parentScreen = parentScreen;
     }
 
     public int index()
@@ -64,12 +64,14 @@ public abstract class ConfigPageBase extends Screen
 
         // Navigation
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20,
-            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> mc.displayGuiScreen(ConfigScreen.getPage(this.index() + 1)));
+            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
+                mc.displayGuiScreen(ConfigScreen.getPage(this.index() + 1, parentScreen)));
         if (this.index() < ConfigScreen.LAST_PAGE)
             this.addButton(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20,
-            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button -> mc.displayGuiScreen(ConfigScreen.getPage(this.index() - 1)));
+            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
+                mc.displayGuiScreen(ConfigScreen.getPage(this.index() - 1, parentScreen)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
             this.addButton(prevNavButton);
     }
@@ -117,7 +119,7 @@ public abstract class ConfigPageBase extends Screen
     public void close()
     {
         this.onClose();
-        Objects.requireNonNull(this.minecraft).displayGuiScreen(this.parentScreen);
+        Minecraft.getInstance().displayGuiScreen(this.parentScreen);
     }
 
     @Override

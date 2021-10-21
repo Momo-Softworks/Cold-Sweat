@@ -27,6 +27,8 @@ public class InitTempModifiers
         BLE.add(new IceBlockEffect());
         BLE.add(new IceboxBlockEffect());
         BLE.add(new BoilerBlockEffect());
+        BLE.add(new SoulFireBlockEffect());
+        BLE.add(new SoulCampfireBlockEffect());
     }
 
     // Register TempModifiers

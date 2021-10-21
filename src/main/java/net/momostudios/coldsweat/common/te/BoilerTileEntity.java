@@ -103,7 +103,7 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = new ArrayList();
-        for (Object iterator : FuelItemsConfig.getInstance().boilerItems())
+        for (Object iterator : new FuelItemsConfig().boilerItems())
         {
             List<String> testIndex = (List<String>) iterator;
             String testItem = testIndex.get(0);

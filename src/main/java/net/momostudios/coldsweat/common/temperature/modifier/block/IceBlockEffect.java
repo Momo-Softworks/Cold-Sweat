@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 public class IceBlockEffect extends BlockEffect
 {
@@ -12,7 +13,10 @@ public class IceBlockEffect extends BlockEffect
     {
         if (hasBlock(state))
         {
-            double temp = -0.02;
+            double temp =
+                    state.getBlock() == Blocks.ICE ? -0.02 :
+                    state.getBlock() == Blocks.PACKED_ICE ? -0.06 :
+                    state.getBlock() == Blocks.BLUE_ICE ? -0.18 : 0;
             return Math.min(0, temp * Math.max(0, 3 - distance));
         }
         return 0;
@@ -24,5 +28,10 @@ public class IceBlockEffect extends BlockEffect
         return block.getBlock() == Blocks.ICE ||
                block.getBlock() == Blocks.PACKED_ICE ||
                block.getBlock() == Blocks.BLUE_ICE;
+    }
+
+    @Override
+    public double minTemp() {
+        return MathHelperCS.convertFromF(-100);
     }
 }

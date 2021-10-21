@@ -41,7 +41,6 @@ public class ConfigScreen
 
     private static final ColdSweatConfig CMI = ColdSweatConfig.getInstance();
     public static final ConfigScreen INSTANCE = new ConfigScreen();
-    public Screen parentScreen = new OptionsScreen(new IngameMenuScreen(true), Minecraft.getInstance().gameSettings);
     public static Minecraft mc = Minecraft.getInstance();
 
     protected int difficulty = CMI.difficulty() - 1;
@@ -53,13 +52,13 @@ public class ConfigScreen
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = 1;
 
-    public static Screen getPage(int index)
+    public static Screen getPage(int index, Screen parentScreen)
     {
         index = Math.max(FIRST_PAGE, Math.min(LAST_PAGE, index));
         switch (index)
         {
-            case 0:  return new PageOne();
-            case 1:  return new PageTwo();
+            case 0:  return new PageOne(parentScreen);
+            case 1:  return new PageTwo(parentScreen);
             default: return null;
         }
     }
@@ -212,7 +211,7 @@ public class ConfigScreen
                 CMI.setDifficulty(4);
             }
             CMI.save();
-            mc.displayGuiScreen(new PageOne());
+            mc.displayGuiScreen(parentScreen);
         }
 
         boolean isMouseOverSlider(double mouseX, double mouseY)
@@ -261,7 +260,6 @@ public class ConfigScreen
         boolean celsius = CCS.celsius;
         boolean iceRes = CMI.iceResistanceEffect();
         boolean fireRes = CMI.fireResistanceEffect();
-        boolean animalTemp = CMI.animalsTemperature();
         boolean damageScaling = CMI.damageScaling();
         boolean requireThermometer = CMI.requireThermometer();
         double minTemp = celsius ? MathHelperCS.convertToC(CMI.minHabitable()) : MathHelperCS.convertToF(CMI.minHabitable());
@@ -281,10 +279,10 @@ public class ConfigScreen
 
         Screen parentScreen;
 
-        public PageOne()
+        public PageOne(Screen parentScreen)
         {
-            super();
-            this.parentScreen = ConfigScreen.INSTANCE.parentScreen;
+            super(parentScreen);
+            this.parentScreen = parentScreen;
         }
 
         @Override
@@ -309,7 +307,6 @@ public class ConfigScreen
                 @Override
                 public boolean setsCustomDifficulty() { return false; }
             };
-            this.addButton(celsiusButton);
 
             // Temp Offset
             this.tempOffsetInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 20, 51, 22, new StringTextComponent(""));
@@ -333,7 +330,7 @@ public class ConfigScreen
             difficultyButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8, 152, 20,
                     new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.name").getString() +
                     " (" + INSTANCE.difficultyName() + ")..."),
-                    button -> mc.displayGuiScreen(new DifficultyPage(new PageOne())))
+                    button -> mc.displayGuiScreen(new DifficultyPage(this)))
             {
                 @Override
                 public boolean setsCustomDifficulty() { return false; }
@@ -362,7 +359,7 @@ public class ConfigScreen
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (this.damageScaling ? ON : OFF)),
                 button -> this.toggleDamageScaling());
 
-            if (mc.player.hasPermissionLevel(3))
+            if (mc.player == null || mc.player.hasPermissionLevel(3))
             {
                 this.addButton(difficultyButton);
 
@@ -376,6 +373,7 @@ public class ConfigScreen
                 this.children.add(this.rateMultInput);
             }
 
+            this.addButton(celsiusButton);
             this.children.add(this.tempOffsetInput);
         }
 
@@ -392,7 +390,7 @@ public class ConfigScreen
             this.tempOffsetInput.render(matrixStack, mouseX, mouseY, partialTicks);
             drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, 16777215);
 
-            if (mc.player.hasPermissionLevel(3))
+            if (mc.player == null || mc.player.hasPermissionLevel(3))
             {
                 // Max Temp
                 this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -423,7 +421,6 @@ public class ConfigScreen
             CCS.celsius = this.celsius;
             CMI.setIceResistanceEffect(this.iceRes);
             CMI.setFireResistanceEffect(this.fireRes);
-            CMI.setAnimalsTemperature(this.animalTemp);
             CMI.setDamageScaling(this.damageScaling);
             CMI.setRequireThermometer(this.requireThermometer);
 
@@ -487,12 +484,6 @@ public class ConfigScreen
             fireResButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.fire_resistance.name").getString() + ": " +
                 (this.fireRes ? ON : OFF)));
         }
-        public void toggleAnimalTemp()
-        {
-            this.animalTemp = !this.animalTemp;
-            animalTempButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.animal_temperature.name").getString() + ": " +
-                (this.animalTemp ? ON : OFF)));
-        }
         public void toggleDamageScaling()
         {
             this.damageScaling = !this.damageScaling;
@@ -514,7 +505,7 @@ public class ConfigScreen
 
         private final Screen parentScreen;
 
-        boolean customHotbar = CMI.customHotbar();
+        boolean customHotbar = CCS.customHotbar;
         boolean iconBobbing = CCS.iconBobbing;
 
         ImageButton upSteveButton;
@@ -533,10 +524,10 @@ public class ConfigScreen
         Button iconBobbingButton;
 
 
-        public PageTwo()
+        public PageTwo(Screen parentScreen)
         {
-            super();
-            this.parentScreen = ConfigScreen.INSTANCE.parentScreen;
+            super(parentScreen);
+            this.parentScreen = parentScreen;
         }
 
         @Override

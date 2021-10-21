@@ -149,7 +149,7 @@ public class SewingContainer extends Container
 
     public boolean isInsulatingItem(ItemStack item)
     {
-        for (String iterator : FuelItemsConfig.getInstance().insulatingItems())
+        for (String iterator : new FuelItemsConfig().insulatingItems())
         {
             if (new ResourceLocation(iterator).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {

@@ -23,7 +23,7 @@ public class DrawConfigButton
             event.addWidget(
                 new ImageButton(event.getGui().width / 2 - 183, event.getGui().height / 6 + 120 - 10, 24, 24, 0, 40, 24,
                     new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                    Minecraft.getInstance().displayGuiScreen(new ConfigScreen.PageOne())));
+                    Minecraft.getInstance().displayGuiScreen(new ConfigScreen.PageOne(Minecraft.getInstance().currentScreen))));
 
         }
     }

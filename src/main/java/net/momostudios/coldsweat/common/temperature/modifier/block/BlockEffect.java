@@ -13,13 +13,23 @@ public abstract class BlockEffect
      * @return the temperature of the block. This is ADDED to the ambient temperature.
      * Temperature is on the Minecraft scale, in which 0 is a snow biome and 2 is a desert (see {@link LavaBlockEffect} for an example)
      */
-    public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
-    {
-        return 0;
+    public abstract double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance);
+
+    public abstract boolean hasBlock(BlockState block);
+
+    /**
+     * The maximum temperature this block can emit, no matter how many there are near the player
+     * @return a double representing the temperature, in Minecraft units
+     */
+    public double maxTemp() {
+        return Integer.MAX_VALUE;
     }
-    
-    public boolean hasBlock(BlockState block)
-    {
-        return false;
+
+    /**
+     * The minimum temperature this block can emit, no matter how many there are near the player
+     * @return a double representing the temperature, in Minecraft units
+     */
+    public double minTemp() {
+        return Integer.MIN_VALUE;
     }
 }

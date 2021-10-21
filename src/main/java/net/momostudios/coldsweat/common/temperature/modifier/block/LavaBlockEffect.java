@@ -5,6 +5,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 public class LavaBlockEffect extends BlockEffect
 {
@@ -23,5 +24,10 @@ public class LavaBlockEffect extends BlockEffect
     public boolean hasBlock(BlockState block)
     {
         return block.getBlock() == Blocks.LAVA;
+    }
+
+    @Override
+    public double maxTemp() {
+        return MathHelperCS.convertFromF(2000);
     }
 }

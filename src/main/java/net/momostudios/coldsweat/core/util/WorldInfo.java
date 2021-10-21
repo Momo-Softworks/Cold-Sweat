@@ -102,7 +102,7 @@ public class WorldInfo
     {
         for (int i = 0; i < 255 - pos.getY(); i++)
         {
-            if (!isBlockSpreadable(world, pos.up(i), Direction.UP) && !isBlockSpreadable(world, pos.up(i), Direction.DOWN))
+            if (!isBlockSpreadable(world, pos.up(i), pos.up(i), Direction.UP) && !isBlockSpreadable(world, pos.up(i), pos.up(i), Direction.DOWN))
             {
                 //if (Math.random() < 0.01) System.out.println(world.getBlockState(pos).getBlock());
                 return false;
@@ -111,13 +111,14 @@ public class WorldInfo
         return true;
     }
 
-    public static boolean isBlockSpreadable(World world, BlockPos pos, @Nullable Direction dir)
+    public static boolean isBlockSpreadable(World world, BlockPos pos, BlockPos newPos, @Nullable Direction dir)
     {
         BlockState state = world.getBlockState(pos);
+        BlockState state2 = world.getBlockState(newPos);
 
-        return (dir == null || (!state.isSolidSide(world, pos, dir) && !state.isSolidSide(world, pos, dir.getOpposite()))) &&
-                (world.isAirBlock(pos) || (state.isSolid() && !state.getShape(world, pos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
-                        (state.hasProperty(DoorBlock.OPEN) && state.get(DoorBlock.OPEN)) ||
-                        (state.hasProperty(TrapDoorBlock.OPEN) && state.get(TrapDoorBlock.OPEN)));
+        return (dir == null || (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir))) &&
+                (world.isAirBlock(newPos) || (state2.isSolid() && !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
+                        (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
+                        (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)));
     }
 }

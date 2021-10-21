@@ -11,6 +11,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.init.EffectInit;
 import net.momostudios.coldsweat.core.util.CustomDamageTypes;
+import net.momostudios.coldsweat.core.util.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
@@ -93,14 +94,16 @@ public class PlayerTempUpdater
         }
 
         //Deal damage to the player if temperature is critical
+        boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && ColdSweatConfig.getInstance().fireResistanceEffect();
+        boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && ColdSweatConfig.getInstance().iceResistanceEffect();
         if (player.ticksExisted % 40 == 0)
         {
             boolean scales = config.damageScaling();
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !player.isPotionActive(Effects.FIRE_RESISTANCE))
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.TOLERANCE))
             {
                 player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);
             }
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !player.isPotionActive(EffectInit.ICE_RESISTANCE_EFFECT_REGISTRY.get()))
+            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.TOLERANCE))
             {
                 player.attackEntityFrom(scales ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2);
             }

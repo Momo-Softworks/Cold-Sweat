@@ -8,10 +8,10 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import javax.annotation.Nullable;
 
-public class PlayerTempCapStorage implements Capability.IStorage<PlayerTempCapability> {
+public class PlayerTempCapStorage implements Capability.IStorage<ITemperatureCapability> {
     @Override
     @Nullable
-    public INBT writeNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction direction)
+    public INBT writeNBT(Capability<ITemperatureCapability> capability, ITemperatureCapability instance, Direction direction)
     {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putDouble("ambient", instance.get(PlayerTemp.Types.AMBIENT));
@@ -22,7 +22,7 @@ public class PlayerTempCapStorage implements Capability.IStorage<PlayerTempCapab
     }
 
     @Override
-    public void readNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction direction, INBT nbtData) {
+    public void readNBT(Capability<ITemperatureCapability> capability, ITemperatureCapability instance, Direction direction, INBT nbtData) {
         if (!(nbtData instanceof CompoundNBT))
         {
             throw new IllegalArgumentException("Unable to deserialize 'MyCapability' from a non-Compound NBT structure");

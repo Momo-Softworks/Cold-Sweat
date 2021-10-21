@@ -22,7 +22,6 @@ public class PlayerTemp
      */
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
-        //return new Temperature(player.getPersistentData().getDouble(getTempTag(type)));
         AtomicReference<Double> temp = new AtomicReference<>(0.0d);
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
@@ -37,7 +36,6 @@ public class PlayerTemp
      */
     public static void setTemperature(PlayerEntity player, Temperature value, Types type)
     {
-        //player.getPersistentData().putDouble(getTempTag(type), value.get());
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get());

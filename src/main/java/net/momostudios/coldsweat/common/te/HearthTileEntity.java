@@ -122,7 +122,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     }
 
                     // Get if any adjacent block is solid
-                    boolean touchingSolid = WorldInfo.adjacentPositions(blockPos).stream().anyMatch(newPos -> !WorldInfo.isBlockSpreadable(world, newPos, null));
+                    boolean touchingSolid = Arrays.stream(Direction.values()).anyMatch(dir ->
+                            !WorldInfo.isBlockSpreadable(world, blockPos, blockPos.add(dir.getDirectionVec()), dir));
 
                     // Create detection box for PlayerEntities
                     int x = blockPos.getX();
@@ -162,7 +163,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                         if (testpos.withinDistance(testpos, 20))
                         {
-                            if (WorldInfo.isBlockSpreadable(world, testpos, direction) &&
+                            if (WorldInfo.isBlockSpreadable(world, blockPos, testpos, direction) &&
                             !WorldInfo.canSeeSky(world, blockPos) &&
                             !poss.contains(testpos) && !positions2.contains(testpos) && (touchingSolid || MathHelperCS.isEvenPosition(testpos)))
                             {
@@ -189,7 +190,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             (playerTemp.get() > config.maxHabitable() && this.getColdFuel() > 0) ||
                        (playerTemp.get() > config.minHabitable() && playerTemp.get() < config.maxHabitable()))
                     {
-                        player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 200, Math.max(0, insulationLevel / 240 - 1),
+                        player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1),
                                 false, false));
                     }
                 }
@@ -278,7 +279,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = Arrays.asList(item, 0);
-        for (List<String> iterator : FuelItemsConfig.getInstance().hearthItems())
+        for (List<String> iterator : new FuelItemsConfig().hearthItems())
         {
             String testItem = iterator.get(0);
 
@@ -345,30 +346,27 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public List<BlockPos> getPoints()
     {
-        return this.getPoints(0, this.getTileData().getList("points", 11).size());
-    }
-
-    public List<BlockPos> getPoints(int firstIndex, int lastIndex)
-    {
         List<BlockPos> pointList = new ArrayList<>();
 
-        for (INBT point : this.getTileData().getList("points", 11).subList(firstIndex, lastIndex))
+        for (INBT point : this.getTileData().getList("points", 11))
         {
-            int[] values = ((IntArrayNBT) point).getIntArray();
-            pointList.add(new BlockPos(values[0], values[1], values[2]));
+            if (point != null) {
+                int[] values = ((IntArrayNBT) point).getIntArray();
+                pointList.add(new BlockPos(values[0], values[1], values[2]));
+            }
         }
         if (pointList.isEmpty())
         {
-                pointList.add(pos);
-                pointList.add(pos.up());
-                if (isBlockSpreadable(pos.north(), null))        pointList.add(pos.north());
-                if (isBlockSpreadable(pos.north().east(), null)) pointList.add(pos.north().east());
-                if (isBlockSpreadable(pos.south(), null))        pointList.add(pos.south());
-                if (isBlockSpreadable(pos.south().west(), null)) pointList.add(pos.south().west());
-                if (isBlockSpreadable(pos.east(), null))         pointList.add(pos.east());
-                if (isBlockSpreadable(pos.east().north(), null)) pointList.add(pos.east().north());
-                if (isBlockSpreadable(pos.west(), null))         pointList.add(pos.west());
-                if (isBlockSpreadable(pos.west().south(), null)) pointList.add(pos.west().south());
+            pointList.add(pos);
+            pointList.add(pos.up());
+            if (isBlockSpreadable(pos.north(), null))        pointList.add(pos.north());
+            if (isBlockSpreadable(pos.north().east(), null)) pointList.add(pos.north().east());
+            if (isBlockSpreadable(pos.south(), null))        pointList.add(pos.south());
+            if (isBlockSpreadable(pos.south().west(), null)) pointList.add(pos.south().west());
+            if (isBlockSpreadable(pos.east(), null))         pointList.add(pos.east());
+            if (isBlockSpreadable(pos.east().north(), null)) pointList.add(pos.east().north());
+            if (isBlockSpreadable(pos.west(), null))         pointList.add(pos.west());
+            if (isBlockSpreadable(pos.west().south(), null)) pointList.add(pos.west().south());
         }
         return pointList;
     }

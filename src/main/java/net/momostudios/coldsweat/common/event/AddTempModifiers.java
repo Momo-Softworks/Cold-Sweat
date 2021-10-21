@@ -7,9 +7,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.config.ModifierLoadOrder;
-import net.momostudios.coldsweat.core.init.EffectInit;
-import net.momostudios.coldsweat.core.util.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
