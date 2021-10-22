@@ -15,8 +15,8 @@ public class IceBlockEffect extends BlockEffect
         {
             double temp =
                     state.getBlock() == Blocks.ICE ? -0.02 :
-                    state.getBlock() == Blocks.PACKED_ICE ? -0.06 :
-                    state.getBlock() == Blocks.BLUE_ICE ? -0.18 : 0;
+                    state.getBlock() == Blocks.PACKED_ICE ? -0.04 :
+                    state.getBlock() == Blocks.BLUE_ICE ? -0.08 : 0;
             return Math.min(0, temp * Math.max(0, 3 - distance));
         }
         return 0;

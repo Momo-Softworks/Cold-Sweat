@@ -13,7 +13,7 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 @Mod.EventBusSubscriber
 public class ScreenEffectOverlay
 {
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void displayOverlay(RenderGameOverlayEvent.Post event)
     {
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
@@ -36,11 +36,8 @@ public class ScreenEffectOverlay
                     Minecraft.getInstance().getTextureManager().bindTexture(coldOverlayTexture);
                     RenderSystem.color4f(1f, 1f, 1f, playerTemp / -150f);
                     Minecraft.getInstance().ingameGUI.blit(event.getMatrixStack(), 0, 0, 0, 0, scaleX, heightFactor, scaleX, heightFactor);
-
-                    /*Minecraft.getInstance().getTextureManager().bindTexture(coldHazeTexture);
-                    Minecraft.getInstance().ingameGUI.blit(event.getMatrixStack(), 0, 0, 0, 0, scaleX, heightFactor, scaleX, heightFactor);*/
                 }
             }
         }
-    }
+    }*/
 }

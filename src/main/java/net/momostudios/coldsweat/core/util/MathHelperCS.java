@@ -1,6 +1,8 @@
 package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class MathHelperCS
 {
@@ -34,13 +36,28 @@ public class MathHelperCS
         return value * (9.0 / 5) + 32;
     }
 
-    public static boolean isEvenPosition(BlockPos pos)
-    {
+    public static boolean isEvenPosition(BlockPos pos) {
         return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
     }
 
     public static int[] getCoordinates(BlockPos pos)
     {
         return new int[] {pos.getX(), pos.getY(), pos.getZ()};
+    }
+
+    public static float toRadians(float input) {
+        return input * (float) (Math.PI / 180);
+    }
+
+    public static float toDegrees(float input) {
+        return input * (float) (180 / Math.PI);
+    }
+
+    public static Quaternion rotateQuat(Quaternion quat, Quaternion rot)
+    {
+        return new Quaternion(quat.getX() * rot.getX(),
+                              quat.getY() * rot.getY(),
+                              quat.getZ() * rot.getZ(),
+                              quat.getW() * rot.getW());
     }
 }

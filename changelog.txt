@@ -2,7 +2,8 @@
 - Fixed the player's body temperature sometimes resetting when exiting the world
 - Addressed a minor issue related to configs resetting when changing some settings
 - Addressed an issue with capabilities that caused incompatibilities with some mods
-- Added screen effects when hot or cold, courtesy of Softi on our Discord server!
 - Different kinds of ice now affect temperature accordingly
-- Added smoothing to the ambient temperature gauge for less jitter
 - Improved Hearth spreading algorithm (takes solid sides of blocks like stairs into account better)
+
+TO-DO
+- Added screen effects when hot or cold, courtesy of Softi on our Discord server!

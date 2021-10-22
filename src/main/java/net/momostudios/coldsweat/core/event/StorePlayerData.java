@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.client.event.AmbientGaugeDisplay;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -18,6 +19,7 @@ public class StorePlayerData
         {
             cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getDouble("body_temperature"));
             cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getDouble("base_temperature"));
+            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getDouble("ambient_temperature"));
         });
     }
 
@@ -29,6 +31,7 @@ public class StorePlayerData
         {
             player.getPersistentData().putDouble("body_temperature", cap.get(PlayerTemp.Types.BODY));
             player.getPersistentData().putDouble("base_temperature", cap.get(PlayerTemp.Types.BASE));
+            player.getPersistentData().putDouble("ambient_temperature", cap.get(PlayerTemp.Types.AMBIENT));
         });
     }
 }
