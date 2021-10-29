@@ -10,6 +10,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
+import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.ModItems;
 
@@ -22,7 +23,7 @@ public class ItemTooltipInfo
     {
         if (event.getItemStack().getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
         {
-            boolean celsius = ColdSweatConfig.getInstance().celsius();
+            boolean celsius = ClientSettingsConfig.getInstance().celsius();
             double temp = event.getItemStack().getOrCreateTag().getDouble("temperature");
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";

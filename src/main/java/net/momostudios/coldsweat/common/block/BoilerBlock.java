@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.common.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FurnaceBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
@@ -38,6 +39,7 @@ import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.ToIntFunction;
 
 public class BoilerBlock extends Block
 {
@@ -51,7 +53,14 @@ public class BoilerBlock extends Block
                 .sound(SoundType.STONE)
                 .hardnessAndResistance(2f, 10f)
                 .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1);
+                .harvestLevel(1)
+                .setLightLevel(getLightValueLit(13));
+    }
+
+    private static ToIntFunction<BlockState> getLightValueLit(int lightValue) {
+        return (state) -> {
+            return state.get(BlockStateProperties.LIT) ? lightValue : 0;
+        };
     }
 
     public static Item.Properties getItemProperties()

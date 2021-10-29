@@ -10,10 +10,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
+
+import java.lang.reflect.Field;
 
 @Mod.EventBusSubscriber
 public class AmbientGaugeDisplay
@@ -22,11 +26,14 @@ public class AmbientGaugeDisplay
     @SubscribeEvent
     public static void renderAmbientTemperature(RenderGameOverlayEvent.Post event)
     {
+        ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
+
         PlayerEntity player = Minecraft.getInstance().player;
+
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
-           (player.getHeldItemMainhand().getItem() == ModItems.THERMOMETER ||
-            player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER ||
-           !ColdSweatConfig.getInstance().requireThermometer()))
+           ((player.inventory.getSlotFor(ModItems.THERMOMETER.getDefaultInstance()) >= 0 &&
+                   player.inventory.getSlotFor(ModItems.THERMOMETER.getDefaultInstance()) <= 8) ||
+           player.getHeldItemOffhand().getItem() == ModItems.THERMOMETER || !ColdSweatConfig.getInstance().requireThermometer()))
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
@@ -34,11 +41,12 @@ public class AmbientGaugeDisplay
             double min = ColdSweatConfig.getInstance().minHabitable();
             double max = ColdSweatConfig.getInstance().maxHabitable();
             double mid = (min + max) / 2;
-            boolean celsius = ColdSweatConfig.getInstance().celsius();
-            boolean bobbing = ColdSweatConfig.getInstance().iconBobbing();
+            boolean celsius = CCS.celsius();
+            boolean bobbing = CCS.iconBobbing();
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
             double temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
+            //double temp2 = player.getPersistentData().getDouble("ambient_temperature");
             int color = 14737376;
 
             ResourceLocation gaugeTexture = new ResourceLocation("cold_sweat:textures/gui/overlay/ambient/temp_gauge_normal.png");
@@ -76,7 +84,7 @@ public class AmbientGaugeDisplay
             RenderSystem.disableBlend();
 
             if (temp > (mid + max) / 2 && temp <= max)
-                color = 16767257;
+                color = 16297781;
             else if (temp > max)
                 color = 16728089;
             else if (temp < (mid + min) / 2 && temp >= min)
@@ -85,14 +93,14 @@ public class AmbientGaugeDisplay
                 color = 4236031;
 
             int tempScaled = (int) MathHelperCS.convertToF(temp);
-            int tempMeasurement = (int) (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + ColdSweatConfig.getInstance().tempOffset();
+            int tempMeasurement = (int) (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + CCS.tempOffset();
 
             if (temp > max || temp < min)
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
-                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15), color);
+                    (scaleX / 2f) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15), color);
             else
                 Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + tempMeasurement + "",
-                    (scaleX / 2) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - 15, color);
+                    (scaleX / 2f) + 107 + (Integer.toString(tempMeasurement).length() * -3), scaleY - 15, color);
         }
     }
 }

@@ -18,7 +18,7 @@ public abstract class BlockEffect
     public abstract boolean hasBlock(BlockState block);
 
     /**
-     * The maximum temperature this block can emit, no matter how many there are near the player
+     * The maximum temperature this block can emit, no matter how many there are near the player <br>
      * @return a double representing the temperature, in Minecraft units
      */
     public double maxTemp() {
@@ -26,7 +26,8 @@ public abstract class BlockEffect
     }
 
     /**
-     * The minimum temperature this block can emit, no matter how many there are near the player
+     * The minimum temperature this block can emit, no matter how many there are near the player <br>
+     * (Useful for blocks with negative temperature) <br>
      * @return a double representing the temperature, in Minecraft units
      */
     public double minTemp() {

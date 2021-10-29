@@ -1,9 +1,11 @@
 package net.momostudios.coldsweat.core.util;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.common.temperature.Temperature;
@@ -11,6 +13,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,27 +55,7 @@ public class PlayerTemp
      */
     public static void applyModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates, INBT... arguments)
     {
-        ListNBT nbt = ListNBTHelper.createIfNull(getModifierTag(type), player);
-        if (TempModifierEntries.getEntries().getEntryName(modifier) != null)
-        {
-            if (!ListNBTHelper.doesNBTContain(nbt, modifier) || duplicates)
-            {
-                CompoundNBT modifierData = new CompoundNBT();
-                //System.out.println("The modifier is " + modifier + " and the key is " + modifier.getRegistryName());
-                    modifierData.putString("modifier_name", TempModifierEntries.getEntries().getEntryName(modifier));
-
-                    if (arguments != null)
-                    {
-                        int modifierIndex = 0;
-                        for (INBT argument : arguments)
-                        {
-                            modifierData.put("argument_" + modifierIndex, argument);
-                        }
-                    }
-                    nbt.add(modifierData);
-            }
-            player.getPersistentData().put(getModifierTag(type), nbt);
-        }
+        MinecraftForge.EVENT_BUS.post(new TempModifierEvent.Add(modifier, player, type, duplicates, arguments));
     }
 
 
@@ -94,28 +77,9 @@ public class PlayerTemp
      * @param type determines which TempModifier list to pull from
      * @param count is the number of modifiers of the given type to be removed (use Integer.MAX_VALUE to remove all instances)
      */
-    public static <T> void removeModifier(PlayerEntity player, Class<T> modClass, Types type, int count)
+    public static void removeModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type, int count)
     {
-        ListNBT modifierList = ListNBTHelper.createIfNull(getModifierTag(type), player);
-        {
-            if (!modifierList.isEmpty())
-            {
-                count = Math.min(count, modifierList.size());
-                int removed = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    INBT inbt = modifierList.get(i);
-                    if (TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) inbt).getString("modifier_name")).getClass().equals(modClass))
-                    {
-                        modifierList.remove(inbt);
-                        removed++;
-
-                        if (removed >= count)
-                            break;
-                    }
-                }
-            }
-        }
+        MinecraftForge.EVENT_BUS.post(new TempModifierEvent.Remove(player, modClass, type, count));
     }
 
 

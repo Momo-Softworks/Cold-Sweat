@@ -4,6 +4,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 
@@ -14,7 +16,13 @@ public class SoulCampfireBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(CampfireBlock.LIT))
         {
-            double temp = -0.03;
+            if (distance < 1.4)
+            {
+                player.extinguish();
+                player.addPotionEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 2, 0));
+            }
+
+            double temp = -0.005;
             return Math.max(0, temp * (9 - distance));
         }
         return 0;
@@ -27,7 +35,7 @@ public class SoulCampfireBlockEffect extends BlockEffect
     }
 
     @Override
-    public double maxTemp() {
-        return MathHelperCS.convertFromF(-400);
+    public double minTemp() {
+        return MathHelperCS.convertFromF(-20);
     }
 }

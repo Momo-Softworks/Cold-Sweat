@@ -1,5 +1,6 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
+import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
@@ -16,23 +17,27 @@ public class TimeTempModifier extends TempModifier
     @Override
     public double calculate(Temperature temp, PlayerEntity player)
     {
-        double timeTemp = 0;
-        World world = player.world;
-        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+        if (!player.world.getDimensionType().doesFixedTimeExist())
         {
-            RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, world.func_241828_r().getRegistry(Registry.BIOME_KEY).getKey(world.getBiome(iterator)));
-            if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
-                BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+            double timeTemp = 0;
+            World world = player.world;
+            for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
             {
-                timeTemp += (Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) / 1d) - 1;
+                RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, world.func_241828_r().getRegistry(Registry.BIOME_KEY).getKey(world.getBiome(iterator)));
+                if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
+                        BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+                {
+                    timeTemp += (Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) / 1d) - 1;
+                }
+                else
+                {
+                    timeTemp += (Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) / 4d) - 0.1;
+                }
             }
-            else
-            {
-                timeTemp += (Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) / 4d) - 0.1;
-            }
-        }
 
-        return temp.get() + (timeTemp / 200);
+            return temp.get() + (timeTemp / 200);
+        }
+        else return temp.get();
     }
 
     public String getID()

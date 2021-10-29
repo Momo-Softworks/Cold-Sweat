@@ -42,7 +42,7 @@ public class BlockEffectEntries
     {
         for (BlockEffect entry : getList())
         {
-            if (entry.hasBlock(block.getDefaultState()))
+            if (block != null && entry.hasBlock(block.getDefaultState()))
                 return entry;
         }
         return null;

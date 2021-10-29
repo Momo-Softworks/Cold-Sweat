@@ -13,8 +13,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.momostudios.coldsweat.client.config.ClientConfigSettings;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
@@ -24,7 +23,7 @@ public class SelfTempDisplay
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void eventHandler(RenderGameOverlayEvent event)
     {
-        ClientConfigSettings CCS = ClientConfigSettings.getInstance();
+        ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof PlayerEntity &&
@@ -74,15 +73,15 @@ public class SelfTempDisplay
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             int threatOffset = 0;
-            if (CCS.iconBobbing)
+            if (CCS.iconBobbing())
             {
                 if (threatLevel == 1) threatOffset = entity.ticksExisted % 10 == 0 && Math.random() < 0.5 ? 1 : 0;
                 if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
             }
 
             mc.getTextureManager().bindTexture(icon);
-            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX,
-                scaleY - 51 + threatOffset + CCS.steveHeadY, 0, 0, 10, 10, 10, 10);
+            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(),
+                scaleY - 51 + threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 
             FontRenderer fontRenderer = mc.fontRenderer;
@@ -91,8 +90,8 @@ public class SelfTempDisplay
             MatrixStack matrixStack = event.getMatrixStack();
 
             String s = "" + (int) Math.min(Math.abs(temp), 100);
-            float i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2f + CCS.tempGaugeX;
-            float j1 = scaledHeight - 31f - 7f + CCS.tempGaugeY;
+            float i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2f + CCS.tempGaugeX();
+            float j1 = scaledHeight - 31f - 7f + CCS.tempGaugeY();
             if (temp > 100 || temp < -100)
             {
                 fontRenderer.drawString(matrixStack, s, i1 + 2f, j1, colorBG2);

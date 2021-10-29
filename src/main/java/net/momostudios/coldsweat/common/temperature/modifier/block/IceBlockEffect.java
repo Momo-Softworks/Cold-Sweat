@@ -32,6 +32,6 @@ public class IceBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertFromF(-100);
+        return MathHelperCS.convertFromF(-30);
     }
 }

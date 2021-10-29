@@ -28,6 +28,6 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertFromF(2000);
+        return MathHelperCS.convertFromF(1000);
     }
 }

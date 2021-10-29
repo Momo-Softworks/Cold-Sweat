@@ -1,9 +1,50 @@
 2.0.3:
 - Fixed the player's body temperature sometimes resetting when exiting the world
-- Addressed a minor issue related to configs resetting when changing some settings
+- Addressed a minor issue related to configs resetting when changing some settings (please delete the main.toml config file)
 - Addressed an issue with capabilities that caused incompatibilities with some mods
 - Different kinds of ice now affect temperature accordingly
 - Improved Hearth spreading algorithm (takes solid sides of blocks like stairs into account better)
+- The Boiler now glows when it has fuel
+- Soul Fire and Soul Campfires now cool down the player and no longer damage entities
+- Made the Nether slightly hotter by default (this will not override existing configs)
+- Fixed Serene Seasons being applied in dimensions where it shouldn't
+- Fixed "time of day" affecting temperature in dimensions where time doesn't exist
+- Instead of going to 150, the player's temperature will now visually max out at 100
+    - After 100, the readout will begin to glow as the critical temperature builds up further
+    - Mechanically, it still works the same
+- Ambient temperature no longer affects players in creative mode
+- Fixed minor bug that would occasionally cause the ambient temperature to jitter
+- Added a Russian translation courtesy of Xemay on our Discord server
+
+2.0.3.1
+- Fixed a bug that caused Cold Sweat to spam errors into the console in some cases
+- Rebalanced temperature-emitting blocks to have a limited effect
+
+2.1
+- Updated the Hearth's texture slightly
+- The Hearth now only consumes the necessary fuel to function
+    - If it is hot, for example, it will only use cold fuel
+    - The Hearth will not use any fuel if there are no players in the area
+- Limited the number of total blocks the Hearth can affect to 2000
+- New Item: Soulfire Lamp
+    - Cools the player down when in the Nether
+    - Requires Warped or Crimson stems as fuel
+
+- Technical Changes:
+    - Added new events for compat mod developers to hook into:
+        - TempModifierEvent.Add
+            - Called when a TempModifier modifier is added to a player
+            - Cancellable
+            - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier type
+        - TempModifierEvent.Remove
+            - Called when a TempModifier is removed from a player
+            - Cancellable
+        - TempModifierEvent.Init
+            - Called when the registry of TempModifiers or BlockEffects is being built
+            - Allows for injection of custom TempModifiers and BlockEffects
+            - If you call this event manually, use TempModifierRegistries/BlockEffectRegistries.getEntries().flush() to prevent duplicate entries
+
+
 
 TO-DO
-- Added screen effects when hot or cold, courtesy of Softi on our Discord server!
+- Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

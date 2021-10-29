@@ -2,7 +2,12 @@ package net.momostudios.coldsweat.common.temperature.modifier.block;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 
@@ -13,8 +18,16 @@ public class SoulFireBlockEffect extends BlockEffect
     {
         if (hasBlock(state))
         {
-            double temp = -0.01;
-            return Math.max(0, temp * (9 - distance));
+            AxisAlignedBB bb = new AxisAlignedBB(pos.getX() - 0.2, pos.getY(), pos.getZ() - 0.2, pos.getX() + 1.2, pos.getY() + 1.2, pos.getZ() + 1.2);
+            player.world.getEntitiesWithinAABB(LivingEntity.class, bb).forEach(entity ->
+            {
+                entity.extinguish();
+                if (!entity.getPersistentData().getBoolean("isInSoulFire"))
+                    entity.getPersistentData().putBoolean("isInSoulFire", true);
+            });
+
+            double temp = -0.005;
+            return Math.min(0, temp * (9 - distance));
         }
         return 0;
     }
@@ -26,7 +39,7 @@ public class SoulFireBlockEffect extends BlockEffect
     }
 
     @Override
-    public double maxTemp() {
-        return MathHelperCS.convertFromF(-400);
+    public double minTemp() {
+        return MathHelperCS.convertFromF(-20);
     }
 }

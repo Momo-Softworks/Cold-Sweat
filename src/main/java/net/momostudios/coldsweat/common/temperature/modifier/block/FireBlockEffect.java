@@ -27,6 +27,6 @@ public class FireBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertFromF(400);
+        return MathHelperCS.convertFromF(40);
     }
 }

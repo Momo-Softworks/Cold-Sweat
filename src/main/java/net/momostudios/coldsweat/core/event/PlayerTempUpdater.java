@@ -39,7 +39,7 @@ public class PlayerTempUpdater
         Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
 
         //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
-        if (ambientTemp > maxTemp)
+        if (ambientTemp > maxTemp && !player.isCreative())
         {
             temp.add(Math.min(new Temperature((Math.abs(maxTemp - ambientTemp)) / 15)
                     .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), 150));
@@ -51,7 +51,7 @@ public class PlayerTempUpdater
         }
 
         //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
-        if (ambientTemp < minTemp)
+        if (ambientTemp < minTemp && !player.isCreative())
         {
             temp.add(Math.max(-new Temperature((Math.abs(minTemp - ambientTemp)) / 15)
                     .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), -150));

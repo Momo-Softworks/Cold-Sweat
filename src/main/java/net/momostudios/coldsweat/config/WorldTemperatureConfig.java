@@ -40,7 +40,7 @@ public class WorldTemperatureConfig
         BUILDER.push("DimensionTemperatureOffset");
         dimensionOffsets = BUILDER
             .defineList("Dimension Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:the_nether", "1.5"),
+                    Arrays.asList("minecraft:the_nether", "0.6"),
                     Arrays.asList("minecraft:the_end", "-0.2")
             ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
@@ -66,7 +66,7 @@ public class WorldTemperatureConfig
         BUILDER.push("BiomeTemperatureOffsets");
         biomeOffsets = BUILDER
             .defineList("Biome Temperature Offsets", Arrays.asList(
-                    // No default values
+                    Arrays.asList("minecraft:soul_sand_valley", "-0.5")
             ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
 

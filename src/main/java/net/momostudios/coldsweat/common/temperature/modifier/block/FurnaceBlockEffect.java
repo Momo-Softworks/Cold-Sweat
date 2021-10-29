@@ -27,6 +27,6 @@ public class FurnaceBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertFromF(450);
+        return MathHelperCS.convertFromF(40);
     }
 }
