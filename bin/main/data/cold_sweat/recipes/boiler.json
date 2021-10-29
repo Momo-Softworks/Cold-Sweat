@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "CCC",
+    "CBC",
+    "CCC"
+  ],
+  "key":
+  {
+    "C":
+    {
+      "item": "minecraft:cobblestone"
+    },
+    "B":
+    {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result":
+  {
+    "item": "cold_sweat:boiler",
+    "count": 1
+  }
+}

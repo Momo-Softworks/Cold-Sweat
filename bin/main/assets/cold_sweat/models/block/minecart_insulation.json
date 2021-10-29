@@ -1,0 +1,194 @@
+{
+  "parent": "",
+  "textures":
+  {
+    "all": "cold_sweat:blocks/minecart_insulation",
+    "particle": "cold_sweat:blocks/minecart_insulation",
+    "minecart_insulation": "cold_sweat:blocks/minecart_insulation"
+  },
+  "display": {
+    "gui": {
+      "rotation": [ 30, 45, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 0.625, 0.625, 0.625 ]
+    },
+    "ground": {
+      "rotation": [ 0, 0, 0 ],
+      "translation": [ 0, 3, 0 ],
+      "scale": [ 0.25, 0.25, 0.25 ]
+    },
+    "fixed": {
+      "rotation": [ 0, 180, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "head": {
+      "rotation": [ 0, 180, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, 315, 0 ],
+      "translation": [ 0, 2.5, 0 ],
+      "scale": [ 0.4, 0.4, 0.4 ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [ 75, 315, 0 ],
+      "translation": [ 0, 2.5, 0 ],
+      "scale": [ 0.375, 0.375, 0.375 ]
+    }
+  },
+  "elements": [
+    {
+      "name": "lining_1",
+      "from": [ -4.5, 7, -6.5 ], "to": [ 20, 12.5, -1 ],
+      "faces": {
+        "north": {
+          "texture": "#minecart_insulation", "uv": [ 5, 5.5, 9.5, 6.5 ]
+        },
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 5, 5.5, 6, 6.5 ]
+        },
+        "south": {
+          "texture": "#minecart_insulation", "uv": [ 10.5, 5.5, 15, 6.5 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 9.5, 5.5, 10.5, 6.5 ]
+        },
+        "up": {
+          "texture": "#minecart_insulation", "uv": [ 9.5, 1, 10.5, 5.5 ],
+          "rotation": 90
+        },
+        "down": {
+          "texture": "#minecart_insulation", "uv": [ 10.5, 5.5, 11.5, 1 ],
+          "rotation": 270
+        }
+      }
+    },
+    {
+      "name": "lining_2",
+      "from": [ 14.5, 7, -1 ],
+      "to": [ 20, 12.5, 17 ],
+      "faces": {
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 0, 3.5, 3.5, 4.5 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 4.5, 3.5, 8, 4.5 ]
+        },
+        "up": {
+          "texture": "#minecart_insulation", "uv": [ 3.5, 0, 4.5, 3.5 ],
+          "rotation": 180
+        },
+        "down": {
+          "texture": "#minecart_insulation", "uv": [ 4.5, 3.5, 5.5, 0 ],
+          "rotation": 180
+        }
+      }
+    },
+    {
+      "name": "lining_3",
+      "from": [-4.5, 7, 17 ],  "to": [ 20, 12.5, 22.5 ],
+      "faces": {
+        "north": {
+          "texture": "#minecart_insulation", "uv": [ 10.5, 5.5, 15, 6.5 ]
+        },
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 5, 5.5, 6, 6.5 ]
+        },
+        "south": {
+          "texture": "#minecart_insulation", "uv": [ 5, 5.5, 9.5, 6.5 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 15, 5.5, 16, 6.5 ]
+        },
+        "up": {
+          "texture": "#minecart_insulation", "uv": [ 9.5, 1, 10.5, 5.5 ],
+          "rotation": 270
+        },
+        "down": {
+          "texture": "#minecart_insulation", "uv": [ 10.5, 5.5, 11.5, 1 ],
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "name": "lining_4",
+      "from": [ -4.5, 7, -1 ], "to": [ 1, 12.5, 17 ],
+      "faces": {
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 4.5, 3.5, 8, 4.5 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 0, 3.5, 3.5, 4.5 ]
+        },
+        "up": {
+          "texture": "#minecart_insulation", "uv": [ 3.5, 0, 4.5, 3.5 ]
+        },
+        "down": {
+          "texture": "#minecart_insulation", "uv": [ 4.5, 3.5, 5.5, 0 ]
+        }
+      }
+    },
+    {
+      "name": "inside_1",
+      "from": [ 0.5, 0, -2 ], "to": [ 0.5, 9, 18 ],
+      "faces": {
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 3, 10.5, 6.5, 12 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 3, 10.5, 6.5, 12 ]
+        }
+      }
+    },
+    {
+      "name": "inside_2",
+      "from": [ 0.5, 0, 18 ], "to": [ 15.5, 9, 18 ],
+      "faces": {
+        "north": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 10.5, 9.25, 12 ]
+        },
+        "south": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 10.5, 9.25, 12 ]
+        }
+      }
+    },
+    {
+      "name": "inside_3",
+      "from": [ 15.5, 0, -2 ], "to": [ 15.5, 9, 18 ],
+      "faces": {
+        "east": {
+          "texture": "#minecart_insulation", "uv": [ 3, 10.5, 6.5, 12 ]
+        },
+        "west": {
+          "texture": "#minecart_insulation", "uv": [ 3, 10.5, 6.5, 12 ]
+        }
+      }
+    },
+    {
+      "name": "inside_4",
+      "from": [ 0.5, 0, -2 ], "to": [ 15.5, 9, -2 ],
+      "faces": {
+        "north": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 10.5, 9.25, 12 ]
+        },
+        "south": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 10.5, 9.25, 12 ]
+        }
+      }
+    },
+    {
+      "name": "inside_bottom",
+      "from": [ 0.5, 0, -2 ], "to": [ 15.5, 0, 18 ],
+      "faces": {
+        "up": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 6.5, 9.25, 10 ]
+        },
+        "down": {
+          "texture": "#minecart_insulation", "uv": [ 6.5, 6.5, 9.25, 10 ]
+        }
+      }
+    }
+  ]
+}
