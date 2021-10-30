@@ -58,6 +58,9 @@ public class InitTempModifiers
             event.addModifier(ModList.get().isLoaded("sereneseasons") ?
                     (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier").newInstance() :
                     (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier").newInstance());
-        } catch (Exception e) {}
+        }
+        catch (Exception e) {
+            event.addModifier(new SereneSeasonsDummyModifier());
+        }
     }
 }
