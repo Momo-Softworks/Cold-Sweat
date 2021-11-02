@@ -127,13 +127,10 @@ public class SewingContainer extends Container
 
         // Insulated Armor
         if (slot0Item.getItem() instanceof ArmorItem && this.isInsulatingItem(slot1Item) &&
-            // Do slot types match OR insulating item is NOT armor
+            // Do slot types match OR is insulating item NOT armor
             (!(slot1Item.getItem() instanceof ArmorItem) ||
-                    ((ArmorItem) slot0Item.getItem()).getEquipmentSlot().equals(((ArmorItem) slot1Item.getItem()).getEquipmentSlot())) &&
-
-            slot2Item.isEmpty())
+                    ((ArmorItem) slot0Item.getItem()).getEquipmentSlot().equals(((ArmorItem) slot1Item.getItem()).getEquipmentSlot())))
         {
-            System.out.println(slot1Item.getItem() instanceof ArmorItem && slot0Item.getEquipmentSlot() == slot1Item.getEquipmentSlot());
             ItemStack processed = this.getSlot(0).getStack().copy();
             processed.getOrCreateTag().putBoolean("insulated", true);
             this.getSlot(2).putStack(processed);
