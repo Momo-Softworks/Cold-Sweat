@@ -26,10 +26,7 @@ public class PlayerTemp
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
         AtomicReference<Double> temp = new AtomicReference<>(0.0d);
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
-        {
-            temp.set(capability.get(type));
-        });
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability -> temp.set(capability.get(type)));
         return new Temperature(temp.get());
     }
 

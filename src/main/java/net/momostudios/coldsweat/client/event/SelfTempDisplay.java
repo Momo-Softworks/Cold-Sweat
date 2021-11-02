@@ -10,15 +10,20 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
+import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
+import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay
 {
+    static ITemperatureCapability playerCap = null;
+
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void eventHandler(RenderGameOverlayEvent event)
@@ -33,11 +38,11 @@ public class SelfTempDisplay
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
             PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
-            double x = entity.getPosX();
-            double y = entity.getPosY();
-            double z = entity.getPosZ();
 
-            double temp = (int) PlayerTemp.getTemperature(entity, PlayerTemp.Types.COMPOSITE).get();
+            if (playerCap == null)
+                playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(null);
+
+            double temp = (int) playerCap.get(PlayerTemp.Types.COMPOSITE);
 
             int threatLevel = 0;
 

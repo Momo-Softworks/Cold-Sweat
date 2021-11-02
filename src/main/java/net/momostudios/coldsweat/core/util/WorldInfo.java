@@ -14,6 +14,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +103,7 @@ public class WorldInfo
     {
         for (int i = 0; i < 255 - pos.getY(); i++)
         {
-            if (!isBlockSpreadable(world, pos.up(i), pos.up(i), Direction.UP) && !isBlockSpreadable(world, pos.up(i), pos.up(i), Direction.DOWN))
+            if (!isBlockSpreadable(world, pos.up(i), pos.up(i - 1)) && !isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
             {
                 //if (Math.random() < 0.01) System.out.println(world.getBlockState(pos).getBlock());
                 return false;
@@ -111,12 +112,13 @@ public class WorldInfo
         return true;
     }
 
-    public static boolean isBlockSpreadable(World world, BlockPos pos, BlockPos newPos, @Nullable Direction dir)
+    public static boolean isBlockSpreadable(World world, @Nonnull BlockPos pos, @Nonnull BlockPos newPos)
     {
         BlockState state = world.getBlockState(pos);
         BlockState state2 = world.getBlockState(newPos);
+        Direction dir = Direction.getFacingFromVector(newPos.getX() - pos.getX(), newPos.getY() - pos.getY(), newPos.getZ() - pos.getZ());
 
-        return (dir == null || (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir))) &&
+        return (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir)) &&
                 (world.isAirBlock(newPos) || (state2.isSolid() && !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
                         (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
                         (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)));

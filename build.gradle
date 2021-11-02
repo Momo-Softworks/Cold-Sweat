@@ -84,6 +84,7 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.5'
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:3337641")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

@@ -23,10 +23,6 @@ public class PlayerTempCapStorage implements Capability.IStorage<ITemperatureCap
 
     @Override
     public void readNBT(Capability<ITemperatureCapability> capability, ITemperatureCapability instance, Direction direction, INBT nbtData) {
-        if (!(nbtData instanceof CompoundNBT))
-        {
-            throw new IllegalArgumentException("Unable to deserialize 'MyCapability' from a non-Compound NBT structure");
-        }
         instance.set(PlayerTemp.Types.AMBIENT, ((CompoundNBT) nbtData).getDouble("ambient"));
         instance.set(PlayerTemp.Types.BODY, ((CompoundNBT) nbtData).getDouble("body"));
         instance.set(PlayerTemp.Types.BASE, ((CompoundNBT) nbtData).getDouble("base"));

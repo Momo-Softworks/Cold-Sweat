@@ -25,13 +25,15 @@ public class BlockTempModifier extends TempModifier
         BlockPos.getAllInBox(new AxisAlignedBB(x - 7, y - 7, z - 7, x + 7, y + 7, z + 7)).forEach(blockpos ->
         {
             BlockState state = player.world.getBlockState(blockpos);
-            try {
-                BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
-                if (totalTemp[0] < be.maxTemp() && totalTemp[0] > be.minTemp()) {
+            BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
+            if (be != null)
+            {
+                if (totalTemp[0] < be.maxTemp() && totalTemp[0] > be.minTemp())
+                {
                     totalTemp[0] += be.getTemperature(player, state, blockpos,
                             Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
                 }
-            } catch (NullPointerException e) {}
+            }
         });
 
         return temp.get() + totalTemp[0];
