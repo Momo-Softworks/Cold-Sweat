@@ -1,27 +1,27 @@
 package net.momostudios.coldsweat.config;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class FuelItemsConfig
+public final class ItemSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> boilerItems;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> iceBoxItems;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> hearthItems;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> boilerItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> iceBoxItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> hearthItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> insulatingArmor;
 
     static
     {
@@ -86,7 +86,7 @@ public final class FuelItemsConfig
                     Arrays.asList("minecraft:packed_ice", "-1000")
                 ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
-        BUILDER.push("InsulatingItems");
+        BUILDER.push("InsulatorItems");
         insulatingItems = BUILDER
             .comment("Defines the items that can be used for insulating armor in the Sewing Table",
                     "Format: [[item-id-1], [item-id-2], ...etc]")
@@ -98,6 +98,18 @@ public final class FuelItemsConfig
                     "minecraft:leather_boots"
                 ), it -> it instanceof String);
         BUILDER.pop();
+        BUILDER.push("InsulatingArmor");
+        insulatingArmor = BUILDER
+            .comment("Defines the items that provide insulation when worn",
+                    "Format: [[item-id-1, amount-1], [item-id-2, amount-2], ...etc]")
+            .defineList("Insulating Armor Items", Arrays.asList
+                    (
+                            Arrays.asList("minecraft:leather_helmet", "5"),
+                            Arrays.asList("minecraft:leather_chestplate", "5"),
+                            Arrays.asList("minecraft:leather_leggings", "5"),
+                            Arrays.asList("minecraft:leather_boots", "5")
+                    ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
 
         SPEC = BUILDER.build();
     }
@@ -108,16 +120,17 @@ public final class FuelItemsConfig
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
 
         // Create the config folder
-        try
-        {
+        try {
             Files.createDirectory(csConfigPath);
         }
-        catch (Exception e)
-        {
-            // Do nothing
-        }
+        catch (Exception e) {}
 
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/fuel_items.toml");
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
+    }
+
+    public static ItemSettingsConfig getInstance()
+    {
+        return new ItemSettingsConfig();
     }
 
     public List<? extends List<String>> boilerItems()
@@ -138,5 +151,10 @@ public final class FuelItemsConfig
     public List<? extends String> insulatingItems()
     {
         return insulatingItems.get();
+    }
+
+    public List<? extends List<String>> insulatingArmor()
+    {
+        return insulatingArmor.get();
     }
 }

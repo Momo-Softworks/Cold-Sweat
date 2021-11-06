@@ -21,14 +21,19 @@
 - Rebalanced temperature-emitting blocks to have a limited effect
 
 2.1
+- New Item: Soulfire Lamp
+    - Cools the player down when in the Nether
+    - Requires Warped or Crimson stems as fuel
 - Updated the Hearth's texture slightly
 - The Hearth now only consumes the necessary fuel to function
     - If it is hot, for example, it will only use cold fuel
     - The Hearth will not use any fuel if there are no players in the area
 - Limited the number of total blocks the Hearth can affect to 2000
-- New Item: Soulfire Lamp
-    - Cools the player down when in the Nether
-    - Requires Warped or Crimson stems as fuel
+    - This replaces the 20-block radius that it used to have
+    - increased the technical radius to 64 blocks
+    - (note that it can't actually fill the entire 64-block radius, but it can reach these distances if you make a tunnel for the hearth to spread through)
+- Added Polish translation by @Lifus_Crustus on our Discord server
+- Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 
 - Technical Changes:
     - Added new events for compat mod developers to hook into:
@@ -42,8 +47,13 @@
         - TempModifierEvent.Init
             - Called when the registry of TempModifiers or BlockEffects is being built
             - Allows for injection of custom TempModifiers and BlockEffects
-            - If you call this event manually, use TempModifierRegistries/BlockEffectRegistries.getEntries().flush() to prevent duplicate entries
-
+            - If you call this event manually, use getPool().flush() beforehand to prevent duplicate entries (lag)
+    - The Hearth now uses the capability system instead of NBT
+            - This should increase performance and prevent issues with the NBT data limit on some servers
+    - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
+    - "fuel_items.toml" config file changes:
+        - Renamed to "item_settings.toml" to better indicate that it also includes insulation items
+        - Insulation items (for the sewing table) and armor items with innate insulation are now defined separately
 
 
 TO-DO

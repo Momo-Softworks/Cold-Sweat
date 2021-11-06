@@ -6,15 +6,13 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.init.*;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -44,7 +42,7 @@ public class ColdSweat
 
         // Setup configs
         WorldTemperatureConfig.setup();
-        FuelItemsConfig.setup();
+        ItemSettingsConfig.setup();
         ColdSweatConfig.setup();
         ClientSettingsConfig.setup();
     }

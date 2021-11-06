@@ -28,10 +28,9 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.HearthBlock;
 import net.momostudios.coldsweat.common.container.HearthContainer;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.HearthTempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import net.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
 import net.momostudios.coldsweat.core.init.BlockInit;
@@ -96,7 +95,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 cap2.add(pos.up());
             });
         }
-        //System.out.println(cap.orElse(null).getList());
 
         this.ticksExisted = (this.ticksExisted + 1) % 1000;
         resetTimer = this.getTileData().getInt("resetTimer");
@@ -321,7 +319,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = Arrays.asList(item, 0);
-        for (List<String> iterator : new FuelItemsConfig().hearthItems())
+        for (List<String> iterator : new ItemSettingsConfig().hearthItems())
         {
             String testItem = iterator.get(0);
 

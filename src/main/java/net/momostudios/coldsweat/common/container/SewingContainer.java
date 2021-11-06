@@ -16,7 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
 
@@ -146,7 +146,7 @@ public class SewingContainer extends Container
 
     public boolean isInsulatingItem(ItemStack item)
     {
-        for (String iterator : new FuelItemsConfig().insulatingItems())
+        for (String iterator : new ItemSettingsConfig().insulatingItems())
         {
             if (new ResourceLocation(iterator).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {

@@ -144,6 +144,8 @@
 	"overrides":
 	[
 		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/soulfire_lamp_off" },
-		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/soulfire_lamp_on" }
+		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/soulfire_lamp_full" },
+		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/soulfire_lamp_dim" },
+		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/soulfire_lamp_flickering" }
 	]
 }

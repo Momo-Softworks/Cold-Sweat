@@ -1,7 +1,6 @@
 package net.momostudios.coldsweat.common.te;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
@@ -19,7 +18,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
-import net.momostudios.coldsweat.config.FuelItemsConfig;
+import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.ModItems;
 
@@ -113,7 +112,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
     public List getFuelItem(ItemStack item)
     {
         List returnList = new ArrayList();
-        for (Object iterator : new FuelItemsConfig().iceboxItems())
+        for (Object iterator : new ItemSettingsConfig().iceboxItems())
         {
             List<String> testIndex = (List<String>) iterator;
             String testItem = testIndex.get(0);
