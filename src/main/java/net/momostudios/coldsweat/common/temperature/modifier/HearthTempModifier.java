@@ -9,7 +9,7 @@ import net.momostudios.coldsweat.core.util.ModEffects;
 public class HearthTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
         ColdSweatConfig config = ColdSweatConfig.getInstance();
 
@@ -19,7 +19,7 @@ public class HearthTempModifier extends TempModifier
 
         int hearthEffect = player.isPotionActive(ModEffects.INSULATION) ?
                 (player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1) * 2 : 1;
-        return mid + ((temp.get() - mid) / hearthEffect);
+        return (float) (mid + ((temp.get() - mid) / hearthEffect));
     }
 
     public String getID()

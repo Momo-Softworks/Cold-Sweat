@@ -17,9 +17,9 @@ public class StorePlayerData
         PlayerEntity player = event.getPlayer();
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
-            cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getDouble("body_temperature"));
-            cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getDouble("base_temperature"));
-            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getDouble("ambient_temperature"));
+            cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getFloat("body_temperature"));
+            cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getFloat("base_temperature"));
+            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getFloat("ambient_temperature"));
         });
     }
 
@@ -29,9 +29,9 @@ public class StorePlayerData
         PlayerEntity player = event.getPlayer();
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
-            player.getPersistentData().putDouble("body_temperature", cap.get(PlayerTemp.Types.BODY));
-            player.getPersistentData().putDouble("base_temperature", cap.get(PlayerTemp.Types.BASE));
-            player.getPersistentData().putDouble("ambient_temperature", cap.get(PlayerTemp.Types.AMBIENT));
+            player.getPersistentData().putFloat("body_temperature", cap.get(PlayerTemp.Types.BODY));
+            player.getPersistentData().putFloat("base_temperature", cap.get(PlayerTemp.Types.BASE));
+            player.getPersistentData().putFloat("ambient_temperature", cap.get(PlayerTemp.Types.AMBIENT));
         });
     }
 }

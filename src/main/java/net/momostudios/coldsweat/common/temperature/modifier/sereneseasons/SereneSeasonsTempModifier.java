@@ -8,27 +8,27 @@ import sereneseasons.api.season.SeasonHelper;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
-        double t = temp.get();
+        float t = temp.get();
         if (player.world.getDimensionType().isNatural())
             switch (SeasonHelper.getSeasonState(player.world).getSubSeason())
             {
-                case EARLY_AUTUMN: return t + 0.2;
+                case EARLY_AUTUMN: return t + 0.2f;
                 case MID_AUTUMN: return t;
-                case LATE_AUTUMN: return t - 0.2;
+                case LATE_AUTUMN: return t - 0.2f;
 
-                case EARLY_WINTER: return t - 0.4;
-                case MID_WINTER: return t - 0.6;
-                case LATE_WINTER: return t - 0.4;
+                case EARLY_WINTER: return t - 0.4f;
+                case MID_WINTER: return t - 0.6f;
+                case LATE_WINTER: return t - 0.4f;
 
-                case EARLY_SPRING: return t - 0.2;
+                case EARLY_SPRING: return t - 0.2f;
                 case MID_SPRING: return t;
-                case LATE_SPRING: return t + 0.2;
+                case LATE_SPRING: return t + 0.2f;
 
-                case EARLY_SUMMER: return t + 0.4;
-                case MID_SUMMER: return t + 0.6;
-                case LATE_SUMMER: return t + 0.4;
+                case EARLY_SUMMER: return t + 0.4f;
+                case MID_SUMMER: return t + 0.6f;
+                case LATE_SUMMER: return t + 0.4f;
 
                 default: return t;
             }

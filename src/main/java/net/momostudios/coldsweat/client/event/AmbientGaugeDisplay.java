@@ -30,10 +30,7 @@ public class AmbientGaugeDisplay
 
         PlayerEntity player = Minecraft.getInstance().player;
 
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
-           ((player.inventory.getSlotFor(ModItems.THERMOMETER.getDefaultInstance()) >= 0 &&
-                   player.inventory.getSlotFor(ModItems.THERMOMETER.getDefaultInstance()) <= 8) ||
-           player.getHeldItemOffhand().getItem() == ModItems.THERMOMETER || !ColdSweatConfig.getInstance().requireThermometer()))
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && ColdSweatConfig.getInstance().showAmbient())
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();

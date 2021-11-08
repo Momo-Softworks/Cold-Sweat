@@ -15,11 +15,11 @@ import net.momostudios.coldsweat.core.util.WorldInfo;
 public class TimeTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
         if (!player.world.getDimensionType().doesFixedTimeExist())
         {
-            double timeTemp = 0;
+            float timeTemp = 0;
             World world = player.world;
             for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
             {
@@ -27,7 +27,7 @@ public class TimeTempModifier extends TempModifier
                 if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
                         BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                 {
-                    timeTemp += (Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) / 1d) - 1;
+                    timeTemp += Math.cos((world.getDayTime() / 3819.7186342) - 1.5707963268) - 1;
                 }
                 else
                 {

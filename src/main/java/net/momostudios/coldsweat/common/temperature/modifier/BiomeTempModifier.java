@@ -17,9 +17,9 @@ public class BiomeTempModifier extends TempModifier
     WorldTemperatureConfig config = new WorldTemperatureConfig();
 
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
-        double worldTemp = 0;
+        float worldTemp = 0;
         for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
         {
             Biome biome = player.world.getBiome(iterator);
@@ -28,11 +28,11 @@ public class BiomeTempModifier extends TempModifier
             // Should temperature be overridden by config
             if ((boolean) dimensionOverride(player.world.getDimensionKey().getLocation()).get(0))
             {
-                return (double) dimensionOverride(player.world.getDimensionKey().getLocation()).get(1);
+                return (float) dimensionOverride(player.world.getDimensionKey().getLocation()).get(1);
             }
             if ((boolean) biomeOverride(biome.getRegistryName()).get(0))
             {
-                return (double) biomeOverride(biome.getRegistryName()).get(1);
+                return (float) biomeOverride(biome.getRegistryName()).get(1);
             }
         }
         return temp.get() + (worldTemp / 200);

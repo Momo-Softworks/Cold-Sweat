@@ -172,7 +172,7 @@ public class ConfigScreen
                 CMI.setMinHabitable(MathHelperCS.convertFromF(40));
                 CMI.setMaxHabitable(MathHelperCS.convertFromF(120));
                 CMI.setRateMultiplier(0.5);
-                CMI.setRequireThermometer(false);
+                CMI.setShowAmbient(true);
                 CMI.setDamageScaling(false);
                 CMI.setFireResistanceEffect(true);
                 CMI.setIceResistanceEffect(true);
@@ -183,7 +183,7 @@ public class ConfigScreen
                 CMI.setMinHabitable(MathHelperCS.convertFromF(45));
                 CMI.setMaxHabitable(MathHelperCS.convertFromF(115));
                 CMI.setRateMultiplier(0.75);
-                CMI.setRequireThermometer(false);
+                CMI.setShowAmbient(true);
                 CMI.setDamageScaling(false);
                 CMI.setFireResistanceEffect(true);
                 CMI.setIceResistanceEffect(true);
@@ -194,7 +194,7 @@ public class ConfigScreen
                 CMI.setMinHabitable(MathHelperCS.convertFromF(50));
                 CMI.setMaxHabitable(MathHelperCS.convertFromF(110));
                 CMI.setRateMultiplier(1.0);
-                CMI.setRequireThermometer(true);
+                CMI.setShowAmbient(false);
                 CMI.setDamageScaling(true);
                 CMI.setFireResistanceEffect(false);
                 CMI.setIceResistanceEffect(false);
@@ -205,7 +205,7 @@ public class ConfigScreen
                 CMI.setMinHabitable(MathHelperCS.convertFromF(60));
                 CMI.setMaxHabitable(MathHelperCS.convertFromF(100));
                 CMI.setRateMultiplier(1.5);
-                CMI.setRequireThermometer(true);
+                CMI.setShowAmbient(false);
                 CMI.setDamageScaling(true);
                 CMI.setFireResistanceEffect(false);
                 CMI.setIceResistanceEffect(false);
@@ -259,7 +259,7 @@ public class ConfigScreen
         boolean iceRes = CMI.iceResistanceEffect();
         boolean fireRes = CMI.fireResistanceEffect();
         boolean damageScaling = CMI.damageScaling();
-        boolean requireThermometer = CMI.requireThermometer();
+        boolean showAmbient = CMI.showAmbient();
         double minTemp = CMI.minHabitable();
         double maxTemp = CMI.maxHabitable();
 
@@ -272,7 +272,7 @@ public class ConfigScreen
         Button iceResButton;
         Button fireResButton;
         Button damageScalingButton;
-        Button requireThermometerButton;
+        Button showAmbientButton;
 
         Screen parentScreen;
 
@@ -343,9 +343,9 @@ public class ConfigScreen
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.fire_resistance.name").getString() + ": " + (this.fireRes ? ON : OFF)),
                 button -> this.toggleFireRes());
 
-            requireThermometerButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 4, 152, 20,
-                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (this.requireThermometer ? ON : OFF)),
-                button -> this.toggleRequireThermometer());
+            showAmbientButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 4, 152, 20,
+                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (this.showAmbient ? ON : OFF)),
+                button -> this.toggleShowAmbient());
 
             /*animalTempButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 3, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.animal_temperature.name").getString() + ": " + (this.animalTemp ? ON : OFF)),
@@ -362,7 +362,7 @@ public class ConfigScreen
 
                 this.addButton(iceResButton);
                 this.addButton(fireResButton);
-                this.addButton(requireThermometerButton);
+                this.addButton(showAmbientButton);
                 this.addButton(damageScalingButton);
 
                 this.children.add(this.maxTempInput);
@@ -419,7 +419,7 @@ public class ConfigScreen
             CMI.setIceResistanceEffect(this.iceRes);
             CMI.setFireResistanceEffect(this.fireRes);
             CMI.setDamageScaling(this.damageScaling);
-            CMI.setRequireThermometer(this.requireThermometer);
+            CMI.setShowAmbient(this.showAmbient);
 
             try
             {
@@ -485,11 +485,11 @@ public class ConfigScreen
                 (this.damageScaling ? ON : OFF)));
         }
 
-        public void toggleRequireThermometer()
+        public void toggleShowAmbient()
         {
-            this.requireThermometer = !this.requireThermometer;
-            requireThermometerButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " +
-                (this.requireThermometer ? ON : OFF)));
+            this.showAmbient = !this.showAmbient;
+            showAmbientButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " +
+                (this.showAmbient ? ON : OFF)));
         }
     }
 

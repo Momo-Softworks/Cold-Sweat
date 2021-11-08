@@ -3,12 +3,10 @@ package net.momostudios.coldsweat.core.event;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.momostudios.coldsweat.client.itemproperties.SoulfireLampOverride;
-import net.momostudios.coldsweat.client.itemproperties.ThermometerOverride;
 import net.momostudios.coldsweat.core.util.ModItems;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

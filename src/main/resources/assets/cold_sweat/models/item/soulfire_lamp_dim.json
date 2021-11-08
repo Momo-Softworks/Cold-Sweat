@@ -1,0 +1,12 @@
+{
+	"parent": "cold_sweat:item/soulfire_lamp",
+	"textures": {
+		"0": "cold_sweat:items/soulfire_lamp/soulfire_lamp_glow_dim",
+		"1": "cold_sweat:items/soulfire_lamp/soulfire_lamp_ornaments",
+		"2": "cold_sweat:items/soulfire_lamp/soulfire_lamp_top_0",
+		"3": "cold_sweat:items/soulfire_lamp/soulfire_lamp_top_1",
+		"4": "cold_sweat:items/soulfire_lamp/soulfire_lamp_bottom_0",
+		"5": "cold_sweat:items/soulfire_lamp/soulfire_lamp_bottom_1",
+		"particle": "cold_sweat:items/soulfire_lamp/soulfire_lamp_glow"
+	}
+}

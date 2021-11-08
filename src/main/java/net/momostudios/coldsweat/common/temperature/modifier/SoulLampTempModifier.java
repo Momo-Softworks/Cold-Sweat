@@ -10,12 +10,12 @@ public class SoulLampTempModifier extends TempModifier
 {
 
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
         if ((player.getHeldItemMainhand().getItem() == ModItems.SOULFIRE_LAMP || player.getHeldItemOffhand().getItem() == ModItems.SOULFIRE_LAMP) &&
         player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp.get() > ColdSweatConfig.getInstance().maxHabitable())
         {
-            return temp.get() * 0.8;
+            return temp.get() * 0.8f;
         }
         return temp.get();
     }

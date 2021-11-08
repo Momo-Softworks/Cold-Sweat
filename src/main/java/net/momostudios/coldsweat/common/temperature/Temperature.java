@@ -15,12 +15,12 @@ import java.util.List;
 public class Temperature
 {
     // Internal variable representing the actual value of the Temperature
-    double temp = 0;
+    float temp = 0;
 
     /**
     * Defines an instance of the class with a custom initial double value
     */
-    public Temperature(double tempIn)
+    public Temperature(float tempIn)
     {
         temp = tempIn;
     }
@@ -36,7 +36,7 @@ public class Temperature
     /**
     * Sets the actual value of the temperature
     */
-    public void set(double amount)
+    public void set(float amount)
     {
         temp = amount;
     }
@@ -44,7 +44,7 @@ public class Temperature
     /**
     * Adds to the actual value of the temperature
     */
-    public Temperature add(double amount)
+    public Temperature add(float amount)
     {
         temp += amount;
         return new Temperature(temp + amount);
@@ -60,7 +60,7 @@ public class Temperature
     /**
     * Returns a double representing the actual value of the Temperature
     */
-    public double get()
+    public float get()
     {
         return temp;
     }
@@ -82,7 +82,7 @@ public class Temperature
      */
     public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull PlayerEntity player)
     {
-        double modTemp = temp;
+        float modTemp = temp;
         if (!modifiers.isEmpty())
         {
             for (TempModifier modifier : modifiers)

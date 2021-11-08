@@ -25,14 +25,14 @@ public class PlayerTemp
      */
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
-        AtomicReference<Double> temp = new AtomicReference<>(0.0d);
+        AtomicReference<Float> temp = new AtomicReference<>(0.0f);
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability -> temp.set(capability.get(type)));
         return new Temperature(temp.get());
     }
 
     /**
-     * You should try to avoid using these unless you need to set the value to a fixed amount.
-     * Use TempModifiers instead.
+     * You should try to avoid using these unless you need to set the value to a fixed amount.<br>
+     * Otherwise, use a {@link TempModifier} instead.
      */
     public static void setTemperature(PlayerEntity player, Temperature value, Types type)
     {
@@ -43,7 +43,7 @@ public class PlayerTemp
     }
 
     /**
-     * Applies the given modifier to the player's temperature directly.
+     * Applies the given modifier to the player's temperature directly.<br>
      * This is used for instant temperature-changing items (i.e. Waterskins)
      *
      * @param duplicates allows or disallows duplicate TempModifiers to be applied

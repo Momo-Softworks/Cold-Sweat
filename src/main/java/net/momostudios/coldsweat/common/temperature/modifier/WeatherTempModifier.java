@@ -7,17 +7,17 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 public class WeatherTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
-        double weatherTemp = 0;
+        float weatherTemp = 0;
         if (player.world.canBlockSeeSky(player.getPosition()))
         {
             if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
             {
                 if (player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15)
-                    weatherTemp = -0.25;
+                    weatherTemp = -0.25f;
                 else
-                    weatherTemp = -0.15;
+                    weatherTemp = -0.15f;
             }
         }
 

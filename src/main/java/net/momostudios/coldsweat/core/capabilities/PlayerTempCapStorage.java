@@ -14,18 +14,18 @@ public class PlayerTempCapStorage implements Capability.IStorage<ITemperatureCap
     public INBT writeNBT(Capability<ITemperatureCapability> capability, ITemperatureCapability instance, Direction direction)
     {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putDouble("ambient", instance.get(PlayerTemp.Types.AMBIENT));
-        nbt.putDouble("body", instance.get(PlayerTemp.Types.BODY));
-        nbt.putDouble("base", instance.get(PlayerTemp.Types.BASE));
-        nbt.putDouble("composite", instance.get(PlayerTemp.Types.COMPOSITE));
+        nbt.putFloat("ambient", instance.get(PlayerTemp.Types.AMBIENT));
+        nbt.putFloat("body", instance.get(PlayerTemp.Types.BODY));
+        nbt.putFloat("base", instance.get(PlayerTemp.Types.BASE));
+        nbt.putFloat("composite", instance.get(PlayerTemp.Types.COMPOSITE));
         return nbt;
     }
 
     @Override
     public void readNBT(Capability<ITemperatureCapability> capability, ITemperatureCapability instance, Direction direction, INBT nbtData) {
-        instance.set(PlayerTemp.Types.AMBIENT, ((CompoundNBT) nbtData).getDouble("ambient"));
-        instance.set(PlayerTemp.Types.BODY, ((CompoundNBT) nbtData).getDouble("body"));
-        instance.set(PlayerTemp.Types.BASE, ((CompoundNBT) nbtData).getDouble("base"));
-        instance.set(PlayerTemp.Types.COMPOSITE, ((CompoundNBT) nbtData).getDouble("composite"));
+        instance.set(PlayerTemp.Types.AMBIENT, ((CompoundNBT) nbtData).getFloat("ambient"));
+        instance.set(PlayerTemp.Types.BODY, ((CompoundNBT) nbtData).getFloat("body"));
+        instance.set(PlayerTemp.Types.BASE, ((CompoundNBT) nbtData).getFloat("base"));
+        instance.set(PlayerTemp.Types.COMPOSITE, ((CompoundNBT) nbtData).getFloat("composite"));
     }
 }

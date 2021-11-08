@@ -39,10 +39,10 @@ public class SelfTempDisplay
             int scaleY = event.getWindow().getScaledHeight();
             PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
 
-            if (playerCap == null)
+            if (playerCap == null || entity.ticksExisted % 40 == 0)
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(null);
 
-            double temp = (int) playerCap.get(PlayerTemp.Types.COMPOSITE);
+            int temp = (int) playerCap.get(PlayerTemp.Types.COMPOSITE);
 
             int threatLevel = 0;
 

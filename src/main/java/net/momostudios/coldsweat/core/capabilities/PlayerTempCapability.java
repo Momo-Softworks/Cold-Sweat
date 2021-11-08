@@ -15,13 +15,13 @@ public class PlayerTempCapability implements ITemperatureCapability
         TEMPERATURE = capability;
     }
 
-    double ambiTemp;
-    double bodyTemp;
-    double baseTemp;
-    double compTemp;
+    float ambiTemp;
+    float bodyTemp;
+    float baseTemp;
+    float compTemp;
 
     @Override
-    public double get(PlayerTemp.Types type)
+    public float get(PlayerTemp.Types type)
     {
         switch (type)
         {
@@ -34,7 +34,7 @@ public class PlayerTempCapability implements ITemperatureCapability
     }
 
     @Override
-    public void set(PlayerTemp.Types type, double value)
+    public void set(PlayerTemp.Types type, float value)
     {
         switch (type)
         {

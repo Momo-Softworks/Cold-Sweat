@@ -11,26 +11,26 @@ import java.util.function.Supplier;
 
 public class PlayerTempSyncMessage
 {
-    public double body;
-    public double base;
+    public float body;
+    public float base;
 
     public PlayerTempSyncMessage() {
     }
 
-    public PlayerTempSyncMessage(double body, double base) {
+    public PlayerTempSyncMessage(float body, float base) {
         this.body = body;
         this.base = base;
     }
 
     public static void encode(PlayerTempSyncMessage message, PacketBuffer buffer)
     {
-        buffer.writeDouble(message.body);
-        buffer.writeDouble(message.base);
+        buffer.writeFloat(message.body);
+        buffer.writeFloat(message.base);
     }
 
     public static PlayerTempSyncMessage decode(PacketBuffer buffer)
     {
-        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble());
+        return new PlayerTempSyncMessage(buffer.readFloat(), buffer.readFloat());
     }
 
     public static void handle(PlayerTempSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)

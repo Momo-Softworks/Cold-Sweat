@@ -40,7 +40,7 @@ public abstract class TempModifier
      * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.
      * @param temp should usually represent the player's body temperature or ambient temperature.
      */
-    public abstract double calculate(Temperature temp, PlayerEntity player);
+    public abstract float calculate(Temperature temp, PlayerEntity player);
 
     /**
      * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate names.

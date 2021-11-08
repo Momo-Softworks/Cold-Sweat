@@ -11,12 +11,12 @@ import java.util.List;
 
 public class LeatherTempModifier extends TempModifier
 {
-    public double amount = 0;
+    public float amount = 0;
     public LeatherTempModifier() {}
 
     public LeatherTempModifier(List<INBT> args)
     {
-        this.amount = ((NumberNBT) args.get(0)).getDouble();
+        this.amount = ((NumberNBT) args.get(0)).getFloat();
     }
 
 
@@ -26,7 +26,7 @@ public class LeatherTempModifier extends TempModifier
     }
 
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public float calculate(Temperature temp, PlayerEntity player)
     {
         PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
 

@@ -30,7 +30,7 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue iceResistanceEffect;
 
     private static final ForgeConfigSpec.BooleanValue damageScaling;
-    private static final ForgeConfigSpec.BooleanValue requireThermometer;
+    private static final ForgeConfigSpec.BooleanValue showAmbient;
 
 
     static 
@@ -52,7 +52,7 @@ public class ColdSweatConfig
         iceResistanceEffect = BUILDER
                 .comment("Ice Resistance blocks all cold temperatures")
                 .define("Ice Resistance Immunity", true);
-        requireThermometer = BUILDER
+        showAmbient = BUILDER
             .comment("Thermometer item is required to see ambient temperature")
             .define("Require Thermometer", true);
         BUILDER.pop();
@@ -122,8 +122,8 @@ public class ColdSweatConfig
         return iceResistanceEffect.get();
     }
 
-    public boolean requireThermometer() {
-        return requireThermometer.get();
+    public boolean showAmbient() {
+        return showAmbient.get();
     }
 
     public boolean damageScaling() {
@@ -170,8 +170,8 @@ public class ColdSweatConfig
         iceResistanceEffect.set(isEffective);
     }
 
-    public void setRequireThermometer(boolean required) {
-        requireThermometer.set(required);
+    public void setShowAmbient(boolean required) {
+        showAmbient.set(required);
     }
 
     public void setDamageScaling(boolean enabled) {
