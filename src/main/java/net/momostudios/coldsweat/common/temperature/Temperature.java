@@ -7,15 +7,15 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * This is the basis for nearly all things relating to temperature in this mod.
- * While {@code Temperature} is not stored onto the player directly, it is very commonly used for calculations
- *
- * It is highly recommended to use Temperature in your code and convert it to Doubles or Integers when needed via {@code get()}
+ * This is the basis for nearly all things relating to temperature in this mod. <br>
+ * While {@code Temperature} is not stored onto the player directly, it is very commonly used for calculations <br>
+ *<br>
+ * It is highly recommended to use Temperature in your code and convert it to a float via {@code get()}
  */
 public class Temperature
 {
     // Internal variable representing the actual value of the Temperature
-    float temp = 0;
+    float temp;
 
     /**
     * Defines an instance of the class with a custom initial double value
@@ -51,6 +51,7 @@ public class Temperature
     }
     /**
      * Adds to the actual value of the temperature
+     * @return a new Temperature with the new value
      */
     public Temperature add(Temperature amount)
     {
@@ -58,7 +59,7 @@ public class Temperature
     }
 
     /**
-    * Returns a double representing the actual value of the Temperature
+    * @return double representing the actual value of the Temperature
     */
     public float get()
     {
@@ -66,9 +67,9 @@ public class Temperature
     }
 
     /**
-     * Returns a double representing what the Temperature would be after a TempModifier is applied.
-     * @param player MUST NOT be null
-     * @param modifier is not applied to the player's Temperature
+     * @return  a double representing what the Temperature would be after a TempModifier is applied.
+     * @param player the player this modifier should use
+     * @param modifier the modifier being applied to the {@code Temperature}
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull PlayerEntity player)
     {
@@ -76,9 +77,9 @@ public class Temperature
     }
 
     /**
-     * Returns a double representing what the Temperature would be after a list of TempModifier(s) are applied.
-     * @param player MUST NOT be null
-     * @param modifiers are not applied to the player's Temperature
+     * @return a double representing what the Temperature would be after a list of TempModifier(s) are applied.
+     * @param player the player this list of modifiers should use
+     * @param modifiers the list of modifiers being applied to the {@code Temperature}
      */
     public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull PlayerEntity player)
     {

@@ -20,6 +20,7 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> boilerItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> iceBoxItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> hearthItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> insulatingArmor;
 
@@ -86,6 +87,30 @@ public final class ItemSettingsConfig
                     Arrays.asList("minecraft:packed_ice", "-1000")
                 ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
+
+        /*
+          Soulfire Lamp Items
+         */
+        BUILDER.push("SoulfireLampItems");
+        soulLampItems = BUILDER
+                .comment("Defines the items that the Ice Box can use as fuel and their values",
+                        "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
+                .defineList("Soulfire Lamp", Arrays.asList
+                        (
+                                Arrays.asList("minecraft:warped_stem", "1"),
+                                Arrays.asList("minecraft:warped_hyphae", "1"),
+                                Arrays.asList("minecraft:stripped_warped_stem", "1"),
+                                Arrays.asList("minecraft:stripped_warped_hyphae", "1"),
+                                Arrays.asList("minecraft:crimson_stem", "1"),
+                                Arrays.asList("minecraft:crimson_hyphae", "1"),
+                                Arrays.asList("minecraft:stripped_crimson_stem", "1"),
+                                Arrays.asList("minecraft:stripped_crimson_hyphae", "1")
+                        ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        BUILDER.pop();
+
+        /*
+         Insulator Items
+         */
         BUILDER.push("InsulatorItems");
         insulatingItems = BUILDER
             .comment("Defines the items that can be used for insulating armor in the Sewing Table",
@@ -98,6 +123,10 @@ public final class ItemSettingsConfig
                     "minecraft:leather_boots"
                 ), it -> it instanceof String);
         BUILDER.pop();
+
+        /*
+         Insulating Armor
+         */
         BUILDER.push("InsulatingArmor");
         insulatingArmor = BUILDER
             .comment("Defines the items that provide insulation when worn",
@@ -156,5 +185,10 @@ public final class ItemSettingsConfig
     public List<? extends List<String>> insulatingArmor()
     {
         return insulatingArmor.get();
+    }
+
+    public List<? extends List<String>> soulLampItems()
+    {
+        return soulLampItems.get();
     }
 }

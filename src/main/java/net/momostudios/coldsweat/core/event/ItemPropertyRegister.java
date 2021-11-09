@@ -20,7 +20,6 @@ public class ItemPropertyRegister
 
     public static void registerPropertyOverride()
     {
-        ItemModelsProperties.registerProperty(ModItems.THERMOMETER, new ResourceLocation("cold_sweat:temperature"), new ThermometerOverride());
         ItemModelsProperties.registerProperty(ModItems.SOULFIRE_LAMP, new ResourceLocation("cold_sweat:soulfire_state"), new SoulfireLampOverride());
     }
 }

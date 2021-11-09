@@ -12,6 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.LeatherTempModifier;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
+import net.momostudios.coldsweat.core.util.ItemEntry;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
@@ -35,10 +36,10 @@ public class AddLeatherModifiers
         leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
         leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
 
-        int helmetInsulation = getInsulatingArmor(helmetItem).insulationAmount;
-        int chestInsulation = getInsulatingArmor(chestplateItem).insulationAmount;
-        int legsInsulation = getInsulatingArmor(leggingsItem).insulationAmount;
-        int bootsInsulation = getInsulatingArmor(bootsItem).insulationAmount;
+        int helmetInsulation = getInsulatingArmor(helmetItem).value;
+        int chestInsulation = getInsulatingArmor(chestplateItem).value;
+        int legsInsulation = getInsulatingArmor(leggingsItem).value;
+        int bootsInsulation = getInsulatingArmor(bootsItem).value;
 
         if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0) {
             leatherMultiplier += helmetInsulation;
@@ -58,28 +59,16 @@ public class AddLeatherModifiers
             PlayerTemp.applyModifier(player, new LeatherTempModifier(), PlayerTemp.Types.RATE, false, IntNBT.valueOf(leatherMultiplier));
     }
 
-    public static InsulatingItem getInsulatingArmor(ItemStack stack)
+    public static ItemEntry getInsulatingArmor(ItemStack stack)
     {
         String id = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
         for (List<String> s : ItemSettingsConfig.getInstance().insulatingArmor())
         {
             if (s.get(0).equals(id))
             {
-                return new InsulatingItem(id, Integer.parseInt(s.get(1)));
+                return new ItemEntry(id, Integer.parseInt(s.get(1)));
             }
         }
-        return new InsulatingItem(id, 0);
-    }
-
-    private static class InsulatingItem
-    {
-        public String id;
-        public int insulationAmount;
-
-        public InsulatingItem(String id, int insulationAmount)
-        {
-            this.id = id;
-            this.insulationAmount = insulationAmount;
-        }
+        return new ItemEntry(id, 0);
     }
 }

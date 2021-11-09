@@ -14,7 +14,7 @@ import java.util.List;
  * It is up to you to apply and remove these modifiers manually.<br>
  * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.<br>
  *<br>
- * TempModifiers must be REGISTERED to {@link net.momostudios.coldsweat.common.world.TempModifierEntries} to be used<br>
+ * TempModifiers must be REGISTERED using {@link net.momostudios.coldsweat.core.event.csevents.TempModifierEvent.Init}<br>
  * (see {@link net.momostudios.coldsweat.core.event.InitTempModifiers} for an example)<br>
  */
 public abstract class TempModifier
