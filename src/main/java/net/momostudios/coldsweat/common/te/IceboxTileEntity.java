@@ -20,7 +20,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;

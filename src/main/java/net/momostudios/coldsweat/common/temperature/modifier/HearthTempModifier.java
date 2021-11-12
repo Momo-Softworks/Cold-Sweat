@@ -1,10 +1,9 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.core.util.ModEffects;
+import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 public class HearthTempModifier extends TempModifier
 {

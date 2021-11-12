@@ -1,0 +1,18 @@
+{
+  "player.damage.freeze":
+  {
+    "category": "player",
+    "subtitle": "player.damage.freeze",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:player/damage/freeze_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:player/damage/freeze_1",
+        "stream": true
+      }
+    ]
+  }
+}

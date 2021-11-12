@@ -6,21 +6,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.CreativeScreen;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,19 +28,19 @@ import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.SoulLampInputMessage;
 import net.momostudios.coldsweat.core.util.ItemEntry;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SoulLampPutFuel
 {
+    static int time = 0;
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onSwapItem(final GuiScreenEvent.MouseReleasedEvent event)
     {
-        if (event.getGui() instanceof ContainerScreen && event.getButton() == 0 || event.getButton() == 1)
+        if (event.getGui() instanceof ContainerScreen && event.getButton() == 0 || event.getButton() == 1 && event.getPhase() == EventPriority.HIGHEST)
         {
             ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getGui();
             Slot slot = inventoryScreen.getSlotUnderMouse();
@@ -59,10 +56,11 @@ public class SoulLampPutFuel
                 {
                     if (slotStack.getOrCreateTag().getFloat("fuel") < 63)
                     {
-                        int slotIndex = slot.slotNumber;
-                        ColdSweatPacketHandler.INSTANCE.sendToServer(new SoulLampInputMessage(slotIndex, slotStack, event.getButton() == 1));
-                        event.setResult(Event.Result.DENY);
+                        int slotIndex = inventoryScreen instanceof CreativeScreen ? slot.getSlotIndex() : slot.slotNumber;
+
                         event.setCanceled(true);
+                        event.setResult(Event.Result.DENY);
+                        ColdSweatPacketHandler.INSTANCE.sendToServer(new SoulLampInputMessage(slotIndex, holdingStack, event.getButton() == 1));
                     }
                 }
             }
@@ -109,7 +107,7 @@ public class SoulLampPutFuel
                         event.getGui().blit(ms, slotX - 7, slotY - 12, 400, 0, 0, 30, 8, 8, 30);
                         RenderSystem.enableBlend();
                         RenderSystem.defaultBlendFunc();
-                        RenderSystem.color4f(0.6f, 0.8f, 1f, 0f + ((float) (Math.sin(Minecraft.getInstance().player.ticksExisted / 5f) + 1) / 2f) * 0.5f);
+                        RenderSystem.color4f(1f, 1f, 1f, 0.15f + (float) ((Math.sin(time / 5f) + 1f) / 2f) * 0.4f);
                         Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_ghost.png"));
                         event.getGui().blit(ms, slotX - 7, slotY - 12, 400, 0, 0, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 8, 30);
                         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
@@ -124,12 +122,26 @@ public class SoulLampPutFuel
                     MatrixStack ms = event.getMatrixStack();
                     float fuel = inventoryScreen.getSlotUnderMouse().getStack().getOrCreateTag().getFloat("fuel");
 
+                    if (event.getGui() instanceof CreativeScreen && ((CreativeScreen) event.getGui()).getSelectedTabIndex() == ItemGroup.SEARCH.getIndex())
+                    {
+                        event.getMatrixStack().translate(0, 10, 0);
+                    }
+
                     Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
                     event.getGui().blit(ms, mouseX + 12, mouseY, 400, 0, 0, 30, 8, 8, 30);
                     Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
                     event.getGui().blit(ms, mouseX + 12, mouseY, 400, 0, 0, (int) (fuel / 2.1333f), 8, 8, 30);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END)
+        {
+            time++;
         }
     }
 

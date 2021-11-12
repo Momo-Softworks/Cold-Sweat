@@ -24,14 +24,10 @@ public class ItemInit
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ColdSweat.MOD_ID);
 
     //Items
-    public static final RegistryObject<Item> WATERSKIN_REGISTRY =
-            ITEMS.register("waterskin", WaterskinItem::new);
-    public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY =
-            ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
-    public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY =
-            ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
-    public static final RegistryObject<Item> SOULFIRE_LAMP_REGISTRY =
-            ITEMS.register("soulfire_lamp", SoulfireLampItem::new);
+    public static final RegistryObject<Item> WATERSKIN_REGISTRY = ITEMS.register("waterskin", WaterskinItem::new);
+    public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
+    public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
+    public static final RegistryObject<Item> SOULFIRE_LAMP_REGISTRY = ITEMS.register("soulfire_lamp", SoulfireLampItem::new);
 
     //BlockItems
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));

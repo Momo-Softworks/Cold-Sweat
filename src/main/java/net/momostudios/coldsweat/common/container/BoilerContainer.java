@@ -13,7 +13,7 @@ import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 import java.util.Objects;
 

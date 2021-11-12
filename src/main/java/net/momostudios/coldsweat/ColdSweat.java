@@ -39,6 +39,7 @@ public class ColdSweat
         EffectInit.EFFECTS.register(bus);
         ParticleTypesInit.PARTICLES.register(bus);
         PotionInit.POTIONS.register(bus);
+        SoundInit.SOUNDS.register(bus);
 
         // Setup configs
         WorldTemperatureConfig.setup();

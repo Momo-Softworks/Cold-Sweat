@@ -1,12 +1,7 @@
 package net.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.BucketItem;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,8 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber
 public class ItemTooltipInfo

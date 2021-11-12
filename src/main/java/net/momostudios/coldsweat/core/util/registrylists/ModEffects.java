@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.core.util.registrylists;
 
 import net.minecraft.potion.Effect;
 import net.momostudios.coldsweat.core.init.EffectInit;

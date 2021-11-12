@@ -17,7 +17,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.BiomeTempModifier;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class WaterskinItem extends Item
 {

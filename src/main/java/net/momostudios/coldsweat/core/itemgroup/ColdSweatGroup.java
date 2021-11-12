@@ -2,7 +2,7 @@ package net.momostudios.coldsweat.core.itemgroup;
 
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class ColdSweatGroup extends ItemGroup
 {

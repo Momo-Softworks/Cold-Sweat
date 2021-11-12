@@ -17,7 +17,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifi
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.util.ModItems;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 public class FilledWaterskinItem extends Item

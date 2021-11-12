@@ -37,6 +37,7 @@ import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.*;
+import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 import javax.annotation.Nullable;
 import java.util.*;

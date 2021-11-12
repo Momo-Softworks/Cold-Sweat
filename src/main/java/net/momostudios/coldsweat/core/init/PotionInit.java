@@ -6,7 +6,6 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.core.util.ModEffects;
 
 public class PotionInit
 {

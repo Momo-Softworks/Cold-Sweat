@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class PlayerHelper
 {

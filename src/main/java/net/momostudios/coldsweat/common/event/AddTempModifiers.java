@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.util.ModEffects;
+import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 

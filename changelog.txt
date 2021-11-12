@@ -32,6 +32,7 @@
     - This replaces the 20-block radius that it used to have
     - increased the technical radius to 64 blocks
     - (note that it can't actually fill the entire 64-block radius, but it can reach these distances if you make a tunnel for the hearth to spread through)
+- Added new sounds for when the player is freezing
 - Added Polish translation by @Lifus_Crustus on our Discord server
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 
@@ -54,6 +55,11 @@
     - "fuel_items.toml" config file changes:
         - Renamed to "item_settings.toml" to better indicate that it also includes insulation items
         - Insulation items (for the sewing table) and armor items with innate insulation are now defined separately
+    - Added new translation keys:
+        - "player.damage.freeze"
+        - "player.damage.freeze.subtitle"
+        - "items.soulfire_lamp"
+        -
 
 
 TO-DO
