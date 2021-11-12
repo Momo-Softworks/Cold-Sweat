@@ -347,11 +347,6 @@ public class ConfigScreen
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (this.showAmbient ? ON : OFF)),
                 button -> this.toggleShowAmbient());
 
-            /*animalTempButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 3, 152, 20,
-                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.animal_temperature.name").getString() + ": " + (this.animalTemp ? ON : OFF)),
-                button -> this.toggleAnimalTemp());
-            this.addButton(animalTempButton);*/
-
             damageScalingButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8 + OPTION_SIZE * 5, 152, 20,
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (this.damageScaling ? ON : OFF)),
                 button -> this.toggleDamageScaling());

@@ -52,4 +52,8 @@ public class MathHelperCS
     public static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(value, max));
     }
+
+    public static boolean isBetween(Number value, Number min, Number max) {
+        return value.doubleValue() >= min.doubleValue() && value.doubleValue() <= max.doubleValue();
+    }
 }

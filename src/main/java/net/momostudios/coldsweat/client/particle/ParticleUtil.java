@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.client.util;
+package net.momostudios.coldsweat.client.particle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;

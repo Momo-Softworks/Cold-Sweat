@@ -88,7 +88,7 @@
   "cold_sweat.config.min_temperature.name":         "Min Temperature",
   "cold_sweat.config.offset_shift.name":            "* Hold 'SHIFT' to move by 10 pixels",
   "cold_sweat.config.rate_multiplier.name":         "Rate Modifier",
-  "cold_sweat.config.show_ambient_gauge.name":      "Show Ambient",
+  "cold_sweat.config.require_thermometer.name":     "Require Thermometer",
   "cold_sweat.config.temp_offset.name":             "Temp. Offset",
   "cold_sweat.config.temperature_icon.name":        "Icon Offset*",
   "cold_sweat.config.temperature_readout.name":     "Readout Offset*",

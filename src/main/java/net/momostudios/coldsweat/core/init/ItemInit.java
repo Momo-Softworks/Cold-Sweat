@@ -27,6 +27,8 @@ public class ItemInit
     public static final RegistryObject<Item> WATERSKIN_REGISTRY = ITEMS.register("waterskin", WaterskinItem::new);
     public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
     public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
+    public static final RegistryObject<Item> THERMOMETER_REGISTRY = ITEMS.register("thermometer", () ->
+            new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> SOULFIRE_LAMP_REGISTRY = ITEMS.register("soulfire_lamp", SoulfireLampItem::new);
 
     //BlockItems

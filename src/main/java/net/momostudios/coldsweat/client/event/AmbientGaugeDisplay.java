@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -13,6 +14,7 @@ import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class AmbientGaugeDisplay
@@ -24,7 +26,10 @@ public class AmbientGaugeDisplay
 
         PlayerEntity player = Minecraft.getInstance().player;
 
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && ColdSweatConfig.getInstance().showAmbient())
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
+                (MathHelperCS.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
+                 player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER ||
+                 ColdSweatConfig.getInstance().showAmbient()))
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
