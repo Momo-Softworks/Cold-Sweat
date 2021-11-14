@@ -8,7 +8,7 @@
   },
   "overrides":
   [
-    { "predicate": { "cold_sweat:temperature": -999.0 },"model": "cold_sweat:item/thermometer/thermometer" },
+    { "predicate": { "cold_sweat:temperature": -999.0 },"model": "cold_sweat:item/thermometer" },
     { "predicate": { "cold_sweat:temperature": -1.0 },  "model": "cold_sweat:item/thermometer/thermometer_-3" },
     { "predicate": { "cold_sweat:temperature": -0.75 }, "model": "cold_sweat:item/thermometer/thermometer_-2" },
     { "predicate": { "cold_sweat:temperature": -0.5 },  "model": "cold_sweat:item/thermometer/thermometer_-1" },

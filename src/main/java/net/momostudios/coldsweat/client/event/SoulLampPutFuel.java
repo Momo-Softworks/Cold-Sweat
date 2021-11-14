@@ -141,17 +141,17 @@ public class SoulLampPutFuel
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            time++;
+            time = (time + 1) % (int) (5 * (Math.PI * 2));
         }
     }
 
     public static ItemEntry getItemEntry(ItemStack stack)
     {
-        for (List<String> entry : ItemSettingsConfig.getInstance().soulLampItems())
+        for (String entry : ItemSettingsConfig.getInstance().soulLampItems())
         {
-            if (entry.get(0).equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString()))
+            if (entry.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString()))
             {
-                return new ItemEntry(entry.get(0), Integer.parseInt(entry.get(1)));
+                return new ItemEntry(entry, 1);
             }
         }
         return new ItemEntry(ForgeRegistries.ITEMS.getKey(Items.AIR).toString(), 0);

@@ -29,7 +29,7 @@ public class AmbientGaugeDisplay
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
                 (MathHelperCS.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
                  player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER ||
-                 ColdSweatConfig.getInstance().showAmbient()))
+                 !ColdSweatConfig.getInstance().showAmbient()))
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
@@ -42,7 +42,6 @@ public class AmbientGaugeDisplay
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
             double temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
-            //double temp2 = player.getPersistentData().getDouble("ambient_temperature");
             int color = 14737376;
 
             ResourceLocation gaugeTexture = new ResourceLocation("cold_sweat:textures/gui/overlay/ambient/temp_gauge_normal.png");

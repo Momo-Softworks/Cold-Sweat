@@ -20,7 +20,7 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> boilerItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> iceBoxItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> hearthItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> soulLampItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> insulatingArmor;
 
@@ -97,15 +97,15 @@ public final class ItemSettingsConfig
                         "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
                 .defineList("Soulfire Lamp", Arrays.asList
                         (
-                                Arrays.asList("minecraft:warped_stem", "1"),
-                                Arrays.asList("minecraft:warped_hyphae", "1"),
-                                Arrays.asList("minecraft:stripped_warped_stem", "1"),
-                                Arrays.asList("minecraft:stripped_warped_hyphae", "1"),
-                                Arrays.asList("minecraft:crimson_stem", "1"),
-                                Arrays.asList("minecraft:crimson_hyphae", "1"),
-                                Arrays.asList("minecraft:stripped_crimson_stem", "1"),
-                                Arrays.asList("minecraft:stripped_crimson_hyphae", "1")
-                        ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+                                "minecraft:warped_stem",
+                                "minecraft:warped_hyphae",
+                                "minecraft:stripped_warped_stem",
+                                "minecraft:stripped_warped_hyphae",
+                                "minecraft:crimson_stem",
+                                "minecraft:crimson_hyphae",
+                                "minecraft:stripped_crimson_stem",
+                                "minecraft:stripped_crimson_hyphae"
+                        ), it -> it instanceof String);
         BUILDER.pop();
 
         /*
@@ -187,7 +187,7 @@ public final class ItemSettingsConfig
         return insulatingArmor.get();
     }
 
-    public List<? extends List<String>> soulLampItems()
+    public List<? extends String> soulLampItems()
     {
         return soulLampItems.get();
     }

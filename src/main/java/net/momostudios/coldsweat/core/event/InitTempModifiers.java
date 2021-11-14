@@ -52,7 +52,6 @@ public class InitTempModifiers
         event.addModifier(new TimeTempModifier());
         event.addModifier(new WaterskinTempModifier());
         event.addModifier(new WeatherTempModifier());
-        event.addModifier(new HearthTempModifier());
         event.addModifier(new SoulLampTempModifier());
         try {
             event.addModifier(ModList.get().isLoaded("sereneseasons") ?
@@ -62,5 +61,6 @@ public class InitTempModifiers
         catch (Exception e) {
             event.addModifier(new SereneSeasonsDummyModifier());
         }
+        event.addModifier(new HearthTempModifier());
     }
 }

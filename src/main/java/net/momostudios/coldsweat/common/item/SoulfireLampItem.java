@@ -27,11 +27,13 @@ public class SoulfireLampItem extends Item
                 stack.getOrCreateTag().putBoolean("hasTicked", true);
                 setFuel(stack, 0);
             }
-            if (isSelected && entityIn.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > ColdSweatConfig.getInstance().maxHabitable() && entityIn.ticksExisted % 10 == 0)
+            //System.out.println(isSelected);
+            if ((isSelected || ((PlayerEntity) entityIn).getHeldItemOffhand() == stack) && entityIn.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
+            temp > ColdSweatConfig.getInstance().maxHabitable() && entityIn.ticksExisted % 10 == 0)
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.026666667f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()) / 5)));
+                    addFuel(stack, -0.01f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()) / 5)));
                 }
             }
         }

@@ -105,7 +105,6 @@ public class WorldInfo
         {
             if (!isBlockSpreadable(world, pos.up(i), pos.up(i - 1)) && !isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
             {
-                //if (Math.random() < 0.01) System.out.println(world.getBlockState(pos).getBlock());
                 return false;
             }
         }
