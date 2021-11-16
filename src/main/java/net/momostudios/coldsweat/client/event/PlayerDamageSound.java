@@ -1,14 +1,15 @@
-package net.momostudios.coldsweat.common.event;
+package net.momostudios.coldsweat.client.event;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.core.util.CustomDamageTypes;
 import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
 
-@Mod.EventBusSubscriber
+//@Mod.EventBusSubscriber(Dist.CLIENT)
 public class PlayerDamageSound
 {
     @SubscribeEvent

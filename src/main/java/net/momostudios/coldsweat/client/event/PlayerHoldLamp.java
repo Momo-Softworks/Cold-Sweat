@@ -5,6 +5,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -54,58 +55,66 @@ public class PlayerHoldLamp
         // Determine whether to render the lamp pose
         PlayerRenderer renderer = event.getRenderer();
         PlayerEntity player = event.getPlayer();
-        boolean renderingLamp = false;
+        if (!player.isSpectator())
+        {
+            boolean renderingLamp = false;
 
-        if (PlayerHelper.holdingLamp(player, HandSide.RIGHT))
-        {
-            event.getRenderer().getEntityModel().bipedRightArm.showModel = false;
-            if (shouldCustomRenderRight(event.getPlayer(), event.getRenderer().getEntityModel(), event.getPartialRenderTick()))
-                renderingLamp = true;
-        }
+            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT))
+            {
+                event.getRenderer().getEntityModel().bipedRightArm.showModel = false;
+                event.getRenderer().getEntityModel().bipedRightArmwear.showModel = false;
+                if (shouldCustomRenderRight(event.getPlayer(), event.getRenderer().getEntityModel(), event.getPartialRenderTick()))
+                    renderingLamp = true;
+            }
 
-        if (PlayerHelper.holdingLamp(player, HandSide.LEFT))
-        {
-            event.getRenderer().getEntityModel().bipedLeftArm.showModel = false;
+            if (PlayerHelper.holdingLamp(player, HandSide.LEFT))
+            {
+                event.getRenderer().getEntityModel().bipedLeftArm.showModel = false;
+                event.getRenderer().getEntityModel().bipedLeftArmwear.showModel = false;
                 renderingLamp = true;
-        }
-        if (renderingLamp)
-        {
-            try {
-                Field layerRenderers = event.getRenderer().getClass().getSuperclass().getDeclaredField("layerRenderers");
+            }
+            try
+            {
+                Field layerRenderers;
+                try
+                {
+                    layerRenderers = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_177097_h");
+                } catch (ObfuscationReflectionHelper.UnableToFindFieldException e)
+                {
+                    layerRenderers = ObfuscationReflectionHelper.findField(LivingRenderer.class, "layerRenderers");
+                }
                 layerRenderers.setAccessible(true);
-                layerRenderers.set(event.getRenderer(), Arrays.asList(
-                        //new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
-                        //new HeldItemLayer<>(renderer),
-                        new ArrowLayer<>(renderer),
-                        new Deadmau5HeadLayer(renderer),
-                        new CapeLayer(renderer),
-                        new HeadLayer<>(renderer),
-                        new ElytraLayer<>(renderer),
-                        new ParrotVariantLayer<>(renderer),
-                        new SpinAttackEffectLayer<>(renderer),
-                        new BeeStingerLayer<>(renderer))
-                );
-            } catch (Exception e) {}
-        }
-        else
-        {
-            event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
-            event.getPlayer().getPersistentData().putFloat("lanternLeftArmRot", 3.0f);
-            try {
-                Field layerRenderers = event.getRenderer().getClass().getSuperclass().getDeclaredField("layerRenderers");
-                layerRenderers.setAccessible(true);
-                layerRenderers.set(event.getRenderer(), Arrays.asList(
-                        new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
-                        new HeldItemLayer<>(renderer),
-                        new ArrowLayer<>(renderer),
-                        new Deadmau5HeadLayer(renderer),
-                        new CapeLayer(renderer),
-                        new HeadLayer<>(renderer),
-                        new ElytraLayer<>(renderer),
-                        new ParrotVariantLayer<>(renderer),
-                        new SpinAttackEffectLayer<>(renderer),
-                        new BeeStingerLayer<>(renderer))
-                );
+                if (renderingLamp)
+                {
+                    layerRenderers.set(renderer, Arrays.asList(
+                            //new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
+                            //new HeldItemLayer<>(renderer),
+                            new ArrowLayer<>(renderer),
+                            new Deadmau5HeadLayer(renderer),
+                            new CapeLayer(renderer),
+                            new HeadLayer<>(renderer),
+                            new ElytraLayer<>(renderer),
+                            new ParrotVariantLayer<>(renderer),
+                            new SpinAttackEffectLayer<>(renderer),
+                            new BeeStingerLayer<>(renderer))
+                    );
+                } else
+                {
+                    event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
+                    event.getPlayer().getPersistentData().putFloat("lanternLeftArmRot", 3.0f);
+                    layerRenderers.set(event.getRenderer(), Arrays.asList(
+                            new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
+                            new HeldItemLayer<>(renderer),
+                            new ArrowLayer<>(renderer),
+                            new Deadmau5HeadLayer(renderer),
+                            new CapeLayer(renderer),
+                            new HeadLayer<>(renderer),
+                            new ElytraLayer<>(renderer),
+                            new ParrotVariantLayer<>(renderer),
+                            new SpinAttackEffectLayer<>(renderer),
+                            new BeeStingerLayer<>(renderer))
+                    );
+                }
             } catch (Exception e) {}
         }
     }
@@ -119,7 +128,7 @@ public class PlayerHoldLamp
         boolean renderRight = shouldCustomRenderRight(player, model, renderTick) && PlayerHelper.holdingLamp(player, HandSide.RIGHT);
         boolean renderLeft = shouldCustomRenderLeft(player, model, renderTick) && PlayerHelper.holdingLamp(player, HandSide.LEFT);
 
-        if (renderRight || renderLeft)
+        if ((renderRight || renderLeft) && !player.isSpectator())
         {
             MatrixStack matrixStack = event.getMatrixStack();
             PlayerRenderer renderer = event.getRenderer();
@@ -130,6 +139,7 @@ public class PlayerHoldLamp
             float naturalRightArmRot = model.bipedRightArm.rotateAngleX / 30 + 0.01f;
             float naturalLeftArmRot = model.bipedLeftArm.rotateAngleX / 30 + 0.01f;
 
+            // Render Right Arm
             matrixStack.push();
             if (renderRight) {
                 renderCustomRight(model, matrixStack, player, event.getBuffers(), event.getLight(), renderTick, naturalRightArmRot, rightArmRot, event.getRenderer());
@@ -138,6 +148,7 @@ public class PlayerHoldLamp
                 event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
             matrixStack.pop();
 
+            // Render Left Arm
             matrixStack.push();
             if (renderLeft) {
                 renderCustomLeft(model, matrixStack, player, event.getBuffers(), event.getLight(), renderTick, naturalLeftArmRot, leftArmRot, event.getRenderer());
@@ -233,6 +244,7 @@ public class PlayerHoldLamp
                                    int light, float renderTick, float naturalRightArmRot, float rightArmRot, PlayerRenderer renderer)
     {
         model.bipedRightArm.showModel = true;
+        model.bipedRightArmwear.showModel = true;
         // Set arm transforms before render
         model.bipedRightArm.rotateAngleX = naturalRightArmRot + (rightArmRot + ((model.isSneak ? 1.4f : 1.6f) - rightArmRot) / 10);
         player.getPersistentData().putFloat("lanternRightArmRot", model.bipedRightArm.rotateAngleX);
@@ -245,12 +257,15 @@ public class PlayerHoldLamp
         // Render right arm
         model.bipedRightArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())),
                 light, OverlayTexture.NO_OVERLAY);
+        model.bipedRightArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())),
+                light, OverlayTexture.NO_OVERLAY);
     }
 
     private static void renderCustomLeft(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, ClientPlayerEntity player, IRenderTypeBuffer buffers,
-                                          int light, float renderTick, float naturalLeftArmRot, float leftArmRot, PlayerRenderer renderer)
+                                         int light, float renderTick, float naturalLeftArmRot, float leftArmRot, PlayerRenderer renderer)
     {
         model.bipedLeftArm.showModel = true;
+        model.bipedLeftArmwear.showModel = true;
         // Set arm transforms before render
         model.bipedLeftArm.rotateAngleX = naturalLeftArmRot + (leftArmRot + ((model.isSneak ? 1.4f : 1.6f) - leftArmRot) / 10);
         player.getPersistentData().putFloat("lanternLeftArmRot", model.bipedLeftArm.rotateAngleX);
@@ -262,6 +277,8 @@ public class PlayerHoldLamp
         matrixStack.rotate(new Quaternion(0, -MathHelper.lerp(renderTick, player.prevRenderYawOffset, player.renderYawOffset), 0, true));
         // Render left arm
         model.bipedLeftArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())),
+                light, OverlayTexture.NO_OVERLAY);
+        model.bipedLeftArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())),
                 light, OverlayTexture.NO_OVERLAY);
     }
 }

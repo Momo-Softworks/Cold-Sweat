@@ -23,7 +23,7 @@
 2.1
 - New Item: Soulfire Lamp
     - Cools the player down when in the Nether
-    - Requires Warped or Crimson stems as fuel
+    - Requires Warped or Crimson stems as fuel (temporarily; will be changed to a custom item in the future)
 - Updated the Hearth's texture slightly
 - The Hearth now only consumes the necessary fuel to function
     - If it is hot, for example, it will only use cold fuel
@@ -35,6 +35,7 @@
 - Added new sounds for when the player is freezing
 - Added Polish translation by @Lifus_Crustus on our Discord server
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
+- Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
 
 - Technical Changes:
     - Added new events for compat mod developers to hook into:
@@ -51,15 +52,14 @@
             - If you call this event manually, use getPool().flush() beforehand to prevent duplicate entries (lag)
     - The Hearth now uses the capability system instead of NBT
             - This should increase performance and prevent issues with the NBT data limit on some servers
-    - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
     - "fuel_items.toml" config file changes:
         - Renamed to "item_settings.toml" to better indicate that it also includes insulation items
         - Insulation items (for the sewing table) and armor items with innate insulation are now defined separately
     - Added new translation keys:
-        - "player.damage.freeze"
-        - "player.damage.freeze.subtitle"
-        - "items.soulfire_lamp"
-        -
+        - "entity.player.damage.freeze" (The subtitle for when the player takes cold damage)
+        - "item.cold_sweat.soulfire_lamp" (The name of the Soulfire Lamp item)
+    - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
+    - Removed some defunct recipes that would throw errors in server consoles
 
 
 TO-DO

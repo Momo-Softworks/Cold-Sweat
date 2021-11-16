@@ -1,5 +1,6 @@
 package net.momostudios.coldsweat.common.item;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -22,18 +23,19 @@ public class SoulfireLampItem extends Item
         if (entityIn instanceof PlayerEntity)
         {
             double temp = PlayerTemp.getTemperature((PlayerEntity) entityIn, PlayerTemp.Types.AMBIENT).get();
+            PlayerEntity player = (PlayerEntity) entityIn;
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
             {
                 stack.getOrCreateTag().putBoolean("hasTicked", true);
                 setFuel(stack, 0);
             }
             //System.out.println(isSelected);
-            if ((isSelected || ((PlayerEntity) entityIn).getHeldItemOffhand() == stack) && entityIn.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-            temp > ColdSweatConfig.getInstance().maxHabitable() && entityIn.ticksExisted % 10 == 0)
+            if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
+            temp > ColdSweatConfig.getInstance().maxHabitable() && player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.01f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()) / 5)));
+                    addFuel(stack, -0.015f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()) / 5)));
                 }
             }
         }

@@ -30,7 +30,7 @@
   "death.attack.hot":           "%1$s died of heatstroke",
   "death.attack.hot.player":    "%1$s died of heatstroke while fighting %2$s",
 
-  "player.damage.freeze": "Player freezes",
+  "entity.player.damage.freeze": "Player freezes",
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.temperature_details":  "Temperature Management",

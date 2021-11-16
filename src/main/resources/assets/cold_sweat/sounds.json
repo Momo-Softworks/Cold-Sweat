@@ -1,8 +1,7 @@
 {
-  "player.damage.freeze":
+  "entity.player.damage.freeze":
   {
-    "category": "player",
-    "subtitle": "player.damage.freeze",
+    "subtitle": "entity.player.damage.freeze",
     "sounds":
     [
       {

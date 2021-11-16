@@ -13,6 +13,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
+import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -103,7 +104,7 @@ public class WorldInfo
     {
         for (int i = 0; i < 255 - pos.getY(); i++)
         {
-            if (!isBlockSpreadable(world, pos.up(i), pos.up(i - 1)) && !isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
+            if (!isBlockSpreadable(world, pos.up(i), pos.up(i - 1)) || !isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
             {
                 return false;
             }
@@ -120,6 +121,7 @@ public class WorldInfo
         return (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir)) &&
                 (world.isAirBlock(newPos) || (state2.isSolid() && !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
                         (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
-                        (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)));
+                        (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)) ||
+                        (state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP));
     }
 }

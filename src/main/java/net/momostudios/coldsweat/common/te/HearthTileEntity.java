@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.common.te;
 
 import net.minecraft.block.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
@@ -143,7 +144,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     {
                         shouldReset = true;
                         cap.ifPresent(cap2 -> cap2.remove(blockPos));
-                        break;
                     }
 
                     // Get if any adjacent block is solid
@@ -166,16 +166,23 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                     // Show radius if enabled
                     if (this.getTileData().getBoolean("showRadius") && world.isRemote && Math.random() < 0.2)
-                        for (int p = 0; p < (touchingSolid ? 1 : Math.random() * 3); p++)
+                    {
+                        if (Minecraft.getInstance().gameSettings.showDebugInfo)
                         {
-                            double xr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                            double xm = Math.random() / 20 - 0.025;
-                            double yr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                            double zr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                            double zm = Math.random() / 20 - 0.025;
-
-                            world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                            world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
                         }
+                        else
+                            for (int p = 0; p < (touchingSolid ? 1 : Math.random() * 3); p++)
+                            {
+                                double xr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                                double xm = Math.random() / 20 - 0.025;
+                                double yr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                                double zr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
+                                double zm = Math.random() / 20 - 0.025;
+
+                                world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                            }
+                    }
 
                     boolean triggerReset = true;
 
@@ -184,7 +191,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         for (Direction direction : Direction.values())
                         {
                             // If a block has changed in the area, trigger a reset of the area shape
-                            if (WorldInfo.isBlockSpreadable(world, blockPos, blockPos.offset(direction))) {
+                            if (WorldInfo.isBlockSpreadable(world, blockPos.offset(direction), blockPos)) {
                                 triggerReset = false;
                             }
 
@@ -212,7 +219,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     {
                         cap.ifPresent(cap2 -> cap2.clear());
                         this.getTileData().putInt("resetTimer", 200);
-                        break;
                     }
                 }
                 // Add new positions to NBT
@@ -372,60 +378,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public void setColdFuel(int amount)
     {
         this.getTileData().putInt("cold_fuel", Math.min(amount, MAX_FUEL));
-    }
-
-    public boolean isBlockSpreadable(BlockPos pos, @Nullable Direction dir)
-    {
-        BlockState state = world.getBlockState(pos);
-        //System.out.println(state.getShape(world, pos));
-
-        return (dir == null || (!state.isSolidSide(world, pos, dir) && !state.isSolidSide(world, pos, dir.getOpposite()))) &&
-                (world.isAirBlock(pos) || (state.isSolid() && !state.getShape(world, pos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
-                        (state.hasProperty(DoorBlock.OPEN) && state.get(DoorBlock.OPEN)) ||
-                        (state.hasProperty(TrapDoorBlock.OPEN) && state.get(TrapDoorBlock.OPEN)));
-    }
-
-    public List<BlockPos> getPoints()
-    {
-        List<BlockPos> pointList = new ArrayList<>();
-
-        for (INBT point : this.getTileData().getList("points", 11))
-        {
-            if (point != null) {
-                int[] values = ((IntArrayNBT) point).getIntArray();
-                pointList.add(new BlockPos(values[0], values[1], values[2]));
-            }
-        }
-        if (pointList.isEmpty())
-        {
-            pointList.add(pos);
-            pointList.add(pos.up());
-            if (isBlockSpreadable(pos.north(), null))        pointList.add(pos.north());
-            if (isBlockSpreadable(pos.north().east(), null)) pointList.add(pos.north().east());
-            if (isBlockSpreadable(pos.south(), null))        pointList.add(pos.south());
-            if (isBlockSpreadable(pos.south().west(), null)) pointList.add(pos.south().west());
-            if (isBlockSpreadable(pos.east(), null))         pointList.add(pos.east());
-            if (isBlockSpreadable(pos.east().north(), null)) pointList.add(pos.east().north());
-            if (isBlockSpreadable(pos.west(), null))         pointList.add(pos.west());
-            if (isBlockSpreadable(pos.west().south(), null)) pointList.add(pos.west().south());
-        }
-        return pointList;
-    }
-
-    public void addPoints(List<BlockPos> pointList)
-    {
-        ListNBT points = this.getTileData().getList("points", 11);
-        for (BlockPos bpos : pointList)
-        {
-            int[] values = {bpos.getX(), bpos.getY(), bpos.getZ()};
-            points.add(new IntArrayNBT(values));
-        }
-        this.getTileData().put("points", points);
-    }
-
-    public void clearPoints()
-    {
-        this.getTileData().put("points", new ListNBT());
     }
 
     @Override
