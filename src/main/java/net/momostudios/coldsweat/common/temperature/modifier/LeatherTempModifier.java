@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
@@ -16,7 +17,7 @@ public class LeatherTempModifier extends TempModifier
 
     public LeatherTempModifier(List<INBT> args)
     {
-        this.amount = ((NumberNBT) args.get(0)).getFloat();
+        this.amount = ((IntNBT) args.get(0)).getInt();
     }
 
 

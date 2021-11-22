@@ -70,15 +70,13 @@ public class ListNBTHelper
                     List<INBT> args = new ArrayList<>();
 
                     //Iterate through the set of argument keys
-                    int iter = 0;
                     for (String modifierArgument : modifierArguments)
                     {
                         //Gets the actual value of the argument from the key
-                        if (iter > 0)
+                        if (!modifierArgument.equals("modifier_name"))
                         {
                             args.add(((CompoundNBT) modifierInstance).get(modifierArgument));
                         }
-                        iter++;
                     }
                     //Apply the arguments (if any)
                     modifier = modifier.with(args);
