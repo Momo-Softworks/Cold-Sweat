@@ -16,7 +16,7 @@ public class BiomeTempModifier extends TempModifier
 {
     WorldTemperatureConfig config = new WorldTemperatureConfig();
 
-    @Override
+    @java.lang.Override
     public float calculate(Temperature temp, PlayerEntity player)
     {
         float worldTemp = 0;
@@ -26,13 +26,13 @@ public class BiomeTempModifier extends TempModifier
             worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation());
 
             // Should temperature be overridden by config
-            if ((boolean) dimensionOverride(player.world.getDimensionKey().getLocation()).get(0))
+            if (dimensionOverride(player.world.getDimensionKey().getLocation()).override)
             {
-                return (float) dimensionOverride(player.world.getDimensionKey().getLocation()).get(1);
+                return (float) dimensionOverride(player.world.getDimensionKey().getLocation()).value;
             }
-            if ((boolean) biomeOverride(biome.getRegistryName()).get(0))
+            if (biomeOverride(biome.getRegistryName()).override)
             {
-                return (float) biomeOverride(biome.getRegistryName()).get(1);
+                return (float) biomeOverride(biome.getRegistryName()).value;
             }
         }
         return temp.get() + (worldTemp / 200);
@@ -55,24 +55,36 @@ public class BiomeTempModifier extends TempModifier
         return offset;
     }
 
-    protected List biomeOverride(ResourceLocation biomeID)
+    protected Override biomeOverride(ResourceLocation biomeID)
     {
         for (List<String> value : config.biomeTemperatures())
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return Arrays.asList(true, Double.parseDouble(value.get(1)));
+                return new Override(true, Double.parseDouble(value.get(1)));
         }
-        return Arrays.asList(false, 0.0d);
+        return new Override(false, 0.0d);
     }
 
-    protected List dimensionOverride(ResourceLocation biomeID)
+    protected Override dimensionOverride(ResourceLocation biomeID)
     {
         for (List<String> value : config.dimensionTemperatures())
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return Arrays.asList(true, Double.parseDouble(value.get(1)));
+                return new Override(true, Double.parseDouble(value.get(1)));
         }
-        return Arrays.asList(false, 0.0d);
+        return new Override(false, 0.0d);
+    }
+
+    private static class Override
+    {
+        public boolean override;
+        public double value;
+
+        public Override(boolean override, double value)
+        {
+            this.override = override;
+            this.value = value;
+        }
     }
 
     public String getID()

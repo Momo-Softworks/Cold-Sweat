@@ -27,7 +27,7 @@ public class SoulfireLampItem extends Item
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
             {
                 stack.getOrCreateTag().putBoolean("hasTicked", true);
-                setFuel(stack, 0);
+                setFuel(stack, 64);
             }
             //System.out.println(isSelected);
             if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&

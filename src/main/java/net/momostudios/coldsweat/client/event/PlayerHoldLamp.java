@@ -2,7 +2,6 @@ package net.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
@@ -122,7 +121,7 @@ public class PlayerHoldLamp
     @SubscribeEvent
     public static void renderPlayerPost(RenderPlayerEvent.Post event)
     {
-        ClientPlayerEntity player = (ClientPlayerEntity) event.getPlayer();
+        AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) event.getPlayer();
         PlayerModel<AbstractClientPlayerEntity> model = event.getRenderer().getEntityModel();
         float renderTick = event.getPartialRenderTick();
         boolean renderRight = shouldCustomRenderRight(player, model, renderTick) && PlayerHelper.holdingLamp(player, HandSide.RIGHT);
@@ -240,7 +239,7 @@ public class PlayerHoldLamp
         }
     }
 
-    private static void renderCustomRight(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, ClientPlayerEntity player, IRenderTypeBuffer buffers,
+    private static void renderCustomRight(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
                                    int light, float renderTick, float naturalRightArmRot, float rightArmRot, PlayerRenderer renderer)
     {
         model.bipedRightArm.showModel = true;
@@ -261,7 +260,7 @@ public class PlayerHoldLamp
                 light, OverlayTexture.NO_OVERLAY);
     }
 
-    private static void renderCustomLeft(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, ClientPlayerEntity player, IRenderTypeBuffer buffers,
+    private static void renderCustomLeft(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
                                          int light, float renderTick, float naturalLeftArmRot, float leftArmRot, PlayerRenderer renderer)
     {
         model.bipedLeftArm.showModel = true;

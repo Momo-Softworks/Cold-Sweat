@@ -43,11 +43,12 @@ public class SoulLampInputMessage
         context.enqueueWork(() ->
         {
             ServerPlayerEntity player = context.getSender();
+            System.out.println("server received input message for player: " + player.getDisplayName().getString());
 
             Container container = player.openContainer;
             ItemStack stack = message.lampStack;
             Slot slot = container.getSlot(message.putSlot);
-            ItemStack stack1 = Minecraft.getInstance().currentScreen instanceof CreativeScreen ? player.inventory.getStackInSlot(message.putSlot) :slot.getStack();
+            ItemStack stack1 = player.isCreative() ? player.inventory.getStackInSlot(message.putSlot) : slot.getStack();
             float fuel = stack1.getOrCreateTag().getFloat("fuel");
 
             stack1.getOrCreateTag().putFloat("fuel", Math.min(64, fuel + (message.depositOne ? 1 : stack.getCount())));

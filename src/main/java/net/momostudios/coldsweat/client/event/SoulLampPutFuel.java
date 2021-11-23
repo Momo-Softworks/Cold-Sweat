@@ -60,6 +60,7 @@ public class SoulLampPutFuel
 
                         event.setCanceled(true);
                         event.setResult(Event.Result.DENY);
+                        System.out.println("fuel inserted for player: " + player.getDisplayName().getString());
                         ColdSweatPacketHandler.INSTANCE.sendToServer(new SoulLampInputMessage(slotIndex, holdingStack, event.getButton() == 1));
                     }
                 }

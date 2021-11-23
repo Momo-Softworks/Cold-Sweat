@@ -17,6 +17,9 @@ public class SoulLampTempModifier extends TempModifier
     @Override
     public float calculate(Temperature temp, PlayerEntity player)
     {
+        float max = (float) ColdSweatConfig.getInstance().maxHabitable();
+        float min = (float) ColdSweatConfig.getInstance().minHabitable();
+
         if (holdingFueledLamp(player) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
                 temp.get() > ColdSweatConfig.getInstance().maxHabitable())
         {
@@ -39,7 +42,7 @@ public class SoulLampTempModifier extends TempModifier
                             randy + 0.5, randz + Math.sin(Math.toRadians(player.renderYawOffset + 50)) * 0.7, 0, 0.02 - Math.random() * 0.01, 0);
                 }
             }
-            return temp.get() * 0.8f;
+            return (min + max) / 2.0f + (temp.get() - max) * 0.4f ;
         }
         return temp.get();
     }
