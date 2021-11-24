@@ -32,12 +32,17 @@
     - This replaces the 20-block radius that it used to have
     - increased the technical radius to 64 blocks
     - (note that it can't actually fill the entire 64-block radius, but it can reach these distances if you make a tunnel for the hearth to spread through)
-- Added new sounds for when the player is freezing
 - Added Polish translation by @Lifus_Crustus on our Discord server
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 - Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
 
 - Technical Changes:
+    - BlockEffects and TempModifiers are now stored in a map instead of a list
+        - Massive performance uplift
+        - Easier to store/lookup elements by their ID
+    - Updates to TempModifiers
+        - Moved to the capabilities system
+        - Much easier to add arguments
     - Added new events for compat mod developers to hook into:
         - TempModifierEvent.Add
             - Called when a TempModifier modifier is added to a player
@@ -56,7 +61,7 @@
         - Renamed to "item_settings.toml" to better indicate that it also includes insulation items
         - Insulation items (for the sewing table) and armor items with innate insulation are now defined separately
     - Added new translation keys:
-        - "entity.player.damage.freeze" (The subtitle for when the player takes cold damage)
+        - "entity.player.damage.freeze" (The subtitle for when the player takes cold damage) (will be added next update)
         - "item.cold_sweat.soulfire_lamp" (The name of the Soulfire Lamp item)
     - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
     - Removed some defunct recipes that would throw errors in server consoles
@@ -64,3 +69,4 @@
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
+- Added new sounds for when the player is freezing
