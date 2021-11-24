@@ -86,9 +86,10 @@ public class PlayerTemp
 
     /**
      * Removes the specified number of TempModifiers of the specified type from the player
-     * @param player is the player being sampled
-     * @param type determines which TempModifier list to pull from
-     * @param count is the number of modifiers of the given type to be removed (use Integer.MAX_VALUE to remove all instances)
+     * @param player The player being sampled
+     * @param modClass The class of the TempModifier to remove
+     * @param type Determines which TempModifier list to pull from
+     * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      */
     public static void removeModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type, int count)
     {
@@ -96,16 +97,31 @@ public class PlayerTemp
     }
 
 
-    //Establish the types of temperature
+    /**
+     * Defines all types of temperature in Cold Sweat. <br>
+     * These are used to get the player's temperature and/or to apply modifiers to it. <br>
+     * <br>
+     * {@link #AMBIENT}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
+     * {@link #BODY}: The temperature of the player's body. <br>
+     * {@link #BASE}: A static offset applied to the player's body temperature. <br>
+     * {@link #COMPOSITE}: The sum of the player's body and base temperatures. (CANNOT be set) <br>
+     * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
+     */
     public enum Types
     {
         AMBIENT,
         BODY,
         BASE,
-        RATE,
-        COMPOSITE
+        COMPOSITE,
+        RATE
     }
 
+    /**
+     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of TempModifier to be stored
+     * @return The NBT tag name for the given type
+     */
     public static String getModifierTag(Types type)
     {
         switch (type)
@@ -118,6 +134,12 @@ public class PlayerTemp
         }
     }
 
+    /**
+     * Used for storing Temperature values in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of Temperature to be stored. ({@link Types#AMBIENT} should only be stored when needed to prevent lag)
+     * @return The NBT tag name for the given type
+     */
     public static String getTempTag(Types type)
     {
         switch (type)

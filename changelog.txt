@@ -51,6 +51,7 @@
         - TempModifierEvent.Remove
             - Called when a TempModifier is removed from a player
             - Cancellable
+            - Allows for changing the number of modifiers removed
         - TempModifierEvent.Init
             - Called when the registry of TempModifiers or BlockEffects is being built
             - Allows for injection of custom TempModifiers and BlockEffects
