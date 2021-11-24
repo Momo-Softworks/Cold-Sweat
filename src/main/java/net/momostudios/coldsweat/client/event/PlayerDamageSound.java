@@ -14,7 +14,7 @@ import net.momostudios.coldsweat.core.util.CustomDamageTypes;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class PlayerDamageSound
 {
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void onPlayerHurt(LivingAttackEvent event)
     {
         if (event.getSource().equals(CustomDamageTypes.COLD) || event.getSource().equals(CustomDamageTypes.COLD_SCALED))
@@ -27,5 +27,5 @@ public class PlayerDamageSound
                 ((PlayerEntity) event.getEntity()).playSound(sound, player.getSoundCategory(), 1f, (float) Math.random() * 0.3f + 0.7f);
             }
         }
-    }
+    }*/
 }
