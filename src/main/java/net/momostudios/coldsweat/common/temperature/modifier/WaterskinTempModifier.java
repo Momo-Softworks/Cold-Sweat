@@ -11,25 +11,18 @@ import java.util.List;
 
 public class WaterskinTempModifier extends TempModifier
 {
-    public float amount = 0;
     public WaterskinTempModifier() {}
 
-    public WaterskinTempModifier(List<INBT> args)
+    public WaterskinTempModifier(double temp)
     {
-        this.amount = ((NumberNBT) args.get(0)).getFloat();
-    }
-
-
-    public WaterskinTempModifier with(List<INBT> args)
-    {
-        return new WaterskinTempModifier(args);
+        addArgument("temperature", temp);
     }
 
     @Override
-    public float calculate(Temperature temp, PlayerEntity player)
+    public double calculate(Temperature temp, PlayerEntity player)
     {
         PlayerTemp.removeModifier(player, WaterskinTempModifier.class, PlayerTemp.Types.BODY, 2);
-        return temp.get() + amount;
+        return temp.get() + (double) getArgument("temperature");
     }
 
     public String getID()

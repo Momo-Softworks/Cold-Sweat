@@ -21,7 +21,7 @@ public class MinecartTempModifier extends TempModifier
     }
 
     @Override
-    public float calculate(Temperature temp, PlayerEntity player)
+    public double calculate(Temperature temp, PlayerEntity player)
     {
         PlayerTemp.removeModifier(player, MinecartTempModifier.class, PlayerTemp.Types.RATE, 1);
 

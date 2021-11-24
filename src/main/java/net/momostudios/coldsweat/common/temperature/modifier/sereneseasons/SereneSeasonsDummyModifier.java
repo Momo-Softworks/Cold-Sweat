@@ -7,7 +7,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 public class SereneSeasonsDummyModifier extends TempModifier
 {
     @Override
-    public float calculate(Temperature temp, PlayerEntity player)
+    public double calculate(Temperature temp, PlayerEntity player)
     {
         return temp.get();
     }

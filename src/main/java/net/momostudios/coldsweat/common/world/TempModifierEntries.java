@@ -3,62 +3,36 @@ package net.momostudios.coldsweat.common.world;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TempModifierEntries
 {
     static TempModifierEntries master = new TempModifierEntries();
-    static List<TempModifier> entries = new ArrayList<>();
+    static Map<String, TempModifier> entries = new HashMap<>();
 
-    public static TempModifierEntries getEntries()
-    {
+    public static TempModifierEntries getEntries() {
         return master;
     }
 
-    public List<TempModifier> getList()
-    {
-        return new ArrayList<>(entries);
+    public final Map<String, TempModifier> getMap() {
+        return entries;
     }
 
-    public void add(TempModifier modifier)
-    {
-        entries.add(modifier);
+    public void add(TempModifier modifier) {
+        entries.put(modifier.getID(), modifier);
     }
 
-    public void remove(TempModifier modifier)
-    {
-        entries.remove(modifier);
+    public void remove(TempModifier modifier) {
+        entries.remove(modifier.getID());
     }
 
-    public void flush()
-    {
+    public void flush() {
         entries.clear();
     }
 
-    public String getEntryName(TempModifier modifier)
-    {
-        for (TempModifier entry : getList())
-        {
-            if (entry.getClass() == modifier.getClass())
-            {
-                return entry.getID();
-            }
-        }
-        return null;
-    }
-
-    public TempModifier getEntryFor(String id)
-    {
-        try {
-            for (TempModifier entry : getList())
-            {
-                if (entry.getID().equals(id))
-                    return entry;
-            }
-        }
-        catch (Exception e) {
-            return null;
-        }
-        return null;
+    public TempModifier getEntryFor(String id) {
+        return getMap().get(id);
     }
 }

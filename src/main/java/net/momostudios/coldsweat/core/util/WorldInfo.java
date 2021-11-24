@@ -104,7 +104,7 @@ public class WorldInfo
     {
         for (int i = 0; i < 255 - pos.getY(); i++)
         {
-            if (!isBlockSpreadable(world, pos.up(i), pos.up(i - 1)) || !isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
+            if (!isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
             {
                 return false;
             }

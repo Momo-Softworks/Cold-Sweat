@@ -4,14 +4,19 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTTypes;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.util.ListNBTHelper;
+import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
+import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import net.momostudios.coldsweat.core.event.StorePlayerData;
+import net.momostudios.coldsweat.core.util.NBTHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 public class TempModifierEvent extends Event
@@ -19,7 +24,6 @@ public class TempModifierEvent extends Event
     /**
      * Fired when a {@link TempModifier} is about to be added. <br>
      * <br>
-     * {@link #args} is a list of INBT used as arguments for the TempModifier. <br>
      * {@link #duplicatesAllowed} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #player} is the player the TempModifier is being applied to. <br>
      * {@link #type} determines the modifier's {@link PlayerTemp.Types}. It will never be {@link PlayerTemp.Types#COMPOSITE} <br>
@@ -32,13 +36,15 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        public INBT[] args;
+        private PlayerEntity player;
+        private TempModifier modifier;
         public boolean duplicatesAllowed;
-        public final PlayerEntity player;
         public PlayerTemp.Types type;
 
-        public void setArgs(INBT[] args) {
-            this.args = args;
+        public void setArgs(Object... args) {
+            try {
+                this.modifier = this.modifier.getClass().getConstructor(Object[].class).newInstance(args);
+            } catch (Exception e) {}
         }
 
         public void setDuplicatesAllowed(boolean allowDuplicates) {
@@ -49,35 +55,36 @@ public class TempModifierEvent extends Event
             this.type = newType;
         }
 
-        public Add(TempModifier modifier, PlayerEntity player, PlayerTemp.Types type, boolean duplicates, INBT... arguments)
+        public final TempModifier getModifier() {
+            return modifier;
+        }
+
+        public final PlayerEntity getPlayer() {
+            return player;
+        }
+
+        public Add(TempModifier modifier, PlayerEntity player, PlayerTemp.Types type, boolean duplicates)
         {
-            args = arguments;
             duplicatesAllowed = duplicates;
             this.player = player;
             this.type = type;
+            this.modifier = modifier;
 
             if (!this.isCanceled())
             {
-                ListNBT nbt = ListNBTHelper.createIfNull(PlayerTemp.getModifierTag(this.type), this.player);
-                if (TempModifierEntries.getEntries().getEntryName(modifier) != null)
+                StorePlayerData.syncData(player);
+                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
                 {
-                    if (!ListNBTHelper.doesNBTContain(nbt, modifier) || this.duplicatesAllowed)
+                    if (TempModifierEntries.getEntries().getMap().containsKey(modifier.getID()))
                     {
-                        CompoundNBT modifierData = new CompoundNBT();
-                        modifierData.putString("modifier_name", TempModifierEntries.getEntries().getEntryName(modifier));
-
-                        if (args != null)
+                        if (cap.getModifiers(type) != null && !cap.getModifiers(type).contains(modifier) || this.duplicatesAllowed)
                         {
-                            int modifierIndex = 0;
-                            for (INBT argument : args)
-                            {
-                                modifierData.put("argument_" + modifierIndex, argument);
-                            }
+                            cap.addModifier(type, modifier);
                         }
-                        nbt.add(modifierData);
                     }
-                    this.player.getPersistentData().put(PlayerTemp.getModifierTag(this.type), nbt);
-                }
+                    else
+                        System.err.println("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
+                });
             }
         }
     }
@@ -113,26 +120,18 @@ public class TempModifierEvent extends Event
 
             if (!this.isCanceled())
             {
-                ListNBT modifierList = ListNBTHelper.createIfNull(PlayerTemp.getModifierTag(this.type), this.player);
+                StorePlayerData.syncData(player);
+                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
                 {
-                    if (!modifierList.isEmpty())
+                    if (cap.getModifiers(type) != null && !cap.getModifiers(type).isEmpty())
                     {
-                        this.count = Math.min(this.count, modifierList.size());
-                        int removed = 0;
+                        this.count = Math.min(this.count, cap.getModifiers(type).size());
                         for (int i = 0; i < this.count; i++)
                         {
-                            INBT inbt = modifierList.get(i);
-                            if (TempModifierEntries.getEntries().getEntryFor(((CompoundNBT) inbt).getString("modifier_name")).getClass().equals(this.modifierClass))
-                            {
-                                modifierList.remove(inbt);
-                                removed++;
-
-                                if (removed >= this.count)
-                                    break;
-                            }
+                            cap.getModifiers(type).removeIf(modifier -> modifier.getClass() == this.modifierClass);
                         }
                     }
-                }
+                });
             }
         }
     }
@@ -155,8 +154,9 @@ public class TempModifierEvent extends Event
                 return TempModifierEntries.getEntries();
             }
 
-            public void addModifier(TempModifier modifier) {
-                this.getPool().add(modifier);
+            public void addModifier(Class<? extends TempModifier> clazz) throws InstantiationException, IllegalAccessException
+            {
+                this.getPool().add(clazz.newInstance());
             }
         }
 

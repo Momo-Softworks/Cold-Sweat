@@ -4,33 +4,36 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class PlayerTempSyncMessage
 {
-    public float body;
-    public float base;
+    public double body;
+    public double base;
 
     public PlayerTempSyncMessage() {
     }
 
-    public PlayerTempSyncMessage(float body, float base) {
+    public PlayerTempSyncMessage(double body, double base){
         this.body = body;
         this.base = base;
     }
 
     public static void encode(PlayerTempSyncMessage message, PacketBuffer buffer)
     {
-        buffer.writeFloat(message.body);
-        buffer.writeFloat(message.base);
+        buffer.writeDouble(message.body);
+        buffer.writeDouble(message.base);
     }
 
     public static PlayerTempSyncMessage decode(PacketBuffer buffer)
     {
-        return new PlayerTempSyncMessage(buffer.readFloat(), buffer.readFloat());
+        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble());
     }
 
     public static void handle(PlayerTempSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)

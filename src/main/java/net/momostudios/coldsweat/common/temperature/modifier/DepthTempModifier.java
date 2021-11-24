@@ -11,14 +11,14 @@ import net.momostudios.coldsweat.core.util.WorldInfo;
 public class DepthTempModifier extends TempModifier
 {
     @Override
-    public float calculate(Temperature temp, PlayerEntity player)
+    public double calculate(Temperature temp, PlayerEntity player)
     {
         if (!player.world.getDimensionType().getHasCeiling())
         {
             //System.out.println(player.world.getDimensionKey().getRegistryName());
             double y = player.getPosY();
             ColdSweatConfig config = ColdSweatConfig.getInstance();
-            Temperature midTemp = new Temperature((float) (config.maxHabitable() + config.minHabitable()) / 2f);
+            Temperature midTemp = new Temperature((config.maxHabitable() + config.minHabitable()) / 2d);
 
             // The total height across all samples
             double weightedHeight = 0;
@@ -42,7 +42,7 @@ public class DepthTempModifier extends TempModifier
             // Gets the depth
             double divisorSurface = Math.max(0, (weightedHeight * 0.5) / surfaceNumber);
 
-            return (float) (midTemp.get() + (temp.get() - midTemp.get()) / (1 + divisorSurface));
+            return midTemp.get() + (temp.get() - midTemp.get()) / (1 + divisorSurface);
         }
         else
             return temp.get();

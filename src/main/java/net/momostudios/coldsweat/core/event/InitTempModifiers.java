@@ -44,23 +44,24 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierEvent.Init.Modifier event)
     {
-        event.addModifier(new BlockTempModifier());
-        event.addModifier(new BiomeTempModifier());
-        event.addModifier(new DepthTempModifier());
-        event.addModifier(new LeatherTempModifier());
-        event.addModifier(new MinecartTempModifier());
-        event.addModifier(new TimeTempModifier());
-        event.addModifier(new WaterskinTempModifier());
-        event.addModifier(new WeatherTempModifier());
-        event.addModifier(new SoulLampTempModifier());
-        try {
+        try
+        {
+            event.addModifier(BlockTempModifier.class);
+            event.addModifier(BiomeTempModifier.class);
+            event.addModifier(DepthTempModifier.class);
+            event.addModifier(LeatherTempModifier.class);
+            event.addModifier(MinecartTempModifier.class);
+            event.addModifier(TimeTempModifier.class);
+            event.addModifier(WaterskinTempModifier.class);
+            event.addModifier(WeatherTempModifier.class);
+            event.addModifier(SoulLampTempModifier.class);
             event.addModifier(ModList.get().isLoaded("sereneseasons") ?
-                    (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier").newInstance() :
-                    (TempModifier) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier").newInstance());
+                    (Class<? extends TempModifier>) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier") :
+                    SereneSeasonsDummyModifier.class);
+            event.addModifier(HearthTempModifier.class);
         }
         catch (Exception e) {
-            event.addModifier(new SereneSeasonsDummyModifier());
+            e.printStackTrace();
         }
-        event.addModifier(new HearthTempModifier());
     }
 }

@@ -56,7 +56,7 @@ public class AddLeatherModifiers
 
         PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
         if (leatherMultiplier > 0)
-            PlayerTemp.applyModifier(player, new LeatherTempModifier(), PlayerTemp.Types.RATE, false, IntNBT.valueOf(leatherMultiplier));
+            PlayerTemp.applyModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
     }
 
     public static ItemEntry getInsulatingArmor(ItemStack stack)

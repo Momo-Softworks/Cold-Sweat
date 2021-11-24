@@ -29,6 +29,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.HearthBlock;
 import net.momostudios.coldsweat.common.container.HearthContainer;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.common.temperature.modifier.HearthTempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
@@ -228,7 +229,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 for (PlayerEntity player : affectedPlayers)
                 {
                     List<TempModifier> modifiers = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
-                    modifiers.removeIf(modifier -> modifier.getID().equals("cold_sweat:hearth_insulation"));
+                    modifiers.removeIf(modifier -> modifier instanceof HearthTempModifier);
                     Temperature playerTemp = new Temperature().with(modifiers, player);
                     if ((playerTemp.get() < config.minHabitable() && this.getHotFuel() > 0))
                     {

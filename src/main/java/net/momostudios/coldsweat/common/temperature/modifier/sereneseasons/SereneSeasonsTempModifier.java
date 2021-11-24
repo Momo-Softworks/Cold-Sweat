@@ -8,9 +8,9 @@ import sereneseasons.api.season.SeasonHelper;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public float calculate(Temperature temp, PlayerEntity player)
+    public double calculate(Temperature temp, PlayerEntity player)
     {
-        float t = temp.get();
+        double t = temp.get();
         if (player.world.getDimensionType().isNatural())
             switch (SeasonHelper.getSeasonState(player.world).getSubSeason())
             {
