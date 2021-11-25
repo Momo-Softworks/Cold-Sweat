@@ -32,9 +32,12 @@
     - This replaces the 20-block radius that it used to have
     - increased the technical radius to 64 blocks
     - (note that it can't actually fill the entire 64-block radius, but it can reach these distances if you make a tunnel for the hearth to spread through)
+- Leather armor now insulates based on what piece of armor it is (configurable)
+    - i.e. a leather chestplate insulates more than a leather helmet
 - Added Polish translation by @Lifus_Crustus on our Discord server
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 - Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
+- Fixed the /temperature command sending an incorrect message when setting another player's temperature
 
 - Technical Changes:
     - BlockEffects and TempModifiers are now stored in a map instead of a list

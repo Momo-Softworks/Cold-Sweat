@@ -133,10 +133,10 @@ public final class ItemSettingsConfig
                     "Format: [[item-id-1, amount-1], [item-id-2, amount-2], ...etc]")
             .defineList("Insulating Armor Items", Arrays.asList
                     (
-                            Arrays.asList("minecraft:leather_helmet", "5"),
-                            Arrays.asList("minecraft:leather_chestplate", "5"),
+                            Arrays.asList("minecraft:leather_helmet", "4"),
+                            Arrays.asList("minecraft:leather_chestplate", "7"),
                             Arrays.asList("minecraft:leather_leggings", "5"),
-                            Arrays.asList("minecraft:leather_boots", "5")
+                            Arrays.asList("minecraft:leather_boots", "4")
                     ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
 
