@@ -1,9 +1,13 @@
 package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraftforge.fml.network.PacketDistributor;
+import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class PlayerHelper
@@ -21,5 +25,15 @@ public class PlayerHelper
     public static boolean holdingLamp(PlayerEntity player, HandSide hand)
     {
         return PlayerHelper.getItemInHand(player, hand).getItem() == ModItems.SOULFIRE_LAMP;
+    }
+
+    public static void updateModifiers(PlayerEntity player)
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+                new PlayerModifiersSyncMessage(
+                        PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT),
+                        PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY),
+                        PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE),
+                        PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE)));
     }
 }

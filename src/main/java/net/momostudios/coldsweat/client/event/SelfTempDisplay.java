@@ -10,19 +10,17 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay
 {
-    static ITemperatureCapability playerCap = null;
+    static PlayerTempCapability playerCap = null;
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.NORMAL)

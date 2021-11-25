@@ -13,7 +13,7 @@ public class CapabilityInit
     @SubscribeEvent
     public static void onCommonSetup(FMLCommonSetupEvent event)
     {
-        CapabilityManager.INSTANCE.register(ITemperatureCapability.class, new PlayerTempCapStorage(), PlayerTempCapability::new);
+        CapabilityManager.INSTANCE.register(PlayerTempCapability.class, new PlayerTempCapStorage(), PlayerTempCapability::new);
         CapabilityManager.INSTANCE.register(IBlockStorageCap.class, new HearthRadiusCapStorage(), HearthRadiusCapability::new);
     }
 }

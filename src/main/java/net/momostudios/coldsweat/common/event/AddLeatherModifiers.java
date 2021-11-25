@@ -4,7 +4,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.IntNBT;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,7 +55,7 @@ public class AddLeatherModifiers
 
         PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
         if (leatherMultiplier > 0)
-            PlayerTemp.applyModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+            PlayerTemp.addModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
     }
 
     public static ItemEntry getInsulatingArmor(ItemStack stack)

@@ -14,7 +14,6 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import net.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
-import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ public class AttachCapabilities
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
         PlayerTempCapability backend = new PlayerTempCapability();
-        LazyOptional<ITemperatureCapability> optionalStorage = LazyOptional.of(() -> backend);
+        LazyOptional<PlayerTempCapability> optionalStorage = LazyOptional.of(() -> backend);
 
         ICapabilityProvider provider = new ICapabilityProvider()
         {

@@ -12,7 +12,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
+import net.momostudios.coldsweat.core.util.PlayerHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
@@ -29,6 +31,14 @@ public class TemperatureClientSync
                         new PlayerTempSyncMessage(
                                 PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get(),
                                 PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).get()));
+            }
+        }
+
+        if (event.world.getGameTime() % 60 == 0)
+        {
+            for (PlayerEntity player : event.world.getPlayers())
+            {
+                PlayerHelper.updateModifiers(player);
             }
         }
     }

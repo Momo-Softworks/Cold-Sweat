@@ -1,23 +1,17 @@
 package net.momostudios.coldsweat.core.event.csevents;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTypes;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
-import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.event.StorePlayerData;
-import net.momostudios.coldsweat.core.util.NBTHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
+
+import java.util.Map;
 
 public class TempModifierEvent extends Event
 {
@@ -41,12 +35,6 @@ public class TempModifierEvent extends Event
         public boolean duplicatesAllowed;
         public PlayerTemp.Types type;
 
-        public void setArgs(Object... args) {
-            try {
-                this.modifier = this.modifier.getClass().getConstructor(Object[].class).newInstance(args);
-            } catch (Exception e) {}
-        }
-
         public void setDuplicatesAllowed(boolean allowDuplicates) {
             this.duplicatesAllowed = allowDuplicates;
         }
@@ -69,23 +57,6 @@ public class TempModifierEvent extends Event
             this.player = player;
             this.type = type;
             this.modifier = modifier;
-
-            if (!this.isCanceled())
-            {
-                StorePlayerData.syncData(player);
-                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
-                {
-                    if (TempModifierEntries.getEntries().getMap().containsKey(modifier.getID()))
-                    {
-                        if (cap.getModifiers(type) != null && !cap.getModifiers(type).contains(modifier) || this.duplicatesAllowed)
-                        {
-                            cap.addModifier(type, modifier);
-                        }
-                    }
-                    else
-                        System.err.println("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
-                });
-            }
         }
     }
 
@@ -117,43 +88,43 @@ public class TempModifierEvent extends Event
             this.modifierClass = modClass;
             this.type = type;
             this.count = count;
+        }
 
-            if (!this.isCanceled())
-            {
-                StorePlayerData.syncData(player);
-                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
-                {
-                    if (cap.getModifiers(type) != null && !cap.getModifiers(type).isEmpty())
-                    {
-                        this.count = Math.min(this.count, cap.getModifiers(type).size());
-                        for (int i = 0; i < this.count; i++)
-                        {
-                            cap.getModifiers(type).removeIf(modifier -> modifier.getClass() == this.modifierClass);
-                        }
-                    }
-                });
-            }
+        public void setCount(int newCount) {
+            this.count = newCount;
         }
     }
 
 
     /**
-     * Fired when a {@link TempModifier} registry is being built. <br>
+     * Fired when the {@link TempModifier} or {@link BlockEffect} registry is being built. <br>
      * The event is fired during {@link net.minecraftforge.event.world.WorldEvent.Load}. <br>
      * <br>
-     * {@link Modifier} refers to registries being added to {@link TempModifierEntries} <br>
-     * {@link Block} refers to registries being added to {@link BlockEffectEntries} <br>
+     * {@link Modifier} refers to registries being added to {@link TempModifierEntries}. <br>
+     * {@link Block} refers to registries being added to {@link BlockEffectEntries}. <br>
+     * Use {@code getPool().flush()} if calling manually to prevent duplicates. <br>
      * <br>
-     * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}.
+     * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
+     * <br>
+     * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
      */
     public static class Init extends TempModifierEvent
     {
         public static class Modifier extends TempModifierEvent
         {
-            public TempModifierEntries getPool() {
+            /**
+             * @return the map of registered {@link TempModifier}s.
+             */
+            public final TempModifierEntries getPool() {
                 return TempModifierEntries.getEntries();
             }
 
+            /**
+             * Adds a new {@link TempModifier} to the registry.
+             * @param clazz The class of the TempModifier to add.
+             * @throws InstantiationException If the TempModifier has no default constructor.
+             * @throws IllegalAccessException If the default constructor is not accessible.
+             */
             public void addModifier(Class<? extends TempModifier> clazz) throws InstantiationException, IllegalAccessException
             {
                 this.getPool().add(clazz.newInstance());
@@ -162,12 +133,22 @@ public class TempModifierEvent extends Event
 
         public static class Block extends TempModifierEvent
         {
-            public BlockEffectEntries getPool() {
+            /**
+             * @return the map of registered {@link BlockEffect}s.
+             */
+            public final BlockEffectEntries getPool() {
                 return BlockEffectEntries.getEntries();
             }
 
-            public void addBlockEffect(BlockEffect effect) {
-                this.getPool().add(effect);
+            /**
+             * Adds a new {@link BlockEffect} to the registry.
+             * @param clazz The class of the BlockEffect to add.
+             * @throws InstantiationException If the BlockEffect doesn't have a default constructor.
+             * @throws IllegalAccessException If the default constructor is not accessible.
+             */
+            public void addBlockEffect(Class<? extends BlockEffect> clazz) throws InstantiationException, IllegalAccessException
+            {
+                this.getPool().add(clazz.newInstance());
             }
         }
     }

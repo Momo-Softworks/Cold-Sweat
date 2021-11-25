@@ -9,12 +9,12 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerTempCapability implements ITemperatureCapability
+public class PlayerTempCapability
 {
-    public static Capability<ITemperatureCapability> TEMPERATURE;
+    public static Capability<PlayerTempCapability> TEMPERATURE;
 
-    @CapabilityInject(ITemperatureCapability.class)
-    private static void onTempInit(Capability<ITemperatureCapability> capability)
+    @CapabilityInject(PlayerTempCapability.class)
+    private static void onTempInit(Capability<PlayerTempCapability> capability)
     {
         TEMPERATURE = capability;
     }
@@ -28,7 +28,6 @@ public class PlayerTempCapability implements ITemperatureCapability
     List<TempModifier> baseModifiers = new ArrayList<>();
     List<TempModifier> rateModifiers = new ArrayList<>();
 
-    @Override
     public double get(PlayerTemp.Types type)
     {
         switch (type)
@@ -41,7 +40,6 @@ public class PlayerTempCapability implements ITemperatureCapability
         }
     }
 
-    @Override
     public void set(PlayerTemp.Types type, double value)
     {
         switch (type)
@@ -54,7 +52,30 @@ public class PlayerTempCapability implements ITemperatureCapability
         }
     }
 
-    @Override
+    public List<TempModifier> getModifiers(PlayerTemp.Types type)
+    {
+        switch (type)
+        {
+            case AMBIENT:  { return ambientModifiers; }
+            case BODY:     { return bodyModifiers; }
+            case BASE:     { return baseModifiers; }
+            case RATE:     { return rateModifiers; }
+            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getModifiers(): " + type);
+        }
+    }
+
+    public boolean hasModifier(PlayerTemp.Types type, Class<? extends TempModifier> mod)
+    {
+        switch (type)
+        {
+            case AMBIENT:  { return this.ambientModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
+            case BODY:     { return this.bodyModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
+            case BASE:     { return this.baseModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
+            case RATE:     { return this.rateModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
+            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.hasModifier(): " + type);
+        }
+    }
+
     public void addModifier(PlayerTemp.Types type, TempModifier modifier)
     {
         switch (type)
@@ -67,29 +88,28 @@ public class PlayerTempCapability implements ITemperatureCapability
         }
     }
 
-    @Override
-    public void removeModifier(PlayerTemp.Types type, TempModifier modifier)
+    public void removeModifier(PlayerTemp.Types type, Class<? extends TempModifier> modifier)
     {
         switch (type)
         {
-            case AMBIENT:  { this.ambientModifiers.remove(modifier); break; }
-            case BODY:     { this.bodyModifiers.remove(modifier); break; }
-            case BASE:     { this.baseModifiers.remove(modifier); break; }
-            case RATE:     { this.rateModifiers.remove(modifier); break; }
+            case AMBIENT:  { this.ambientModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
+            case BODY:     { this.bodyModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
+            case BASE:     { this.baseModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
+            case RATE:     { this.rateModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.removeModifier(): " + type);
         }
     }
 
-    @Override
-    public List<TempModifier> getModifiers(PlayerTemp.Types type)
+
+    public void clearModifiers(PlayerTemp.Types type)
     {
         switch (type)
         {
-            case AMBIENT:  { return ambientModifiers; }
-            case BODY:     { return bodyModifiers; }
-            case BASE:     { return baseModifiers; }
-            case RATE:     { return rateModifiers; }
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getModifiers(): " + type);
+            case AMBIENT:  { this.ambientModifiers.clear(); break; }
+            case BODY:     { this.bodyModifiers.clear(); break; }
+            case BASE:     { this.baseModifiers.clear(); break; }
+            case RATE:     { this.rateModifiers.clear(); break; }
+            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.clearModifiers(): " + type);
         }
     }
 }

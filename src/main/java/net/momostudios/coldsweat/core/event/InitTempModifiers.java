@@ -5,6 +5,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.temperature.modifier.block.*;
 import net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier;
@@ -29,15 +30,22 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerBlockEffects(TempModifierEvent.Init.Block event)
     {
-        event.addBlockEffect(new LavaBlockEffect());
-        event.addBlockEffect(new FurnaceBlockEffect());
-        event.addBlockEffect(new CampfireBlockEffect());
-        event.addBlockEffect(new FireBlockEffect());
-        event.addBlockEffect(new IceBlockEffect());
-        event.addBlockEffect(new IceboxBlockEffect());
-        event.addBlockEffect(new BoilerBlockEffect());
-        event.addBlockEffect(new SoulFireBlockEffect());
-        event.addBlockEffect(new SoulCampfireBlockEffect());
+        try
+        {
+            event.addBlockEffect(LavaBlockEffect.class);
+            event.addBlockEffect(FurnaceBlockEffect.class);
+            event.addBlockEffect(CampfireBlockEffect.class);
+            event.addBlockEffect(FireBlockEffect.class);
+            event.addBlockEffect(IceBlockEffect.class);
+            event.addBlockEffect(IceboxBlockEffect.class);
+            event.addBlockEffect(BoilerBlockEffect.class);
+            event.addBlockEffect(SoulFireBlockEffect.class);
+            event.addBlockEffect(SoulCampfireBlockEffect.class);
+        }
+        catch (Exception e) {
+            ColdSweat.LOGGER.error("Registering BlockEffects failed!");
+            e.printStackTrace();
+        }
     }
 
     // Register TempModifiers
@@ -61,6 +69,7 @@ public class InitTempModifiers
             event.addModifier(HearthTempModifier.class);
         }
         catch (Exception e) {
+            ColdSweat.LOGGER.error("Registering TempModifiers failed!");
             e.printStackTrace();
         }
     }

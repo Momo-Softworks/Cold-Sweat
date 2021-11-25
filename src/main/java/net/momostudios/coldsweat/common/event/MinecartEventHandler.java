@@ -79,7 +79,7 @@ public class MinecartEventHandler
         PlayerEntity player = event.player;
         if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
         {
-            PlayerTemp.applyModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
+            PlayerTemp.addModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
         }
     }
 }

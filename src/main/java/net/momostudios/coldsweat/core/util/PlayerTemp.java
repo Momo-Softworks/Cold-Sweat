@@ -1,13 +1,16 @@
 package net.momostudios.coldsweat.core.util;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.MinecraftForge;
+import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import net.momostudios.coldsweat.core.event.StorePlayerData;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 
 import java.util.ArrayList;
@@ -45,44 +48,31 @@ public class PlayerTemp
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void applyModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates)
+    public static void addModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates)
     {
-        MinecraftForge.EVENT_BUS.post(new TempModifierEvent.Add(modifier, player, type, duplicates));
-    }
-
-
-    /**
-     * Gets all TempModifiers of the specified type on the player
-     * @param player is the player being sampled
-     * @param type determines which TempModifier list to pull from
-     * @returns a NEW list of all TempModifiers of the specified type
-     */
-    public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
-    {
-        List<TempModifier> modifierList = new ArrayList<>();
-        // Get the list of modifiers from the player's persistent data
-        ListNBT modifiers = player.getPersistentData().getList(PlayerTemp.getModifierTag(type), 10);
-        // For each modifier in the list
-        modifiers.forEach(modifier ->
+        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, duplicates);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (!event.isCanceled())
         {
-            CompoundNBT modifierNBT = (CompoundNBT) modifier;
-
-            // Create a new modifier from the CompoundNBT
-            TempModifier newModifier = TempModifierEntries.getEntries().getEntryFor(modifierNBT.getString("id"));
-
-            modifierNBT.keySet().forEach(key ->
+            player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
             {
-                // Add the modifier's arguments
-                newModifier.addArgument(key, NBTHelper.getObjectFromINBT(modifierNBT.get(key)));
+                if (TempModifierEntries.getEntries().getMap().containsKey(event.getModifier().getID()))
+                {
+                    if (!cap.hasModifier(event.type, event.getModifier().getClass()) || event.duplicatesAllowed)
+                    {
+                        cap.addModifier(event.type, event.getModifier());
+                    }
+                }
+                else
+                    ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
             });
-
-            // Add the modifier to the player's temperature
-            modifierList.add(newModifier);
-        });
-
-        return modifierList;
+            // Update for player's client
+            if (player instanceof ServerPlayerEntity)
+            {
+                PlayerHelper.updateModifiers(player);
+            }
+        }
     }
-
 
     /**
      * Removes the specified number of TempModifiers of the specified type from the player
@@ -93,9 +83,47 @@ public class PlayerTemp
      */
     public static void removeModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type, int count)
     {
-        MinecraftForge.EVENT_BUS.post(new TempModifierEvent.Remove(player, modClass, type, count));
+        TempModifierEvent.Remove event = new TempModifierEvent.Remove(player, modClass, type, count);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (!event.isCanceled())
+        {
+            // Sync modifier data to the player's NBT
+            player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+            {
+                if (cap.getModifiers(event.type) != null && !cap.getModifiers(event.type).isEmpty())
+                {
+                    for (int i = 0; i < Math.min(event.count, cap.getModifiers(event.type).size()); i++)
+                    {
+                        cap.removeModifier(event.type, event.modifierClass);
+                    }
+                }
+            });
+            // Update for player's client
+            if (player instanceof ServerPlayerEntity)
+            {
+                PlayerHelper.updateModifiers(player);
+            }
+        }
     }
 
+    /**
+     * Gets all TempModifiers of the specified type on the player
+     * @param player is the player being sampled
+     * @param type determines which TempModifier list to pull from
+     * @returns a NEW list of all TempModifiers of the specified type
+     */
+    public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
+    {
+        List<TempModifier> modifierList = new ArrayList<>();
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+        {
+            if (cap.getModifiers(type) != null)
+            {
+                modifierList.addAll(cap.getModifiers(type));
+            }
+        });
+        return modifierList;
+    }
 
     /**
      * Defines all types of temperature in Cold Sweat. <br>

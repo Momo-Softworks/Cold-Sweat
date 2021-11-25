@@ -1,24 +1,18 @@
 package net.momostudios.coldsweat.core.event;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.client.event.AmbientGaugeDisplay;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.capabilities.ITemperatureCapability;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.util.NBTHelper;
+import net.momostudios.coldsweat.core.util.PlayerHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.ArrayList;
@@ -64,15 +58,9 @@ public class StorePlayerData
                 });
             }
         });
-    }
 
-    @SubscribeEvent
-    public static void updateDataSync(TickEvent.PlayerTickEvent event)
-    {
-        if (event.player.ticksExisted % 60 == 0)
-        {
-            syncData(event.player);
-        }
+        if (player instanceof ServerPlayerEntity)
+            PlayerHelper.updateModifiers(player);
     }
 
     @SubscribeEvent
@@ -82,7 +70,7 @@ public class StorePlayerData
         syncData(event.getPlayer());
     }
 
-    public static void syncData(PlayerEntity player)
+    private static void syncData(PlayerEntity player)
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
@@ -100,23 +88,18 @@ public class StorePlayerData
             for (PlayerTemp.Types type : validTypes)
             {
                 ListNBT modifiers = new ListNBT();
-                List<String> modifierIds = new ArrayList<>();
                 for (TempModifier modifier : cap.getModifiers(type))
                 {
-                    if (!modifierIds.contains(modifier.getID()))
-                    {
-                        // Write the modifier's data to a CompoundNBT
-                        CompoundNBT modifierNBT = new CompoundNBT();
-                        modifierNBT.putString("id", modifier.getID());
-                        modifierIds.add(modifier.getID());
+                    // Write the modifier's data to a CompoundNBT
+                    CompoundNBT modifierNBT = new CompoundNBT();
+                    modifierNBT.putString("id", modifier.getID());
 
-                        // Add the modifier's arguments
-                        modifier.getArguments().forEach((name, value) ->
-                        {
-                            modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
-                        });
-                        modifiers.add(modifierNBT);
-                    }
+                    // Add the modifier's arguments
+                    modifier.getArguments().forEach((name, value) ->
+                    {
+                        modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
+                    });
+                    modifiers.add(modifierNBT);
                 }
                 // Write the list of modifiers to the player's persistent data
                 player.getPersistentData().put(PlayerTemp.getModifierTag(type), modifiers);
