@@ -149,7 +149,7 @@ public class TempCommand extends BaseCommand
                     //Compose the message
                     player.sendStatusMessage(new StringTextComponent(
                     "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-                    new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", source.asPlayer().getScoreboardName()).getString()  +
+                    new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", players.iterator().next().getScoreboardName()).getString()  +
                     " \u00a7f" + PlayerTemp.getTemperature(players.iterator().next(), PlayerTemp.Types.BODY).get() + "\u00a7r"), false);
                 }
             }
