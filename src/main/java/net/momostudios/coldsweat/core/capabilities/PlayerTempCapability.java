@@ -68,14 +68,18 @@ public class PlayerTempCapability
     {
         switch (type)
         {
-            case AMBIENT:  { return this.ambientModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
-            case BODY:     { return this.bodyModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
-            case BASE:     { return this.baseModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
-            case RATE:     { return this.rateModifiers.stream().anyMatch(modifier -> modifier.getClass() == mod); }
+            case AMBIENT:  { return this.ambientModifiers.stream().anyMatch(mod::isInstance); }
+            case BODY:     { return this.bodyModifiers.stream().anyMatch(mod::isInstance); }
+            case BASE:     { return this.baseModifiers.stream().anyMatch(mod::isInstance); }
+            case RATE:     { return this.rateModifiers.stream().anyMatch(mod::isInstance); }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.hasModifier(): " + type);
         }
     }
 
+    /**
+     * Do NOT use this! (use {@link PlayerTemp#addModifier} instead) <br>
+     * Using this method will cause client-server desync.
+     */
     public void addModifier(PlayerTemp.Types type, TempModifier modifier)
     {
         switch (type)
@@ -88,6 +92,10 @@ public class PlayerTempCapability
         }
     }
 
+    /**
+     * Do NOT use this! (use {@link PlayerTemp#removeModifier} instead) <br>
+     * Using this method will cause client-server desync.
+     */
     public void removeModifier(PlayerTemp.Types type, Class<? extends TempModifier> modifier)
     {
         switch (type)

@@ -16,6 +16,8 @@ import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PlayerTemp
 {
@@ -123,6 +125,32 @@ public class PlayerTemp
             }
         });
         return modifierList;
+    }
+
+    /**
+     * @param modClass The class of the TempModifier to check for
+     * @param type The type of TempModifier to check for
+     * @return true if the player has the specified TempModifier of the specified type
+     */
+    public static boolean hasModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type)
+    {
+        return player.getCapability(PlayerTempCapability.TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
+    }
+
+    /**
+     * Iterates through all TempModifiers of the specified type on the player
+     * @param type determines which TempModifier list to pull from
+     * @param action the action(s) to perform on each TempModifier
+     */
+    public static void forEachModifier(PlayerEntity player, Types type, Consumer<TempModifier> action)
+    {
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+        {
+            if (cap.getModifiers(type) != null)
+            {
+                cap.getModifiers(type).forEach(action);
+            }
+        });
     }
 
     /**

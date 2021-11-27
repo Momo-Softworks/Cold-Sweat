@@ -40,9 +40,9 @@ public class SoulLampPutFuel
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onSwapItem(final GuiScreenEvent.MouseReleasedEvent event)
     {
-        if (event.getGui() instanceof ContainerScreen && event.getButton() == 0 || event.getButton() == 1 && event.getPhase() == EventPriority.HIGHEST)
+        if (event.getGui() instanceof ContainerScreen && (event.getButton() == 0 || event.getButton() == 1))
         {
-            ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getGui();
+            ContainerScreen inventoryScreen = (ContainerScreen) event.getGui();
             Slot slot = inventoryScreen.getSlotUnderMouse();
             PlayerEntity player = Minecraft.getInstance().player;
 
@@ -60,7 +60,6 @@ public class SoulLampPutFuel
 
                         event.setCanceled(true);
                         event.setResult(Event.Result.DENY);
-                        System.out.println("fuel inserted for player: " + player.getDisplayName().getString());
                         ColdSweatPacketHandler.INSTANCE.sendToServer(new SoulLampInputMessage(slotIndex, holdingStack, event.getButton() == 1));
                     }
                 }

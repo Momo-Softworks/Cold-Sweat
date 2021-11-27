@@ -14,16 +14,14 @@ public class LeatherTempModifier extends TempModifier
 {
     public LeatherTempModifier() {}
 
-    public LeatherTempModifier(double amount) {
+    public LeatherTempModifier(int amount) {
         addArgument("amount", amount);
     }
 
     @Override
     public double calculate(Temperature temp, PlayerEntity player)
     {
-        PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
-
-        return temp.get() / Math.max(1, (double) getArgument("amount") / 15);
+        return temp.get() / Math.max(1d, (int) getArgument("amount") / 15d);
     }
 
     public String getID()

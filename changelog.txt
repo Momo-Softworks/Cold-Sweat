@@ -20,20 +20,21 @@
 - Fixed a bug that caused Cold Sweat to spam errors into the console in some cases
 - Rebalanced temperature-emitting blocks to have a limited effect
 
-2.1
+2.1 Beta 1
 - New Item: Soulfire Lamp
     - Cools the player down when in the Nether
     - Requires Warped or Crimson stems as fuel (temporarily; will be changed to a custom item in the future)
-- Updated the Hearth's texture slightly
 - The Hearth now only consumes the necessary fuel to function
     - If it is hot, for example, it will only use cold fuel
     - The Hearth will not use any fuel if there are no players in the area
+    - If the temperature in the area is habitable, the Hearth will not use any fuel
 - Limited the number of total blocks the Hearth can affect to 2000
     - This replaces the 20-block radius that it used to have
     - increased the technical radius to 64 blocks
     - (note that it can't actually fill the entire 64-block radius, but it can reach these distances if you make a tunnel for the hearth to spread through)
 - Leather armor now insulates based on what piece of armor it is (configurable)
     - i.e. a leather chestplate insulates more than a leather helmet
+- Updated the Hearth's texture slightly
 - Added Polish translation by @Lifus_Crustus on our Discord server
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 - Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
@@ -42,7 +43,7 @@
 - Technical Changes:
     - BlockEffects and TempModifiers are now stored in a map instead of a list
         - Massive performance uplift
-        - Easier to store/lookup elements by their ID
+        - Easier to store/lookup elements by their ID/block
     - Updates to TempModifiers
         - Moved to the capabilities system
         - Much easier to add arguments
@@ -70,6 +71,15 @@
     - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
     - Removed some defunct recipes that would throw errors in server consoles
 
+2.1 Beta 2
+- Added new methods for handling TempModifiers:
+    - PlayerTemp.hasModifier():
+        - Returns true if the player has a modifier of the given type
+    - PlayerTemp.forEachModifier():
+        - Calls the given function for each modifier of the given type
+- Reduced the potential performance impact of wearing leather armor
+    - This probably won't affect performance much, but it's worth noting (it all adds up, you know!)
+- Fixed an issue that caused the player's temperature to not be saved properly upon leaving the world
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

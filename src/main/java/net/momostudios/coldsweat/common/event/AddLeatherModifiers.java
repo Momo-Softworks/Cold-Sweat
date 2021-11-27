@@ -23,39 +23,56 @@ public class AddLeatherModifiers
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
         PlayerEntity player = event.player;
+        if (player.ticksExisted % 10 == 0)
+        {
+            ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 3));
+            ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 2));
+            ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 1));
+            ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 0));
 
-        ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 3));
-        ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 2));
-        ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 1));
-        ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 0));
+            int leatherMultiplier = 0;
+            leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
+            leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
+            leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
+            leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
 
-        int leatherMultiplier = 0;
-        leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
-        leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
-        leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
-        leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
+            int helmetInsulation = getInsulatingArmor(helmetItem).value;
+            int chestInsulation = getInsulatingArmor(chestplateItem).value;
+            int legsInsulation = getInsulatingArmor(leggingsItem).value;
+            int bootsInsulation = getInsulatingArmor(bootsItem).value;
 
-        int helmetInsulation = getInsulatingArmor(helmetItem).value;
-        int chestInsulation = getInsulatingArmor(chestplateItem).value;
-        int legsInsulation = getInsulatingArmor(leggingsItem).value;
-        int bootsInsulation = getInsulatingArmor(bootsItem).value;
+            if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0) {
+                leatherMultiplier += helmetInsulation;
+            }
+            if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0) {
+                leatherMultiplier += chestInsulation;
+            }
+            if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0) {
+                leatherMultiplier += legsInsulation;
+            }
+            if (bootsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0) {
+                leatherMultiplier += bootsInsulation;
+            }
 
-        if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0) {
-            leatherMultiplier += helmetInsulation;
+            if (leatherMultiplier > 0)
+            {
+                if (PlayerTemp.hasModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE))
+                {
+                    int multiplier = leatherMultiplier;
+                    PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
+                    {
+                        if (modifier instanceof LeatherTempModifier)
+                        {
+                            modifier.setArgument("amount", multiplier);
+                        }
+                    });
+                }
+                else
+                    PlayerTemp.addModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+            }
+            else
+                PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, Integer.MAX_VALUE);
         }
-        if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0) {
-            leatherMultiplier += chestInsulation;
-        }
-        if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0) {
-            leatherMultiplier += legsInsulation;
-        }
-        if (bootsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0) {
-            leatherMultiplier += bootsInsulation;
-        }
-
-        PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, 1);
-        if (leatherMultiplier > 0)
-            PlayerTemp.addModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
     }
 
     public static ItemEntry getInsulatingArmor(ItemStack stack)

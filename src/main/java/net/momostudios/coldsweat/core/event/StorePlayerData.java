@@ -21,17 +21,24 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class StorePlayerData
 {
+    static String ambientTemp = PlayerTemp.getTempTag(PlayerTemp.Types.AMBIENT);
+    static String bodyTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BODY);
+    static String baseTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BASE);
+
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event)
     {
         PlayerEntity player = event.getPlayer();
-        ColdSweat.LOGGER.debug("Reading temperature data for player " + player.getName().getString());
+        ColdSweat.LOGGER.debug("Loading temperature data for player " + player.getName().getString() +
+                " A: " + player.getPersistentData().getDouble(ambientTemp) +
+                " Bo: " + player.getPersistentData().getDouble(bodyTemp) +
+                " Ba: " + player.getPersistentData().getDouble(baseTemp));
 
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
-            cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getDouble("body_temperature"));
-            cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getDouble("base_temperature"));
-            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getDouble("ambient_temperature"));
+            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getDouble(ambientTemp));
+            cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getDouble(bodyTemp));
+            cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getDouble(baseTemp));
 
             // Load the player's modifiers
             PlayerTemp.Types[] validTypes = {PlayerTemp.Types.AMBIENT, PlayerTemp.Types.BODY, PlayerTemp.Types.BASE, PlayerTemp.Types.RATE};
@@ -50,6 +57,7 @@ public class StorePlayerData
                     modifierNBT.keySet().forEach(key ->
                     {
                         // Add the modifier's arguments
+                        if (newModifier != null && key != null)
                         newModifier.addArgument(key, NBTHelper.getObjectFromINBT(modifierNBT.get(key)));
                     });
 
@@ -66,22 +74,15 @@ public class StorePlayerData
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event)
     {
-        ColdSweat.LOGGER.debug("Writing temperature data for player " + event.getPlayer().getName().getString());
-        syncData(event.getPlayer());
-    }
+        ColdSweat.LOGGER.debug("Saving temperature data for player " + event.getPlayer().getName().getString());
+        PlayerEntity player = event.getPlayer();
 
-    private static void syncData(PlayerEntity player)
-    {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
             // Save the player's temperature data
-            String ambientTemp = PlayerTemp.getTempTag(PlayerTemp.Types.AMBIENT);
-            String bodyTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BODY);
-            String baseTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BASE);
-
-            player.getPersistentData().putDouble(ambientTemp, cap.get(PlayerTemp.Types.BODY));
-            player.getPersistentData().putDouble(bodyTemp, cap.get(PlayerTemp.Types.BASE));
-            player.getPersistentData().putDouble(baseTemp, cap.get(PlayerTemp.Types.AMBIENT));
+            player.getPersistentData().putDouble(ambientTemp, cap.get(PlayerTemp.Types.AMBIENT));
+            player.getPersistentData().putDouble(bodyTemp, cap.get(PlayerTemp.Types.BODY));
+            player.getPersistentData().putDouble(baseTemp, cap.get(PlayerTemp.Types.BASE));
 
             // Save the player's modifiers
             PlayerTemp.Types[] validTypes = {PlayerTemp.Types.AMBIENT, PlayerTemp.Types.BODY, PlayerTemp.Types.BASE, PlayerTemp.Types.RATE};

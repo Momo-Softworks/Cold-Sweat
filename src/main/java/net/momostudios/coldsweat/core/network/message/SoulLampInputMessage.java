@@ -43,7 +43,6 @@ public class SoulLampInputMessage
         context.enqueueWork(() ->
         {
             ServerPlayerEntity player = context.getSender();
-            System.out.println("server received input message for player: " + player.getDisplayName().getString());
 
             Container container = player.openContainer;
             ItemStack stack = message.lampStack;

@@ -5,10 +5,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.common.temperature.modifier.SoulLampTempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
+
+import java.util.List;
 
 public class SoulfireLampItem extends Item
 {
@@ -22,8 +28,11 @@ public class SoulfireLampItem extends Item
     {
         if (entityIn instanceof PlayerEntity)
         {
-            double temp = PlayerTemp.getTemperature((PlayerEntity) entityIn, PlayerTemp.Types.AMBIENT).get();
             PlayerEntity player = (PlayerEntity) entityIn;
+            List<TempModifier> mods = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
+            mods.removeIf(mod -> mod instanceof SoulLampTempModifier);
+            double temp = new Temperature().with(mods, player).get();
+
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
             {
                 stack.getOrCreateTag().putBoolean("hasTicked", true);
@@ -35,7 +44,7 @@ public class SoulfireLampItem extends Item
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.015f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()) / 5)));
+                    addFuel(stack, -0.03f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()))));
                 }
             }
         }
