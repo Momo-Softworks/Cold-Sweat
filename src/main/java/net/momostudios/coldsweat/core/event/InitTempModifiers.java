@@ -52,6 +52,7 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierEvent.Init.Modifier event)
     {
+        String sereneseasons = "net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier";
         try
         {
             event.addModifier(BlockTempModifier.class);
@@ -63,9 +64,7 @@ public class InitTempModifiers
             event.addModifier(WaterskinTempModifier.class);
             event.addModifier(WeatherTempModifier.class);
             event.addModifier(SoulLampTempModifier.class);
-            event.addModifier(ModList.get().isLoaded("sereneseasons") ?
-                    (Class<? extends TempModifier>) Class.forName("net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier") :
-                    SereneSeasonsDummyModifier.class);
+            if (ModList.get().isLoaded("sereneseasons")) event.addModifier((Class<TempModifier>) Class.forName(sereneseasons));
             event.addModifier(HearthTempModifier.class);
         }
         catch (Exception e) {

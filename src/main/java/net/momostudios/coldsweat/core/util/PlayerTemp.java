@@ -22,18 +22,15 @@ import java.util.function.Supplier;
 public class PlayerTemp
 {
     /**
-     * Returns the player's temperature AFTER the modifiers are calculated.
+     * Returns the player's temperature AFTER {@link TempModifier}s are calculated.
      */
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
-        AtomicReference<Double> temp = new AtomicReference<>(0.0d);
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability -> temp.set(capability.get(type)));
-        return new Temperature(temp.get());
+        return new Temperature(player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
     }
 
     /**
-     * You should try to avoid using these unless you need to set the value to a fixed amount.<br>
-     * Otherwise, use a {@link TempModifier} instead.
+     * Use {@link TempModifier}s for over-time effects.
      */
     public static void setTemperature(PlayerEntity player, Temperature value, Types type)
     {
@@ -116,15 +113,18 @@ public class PlayerTemp
      */
     public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
     {
-        List<TempModifier> modifierList = new ArrayList<>();
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+        List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(null).getModifiers(type);
+        List<TempModifier> toRemove = new ArrayList<>();
+        mods.forEach(mod ->
         {
-            if (cap.getModifiers(type) != null)
+            if (mod == null || mod.getID() == null)
             {
-                modifierList.addAll(cap.getModifiers(type));
+                ColdSweat.LOGGER.error("Found TempModifier with null ID! Removing...");
+                toRemove.add(mod);
             }
         });
-        return modifierList;
+        mods.removeAll(toRemove);
+        return mods;
     }
 
     /**

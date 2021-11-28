@@ -28,6 +28,6 @@ public class IceboxBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertFromF(-40);
+        return MathHelperCS.FtoMC(-40);
     }
 }

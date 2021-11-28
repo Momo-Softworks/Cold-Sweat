@@ -1,7 +1,6 @@
 package net.momostudios.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.java.games.input.Mouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.screen.Screen;
@@ -169,8 +168,8 @@ public class ConfigScreen
 
             if (INSTANCE.difficulty == 0)
             {
-                CMI.setMinHabitable(MathHelperCS.convertFromF(40));
-                CMI.setMaxHabitable(MathHelperCS.convertFromF(120));
+                CMI.setMinHabitable(MathHelperCS.FtoMC(40));
+                CMI.setMaxHabitable(MathHelperCS.FtoMC(120));
                 CMI.setRateMultiplier(0.5);
                 CMI.setShowAmbient(true);
                 CMI.setDamageScaling(false);
@@ -180,8 +179,8 @@ public class ConfigScreen
             }
             else if (INSTANCE.difficulty == 1)
             {
-                CMI.setMinHabitable(MathHelperCS.convertFromF(45));
-                CMI.setMaxHabitable(MathHelperCS.convertFromF(115));
+                CMI.setMinHabitable(MathHelperCS.FtoMC(45));
+                CMI.setMaxHabitable(MathHelperCS.FtoMC(115));
                 CMI.setRateMultiplier(0.75);
                 CMI.setShowAmbient(true);
                 CMI.setDamageScaling(false);
@@ -191,8 +190,8 @@ public class ConfigScreen
             }
             else if (INSTANCE.difficulty == 2)
             {
-                CMI.setMinHabitable(MathHelperCS.convertFromF(50));
-                CMI.setMaxHabitable(MathHelperCS.convertFromF(110));
+                CMI.setMinHabitable(MathHelperCS.FtoMC(50));
+                CMI.setMaxHabitable(MathHelperCS.FtoMC(110));
                 CMI.setRateMultiplier(1.0);
                 CMI.setShowAmbient(false);
                 CMI.setDamageScaling(true);
@@ -202,8 +201,8 @@ public class ConfigScreen
             }
             else if (INSTANCE.difficulty == 3)
             {
-                CMI.setMinHabitable(MathHelperCS.convertFromF(60));
-                CMI.setMaxHabitable(MathHelperCS.convertFromF(100));
+                CMI.setMinHabitable(MathHelperCS.FtoMC(60));
+                CMI.setMaxHabitable(MathHelperCS.FtoMC(100));
                 CMI.setRateMultiplier(1.5);
                 CMI.setShowAmbient(false);
                 CMI.setDamageScaling(true);
@@ -312,12 +311,12 @@ public class ConfigScreen
             // Max Temperature
             this.maxTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 52, 51, 22, new StringTextComponent(""));
             this.maxTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format
-                    (celsius ? MathHelperCS.convertToC(CMI.maxHabitable()) : MathHelperCS.convertToF(CMI.maxHabitable()))));
+                    (celsius ? MathHelperCS.MCtoC(CMI.maxHabitable()) : MathHelperCS.MCtoF(CMI.maxHabitable()))));
 
             // Min Temperature
             this.minTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 84, 51, 22, new StringTextComponent(""));
             this.minTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format
-                    (celsius ? MathHelperCS.convertToC(CMI.minHabitable()) : MathHelperCS.convertToF(CMI.minHabitable()))));
+                    (celsius ? MathHelperCS.MCtoC(CMI.minHabitable()) : MathHelperCS.MCtoF(CMI.minHabitable()))));
 
             // Rate Multiplier
             this.rateMultInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 116, 51, 22, new StringTextComponent(""));
@@ -423,14 +422,14 @@ public class ConfigScreen
 
             try
             {
-                CMI.setMaxHabitable(celsius ? MathHelperCS.convertFromC(Double.parseDouble(maxTempInput.getText())) :
-                        MathHelperCS.convertFromF(Double.parseDouble(maxTempInput.getText())));
+                CMI.setMaxHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(maxTempInput.getText())) :
+                        MathHelperCS.FtoMC(Double.parseDouble(maxTempInput.getText())));
             } catch (Exception e) {}
 
             try
             {
-                CMI.setMinHabitable(celsius ? MathHelperCS.convertFromC(Double.parseDouble(minTempInput.getText())) :
-                        MathHelperCS.convertFromF(Double.parseDouble(minTempInput.getText())));
+                CMI.setMinHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(minTempInput.getText())) :
+                        MathHelperCS.FtoMC(Double.parseDouble(minTempInput.getText())));
             } catch (Exception e) {}
 
             try
@@ -455,8 +454,8 @@ public class ConfigScreen
                 (this.celsius ? new TranslationTextComponent("cold_sweat.config.celsius.name").getString() :
                                 new TranslationTextComponent("cold_sweat.config.fahrenheit.name").getString())));
 
-            minTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format(celsius ? MathHelperCS.convertToC(minTemp) : MathHelperCS.convertToF(minTemp))));
-            maxTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format(celsius ? MathHelperCS.convertToC(maxTemp) : MathHelperCS.convertToF(maxTemp))));
+            minTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format(celsius ? MathHelperCS.MCtoC(minTemp) : MathHelperCS.MCtoF(minTemp))));
+            maxTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format(celsius ? MathHelperCS.MCtoC(maxTemp) : MathHelperCS.MCtoF(maxTemp))));
             INSTANCE.difficulty = 4;
         }
 

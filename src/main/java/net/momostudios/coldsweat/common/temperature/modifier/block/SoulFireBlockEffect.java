@@ -2,11 +2,8 @@ package net.momostudios.coldsweat.common.temperature.modifier.block;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
@@ -40,6 +37,6 @@ public class SoulFireBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertFromF(-20);
+        return MathHelperCS.FtoMC(-20);
     }
 }

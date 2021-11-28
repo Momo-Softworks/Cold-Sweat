@@ -1,19 +1,13 @@
 package net.momostudios.coldsweat.config;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 public class ColdSweatConfig
 {
@@ -72,10 +66,10 @@ public class ColdSweatConfig
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
                 .comment("Minimum habitable temperature (default: 0.25, on a scale of 0 - 2)")
-                .defineInRange("Minimum Habitable Temperature", MathHelperCS.convertFromF(50), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .defineInRange("Minimum Habitable Temperature", MathHelperCS.FtoMC(50), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
                 .comment("Maximum habitable temperature (default: 1.75, on a scale of 0 - 2)")
-                .defineInRange("Maximum Habitable Temperature", MathHelperCS.convertFromF(100), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .defineInRange("Maximum Habitable Temperature", MathHelperCS.FtoMC(100), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);

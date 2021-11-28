@@ -203,9 +203,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                             if (testpos.withinDistance(testpos, 64))
                             {
-                                if (WorldInfo.isBlockSpreadable(world, blockPos, testpos) &&
-                                !WorldInfo.canSeeSky(world, testpos) &&
-                                !poss.contains(testpos) && !positions2.contains(testpos) && (touchingSolid || MathHelperCS.isEvenPosition(testpos)))
+                                if (WorldInfo.isBlockSpreadable(world, blockPos, testpos) && !WorldInfo.canSeeSky(world, testpos) &&
+                                !poss.contains(testpos) && !positions2.contains(testpos) &&
+                                (touchingSolid || MathHelperCS.isEvenPosition(testpos, pos.getX() % 2 != 0, pos.getY() % 2 != 0, pos.getZ() % 2 != 0)))
                                 {
                                     positions2.add(testpos);
                                 }

@@ -100,15 +100,18 @@ public class PlayerTempCapability
     {
         switch (type)
         {
-            case AMBIENT:  { this.ambientModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
-            case BODY:     { this.bodyModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
-            case BASE:     { this.baseModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
-            case RATE:     { this.rateModifiers.removeIf(mod -> mod.getClass() == modifier); break; }
+            case AMBIENT:  { this.ambientModifiers.removeIf(modifier::isInstance); break; }
+            case BODY:     { this.bodyModifiers.removeIf(modifier::isInstance); break; }
+            case BASE:     { this.baseModifiers.removeIf(modifier::isInstance); break; }
+            case RATE:     { this.rateModifiers.removeIf(modifier::isInstance); break; }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.removeModifier(): " + type);
         }
     }
 
 
+    /**
+     * Do NOT use this! <br>
+     */
     public void clearModifiers(PlayerTemp.Types type)
     {
         switch (type)

@@ -87,7 +87,7 @@ public class AmbientGaugeDisplay
             else if (temp < min)
                 color = 4236031;
 
-            int tempScaled = (int) MathHelperCS.convertToF(temp);
+            int tempScaled = (int) MathHelperCS.MCtoF(temp);
             int tempMeasurement = (int) (celsius ? MathHelperCS.FtoC(tempScaled) : tempScaled) + CCS.tempOffset();
 
             if (temp > max || temp < min)

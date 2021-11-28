@@ -3,9 +3,12 @@ package net.momostudios.coldsweat.common.event;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
+import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
@@ -29,8 +32,9 @@ public class AddTempModifiers
             PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
             PlayerTemp.addModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
             PlayerTemp.addModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);;
-            PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
+            PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            if (ModList.get().isLoaded("sereneseasons"))
+                PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
 
             // Hearth
             if (player.isPotionActive(ModEffects.INSULATION))
@@ -44,5 +48,12 @@ public class AddTempModifiers
             else
                 PlayerTemp.removeModifier(player, SoulLampTempModifier.class, PlayerTemp.Types.AMBIENT, 1);
         }
+    }
+
+    @SubscribeEvent
+    public static void onSleep(PlayerSleepInBedEvent event)
+    {
+        Temperature temp = PlayerTemp.getTemperature(event.getPlayer(), PlayerTemp.Types.BODY);
+        PlayerTemp.setTemperature(event.getPlayer(), new Temperature(temp.get() / 4), PlayerTemp.Types.BODY);
     }
 }

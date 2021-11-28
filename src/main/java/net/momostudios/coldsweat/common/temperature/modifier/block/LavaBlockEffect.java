@@ -14,8 +14,8 @@ public class LavaBlockEffect extends BlockEffect
     {
         if (hasBlock(state))
         {
-            double temp = 0.002 + (15 - state.get(FlowingFluidBlock.LEVEL)) / 1200.0;
-            return Math.max(0, temp * (9 - distance));
+            double temp = 0.002 + Math.max((15 - state.get(FlowingFluidBlock.LEVEL)) / 1200d, 0d);
+            return Math.max(0, temp * (9d - distance));
         }
         return 0;
     }
@@ -28,6 +28,6 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertFromF(1000);
+        return MathHelperCS.FtoMC(1000);
     }
 }

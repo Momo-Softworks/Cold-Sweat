@@ -27,6 +27,6 @@ public class BoilerBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertFromF(40);
+        return MathHelperCS.FtoMC(40);
     }
 }

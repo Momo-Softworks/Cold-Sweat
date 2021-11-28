@@ -8,6 +8,7 @@ import net.minecraft.util.HandSide;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
+import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class PlayerHelper
@@ -31,9 +32,16 @@ public class PlayerHelper
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
                 new PlayerModifiersSyncMessage(
+                        player,
                         PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT),
                         PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY),
                         PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE),
                         PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE)));
+    }
+
+    public static void updateTemperature(PlayerEntity player)
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+                new PlayerTempSyncMessage(PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get(), PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).get()));
     }
 }

@@ -7,22 +7,22 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class MathHelperCS
 {
-    public static double convertToF(double value)
+    public static double MCtoF(double value)
     {
         return value * 42 + 32;
     }
 
-    public static double convertToC(double value)
+    public static double MCtoC(double value)
     {
         return (value * 210) / 9.0;
     }
 
-    public static double convertFromC(double value)
+    public static double CtoMC(double value)
     {
         return (value * 9.0) / 210;
     }
 
-    public static double convertFromF(double value)
+    public static double FtoMC(double value)
     {
         return (value - 32) / 42.0;
     }
@@ -37,8 +37,10 @@ public class MathHelperCS
         return value * (9.0 / 5) + 32;
     }
 
-    public static boolean isEvenPosition(BlockPos pos) {
-        return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
+    public static boolean isEvenPosition(BlockPos pos, boolean xOffset, boolean yOffset, boolean zOffset) {
+        return (xOffset == (pos.getX() % 2 == 0)) &&
+               (yOffset == (pos.getY() % 2 == 0)) &&
+               (zOffset == (pos.getZ() % 2 == 0));
     }
 
     public static float toRadians(float input) {
@@ -49,7 +51,7 @@ public class MathHelperCS
         return input * (float) (180 / Math.PI);
     }
 
-    public static float clamp(float value, float min, float max) {
+    public static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(value, max));
     }
 

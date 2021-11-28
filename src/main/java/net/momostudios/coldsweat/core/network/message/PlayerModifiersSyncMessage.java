@@ -2,9 +2,11 @@ package net.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
@@ -21,15 +23,17 @@ public class PlayerModifiersSyncMessage
     public List<TempModifier> body;
     public List<TempModifier> base;
     public List<TempModifier> rate;
+    PlayerEntity player;
 
     public PlayerModifiersSyncMessage() {
     }
 
-    public PlayerModifiersSyncMessage(List<TempModifier> ambient, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
+    public PlayerModifiersSyncMessage(PlayerEntity player, List<TempModifier> ambient, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
         this.ambient = ambient;
         this.body = body;
         this.base = base;
         this.rate = rate;
+        this.player = player;
     }
 
     public static void encode(PlayerModifiersSyncMessage message, PacketBuffer buffer)
@@ -43,6 +47,7 @@ public class PlayerModifiersSyncMessage
     public static PlayerModifiersSyncMessage decode(PacketBuffer buffer)
     {
         return new PlayerModifiersSyncMessage(
+                null,
                 readFromNBT(buffer.readCompoundTag()),
                 readFromNBT(buffer.readCompoundTag()),
                 readFromNBT(buffer.readCompoundTag()),
@@ -58,21 +63,26 @@ public class PlayerModifiersSyncMessage
                 type == PlayerTemp.Types.BASE ? message.base :
                 message.rate;
 
+        // Iterate modifiers and write to NBT
         for (int i = 0; i < referenceList.size(); i++)
         {
             TempModifier modifier = referenceList.get(i);
 
-            // Write the modifier's data to a CompoundNBT
-            CompoundNBT modifierNBT = new CompoundNBT();
-            modifierNBT.putString("id", modifier.getID());
-
-            // Add the modifier's arguments
-            modifier.getArguments().forEach((name, value) ->
+            if (modifier != null && modifier.getID() != null)
             {
-                modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
-            });
-            nbt.put(String.valueOf(i), modifierNBT);
+                // Write the modifier's data to a CompoundNBT
+                CompoundNBT modifierNBT = new CompoundNBT();
+                modifierNBT.putString("id", modifier.getID());
+
+                // Add the modifier's arguments
+                modifier.getArguments().forEach((name, value) ->
+                {
+                    modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
+                });
+                nbt.put(String.valueOf(i), modifierNBT);
+            }
         }
+
         return nbt;
     }
 
