@@ -12,6 +12,7 @@ import net.momostudios.coldsweat.core.event.StorePlayerData;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class TempModifierEvent extends Event
 {
@@ -66,8 +67,8 @@ public class TempModifierEvent extends Event
      * <br>
      * {@link #player} is the player the TempModifier is being removed from. <br>
      * {@link #type} is the modifier's {@link PlayerTemp.Types}. It will never be {@link PlayerTemp.Types#COMPOSITE}. <br>
-     * {@link #modifierClass} is the class of the TempModifier being removed. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
+     * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being removed. <br>
@@ -78,20 +79,28 @@ public class TempModifierEvent extends Event
     public static class Remove extends TempModifierEvent
     {
         public final PlayerEntity player;
-        public final Class<? extends TempModifier> modifierClass;
         public final PlayerTemp.Types type;
-        public int count;
+        int count;
+        Predicate<TempModifier> condition;
 
-        public Remove(PlayerEntity player, Class<? extends TempModifier> modClass, PlayerTemp.Types type, int count)
+        public Remove(PlayerEntity player, PlayerTemp.Types type, int count, Predicate<TempModifier> condition)
         {
             this.player = player;
-            this.modifierClass = modClass;
             this.type = type;
             this.count = count;
+            this.condition = condition;
         }
-
-        public void setCount(int newCount) {
-            this.count = newCount;
+        public void setCount(int count) {
+            this.count = count;
+        }
+        public void setCondition(Predicate<TempModifier> condition) {
+            this.condition = condition;
+        }
+        public int getCount() {
+            return count;
+        }
+        public Predicate<TempModifier> getCondition() {
+            return condition;
         }
     }
 

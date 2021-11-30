@@ -47,7 +47,7 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ColdSweatConfig.getInstance().rateMultiplier()), PlayerTemp.Types.BODY, false);
+                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ColdSweatConfig.getInstance().rateMultiplier()), PlayerTemp.Types.BODY, true);
             }
         }
     }
@@ -58,7 +58,7 @@ public class FilledWaterskinItem extends Item
         ActionResult<ItemStack> ar = super.onItemRightClick(world, entity, hand);
         ItemStack itemstack = ar.getResult();
 
-        PlayerTemp.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")), PlayerTemp.Types.BODY, false);
+        PlayerTemp.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")), PlayerTemp.Types.BODY, true);
 
         world.playSound(entity.getPosX(), entity.getPosY(), entity.getPosZ(),
         ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("ambient.underwater.exit")),

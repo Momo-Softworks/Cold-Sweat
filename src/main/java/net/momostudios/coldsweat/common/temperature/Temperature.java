@@ -4,13 +4,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This is the basis for nearly all things relating to temperature in this mod. <br>
  * While {@code Temperature} is not stored onto the player directly, it is very commonly used for calculations <br>
  *<br>
- * It is highly recommended to use Temperature in your code and convert it to a float via {@code get()}
+ * It is highly recommended to use Temperature in your code and convert it to a double via {@code get()}
  */
 public class Temperature
 {
@@ -36,7 +39,7 @@ public class Temperature
     /**
     * Sets the actual value of the temperature
     */
-    public void set(float amount)
+    public void set(double amount)
     {
         temp = amount;
     }
@@ -44,7 +47,7 @@ public class Temperature
     /**
     * Adds to the actual value of the temperature
     */
-    public Temperature add(float amount)
+    public Temperature add(double amount)
     {
         temp += amount;
         return new Temperature(temp + amount);
@@ -73,7 +76,7 @@ public class Temperature
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull PlayerEntity player)
     {
-        return new Temperature(temp + modifier.calculate(new Temperature(temp), player));
+        return new Temperature(modifier.calculate(new Temperature(temp), player));
     }
 
     /**
@@ -83,15 +86,11 @@ public class Temperature
      */
     public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull PlayerEntity player)
     {
-        double modTemp = temp;
-        if (!modifiers.isEmpty())
+        Temperature temp2 = new Temperature(this.temp);
+        for(TempModifier modifier : new ArrayList<>(modifiers))
         {
-            for (TempModifier modifier : modifiers)
-            {
-                if (modifier != null)
-                    modTemp = modifier.calculate(new Temperature(modTemp), player);
-            }
+            temp2.set(modifier.calculate(temp2, player));
         }
-        return new Temperature(modTemp);
+        return temp2;
     }
 }

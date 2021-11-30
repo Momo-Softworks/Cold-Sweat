@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 public class ColdSweatConfig
 {
     private static final ForgeConfigSpec SPEC;
+    private static ColdSweatConfig configReference = new ColdSweatConfig();
+    private static final ColdSweatConfig storedConfigReference = configReference;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.IntValue difficulty;
@@ -98,7 +100,7 @@ public class ColdSweatConfig
 
     public static ColdSweatConfig getInstance()
     {
-        return new ColdSweatConfig();
+        return configReference;
     }
 
     /*
@@ -170,6 +172,16 @@ public class ColdSweatConfig
 
     public void setDamageScaling(boolean enabled) {
         damageScaling.set(enabled);
+    }
+
+    public static void setConfigReference(ColdSweatConfig config) {
+        configReference = config;
+
+    }
+
+    public static void restoreConfigReference()
+    {
+        configReference = storedConfigReference;
     }
 
     public void save() {

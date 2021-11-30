@@ -17,8 +17,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.ConfigSyncMessage;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 import javax.annotation.Nonnull;
@@ -36,14 +39,14 @@ public class ConfigScreen
     private static final String ON = new TranslationTextComponent("options.on").getString();
     private static final String OFF = new TranslationTextComponent("options.off").getString();
 
-    private static final ColdSweatConfig CMI = ColdSweatConfig.getInstance();
-    private static final ClientSettingsConfig CCI = ClientSettingsConfig.getInstance();
+    private static final ColdSweatConfig SHARED_CONFIG = ColdSweatConfig.getInstance();
+    private static final ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
     public static final ConfigScreen INSTANCE = new ConfigScreen();
     public static Minecraft mc = Minecraft.getInstance();
 
     DecimalFormat twoPlaces = new DecimalFormat("#.##");
 
-    protected int difficulty = CMI.difficulty() - 1;
+    protected int difficulty = SHARED_CONFIG.difficulty() - 1;
 
     public boolean isMouseDown = false;
     public int mouseX = 0;
@@ -63,6 +66,11 @@ public class ConfigScreen
         }
     }
 
+    public static void syncConfig()
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.SERVER.noArg(), new ConfigSyncMessage(ColdSweatConfig.getInstance()));
+    }
+
     @SubscribeEvent
     public static void onClicked(GuiScreenEvent.MouseClickedEvent event)
     {
@@ -73,7 +81,7 @@ public class ConfigScreen
     @SubscribeEvent
     public static void onReleased(GuiScreenEvent.MouseReleasedEvent event)
     {
-        if (Minecraft.getInstance().currentScreen instanceof DifficultyPage)
+        if (event.getButton() == 0 && Minecraft.getInstance().currentScreen instanceof DifficultyPage)
             INSTANCE.isMouseDown = false;
     }
 
@@ -212,6 +220,7 @@ public class ConfigScreen
             }
             CMI.save();
             mc.displayGuiScreen(parentScreen);
+            syncConfig();
         }
 
         boolean isMouseOverSlider(double mouseX, double mouseY)
@@ -254,13 +263,13 @@ public class ConfigScreen
 
     public static class PageOne extends ConfigPageBase
     {
-        boolean celsius = CCI.celsius();
-        boolean iceRes = CMI.iceResistanceEffect();
-        boolean fireRes = CMI.fireResistanceEffect();
-        boolean damageScaling = CMI.damageScaling();
-        boolean showAmbient = CMI.showAmbient();
-        double minTemp = CMI.minHabitable();
-        double maxTemp = CMI.maxHabitable();
+        boolean celsius = CLIENT_CONFIG.celsius();
+        boolean iceRes = SHARED_CONFIG.iceResistanceEffect();
+        boolean fireRes = SHARED_CONFIG.fireResistanceEffect();
+        boolean damageScaling = SHARED_CONFIG.damageScaling();
+        boolean showAmbient = SHARED_CONFIG.showAmbient();
+        double minTemp = SHARED_CONFIG.minHabitable();
+        double maxTemp = SHARED_CONFIG.maxHabitable();
 
         TextFieldWidget tempOffsetInput;
         TextFieldWidget maxTempInput;
@@ -306,21 +315,21 @@ public class ConfigScreen
 
             // Temp Offset
             this.tempOffsetInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 20, 51, 22, new StringTextComponent(""));
-            this.tempOffsetInput.setText(String.valueOf(CCI.tempOffset()));
+            this.tempOffsetInput.setText(String.valueOf(CLIENT_CONFIG.tempOffset()));
 
             // Max Temperature
             this.maxTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 52, 51, 22, new StringTextComponent(""));
             this.maxTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format
-                    (celsius ? MathHelperCS.MCtoC(CMI.maxHabitable()) : MathHelperCS.MCtoF(CMI.maxHabitable()))));
+                    (celsius ? MathHelperCS.MCtoC(SHARED_CONFIG.maxHabitable()) : MathHelperCS.MCtoF(SHARED_CONFIG.maxHabitable()))));
 
             // Min Temperature
             this.minTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 84, 51, 22, new StringTextComponent(""));
             this.minTempInput.setText(String.valueOf(INSTANCE.twoPlaces.format
-                    (celsius ? MathHelperCS.MCtoC(CMI.minHabitable()) : MathHelperCS.MCtoF(CMI.minHabitable()))));
+                    (celsius ? MathHelperCS.MCtoC(SHARED_CONFIG.minHabitable()) : MathHelperCS.MCtoF(SHARED_CONFIG.minHabitable()))));
 
             // Rate Multiplier
             this.rateMultInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 116, 51, 22, new StringTextComponent(""));
-            this.rateMultInput.setText(String.valueOf(CMI.rateMultiplier()));
+            this.rateMultInput.setText(String.valueOf(SHARED_CONFIG.rateMultiplier()));
 
             // Difficulty button
             difficultyButton = new ConfigButton(this.width / 2 + 51, this.height / 4 - 8, 152, 20,
@@ -409,34 +418,36 @@ public class ConfigScreen
 
         private void save()
         {
-            CCI.setCelsius(this.celsius);
-            CMI.setIceResistanceEffect(this.iceRes);
-            CMI.setFireResistanceEffect(this.fireRes);
-            CMI.setDamageScaling(this.damageScaling);
-            CMI.setShowAmbient(this.showAmbient);
+            CLIENT_CONFIG.setCelsius(this.celsius);
+            SHARED_CONFIG.setIceResistanceEffect(this.iceRes);
+            SHARED_CONFIG.setFireResistanceEffect(this.fireRes);
+            SHARED_CONFIG.setDamageScaling(this.damageScaling);
+            SHARED_CONFIG.setShowAmbient(this.showAmbient);
 
             try
             {
-                CCI.setTempOffset(Integer.parseInt(tempOffsetInput.getText()));
+                CLIENT_CONFIG.setTempOffset(Integer.parseInt(tempOffsetInput.getText()));
             } catch (Exception e) {}
 
             try
             {
-                CMI.setMaxHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(maxTempInput.getText())) :
+                SHARED_CONFIG.setMaxHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(maxTempInput.getText())) :
                         MathHelperCS.FtoMC(Double.parseDouble(maxTempInput.getText())));
             } catch (Exception e) {}
 
             try
             {
-                CMI.setMinHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(minTempInput.getText())) :
+                SHARED_CONFIG.setMinHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(minTempInput.getText())) :
                         MathHelperCS.FtoMC(Double.parseDouble(minTempInput.getText())));
             } catch (Exception e) {}
 
             try
             {
                 double rateModifier = Double.parseDouble(rateMultInput.getText());
-                CMI.setRateMultiplier(rateModifier);
+                SHARED_CONFIG.setRateMultiplier(rateModifier);
             } catch (Exception e) {}
+
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.SERVER.noArg(), new ConfigSyncMessage(ColdSweatConfig.getInstance()));
 
         }
 
@@ -491,8 +502,8 @@ public class ConfigScreen
     {
         private final Screen parentScreen;
 
-        boolean customHotbar = CCI.customHotbar();
-        boolean iconBobbing = CCI.iconBobbing();
+        boolean customHotbar = CLIENT_CONFIG.customHotbar();
+        boolean iconBobbing = CLIENT_CONFIG.iconBobbing();
 
         ImageButton upSteveButton;
         ImageButton downSteveButton;
@@ -608,12 +619,13 @@ public class ConfigScreen
         {
             this.onClose();
             Objects.requireNonNull(this.minecraft).displayGuiScreen(parentScreen);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.SERVER.noArg(), new ConfigSyncMessage(ColdSweatConfig.getInstance()));
         }
 
         @Override
         public void onClose()
         {
-            CMI.save();
+            SHARED_CONFIG.save();
         }
 
         private void changeSelfIndicatorPos(int axis, int amount)
@@ -621,18 +633,18 @@ public class ConfigScreen
             if (isShiftPressed()) amount *= 10;
             if (axis == 0)
             {
-                CCI.setSteveHeadX(CCI.steveHeadX() + amount);
+                CLIENT_CONFIG.setSteveHeadX(CLIENT_CONFIG.steveHeadX() + amount);
             }
             else if (axis == 1)
             {
-                CCI.setSteveHeadY(CCI.steveHeadY() + amount);
+                CLIENT_CONFIG.setSteveHeadY(CLIENT_CONFIG.steveHeadY() + amount);
             }
         }
 
         private void resetSelfIndicatorPos()
         {
-            CCI.setSteveHeadX(0);
-            CCI.setSteveHeadY(0);
+            CLIENT_CONFIG.setSteveHeadX(0);
+            CLIENT_CONFIG.setSteveHeadY(0);
         }
 
         private void changeTempReadoutPos(int axis, int amount)
@@ -640,18 +652,18 @@ public class ConfigScreen
             if (isShiftPressed()) amount *= 10;
             if (axis == 0)
             {
-                CCI.setTempGaugeX(CCI.tempGaugeX() + amount);
+                CLIENT_CONFIG.setTempGaugeX(CLIENT_CONFIG.tempGaugeX() + amount);
             }
             else if (axis == 1)
             {
-                CCI.setTempGaugeY(CCI.tempGaugeY() + amount);
+                CLIENT_CONFIG.setTempGaugeY(CLIENT_CONFIG.tempGaugeY() + amount);
             }
         }
 
         private void resetTempReadoutPos()
         {
-            CCI.setTempGaugeX(0);
-            CCI.setTempGaugeY(0);
+            CLIENT_CONFIG.setTempGaugeX(0);
+            CLIENT_CONFIG.setTempGaugeY(0);
         }
 
         private void toggleCustomHotbar()
@@ -659,7 +671,7 @@ public class ConfigScreen
             this.customHotbar = !this.customHotbar;
             customHotbarButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").getString() + ": " +
                 (this.customHotbar ? ON : OFF)));
-            CCI.setCustomHotbar(this.customHotbar);
+            CLIENT_CONFIG.setCustomHotbar(this.customHotbar);
         }
 
         private void toggleIconBobbing()
@@ -667,7 +679,7 @@ public class ConfigScreen
             this.iconBobbing = !this.iconBobbing;
             iconBobbingButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " +
                 (this.iconBobbing ? ON : OFF)));
-            CCI.setIconBobbing(this.iconBobbing);
+            CLIENT_CONFIG.setIconBobbing(this.iconBobbing);
         }
     }
 }

@@ -40,13 +40,13 @@ public class AddTempModifiers
             if (player.isPotionActive(ModEffects.INSULATION))
                 PlayerTemp.addModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
             else
-                PlayerTemp.removeModifier(player, HearthTempModifier.class, PlayerTemp.Types.AMBIENT, 1);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
 
             // Soul Lamp
             if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
                 PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
             else
-                PlayerTemp.removeModifier(player, SoulLampTempModifier.class, PlayerTemp.Types.AMBIENT, 1);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
         }
     }
 

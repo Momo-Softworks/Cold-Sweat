@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 
 group = 'net.momostudios'
-version = 'b2.1-1'
+version = 'b2.1-2'
 
 java {
     archivesBaseName = 'ColdSweat'

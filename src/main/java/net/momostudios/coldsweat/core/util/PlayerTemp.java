@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class PlayerTemp
@@ -59,7 +60,7 @@ public class PlayerTemp
                 {
                     if (!cap.hasModifier(event.type, event.getModifier().getClass()) || event.duplicatesAllowed)
                     {
-                        cap.addModifier(event.type, event.getModifier());
+                        cap.getModifiers(event.type).add(event.getModifier());
                     }
                 }
                 else
@@ -76,32 +77,35 @@ public class PlayerTemp
     /**
      * Removes the specified number of TempModifiers of the specified type from the player
      * @param player The player being sampled
-     * @param modClass The class of the TempModifier to remove
      * @param type Determines which TempModifier list to pull from
      * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
+     * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type, int count)
+    public static void removeModifiers(PlayerEntity player, Types type, int count, Predicate<TempModifier> condition)
     {
-        TempModifierEvent.Remove event = new TempModifierEvent.Remove(player, modClass, type, count);
-        MinecraftForge.EVENT_BUS.post(event);
-        if (!event.isCanceled())
+        // Sync modifier data to the player's NBT
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
-            // Sync modifier data to the player's NBT
-            player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+            List<TempModifier> toRemove = new ArrayList<>();
+            for (int i = 0; i < Math.min(count, cap.getModifiers(type).size()); i++)
             {
-                if (cap.getModifiers(event.type) != null && !cap.getModifiers(event.type).isEmpty())
+                TempModifier modifier = cap.getModifiers(type).get(i);
+                TempModifierEvent.Remove event = new TempModifierEvent.Remove(player, type, count, condition);
+                MinecraftForge.EVENT_BUS.post(event);
+                if (!event.isCanceled())
                 {
-                    for (int i = 0; i < Math.min(event.count, cap.getModifiers(event.type).size()); i++)
+                    if (event.getCondition().test(modifier))
                     {
-                        cap.removeModifier(event.type, event.modifierClass);
+                        toRemove.add(modifier);
                     }
                 }
-            });
-            // Update for player's client
-            if (player instanceof ServerPlayerEntity)
-            {
-                PlayerHelper.updateModifiers(player);
             }
+            cap.getModifiers(type).removeAll(toRemove);
+        });
+        // Update for player's client
+        if (player instanceof ServerPlayerEntity)
+        {
+            PlayerHelper.updateModifiers(player);
         }
     }
 

@@ -71,7 +71,7 @@ public class AddLeatherModifiers
                     PlayerTemp.addModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
             }
             else
-                PlayerTemp.removeModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE, Integer.MAX_VALUE);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof LeatherTempModifier);
         }
     }
 

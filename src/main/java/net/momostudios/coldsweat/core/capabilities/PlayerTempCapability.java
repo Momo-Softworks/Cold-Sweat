@@ -2,7 +2,6 @@ package net.momostudios.coldsweat.core.capabilities;
 
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
@@ -73,38 +72,6 @@ public class PlayerTempCapability
             case BASE:     { return this.baseModifiers.stream().anyMatch(mod::isInstance); }
             case RATE:     { return this.rateModifiers.stream().anyMatch(mod::isInstance); }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.hasModifier(): " + type);
-        }
-    }
-
-    /**
-     * Do NOT use this! (use {@link PlayerTemp#addModifier} instead) <br>
-     * Using this method will cause client-server desync.
-     */
-    public void addModifier(PlayerTemp.Types type, TempModifier modifier)
-    {
-        switch (type)
-        {
-            case AMBIENT:  { this.ambientModifiers.add(modifier); break; }
-            case BODY:     { this.bodyModifiers.add(modifier); break; }
-            case BASE:     { this.baseModifiers.add(modifier); break; }
-            case RATE:     { this.rateModifiers.add(modifier); break; }
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.addModifier(): " + type);
-        }
-    }
-
-    /**
-     * Do NOT use this! (use {@link PlayerTemp#removeModifier} instead) <br>
-     * Using this method will cause client-server desync.
-     */
-    public void removeModifier(PlayerTemp.Types type, Class<? extends TempModifier> modifier)
-    {
-        switch (type)
-        {
-            case AMBIENT:  { this.ambientModifiers.removeIf(modifier::isInstance); break; }
-            case BODY:     { this.bodyModifiers.removeIf(modifier::isInstance); break; }
-            case BASE:     { this.baseModifiers.removeIf(modifier::isInstance); break; }
-            case RATE:     { this.rateModifiers.removeIf(modifier::isInstance); break; }
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.removeModifier(): " + type);
         }
     }
 

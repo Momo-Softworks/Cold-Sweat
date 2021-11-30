@@ -62,7 +62,7 @@ public class StorePlayerData
                     });
 
                     // Add the modifier to the player's temperature
-                    cap.addModifier(type, newModifier);
+                    cap.getModifiers(type).add(newModifier);
                 });
             }
         });
