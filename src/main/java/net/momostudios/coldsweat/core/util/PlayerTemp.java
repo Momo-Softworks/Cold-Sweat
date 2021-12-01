@@ -117,7 +117,7 @@ public class PlayerTemp
      */
     public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
     {
-        List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(null).getModifiers(type);
+        List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
         List<TempModifier> toRemove = new ArrayList<>();
         mods.forEach(mod ->
         {

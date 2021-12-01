@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 
@@ -13,7 +14,6 @@ public class ColdSweatConfig
 {
     private static final ForgeConfigSpec SPEC;
     private static ColdSweatConfig configReference = new ColdSweatConfig();
-    private static final ColdSweatConfig storedConfigReference = configReference;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.IntValue difficulty;
@@ -95,12 +95,25 @@ public class ColdSweatConfig
             // Do nothing
         }
 
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
     }
 
     public static ColdSweatConfig getInstance()
     {
         return configReference;
+    }
+
+    public void writeValues(ConfigCache cache)
+    {
+        setDifficulty(cache.difficulty);
+        setMaxHabitable(cache.maxTemp);
+        setMinHabitable(cache.minTemp);
+        setRateMultiplier(cache.rate);
+        setFireResistanceEffect(cache.fireRes);
+        setIceResistanceEffect(cache.iceRes);
+        setDamageScaling(cache.damageScaling);
+        setShowAmbient(cache.showAmbient);
+        save();
     }
 
     /*
@@ -172,16 +185,6 @@ public class ColdSweatConfig
 
     public void setDamageScaling(boolean enabled) {
         damageScaling.set(enabled);
-    }
-
-    public static void setConfigReference(ColdSweatConfig config) {
-        configReference = config;
-
-    }
-
-    public static void restoreConfigReference()
-    {
-        configReference = storedConfigReference;
     }
 
     public void save() {

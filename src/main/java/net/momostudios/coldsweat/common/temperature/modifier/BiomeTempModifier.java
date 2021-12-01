@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.util.WorldInfo;
 
@@ -14,8 +15,6 @@ import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
 {
-    WorldTemperatureConfig config = new WorldTemperatureConfig();
-
     @java.lang.Override
     public double calculate(Temperature temp, PlayerEntity player)
     {
@@ -41,13 +40,13 @@ public class BiomeTempModifier extends TempModifier
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
     {
         double offset = 0;
-        for (List<String> value : config.biomeOffsets())
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.biomeOffsets())
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 offset += Double.parseDouble(value.get(1));
         }
 
-        for (List<String> value : config.dimensionOffsets())
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.dimensionOffsets())
         {
             if (new ResourceLocation(value.get(0)).equals(dimensionID))
                 offset += Double.parseDouble(value.get(1));
@@ -57,7 +56,7 @@ public class BiomeTempModifier extends TempModifier
 
     protected Override biomeOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : config.biomeTemperatures())
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.biomeTemperatures())
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 return new Override(true, Double.parseDouble(value.get(1)));
@@ -67,7 +66,7 @@ public class BiomeTempModifier extends TempModifier
 
     protected Override dimensionOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : config.dimensionTemperatures())
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.dimensionTemperatures())
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 return new Override(true, Double.parseDouble(value.get(1)));

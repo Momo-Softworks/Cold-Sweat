@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.core.event;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effects;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -9,6 +10,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.CustomDamageTypes;
 import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
@@ -31,9 +33,13 @@ public class PlayerTempUpdater
 
         double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
         double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
-        ColdSweatConfig config = ColdSweatConfig.getInstance();
-        double maxTemp = config.maxHabitable();
-        double minTemp = config.minHabitable();
+        ConfigCache config = ConfigCache.getInstance();
+        if (!player.getEntityWorld().isRemote())
+        {
+            config.writeValues(ColdSweatConfig.getInstance());
+        }
+        double maxTemp = config.maxTemp;
+        double minTemp = config.minTemp;
 
         Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
 
@@ -41,24 +47,24 @@ public class PlayerTempUpdater
         if (ambientTemp > maxTemp && !player.isCreative())
         {
             temp.add((float) Math.min(new Temperature((float) Math.abs(maxTemp - ambientTemp) / 15f)
-                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), 150));
+                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate, 150));
         }
         //Return the player's temperature back to 0
         else if (bodyTemp > 0)
         {
-            temp.add((float) -Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 10f) * config.rateMultiplier(), bodyTemp));
+            temp.add((float) -Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 10f) * config.rate, bodyTemp));
         }
 
         //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
         if (ambientTemp < minTemp && !player.isCreative())
         {
             temp.add((float) Math.max(-new Temperature((float) Math.abs(minTemp - ambientTemp) / 15f)
-                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rateMultiplier(), -150));
+                    .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate, -150));
         }
         //Return the player's temperature back to 0
         else if (bodyTemp < 0)
         {
-            temp.add((float) Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 10) * config.rateMultiplier(), -bodyTemp));
+            temp.add((float) Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 10) * config.rate, -bodyTemp));
         }
 
         //Calculates the player's temperature
@@ -93,11 +99,11 @@ public class PlayerTempUpdater
         }
 
         //Deal damage to the player if temperature is critical
-        boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && ColdSweatConfig.getInstance().fireResistanceEffect();
-        boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && ColdSweatConfig.getInstance().iceResistanceEffect();
+        boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && config.fireRes;
+        boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && config.iceRes;
         if (player.ticksExisted % 40 == 0)
         {
-            boolean scales = config.damageScaling();
+            boolean scales = config.damageScaling;
             if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.TOLERANCE))
             {
                 player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);

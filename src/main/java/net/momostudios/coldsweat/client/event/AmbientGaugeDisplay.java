@@ -11,7 +11,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
@@ -29,13 +29,13 @@ public class AmbientGaugeDisplay
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
                 (MathHelperCS.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
                  player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER ||
-                 !ColdSweatConfig.getInstance().showAmbient()))
+                 !ConfigCache.getInstance().showAmbient))
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
 
-            double min = ColdSweatConfig.getInstance().minHabitable();
-            double max = ColdSweatConfig.getInstance().maxHabitable();
+            double min = ConfigCache.getInstance().minTemp;
+            double max = ConfigCache.getInstance().maxTemp;
             double mid = (min + max) / 2;
             boolean celsius = CCS.celsius();
             boolean bobbing = CCS.iconBobbing();

@@ -10,6 +10,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,6 +19,8 @@ import java.util.Objects;
 public abstract class ConfigPageBase extends Screen
 {
     private final Screen parentScreen;
+    private final ConfigCache configCache;
+
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
@@ -40,10 +43,11 @@ public abstract class ConfigPageBase extends Screen
         return new TranslationTextComponent("cold_sweat.config.section.other");
     }
 
-    public ConfigPageBase(Screen parentScreen)
+    public ConfigPageBase(Screen parentScreen, ConfigCache configCache)
     {
         super(new TranslationTextComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
+        this.configCache = configCache;
     }
 
     public int index()
@@ -65,13 +69,13 @@ public abstract class ConfigPageBase extends Screen
         // Navigation
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20,
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.displayGuiScreen(ConfigScreen.getPage(this.index() + 1, parentScreen)));
+                mc.displayGuiScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configCache)));
         if (this.index() < ConfigScreen.LAST_PAGE)
             this.addButton(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20,
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.displayGuiScreen(ConfigScreen.getPage(this.index() - 1, parentScreen)));
+                mc.displayGuiScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configCache)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
             this.addButton(prevNavButton);
     }

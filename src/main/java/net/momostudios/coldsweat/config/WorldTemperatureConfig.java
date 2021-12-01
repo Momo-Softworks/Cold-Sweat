@@ -27,6 +27,8 @@ public class WorldTemperatureConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> dimensionTemperatures;
 
+    public static final WorldTemperatureConfig INSTANCE = new WorldTemperatureConfig();
+
     static
     {
         /*

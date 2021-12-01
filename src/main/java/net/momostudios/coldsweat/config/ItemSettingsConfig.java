@@ -24,6 +24,8 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> insulatingArmor;
 
+    public static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
+
     static
     {
         /*
