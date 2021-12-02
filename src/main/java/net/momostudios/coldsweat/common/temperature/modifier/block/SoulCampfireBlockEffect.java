@@ -23,7 +23,7 @@ public class SoulCampfireBlockEffect extends BlockEffect
             }
 
             double temp = -0.005;
-            return Math.max(0, temp * (9 - distance));
+            return Math.min(0, temp * (9 - distance));
         }
         return 0;
     }

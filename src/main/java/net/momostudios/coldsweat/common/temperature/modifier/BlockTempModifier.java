@@ -8,6 +8,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
+import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
 import java.util.ArrayList;
 import java.util.List;
