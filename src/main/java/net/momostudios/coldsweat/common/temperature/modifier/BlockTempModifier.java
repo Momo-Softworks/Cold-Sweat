@@ -16,7 +16,7 @@ import java.util.List;
 public class BlockTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         final double[] totalTemp = {0};
         int x = player.getPosition().getX();

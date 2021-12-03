@@ -9,7 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.common.temperature.modifier.LeatherTempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.util.ItemEntry;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
@@ -56,22 +56,22 @@ public class AddLeatherModifiers
 
             if (leatherMultiplier > 0)
             {
-                if (PlayerTemp.hasModifier(player, LeatherTempModifier.class, PlayerTemp.Types.RATE))
+                if (PlayerTemp.hasModifier(player, InsulationTempModifier.class, PlayerTemp.Types.RATE))
                 {
                     int multiplier = leatherMultiplier;
                     PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
                     {
-                        if (modifier instanceof LeatherTempModifier)
+                        if (modifier instanceof InsulationTempModifier)
                         {
                             modifier.setArgument("amount", multiplier);
                         }
                     });
                 }
                 else
-                    PlayerTemp.addModifier(player, new LeatherTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+                    PlayerTemp.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
             }
             else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof LeatherTempModifier);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof InsulationTempModifier);
         }
     }
 

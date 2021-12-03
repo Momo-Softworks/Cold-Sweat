@@ -8,8 +8,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.temperature.modifier.block.*;
-import net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsDummyModifier;
-import net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
@@ -58,7 +56,7 @@ public class InitTempModifiers
             event.addModifier(BlockTempModifier.class);
             event.addModifier(BiomeTempModifier.class);
             event.addModifier(DepthTempModifier.class);
-            event.addModifier(LeatherTempModifier.class);
+            event.addModifier(InsulationTempModifier.class);
             event.addModifier(MinecartTempModifier.class);
             event.addModifier(TimeTempModifier.class);
             event.addModifier(WaterskinTempModifier.class);

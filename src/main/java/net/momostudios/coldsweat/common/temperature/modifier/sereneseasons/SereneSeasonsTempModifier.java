@@ -8,7 +8,7 @@ import sereneseasons.api.season.SeasonHelper;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         double t = temp.get();
         if (player.world.getDimensionType().isNatural())

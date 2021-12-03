@@ -15,7 +15,7 @@ import net.momostudios.coldsweat.core.util.WorldInfo;
 public class TimeTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         if (!player.world.getDimensionType().doesFixedTimeExist())
         {

@@ -7,7 +7,7 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 public class WeatherTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         float weatherTemp = 0;
         if (player.world.canBlockSeeSky(player.getPosition()))

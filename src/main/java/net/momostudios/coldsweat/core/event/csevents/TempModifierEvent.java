@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
@@ -14,6 +15,10 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 import java.util.Map;
 import java.util.function.Predicate;
 
+/**
+ * These events are fired when dealing with {@link TempModifier}s. <br>
+ * They should not be side-specific. Do not limit them to run on any one side as it will cause desyncs.
+ */
 public class TempModifierEvent extends Event
 {
     /**
@@ -46,6 +51,10 @@ public class TempModifierEvent extends Event
 
         public final TempModifier getModifier() {
             return modifier;
+        }
+
+        public void setModifier(TempModifier modifier) {
+            this.modifier = modifier;
         }
 
         public final PlayerEntity getPlayer() {
@@ -101,6 +110,75 @@ public class TempModifierEvent extends Event
         }
         public Predicate<TempModifier> getCondition() {
             return condition;
+        }
+    }
+
+    /**
+     * Fired when a TempModifier runs the {@code calculate()} method. <br>
+     * {@code Pre} and {@code Post} are fired on the {@link MinecraftForge#EVENT_BUS} before/after the calculation respectively. <br>
+     */
+    public static class Tick extends TempModifierEvent
+    {
+        /**
+         * Fired at the beginning of {@code calculate()}, before the {@code getValue()} method is called. <br>
+         * <br>
+         * {@link #player} - The player the TempModifier is attached to. <br>
+         * {@link #modifier} - The TempModifier running the method. <br>
+         * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
+         * <br>
+         * This event is {@link Cancelable}. <br>
+         * Cancelling this event results in the Temperature passing through without calling {@code calculate()}. <br>
+         */
+        @Cancelable
+        public static class Pre extends Tick
+        {
+            public final PlayerEntity player;
+            private TempModifier modifier;
+            private Temperature temperature;
+
+            public Pre(TempModifier modifier, PlayerEntity player, Temperature temperature)
+            {
+                this.player = player;
+                this.modifier = modifier;
+                this.temperature = temperature;
+            }
+
+            public TempModifier getModifier() {
+                return modifier;
+            }
+            public Temperature getTemperature() {
+                return temperature;
+            }
+        }
+
+        /**
+         * Fired after the {@code getValue()} method is run, but before the value is returned <br>
+         * <br>
+         * {@link #player} is the player the TempModifier is attached to. <br>
+         * {@link #modifier} is the TempModifier running the method. <br>
+         * {@link #temperature} is the Temperature after the {@code getValue())} method has been called. <br>
+         * <br>
+         * This event is not {@link Cancelable}. <br>
+         */
+        public static class Post extends Tick
+        {
+            public final PlayerEntity player;
+            private TempModifier modifier;
+            private Temperature temperature;
+
+            public Post(TempModifier modifier, PlayerEntity player, Temperature temperature)
+            {
+                this.player = player;
+                this.modifier = modifier;
+                this.temperature = temperature;
+            }
+
+            public TempModifier getModifier() {
+                return modifier;
+            }
+            public Temperature getTemperature() {
+                return temperature;
+            }
         }
     }
 

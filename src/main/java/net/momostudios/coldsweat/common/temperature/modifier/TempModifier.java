@@ -2,8 +2,10 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +49,13 @@ public abstract class TempModifier
 
     /**
      * Sets the argument of the TempModifier instance to the specified value.<br>
-     * @param name the name of the argument
-     * @param arg the value of the argument
+     * @param name The name of the argument
+     * @param arg The new value of the argument
      */
     public void setArgument(String name, Object arg) {
-        args.put(name, arg);
+        if (arg.getClass().equals(args.get(name).getClass()))
+            args.put(name, arg);
+        else throw new IllegalArgumentException("Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg);
     }
 
     public final Map<String, Object> getArguments() {
@@ -60,11 +64,31 @@ public abstract class TempModifier
 
     /**
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
-     * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.
-     * @param temp should usually represent the player's body temperature or ambient temperature.
-     * @param player the player that is being affected by the modifier
+     * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.<br>
+     * <br>
+     * Do not call this method directly. Use {@link #calculate(Temperature, PlayerEntity)} instead.<br>
+     * <br>
+     * @param temp should usually represent the player's body temperature or ambient temperature.<br>
+     * @param player the player that is being affected by the modifier.<br>
+     * @return the new {@link Temperature}.<br>
      */
-    public abstract double calculate(Temperature temp, PlayerEntity player);
+    public abstract double getValue(Temperature temp, PlayerEntity player);
+
+    public final double calculate(Temperature temp, PlayerEntity player)
+    {
+        TempModifierEvent.Tick.Pre pre = new TempModifierEvent.Tick.Pre(this, player, temp);
+        MinecraftForge.EVENT_BUS.post(pre);
+        if (!pre.isCanceled())
+        {
+            double value = getValue(pre.getTemperature(), player);
+
+            TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
+            MinecraftForge.EVENT_BUS.post(post);
+
+            return post.getTemperature().get();
+        }
+        else return pre.getTemperature().get();
+    }
 
     /**
      * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate names.

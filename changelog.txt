@@ -73,19 +73,35 @@
 
 2.1 Beta 2
 - Sleeping in a bed now warms you up/cools you down (must sleep through the night)
-- Reduced the potential performance impact of wearing leather armor
-    - This probably won't affect performance much, but it's worth noting (it all adds up, you know!)
-- Added new methods for handling TempModifiers:
-    - PlayerTemp.hasModifier():
-        - Returns true if the player has a modifier of the given type
-    - PlayerTemp.forEachModifier():
-        - Calls the given function for each modifier of the given type
-- Changed how PlayerTemp.removeModifiers() works
-    - Instead of taking the class of the modifier to remove, it takes a predicate to determine which modifiers to remove
+- Added new sounds for when the player is freezing
+- Fixed Icebox and Soul Campfire not cooling the area around them
 - Fixed an issue that caused the player's temperature to not be saved properly upon leaving the world
 - Fixed server configs not taking precedence over local configs, causing desyncs
 - Fixed crash with Waterskins in the player's hotbar
+- New textures for Boiler and Icebox fuel gauges
+
+- Technical Changes:
+    - Reduced the potential performance impact of wearing leather armor
+        - This probably won't affect performance much, but it's worth noting (it all adds up, you know!)
+    - Added new methods for handling TempModifiers:
+        - PlayerTemp.hasModifier():
+            - Returns true if the player has a modifier of the given type
+        - PlayerTemp.forEachModifier():
+            - Calls the given function for each modifier of the given type
+    - Changed how PlayerTemp.removeModifier() works
+        - Instead of removing all modifiers of the given class, it takes a predicate which determines which modifiers to remove
+    - Added new method for TempModifierEvent.Add: setModifier()
+        - Replaces the modifier that would have been added with the one given
+    - Renamed LeatherTempModifier to InsulationTempModifier
+    - Added new event for compat mod developers to hook into:
+        - TempModifierEvent.Tick
+            - Fired when a TempModifier's value is called
+            - Has two phases:
+                - Pre: Called before getValue() is called
+                    - Cancellable (Modifier will be skipped)
+                - Post: Called after getValue() is called
+    - When creating TempModifiers, override the getValue() method now instead of calculate()
+        - Calculate is still used when referencing the modifier's value, but it also posts to TempModifierEvent.Tick
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
-- Added new sounds for when the player is freezing

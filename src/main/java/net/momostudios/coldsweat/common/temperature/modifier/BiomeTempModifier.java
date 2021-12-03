@@ -16,7 +16,7 @@ import java.util.List;
 public class BiomeTempModifier extends TempModifier
 {
     @java.lang.Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         double worldTemp = 0;
         for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))

@@ -10,16 +10,16 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
 
-public class LeatherTempModifier extends TempModifier
+public class InsulationTempModifier extends TempModifier
 {
-    public LeatherTempModifier() {}
+    public InsulationTempModifier() {}
 
-    public LeatherTempModifier(int amount) {
+    public InsulationTempModifier(int amount) {
         addArgument("amount", amount);
     }
 
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         return temp.get() / Math.max(1d, (int) getArgument("amount") / 15d);
     }

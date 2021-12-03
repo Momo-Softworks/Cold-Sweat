@@ -12,7 +12,7 @@ import net.momostudios.coldsweat.core.util.WorldInfo;
 public class DepthTempModifier extends TempModifier
 {
     @Override
-    public double calculate(Temperature temp, PlayerEntity player)
+    public double getValue(Temperature temp, PlayerEntity player)
     {
         if (player.world.getDimensionType().getHasCeiling())
             return temp.get();
