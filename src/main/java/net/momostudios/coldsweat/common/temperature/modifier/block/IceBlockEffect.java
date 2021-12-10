@@ -5,6 +5,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class IceBlockEffect extends BlockEffect
 {
@@ -32,6 +33,6 @@ public class IceBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.FtoMC(-30);
+        return MathHelperCS.convertUnits(-30, Units.F, Units.MC, false);
     }
 }

@@ -11,6 +11,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.core.util.PlayerHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
@@ -47,6 +48,14 @@ public class AddTempModifiers
                 PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
             else
                 PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+        }
+
+        if (player.ticksExisted % 5 == 0)
+        {
+            if (player.isInWater())
+                PlayerTemp.addModifier(player, new WaterTempModifier(1d), PlayerTemp.Types.AMBIENT, false);
+            else
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (int) modifier.getArgument("strength") == 0);
         }
     }
 

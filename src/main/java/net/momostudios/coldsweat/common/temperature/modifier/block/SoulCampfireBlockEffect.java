@@ -8,6 +8,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class SoulCampfireBlockEffect extends BlockEffect
 {
@@ -36,6 +37,6 @@ public class SoulCampfireBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.FtoMC(-20);
+        return MathHelperCS.convertUnits(-20, Units.F, Units.MC, false);
     }
 }

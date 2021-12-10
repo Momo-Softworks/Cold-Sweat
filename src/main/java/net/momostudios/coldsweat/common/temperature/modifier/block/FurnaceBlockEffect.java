@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class FurnaceBlockEffect extends BlockEffect
 {
@@ -27,6 +28,6 @@ public class FurnaceBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.FtoMC(40);
+        return MathHelperCS.convertUnits(40, Units.F, Units.MC, false);
     }
 }

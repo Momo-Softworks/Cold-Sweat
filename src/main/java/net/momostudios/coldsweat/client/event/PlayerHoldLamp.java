@@ -30,6 +30,7 @@ import net.momostudios.coldsweat.core.util.PlayerHelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class PlayerHoldLamp
@@ -85,34 +86,19 @@ public class PlayerHoldLamp
                 layerRenderers.setAccessible(true);
                 if (renderingLamp)
                 {
-                    layerRenderers.set(renderer, Arrays.asList(
-                            //new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
-                            //new HeldItemLayer<>(renderer),
-                            new ArrowLayer<>(renderer),
-                            new Deadmau5HeadLayer(renderer),
-                            new CapeLayer(renderer),
-                            new HeadLayer<>(renderer),
-                            new ElytraLayer<>(renderer),
-                            new ParrotVariantLayer<>(renderer),
-                            new SpinAttackEffectLayer<>(renderer),
-                            new BeeStingerLayer<>(renderer))
-                    );
-                } else
+                    ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).removeIf(layerRenderer ->
+                            layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer);
+                }
+                else
                 {
+                    if (((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).stream().noneMatch(layerRenderer ->
+                            layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer))
+                    {
+                        ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).add(new HeldItemLayer(event.getRenderer()));
+                        ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).add(new BipedArmorLayer(event.getRenderer(), new BipedModel(0.5F), new BipedModel(1.0F)));
+                    }
                     event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
                     event.getPlayer().getPersistentData().putFloat("lanternLeftArmRot", 3.0f);
-                    layerRenderers.set(event.getRenderer(), Arrays.asList(
-                            new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F)),
-                            new HeldItemLayer<>(renderer),
-                            new ArrowLayer<>(renderer),
-                            new Deadmau5HeadLayer(renderer),
-                            new CapeLayer(renderer),
-                            new HeadLayer<>(renderer),
-                            new ElytraLayer<>(renderer),
-                            new ParrotVariantLayer<>(renderer),
-                            new SpinAttackEffectLayer<>(renderer),
-                            new BeeStingerLayer<>(renderer))
-                    );
                 }
             } catch (Exception e) {}
         }
@@ -231,9 +217,9 @@ public class PlayerHoldLamp
                 }
                 BipedArmorLayer armorLayer = new BipedArmorLayer<>(renderer, new BipedModel(0.5F), new BipedModel(1.0F));
                 renderArmor.invoke(armorLayer, matrixStack, buffers, player, EquipmentSlotType.HEAD, light, armorModel.get(armorLayer));
-                renderArmor.invoke(armorLayer, matrixStack, buffers, player, EquipmentSlotType.FEET, light, armorModel.get(armorLayer));
                 renderArmor.invoke(armorLayer, matrixStack, buffers, player, EquipmentSlotType.CHEST,light, armorModel.get(armorLayer));
                 renderArmor.invoke(armorLayer, matrixStack, buffers, player, EquipmentSlotType.LEGS, light, leggingsModel.get(armorLayer));
+                renderArmor.invoke(armorLayer, matrixStack, buffers, player, EquipmentSlotType.FEET, light, armorModel.get(armorLayer));
                 matrixStack.pop();
             } catch (Exception e) {}
         }

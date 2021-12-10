@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
@@ -24,6 +25,7 @@ import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.ClientConfigSendMessage;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -68,7 +70,6 @@ public class ConfigScreen
         if (!mc.isSingleplayer() && Minecraft.getInstance().player != null && Minecraft.getInstance().player.hasPermissionLevel(2))
         {
             ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ClientConfigSendMessage(configCache));
         }
         else
         {
@@ -184,49 +185,53 @@ public class ConfigScreen
         {
             configCache.setDifficulty(configCache.difficulty);
 
+            // Super Easy
             if (configCache.difficulty == 0)
             {
-                configCache.setMinHabitable(MathHelperCS.FtoMC(40));
-                configCache.setMaxHabitable(MathHelperCS.FtoMC(120));
+                configCache.setMinHabitable(MathHelperCS.convertUnits(40, Units.F, Units.MC, true));
+                configCache.setMaxHabitable(MathHelperCS.convertUnits(120, Units.F, Units.MC, true));
                 configCache.setRateMultiplier(0.5);
+                configCache.setShowAmbient(true);
+                configCache.setDamageScaling(false);
+                configCache.setFireResistanceEffect(true);
+                configCache.setIceResistanceEffect(true);
+                configCache.setDifficulty(0);
+            }
+            // Easy
+            else if (configCache.difficulty == 1)
+            {
+                configCache.setMinHabitable(MathHelperCS.convertUnits(45, Units.F, Units.MC, true));
+                configCache.setMaxHabitable(MathHelperCS.convertUnits(110, Units.F, Units.MC, true));
+                configCache.setRateMultiplier(0.75);
                 configCache.setShowAmbient(true);
                 configCache.setDamageScaling(false);
                 configCache.setFireResistanceEffect(true);
                 configCache.setIceResistanceEffect(true);
                 configCache.setDifficulty(1);
             }
-            else if (configCache.difficulty == 1)
-            {
-                configCache.setMinHabitable(MathHelperCS.FtoMC(45));
-                configCache.setMaxHabitable(MathHelperCS.FtoMC(115));
-                configCache.setRateMultiplier(0.75);
-                configCache.setShowAmbient(true);
-                configCache.setDamageScaling(false);
-                configCache.setFireResistanceEffect(true);
-                configCache.setIceResistanceEffect(true);
-                configCache.setDifficulty(2);
-            }
+            // Normal
             else if (configCache.difficulty == 2)
             {
-                configCache.setMinHabitable(MathHelperCS.FtoMC(50));
-                configCache.setMaxHabitable(MathHelperCS.FtoMC(110));
+                configCache.setMinHabitable(MathHelperCS.convertUnits(50, Units.F, Units.MC, true));
+                configCache.setMaxHabitable(MathHelperCS.convertUnits(100, Units.F, Units.MC, true));
                 configCache.setRateMultiplier(1.0);
                 configCache.setShowAmbient(false);
                 configCache.setDamageScaling(true);
                 configCache.setFireResistanceEffect(false);
                 configCache.setIceResistanceEffect(false);
-                configCache.setDifficulty(3);
+                configCache.setDifficulty(2);
             }
+            // Hard
             else if (configCache.difficulty == 3)
             {
-                configCache.setMinHabitable(MathHelperCS.FtoMC(60));
-                configCache.setMaxHabitable(MathHelperCS.FtoMC(100));
+                configCache.setMinHabitable(MathHelperCS.convertUnits(60, Units.F, Units.MC, true));
+                configCache.setMaxHabitable(MathHelperCS.convertUnits(90, Units.F, Units.MC, true));
                 configCache.setRateMultiplier(1.5);
                 configCache.setShowAmbient(false);
                 configCache.setDamageScaling(true);
                 configCache.setFireResistanceEffect(false);
                 configCache.setIceResistanceEffect(false);
-                configCache.setDifficulty(4);
+                configCache.setDifficulty(3);
             }
             mc.displayGuiScreen(parentScreen);
             saveConfig(configCache);
@@ -324,13 +329,13 @@ public class ConfigScreen
 
             // Max Temperature
             this.maxTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 52, 51, 22, new StringTextComponent(""));
-            this.maxTempInput.setText(String.valueOf(twoPlaces.format
-                    (celsius ? MathHelperCS.MCtoC(configCache.maxTemp) : MathHelperCS.MCtoF(configCache.maxTemp))));
+            this.maxTempInput.setText(String.valueOf(twoPlaces.format(
+                    MathHelperCS.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
 
             // Min Temperature
             this.minTempInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 84, 51, 22, new StringTextComponent(""));
-            this.minTempInput.setText(String.valueOf(twoPlaces.format
-                    (celsius ? MathHelperCS.MCtoC(configCache.minTemp) : MathHelperCS.MCtoF(configCache.minTemp))));
+            this.minTempInput.setText(String.valueOf(twoPlaces.format(
+                    MathHelperCS.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
 
             // Rate Multiplier
             this.rateMultInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 116, 51, 22, new StringTextComponent(""));
@@ -436,14 +441,12 @@ public class ConfigScreen
 
             try
             {
-                configCache.setMaxHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(maxTempInput.getText())) :
-                        MathHelperCS.FtoMC(Double.parseDouble(maxTempInput.getText())));
+                configCache.setMaxHabitable(MathHelperCS.convertUnits(Double.parseDouble(maxTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true));
             } catch (Exception e) {}
 
             try
             {
-                configCache.setMinHabitable(celsius ? MathHelperCS.CtoMC(Double.parseDouble(minTempInput.getText())) :
-                        MathHelperCS.FtoMC(Double.parseDouble(minTempInput.getText())));
+                configCache.setMinHabitable(MathHelperCS.convertUnits(Double.parseDouble(minTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true));
             } catch (Exception e) {}
 
             try
@@ -470,8 +473,8 @@ public class ConfigScreen
                 (this.celsius ? new TranslationTextComponent("cold_sweat.config.celsius.name").getString() :
                                 new TranslationTextComponent("cold_sweat.config.fahrenheit.name").getString())));
 
-            minTempInput.setText(String.valueOf(twoPlaces.format(celsius ? MathHelperCS.MCtoC(configCache.minTemp) : MathHelperCS.MCtoF(configCache.minTemp))));
-            maxTempInput.setText(String.valueOf(twoPlaces.format(celsius ? MathHelperCS.MCtoC(configCache.maxTemp) : MathHelperCS.MCtoF(configCache.maxTemp))));
+            minTempInput.setText(String.valueOf(twoPlaces.format(MathHelperCS.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+            maxTempInput.setText(String.valueOf(twoPlaces.format(MathHelperCS.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
         }
 
         public void toggleIceRes()
@@ -624,7 +627,7 @@ public class ConfigScreen
         @Override
         public void onClose()
         {
-            Objects.requireNonNull(this.minecraft).displayGuiScreen(parentScreen);
+            Minecraft.getInstance().displayGuiScreen(parentScreen);
             saveConfig(configCache);
         }
 

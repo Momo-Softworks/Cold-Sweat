@@ -63,6 +63,7 @@ public class InitTempModifiers
             event.addModifier(WeatherTempModifier.class);
             event.addModifier(SoulLampTempModifier.class);
             if (ModList.get().isLoaded("sereneseasons")) event.addModifier((Class<TempModifier>) Class.forName(sereneseasons));
+            event.addModifier(WaterTempModifier.class);
             event.addModifier(HearthTempModifier.class);
         }
         catch (Exception e) {

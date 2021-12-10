@@ -6,6 +6,7 @@ import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class LavaBlockEffect extends BlockEffect
 {
@@ -28,6 +29,6 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.FtoMC(1000);
+        return MathHelperCS.convertUnits(1000, Units.F, Units.MC, false);
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class SoulFireBlockEffect extends BlockEffect
 {
@@ -37,6 +38,6 @@ public class SoulFireBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.FtoMC(-20);
+        return MathHelperCS.convertUnits(-20, Units.F, Units.MC, false);
     }
 }

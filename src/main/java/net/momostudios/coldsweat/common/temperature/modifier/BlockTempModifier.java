@@ -8,6 +8,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class BlockTempModifier extends TempModifier
             BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
             if (be != null)
             {
-                if (totalTemp[0] < be.maxTemp() && totalTemp[0] > be.minTemp())
+                if (MathHelperCS.isBetween(totalTemp[0], be.minTemp(), be.maxTemp()))
                 {
                     totalTemp[0] += be.getTemperature(player, state, blockpos,
                             Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));

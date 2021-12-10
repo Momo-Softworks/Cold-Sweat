@@ -10,7 +10,7 @@ import net.momostudios.coldsweat.config.ConfigCache;
 
 public class ConfigButton extends Button
 {
-    ConfigCache configCache;
+    ConfigCache configCache = ConfigCache.getInstance();
 
     public ConfigButton(int x, int y, int width, int height, ITextComponent title, IPressable pressedAction, ConfigCache cache)
     {

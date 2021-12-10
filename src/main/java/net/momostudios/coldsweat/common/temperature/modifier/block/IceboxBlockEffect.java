@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.Units;
 
 public class IceboxBlockEffect extends BlockEffect
 {
@@ -28,6 +29,6 @@ public class IceboxBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.FtoMC(-40);
+        return MathHelperCS.convertUnits(-40, Units.F, Units.MC, false);
     }
 }

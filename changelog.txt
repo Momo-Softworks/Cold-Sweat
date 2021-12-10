@@ -74,10 +74,11 @@
 2.1 Beta 2
 - Sleeping in a bed now warms you up/cools you down (must sleep through the night)
 - Added new sounds for when the player is freezing
+- Using the ingame config menu on a server now changes the server's configs if the player has OP permission level 2 or higher
 - Fixed Icebox and Soul Campfire not cooling the area around them
 - Fixed an issue that caused the player's temperature to not be saved properly upon leaving the world
-- Fixed server configs not taking precedence over local configs, causing desyncs
 - Fixed crash with Waterskins in the player's hotbar
+- Fixed bug that prevented some modded worn items from showing on the player's model
 - New textures for Boiler and Icebox fuel gauges
 
 - Technical Changes:
@@ -102,6 +103,11 @@
                 - Post: Called after getValue() is called
     - When creating TempModifiers, override the getValue() method now instead of calculate()
         - Calculate is still used when referencing the modifier's value, but it also posts to TempModifierEvent.Tick
+    - Replaced all temperature unit conversion methods with on method: MathHelperCS.convertUnits()
+        - arguments: double value: a double representing the temperature to convert
+                     Unit from: the unit to convert from (Unit is a new enum class in net.momostudios.util)
+                     Unit to: the unit to convert to
+                     boolean absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
