@@ -9,6 +9,7 @@ import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
+import java.util.*;
 import java.util.function.Supplier;
 
 public class ClientConfigAskMessage
@@ -37,7 +38,14 @@ public class ClientConfigAskMessage
             cache.writeValues(ColdSweatConfig.getInstance());
             cache.worldOptionsReference = WorldTemperatureConfig.INSTANCE;
             cache.itemSettingsReference = ItemSettingsConfig.INSTANCE;
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin));
+
+            Map<String, List<? extends List<String>>> worldTempConfig = new HashMap<>();
+            worldTempConfig.put("biomeOffsets", WorldTemperatureConfig.INSTANCE.biomeOffsets());
+            worldTempConfig.put("dimensionOffsets", WorldTemperatureConfig.INSTANCE.dimensionOffsets());
+            worldTempConfig.put("biomeTemperatures", WorldTemperatureConfig.INSTANCE.biomeTemperatures());
+            worldTempConfig.put("dimensionTemperatures", WorldTemperatureConfig.INSTANCE.dimensionTemperatures());
+
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin, worldTempConfig));
         });
     }
 }

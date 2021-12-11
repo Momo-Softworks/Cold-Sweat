@@ -73,8 +73,11 @@
 
 2.1 Beta 2
 - Sleeping in a bed now warms you up/cools you down (must sleep through the night)
+- Water now cools down the player
+    - When you get out, it takes a bit of time to warm up
 - Added new sounds for when the player is freezing
 - Using the ingame config menu on a server now changes the server's configs if the player has OP permission level 2 or higher
+- Configs on the server now properly take precedence over the player's configs
 - Fixed Icebox and Soul Campfire not cooling the area around them
 - Fixed an issue that caused the player's temperature to not be saved properly upon leaving the world
 - Fixed crash with Waterskins in the player's hotbar

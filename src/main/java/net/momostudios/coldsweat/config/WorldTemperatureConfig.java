@@ -117,4 +117,17 @@ public class WorldTemperatureConfig
     public List<? extends List<String>> dimensionTemperatures() {
         return dimensionTemperatures.get();
     }
+
+    public void setBiomeOffsets(List<? extends List<String>> list) {
+        biomeOffsets.set(list);
+    }
+    public void setDimensionOffsets(List<? extends List<String>> list) {
+        dimensionOffsets.set(list);
+    }
+    public void setBiomeTemperatures(List<? extends List<String>> list) {
+        biomeTemperatures.set(list);
+    }
+    public void setDimensionTemperatures(List<? extends List<String>> list) {
+        dimensionTemperatures.set(list);
+    }
 }

@@ -1,5 +1,8 @@
 package net.momostudios.coldsweat.core.network;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -7,6 +10,9 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.network.message.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColdSweatPacketHandler
 {
@@ -54,5 +60,37 @@ public class ColdSweatPacketHandler
         config.damageScaling = buffer.readBoolean();
         config.showAmbient = buffer.readBoolean();
         return config;
+    }
+
+    public static CompoundNBT writeListOfLists(List<? extends List<String>> list)
+    {
+        CompoundNBT tag = new CompoundNBT();
+        for (int i = 0; i < list.size(); i++)
+        {
+            List<String> sublist = list.get(i);
+            ListNBT subtag = new ListNBT();
+            for (int j = 0; j < sublist.size(); j++)
+            {
+                subtag.add(StringNBT.valueOf(sublist.get(j)));
+            }
+            tag.put("" + i, subtag);
+        }
+        return tag;
+    }
+
+    public static List<? extends List<String>> getListOfLists(CompoundNBT tag)
+    {
+        List<List<String>> list = new ArrayList<>();
+        for (int i = 0; i < tag.size(); i++)
+        {
+            ListNBT subtag = tag.getList("" + i, 8);
+            List<String> sublist = new ArrayList<>();
+            for (int j = 0; j < subtag.size(); j++)
+            {
+                sublist.add(subtag.getString(j));
+            }
+            list.add(sublist);
+        }
+        return list;
     }
 }
