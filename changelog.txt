@@ -75,6 +75,8 @@
 - Sleeping in a bed now warms you up/cools you down (must sleep through the night)
 - Water now cools down the player
     - When you get out, it takes a bit of time to warm up
+    - In cold biomes, the effect is greater, so be careful!
+    - The speed at which you warm up also depends on the ambient temperature
 - Added new sounds for when the player is freezing
 - Using the ingame config menu on a server now changes the server's configs if the player has OP permission level 2 or higher
 - Configs on the server now properly take precedence over the player's configs
