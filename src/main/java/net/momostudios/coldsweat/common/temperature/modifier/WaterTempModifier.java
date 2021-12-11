@@ -3,6 +3,7 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.Units;
 
@@ -22,7 +23,7 @@ public class WaterTempModifier extends TempModifier
     public double getValue(Temperature temp, PlayerEntity player)
     {
         double strength = (double) getArgument("strength");
-        setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.3 : -0.02), 0, 10));
+        setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : -0.02), 0, 10));
 
         if (!player.isInWater() && strength > 0)
         {
@@ -35,7 +36,8 @@ public class WaterTempModifier extends TempModifier
             }
         }
 
-        return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false);
+        //System.out.println(Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) / 2d);
+        return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) * (strength / 20);
     }
 
     @Override

@@ -627,7 +627,7 @@ public class ConfigScreen
         @Override
         public void onClose()
         {
-            Minecraft.getInstance().displayGuiScreen(parentScreen);
+            super.onClose();
             saveConfig(configCache);
         }
 
