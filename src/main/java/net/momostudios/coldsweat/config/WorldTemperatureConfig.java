@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WorldTemperatureConfig
 {
@@ -116,6 +118,16 @@ public class WorldTemperatureConfig
     }
     public List<? extends List<String>> dimensionTemperatures() {
         return dimensionTemperatures.get();
+    }
+
+    public Map<String, List<? extends List<String>>> getConfigMap()
+    {
+        Map<String, List<? extends List<String>>> map = new HashMap<>();
+        map.put("biome_temperatures", biomeTemperatures());
+        map.put("biome_offsets", biomeOffsets());
+        map.put("dimension_temperatures", dimensionTemperatures());
+        map.put("dimension_offsets", dimensionOffsets());
+        return map;
     }
 
     public void setBiomeOffsets(List<? extends List<String>> list) {

@@ -1,5 +1,8 @@
 package net.momostudios.coldsweat.config;
 
+import java.util.List;
+import java.util.Map;
+
 public class ConfigCache
 {
 
@@ -12,7 +15,7 @@ public class ConfigCache
     public boolean damageScaling;
     public boolean showAmbient;
 
-    public WorldTemperatureConfig worldOptionsReference = WorldTemperatureConfig.INSTANCE;
+    public Map<String, List<? extends List<String>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
     public ItemSettingsConfig itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
     private static ConfigCache INSTANCE = new ConfigCache();

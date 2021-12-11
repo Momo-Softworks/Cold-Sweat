@@ -19,46 +19,34 @@ public class ClientConfigRecieveMessage
 {
     ConfigCache configCache;
     boolean onJoin;
-    Map<String, List<? extends List<String>>> worldTempConfig = new HashMap<>();
 
-    public ClientConfigRecieveMessage(ConfigCache configCache, boolean onJoin, Map<String, List<? extends List<String>>> worldTempConfig)
+    public ClientConfigRecieveMessage(ConfigCache configCache, boolean onJoin)
     {
         this.configCache = configCache;
         this.onJoin = onJoin;
-        if (onJoin)
-        {
-            this.worldTempConfig = worldTempConfig;
-        }
     }
 
     public static void encode(ClientConfigRecieveMessage message, PacketBuffer buffer)
     {
         buffer.writeBoolean(message.onJoin);
         ColdSweatPacketHandler.writeConfigCacheToBuffer(message.configCache, buffer);
-        if (message.onJoin)
-        {
-            // WorldTempConfig
-            message.worldTempConfig.forEach((key, value) ->
-            {
-                buffer.writeCompoundTag(ColdSweatPacketHandler.writeListOfLists(message.worldTempConfig.get(key)));
-            });
-        }
+        // WorldTempConfig
+        buffer.writeCompoundTag(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("biome_offsets")));
+        buffer.writeCompoundTag(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("dimension_offsets")));
+        buffer.writeCompoundTag(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("biome_temperatures")));
+        buffer.writeCompoundTag(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("dimension_temperatures")));
     }
 
     public static ClientConfigRecieveMessage decode(PacketBuffer buffer)
     {
         boolean onJoin = buffer.readBoolean();
         ConfigCache configCache = ColdSweatPacketHandler.readConfigCacheFromBuffer(buffer);
-        Map<String, List<? extends List<String>>> worldTempConfig = new HashMap<>();
-        if (onJoin)
-        {
-            worldTempConfig.put("biomeOffsets", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
-            worldTempConfig.put("dimensionOffsets", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
-            worldTempConfig.put("biomeTemperatures", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
-            worldTempConfig.put("dimensionTemperatures", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
-        }
+        configCache.worldOptionsReference.put("biome_offsets", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
+        configCache.worldOptionsReference.put("dimension_offsets", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
+        configCache.worldOptionsReference.put("biome_temperatures", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
+        configCache.worldOptionsReference.put("dimension_temperatures", ColdSweatPacketHandler.getListOfLists(buffer.readCompoundTag()));
 
-        return new ClientConfigRecieveMessage(configCache, onJoin, worldTempConfig);
+        return new ClientConfigRecieveMessage(configCache, onJoin);
     }
 
     public static void handle(ClientConfigRecieveMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -69,10 +57,6 @@ public class ClientConfigRecieveMessage
             if (message.onJoin)
             {
                 ConfigCache.setInstance(message.configCache);
-                WorldTemperatureConfig.INSTANCE.setBiomeOffsets(message.worldTempConfig.get("biomeOffsets"));
-                WorldTemperatureConfig.INSTANCE.setDimensionOffsets(message.worldTempConfig.get("dimensionOffsets"));
-                WorldTemperatureConfig.INSTANCE.setBiomeTemperatures(message.worldTempConfig.get("biomeTemperatures"));
-                WorldTemperatureConfig.INSTANCE.setDimensionTemperatures(message.worldTempConfig.get("dimensionTemperatures"));
             }
             else
             {

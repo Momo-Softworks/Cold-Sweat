@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
@@ -22,31 +23,30 @@ public class BiomeTempModifier extends TempModifier
         for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
         {
             Biome biome = player.world.getBiome(iterator);
-            worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation());
+            worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
 
             // Should temperature be overridden by config
-            if (dimensionOverride(player.world.getDimensionKey().getLocation()).override)
-            {
-                return dimensionOverride(player.world.getDimensionKey().getLocation()).value;
-            }
-            if (biomeOverride(biome.getRegistryName()).override)
-            {
-                return biomeOverride(biome.getRegistryName()).value;
-            }
+            Override biomeOverride = biomeOverride(biome.getRegistryName(), player);
+            Override dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation(), player);
+
+            if (dimensionOverride.override) return dimensionOverride.value;
+            if (biomeOverride.override) return biomeOverride.value;
         }
         return temp.get() + (worldTemp / 200);
     }
 
-    protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
+    protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID, PlayerEntity player)
     {
         double offset = 0;
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.biomeOffsets())
+        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.biomeOffsets() :
+                ConfigCache.getInstance().worldOptionsReference.get("biome_offsets")))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 offset += Double.parseDouble(value.get(1));
         }
 
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.dimensionOffsets())
+        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.dimensionOffsets() :
+                ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets")))
         {
             if (new ResourceLocation(value.get(0)).equals(dimensionID))
                 offset += Double.parseDouble(value.get(1));
@@ -54,9 +54,10 @@ public class BiomeTempModifier extends TempModifier
         return offset;
     }
 
-    protected Override biomeOverride(ResourceLocation biomeID)
+    protected Override biomeOverride(ResourceLocation biomeID, PlayerEntity player)
     {
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.biomeTemperatures())
+        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.biomeTemperatures() :
+                ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures")))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 return new Override(true, Double.parseDouble(value.get(1)));
@@ -64,9 +65,10 @@ public class BiomeTempModifier extends TempModifier
         return new Override(false, 0.0d);
     }
 
-    protected Override dimensionOverride(ResourceLocation biomeID)
+    protected Override dimensionOverride(ResourceLocation biomeID, PlayerEntity player)
     {
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.dimensionTemperatures())
+        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.dimensionTemperatures() :
+                ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures")))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 return new Override(true, Double.parseDouble(value.get(1)));

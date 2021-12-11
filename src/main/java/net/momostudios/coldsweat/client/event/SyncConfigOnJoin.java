@@ -7,6 +7,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
+import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.ClientConfigAskMessage;
 
@@ -25,6 +26,7 @@ public class SyncConfigOnJoin
             else
             {
                 ConfigCache.getInstance().writeValues(ColdSweatConfig.getInstance());
+                ConfigCache.getInstance().worldOptionsReference.putAll(WorldTemperatureConfig.INSTANCE.getConfigMap());
             }
         }
     }

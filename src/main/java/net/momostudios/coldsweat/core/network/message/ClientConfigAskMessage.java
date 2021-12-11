@@ -36,16 +36,10 @@ public class ClientConfigAskMessage
         {
             ConfigCache cache = new ConfigCache();
             cache.writeValues(ColdSweatConfig.getInstance());
-            cache.worldOptionsReference = WorldTemperatureConfig.INSTANCE;
+            System.out.println(WorldTemperatureConfig.INSTANCE.getConfigMap());
             cache.itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
-            Map<String, List<? extends List<String>>> worldTempConfig = new HashMap<>();
-            worldTempConfig.put("biomeOffsets", WorldTemperatureConfig.INSTANCE.biomeOffsets());
-            worldTempConfig.put("dimensionOffsets", WorldTemperatureConfig.INSTANCE.dimensionOffsets());
-            worldTempConfig.put("biomeTemperatures", WorldTemperatureConfig.INSTANCE.biomeTemperatures());
-            worldTempConfig.put("dimensionTemperatures", WorldTemperatureConfig.INSTANCE.dimensionTemperatures());
-
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin, worldTempConfig));
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin));
         });
     }
 }
