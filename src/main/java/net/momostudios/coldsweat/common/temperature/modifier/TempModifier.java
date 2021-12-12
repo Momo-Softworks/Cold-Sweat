@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This is the basis of all ways that a Temperature can be changed.<br>
+ * TempModifiers are applied to entities to dynamically change their temperature.<br>
  * For example, biome temperature, time of day, depth, and waterskins are all TempModifiers<br>
  *<br>
  * It is up to you to apply and remove these modifiers manually.<br>
@@ -26,12 +26,12 @@ public abstract class TempModifier
     Map<String, Object> args = new HashMap<>();
 
     /**
-     * Default constructor.
+     * REQUIRED default constructor.
      */
     public TempModifier() {}
 
     /**
-     * Adds a new argument to this TempModifier instance.<br>
+     * Adds a new argument to this TempModifier.<br>
      * @param name is the name of the argument. Used to retrieve the argument in {@link #getArgument(String)}
      * @param arg is value of the argument. It is stored in the {@link PlayerEntity} NBT.
      */
@@ -41,14 +41,14 @@ public abstract class TempModifier
 
     /**
      * @param name the name of the argument
-     * @return the value of the argument with the specified name.
+     * @return the value of the argument on this TempModifier instance with the specified name.
      */
     public Object getArgument(String name) {
         return args.get(name);
     }
 
     /**
-     * Sets the argument of the TempModifier instance to the specified value.<br>
+     * Sets the specified argument of the TempModifier instance to the given value.<br>
      * @param name The name of the argument
      * @param arg The new value of the argument
      */
@@ -91,8 +91,8 @@ public abstract class TempModifier
     }
 
     /**
-     * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate names.
      * The ID is used to mark the TempModifier when it is stored in NBT
+     * @return the string ID of the TempModifier. You should include your mod's ID to prevent duplicate IDs.<br>
      */
     public abstract String getID();
 }
