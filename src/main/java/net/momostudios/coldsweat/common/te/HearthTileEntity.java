@@ -159,11 +159,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             new AxisAlignedBB(x - 1, y - 1, z - 1, x + 2, y + 2, z + 2);
 
                     // Add players to list [affectedPlayers]
-                    world.getEntitiesWithinAABB(PlayerEntity.class, aabb).forEach(player ->
-                    {
-                        if (WorldInfo.isBlockSpreadable(world, blockPos, player.getPosition()))
-                            affectedPlayers.add(player);
-                    });
+                    affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
 
                     // Show radius if enabled
                     if (this.getTileData().getBoolean("showRadius") && world.isRemote && Math.random() < 0.2)
@@ -228,7 +224,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 ColdSweatConfig config = ColdSweatConfig.getInstance();
                 for (PlayerEntity player : affectedPlayers)
                 {
-                    List<TempModifier> modifiers = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
+                    List<TempModifier> modifiers = new ArrayList<>(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT));
                     modifiers.removeIf(modifier -> modifier instanceof HearthTempModifier);
                     Temperature playerTemp = new Temperature().with(modifiers, player);
                     if ((playerTemp.get() < config.minHabitable() && this.getHotFuel() > 0))

@@ -119,7 +119,7 @@ public class WorldInfo
         Direction dir = Direction.getFacingFromVector(newPos.getX() - pos.getX(), newPos.getY() - pos.getY(), newPos.getZ() - pos.getZ());
 
         return (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir)) &&
-                (world.isAirBlock(newPos) || (state2.isSolid() && !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1))) ||
+                (world.isAirBlock(newPos) || !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
                         (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
                         (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)) ||
                         (state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP));
