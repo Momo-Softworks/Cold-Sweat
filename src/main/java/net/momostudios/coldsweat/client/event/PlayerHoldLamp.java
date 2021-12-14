@@ -35,6 +35,32 @@ import java.util.List;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class PlayerHoldLamp
 {
+    static Field layerRenderers;
+    static Method renderHeldItem;
+    static Field armorModel;
+    static Field leggingsModel;
+    static Method renderArmor;
+
+    static
+    {
+        renderHeldItem = ObfuscationReflectionHelper.findMethod(HeldItemLayer.class, "func_229135_a_",
+                LivingEntity.class, ItemStack.class, ItemCameraTransforms.TransformType.class, HandSide.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
+        renderHeldItem.setAccessible(true);
+
+        layerRenderers = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_177097_h");
+        layerRenderers.setAccessible(true);
+
+        armorModel = ObfuscationReflectionHelper.findField(BipedArmorLayer.class, "field_177186_d");
+        armorModel.setAccessible(true);
+
+        leggingsModel = ObfuscationReflectionHelper.findField(BipedArmorLayer.class, "field_177189_c");
+        leggingsModel.setAccessible(true);
+
+        renderArmor = ObfuscationReflectionHelper.findMethod(BipedArmorLayer.class, "func_241739_a_",
+                MatrixStack.class, IRenderTypeBuffer.class, LivingEntity.class, EquipmentSlotType.class, int.class, BipedModel.class);
+        renderArmor.setAccessible(true);
+    }
+
     private static boolean shouldCustomRenderRight(PlayerEntity player, PlayerModel model, float partialRenderTick)
     {
         return model.rightArmPose != BipedModel.ArmPose.BOW_AND_ARROW && model.rightArmPose != BipedModel.ArmPose.CROSSBOW_CHARGE &&
@@ -59,43 +85,35 @@ public class PlayerHoldLamp
         {
             boolean renderingLamp = false;
 
-            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT))
+            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) &&
+            shouldCustomRenderRight(event.getPlayer(), renderer.getEntityModel(), event.getPartialRenderTick()))
             {
-                event.getRenderer().getEntityModel().bipedRightArm.showModel = false;
-                event.getRenderer().getEntityModel().bipedRightArmwear.showModel = false;
-                if (shouldCustomRenderRight(event.getPlayer(), event.getRenderer().getEntityModel(), event.getPartialRenderTick()))
-                    renderingLamp = true;
+                renderer.getEntityModel().bipedRightArm.showModel = false;
+                renderer.getEntityModel().bipedRightArmwear.showModel = false;
+                renderingLamp = true;
             }
 
-            if (PlayerHelper.holdingLamp(player, HandSide.LEFT))
+            if (PlayerHelper.holdingLamp(player, HandSide.LEFT) &&
+            shouldCustomRenderLeft(event.getPlayer(), renderer.getEntityModel(), event.getPartialRenderTick()))
             {
-                event.getRenderer().getEntityModel().bipedLeftArm.showModel = false;
-                event.getRenderer().getEntityModel().bipedLeftArmwear.showModel = false;
+                renderer.getEntityModel().bipedLeftArm.showModel = false;
+                renderer.getEntityModel().bipedLeftArmwear.showModel = false;
                 renderingLamp = true;
             }
             try
             {
-                Field layerRenderers;
-                try
-                {
-                    layerRenderers = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_177097_h");
-                } catch (ObfuscationReflectionHelper.UnableToFindFieldException e)
-                {
-                    layerRenderers = ObfuscationReflectionHelper.findField(LivingRenderer.class, "layerRenderers");
-                }
-                layerRenderers.setAccessible(true);
                 if (renderingLamp)
                 {
-                    ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).removeIf(layerRenderer ->
+                    ((List<LayerRenderer>) layerRenderers.get(renderer)).removeIf(layerRenderer ->
                             layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer);
                 }
                 else
                 {
-                    if (((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).stream().noneMatch(layerRenderer ->
+                    if (((List<LayerRenderer>) layerRenderers.get(renderer)).stream().noneMatch(layerRenderer ->
                             layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer))
                     {
-                        ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).add(new HeldItemLayer(event.getRenderer()));
-                        ((List<LayerRenderer>) layerRenderers.get(event.getRenderer())).add(new BipedArmorLayer(event.getRenderer(), new BipedModel(0.5F), new BipedModel(1.0F)));
+                        ((List<LayerRenderer>) layerRenderers.get(renderer)).add(new HeldItemLayer(event.getRenderer()));
+                        ((List<LayerRenderer>) layerRenderers.get(renderer)).add(new BipedArmorLayer(event.getRenderer(), new BipedModel(0.5F), new BipedModel(1.0F)));
                     }
                     event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
                     event.getPlayer().getPersistentData().putFloat("lanternLeftArmRot", 3.0f);
@@ -145,11 +163,6 @@ public class PlayerHoldLamp
             // Render held items
             try
             {
-                // Access transformer
-                Method renderHeldItem = ObfuscationReflectionHelper.findMethod(HeldItemLayer.class, "func_229135_a_",
-                        LivingEntity.class, ItemStack.class, ItemCameraTransforms.TransformType.class, HandSide.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
-                renderHeldItem.setAccessible(true);
-
                 if (renderRight)
                 {
                     // MatrixStack transforms for right hand
@@ -191,15 +204,6 @@ public class PlayerHoldLamp
             // Render armor
             try
             {
-                // Access transformer
-                Field armorModel = ObfuscationReflectionHelper.findField(BipedArmorLayer.class, "modelArmor");
-                Field leggingsModel = ObfuscationReflectionHelper.findField(BipedArmorLayer.class, "modelLeggings");
-                armorModel.setAccessible(true);
-                leggingsModel.setAccessible(true);
-                Method renderArmor = ObfuscationReflectionHelper.findMethod(BipedArmorLayer.class, "func_241739_a_",
-                        MatrixStack.class, IRenderTypeBuffer.class, LivingEntity.class, EquipmentSlotType.class, int.class, BipedModel.class);
-                renderArmor.setAccessible(true);
-
                 matrixStack.push();
                 matrixStack.rotate(Vector3f.XP.rotation(MathHelperCS.toRadians(180)));
                 matrixStack.rotate(new Quaternion(0, MathHelper.lerp(renderTick, player.prevRenderYawOffset, player.renderYawOffset), 0, true));
