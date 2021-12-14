@@ -14,6 +14,7 @@ import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SoulfireLampItem extends Item
@@ -29,7 +30,7 @@ public class SoulfireLampItem extends Item
         if (entityIn instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) entityIn;
-            List<TempModifier> mods = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
+            List<TempModifier> mods = new ArrayList<>(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT));
             mods.removeIf(mod -> mod instanceof SoulLampTempModifier);
             double temp = new Temperature().with(mods, player).get();
 
@@ -44,7 +45,7 @@ public class SoulfireLampItem extends Item
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.03f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()))));
+                    addFuel(stack, -0.02f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()))));
                 }
             }
         }
