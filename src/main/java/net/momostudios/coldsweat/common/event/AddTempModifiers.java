@@ -42,12 +42,6 @@ public class AddTempModifiers
                 PlayerTemp.addModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
             else
                 PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
-
-            // Soul Lamp
-            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
-                PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
         }
 
         if (player.ticksExisted % 5 == 0)
@@ -56,6 +50,12 @@ public class AddTempModifiers
                 PlayerTemp.addModifier(player, new WaterTempModifier(1d), PlayerTemp.Types.AMBIENT, false);
             else
                 PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (int) modifier.getArgument("strength") == 0);
+
+            // Soul Lamp
+            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
+                PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+            else
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
         }
     }
 
