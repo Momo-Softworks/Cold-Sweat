@@ -23,7 +23,7 @@ public class WaterTempModifier extends TempModifier
     public double getValue(Temperature temp, PlayerEntity player)
     {
         double strength = (double) getArgument("strength");
-        setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : -0.005 - Math.max(0, temp.get() / 20)), 0, 10));
+        setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : -0.005 - Math.max(0, temp.get() / 20 - 0.05)), 0, 10));
         //System.out.println(Math.max(0, temp.get() / 10));
 
         if (!player.isInWater() && strength > 0)
