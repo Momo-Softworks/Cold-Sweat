@@ -2,23 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "WWW",
-    "ISI",
+    " I ",
+    "IHI",
     " C "
   ],
   "key":
   {
-    "W":
-    {
-      "item": "minecraft:warped_planks"
-    },
     "I":
     {
       "item": "minecraft:iron_nugget"
     },
-    "S":
+    "H":
     {
-      "item": "minecraft:soul_soil"
+      "item": "minecraft:heart_of_the_sea"
     },
     "C":
     {
