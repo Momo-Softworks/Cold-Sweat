@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "net.momostudios.coldsweat.mixin",
+  "client": [
+    "MixinBipedModel"
+  ],
+  "injectors":
+  {
+    "defaultRequire": 1
+  },
+  "refmap": "cold_sweat.mixin-refmap.json"
+}

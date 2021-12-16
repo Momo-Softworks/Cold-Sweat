@@ -121,4 +121,5 @@
                      boolean absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
 
 TO-DO
+- Added Italian translation courtesy of @SniperFoxy on our Discord server
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
