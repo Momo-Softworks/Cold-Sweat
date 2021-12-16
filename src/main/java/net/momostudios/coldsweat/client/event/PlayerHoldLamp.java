@@ -1,20 +1,29 @@
 package net.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeBuffers;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Direction;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
@@ -29,13 +38,14 @@ import net.momostudios.coldsweat.core.util.PlayerHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class PlayerHoldLamp
 {
-    static Field layerRenderers;
+    /*static Field layerRenderers;
     static Method renderHeldItem;
     static Field armorModel;
     static Field leggingsModel;
@@ -102,23 +112,29 @@ public class PlayerHoldLamp
             }
             try
             {
+                List<LayerRenderer> layers = (List<LayerRenderer>) layerRenderers.get(renderer);
                 if (renderingLamp)
                 {
-                    ((List<LayerRenderer>) layerRenderers.get(renderer)).removeIf(layerRenderer ->
+                    (layers).removeIf(layerRenderer ->
                             layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer);
                 }
                 else
                 {
-                    if (((List<LayerRenderer>) layerRenderers.get(renderer)).stream().noneMatch(layerRenderer ->
+                    if ((layers).stream().noneMatch(layerRenderer ->
                             layerRenderer instanceof HeldItemLayer || layerRenderer instanceof BipedArmorLayer))
                     {
-                        ((List<LayerRenderer>) layerRenderers.get(renderer)).add(new HeldItemLayer(event.getRenderer()));
-                        ((List<LayerRenderer>) layerRenderers.get(renderer)).add(new BipedArmorLayer(event.getRenderer(), new BipedModel(0.5F), new BipedModel(1.0F)));
+                        (layers).add(new HeldItemLayer(event.getRenderer()));
+                        (layers).add(new BipedArmorLayer(event.getRenderer(), new BipedModel(0.5F), new BipedModel(1.0F)));
                     }
                     event.getPlayer().getPersistentData().putFloat("lanternRightArmRot", 3.0f);
                     event.getPlayer().getPersistentData().putFloat("lanternLeftArmRot", 3.0f);
                 }
             } catch (Exception e) {}
+
+            renderer.getEntityModel().bipedBodyWear.showModel = player.isWearing(PlayerModelPart.JACKET);
+            renderer.getEntityModel().bipedRightLegwear.showModel = player.isWearing(PlayerModelPart.RIGHT_PANTS_LEG);
+            renderer.getEntityModel().bipedLeftLegwear.showModel = player.isWearing(PlayerModelPart.LEFT_PANTS_LEG);
+            renderer.getEntityModel().bipedHeadwear.showModel = player.isWearing(PlayerModelPart.HAT);
         }
     }
 
@@ -229,8 +245,8 @@ public class PlayerHoldLamp
         }
     }
 
-    private static void renderCustomRight(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
-                                   int light, float renderTick, float naturalRightArmRot, float rightArmRot, PlayerRenderer renderer)
+    static void renderCustomRight(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
+    int light, float renderTick, float naturalRightArmRot, float rightArmRot, PlayerRenderer renderer)
     {
         model.bipedRightArm.showModel = true;
         model.bipedRightArmwear.showModel = true;
@@ -244,14 +260,14 @@ public class PlayerHoldLamp
         model.bipedRightArmwear.copyModelAngles(model.bipedRightArm);
         matrixStack.rotate(new Quaternion(0, -MathHelper.lerp(renderTick, player.prevRenderYawOffset, player.renderYawOffset), 0, true));
         // Render right arm
-        model.bipedRightArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())),
-                light, OverlayTexture.NO_OVERLAY);
-        model.bipedRightArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())),
-                light, OverlayTexture.NO_OVERLAY);
+        model.bipedRightArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())), light, OverlayTexture.NO_OVERLAY);
+        // Render right arm overlay
+        if (player.isWearing(PlayerModelPart.RIGHT_SLEEVE))
+            model.bipedRightArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())), light, OverlayTexture.NO_OVERLAY);
     }
 
-    private static void renderCustomLeft(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
-                                         int light, float renderTick, float naturalLeftArmRot, float leftArmRot, PlayerRenderer renderer)
+    static void renderCustomLeft(PlayerModel<AbstractClientPlayerEntity> model, MatrixStack matrixStack, AbstractClientPlayerEntity player, IRenderTypeBuffer buffers,
+    int light, float renderTick, float naturalLeftArmRot, float leftArmRot, PlayerRenderer renderer)
     {
         model.bipedLeftArm.showModel = true;
         model.bipedLeftArmwear.showModel = true;
@@ -265,9 +281,10 @@ public class PlayerHoldLamp
         model.bipedLeftArmwear.copyModelAngles(model.bipedLeftArm);
         matrixStack.rotate(new Quaternion(0, -MathHelper.lerp(renderTick, player.prevRenderYawOffset, player.renderYawOffset), 0, true));
         // Render left arm
-        model.bipedLeftArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())),
-                light, OverlayTexture.NO_OVERLAY);
-        model.bipedLeftArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())),
-                light, OverlayTexture.NO_OVERLAY);
-    }
+        model.bipedLeftArm.render(matrixStack, buffers.getBuffer(RenderType.getEntitySolid(player.getLocationSkin())), light, OverlayTexture.NO_OVERLAY);
+
+        // Render left arm overlay
+        if (player.isWearing(PlayerModelPart.LEFT_SLEEVE))
+        model.bipedLeftArmwear.render(matrixStack, buffers.getBuffer(RenderType.getEntityCutout(player.getLocationSkin())), light, OverlayTexture.NO_OVERLAY);
+    }*/
 }
