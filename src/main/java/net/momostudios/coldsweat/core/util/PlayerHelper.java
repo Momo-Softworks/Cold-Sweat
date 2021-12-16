@@ -1,5 +1,6 @@
 package net.momostudios.coldsweat.core.util;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -13,7 +14,7 @@ import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 public class PlayerHelper
 {
-    public static ItemStack getItemInHand(PlayerEntity player, HandSide hand)
+    public static ItemStack getItemInHand(LivingEntity player, HandSide hand)
     {
         return player.getHeldItem(hand == player.getPrimaryHand() ? Hand.MAIN_HAND : Hand.OFF_HAND);
     }
@@ -23,7 +24,7 @@ public class PlayerHelper
         return hand == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
     }
 
-    public static boolean holdingLamp(PlayerEntity player, HandSide hand)
+    public static boolean holdingLamp(LivingEntity player, HandSide hand)
     {
         return PlayerHelper.getItemInHand(player, hand).getItem() == ModItems.SOULFIRE_LAMP;
     }
