@@ -13,32 +13,41 @@ import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class BlockTempModifier extends TempModifier
 {
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        final double[] totalTemp = {0};
+        double totalTemp = 0;
         int x = player.getPosition().getX();
         int y = player.getPosition().getY();
         int z = player.getPosition().getZ();
 
-        BlockPos.getAllInBox(new AxisAlignedBB(x - 7, y - 7, z - 7, x + 7, y + 7, z + 7)).forEach(blockpos ->
+        for (int x1 = -7; x1 < 14; x1++)
         {
-            BlockState state = player.world.getBlockState(blockpos);
-            BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
-            if (be != null)
+            for (int y1 = -7; y1 < 14; y1++)
             {
-                if (MathHelperCS.isBetween(totalTemp[0], be.minTemp(), be.maxTemp()))
+                for (int z1 = -7; z1 < 14; z1++)
                 {
-                    totalTemp[0] += be.getTemperature(player, state, blockpos,
-                            Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
+                    BlockPos blockpos = player.getPosition().add(x1, y1, z1);
+
+                    BlockState state = player.world.getBlockState(blockpos);
+                    BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
+                    if (be != null)
+                    {
+                        if (MathHelperCS.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
+                        {
+                            totalTemp += be.getTemperature(player, state, blockpos,
+                                    Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
+                        }
+                    }
                 }
             }
-        });
+        }
 
-        return temp.get() + totalTemp[0];
+        return temp.get() + totalTemp;
     }
 
     public String getID()
