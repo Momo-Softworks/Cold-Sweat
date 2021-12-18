@@ -16,23 +16,32 @@ import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
 {
+    public BiomeTempModifier()
+    {
+        addArgument("value", 0d);
+    }
+
     @java.lang.Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        double worldTemp = 0;
-        for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+        if (player.ticksExisted % 3 == 0)
         {
-            Biome biome = player.world.getBiome(iterator);
-            worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
+            double worldTemp = 0;
+            for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+            {
+                Biome biome = player.world.getBiome(iterator);
+                worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
 
-            // Should temperature be overridden by config
-            Override biomeOverride = biomeOverride(biome.getRegistryName(), player);
-            Override dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation(), player);
+                // Should temperature be overridden by config
+                Override biomeOverride = biomeOverride(biome.getRegistryName(), player);
+                Override dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation(), player);
 
-            if (dimensionOverride.override) return dimensionOverride.value;
-            if (biomeOverride.override) return biomeOverride.value;
+                if (dimensionOverride.override) return dimensionOverride.value;
+                if (biomeOverride.override) return biomeOverride.value;
+            }
+            setArgument("value", temp.get() + (worldTemp / 200));
         }
-        return temp.get() + (worldTemp / 200);
+        return (double) getArgument("value");
     }
 
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID, PlayerEntity player)
