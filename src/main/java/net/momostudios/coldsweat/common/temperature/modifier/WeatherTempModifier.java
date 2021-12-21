@@ -6,22 +6,35 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 
 public class WeatherTempModifier extends TempModifier
 {
+    public WeatherTempModifier()
+    {
+        addArgument("weatherTemp", 0.0);
+    }
+
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        float weatherTemp = 0;
         if (!player.world.canBlockSeeSky(player.getPosition()))
             return temp.get();
 
-        if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
+        if (player.ticksExisted % 10 > 0)
         {
-            if (player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15)
-                weatherTemp = -0.25f;
-            else
-                weatherTemp = -0.15f;
+            return temp.get() + (double) getArgument("weatherTemp");
         }
 
-        return temp.get() + weatherTemp;
+        if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
+        {
+            double weatherTemp = player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15 ? -0.25 : -0.15;
+            setArgument("weatherTemp", weatherTemp);
+            return temp.get() + weatherTemp;
+        }
+        else
+        {
+            setArgument("weatherTemp", 0.0);
+        }
+        //System.out.println(getArgument("weatherTemp"));
+
+        return temp.get();
     }
 
     public String getID()
