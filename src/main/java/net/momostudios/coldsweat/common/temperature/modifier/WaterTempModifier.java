@@ -5,13 +5,14 @@ import net.minecraft.particles.ParticleTypes;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.core.util.Units;
 
 public class WaterTempModifier extends TempModifier
 {
     public WaterTempModifier()
     {
-        addArgument("strength", 1);
+        addArgument("strength", 1d);
     }
 
     public WaterTempModifier(double strength)
@@ -22,23 +23,32 @@ public class WaterTempModifier extends TempModifier
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        double strength = (double) getArgument("strength");
-        setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : -0.005 - Math.max(0, temp.get() / 20 - 0.05)), 0, 10));
-        //System.out.println(Math.max(0, temp.get() / 10));
-
-        if (!player.isInWater() && strength > 0)
+        try
         {
-            if (Math.random() < strength / 40)
-            {
-                double randX = player.getWidth() * (Math.random() - 0.5);
-                double randY = player.getHeight() * Math.random();
-                double randZ = player.getWidth() * (Math.random() - 0.5);
-                player.world.addParticle(ParticleTypes.FALLING_WATER, player.getPosX() + randX, player.getPosY() + randY, player.getPosZ() + randZ, 0, 0, 0);
-            }
-        }
+            double strength = (double) getArgument("strength");
+            double factor = Math.min(-0.005, -0.005 - temp.get() / 100);
+            setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : factor), 0, 10));
 
-        //System.out.println(Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) / 2d);
-        return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) * (strength / 40);
+            if (!player.isInWater() && strength > 0.0)
+            {
+                if (Math.random() < strength / 40.0)
+                {
+                    double randX = player.getWidth() * (Math.random() - 0.5);
+                    double randY = player.getHeight() * Math.random();
+                    double randZ = player.getWidth() * (Math.random() - 0.5);
+                    player.world.addParticle(ParticleTypes.FALLING_WATER, player.getPosX() + randX, player.getPosY() + randY, player.getPosZ() + randZ, 0, 0, 0);
+                }
+            }
+            return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) * (strength / 40);
+        }
+        // Remove the modifier if an exception is thrown
+        catch (Exception e)
+        {
+            System.out.println("test");
+            args.remove("strength");
+            args.put("strength", 1d);
+            return temp.get();
+        }
     }
 
     @Override
