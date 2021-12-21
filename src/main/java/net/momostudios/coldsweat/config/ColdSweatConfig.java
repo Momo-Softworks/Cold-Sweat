@@ -126,6 +126,8 @@ public class ColdSweatConfig
         setIceResistanceEffect(cache.iceRes);
         setDamageScaling(cache.damageScaling);
         setShowAmbient(cache.showAmbient);
+        setGracePeriodLength(cache.gracePeriodLength);
+        setGracePeriodEnabled(cache.gracePeriodEnabled);
         save();
     }
 

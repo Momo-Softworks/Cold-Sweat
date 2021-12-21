@@ -67,9 +67,16 @@ public class ConfigScreen
 
     public static void saveConfig(ConfigCache configCache)
     {
-        if (!mc.isSingleplayer() && Minecraft.getInstance().player != null && Minecraft.getInstance().player.hasPermissionLevel(2))
+        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.hasPermissionLevel(2))
         {
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
+            if (!mc.isSingleplayer())
+            {
+                ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
+            }
+            else
+            {
+                ColdSweatConfig.getInstance().writeValues(configCache);
+            }
         }
         else
         {
@@ -108,6 +115,11 @@ public class ConfigScreen
                 difficulty == 2 ? 16755024 :
                 difficulty == 3 ? 16731202 :
                 difficulty == 4 ? 10631158 : 16777215;
+    }
+
+    public static int textOptionColor()
+    {
+        return Minecraft.getInstance().player == null || Minecraft.getInstance().player.hasPermissionLevel(2) ? 16777215 : 8421504;
     }
 
     public static class DifficultyPage extends Screen
@@ -189,7 +201,7 @@ public class ConfigScreen
                 configCache.minTemp = MathHelperCS.convertUnits(40, Units.F, Units.MC, true);
                 configCache.maxTemp = MathHelperCS.convertUnits(120, Units.F, Units.MC, true);
                 configCache.rate = 0.5;
-                configCache.showAmbient = true;
+                configCache.showAmbient = false;
                 configCache.damageScaling = false;
                 configCache.fireRes = true;
                 configCache.iceRes = true;
@@ -200,7 +212,7 @@ public class ConfigScreen
                 configCache.minTemp = MathHelperCS.convertUnits(45, Units.F, Units.MC, true);
                 configCache.maxTemp = MathHelperCS.convertUnits(110, Units.F, Units.MC, true);
                 configCache.rate = 0.75;
-                configCache.showAmbient = true;
+                configCache.showAmbient = false;
                 configCache.damageScaling = false;
                 configCache.fireRes = true;
                 configCache.iceRes = true;
@@ -211,7 +223,7 @@ public class ConfigScreen
                 configCache.minTemp = MathHelperCS.convertUnits(50, Units.F, Units.MC, true);
                 configCache.maxTemp = MathHelperCS.convertUnits(100, Units.F, Units.MC, true);
                 configCache.rate = 1.0;
-                configCache.showAmbient = false;
+                configCache.showAmbient = true;
                 configCache.damageScaling = true;
                 configCache.fireRes = false;
                 configCache.iceRes = false;
@@ -222,7 +234,7 @@ public class ConfigScreen
                 configCache.minTemp = MathHelperCS.convertUnits(60, Units.F, Units.MC, true);
                 configCache.maxTemp = MathHelperCS.convertUnits(90, Units.F, Units.MC, true);
                 configCache.rate = 1.5;
-                configCache.showAmbient = false;
+                configCache.showAmbient = true;
                 configCache.damageScaling = true;
                 configCache.fireRes = false;
                 configCache.iceRes = false;
@@ -262,7 +274,7 @@ public class ConfigScreen
                }
 
                if (newDifficulty != configCache.difficulty) {
-                   mc.getSoundHandler().play(SimpleSound.master(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 2f, 1f));
+                   mc.getSoundHandler().play(SimpleSound.master(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
                }
                configCache.difficulty = newDifficulty;
            }
@@ -363,15 +375,23 @@ public class ConfigScreen
                 new StringTextComponent(new TranslationTextComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (configCache.damageScaling ? ON : OFF)),
                 button -> this.toggleDamageScaling(), configCache);
 
-            if (mc.player == null || mc.player.hasPermissionLevel(3))
+            this.addButton(difficultyButton);
+
+            this.addButton(iceResButton);
+            this.addButton(fireResButton);
+            this.addButton(showAmbientButton);
+            this.addButton(damageScalingButton);
+
+            if (mc.player != null && !mc.player.hasPermissionLevel(2))
             {
-                this.addButton(difficultyButton);
-
-                this.addButton(iceResButton);
-                this.addButton(fireResButton);
-                this.addButton(showAmbientButton);
-                this.addButton(damageScalingButton);
-
+                difficultyButton.active = false;
+                iceResButton.active = false;
+                fireResButton.active = false;
+                showAmbientButton.active = false;
+                damageScalingButton.active = false;
+            }
+            else
+            {
                 this.children.add(this.maxTempInput);
                 this.children.add(this.minTempInput);
                 this.children.add(this.rateMultInput);
@@ -392,22 +412,19 @@ public class ConfigScreen
 
             // Temp Offset
             this.tempOffsetInput.render(matrixStack, mouseX, mouseY, partialTicks);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, 16777215);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, textOptionColor());
 
-            if (mc.player == null || mc.player.hasPermissionLevel(3))
-            {
-                // Max Temp
-                this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
-                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.max_temperature.name"), this.width / 2 - 185, maxTempInput.y + 6, 16777215);
+            // Max Temp
+            this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.max_temperature.name"), this.width / 2 - 185, maxTempInput.y + 6, textOptionColor());
 
-                // Min Temp
-                this.minTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
-                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.min_temperature.name"), this.width / 2 - 185, minTempInput.y + 6, 16777215);
+            // Min Temp
+            this.minTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.min_temperature.name"), this.width / 2 - 185, minTempInput.y + 6, textOptionColor());
 
-                // Rate Multiplier
-                this.rateMultInput.render(matrixStack, mouseX, mouseY, partialTicks);
-                drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.rate_multiplier.name"), this.width / 2 - 185, rateMultInput.y + 6, 16777215);
-            }
+            // Rate Multiplier
+            this.rateMultInput.render(matrixStack, mouseX, mouseY, partialTicks);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.rate_multiplier.name"), this.width / 2 - 185, rateMultInput.y + 6, textOptionColor());
         }
 
         @Override
@@ -418,6 +435,12 @@ public class ConfigScreen
             maxTempInput.tick();
             minTempInput.tick();
             rateMultInput.tick();
+            if (mc.player != null && !mc.player.hasPermissionLevel(2))
+            {
+                maxTempInput.setText(String.valueOf(twoPlaces.format(MathHelperCS.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+                minTempInput.setText(String.valueOf(twoPlaces.format(MathHelperCS.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+                rateMultInput.setText(String.valueOf(configCache.rate));
+            }
         }
 
         private void save()
@@ -518,12 +541,19 @@ public class ConfigScreen
         Button customHotbarButton;
         Button iconBobbingButton;
 
+        boolean gracePeriod;
+        int gracePeriodLength;
+        Button gracePeriodButton;
+        TextFieldWidget gracePeriodLengthInput;
+
 
         public PageTwo(Screen parentScreen, ConfigCache configCache)
         {
             super(parentScreen, configCache);
             this.parentScreen = parentScreen;
             this.configCache = configCache;
+            gracePeriod = configCache.gracePeriodEnabled;
+            gracePeriodLength = configCache.gracePeriodLength;
         }
 
         @Override
@@ -549,6 +579,15 @@ public class ConfigScreen
             super.init();
 
             // The options
+
+            // Enable Grace Period
+            gracePeriodButton = new ConfigButton(this.width / 2 - 185, this.height / 4 - 8, 152, 20,
+                    new StringTextComponent(new TranslationTextComponent("cold_sweat.config.grace_period.name").getString() + ": " +
+                            (configCache.gracePeriodEnabled ? ON : OFF)), button -> this.toggleGracePeriod(), configCache);
+
+            // Grace Period Length
+            this.gracePeriodLengthInput = new TextFieldWidget(font, this.width / 2 - 86, this.height / 4 + 20, 51, 22, new StringTextComponent(""));
+            this.gracePeriodLengthInput.setText(configCache.gracePeriodLength + "");
 
             // Direction Buttons: Steve Head
             leftSteveButton = new ImageButton(this.width / 2 + 140, this.height / 4 - 8, 14, 20, 0, 0, 20,
@@ -596,7 +635,21 @@ public class ConfigScreen
             this.addButton(leftTempReadoutButton);
             this.addButton(rightTempReadoutButton);
             this.addButton(resetTempReadoutButton);
+
             this.addButton(iconBobbingButton);
+            this.addButton(gracePeriodButton);
+
+            if (mc.player == null || mc.player.hasPermissionLevel(2))
+            {
+                this.children.add(gracePeriodLengthInput);
+            }
+        }
+
+        @Override
+        public void tick()
+        {
+            super.tick();
+            gracePeriodLengthInput.tick();
         }
 
         @Override
@@ -604,9 +657,16 @@ public class ConfigScreen
         {
             super.render(matrixStack, mouseX, mouseY, partialTicks);
 
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temperature_icon.name"), this.width / 2 + 51, this.height / 4 - 2, 16777215);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temperature_readout.name"), this.width / 2 + 51, this.height / 4 - 2 + (int) (OPTION_SIZE * 1.5), 16777215);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.offset_shift.name"), this.width / 2 + 51, this.height / 4 + 128, 16777215);
+            gracePeriodLengthInput.render(matrixStack, mouseX, mouseY, partialTicks);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.grace_period_length.name"), this.width / 2 - 185,
+                    gracePeriodLengthInput.y + 6, textOptionColor());
+
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temperature_icon.name"), this.width / 2 + 51,
+                    this.height / 4 - 2, 16777215);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temperature_readout.name"), this.width / 2 + 51,
+                    this.height / 4 - 2 + (int) (OPTION_SIZE * 1.5), 16777215);
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.offset_shift.name"), this.width / 2 + 51,
+                    this.height / 4 + 128, 16777215);
         }
 
         public boolean isShiftPressed()
@@ -618,6 +678,8 @@ public class ConfigScreen
         public void onClose()
         {
             super.onClose();
+            configCache.gracePeriodLength = Integer.parseInt(gracePeriodLengthInput.getText());
+            configCache.gracePeriodEnabled = gracePeriod;
             saveConfig(configCache);
         }
 
@@ -673,6 +735,13 @@ public class ConfigScreen
             iconBobbingButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " +
                 (this.iconBobbing ? ON : OFF)));
             CLIENT_CONFIG.setIconBobbing(this.iconBobbing);
+        }
+
+        public void toggleGracePeriod()
+        {
+            gracePeriod = !gracePeriod;
+            gracePeriodButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.grace_period.name").getString() + ": " +
+                    (gracePeriod ? ON : OFF)));
         }
     }
 }
