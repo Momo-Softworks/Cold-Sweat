@@ -412,7 +412,7 @@ public class ConfigScreen
 
             // Temp Offset
             this.tempOffsetInput.render(matrixStack, mouseX, mouseY, partialTicks);
-            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, textOptionColor());
+            drawString(matrixStack, this.font, new TranslationTextComponent("cold_sweat.config.temp_offset.name"), this.width / 2 - 185, tempOffsetInput.y + 6, 16777215);
 
             // Max Temp
             this.maxTempInput.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -642,6 +642,10 @@ public class ConfigScreen
             if (mc.player == null || mc.player.hasPermissionLevel(2))
             {
                 this.children.add(gracePeriodLengthInput);
+            }
+            else
+            {
+                gracePeriodButton.active = false;
             }
         }
 
