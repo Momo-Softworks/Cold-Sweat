@@ -46,7 +46,7 @@ public class AmbientGaugeDisplay
             boolean bobbing = CCS.iconBobbing();
 
             // Get player ambient temperature
-            double temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
+            double temp = MathHelperCS.convertUnits(clientTemp, CCS.celsius() ? Units.C : Units.F, Units.MC, true);
 
             // Set default color (white)
             int color = 14737376;
