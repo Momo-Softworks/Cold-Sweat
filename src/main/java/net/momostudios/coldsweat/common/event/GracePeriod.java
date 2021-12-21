@@ -19,11 +19,11 @@ public class GracePeriod
         if (event.getEntity() instanceof PlayerEntity)
         {
             if (!Minecraft.getInstance().isSingleplayer() && !event.getEntity().world.isRemote)
-                ColdSweatPacketHandler.INSTANCE.sendToServer(new GracePeriodAskMessage());
+                ColdSweatPacketHandler.INSTANCE.sendToServer(new GracePeriodAskMessage(6000));
             else if (!event.getEntity().getPersistentData().getBoolean("givenGracePeriod"))
             {
                 event.getEntity().getPersistentData().putBoolean("givenGracePeriod", true);
-                ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(ModEffects.INSULATION, 12000, 4, false, false));
+                ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(ModEffects.INSULATION, 6000, 4, false, false));
             }
         }
     }
