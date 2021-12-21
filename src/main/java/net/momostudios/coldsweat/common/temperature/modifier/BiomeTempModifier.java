@@ -24,7 +24,7 @@ public class BiomeTempModifier extends TempModifier
     @java.lang.Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        if (player.ticksExisted % 3 == 0)
+        if (player.ticksExisted % 5 == 0)
         {
             double worldTemp = 0;
             for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
