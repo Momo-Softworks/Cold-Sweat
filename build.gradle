@@ -88,6 +88,7 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.5'
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")
+    compileOnly fg.deobf("curse.maven:jei-238222:3514175")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3337641")
     runtimeOnly fg.deobf("curse.maven:jei-238222:3514175")
 }
