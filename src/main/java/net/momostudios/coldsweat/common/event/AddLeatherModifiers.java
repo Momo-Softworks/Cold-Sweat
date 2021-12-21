@@ -15,6 +15,7 @@ import net.momostudios.coldsweat.core.util.ItemEntry;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddLeatherModifiers
@@ -58,14 +59,27 @@ public class AddLeatherModifiers
             {
                 if (PlayerTemp.hasModifier(player, InsulationTempModifier.class, PlayerTemp.Types.RATE))
                 {
+                    AtomicBoolean shouldRemove = new AtomicBoolean(false);
                     int multiplier = leatherMultiplier;
                     PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
                     {
                         if (modifier instanceof InsulationTempModifier)
                         {
-                            modifier.setArgument("amount", multiplier);
+                            try
+                            {
+                                modifier.setArgument("amount", multiplier);
+                            }
+                            catch (IllegalArgumentException e)
+                            {
+                                shouldRemove.set(true);
+                            }
                         }
                     });
+                    // Reset the modifier if it throws an error
+                    if (shouldRemove.get())
+                    {
+                        PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier instanceof InsulationTempModifier);
+                    }
                 }
                 else
                     PlayerTemp.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
