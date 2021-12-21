@@ -5,7 +5,6 @@
   "block.cold_sweat.sewing_table":      "Sewing Table",
 
   "item.cold_sweat.minecart_insulation": "Minecart Insulation",
-  "item.cold_sweat.obsidian_shard":      "Obsidian Shard",
   "item.cold_sweat.soulfire_lamp":       "Soulfire Lamp",
   "item.cold_sweat.thermometer":         "Thermometer",
   "item.cold_sweat.waterskin":           "Waterskin",
@@ -82,6 +81,8 @@
   "cold_sweat.config.custom_hotbar.name":           "Custom Hotbar",
   "cold_sweat.config.damage_scaling.name":          "Difficulty Damage Scaling",
   "cold_sweat.config.fire_resistance.name":         "Fire Resistance",
+  "cold_sweat.config.grace_period.name":            "Grace Period",
+  "cold_sweat.config.grace_period_length.name":     "Grace Length",
   "cold_sweat.config.ice_resistance.name":          "Ice Resistance",
   "cold_sweat.config.icon_bobbing.name":            "Icon Bobbing",
   "cold_sweat.config.max_temperature.name":         "Max Temperature",
