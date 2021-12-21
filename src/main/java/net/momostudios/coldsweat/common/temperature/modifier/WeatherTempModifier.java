@@ -10,15 +10,15 @@ public class WeatherTempModifier extends TempModifier
     public double getValue(Temperature temp, PlayerEntity player)
     {
         float weatherTemp = 0;
-        if (player.world.canBlockSeeSky(player.getPosition()))
+        if (!player.world.canBlockSeeSky(player.getPosition()))
+            return temp.get();
+
+        if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
         {
-            if (player.world.isRaining() && player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.95)
-            {
-                if (player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15)
-                    weatherTemp = -0.25f;
-                else
-                    weatherTemp = -0.15f;
-            }
+            if (player.world.getBiome(player.getPosition()).getTemperature(player.getPosition()) < 0.15)
+                weatherTemp = -0.25f;
+            else
+                weatherTemp = -0.15f;
         }
 
         return temp.get() + weatherTemp;
