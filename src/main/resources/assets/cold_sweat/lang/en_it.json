@@ -5,7 +5,7 @@
   "block.cold_sweat.sewing_table":      "Tavolo Da Cucito",
 
   "item.cold_sweat.minecart_insulation": "Insulazione Per Carrello Da Miniera",
-  "item.cold_sweat.obsidian_shard":      "Frammento Di Ossidiana",
+  "item.cold_sweat.soulfire_lamp":       "Soulfire Lamp",
   "item.cold_sweat.thermometer":         "Termometro",
   "item.cold_sweat.waterskin":           "Otre",
   "item.cold_sweat.waterskin.filled":    "Pieno",
@@ -28,6 +28,8 @@
   "death.attack.cold.player":   "%1$s è morto di freddo mentre combatteva %2$s",
   "death.attack.hot":           "%1$s è stato ucciso da un colpo di calore",
   "death.attack.hot.player":    "%1$s è stato ucciso da un colpo di calore mentre combatteva %2$s",
+
+  "entity.player.damage.freeze": "Player freezes",
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.temperature_details":  "Gestione Della Temperatura",
@@ -97,5 +99,5 @@
   "commands.cold_sweat.temperature.set.self.result":  "Imposta la tua temperatura a",
   "commands.cold_sweat.temperature.set.other.result": "Imposta la temperatura di %d a",
   "commands.cold_sweat.temperature.set.all.result":   "Imposta la temperatura di %d giocatori a",
-  "commands.cold_sweat.temperature.get.result":       "La temperatura corporea di %d è"
+  "commands.cold_sweat.temperature.get.result":       "La temperatura corporea di %d è",
 }
