@@ -18,8 +18,8 @@ public class ThermometerOverride implements IItemPropertyGetter
     {
         PlayerEntity player = Minecraft.getInstance().player;
         ColdSweatConfig config = ColdSweatConfig.getInstance();
-        float minTemp = (float) config.minHabitable();
-        float maxTemp = (float) config.maxHabitable();
+        float minTemp = (float) config.getMinTempHabitable();
+        float maxTemp = (float) config.getMaxTempHabitable();
 
         float ambientTemp = (float) PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
 

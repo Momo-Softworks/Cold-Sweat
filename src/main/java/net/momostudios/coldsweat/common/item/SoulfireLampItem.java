@@ -1,11 +1,9 @@
 package net.momostudios.coldsweat.common.item;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.SoulLampTempModifier;
@@ -41,11 +39,11 @@ public class SoulfireLampItem extends Item
             }
             //System.out.println(isSelected);
             if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-            temp > ColdSweatConfig.getInstance().maxHabitable() && player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
+            temp > ColdSweatConfig.getInstance().getMaxTempHabitable() && player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.02f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().maxHabitable()))));
+                    addFuel(stack, -0.02f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().getMaxTempHabitable()))));
                 }
             }
         }

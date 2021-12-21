@@ -47,7 +47,7 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ColdSweatConfig.getInstance().rateMultiplier()), PlayerTemp.Types.BODY, true);
+                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ColdSweatConfig.getInstance().getRateMultiplier()), PlayerTemp.Types.BODY, true);
             }
         }
     }

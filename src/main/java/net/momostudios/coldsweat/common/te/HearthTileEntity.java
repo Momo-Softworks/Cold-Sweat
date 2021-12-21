@@ -18,7 +18,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -41,7 +40,6 @@ import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.*;
 import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -227,12 +225,12 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     List<TempModifier> modifiers = new ArrayList<>(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT));
                     modifiers.removeIf(modifier -> modifier instanceof HearthTempModifier);
                     Temperature playerTemp = new Temperature().with(modifiers, player);
-                    if ((playerTemp.get() < config.minHabitable() && this.getHotFuel() > 0))
+                    if ((playerTemp.get() < config.getMinTempHabitable() && this.getHotFuel() > 0))
                     {
                         player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
                         shouldUseHotFuel = true;
                     }
-                    if (playerTemp.get() > config.maxHabitable() && this.getColdFuel() > 0)
+                    if (playerTemp.get() > config.getMaxTempHabitable() && this.getColdFuel() > 0)
                     {
                         player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
                         shouldUseColdFuel = true;

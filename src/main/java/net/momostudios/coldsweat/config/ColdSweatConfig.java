@@ -29,6 +29,9 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue damageScaling;
     private static final ForgeConfigSpec.BooleanValue showAmbient;
 
+    private static final ForgeConfigSpec.IntValue gracePeriodLength;
+    private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
+
 
     static 
     {
@@ -78,6 +81,15 @@ public class ColdSweatConfig
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
         BUILDER.pop();
 
+        BUILDER.push("Grace Period Details");
+                gracePeriodLength = BUILDER
+                .comment("Grace period length in ticks (default: 6000)")
+                .defineInRange("Grace Period Length", 6000, 0, Integer.MAX_VALUE);
+                gracePeriodEnabled = BUILDER
+                .comment("Enables the grace period (default: true)")
+                .define("Grace Period Enabled", true);
+        BUILDER.pop();
+
         SPEC = BUILDER.build();
     }
 
@@ -120,36 +132,46 @@ public class ColdSweatConfig
     /*
      * Non-private values for use elsewhere
      */
-    public int difficulty() {
+    public int getDifficulty() {
         return difficulty.get();
     }
 
-    public boolean fireResistanceEffect() {
+    public boolean isFireResistanceEnabled() {
         return fireResistanceEffect.get();
     }
 
-    public boolean iceResistanceEffect() {
+    public boolean isIceResistanceEnabled() {
         return iceResistanceEffect.get();
     }
 
-    public boolean showAmbient() {
+    public boolean showAmbientGauge() {
         return showAmbient.get();
     }
 
-    public boolean damageScaling() {
+    public boolean doDamageScaling() {
         return damageScaling.get();
     }
 
-    public double minHabitable() {
+    public double getMinTempHabitable() {
         return minHabitable.get();
     }
 
-    public double maxHabitable() {
+    public double getMaxTempHabitable() {
         return maxHabitable.get();
     }
 
-    public double rateMultiplier() {
+    public double getRateMultiplier() {
         return rateMultiplier.get();
+    }
+
+    public int getGracePeriodLength()
+    {
+        return gracePeriodLength.get();
+    }
+
+    public boolean isGracePeriodEnabled()
+    {
+        return gracePeriodEnabled.get();
     }
 
 
@@ -186,6 +208,16 @@ public class ColdSweatConfig
 
     public void setDamageScaling(boolean enabled) {
         damageScaling.set(enabled);
+    }
+
+    public void setGracePeriodLength(int ticks)
+    {
+        gracePeriodLength.set(ticks);
+    }
+
+    public void setGracePeriodEnabled(boolean enabled)
+    {
+        gracePeriodEnabled.set(enabled);
     }
 
     public void save() {

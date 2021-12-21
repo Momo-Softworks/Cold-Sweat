@@ -14,6 +14,8 @@ public class ConfigCache
     public boolean iceRes;
     public boolean damageScaling;
     public boolean showAmbient;
+    public int gracePeriodLength;
+    public boolean gracePeriodEnabled;
 
     public Map<String, List<? extends List<String>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
     public ItemSettingsConfig itemSettingsReference = ItemSettingsConfig.INSTANCE;
@@ -39,53 +41,15 @@ public class ConfigCache
 
     public void writeValues(ColdSweatConfig config)
     {
-        difficulty = config.difficulty();
-        maxTemp = config.maxHabitable();
-        minTemp = config.minHabitable();
-        rate = config.rateMultiplier();
-        fireRes = config.fireResistanceEffect();
-        iceRes = config.iceResistanceEffect();
-        damageScaling = config.damageScaling();
-        showAmbient = config.showAmbient();
-    }
-
-    public void setDamageScaling(boolean damageScaling)
-    {
-        this.damageScaling = damageScaling;
-    }
-
-    public void setDifficulty(int difficulty)
-    {
-        this.difficulty = difficulty;
-    }
-
-    public void setFireResistanceEffect(boolean fireRes)
-    {
-        this.fireRes = fireRes;
-    }
-
-    public void setIceResistanceEffect(boolean iceRes)
-    {
-        this.iceRes = iceRes;
-    }
-
-    public void setMaxHabitable(double maxTemp)
-    {
-        this.maxTemp = maxTemp;
-    }
-
-    public void setMinHabitable(double minTemp)
-    {
-        this.minTemp = minTemp;
-    }
-
-    public void setRateMultiplier(double rate)
-    {
-        this.rate = rate;
-    }
-
-    public void setShowAmbient(boolean showAmbient)
-    {
-        this.showAmbient = showAmbient;
+        difficulty = config.getDifficulty();
+        maxTemp = config.getMaxTempHabitable();
+        minTemp = config.getMinTempHabitable();
+        rate = config.getRateMultiplier();
+        fireRes = config.isFireResistanceEnabled();
+        iceRes = config.isIceResistanceEnabled();
+        damageScaling = config.doDamageScaling();
+        showAmbient = config.showAmbientGauge();
+        gracePeriodLength = config.getGracePeriodLength();
+        gracePeriodEnabled = config.isGracePeriodEnabled();
     }
 }

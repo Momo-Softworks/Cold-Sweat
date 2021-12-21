@@ -2,8 +2,6 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
@@ -19,7 +17,7 @@ public class DepthTempModifier extends TempModifier
 
         double y = player.getPosY();
         ColdSweatConfig config = ColdSweatConfig.getInstance();
-        Temperature midTemp = new Temperature((config.maxHabitable() + config.minHabitable()) / 2d);
+        Temperature midTemp = new Temperature((config.getMaxTempHabitable() + config.getMinTempHabitable()) / 2d);
 
         // The total height across all samples
         double weightedHeight = 0;

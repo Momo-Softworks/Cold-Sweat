@@ -17,11 +17,11 @@ public class SoulLampTempModifier extends TempModifier
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
-        float max = (float) ColdSweatConfig.getInstance().maxHabitable();
-        float min = (float) ColdSweatConfig.getInstance().minHabitable();
+        float max = (float) ColdSweatConfig.getInstance().getMaxTempHabitable();
+        float min = (float) ColdSweatConfig.getInstance().getMinTempHabitable();
 
         if (holdingFueledLamp(player) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-                temp.get() > ColdSweatConfig.getInstance().maxHabitable())
+                temp.get() > ColdSweatConfig.getInstance().getMaxTempHabitable())
         {
             if (!player.world.isRemote || (player != Minecraft.getInstance().player || Minecraft.getInstance().gameSettings.getPointOfView() != PointOfView.FIRST_PERSON))
             {

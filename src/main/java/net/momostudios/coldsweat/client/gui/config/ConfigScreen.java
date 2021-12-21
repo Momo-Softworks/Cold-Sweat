@@ -183,55 +183,49 @@ public class ConfigScreen
 
         private void close()
         {
-            configCache.setDifficulty(configCache.difficulty);
-
             // Super Easy
             if (configCache.difficulty == 0)
             {
-                configCache.setMinHabitable(MathHelperCS.convertUnits(40, Units.F, Units.MC, true));
-                configCache.setMaxHabitable(MathHelperCS.convertUnits(120, Units.F, Units.MC, true));
-                configCache.setRateMultiplier(0.5);
-                configCache.setShowAmbient(true);
-                configCache.setDamageScaling(false);
-                configCache.setFireResistanceEffect(true);
-                configCache.setIceResistanceEffect(true);
-                configCache.setDifficulty(0);
+                configCache.minTemp = MathHelperCS.convertUnits(40, Units.F, Units.MC, true);
+                configCache.maxTemp = MathHelperCS.convertUnits(120, Units.F, Units.MC, true);
+                configCache.rate = 0.5;
+                configCache.showAmbient = true;
+                configCache.damageScaling = false;
+                configCache.fireRes = true;
+                configCache.iceRes = true;
             }
             // Easy
             else if (configCache.difficulty == 1)
             {
-                configCache.setMinHabitable(MathHelperCS.convertUnits(45, Units.F, Units.MC, true));
-                configCache.setMaxHabitable(MathHelperCS.convertUnits(110, Units.F, Units.MC, true));
-                configCache.setRateMultiplier(0.75);
-                configCache.setShowAmbient(true);
-                configCache.setDamageScaling(false);
-                configCache.setFireResistanceEffect(true);
-                configCache.setIceResistanceEffect(true);
-                configCache.setDifficulty(1);
+                configCache.minTemp = MathHelperCS.convertUnits(45, Units.F, Units.MC, true);
+                configCache.maxTemp = MathHelperCS.convertUnits(110, Units.F, Units.MC, true);
+                configCache.rate = 0.75;
+                configCache.showAmbient = true;
+                configCache.damageScaling = false;
+                configCache.fireRes = true;
+                configCache.iceRes = true;
             }
             // Normal
             else if (configCache.difficulty == 2)
             {
-                configCache.setMinHabitable(MathHelperCS.convertUnits(50, Units.F, Units.MC, true));
-                configCache.setMaxHabitable(MathHelperCS.convertUnits(100, Units.F, Units.MC, true));
-                configCache.setRateMultiplier(1.0);
-                configCache.setShowAmbient(false);
-                configCache.setDamageScaling(true);
-                configCache.setFireResistanceEffect(false);
-                configCache.setIceResistanceEffect(false);
-                configCache.setDifficulty(2);
+                configCache.minTemp = MathHelperCS.convertUnits(50, Units.F, Units.MC, true);
+                configCache.maxTemp = MathHelperCS.convertUnits(100, Units.F, Units.MC, true);
+                configCache.rate = 1.0;
+                configCache.showAmbient = false;
+                configCache.damageScaling = true;
+                configCache.fireRes = false;
+                configCache.iceRes = false;
             }
             // Hard
             else if (configCache.difficulty == 3)
             {
-                configCache.setMinHabitable(MathHelperCS.convertUnits(60, Units.F, Units.MC, true));
-                configCache.setMaxHabitable(MathHelperCS.convertUnits(90, Units.F, Units.MC, true));
-                configCache.setRateMultiplier(1.5);
-                configCache.setShowAmbient(false);
-                configCache.setDamageScaling(true);
-                configCache.setFireResistanceEffect(false);
-                configCache.setIceResistanceEffect(false);
-                configCache.setDifficulty(3);
+                configCache.minTemp = MathHelperCS.convertUnits(60, Units.F, Units.MC, true);
+                configCache.maxTemp = MathHelperCS.convertUnits(90, Units.F, Units.MC, true);
+                configCache.rate = 1.5;
+                configCache.showAmbient = false;
+                configCache.damageScaling = true;
+                configCache.fireRes = false;
+                configCache.iceRes = false;
             }
             mc.displayGuiScreen(parentScreen);
             saveConfig(configCache);
@@ -429,10 +423,6 @@ public class ConfigScreen
         private void save()
         {
             CLIENT_CONFIG.setCelsius(this.celsius);
-            configCache.setIceResistanceEffect(configCache.iceRes);
-            configCache.setFireResistanceEffect(configCache.fireRes);
-            configCache.setDamageScaling(configCache.damageScaling);
-            configCache.setShowAmbient(configCache.showAmbient);
 
             try
             {
@@ -441,18 +431,18 @@ public class ConfigScreen
 
             try
             {
-                configCache.setMaxHabitable(MathHelperCS.convertUnits(Double.parseDouble(maxTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true));
+                configCache.maxTemp = MathHelperCS.convertUnits(Double.parseDouble(maxTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true);
             } catch (Exception e) {}
 
             try
             {
-                configCache.setMinHabitable(MathHelperCS.convertUnits(Double.parseDouble(minTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true));
+                configCache.minTemp = MathHelperCS.convertUnits(Double.parseDouble(minTempInput.getText()), celsius ? Units.C : Units.F, Units.MC, true);
             } catch (Exception e) {}
 
             try
             {
                 double rateModifier = Double.parseDouble(rateMultInput.getText());
-                configCache.setRateMultiplier(rateModifier);
+                configCache.rate = rateModifier;
             } catch (Exception e) {}
 
             saveConfig(configCache);

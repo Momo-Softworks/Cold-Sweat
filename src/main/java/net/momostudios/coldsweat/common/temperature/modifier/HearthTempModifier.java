@@ -12,8 +12,8 @@ public class HearthTempModifier extends TempModifier
     {
         ColdSweatConfig config = ColdSweatConfig.getInstance();
 
-        double min = config.minHabitable();
-        double max = config.maxHabitable();
+        double min = config.getMinTempHabitable();
+        double max = config.getMaxTempHabitable();
         double mid = (min + max) / 2;
 
         int hearthEffect = player.isPotionActive(ModEffects.INSULATION) ?

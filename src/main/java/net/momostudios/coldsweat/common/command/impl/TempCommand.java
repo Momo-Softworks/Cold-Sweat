@@ -17,7 +17,6 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 public class TempCommand extends BaseCommand
@@ -84,7 +83,7 @@ public class TempCommand extends BaseCommand
         //Set the option in the config
         ColdSweatConfig.getInstance().setMinHabitable(amount);
         ColdSweatConfig.getInstance().save();
-        System.out.println(ColdSweatConfig.getInstance().minHabitable());
+        System.out.println(ColdSweatConfig.getInstance().getMinTempHabitable());
 
         //Print success message to all players
         for (PlayerEntity player : source.asPlayer().world.getPlayers())
