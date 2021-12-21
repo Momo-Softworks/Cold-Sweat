@@ -17,13 +17,20 @@ import java.util.stream.Stream;
 
 public class BlockTempModifier extends TempModifier
 {
+    public BlockTempModifier()
+    {
+        addArgument("value", 0.0);
+    }
+
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
+        if (player.ticksExisted % 2 == 0)
+        {
+            return temp.get() + (double) this.getArgument("value");
+        }
+
         double totalTemp = 0;
-        int x = player.getPosition().getX();
-        int y = player.getPosition().getY();
-        int z = player.getPosition().getZ();
 
         for (int x1 = -7; x1 < 14; x1++)
         {
@@ -31,21 +38,25 @@ public class BlockTempModifier extends TempModifier
             {
                 for (int z1 = -7; z1 < 14; z1++)
                 {
-                    BlockPos blockpos = player.getPosition().add(x1, y1, z1);
-
-                    BlockState state = player.world.getBlockState(blockpos);
-                    BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
-                    if (be != null)
+                    try
                     {
-                        if (MathHelperCS.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
+                        BlockPos blockpos = player.getPosition().add(x1, y1, z1);
+
+                        BlockState state = player.world.getBlockState(blockpos);
+                        BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
+                        if (be != null)
                         {
-                            totalTemp += be.getTemperature(player, state, blockpos,
-                                    Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
+                            if (MathHelperCS.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
+                            {
+                                totalTemp += be.getTemperature(player, state, blockpos,
+                                        Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
+                            }
                         }
-                    }
+                    } catch (Exception e) {}
                 }
             }
         }
+        setArgument("value", totalTemp);
 
         return temp.get() + totalTemp;
     }
