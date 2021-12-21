@@ -114,7 +114,7 @@ public class AmbientGaugeDisplay
             double tempReadout = MathHelperCS.convertUnits(PlayerTemp.getTemperature(Minecraft.getInstance().player, PlayerTemp.Types.AMBIENT).get(),
                     Units.MC, celsius ? Units.C : Units.F, true) + CCS.tempOffset();
 
-            clientTemp = clientTemp + (tempReadout - clientTemp) / 5.0;
+            clientTemp = clientTemp + (tempReadout - clientTemp) / 10.0;
         }
     }
 }
