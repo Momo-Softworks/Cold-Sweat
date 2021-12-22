@@ -26,12 +26,11 @@ public class BoilerContainer extends Container
         super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
-        int slotIndex = 0;
 
         // Tile Entity
         for (int in = 0; in < 9; in++)
         {
-            this.addSlot(new Slot((IInventory) te, in, 8 + in * 18, 35)
+            this.addSlot(new Slot(te, in, 8 + in * 18, 35)
             {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
@@ -40,21 +39,21 @@ public class BoilerContainer extends Container
             });
         }
 
-        this.addSlot(new Slot((IInventory) te, 9, 80, 62));
+        this.addSlot(new Slot(te, 9, 80, 62));
 
         // Main player inventory
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
             {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 202 - (4 - row) * 18 - 10));
+                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 163 - (4 - row) * 18));
             }
         }
 
         // Player Hotbar
         for (int col = 0; col < 9; col++)
         {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 178));
+            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
         }
     }
 

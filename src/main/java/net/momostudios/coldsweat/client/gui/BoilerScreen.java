@@ -37,11 +37,11 @@ public class BoilerScreen extends ContainerScreen<BoilerContainer>
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y)
     {
-        this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY + 36, 4210752);
+        this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY + 6, 4210752);
         this.font.drawText(matrixStack, name, titleX, 9f, 4210752);
 
         this.minecraft.textureManager.bindTexture(FUEL_GAUGE);
-        this.blit(matrixStack, 27 ,62, 0, 0, (int) (this.container.getFuel() / 31.25), 16, 32, 16);
+        this.blit(matrixStack, 108, 62, 0, 0, (int) (this.container.getFuel() / 31.25), 16, 32, 16);
     }
 
     @SuppressWarnings("deprecation")
