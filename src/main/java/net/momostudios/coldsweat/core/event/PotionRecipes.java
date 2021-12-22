@@ -9,6 +9,7 @@ import net.minecraftforge.common.brewing.IBrewingRecipe;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
 import net.momostudios.coldsweat.core.init.PotionInit;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -19,27 +20,10 @@ public class PotionRecipes
     {
         event.enqueueWork(() ->
         {
-            BrewingRecipeRegistry.addRecipe(new IcePotionRecipe());
+            ItemStack awkward = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTION), Potions.AWKWARD);
+            ItemStack packedIce = new ItemStack(Items.PACKED_ICE);
+            ItemStack iceResPotion = PotionUtils.addPotionToItemStack(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get());
+            BrewingRecipeRegistry.addRecipe(Ingredient.fromStacks(awkward), Ingredient.fromStacks(packedIce), iceResPotion);
         });
-    }
-
-    public static class IcePotionRecipe implements IBrewingRecipe
-    {
-
-        @Override
-        public boolean isInput(ItemStack input) {
-            return input.getItem() == Items.POTION && PotionUtils.getPotionFromItem(input) == Potions.AWKWARD;
-        }
-
-        @Override
-        public boolean isIngredient(ItemStack ingredient) {
-            return ingredient.getItem() == Items.PACKED_ICE;
-        }
-
-        @Override
-        public ItemStack getOutput(ItemStack input, ItemStack ingredient) {
-            return this.isInput(input) && this.isIngredient(ingredient) ?
-                    PotionUtils.addPotionToItemStack(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get()) : ItemStack.EMPTY;
-        }
     }
 }
