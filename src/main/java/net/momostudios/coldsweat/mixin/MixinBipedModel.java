@@ -4,7 +4,6 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelHelper;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.PlayerHelper;
@@ -37,12 +36,12 @@ public class MixinBipedModel
         if (PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT) && (this.rightArmPose == BipedModel.ArmPose.BLOCK || this.rightArmPose == BipedModel.ArmPose.ITEM))
         {
             if (rightArmRot < 70)
-                p_241654_1_.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 5f);
+                p_241654_1_.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 7);
         }
         else
         {
             if (rightArmRot > 0)
-                p_241654_1_.getPersistentData().putFloat("rightArmRot", rightArmRot + (0 - rightArmRot) / 5f);
+                p_241654_1_.getPersistentData().putFloat("rightArmRot", rightArmRot + (0 - rightArmRot) / 7);
         }
 
         switch(this.rightArmPose)
@@ -91,12 +90,12 @@ public class MixinBipedModel
         if (PlayerHelper.holdingLamp(p_241655_1_, HandSide.LEFT) && (this.leftArmPose == BipedModel.ArmPose.BLOCK || this.leftArmPose == BipedModel.ArmPose.ITEM))
         {
             if (leftArmRot < 70)
-                p_241655_1_.getPersistentData().putFloat("leftArmRot", leftArmRot + (71 - leftArmRot) / 5f);
+                p_241655_1_.getPersistentData().putFloat("leftArmRot", leftArmRot + (71 - leftArmRot) / 7);
         }
         else
         {
             if (leftArmRot > 0)
-                p_241655_1_.getPersistentData().putFloat("leftArmRot", leftArmRot + (0 - leftArmRot) / 5f);
+                p_241655_1_.getPersistentData().putFloat("leftArmRot", leftArmRot + (0 - leftArmRot) / 7);
         }
 
         switch(this.leftArmPose)
