@@ -39,7 +39,14 @@ public class BoilerContainer extends Container
             });
         }
 
-        this.addSlot(new Slot(te, 9, 80, 62));
+        this.addSlot(new Slot(te, 9, 80, 62)
+        {
+            @Override
+            public boolean isItemValid(ItemStack stack)
+            {
+                return !te.getFuelItem(stack).isEmpty();
+            }
+        });
 
         // Main player inventory
         for (int row = 0; row < 3; row++)

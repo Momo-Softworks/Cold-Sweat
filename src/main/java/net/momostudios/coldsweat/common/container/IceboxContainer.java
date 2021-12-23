@@ -52,14 +52,14 @@ public class IceboxContainer extends Container
         {
             for (int col = 0; col < 9; col++)
             {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 202 - (4 - row) * 18 - 10));
+                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 163 - (4 - row) * 18));
             }
         }
 
         // Player Hotbar
         for (int col = 0; col < 9; col++)
         {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 178));
+            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
         }
     }
 

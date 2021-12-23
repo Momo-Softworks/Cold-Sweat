@@ -17,6 +17,7 @@ public class BoilerScreen extends ContainerScreen<BoilerContainer>
     ITextComponent name = new TranslationTextComponent("block." + ColdSweat.MOD_ID + ".boiler");
     int titleX = this.xSize / 2 - name.toString().length() / 18;
     int fuelLevel;
+
     public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
@@ -38,7 +39,7 @@ public class BoilerScreen extends ContainerScreen<BoilerContainer>
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y)
     {
         this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY + 6, 4210752);
-        this.font.drawText(matrixStack, name, titleX, 9f, 4210752);
+        this.font.drawText(matrixStack, name, 88 - font.getStringWidth(name.getString()) / 2f, 9f, 4210752);
 
         this.minecraft.textureManager.bindTexture(FUEL_GAUGE);
         this.blit(matrixStack, 108, 62, 0, 0, (int) (this.container.getFuel() / 31.25), 16, 32, 16);

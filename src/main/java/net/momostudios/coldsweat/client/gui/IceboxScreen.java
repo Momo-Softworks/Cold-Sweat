@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
@@ -34,14 +35,15 @@ public class IceboxScreen extends ContainerScreen<IceboxContainer>
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
     }
+
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y)
     {
-        this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY + 36, 4210752);
-        this.font.drawText(matrixStack, name, titleX, 9f, 4210752);
+        this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY + 6, 4210752);
+        this.font.drawText(matrixStack, name, 88 - font.getStringWidth(name.getString()) / 2f, 9f, 4210752);
 
         this.minecraft.textureManager.bindTexture(FUEL_GAUGE);
-        this.blit(matrixStack, 27 ,62, 0, 0, (int) (this.container.getFuel() / 31.25), 16, 32, 16);
+        blit(matrixStack, 108, 62, 0, 0, (int) (this.container.getFuel() / 31.25), 16, 32, 16);
     }
 
     @SuppressWarnings("deprecation")
