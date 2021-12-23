@@ -40,6 +40,11 @@ public class BlockEffectEntries
     @Nullable
     public BlockEffect getEntryFor(Block block)
     {
-        return getList().stream().filter(entry -> entry.hasBlock(block.getDefaultState())).findFirst().orElse(null);
+        for (BlockEffect blockEffect : getList())
+        {
+            if (blockEffect.hasBlock(block.getDefaultState()))
+                return blockEffect;
+        }
+        return null;
     }
 }

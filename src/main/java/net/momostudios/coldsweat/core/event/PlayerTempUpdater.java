@@ -1,7 +1,6 @@
 package net.momostudios.coldsweat.core.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effects;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -106,11 +105,11 @@ public class PlayerTempUpdater
             if (player.ticksExisted % 40 == 0)
             {
                 boolean scales = config.damageScaling;
-                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.TOLERANCE))
+                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
                 {
                     player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);
                 }
-                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.TOLERANCE))
+                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
                 {
                     player.attackEntityFrom(scales ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2);
                 }
