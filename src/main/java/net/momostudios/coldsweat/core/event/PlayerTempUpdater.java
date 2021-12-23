@@ -47,25 +47,25 @@ public class PlayerTempUpdater
             //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
             if (ambientTemp > maxTemp && !player.isCreative())
             {
-                temp.add((float) Math.min(new Temperature((float) Math.abs(maxTemp - ambientTemp) / 15f)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate, 150));
+                temp.add((float) new Temperature((float) Math.abs(maxTemp - ambientTemp) / 7f)
+                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
             }
             //Return the player's temperature back to 0
             else if (bodyTemp > 0)
             {
-                temp.add((float) -Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 10f) * config.rate, bodyTemp));
+                temp.add((float) -Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 5f) * config.rate, bodyTemp));
             }
 
             //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
             if (ambientTemp < minTemp && !player.isCreative())
             {
-                temp.add((float) Math.max(-new Temperature((float) Math.abs(minTemp - ambientTemp) / 15f)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate, -150));
+                temp.add((float) -new Temperature((float) Math.abs(minTemp - ambientTemp) / 7f)
+                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
             }
             //Return the player's temperature back to 0
             else if (bodyTemp < 0)
             {
-                temp.add((float) Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 10) * config.rate, -bodyTemp));
+                temp.add((float) Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 5f) * config.rate, -bodyTemp));
             }
 
             //Calculates the player's temperature

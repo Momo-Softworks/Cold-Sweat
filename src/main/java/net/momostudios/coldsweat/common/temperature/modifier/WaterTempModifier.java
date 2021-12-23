@@ -26,8 +26,8 @@ public class WaterTempModifier extends TempModifier
         try
         {
             double strength = (double) getArgument("strength");
-            double factor = Math.min(-0.005, -0.005 - temp.get() / 100);
-            setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.15 : factor), 0, 10));
+            double factor = Math.min(-0.01, -0.01 - temp.get() / 50);
+            setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.3 : factor), 0, 10));
 
             if (!player.isInWater() && strength > 0.0)
             {
