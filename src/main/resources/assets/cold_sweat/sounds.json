@@ -13,5 +13,27 @@
         "stream": true
       }
     ]
+  },
+  "item.soulfire_lamp.on":
+  {
+    "subtitle": "item.soulfire_lamp.on",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/soulfire_lamp/soulfire_lamp_on",
+        "stream": true
+      }
+    ]
+  },
+  "item.soulfire_lamp.off":
+  {
+    "subtitle": "item.soulfire_lamp.off",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/soulfire_lamp/soulfire_lamp_off",
+        "stream": true
+      }
+    ]
   }
 }
