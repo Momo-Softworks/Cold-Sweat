@@ -29,23 +29,6 @@ public class TempCommand extends BaseCommand
     public LiteralArgumentBuilder<CommandSource> setExecution()
     {
         return builder
-                .then(Commands.literal("rate")
-                        .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, 100))
-                                .executes(source -> executeSetRate(source.getSource(), IntegerArgumentType.getInteger(source, "amount")))
-                        )
-                )
-                .then(Commands.literal("range")
-                        .then(Commands.literal("min")
-                                .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, 100))
-                                        .executes(source -> executeSetMinRange(source.getSource(), DoubleArgumentType.getDouble(source, "amount")))
-                                )
-                        )
-                        .then(Commands.literal("max")
-                                .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, 100))
-                                        .executes(source -> executeSetMaxRange(source.getSource(), DoubleArgumentType.getDouble(source, "amount")))
-                                )
-                        )
-                )
                 .then(Commands.literal("set")
                         .then(Commands.argument("players", EntityArgument.players())
                                 .then(Commands.argument("amount", IntegerArgumentType.integer(-150, 150))
@@ -60,57 +43,6 @@ public class TempCommand extends BaseCommand
                                 source.getSource(), EntityArgument.getPlayers(source, "players")))
                         )
                 );
-    }
-
-    private int executeSetRate(CommandSource source, double multiplier) throws CommandSyntaxException
-    {
-        //Set the option in the config
-        ColdSweatConfig.getInstance().setRateMultiplier(multiplier);
-        ColdSweatConfig.getInstance().save();
-
-        //Print success message to all players
-        for (PlayerEntity player : source.asPlayer().world.getPlayers()) {
-            player.sendStatusMessage(new StringTextComponent(
-            "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-            new TranslationTextComponent("commands.cold_sweat.temperature.rate.result").getString() +
-            " \u00a7f" + (multiplier * 100) + "%\u00a7r"), false);
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int executeSetMinRange(CommandSource source, double amount) throws CommandSyntaxException
-    {
-        //Set the option in the config
-        ColdSweatConfig.getInstance().setMinHabitable(amount);
-        ColdSweatConfig.getInstance().save();
-        System.out.println(ColdSweatConfig.getInstance().getMinTempHabitable());
-
-        //Print success message to all players
-        for (PlayerEntity player : source.asPlayer().world.getPlayers())
-        {
-            player.sendStatusMessage(new StringTextComponent(
-            "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-            new TranslationTextComponent("commands.cold_sweat.temperature.range.min.result").getString() +
-            " \u00a7f" + amount + "\u00a7r"), false);
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private int executeSetMaxRange(CommandSource source, double amount) throws CommandSyntaxException
-    {
-        //Set the option in the config
-        ColdSweatConfig.getInstance().setMaxHabitable(amount);
-        ColdSweatConfig.getInstance().save();
-
-        //Print success message to all players
-        for (PlayerEntity player : source.asPlayer().world.getPlayers())
-        {
-            player.sendStatusMessage(new StringTextComponent(
-            "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-            new TranslationTextComponent("commands.cold_sweat.temperature.range.max.result").getString() +
-            " \u00a7f" + amount + "\u00a7r"), false);
-        }
-        return Command.SINGLE_SUCCESS;
     }
 
     private int executeSetPlayerTemp(CommandSource source, Collection<ServerPlayerEntity> players, int amount) throws CommandSyntaxException
