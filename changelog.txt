@@ -16,9 +16,11 @@
 - Fixed minor bug that would occasionally cause the ambient temperature to jitter
 - Added a Russian translation courtesy of @Xemay on our Discord server
 
+
 2.0.3.1
 - Fixed a bug that caused Cold Sweat to spam errors into the console in some cases
 - Rebalanced temperature-emitting blocks to have a limited effect
+
 
 2.1 Beta 1
 - New Item: Soulfire Lamp
@@ -71,6 +73,7 @@
     - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
     - Removed some defunct recipes that would throw errors in server consoles
 
+
 2.1 Beta 2
 - The Soulfire Lamp no longer requires ingredients from the Nether to craft
     - Now crafted with a Heart of the Sea
@@ -115,10 +118,33 @@
     - When creating TempModifiers, override the getValue() method now instead of calculate()
         - Calculate is still used when referencing the modifier's value, but it also posts to TempModifierEvent.Tick
     - Replaced all temperature unit conversion methods with on method: MathHelperCS.convertUnits()
-        - arguments: double value: a double representing the temperature to convert
-                     Unit from: the unit to convert from (Unit is a new enum class in net.momostudios.util)
-                     Unit to: the unit to convert to
-                     boolean absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
+        - arguments: (double) value: a double representing the temperature to convert
+                     (Unit) from: the unit to convert from (Unit is a new enum in net.momostudios.util)
+                     (Unit) to: the unit to convert to
+                     (boolean) absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
+
+
+2.1 Beta 3
+- Switched the Soulfire Lamp holding animation to the Mixin system to improve performance/compatibility
+- Re-introduced the grace period from pre-2.0 versions
+    - The player will be given the grace effect upon respawning or entering the world for the first time
+    - "Grace" is a new potion effect that replaces Tolerance (which went unused until now!)
+    - The length is configurable (default: 5 minutes)
+    - It can also be disabled if you prefer
+- New sounds for the Soulfire Lamp when it is lit or extinguished
+- Active nether portals now give off heat in the overworld
+- The ambient temperature gauge now smoothly transitions to new temperatures
+- Massive performance improvements for things that affect temperature (mainly blocks, weather, and biomes)
+- Config options now appear greyed-out instead of disappearing if the player is not OP or has cheats disabled
+- Removed some blank space in Boiler & Icebox GUIs
+- Retextured the Boiler
+- Removed the ability to set min/max temperature & rate with commands
+- Fixed incorrect math for converting temperatures to/from Celsius
+- Fixed Ice Resistance Potion recipe not showing in JEI
+
+Technical Changes:
+- Added new translation key for the Grace effect: "effect.grace" (subtitle)
+- Added new translation keys for Soulfire Lamp sounds: "item.soulfire_lamp.on" & "item.soulfire_lamp.off"
 
 TO-DO
 - Added Italian translation courtesy of @SniperFoxy on our Discord server
