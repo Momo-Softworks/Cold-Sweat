@@ -6,15 +6,15 @@ import net.minecraft.potion.EffectType;
 
 import javax.annotation.Nonnull;
 
-public class ToleranceEffect extends Effect
+public class GraceEffect extends Effect
 {
-    public ToleranceEffect() {
+    public GraceEffect() {
         super(EffectType.BENEFICIAL, 7355178);
     }
 
     @Nonnull
     public String getName() {
-        return "effect.tolerance";
+        return "effect.grace";
     }
 
     public boolean isInstant() {
@@ -22,14 +22,14 @@ public class ToleranceEffect extends Effect
     }
 
     public boolean shouldRenderInvText(EffectInstance effect) {
-        return false;
+        return true;
     }
 
     public boolean shouldRender(EffectInstance effect) {
-        return false;
+        return true;
     }
 
     public boolean shouldRenderHUD(EffectInstance effect) {
-        return false;
+        return true;
     }
 }

@@ -24,7 +24,7 @@ public class GracePeriod
             else if (!event.getEntity().world.isRemote && !event.getEntity().getPersistentData().getBoolean("givenGracePeriod"))
             {
                 event.getEntity().getPersistentData().putBoolean("givenGracePeriod", true);
-                ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(ModEffects.INSULATION, ConfigCache.getInstance().gracePeriodLength, 4, false, false));
+                ((PlayerEntity) event.getEntity()).addPotionEffect(new EffectInstance(ModEffects.GRACE, ConfigCache.getInstance().gracePeriodLength, 0, false, false));
             }
         }
     }

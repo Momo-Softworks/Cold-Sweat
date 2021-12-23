@@ -39,7 +39,7 @@ public class GracePeriodAskMessage
             if (!context.getSender().getPersistentData().getBoolean("givenGracePeriod"))
             {
                 context.getSender().getPersistentData().putBoolean("givenGracePeriod", true);
-                context.getSender().addPotionEffect(new EffectInstance(ModEffects.INSULATION, message.duration, 4, false, false));
+                context.getSender().addPotionEffect(new EffectInstance(ModEffects.INSULATION, message.duration, 0, false, false));
             }
         });
     }

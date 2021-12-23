@@ -23,7 +23,7 @@ import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class AmbientGaugeDisplay
 {
-    static double clientTemp = 0;
+    public static double clientTemp = 0;
 
     static ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
 
