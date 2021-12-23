@@ -23,69 +23,74 @@ public class AddLeatherModifiers
     @SubscribeEvent
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
-        PlayerEntity player = event.player;
-        if (player.ticksExisted % 10 == 0)
+        if (event.phase == TickEvent.Phase.END)
         {
-            ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 3));
-            ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 2));
-            ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 1));
-            ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 0));
-
-            int leatherMultiplier = 0;
-            leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
-            leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
-            leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
-            leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
-
-            int helmetInsulation = getInsulatingArmor(helmetItem).value;
-            int chestInsulation = getInsulatingArmor(chestplateItem).value;
-            int legsInsulation = getInsulatingArmor(leggingsItem).value;
-            int bootsInsulation = getInsulatingArmor(bootsItem).value;
-
-            if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0) {
-                leatherMultiplier += helmetInsulation;
-            }
-            if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0) {
-                leatherMultiplier += chestInsulation;
-            }
-            if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0) {
-                leatherMultiplier += legsInsulation;
-            }
-            if (bootsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0) {
-                leatherMultiplier += bootsInsulation;
-            }
-
-            if (leatherMultiplier > 0)
+            PlayerEntity player = event.player;
+            if (player.ticksExisted % 10 == 0)
             {
-                if (PlayerTemp.hasModifier(player, InsulationTempModifier.class, PlayerTemp.Types.RATE))
+                ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 3));
+                ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 2));
+                ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 1));
+                ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 0));
+
+                int leatherMultiplier = 0;
+                leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
+                leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
+                leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
+                leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
+
+                int helmetInsulation = getInsulatingArmor(helmetItem).value;
+                int chestInsulation = getInsulatingArmor(chestplateItem).value;
+                int legsInsulation = getInsulatingArmor(leggingsItem).value;
+                int bootsInsulation = getInsulatingArmor(bootsItem).value;
+
+                if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0)
                 {
-                    AtomicBoolean shouldRemove = new AtomicBoolean(false);
-                    int multiplier = leatherMultiplier;
-                    PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
-                    {
-                        if (modifier instanceof InsulationTempModifier)
-                        {
-                            try
-                            {
-                                modifier.setArgument("amount", multiplier);
-                            }
-                            catch (IllegalArgumentException e)
-                            {
-                                shouldRemove.set(true);
-                            }
-                        }
-                    });
-                    // Reset the modifier if it throws an error
-                    if (shouldRemove.get())
-                    {
-                        PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier instanceof InsulationTempModifier);
-                    }
+                    leatherMultiplier += helmetInsulation;
                 }
-                else
-                    PlayerTemp.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+                if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0)
+                {
+                    leatherMultiplier += chestInsulation;
+                }
+                if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0)
+                {
+                    leatherMultiplier += legsInsulation;
+                }
+                if (bootsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0)
+                {
+                    leatherMultiplier += bootsInsulation;
+                }
+
+                if (leatherMultiplier > 0)
+                {
+                    if (PlayerTemp.hasModifier(player, InsulationTempModifier.class, PlayerTemp.Types.RATE))
+                    {
+                        AtomicBoolean shouldRemove = new AtomicBoolean(false);
+                        int multiplier = leatherMultiplier;
+                        PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
+                        {
+                            if (modifier instanceof InsulationTempModifier)
+                            {
+                                try
+                                {
+                                    modifier.setArgument("amount", multiplier);
+                                }
+                                catch (IllegalArgumentException e)
+                                {
+                                    shouldRemove.set(true);
+                                }
+                            }
+                        });
+                        // Reset the modifier if it throws an error
+                        if (shouldRemove.get())
+                        {
+                            PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier instanceof InsulationTempModifier);
+                        }
+                    }
+                    else PlayerTemp.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+                }
+                else PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof InsulationTempModifier);
             }
-            else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof InsulationTempModifier);
         }
     }
 

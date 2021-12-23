@@ -76,10 +76,13 @@ public class MinecartEventHandler
     @SubscribeEvent
     public static void playerRidingMinecart(TickEvent.PlayerTickEvent event)
     {
-        PlayerEntity player = event.player;
-        if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
+        if (event.phase == TickEvent.Phase.END)
         {
-            PlayerTemp.addModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
+            PlayerEntity player = event.player;
+            if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
+            {
+                PlayerTemp.addModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
+            }
         }
     }
 }

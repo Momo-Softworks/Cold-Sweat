@@ -22,40 +22,43 @@ public class AddTempModifiers
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        PlayerEntity player = event.player;
-
-        /*
-         * Add TempModifiers if not present
-         */
-        if (player.ticksExisted % 20 == 4)
+        if (event.phase == TickEvent.Phase.END)
         {
-            PlayerTemp.addModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.addModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.addModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            if (ModList.get().isLoaded("sereneseasons"))
-                PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
+            PlayerEntity player = event.player;
 
-            // Hearth
-            if (player.isPotionActive(ModEffects.INSULATION))
-                PlayerTemp.addModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
-        }
+            /*
+             * Add TempModifiers if not present
+             */
+            if (player.ticksExisted % 20 == 4)
+            {
+                PlayerTemp.addModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                PlayerTemp.addModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                PlayerTemp.addModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                if (ModList.get().isLoaded("sereneseasons"))
+                    PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
 
-        if (player.ticksExisted % 5 == 0)
-        {
-            if (player.isInWater())
-                PlayerTemp.addModifier(player, new WaterTempModifier(1d), PlayerTemp.Types.AMBIENT, false);
-            else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (int) modifier.getArgument("strength") == 0);
+                // Hearth
+                if (player.isPotionActive(ModEffects.INSULATION))
+                    PlayerTemp.addModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                else
+                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
+            }
 
-            // Soul Lamp
-            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
-                PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
-            else
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+            if (player.ticksExisted % 5 == 0)
+            {
+                if (player.isInWater())
+                    PlayerTemp.addModifier(player, new WaterTempModifier(1d), PlayerTemp.Types.AMBIENT, false);
+                else
+                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (int) modifier.getArgument("strength") == 0);
+
+                // Soul Lamp
+                if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
+                    PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                else
+                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+            }
         }
     }
 
