@@ -14,6 +14,7 @@
 
   "effect.insulated":       "Insulated",
   "effect.ice_resistance":  "Ice Resistance",
+  "effect.grace":           "Grace",
   "item.minecraft.potion.effect.ice_resistance": "Potion of Ice Resistance",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Lingering Potion of Ice Resistance",
   "item.minecraft.splash_potion.effect.ice_resistance": "Splash Potion of Ice Resistance",
@@ -25,11 +26,13 @@
   "itemGroup.cold_sweat": "Cold Sweat",
 
   "death.attack.cold":          "%1$s froze to death",
-  "death.attack.cold.player":   "%1$s froze to death while fighting %2$s",
+  "death.attack.cold.player":   "%1$s froze to death whilst fighting %2$s",
   "death.attack.hot":           "%1$s died of heatstroke",
-  "death.attack.hot.player":    "%1$s died of heatstroke while fighting %2$s",
+  "death.attack.hot.player":    "%1$s died of heatstroke whilst fighting %2$s",
 
   "entity.player.damage.freeze": "Player freezes",
+  "item.soulfire_lamp.on":       "Soulfire Lamp Ignites",
+  "item.soulfire_lamp.off":      "Soulfire Lamp Extinguishes",
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.temperature_details":  "Temperature Management",

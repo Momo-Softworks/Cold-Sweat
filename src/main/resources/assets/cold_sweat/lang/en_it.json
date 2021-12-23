@@ -14,6 +14,7 @@
 
   "effect.insulated":       "Insulato",
   "effect.ice_resistance":  "Resistenza Al Freddo",
+  "effect.grace":           "Grace",
   "item.minecraft.potion.effect.ice_resistance": "Pozione Di Resistenza Al Freddo",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Pozione Persistente Di Resistenza Al Freddo",
   "item.minecraft.splash_potion.effect.ice_resistance": "Pozione Da Lancio Di Resistenza Al Freddo",
