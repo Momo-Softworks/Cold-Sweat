@@ -3,12 +3,6 @@ package net.momostudios.coldsweat.core.network.message;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.potion.EffectInstance;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.common.event.GracePeriod;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.config.ItemSettingsConfig;
-import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 import java.util.function.Supplier;
