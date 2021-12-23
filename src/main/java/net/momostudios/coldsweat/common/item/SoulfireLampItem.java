@@ -1,7 +1,5 @@
 package net.momostudios.coldsweat.common.item;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -10,10 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.client.event.AmbientGaugeDisplay;
-import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.SoulLampTempModifier;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -21,9 +15,6 @@ import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.RequestSoundMessage;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SoulfireLampItem extends Item
 {
@@ -64,7 +55,7 @@ public class SoulfireLampItem extends Item
             }
 
             if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-                    -2.5 * (-AmbientGaugeDisplay.clientTemp - 0.5 * (-min - max) -0.4 * max) > max)
+                    -2.5 * (-PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get() - 0.5 * (-min - max) -0.4 * max) > max)
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") == 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {
