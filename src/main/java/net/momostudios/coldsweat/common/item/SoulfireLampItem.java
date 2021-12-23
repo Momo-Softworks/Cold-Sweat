@@ -84,6 +84,7 @@ public class SoulfireLampItem extends Item
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);
                     player.world.playMovingSound(null, player, ModSounds.SOUL_LAMP_OFF, SoundCategory.PLAYERS, (float) Math.random() / 5f + 0.9f, 2F);
+                    setFuel(stack, 0);
 
                     // In case the player is on a server
                     if (player instanceof ServerPlayerEntity)
