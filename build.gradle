@@ -3,19 +3,21 @@ buildscript {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
         mavenCentral()
         maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven { url='https://repo.spongepowered.org/repository/maven-public' }
     }
     dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT', changing: true
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'net.momostudios'
-version = 'b2.1-2'
+version = 'b2.1-3'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -70,27 +72,25 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
     maven {
         url 'https://www.cursemaven.com'
          content {
              includeGroup "curse.maven"
          }
     }
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.5'
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")
-    compileOnly fg.deobf("curse.maven:jei-238222:3514175")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3337641")
     runtimeOnly fg.deobf("curse.maven:jei-238222:3514175")
+}
+
+mixin {
+    add sourceSets.main, "cold_sweat.mixin-refmap.json"
+    config 'cold_sweat.mixin.json'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -98,19 +98,17 @@ jar {
     manifest {
         attributes([
                 "Specification-Title"     : "coldsweat",
-                "Specification-Vendor"    : "chubbymomo, iMikul",
+                "Specification-Vendor"    : "chubbymomo, iMikul, skinnymomo",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "chubbymomo, iMikul",
+                "Implementation-Vendor"   : "chubbymomo, iMikul, skinnymomo",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "TweakerClass"            : "org.spongepowered.asm.launch.MixinTweaker",
                 "TweakOrder"              : 0,
                 "MixinConfigs"            : "cold_sweat.mixin.json"
         ])
     }
-
-    rename 'mixin.refmap.json', 'cold_sweat.mixin-refmap.json'
 }
 
 jar.finalizedBy('reobfJar')
