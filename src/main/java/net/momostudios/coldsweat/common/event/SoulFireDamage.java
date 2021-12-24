@@ -35,7 +35,7 @@ public class SoulFireDamage
         {
             Entity ent = event.getEntity();
             AxisAlignedBB bb = new AxisAlignedBB(ent.getPosX() - 0.7, ent.getPosY() - 0.5, ent.getPosZ() - 0.7, ent.getPosX() + 0.7, ent.getPosY() + 2.1, ent.getPosZ() + 0.7);
-            if (ent.world.getStatesInArea(bb).noneMatch(state -> state.getBlock() == Blocks.SOUL_FIRE))
+            if (ent.world.getStatesInArea(bb).noneMatch(state -> state.getBlock() == Blocks.SOUL_FIRE) && event.getEntity().getPersistentData().getBoolean("isInSoulFire"))
             {
                 event.getEntity().getPersistentData().putBoolean("isInSoulFire", false);
             }
