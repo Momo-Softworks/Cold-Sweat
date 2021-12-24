@@ -29,7 +29,7 @@ public class AddTempModifiers
             /*
              * Add TempModifiers if not present
              */
-            if (player.ticksExisted % 20 == 4)
+            if (player.ticksExisted % 20 == 0)
             {
                 PlayerTemp.addModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
@@ -41,17 +41,33 @@ public class AddTempModifiers
 
                 // Hearth
                 if (player.isPotionActive(ModEffects.INSULATION))
-                    PlayerTemp.addModifier(player, new HearthTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                {
+                    int potionLevel = player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1;
+                    if (PlayerTemp.hasModifier(player, HearthTempModifier.class, PlayerTemp.Types.AMBIENT))
+                    {
+                        PlayerTemp.forEachModifier(player, PlayerTemp.Types.AMBIENT, (modifier) ->
+                        {
+                            if (modifier instanceof HearthTempModifier)
+                            {
+                                modifier.setArgument("strength", potionLevel);
+                            }
+                        });
+                    }
+                    else
+                        PlayerTemp.addModifier(player, new HearthTempModifier(potionLevel), PlayerTemp.Types.AMBIENT, false);
+                }
                 else
+                {
                     PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
+                }
             }
 
             if (player.ticksExisted % 5 == 0)
             {
                 if (player.isInWater())
-                    PlayerTemp.addModifier(player, new WaterTempModifier(1d), PlayerTemp.Types.AMBIENT, false);
+                    PlayerTemp.addModifier(player, new WaterTempModifier(0.15), PlayerTemp.Types.AMBIENT, false);
                 else
-                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (int) modifier.getArgument("strength") == 0);
+                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
 
                 // Soul Lamp
                 if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
