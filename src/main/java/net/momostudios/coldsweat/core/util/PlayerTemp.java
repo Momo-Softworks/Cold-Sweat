@@ -83,11 +83,11 @@ public class PlayerTemp
      */
     public static void removeModifiers(PlayerEntity player, Types type, int count, Predicate<TempModifier> condition)
     {
-        // Sync modifier data to the player's NBT
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
             List<TempModifier> toRemove = new ArrayList<>();
-            for (int i = 0; i < Math.min(count, cap.getModifiers(type).size()); i++)
+            int count2 = 0;
+            for (int i = 0; i < cap.getModifiers(type).size(); i++)
             {
                 TempModifier modifier = cap.getModifiers(type).get(i);
                 TempModifierEvent.Remove event = new TempModifierEvent.Remove(player, type, count, condition);
@@ -97,6 +97,10 @@ public class PlayerTemp
                     if (event.getCondition().test(modifier))
                     {
                         toRemove.add(modifier);
+
+                        count2++;
+                        if (count2 >= count)
+                            break;
                     }
                 }
             }
