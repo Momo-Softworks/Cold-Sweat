@@ -6,6 +6,7 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class HearthRadiusCapability implements IBlockStorageCap
@@ -18,16 +19,18 @@ public class HearthRadiusCapability implements IBlockStorageCap
         HEARTH_BLOCKS = capability;
     }
 
-    List<BlockPos> points = new ArrayList<>();
+    HashSet<BlockPos> points = new HashSet<>();
 
     @Override
-    public List<BlockPos> getList() {
+    public HashSet<BlockPos> getHashSet() {
         return points;
     }
 
     @Override
-    public void setList(List<BlockPos> list) {
-        this.points = list;
+    public void setHashSet(HashSet<BlockPos> list)
+    {
+        this.points.clear();
+        this.points.addAll(list);
     }
 
     @Override

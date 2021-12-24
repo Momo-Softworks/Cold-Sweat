@@ -42,6 +42,7 @@ import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
@@ -83,13 +84,15 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public void tick()
     {
         LazyOptional<IBlockStorageCap> cap = cache.get(pos);
-        if (cap == null) {
+        if (cap == null)
+        {
             ICapabilityProvider provider = world.getTileEntity(pos);
             cap = provider.getCapability(HearthRadiusCapability.HEARTH_BLOCKS);
             cache.put(pos, cap);
             cap.addListener(self -> cache.put(pos, self));
         }
-        if (cap.orElse(null).getList().isEmpty()) {
+        if (cap.orElse(null).getHashSet().isEmpty())
+        {
             cap.ifPresent(cap2 ->
             {
                 cap2.add(pos);
@@ -112,8 +115,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
             // Represents the NBT list
-            List<BlockPos> poss = new ArrayList<>();
-            cap.ifPresent(cap2 -> poss.addAll(cap2.getList()));
+            HashSet<BlockPos> poss = cap.orElse(new HearthRadiusCapability()).getHashSet();
 
             if (poss.size() > 0)
             {
@@ -124,7 +126,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                  Partition all points into multiple lists (max of 19)
                 */
                 // Size of each partition
-                int partSize = 80;
+                int partSize = 150;
                 // Number of partitions with 150 elements each
                 int partitionCount = (int) Math.ceil(poss.size() / (double) partSize);
                 // Index of the last point being worked on this tick
@@ -137,7 +139,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 /*
                  Iterate through the partition with index [scanningIndex]
                  */
-                for (BlockPos blockPos : poss.subList(firstIndex, lastIndex))
+                for (BlockPos blockPos : new LinkedList<>(poss).subList(firstIndex, lastIndex))
                 {
                     if (WorldInfo.canSeeSky(world, blockPos))
                     {
@@ -222,15 +224,15 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 ColdSweatConfig config = ColdSweatConfig.getInstance();
                 for (PlayerEntity player : affectedPlayers)
                 {
-                    List<TempModifier> modifiers = new ArrayList<>(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT));
-                    modifiers.removeIf(modifier -> modifier instanceof HearthTempModifier);
-                    Temperature playerTemp = new Temperature().with(modifiers, player);
-                    if ((playerTemp.get() < config.getMinTempHabitable() && this.getHotFuel() > 0))
+                    Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
+                    double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") : playerTemp.get();
+
+                    if ((temp < config.getMinTempHabitable() && this.getHotFuel() > 0))
                     {
                         player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
                         shouldUseHotFuel = true;
                     }
-                    if (playerTemp.get() > config.getMaxTempHabitable() && this.getColdFuel() > 0)
+                    if (temp > config.getMaxTempHabitable() && this.getColdFuel() > 0)
                     {
                         player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
                         shouldUseColdFuel = true;

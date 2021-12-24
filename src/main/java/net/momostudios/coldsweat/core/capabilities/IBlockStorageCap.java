@@ -2,13 +2,14 @@ package net.momostudios.coldsweat.core.capabilities;
 
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashSet;
 import java.util.List;
 
 public interface IBlockStorageCap
 {
-    List<BlockPos> getList();
+    HashSet<BlockPos> getHashSet();
 
-    void setList(List<BlockPos> list);
+    void setHashSet(HashSet<BlockPos> list);
 
     void add(BlockPos pos);
 

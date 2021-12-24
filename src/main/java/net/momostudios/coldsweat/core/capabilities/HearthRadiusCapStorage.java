@@ -9,6 +9,7 @@ import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorageCap>
@@ -20,7 +21,7 @@ public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorage
         CompoundNBT nbt = new CompoundNBT();
         ListNBT list = new ListNBT();
 
-        for (BlockPos pos : instance.getList())
+        for (BlockPos pos : instance.getHashSet())
         {
             list.add(LongNBT.valueOf(pos.toLong()));
         }
@@ -31,13 +32,12 @@ public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorage
     @Override
     public void readNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction, INBT nbtData)
     {
-        List<BlockPos> newList = new ArrayList<>();
         CompoundNBT nbt = (CompoundNBT) nbtData;
 
+        instance.clear();
         for (INBT inbt : nbt.getList("points", 11))
         {
-            newList.add(BlockPos.fromLong(((LongNBT) inbt).getLong()));
+            instance.add(BlockPos.fromLong(((LongNBT) inbt).getLong()));
         }
-        instance.setList(newList);
     }
 }

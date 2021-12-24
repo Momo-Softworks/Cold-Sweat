@@ -7,6 +7,16 @@ import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 public class HearthTempModifier extends TempModifier
 {
+    public HearthTempModifier()
+    {
+        addArgument("strength", 0);
+    }
+
+    public HearthTempModifier(int strength)
+    {
+        addArgument("strength", strength);
+    }
+
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
@@ -16,9 +26,8 @@ public class HearthTempModifier extends TempModifier
         double max = config.getMaxTempHabitable();
         double mid = (min + max) / 2;
 
-        int hearthEffect = player.isPotionActive(ModEffects.INSULATION) ?
-                (player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1) * 2 : 1;
-        return mid + ((temp.get() - mid) / hearthEffect);
+        int hearthEffect = (int) this.getArgument("strength");
+        return temp.get() + ((mid - temp.get()) / 10) * hearthEffect;
     }
 
     public String getID()
