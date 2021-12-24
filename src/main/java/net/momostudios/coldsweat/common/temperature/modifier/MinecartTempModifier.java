@@ -11,15 +11,6 @@ public class MinecartTempModifier extends TempModifier
 {
     public MinecartTempModifier() {}
 
-    public MinecartTempModifier(List<INBT> args)
-    {
-    }
-
-    public MinecartTempModifier with(List<INBT> args)
-    {
-        return new MinecartTempModifier(args);
-    }
-
     @Override
     public double getValue(Temperature temp, PlayerEntity player)
     {
