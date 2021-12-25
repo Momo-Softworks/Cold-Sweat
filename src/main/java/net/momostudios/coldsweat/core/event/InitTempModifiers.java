@@ -40,6 +40,7 @@ public class InitTempModifiers
             event.addBlockEffect(SoulFireBlockEffect.class);
             event.addBlockEffect(SoulCampfireBlockEffect.class);
             event.addBlockEffect(NetherPortalBlockEffect.class);
+            event.addBlockEffect(MagmaBlockEffect.class);
         }
         catch (Exception e) {
             ColdSweat.LOGGER.error("Registering BlockEffects failed!");
