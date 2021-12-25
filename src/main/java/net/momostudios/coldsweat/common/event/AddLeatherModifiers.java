@@ -28,10 +28,10 @@ public class AddLeatherModifiers
             PlayerEntity player = event.player;
             if (player.ticksExisted % 10 == 0)
             {
-                ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 3));
-                ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 2));
-                ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 1));
-                ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, 0));
+                ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
+                ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
+                ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.LEGS);
+                ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.FEET);
 
                 int leatherMultiplier = 0;
                 leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
