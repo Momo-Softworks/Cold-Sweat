@@ -24,8 +24,7 @@ public class SoulFireBlockEffect extends BlockEffect
                     entity.getPersistentData().putBoolean("isInSoulFire", true);
             });
 
-            double temp = -0.005;
-            return Math.min(0, temp * (9 - distance));
+            return MathHelperCS.convertUnits(8, Units.F, Units.MC, false);
         }
         return 0;
     }
@@ -38,6 +37,6 @@ public class SoulFireBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertUnits(-20, Units.F, Units.MC, false);
+        return MathHelperCS.convertUnits(-24, Units.F, Units.MC, false);
     }
 }

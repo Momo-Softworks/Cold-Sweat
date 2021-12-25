@@ -39,12 +39,13 @@ public class WaterTempModifier extends TempModifier
                     player.world.addParticle(ParticleTypes.FALLING_WATER, player.getPosX() + randX, player.getPosY() + randY, player.getPosZ() + randZ, 0, 0, 0);
                 }
             }
-            return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + Math.min(0, temp.get() - ConfigCache.getInstance().minTemp) * (strength / 40);
+            double ambientEffect = Math.min(0, temp.get() - ConfigCache.getInstance().minTemp);
+
+            return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + ambientEffect * (strength / 40);
         }
         // Remove the modifier if an exception is thrown
         catch (Exception e)
         {
-            System.out.println("test");
             args.remove("strength");
             args.put("strength", 1d);
             return temp.get();

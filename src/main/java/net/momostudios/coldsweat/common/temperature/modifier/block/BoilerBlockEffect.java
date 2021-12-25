@@ -14,8 +14,7 @@ public class BoilerBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(BoilerBlock.LIT))
         {
-            double temp = 0.04;
-            return Math.max(0, temp * (9 - distance));
+            return MathHelperCS.convertUnits(10, Units.F, Units.MC, false) / distance;
         }
         return 0;
     }
