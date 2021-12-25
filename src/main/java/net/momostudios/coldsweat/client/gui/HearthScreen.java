@@ -82,6 +82,9 @@ public class HearthScreen extends ContainerScreen<HearthContainer>
 
         this.minecraft.textureManager.bindTexture(RADIUS_TOGGLE);
         blit(matrixStack, 82, 68, isHoveringButton(x, y) ? 12 : 0, isRadiusShowing() ? 0 : 12, 12, 12, 24, 24);
+
+        if (isHoveringButton(x, y))
+            font.drawString(matrixStack, "Show Particles", 97, 71, 5592405);
     }
 
     @SuppressWarnings("deprecation")
