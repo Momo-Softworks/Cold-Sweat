@@ -34,7 +34,6 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(5, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
         INSTANCE.registerMessage(6, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
         INSTANCE.registerMessage(7, RequestSoundMessage.class, RequestSoundMessage::encode, RequestSoundMessage::decode, RequestSoundMessage::handle);
-        INSTANCE.registerMessage(8, GracePeriodAskMessage.class, GracePeriodAskMessage::encode, GracePeriodAskMessage::decode, GracePeriodAskMessage::handle);
     }
     
     public static void writeConfigCacheToBuffer(ConfigCache config, PacketBuffer buffer)
