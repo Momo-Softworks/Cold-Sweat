@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.TrapDoorBlock;
+import net.minecraft.block.material.Material;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -102,6 +103,8 @@ public class WorldInfo
 
     public static boolean canSeeSky(World world, BlockPos pos)
     {
+        if (!world.canSeeSky(pos)) return false;
+
         for (int i = 0; i < 255 - pos.getY(); i++)
         {
             if (!isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
@@ -119,7 +122,7 @@ public class WorldInfo
         Direction dir = Direction.getFacingFromVector(newPos.getX() - pos.getX(), newPos.getY() - pos.getY(), newPos.getZ() - pos.getZ());
 
         return (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir)) &&
-                (world.isAirBlock(newPos) || !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
+                (state2.getMaterial() == Material.AIR || !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
                         (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
                         (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)) ||
                         (state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP));

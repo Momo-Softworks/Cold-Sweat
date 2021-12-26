@@ -80,154 +80,143 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public void tick()
     {
-        if (world != null && !world.isRemote)
+        LazyOptional<IBlockStorageCap> cap = cache.get(pos);
+        if (cap == null)
         {
-            LazyOptional<IBlockStorageCap> cap = cache.get(pos);
-            if (cap == null)
+            ICapabilityProvider provider = world.getTileEntity(pos);
+            cap = provider.getCapability(HearthRadiusCapability.HEARTH_BLOCKS);
+            cache.put(pos, cap);
+            cap.addListener(self -> cache.put(pos, self));
+        }
+        if (cap.orElse(new HearthRadiusCapability()).getHashSet().isEmpty())
+        {
+            cap.ifPresent(cap2 ->
             {
-                ICapabilityProvider provider = world.getTileEntity(pos);
-                cap = provider.getCapability(HearthRadiusCapability.HEARTH_BLOCKS);
-                cache.put(pos, cap);
-                cap.addListener(self -> cache.put(pos, self));
-            }
-            if (cap.orElse(null).getHashSet().isEmpty())
+                cap2.add(pos);
+                cap2.add(pos.up());
+            });
+        }
+
+        this.ticksExisted = (this.ticksExisted + 1) % 1000;
+        resetTimer = this.getTileData().getInt("resetTimer");
+        insulationLevel = this.getTileData().getInt("insulationLevel");
+
+        if (resetTimer > 0)
+            this.getTileData().putInt("resetTimer", resetTimer - 1);
+
+        if (insulationLevel < 2400)
+            this.getTileData().putInt("insulationLevel", insulationLevel + 1);
+
+        if ((this.getHotFuel() > 0 || this.getColdFuel() > 0) && !WorldInfo.canSeeSky(world, pos))
+        {
+            List<PlayerEntity> affectedPlayers = new ArrayList<>();
+
+            // Represents the NBT list
+            HashSet<BlockPos> poss = cap.orElse(new HearthRadiusCapability()).getHashSet();
+
+            if (poss.size() > 0)
             {
-                cap.ifPresent(cap2 ->
+                // Create temporary list to add back to the NBT
+                List<BlockPos> positions2 = new ArrayList<>();
+
+            /*
+             Partition all points into multiple lists (max of 19)
+            */
+                // Size of each partition
+                int partSize = 150;
+                // Number of partitions with 150 elements each
+                int partitionCount = (int) Math.ceil(poss.size() / (double) partSize);
+                // Index of the last point being worked on this tick
+                int lastIndex = Math.min(poss.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
+                // Index of the first point being worked on this tick
+                int firstIndex = Math.max(0, lastIndex - partSize);
+
+                boolean shouldReset = false;
+
+            /*
+             Iterate through the partition with index [scanningIndex]
+             */
+                for (BlockPos blockPos : new LinkedList<>(poss).subList(firstIndex, lastIndex))
                 {
-                    cap2.add(pos);
-                    cap2.add(pos.up());
-                });
-            }
-
-            this.ticksExisted = (this.ticksExisted + 1) % 1000;
-            resetTimer = this.getTileData().getInt("resetTimer");
-            insulationLevel = this.getTileData().getInt("insulationLevel");
-
-            if (resetTimer > 0)
-                this.getTileData().putInt("resetTimer", resetTimer - 1);
-
-            if (insulationLevel < 2400)
-                this.getTileData().putInt("insulationLevel", insulationLevel + 1);
-
-            if ((this.getHotFuel() > 0 || this.getColdFuel() > 0) && !WorldInfo.canSeeSky(world, pos))
-            {
-                List<PlayerEntity> affectedPlayers = new ArrayList<>();
-
-                // Represents the NBT list
-                HashSet<BlockPos> poss = cap.orElse(new HearthRadiusCapability()).getHashSet();
-
-                if (poss.size() > 0)
-                {
-                    // Create temporary list to add back to the NBT
-                    List<BlockPos> positions2 = new ArrayList<>();
-
-                /*
-                 Partition all points into multiple lists (max of 19)
-                */
-                    // Size of each partition
-                    int partSize = 150;
-                    // Number of partitions with 150 elements each
-                    int partitionCount = (int) Math.ceil(poss.size() / (double) partSize);
-                    // Index of the last point being worked on this tick
-                    int lastIndex = Math.min(poss.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
-                    // Index of the first point being worked on this tick
-                    int firstIndex = Math.max(0, lastIndex - partSize);
-
-                    boolean shouldReset = false;
-
-                /*
-                 Iterate through the partition with index [scanningIndex]
-                 */
-                    for (BlockPos blockPos : new LinkedList<>(poss).subList(firstIndex, lastIndex))
+                    if (WorldInfo.canSeeSky(world, blockPos))
                     {
-                        if (WorldInfo.canSeeSky(world, blockPos))
+                        shouldReset = true;
+                        cap.ifPresent(cap2 -> cap2.remove(blockPos));
+                    }
+
+                    // Get if any adjacent block is solid
+                    boolean touchingSolid = false;
+                    for (Direction dir : Direction.values())
+                    {
+                        if (!WorldInfo.isBlockSpreadable(world, blockPos, blockPos.add(dir.getDirectionVec())))
                         {
-                            shouldReset = true;
-                            cap.ifPresent(cap2 -> cap2.remove(blockPos));
-                        }
-
-                        // Get if any adjacent block is solid
-                        boolean touchingSolid = Arrays.stream(Direction.values()).anyMatch(dir ->
-                                !WorldInfo.isBlockSpreadable(world, blockPos, blockPos.add(dir.getDirectionVec())));
-
-                        // Create detection box for PlayerEntities
-                        int x = blockPos.getX();
-                        int y = blockPos.getY();
-                        int z = blockPos.getZ();
-                        AxisAlignedBB aabb = touchingSolid ?
-                                new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1) :
-                                new AxisAlignedBB(x - 1, y - 1, z - 1, x + 2, y + 2, z + 2);
-
-                        // Add players to affectedPlayers
-                        affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
-
-                        // Spawn particles if enabled
-                        if (this.getTileData().getBoolean("showRadius") && world.isRemote && Math.random() < 0.2)
-                        {
-                            if (Minecraft.getInstance().gameSettings.showDebugInfo)
-                            {
-                                world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
-                            } else
-                                for (int p = 0; p < (touchingSolid ? 1 : Math.random() * 3); p++)
-                                {
-                                    double xr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                                    double xm = Math.random() / 20 - 0.025;
-                                    double yr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                                    double zr = touchingSolid ? Math.random() : Math.random() * 3 - 1;
-                                    double zm = Math.random() / 20 - 0.025;
-
-                                    world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
-                                }
-                        }
-
-                        boolean triggerReset = true;
-
-                        // Check in all 6 directions
-                        if (poss.size() < 2000)
-                        {
-                            for (Direction direction : Direction.values())
-                            {
-                                // If a block has changed in the area, trigger a reset of the area shape
-                                if (WorldInfo.isBlockSpreadable(world, blockPos.offset(direction), blockPos))
-                                {
-                                    triggerReset = false;
-                                }
-
-                                // Create new BlockPos with an offset of [direction] from [blockPos]
-                                BlockPos testpos = touchingSolid ?
-                                        blockPos.add(direction.getDirectionVec()) :
-                                        blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
-
-                                if (testpos.withinDistance(pos, 20))
-                                {
-                                    if (WorldInfo.isBlockSpreadable(world, blockPos, testpos) && !WorldInfo.canSeeSky(world, testpos) &&
-                                            !poss.contains(testpos) && !positions2.contains(testpos) &&
-                                            (touchingSolid || MathHelperCS.isEvenPosition(testpos, pos.getX() % 2 != 0, pos.getY() % 2 != 0, pos.getZ() % 2 != 0)))
-                                    {
-                                        positions2.add(testpos);
-                                    }
-                                }
-                            }
-                        } else
-                            positions2.clear();
-
-                        if (triggerReset)
-                            shouldReset = true;
-
-                        // Reset points if a block has been added
-                        if (shouldReset && resetTimer <= 0)
-                        {
-                            cap.ifPresent(cap2 -> cap2.clear());
-                            this.getTileData().putInt("resetTimer", 200);
+                            touchingSolid = true;
+                            break;
                         }
                     }
-                    // Add new positions
-                    cap.ifPresent(cap2 -> cap2.addAll(positions2));
 
+                    // Create detection box for PlayerEntities
+                    int x = blockPos.getX();
+                    int y = blockPos.getY();
+                    int z = blockPos.getZ();
+                    AxisAlignedBB aabb = touchingSolid ?
+                            new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1) :
+                            new AxisAlignedBB(x - 1, y - 1, z - 1, x + 2, y + 2, z + 2);
+
+                    // Add players to affectedPlayers
+                    affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
+
+                    boolean triggerReset = true;
+
+                    // Check in all 6 directions
+                    if (poss.size() < 2000)
+                    {
+                        for (Direction direction : Direction.values())
+                        {
+                            // If a block has changed in the area, trigger a reset of the area shape
+                            if (WorldInfo.isBlockSpreadable(world, blockPos.offset(direction), blockPos))
+                            {
+                                triggerReset = false;
+                            }
+
+                            // Create new BlockPos with an offset of [direction] from [blockPos]
+                            BlockPos testpos = touchingSolid ?
+                                    blockPos.add(direction.getDirectionVec()) :
+                                    blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
+
+                            if (testpos.withinDistance(pos, 20))
+                            {
+                                if (WorldInfo.isBlockSpreadable(world, blockPos, testpos) && !WorldInfo.canSeeSky(world, testpos) &&
+                                        !poss.contains(testpos) && !positions2.contains(testpos) &&
+                                        (touchingSolid || MathHelperCS.isEvenPosition(testpos, pos.getX() % 2 != 0, pos.getY() % 2 != 0, pos.getZ() % 2 != 0)))
+                                {
+                                    positions2.add(testpos);
+                                }
+                            }
+                        }
+                    } else
+                        positions2.clear();
+
+                    if (triggerReset)
+                        shouldReset = true;
+
+                    // Reset points if a block has been added
+                    if (shouldReset && resetTimer <= 0)
+                    {
+                        cap.ifPresent(cap2 -> cap2.clear());
+                        this.getTileData().putInt("resetTimer", 200);
+                    }
+                }
+                // Add new positions
+                cap.ifPresent(cap2 -> cap2.addAll(positions2));
+
+                if (world != null && !world.isRemote)
+                {
                     ColdSweatConfig config = ColdSweatConfig.getInstance();
                     for (PlayerEntity player : affectedPlayers)
                     {
-                        player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
+                        if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
+                            player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
 
                         Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
                         double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") : playerTemp.get();
@@ -243,83 +232,113 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     }
                 }
             }
+        }
 
-            // Input fuel types
-            if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
+        // Input fuel types
+        if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
+        {
+            ItemStack fuel = this.getItemInSlot(0);
+            int amount = (int) getFuelItem(this.getItemInSlot(0)).get(1);
+            if (this.getHotFuel() <= Math.max(MAX_FUEL - amount, MAX_FUEL * 0.9) && amount > 0)
             {
-                ItemStack fuel = this.getItemInSlot(0);
-                int amount = (int) getFuelItem(this.getItemInSlot(0)).get(1);
-                if (this.getHotFuel() <= Math.max(MAX_FUEL - amount, MAX_FUEL * 0.9) && amount > 0)
+                if (fuel.hasContainerItem() && fuel.getCount() == 1)
                 {
-                    if (fuel.hasContainerItem() && fuel.getCount() == 1)
-                    {
-                        this.setItemInSlot(0, fuel.getContainerItem());
-                    } else this.getItemInSlot(0).shrink(1);
-                    this.setHotFuel(this.getHotFuel() + amount);
-                }
-
-                if (this.getColdFuel() <= Math.max(MAX_FUEL + amount, MAX_FUEL * 0.9) && amount < 0)
-                {
-                    if (fuel.hasContainerItem() && fuel.getCount() == 1)
-                    {
-                        this.setItemInSlot(0, fuel.getContainerItem());
-                    } else this.getItemInSlot(0).shrink(1);
-                    this.setColdFuel(this.getColdFuel() - amount);
-                }
+                    this.setItemInSlot(0, fuel.getContainerItem());
+                } else this.getItemInSlot(0).shrink(1);
+                this.setHotFuel(this.getHotFuel() + amount);
             }
 
-            // Drain fuel
-            if (this.ticksExisted % 40 == 0)
+            if (this.getColdFuel() <= Math.max(MAX_FUEL + amount, MAX_FUEL * 0.9) && amount < 0)
             {
-                if (this.getColdFuel() > 0 && shouldUseColdFuel)
+                if (fuel.hasContainerItem() && fuel.getCount() == 1)
                 {
-                    this.setColdFuel(this.getColdFuel() - 1);
-                }
-                if (this.getHotFuel() > 0 && shouldUseHotFuel)
-                {
-                    this.setHotFuel(this.getHotFuel() - 1);
-                }
-            }
-
-            // Update BlockState
-            if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
-            {
-                BlockState state = world.getBlockState(pos);
-                int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
-                int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
-
-                BlockState desiredState = state.with(HearthBlock.WATER, waterLevel).with(HearthBlock.LAVA, lavaLevel);
-                if (state.get(HearthBlock.WATER) != waterLevel || state.get(HearthBlock.LAVA) != lavaLevel)
-                {
-                    world.setBlockState(pos, desiredState);
-                }
-            }
-
-            // Particles
-            int coldFuel = getColdFuel();
-            int hotFuel = getHotFuel();
-
-            if (Math.random() < coldFuel / 2000d)
-            {
-                double d0 = pos.getX() + 0.5d;
-                double d1 = pos.getY() + 2d;
-                double d2 = pos.getZ() + 0.5d;
-                double d3 = (Math.random() - 0.5) / 4;
-                double d4 = (Math.random() - 0.5) / 4;
-                double d5 = (Math.random() - 0.5) / 4;
-                world.addParticle(ParticleTypes.CLOUD, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
-            }
-            if (Math.random() < hotFuel / 2000d)
-            {
-                double d0 = pos.getX() + 0.5d;
-                double d1 = pos.getY() + 2d;
-                double d2 = pos.getZ() + 0.5d;
-                double d3 = (Math.random() - 0.5) / 2;
-                double d4 = (Math.random() - 0.5) / 2;
-                double d5 = (Math.random() - 0.5) / 2;
-                world.addParticle(ParticleTypes.LARGE_SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
+                    this.setItemInSlot(0, fuel.getContainerItem());
+                } else this.getItemInSlot(0).shrink(1);
+                this.setColdFuel(this.getColdFuel() - amount);
             }
         }
+
+        // Drain fuel
+        if (this.ticksExisted % 40 == 0)
+        {
+            if (this.getColdFuel() > 0 && shouldUseColdFuel)
+            {
+                this.setColdFuel(this.getColdFuel() - 1);
+            }
+            if (this.getHotFuel() > 0 && shouldUseHotFuel)
+            {
+                this.setHotFuel(this.getHotFuel() - 1);
+            }
+        }
+
+        // Update BlockState
+        if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
+        {
+            BlockState state = world.getBlockState(pos);
+            int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
+            int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
+
+            BlockState desiredState = state.with(HearthBlock.WATER, waterLevel).with(HearthBlock.LAVA, lavaLevel);
+            if (state.get(HearthBlock.WATER) != waterLevel || state.get(HearthBlock.LAVA) != lavaLevel)
+            {
+                world.setBlockState(pos, desiredState);
+            }
+        }
+
+        // Particles
+        int coldFuel = getColdFuel();
+        int hotFuel = getHotFuel();
+
+        if (Math.random() < coldFuel / 2000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 2d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 4;
+            double d4 = (Math.random() - 0.5) / 4;
+            double d5 = (Math.random() - 0.5) / 4;
+            world.addParticle(ParticleTypes.CLOUD, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
+        }
+        if (Math.random() < hotFuel / 2000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 2d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 2;
+            double d4 = (Math.random() - 0.5) / 2;
+            double d5 = (Math.random() - 0.5) / 2;
+            world.addParticle(ParticleTypes.LARGE_SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
+        }
+
+        // Air Particles
+        if (world.isRemote && world.getTileEntity(pos).getTileData().getBoolean("showRadius"))
+        cap.ifPresent(c ->
+        {
+            // Spawn particles if enabled
+            for (BlockPos blockPos : c.getHashSet())
+            {
+                if (Math.random() < 0.015)
+                {
+                    if (Minecraft.getInstance().gameSettings.showDebugInfo)
+                    {
+                        world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                    }
+                    else
+                    {
+                        for (int p = 0; p < Math.random() * 3; p++)
+                        {
+                            double xr = Math.random() * 3 - 1;
+                            double xm = Math.random() / 20 - 0.025;
+                            double yr = Math.random() * 3 - 1;
+                            double zr = Math.random() * 3 - 1;
+                            double zm = Math.random() / 20 - 0.025;
+
+                            world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     public List getFuelItem(ItemStack item)
