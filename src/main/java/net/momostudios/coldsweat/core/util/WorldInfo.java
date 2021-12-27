@@ -115,14 +115,14 @@ public class WorldInfo
         return true;
     }
 
-    public static boolean isBlockSpreadable(World world, @Nonnull BlockPos pos, @Nonnull BlockPos newPos)
+    public static boolean isBlockSpreadable(World world, @Nonnull BlockPos fromPos, @Nonnull BlockPos toPos)
     {
-        BlockState state = world.getBlockState(pos);
-        BlockState state2 = world.getBlockState(newPos);
-        Direction dir = Direction.getFacingFromVector(newPos.getX() - pos.getX(), newPos.getY() - pos.getY(), newPos.getZ() - pos.getZ());
+        BlockState state = world.getBlockState(fromPos);
+        BlockState state2 = world.getBlockState(toPos);
+        Direction dir = Direction.getFacingFromVector(toPos.getX() - fromPos.getX(), toPos.getY() - fromPos.getY(), toPos.getZ() - fromPos.getZ());
 
-        return (!state2.isSolidSide(world, newPos, dir.getOpposite()) && !state.isSolidSide(world, pos, dir)) &&
-                (state2.getMaterial() == Material.AIR || !state2.getShape(world, newPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
+        return (!state2.isSolidSide(world, toPos, dir.getOpposite()) && !state.isSolidSide(world, fromPos, dir)) &&
+                (state2.getMaterial() == Material.AIR || !state2.getShape(world, toPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
                         (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
                         (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)) ||
                         (state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP));

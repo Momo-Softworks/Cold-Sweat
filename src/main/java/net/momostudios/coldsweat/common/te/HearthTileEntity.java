@@ -40,6 +40,7 @@ import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
@@ -47,7 +48,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     private final Map<BlockPos, LazyOptional<IBlockStorageCap>> cache = new HashMap<>();
     public int ticksExisted;
-    private int resetTimer;
     private int insulationLevel;
     private boolean shouldUseHotFuel = false;
     private boolean shouldUseColdFuel = false;
@@ -98,11 +98,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         this.ticksExisted = (this.ticksExisted + 1) % 1000;
-        resetTimer = this.getTileData().getInt("resetTimer");
         insulationLevel = this.getTileData().getInt("insulationLevel");
-
-        if (resetTimer > 0)
-            this.getTileData().putInt("resetTimer", resetTimer - 1);
 
         if (insulationLevel < 2400)
             this.getTileData().putInt("insulationLevel", insulationLevel + 1);
@@ -119,9 +115,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 // Create temporary list to add back to the NBT
                 List<BlockPos> positions2 = new ArrayList<>();
 
-            /*
-             Partition all points into multiple lists (max of 19)
-            */
+                /*
+                 Partition all points into multiple lists (max of 19)
+                */
                 // Size of each partition
                 int partSize = 150;
                 // Number of partitions with 150 elements each
@@ -133,10 +129,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                 boolean shouldReset = false;
 
-            /*
-             Iterate through the partition with index [scanningIndex]
-             */
-                for (BlockPos blockPos : new LinkedList<>(poss).subList(firstIndex, lastIndex))
+                for (BlockPos blockPos : poss.stream().sequential().skip(firstIndex).limit(lastIndex - firstIndex).collect(Collectors.toList()))
                 {
                     if (WorldInfo.canSeeSky(world, blockPos))
                     {
@@ -144,24 +137,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         cap.ifPresent(cap2 -> cap2.remove(blockPos));
                     }
 
-                    // Get if any adjacent block is solid
-                    boolean touchingSolid = false;
-                    for (Direction dir : Direction.values())
-                    {
-                        if (!WorldInfo.isBlockSpreadable(world, blockPos, blockPos.add(dir.getDirectionVec())))
-                        {
-                            touchingSolid = true;
-                            break;
-                        }
-                    }
-
                     // Create detection box for PlayerEntities
                     int x = blockPos.getX();
                     int y = blockPos.getY();
                     int z = blockPos.getZ();
-                    AxisAlignedBB aabb = touchingSolid ?
-                            new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1) :
-                            new AxisAlignedBB(x - 1, y - 1, z - 1, x + 2, y + 2, z + 2);
+                    AxisAlignedBB aabb = new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1);
 
                     // Add players to affectedPlayers
                     affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
@@ -169,42 +149,41 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     boolean triggerReset = true;
 
                     // Check in all 6 directions
-                    if (poss.size() < 2000)
+                    for (Direction direction : Direction.values())
                     {
-                        for (Direction direction : Direction.values())
+                        // If a block has changed in the area, trigger a reset of the area shape
+                        if (WorldInfo.isBlockSpreadable(world, blockPos.offset(direction), blockPos))
                         {
-                            // If a block has changed in the area, trigger a reset of the area shape
-                            if (WorldInfo.isBlockSpreadable(world, blockPos.offset(direction), blockPos))
-                            {
-                                triggerReset = false;
-                            }
+                            triggerReset = false;
+                            if (poss.size() >= 4000) break;
+                        }
+
+                        if (poss.size() < 4000)
+                        {
 
                             // Create new BlockPos with an offset of [direction] from [blockPos]
-                            BlockPos testpos = touchingSolid ?
-                                    blockPos.add(direction.getDirectionVec()) :
-                                    blockPos.add(direction.getXOffset() * 2, direction.getYOffset() * 2, direction.getZOffset() * 2);
+                            BlockPos testpos = blockPos.add(direction.getDirectionVec());
 
                             if (testpos.withinDistance(pos, 20))
                             {
                                 if (WorldInfo.isBlockSpreadable(world, blockPos, testpos) && !WorldInfo.canSeeSky(world, testpos) &&
-                                        !poss.contains(testpos) && !positions2.contains(testpos) &&
-                                        (touchingSolid || MathHelperCS.isEvenPosition(testpos, pos.getX() % 2 != 0, pos.getY() % 2 != 0, pos.getZ() % 2 != 0)))
+                                !poss.contains(testpos) && !positions2.contains(testpos))
                                 {
                                     positions2.add(testpos);
                                 }
                             }
                         }
-                    } else
-                        positions2.clear();
+                        else positions2.clear();
+                    }
 
                     if (triggerReset)
                         shouldReset = true;
 
                     // Reset points if a block has been added
-                    if (shouldReset && resetTimer <= 0)
+                    if (shouldReset)
                     {
-                        cap.ifPresent(cap2 -> cap2.clear());
-                        this.getTileData().putInt("resetTimer", 200);
+                        cap.ifPresent(IBlockStorageCap::clear);
+                        break;
                     }
                 }
                 // Add new positions
@@ -319,7 +298,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             // Spawn particles if enabled
             for (BlockPos blockPos : c.getHashSet())
             {
-                if (Math.random() < 0.015)
+                if (Math.random() < 0.008)
                 {
                     if (Minecraft.getInstance().gameSettings.showDebugInfo)
                     {
@@ -327,16 +306,13 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     }
                     else
                     {
-                        for (int p = 0; p < Math.random() * 3; p++)
-                        {
-                            double xr = Math.random() * 3 - 1;
-                            double xm = Math.random() / 20 - 0.025;
-                            double yr = Math.random() * 3 - 1;
-                            double zr = Math.random() * 3 - 1;
-                            double zm = Math.random() / 20 - 0.025;
+                        double xr = Math.random();
+                        double yr = Math.random();
+                        double zr = Math.random();
+                        double xm = Math.random() / 20 - 0.025;
+                        double zm = Math.random() / 20 - 0.025;
 
-                            world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
-                        }
+                        world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
                     }
                 }
             }
