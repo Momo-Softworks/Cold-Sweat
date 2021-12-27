@@ -33,9 +33,9 @@ public class MixinBipedModel
     @Overwrite
     private void func_241654_b_(LivingEntity p_241654_1_)
     {
+        boolean holdingLamp = PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT);
         float armRot = MathHelperCS.toRadians(p_241654_1_.getPersistentData().getFloat("rightArmRot"));
-        int target = PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT) ? 70 : 0;
-        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(target) - armRot) * 20);
+        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
         float rightArmRot = armRot + rotOffset;
 
         switch(this.rightArmPose)
@@ -49,12 +49,10 @@ public class MixinBipedModel
                 this.bipedRightArm.rotateAngleY = (-(float)Math.PI / 6F);
                 break;
             case ITEM:
-            {
-                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.15F - ((float) Math.PI / 10F) - rightArmRot;
-                this.bipedRightArm.rotateAngleZ = this.bipedRightArm.rotateAngleZ * 0.15F;
+                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * (holdingLamp ? 0.15F : 0.5f) - ((float) Math.PI / 10F) - rightArmRot;
+                this.bipedRightArm.rotateAngleZ = this.bipedRightArm.rotateAngleZ * (holdingLamp ? 0.15F : 0.5f);
                 this.bipedRightArm.rotateAngleY = 0.0F;
                 break;
-            }
             case THROW_SPEAR:
                 this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - (float)Math.PI;
                 this.bipedRightArm.rotateAngleY = 0.0F;
@@ -80,9 +78,9 @@ public class MixinBipedModel
     @Overwrite
     private void func_241655_c_(LivingEntity p_241655_1_)
     {
+        boolean holdingLamp = PlayerHelper.holdingLamp(p_241655_1_, HandSide.LEFT);
         float armRot = MathHelperCS.toRadians(p_241655_1_.getPersistentData().getFloat("leftArmRot"));
-        int target = PlayerHelper.holdingLamp(p_241655_1_, HandSide.LEFT) ? 70 : 0;
-        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(target) - armRot) * 20);
+        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
         float leftArmRot = armRot + rotOffset;
 
         switch(this.leftArmPose)
@@ -92,12 +90,12 @@ public class MixinBipedModel
                 this.bipedLeftArm.rotateAngleY = 0.0F;
                 break;
             case BLOCK:
-                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - 0.9424779F - leftArmRot;
+                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5f - 0.9424779F - leftArmRot;
                 this.bipedLeftArm.rotateAngleY = ((float)Math.PI / 6F);
                 break;
             case ITEM:
-                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.15F - ((float)Math.PI / 10F) - leftArmRot;
-                this.bipedLeftArm.rotateAngleZ = this.bipedLeftArm.rotateAngleZ * 0.15F;
+                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * (holdingLamp ? 0.15F : 0.5f) - ((float)Math.PI / 10F) - leftArmRot;
+                this.bipedLeftArm.rotateAngleZ = this.bipedLeftArm.rotateAngleZ * (holdingLamp ? 0.15F : 0.5f);
                 this.bipedLeftArm.rotateAngleY = 0.0F;
                 break;
             case THROW_SPEAR:
