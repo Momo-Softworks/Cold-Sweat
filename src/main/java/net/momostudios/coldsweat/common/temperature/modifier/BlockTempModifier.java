@@ -23,7 +23,7 @@ public class BlockTempModifier extends TempModifier
     }
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         if (player.ticksExisted % 5 > 0)
         {

@@ -33,7 +33,6 @@ public class AddTempModifiers
             {
                 PlayerTemp.addModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                PlayerTemp.addModifier(player, new WeatherTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 PlayerTemp.addModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
@@ -64,7 +63,7 @@ public class AddTempModifiers
 
             if (player.ticksExisted % 5 == 0)
             {
-                if (player.isInWater())
+                if (player.isInWater() || player.world.isRainingAt(player.getPosition()))
                     PlayerTemp.addModifier(player, new WaterTempModifier(0.15), PlayerTemp.Types.AMBIENT, false);
                 else
                     PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);

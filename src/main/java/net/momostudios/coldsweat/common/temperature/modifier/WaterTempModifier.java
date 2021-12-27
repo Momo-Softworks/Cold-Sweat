@@ -21,13 +21,15 @@ public class WaterTempModifier extends TempModifier
     }
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         try
         {
             double strength = (double) getArgument("strength");
             double factor = Math.min(-0.01, -0.01 - temp.get() / 50);
-            setArgument("strength", MathHelperCS.clamp(strength + (player.isInWater() ? 0.3 : factor), 0, 10));
+            double addAmount = player.isInWater() ? 0.3 : player.world.isRainingAt(player.getPosition()) ? 0.05 : factor;
+
+            setArgument("strength", MathHelperCS.clamp(strength + addAmount, 0, 10));
 
             if (!player.isInWater() && strength > 0.0)
             {
