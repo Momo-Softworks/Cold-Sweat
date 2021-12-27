@@ -20,7 +20,7 @@ public class WaterskinTempModifier extends TempModifier
     }
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         PlayerTemp.removeModifiers(player, PlayerTemp.Types.BODY, 1, modifier -> modifier.equals(this));
         return temp.get() + (double) getArgument("temperature");

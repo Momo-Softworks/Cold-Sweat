@@ -1,14 +1,11 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.INBT;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,7 +69,7 @@ public abstract class TempModifier
      * @param player the player that is being affected by the modifier.<br>
      * @return the new {@link Temperature}.<br>
      */
-    public abstract double getValue(Temperature temp, PlayerEntity player);
+    public abstract double getResult(Temperature temp, PlayerEntity player);
 
     public final double calculate(Temperature temp, PlayerEntity player)
     {
@@ -80,7 +77,7 @@ public abstract class TempModifier
         MinecraftForge.EVENT_BUS.post(pre);
         if (!pre.isCanceled())
         {
-            double value = getValue(pre.getTemperature(), player);
+            double value = getResult(pre.getTemperature(), player);
 
             TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
             MinecraftForge.EVENT_BUS.post(post);

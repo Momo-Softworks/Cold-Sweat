@@ -18,7 +18,7 @@ public class HearthTempModifier extends TempModifier
     }
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         ColdSweatConfig config = ColdSweatConfig.getInstance();
 

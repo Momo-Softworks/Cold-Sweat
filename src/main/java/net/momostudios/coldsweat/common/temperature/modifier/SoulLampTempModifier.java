@@ -15,7 +15,7 @@ public class SoulLampTempModifier extends TempModifier
 {
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         float max = (float) ColdSweatConfig.getInstance().getMaxTempHabitable();
         float min = (float) ColdSweatConfig.getInstance().getMinTempHabitable();

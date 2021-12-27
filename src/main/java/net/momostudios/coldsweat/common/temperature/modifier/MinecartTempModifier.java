@@ -12,7 +12,7 @@ public class MinecartTempModifier extends TempModifier
     public MinecartTempModifier() {}
 
     @Override
-    public double getValue(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, PlayerEntity player)
     {
         PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier.getID().equals(getID()));
 
