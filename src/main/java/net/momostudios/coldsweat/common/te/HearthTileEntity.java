@@ -239,21 +239,23 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         {
             ItemStack fuel = this.getItemInSlot(0);
             int amount = (int) getFuelItem(this.getItemInSlot(0)).get(1);
-            if (this.getHotFuel() <= Math.max(MAX_FUEL - amount, MAX_FUEL * 0.9) && amount > 0)
+            if (this.getHotFuel() <= MAX_FUEL - amount / 2 && amount > 0)
             {
                 if (fuel.hasContainerItem() && fuel.getCount() == 1)
                 {
                     this.setItemInSlot(0, fuel.getContainerItem());
-                } else this.getItemInSlot(0).shrink(1);
+                }
+                else this.getItemInSlot(0).shrink(1);
                 this.setHotFuel(this.getHotFuel() + amount);
             }
 
-            if (this.getColdFuel() <= Math.max(MAX_FUEL + amount, MAX_FUEL * 0.9) && amount < 0)
+            if (this.getColdFuel() <= MAX_FUEL + amount / 2 && amount < 0)
             {
                 if (fuel.hasContainerItem() && fuel.getCount() == 1)
                 {
                     this.setItemInSlot(0, fuel.getContainerItem());
-                } else this.getItemInSlot(0).shrink(1);
+                }
+                else this.getItemInSlot(0).shrink(1);
                 this.setColdFuel(this.getColdFuel() - amount);
             }
         }
