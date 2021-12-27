@@ -96,8 +96,6 @@
 - New textures for Boiler and Icebox fuel gauges
 
 - Technical Changes:
-    - Reduced the potential performance impact of wearing leather armor
-        - This probably won't affect performance much, but it's worth noting (it all adds up, you know!)
     - Added new methods for handling TempModifiers:
         - PlayerTemp.hasModifier():
             - Returns true if the player has a modifier of the given type
@@ -145,6 +143,102 @@
 Technical Changes:
 - Added new translation key for the Grace effect: "effect.grace" (subtitle)
 - Added new translation keys for Soulfire Lamp sounds: "item.soulfire_lamp.on" & "item.soulfire_lamp.off"
+
+Release 2.1:
+- MASSIVE performance improvements (especially for the Hearth)!
+- New Item: Soulfire Lamp
+    - Cools the player down when in the Nether
+    - Requires Warped or Crimson stems as fuel (temporarily; will be changed to a custom item in the future)
+- Re-introduced the grace period from pre-2.0 versions
+    - The player will be given the grace effect upon respawning or entering the world for the first time
+    - "Grace" is a new potion effect that replaces Tolerance (which went unused until now!)
+    - The length is configurable (default: 5 minutes)
+    - It can also be disabled if you prefer
+- Water now cools you down
+    - When you get out, it takes a bit of time to dry off/warm up
+    - In cold biomes, the effect is greater, so be careful!
+    - The speed at which you warm up depends on the ambient temperature
+- Changes to how weather affects the player:
+    - Snow no longer does anything (It doesn't really make sense)
+    - Rain makes the player wet, similar to how water does
+- Sleeping through the night now brings your temperature closer to 0
+- Added new sounds for when the player is freezing
+- Added new sounds for the Soulfire Lamp when it is lit or extinguished
+- Active nether portals now give off heat in the overworld
+- The ambient temperature gauge now smoothly transitions to new temperatures
+- The /temperature command can no longer be used to set config settings
+- The Hearth now only consumes the necessary fuel to function
+    - If it is hot, for example, it will only use cold fuel
+    - The Hearth will not use any fuel if there are no players in the area
+    - If the temperature in the area is habitable, the Hearth will not use any fuel
+    - It now must have over 3/4 of an item's fuel value missing to consume fuel
+- Limited the number of total blocks the Hearth can affect to 2000
+    - This is to prevent lag from tons of hearths
+- Leather armor now insulates based on what piece of armor it is (configurable)
+    - i.e. a leather chestplate insulates more than a leather helmet
+- Using the ingame config menu on a server now changes the server's configs if the player has OP permission level 2 or higher
+- Configs on the server now properly take precedence over the player's configs
+- Updated the Hearth's texture slightly
+- Retextured the Boiler
+- New textures for Boiler and Icebox fuel gauges
+- Compacted Boiler & Icebox GUIs
+
+- Added Polish translation by @Lifus_Crustus on our Discord server
+- Added Portuguese translation by @Joymachs and @Vellar on our Discord server
+
+Fixes:
+- Fixed crash with Waterskins in the player's hotbar
+- Fixed incorrect math for converting temperatures to/from Celsius
+- Fixed Ice Resistance Potion recipe not showing in JEI
+- Fixed an issue that caused the player's temperature to sometimes not be saved properly upon leaving the world
+- Fixed a bug that prevented the Hearth from spreading through some non-solid blocks
+- Fixed Icebox and Soul Campfire not cooling the area around them
+- Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
+- Fixed the /temperature command sending an incorrect message when setting another player's temperature
+
+Technical Changes:
+- BlockEffects and TempModifiers are now stored in a map instead of a list
+    - Massive performance uplift
+    - Easier to store/lookup elements by their ID/block
+- Updates to TempModifiers
+    - Moved to the capabilities system
+    - Much easier to add arguments
+    - Added new methods for handling:
+        - PlayerTemp.hasModifier():
+            - Returns true if the player has a modifier of the given type
+        - PlayerTemp.forEachModifier():
+            - Calls the given function for each modifier of the given type
+    - Changed how PlayerTemp.removeModifier() works:
+        - Instead of removing all modifiers of the given class, it takes a predicate which determines which modifiers to remove
+- Added new events for compat mod developers to hook into:
+    - TempModifierEvent.Add
+        - Called when a TempModifier modifier is added to a player
+        - Cancellable
+        - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier type
+    - TempModifierEvent.Remove
+        - Called when a TempModifier is removed from a player
+        - Cancellable
+        - Allows for changing the number of modifiers removed
+    - TempModifierEvent.Init
+        - Called when the registry of TempModifiers or BlockEffects is being built
+        - Allows for injection of custom TempModifiers and BlockEffects
+        - If you call this event manually, use getPool().flush() beforehand to prevent duplicate entries (lag)
+    - TempModifierEvent.Tick
+        - Fired when a TempModifier's value is called
+        - Has two phases:
+            - Pre: Called before getValue() is called (cancellable)
+            - Post: Called after getValue() is called
+- Replaced all temperature unit conversion methods with on method: MathHelperCS.convertUnits()
+- The Hearth now uses the capability system instead of NBT
+        - This should increase performance and prevent issues with the NBT data limit on some servers
+- "fuel_items.toml" config file changes:
+    - Renamed to "item_settings.toml" to better indicate that it also includes insulation items
+    - Insulation items (for the sewing table) and armor items with innate insulation are now defined separately
+- Added new translation keys:
+    - "entity.player.damage.freeze" (The subtitle for when the player takes cold damage) (will be added next update)
+    - "item.cold_sweat.soulfire_lamp" (The name of the Soulfire Lamp item)
+- Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
+- Removed some defunct recipes that would throw errors in server consoles
 
 TO-DO
 - Added Italian translation courtesy of @SniperFoxy on our Discord server
