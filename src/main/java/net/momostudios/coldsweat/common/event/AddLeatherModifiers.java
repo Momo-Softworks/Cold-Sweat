@@ -39,26 +39,33 @@ public class AddLeatherModifiers
                 leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
                 leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
 
-                int helmetInsulation = getInsulatingArmor(helmetItem).value;
-                int chestInsulation = getInsulatingArmor(chestplateItem).value;
-                int legsInsulation = getInsulatingArmor(leggingsItem).value;
-                int bootsInsulation = getInsulatingArmor(bootsItem).value;
+                if (helmetItem != null)
+                {
+                    int helmetInsulation = getInsulatingArmor(helmetItem).value;
 
-                if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0)
-                {
-                    leatherMultiplier += helmetInsulation;
+                    if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0)
+                        leatherMultiplier += helmetInsulation;
                 }
-                if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0)
+                if (chestplateItem != null)
                 {
-                    leatherMultiplier += chestInsulation;
+                    int chestInsulation = getInsulatingArmor(chestplateItem).value;
+
+                    if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0)
+                        leatherMultiplier += chestInsulation;
                 }
-                if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0)
+                if (leggingsItem != null)
                 {
-                    leatherMultiplier += legsInsulation;
+                    int legsInsulation = getInsulatingArmor(leggingsItem).value;
+
+                    if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0)
+                        leatherMultiplier += legsInsulation;
                 }
-                if (bootsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0)
+                if (bootsItem != null)
                 {
-                    leatherMultiplier += bootsInsulation;
+                    int bootsInsulation = getInsulatingArmor(bootsItem).value;
+
+                    if (leggingsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0)
+                        leatherMultiplier += bootsInsulation;
                 }
 
                 if (leatherMultiplier > 0)
@@ -75,7 +82,7 @@ public class AddLeatherModifiers
                                 {
                                     modifier.setArgument("amount", multiplier);
                                 }
-                                catch (IllegalArgumentException e)
+                                catch (Exception e)
                                 {
                                     shouldRemove.set(true);
                                 }
