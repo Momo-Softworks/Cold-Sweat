@@ -195,6 +195,7 @@ Fixes:
 - Fixed Icebox and Soul Campfire not cooling the area around them
 - Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
 - Fixed the /temperature command sending an incorrect message when setting another player's temperature
+- Fixed Hearth spawning too many particles in small spaces
 
 Technical Changes:
 - BlockEffects and TempModifiers are now stored in a map instead of a list
