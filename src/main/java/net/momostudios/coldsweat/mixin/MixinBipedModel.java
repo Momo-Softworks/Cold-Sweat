@@ -28,6 +28,7 @@ public class MixinBipedModel
 
     /**
      * @author iMikul
+     * @reason Adds functions for the Soulfire Lamp
      */
     @Overwrite
     private void func_241654_b_(LivingEntity p_241654_1_)
@@ -74,6 +75,7 @@ public class MixinBipedModel
 
     /**
      * @author iMikul
+     * @reason Adds functions for the Soulfire Lamp
      */
     @Overwrite
     private void func_241655_c_(LivingEntity p_241655_1_)
