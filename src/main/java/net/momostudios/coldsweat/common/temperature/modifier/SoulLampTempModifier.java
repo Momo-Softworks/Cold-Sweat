@@ -42,9 +42,8 @@ public class SoulLampTempModifier extends TempModifier
                             randy + 0.5, randz + Math.sin(Math.toRadians(player.renderYawOffset + 50)) * 0.7, 0, 0.02 - Math.random() * 0.01, 0);
                 }
             }
-            return (min + max) / 2.0f + (temp.get() - max) * 0.4f ;
         }
-        return temp.get();
+        return (min + max) / 2.0f + (temp.get() - max) * 0.4f;
     }
 
     private double totalPlayerMotion(PlayerEntity player)

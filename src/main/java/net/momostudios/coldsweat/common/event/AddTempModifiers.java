@@ -71,8 +71,10 @@ public class AddTempModifiers
                 // Soul Lamp
                 if (PlayerHelper.holdingLamp(player, HandSide.RIGHT) || PlayerHelper.holdingLamp(player, HandSide.LEFT))
                     PlayerTemp.addModifier(player, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                else
+                else if (player.getPersistentData().getInt("soulLampTimeout") <= 0)
                     PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+                else
+                    player.getPersistentData().putInt("soulLampTimeout", player.getPersistentData().getInt("soulLampTimeout") - 1);
             }
         }
     }
