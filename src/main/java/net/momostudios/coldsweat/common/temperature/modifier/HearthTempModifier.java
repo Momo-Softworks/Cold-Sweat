@@ -20,6 +20,8 @@ public class HearthTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
+        player.getPersistentData().putDouble("preHearthTemp", temp.get());
+
         ColdSweatConfig config = ColdSweatConfig.getInstance();
 
         double min = config.getMinTempHabitable();
