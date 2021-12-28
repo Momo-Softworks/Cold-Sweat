@@ -64,6 +64,7 @@ public class WorldInfo
                 posList.add(pos.add(sx * factor - (factor * sampleRoot) / 2, 0, sz * factor - (factor * sampleRoot) / 2));
             }
         }
+
         return posList;
     }
 
