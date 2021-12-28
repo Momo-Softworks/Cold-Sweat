@@ -54,51 +54,17 @@ public class WorldInfo
     {
         List<BlockPos> posList = new ArrayList<>();
         pos = new BlockPos(pos.getX() / 2, pos.getY(), pos.getZ() / 2);
+        int sampleRoot = (int) Math.sqrt(samples);
 
-        int lx = (int) (pos.getX() - (Math.sqrt(samples) * interval) / 2);
-        for (int sx = 0; sx < Math.sqrt(samples); sx++)
+        for (int sx = 0; sx < sampleRoot; sx++)
         {
-            int lz = (int) (pos.getZ() - (Math.sqrt(samples) * interval) / 2);
-            for (int sz = 0; sz < Math.sqrt(samples); sz++)
+            for (int sz = 0; sz < sampleRoot; sz++)
             {
-                posList.add(pos.add(lx, 0, lz));
-                lz += interval;
+                double factor = interval * sampleRoot;
+                posList.add(pos.add(sx * factor - (factor * sampleRoot) / 2, 0, sz * factor - (factor * sampleRoot) / 2));
             }
-            lx += interval;
         }
         return posList;
-    }
-
-    public static List<BlockPos> getNearbyPositionsCubed(BlockPos pos, int samples, int interval)
-    {
-        List<BlockPos> posList = new ArrayList<>();
-        pos = new BlockPos(pos.getX() / 2, pos.getY() / 2, pos.getZ() / 2);
-
-        int lx = (int) (pos.getX() - (Math.cbrt(samples) * interval) / 2);
-        for (int sx = 0; sx < Math.cbrt(samples); sx++)
-        {
-            int ly = (int) (pos.getY() - (Math.cbrt(samples) * interval) / 2);
-            for (int sy = 0; sy < Math.cbrt(samples); sy++)
-            {
-                int lz = (int) (pos.getZ() - (Math.cbrt(samples) * interval) / 2);
-                for (int sz = 0; sz < Math.cbrt(samples); sz++)
-                {
-                    posList.add(pos.add(lx, ly, lz));
-                    lz += interval;
-                }
-                ly += interval;
-            }
-            lx += interval;
-        }
-        return posList;
-    }
-
-    /**
-     * Returns the adjacent 6 positions to the BlockPos
-     */
-    public static List<BlockPos> adjacentPositions(BlockPos pos)
-    {
-        return new ArrayList<>(Arrays.asList(pos, pos.up(), pos.down(), pos.east(), pos.west(), pos.north(), pos.south()));
     }
 
     public static boolean canSeeSky(World world, BlockPos pos)
