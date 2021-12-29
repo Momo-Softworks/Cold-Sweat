@@ -147,8 +147,9 @@ Technical Changes:
 Release 2.1:
 - MASSIVE performance improvements (especially for the Hearth)!
 - New Item: Soulfire Lamp
-    - Cools the player down when in the Nether
-    - Requires Warped or Crimson stems as fuel (temporarily; will be changed to a custom item in the future)
+    - Cools the player down when in the Nether (and nearby players, too!)
+    - Requires Warped or Crimson stems as fuel (will be changed to a custom item in the future)
+    - Has cool sounds for when it is lit or extinguished
 - Re-introduced the grace period from pre-2.0 versions
     - The player will be given the grace effect upon respawning or entering the world for the first time
     - "Grace" is a new potion effect that replaces Tolerance (which went unused until now!)
@@ -161,17 +162,18 @@ Release 2.1:
 - Changes to how weather affects the player:
     - Snow no longer does anything (It doesn't really make sense)
     - Rain makes the player wet, similar to how water does
-- Sleeping through the night now brings your temperature closer to 0
+- Hearth updates:
+    - The Hearth now only consumes the necessary fuel to function
+        - If it is hot, for example, it will only use cold fuel
+        - The Hearth will not use any fuel if there are no players in the area
+        - If the temperature in the area is habitable, the Hearth will not use any fuel
+        - It now must have over 3/4 of an item's fuel value missing to consume fuel
+    - The Hearth's code is now up to 800x more efficient (~20,000-40,000ms -> ~50-200ms of lag over 60 seconds)
+- Sleeping through the night now brings your temperature closer to 0 (divides it by 4)
 - Added new sounds for when the player is freezing
-- Added new sounds for the Soulfire Lamp when it is lit or extinguished
 - Active nether portals now give off heat in the overworld
 - The ambient temperature gauge now smoothly transitions to new temperatures
 - The /temperature command can no longer be used to set config settings
-- The Hearth now only consumes the necessary fuel to function
-    - If it is hot, for example, it will only use cold fuel
-    - The Hearth will not use any fuel if there are no players in the area
-    - If the temperature in the area is habitable, the Hearth will not use any fuel
-    - It now must have over 3/4 of an item's fuel value missing to consume fuel
 - Limited the number of total blocks the Hearth can affect to 2000
     - This is to prevent lag from tons of hearths
 - Leather armor now insulates based on what piece of armor it is (configurable)
