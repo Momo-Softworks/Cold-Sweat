@@ -13,11 +13,11 @@ import net.momostudios.coldsweat.core.util.PlayerHelper;
 public class HandleSoulLampAnim
 {
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null)
+        if (event.phase == TickEvent.Phase.START)
         {
-            PlayerEntity player = Minecraft.getInstance().player;
+            PlayerEntity player = event.player;
 
             float rightArmRot = player.getPersistentData().getFloat("rightArmRot");
 
