@@ -5,6 +5,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.TrapDoorBlock;
 import net.minecraft.block.material.Material;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.state.properties.Half;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -12,6 +14,7 @@ import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
@@ -53,15 +56,14 @@ public class WorldInfo
     public static List<BlockPos> getNearbyPositions(BlockPos pos, int samples, int interval)
     {
         List<BlockPos> posList = new ArrayList<>();
-        pos = new BlockPos(pos.getX() / 2, pos.getY(), pos.getZ() / 2);
         int sampleRoot = (int) Math.sqrt(samples);
 
         for (int sx = 0; sx < sampleRoot; sx++)
         {
             for (int sz = 0; sz < sampleRoot; sz++)
             {
-                double factor = interval * sampleRoot;
-                posList.add(pos.add(sx * factor - (factor * sampleRoot) / 2, 0, sz * factor - (factor * sampleRoot) / 2));
+                int length = interval * sampleRoot;
+                posList.add(pos.add(sx * interval - (length / 2), 0, sz * interval - (length / 2)));
             }
         }
 
@@ -88,10 +90,22 @@ public class WorldInfo
         BlockState state2 = world.getBlockState(toPos);
         Direction dir = Direction.getFacingFromVector(toPos.getX() - fromPos.getX(), toPos.getY() - fromPos.getY(), toPos.getZ() - fromPos.getZ());
 
-        return (!state2.isSolidSide(world, toPos, dir.getOpposite()) && !state.isSolidSide(world, fromPos, dir)) &&
-                (state2.getMaterial() == Material.AIR || !state2.getShape(world, toPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
-                        (state2.hasProperty(DoorBlock.OPEN) && state2.get(DoorBlock.OPEN)) ||
-                        (state2.hasProperty(TrapDoorBlock.OPEN) && state2.get(TrapDoorBlock.OPEN)) ||
-                        (state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP));
+        return
+            // Outlet side of original block is not solid
+            !state.isSolidSide(world, fromPos, dir) &&
+
+            // Inlet side of new pos is not solid
+            (!state2.isSolidSide(world, toPos, dir.getOpposite()) ||
+
+            // Block is air or no sides solid
+            state2.getMaterial() == Material.AIR || !state2.getShape(world, toPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
+
+            // Block is a hearth
+            state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP);
+    }
+
+    public static double distance(Vector3i pos1, Vector3i pos2)
+    {
+        return Math.sqrt(pos1.distanceSq(pos2));
     }
 }
