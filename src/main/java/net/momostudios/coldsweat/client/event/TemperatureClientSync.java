@@ -23,7 +23,7 @@ public class TemperatureClientSync
     @SubscribeEvent
     public static void onTick(TickEvent.WorldTickEvent event)
     {
-        if (event.world.getGameTime() % 10 == 0)
+        if (event.world.getGameTime() % 10 == 0 && !event.world.isRemote)
         {
             for (PlayerEntity player : event.world.getPlayers())
             {
@@ -34,7 +34,7 @@ public class TemperatureClientSync
             }
         }
 
-        if (event.world.getGameTime() % 60 == 0)
+        if (event.world.getGameTime() % 60 == 0 && !event.world.isRemote)
         {
             for (PlayerEntity player : event.world.getPlayers())
             {
