@@ -17,4 +17,6 @@ public class SoundInit
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.soulfire_lamp.on")));
     public static final RegistryObject<SoundEvent> SOUL_LAMP_OFF_SOUND_REGISTRY = SOUNDS.register("item.soulfire_lamp.off",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.soulfire_lamp.off")));
+    public static final RegistryObject<SoundEvent> HEARTH_FUEL_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel")));
 }

@@ -24,10 +24,9 @@ public class HearthContainer extends Container
         super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
-        int slotIndex = 0;
 
         // Tile Entity
-        this.addSlot(new Slot((IInventory) te, 0, 80, 48)
+        this.addSlot(new Slot(te, 0, 80, 48)
         {
             @Override
             public boolean isItemValid(ItemStack stack)

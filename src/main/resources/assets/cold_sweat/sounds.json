@@ -35,5 +35,16 @@
         "stream": true
       }
     ]
+  },
+  "block.hearth.fuel":
+  {
+    "subtitle": "block.hearth.fuel",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:block/hearth/hearth_ready",
+        "stream": true
+      }
+    ]
   }
 }

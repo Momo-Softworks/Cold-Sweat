@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.FurnaceScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -86,6 +87,7 @@ public class HearthScreen extends ContainerScreen<HearthContainer>
         if (isHoveringButton(x, y))
             font.drawString(matrixStack, "Show Particles", 97, 71, 5592405);
     }
+
 
     @SuppressWarnings("deprecation")
     @Override
