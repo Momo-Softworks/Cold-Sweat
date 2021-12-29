@@ -1,5 +1,6 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -27,10 +28,10 @@ public class BiomeTempModifier extends TempModifier
         if (player.ticksExisted % 5 == 0)
         {
             double worldTemp = 0;
-            for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+            for (BlockPos blockPos : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
             {
-                Biome biome = player.world.getBiome(iterator);
-                worldTemp += biome.getTemperature(iterator) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
+                Biome biome = player.world.getBiome(blockPos);
+                worldTemp += biome.getTemperature(blockPos) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
 
                 // Should temperature be overridden by config
                 Override biomeOverride = biomeOverride(biome.getRegistryName(), player);
