@@ -15,6 +15,7 @@ import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.RequestSoundMessage;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
 
@@ -28,13 +29,12 @@ public class SoulfireLampItem extends Item
     @Override
     public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof PlayerEntity)
+        if (entityIn instanceof PlayerEntity && !worldIn.isRemote)
         {
             PlayerEntity player = (PlayerEntity) entityIn;
             double min = ConfigCache.getInstance().minTemp;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp1 = PlayerTemp.getTemperature((PlayerEntity) entityIn, PlayerTemp.Types.AMBIENT).get();
-            double temp = -2.5 * (-temp1 - 0.5 * (-min-max) -0.4 * max);
+            double temp = player.getPersistentData().getDouble("preLampTemp");
 
             // Fuel the item on creation
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
@@ -49,17 +49,16 @@ public class SoulfireLampItem extends Item
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.02f * (float) Math.min(3, Math.max(1, (temp - ColdSweatConfig.getInstance().getMaxTempHabitable()))));
+                    addFuel(stack, -0.02f * (float) MathHelperCS.clamp(temp - ColdSweatConfig.getInstance().getMaxTempHabitable(), 1, 3));
                 }
-            }
 
-            // Give effect to nearby players
-            AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
-            worldIn.getEntitiesInAABBexcluding(entityIn, bb, e -> e instanceof PlayerEntity).forEach(e ->
-            {
-                PlayerTemp.addModifier((PlayerEntity) e, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                e.getPersistentData().putInt("soulLampTimeout", 2);
-            });
+                AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
+                worldIn.getEntitiesInAABBexcluding(entityIn, bb, e -> e instanceof PlayerEntity).forEach(e ->
+                {
+                    PlayerTemp.addModifier((PlayerEntity) e, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                    e.getPersistentData().putInt("soulLampTimeout", 2);
+                });
+            }
 
             // Handle state changes & sounds
             if (stack.getOrCreateTag().getInt("stateChangeTimer") > 0)
@@ -88,7 +87,9 @@ public class SoulfireLampItem extends Item
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);
                     player.world.playMovingSound(null, player, ModSounds.SOUL_LAMP_OFF, SoundCategory.PLAYERS, (float) Math.random() / 5f + 0.9f, 2F);
-                    setFuel(stack, 0);
+
+                    if (getFuel(stack) < 0.5)
+                        setFuel(stack, 0);
 
                     // In case the player is on a server
                     if (player instanceof ServerPlayerEntity)
@@ -104,7 +105,7 @@ public class SoulfireLampItem extends Item
     }
     private void addFuel(ItemStack stack, float fuel)
     {
-        stack.getOrCreateTag().putFloat("fuel", stack.getOrCreateTag().getFloat("fuel") + fuel);
+        setFuel(stack, getFuel(stack) + fuel);
     }
     private float getFuel(ItemStack stack)
     {
