@@ -45,12 +45,12 @@ public class SoulfireLampItem extends Item
             }
 
             if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-            temp > ConfigCache.getInstance().maxTemp && !(player.isCreative() || player.isSpectator()))
+            temp > ConfigCache.getInstance().maxTemp)
             {
                 if (getFuel(stack) > 0)
                 {
                     // Drain fuel
-                    if (player.ticksExisted % 10 == 0)
+                    if (player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
                         addFuel(stack, -0.02f * (float) MathHelperCS.clamp(temp - ConfigCache.getInstance().maxTemp, 1, 3));
 
                     // Give effect to nearby players
@@ -70,9 +70,10 @@ public class SoulfireLampItem extends Item
                 stack.getOrCreateTag().putInt("stateChangeTimer", stack.getOrCreateTag().getInt("stateChangeTimer") - 1);
             }
 
-            if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max)
+            if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max &&
+            (isSelected || player.getHeldItemOffhand() == stack))
             {
-                if (stack.getOrCreateTag().getInt("stateChangeTimer") == 0 && !stack.getOrCreateTag().getBoolean("isOn"))
+                if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", true);
@@ -85,7 +86,7 @@ public class SoulfireLampItem extends Item
             }
             else
             {
-                if (stack.getOrCreateTag().getInt("stateChangeTimer") == 0 && stack.getOrCreateTag().getBoolean("isOn"))
+                if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && stack.getOrCreateTag().getBoolean("isOn"))
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);

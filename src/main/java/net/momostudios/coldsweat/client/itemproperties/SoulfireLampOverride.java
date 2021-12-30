@@ -26,14 +26,7 @@ public class SoulfireLampOverride implements IItemPropertyGetter
     @Override
     public float call(ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity)
     {
-        if (world == null && Minecraft.getInstance().player != null)
-            world = Minecraft.getInstance().player.worldClient;
-
-        double max = MathHelperCS.convertUnits(ConfigCache.getInstance().maxTemp, Units.MC, ClientSettingsConfig.getInstance().celsius() ? Units.C : Units.F, true);
-        double min = MathHelperCS.convertUnits(ConfigCache.getInstance().minTemp, Units.MC, ClientSettingsConfig.getInstance().celsius() ? Units.C : Units.F, true);
-
-        if (stack.getOrCreateTag().getInt("fuel") > 0 && world != null && world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-        (!(entity instanceof PlayerEntity) || -2.5 * (-AmbientGaugeDisplay.clientTemp - 0.5 * (-min - max) -0.4 * max) > max))
+        if (stack.getOrCreateTag().getBoolean("isOn"))
         {
             return stack.getOrCreateTag().getInt("fuel") > 43 ? 1 :
                    stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 3;
