@@ -1,18 +1,15 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.config.WorldTemperatureConfig;
 import net.momostudios.coldsweat.core.util.WorldInfo;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
@@ -22,41 +19,47 @@ public class BiomeTempModifier extends TempModifier
         addArgument("value", 0d);
     }
 
-    @java.lang.Override
+    @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
-        if (player.ticksExisted % 5 == 0)
+        if (player.world.getGameTime() % 5 == 0)
         {
             double worldTemp = 0;
             for (BlockPos blockPos : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
             {
                 Biome biome = player.world.getBiome(blockPos);
-                worldTemp += biome.getTemperature(blockPos) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation(), player);
+                worldTemp += biome.getTemperature(blockPos) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation());
 
                 // Should temperature be overridden by config
-                Override biomeOverride = biomeOverride(biome.getRegistryName(), player);
-                Override dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation(), player);
+                TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
+                TempOverride dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation());
 
-                if (dimensionOverride.override) return dimensionOverride.value;
-                if (biomeOverride.override) return biomeOverride.value;
+                if (dimensionOverride.override)
+                {
+                    setArgument("value", dimensionOverride.value);
+                    return dimensionOverride.value;
+                }
+                if (biomeOverride.override)
+                {
+                    setArgument("value", biomeOverride.value);
+                    return biomeOverride.value;
+                }
             }
             setArgument("value", temp.get() + (worldTemp / 200));
         }
         return (double) getArgument("value");
     }
 
-    protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID, PlayerEntity player)
+    protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
     {
         double offset = 0;
-        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.biomeOffsets() :
-                ConfigCache.getInstance().worldOptionsReference.get("biome_offsets")))
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("biome_offsets"))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
                 offset += Double.parseDouble(value.get(1));
         }
 
-        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.dimensionOffsets() :
-                ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets")))
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets"))
         {
             if (new ResourceLocation(value.get(0)).equals(dimensionID))
                 offset += Double.parseDouble(value.get(1));
@@ -64,34 +67,32 @@ public class BiomeTempModifier extends TempModifier
         return offset;
     }
 
-    protected Override biomeOverride(ResourceLocation biomeID, PlayerEntity player)
+    protected TempOverride biomeOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.biomeTemperatures() :
-                ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures")))
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures"))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return new Override(true, Double.parseDouble(value.get(1)));
+                return new TempOverride(true, Double.parseDouble(value.get(1)));
         }
-        return new Override(false, 0.0d);
+        return new TempOverride(false, 0.0d);
     }
 
-    protected Override dimensionOverride(ResourceLocation biomeID, PlayerEntity player)
+    protected TempOverride dimensionOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : (player instanceof ServerPlayerEntity ? WorldTemperatureConfig.INSTANCE.dimensionTemperatures() :
-                ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures")))
+        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_temperatures"))
         {
             if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return new Override(true, Double.parseDouble(value.get(1)));
+                return new TempOverride(true, Double.parseDouble(value.get(1)));
         }
-        return new Override(false, 0.0d);
+        return new TempOverride(false, 0.0d);
     }
 
-    private static class Override
+    private static class TempOverride
     {
         public boolean override;
         public double value;
 
-        public Override(boolean override, double value)
+        public TempOverride(boolean override, double value)
         {
             this.override = override;
             this.value = value;
