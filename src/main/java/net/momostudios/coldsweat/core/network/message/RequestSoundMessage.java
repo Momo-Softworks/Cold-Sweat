@@ -44,5 +44,6 @@ public class RequestSoundMessage
                 }
             }
         });
+        context.setPacketHandled(true);
     }
 }

@@ -41,5 +41,6 @@ public class ClientConfigAskMessage
 
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin));
         });
+        context.setPacketHandled(true);
     }
 }

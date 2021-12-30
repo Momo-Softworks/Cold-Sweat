@@ -44,5 +44,6 @@ public class ClientConfigSendMessage
 
             ConfigCache.setInstance(message.configCache);
         });
+        context.setPacketHandled(true);
     }
 }

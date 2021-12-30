@@ -80,5 +80,6 @@ public class ClientConfigRecieveMessage
                 }
             }
         });
+        context.setPacketHandled(true);
     }
 }
