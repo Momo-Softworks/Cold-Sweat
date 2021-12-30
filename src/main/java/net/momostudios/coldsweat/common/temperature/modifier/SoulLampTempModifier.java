@@ -20,8 +20,8 @@ public class SoulLampTempModifier extends TempModifier
     {
         player.getPersistentData().putDouble("preLampTemp", temp.get());
 
-        float max = (float) ConfigCache.getInstance().maxTemp;
-        float min = (float) ConfigCache.getInstance().minTemp;
+        double max = ConfigCache.getInstance().maxTemp;
+        double min = ConfigCache.getInstance().minTemp;
 
         if (holdingFueledLamp(player) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp.get() > max)
         {
@@ -45,7 +45,8 @@ public class SoulLampTempModifier extends TempModifier
                 }
             }
         }
-        return (min + max) / 2.0f + (temp.get() - max) * 0.4f;
+        double mid = (max + min) / 2;
+        return mid + (temp.get() - mid) * 0.4;
     }
 
     private double totalPlayerMotion(PlayerEntity player)
