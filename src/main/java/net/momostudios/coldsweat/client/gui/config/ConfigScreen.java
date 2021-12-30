@@ -67,15 +67,18 @@ public class ConfigScreen
 
     public static void saveConfig(ConfigCache configCache)
     {
-        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.hasPermissionLevel(2))
+        if (Minecraft.getInstance().player != null)
         {
-            if (!mc.isSingleplayer())
+            if (Minecraft.getInstance().player.hasPermissionLevel(2))
             {
-                ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
-            }
-            else
-            {
-                ColdSweatConfig.getInstance().writeValues(configCache);
+                if (!mc.isSingleplayer())
+                {
+                    ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
+                }
+                else
+                {
+                    ColdSweatConfig.getInstance().writeValues(configCache);
+                }
             }
         }
         else

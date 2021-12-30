@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemStack;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 import javax.annotation.Nullable;
@@ -17,9 +18,9 @@ public class ThermometerOverride implements IItemPropertyGetter
     public float call(ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity)
     {
         PlayerEntity player = Minecraft.getInstance().player;
-        ColdSweatConfig config = ColdSweatConfig.getInstance();
-        float minTemp = (float) config.getMinTempHabitable();
-        float maxTemp = (float) config.getMaxTempHabitable();
+        ConfigCache config = ConfigCache.getInstance();
+        float minTemp = (float) config.minTemp;
+        float maxTemp = (float) config.maxTemp;
 
         float ambientTemp = (float) PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
 

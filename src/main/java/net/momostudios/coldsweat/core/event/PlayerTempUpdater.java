@@ -29,16 +29,12 @@ public class PlayerTempUpdater
             /*
              * Runs the calculate() method for every TempModifier on the player
              */
-            List<TempModifier> modList = PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT);
-            PlayerTemp.setTemperature(player, new Temperature().with(modList, player), PlayerTemp.Types.AMBIENT);
-
+            double ambientTemp = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT), player).get();
             double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
-            double ambientTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
             ConfigCache config = ConfigCache.getInstance();
-            if (!player.getEntityWorld().isRemote())
-            {
-                config.writeValues(ColdSweatConfig.getInstance());
-            }
+
+            PlayerTemp.setTemperature(player, new Temperature(ambientTemp), PlayerTemp.Types.AMBIENT);
+
             double maxTemp = config.maxTemp;
             double minTemp = config.minTemp;
 
@@ -70,24 +66,24 @@ public class PlayerTempUpdater
 
             //Calculates the player's temperature
             PlayerTemp.setTemperature
-                    (
-                            player,
-                            temp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
-                            PlayerTemp.Types.BODY
-                    );
+            (
+                player,
+                temp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
+                PlayerTemp.Types.BODY
+            );
             PlayerTemp.setTemperature
-                    (
-                            player,
-                            new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player),
-                            PlayerTemp.Types.BASE
-                    );
+            (
+                player,
+                new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player),
+                PlayerTemp.Types.BASE
+            );
             PlayerTemp.setTemperature
-                    (
-                            player,
-                            PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player).add(
-                                    PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player)),
-                            PlayerTemp.Types.COMPOSITE
-                    );
+            (
+                player,
+                PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player).add(
+                        PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player)),
+                PlayerTemp.Types.COMPOSITE
+            );
 
             //Ensure a maximum and minimum cap of 150 or -150 for body temperature (does not include base offset)
             if (PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get() > 150)
@@ -115,5 +111,12 @@ public class PlayerTempUpdater
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void worldTickEvent(TickEvent.WorldTickEvent event)
+    {
+        if (!event.world.isRemote && event.world.getGameTime() % 20 == 0)
+            ConfigCache.getInstance().writeValues(ColdSweatConfig.getInstance());
     }
 }

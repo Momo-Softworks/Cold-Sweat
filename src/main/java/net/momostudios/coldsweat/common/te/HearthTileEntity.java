@@ -27,6 +27,7 @@ import net.momostudios.coldsweat.common.block.HearthBlock;
 import net.momostudios.coldsweat.common.container.HearthContainer;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import net.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
@@ -175,7 +176,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                 if (world != null && !world.isRemote)
                 {
-                    ColdSweatConfig config = ColdSweatConfig.getInstance();
+                    ConfigCache config = ConfigCache.getInstance();
                     for (PlayerEntity player : affectedPlayers)
                     {
                         if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
@@ -184,11 +185,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
                         double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") : playerTemp.get();
 
-                        if ((temp < config.getMinTempHabitable() && this.getHotFuel() > 0))
+                        if ((temp < config.maxTemp && this.getHotFuel() > 0))
                         {
                             shouldUseHotFuel = true;
                         }
-                        if (temp > config.getMaxTempHabitable() && this.getColdFuel() > 0)
+                        if (temp > config.minTemp && this.getColdFuel() > 0)
                         {
                             shouldUseColdFuel = true;
                         }
@@ -224,18 +225,15 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Drain fuel
-        if (!world.isRemote)
+        if (this.ticksExisted % 40 == 0)
         {
-            if (this.ticksExisted % 40 == 0)
+            if (this.getColdFuel() > 0 && shouldUseColdFuel)
             {
-                if (this.getColdFuel() > 0 && shouldUseColdFuel)
-                {
-                    this.setColdFuel(this.getColdFuel() - 1);
-                }
-                if (this.getHotFuel() > 0 && shouldUseHotFuel)
-                {
-                    this.setHotFuel(this.getHotFuel() - 1);
-                }
+                this.setColdFuel(this.getColdFuel() - 1);
+            }
+            if (this.getHotFuel() > 0 && shouldUseHotFuel)
+            {
+                this.setHotFuel(this.getHotFuel() - 1);
             }
         }
 

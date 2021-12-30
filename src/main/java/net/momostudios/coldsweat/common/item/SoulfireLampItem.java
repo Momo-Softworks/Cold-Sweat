@@ -32,7 +32,6 @@ public class SoulfireLampItem extends Item
         if (entityIn instanceof PlayerEntity && !worldIn.isRemote)
         {
             PlayerEntity player = (PlayerEntity) entityIn;
-            double min = ConfigCache.getInstance().minTemp;
             double max = ConfigCache.getInstance().maxTemp;
             double temp = player.getPersistentData().getDouble("preLampTemp");
 
@@ -45,11 +44,11 @@ public class SoulfireLampItem extends Item
 
             // Drain fuel
             if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-            temp > ColdSweatConfig.getInstance().getMaxTempHabitable() && player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
+            temp > ConfigCache.getInstance().maxTemp && player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
             {
                 if (getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.02f * (float) MathHelperCS.clamp(temp - ColdSweatConfig.getInstance().getMaxTempHabitable(), 1, 3));
+                    addFuel(stack, -0.02f * (float) MathHelperCS.clamp(temp - ConfigCache.getInstance().maxTemp, 1, 3));
                 }
 
                 AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
@@ -66,8 +65,7 @@ public class SoulfireLampItem extends Item
                 stack.getOrCreateTag().putInt("stateChangeTimer", stack.getOrCreateTag().getInt("stateChangeTimer") - 1);
             }
 
-            if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-                    -2.5 * (-PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get() - 0.5 * (-min - max) -0.4 * max) > max)
+            if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max)
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") == 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {

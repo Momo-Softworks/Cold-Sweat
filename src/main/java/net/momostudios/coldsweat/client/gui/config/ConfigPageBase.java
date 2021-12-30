@@ -25,7 +25,6 @@ public abstract class ConfigPageBase extends Screen
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
-    private static final ColdSweatConfig CMI = ColdSweatConfig.getInstance();
     public static Minecraft mc = Minecraft.getInstance();
 
     ResourceLocation divider = new ResourceLocation("cold_sweat:textures/gui/screen/configs/style_divider.png");
@@ -125,11 +124,5 @@ public abstract class ConfigPageBase extends Screen
     {
         this.onClose();
         Minecraft.getInstance().displayGuiScreen(this.parentScreen);
-    }
-
-    @Override
-    public void onClose()
-    {
-        CMI.save();
     }
 }

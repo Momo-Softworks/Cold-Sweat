@@ -14,6 +14,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
@@ -47,7 +48,7 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ColdSweatConfig.getInstance().getRateMultiplier()), PlayerTemp.Types.BODY, true);
+                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate), PlayerTemp.Types.BODY, true);
             }
         }
     }

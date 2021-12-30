@@ -8,6 +8,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.HandSide;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 import net.momostudios.coldsweat.core.util.PlayerHelper;
 
@@ -19,11 +20,10 @@ public class SoulLampTempModifier extends TempModifier
     {
         player.getPersistentData().putDouble("preLampTemp", temp.get());
 
-        float max = (float) ColdSweatConfig.getInstance().getMaxTempHabitable();
-        float min = (float) ColdSweatConfig.getInstance().getMinTempHabitable();
+        float max = (float) ConfigCache.getInstance().maxTemp;
+        float min = (float) ConfigCache.getInstance().minTemp;
 
-        if (holdingFueledLamp(player) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-                temp.get() > ColdSweatConfig.getInstance().getMaxTempHabitable())
+        if (holdingFueledLamp(player) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp.get() > max)
         {
             if (!player.world.isRemote || (player != Minecraft.getInstance().player || Minecraft.getInstance().gameSettings.getPointOfView() != PointOfView.FIRST_PERSON))
             {

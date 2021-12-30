@@ -36,6 +36,7 @@ public class ClientConfigAskMessage
         {
             ConfigCache cache = new ConfigCache();
             cache.writeValues(ColdSweatConfig.getInstance());
+            cache.worldOptionsReference.putAll(WorldTemperatureConfig.INSTANCE.getConfigMap());
             cache.itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin));
