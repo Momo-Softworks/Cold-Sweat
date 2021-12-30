@@ -199,7 +199,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Input fuel types
-        if (!world.isRemote() && !getFuelItem(this.getItemInSlot(0)).isEmpty())
+        if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
         {
             ItemStack fuel = this.getItemInSlot(0);
             int amount = (int) getFuelItem(this.getItemInSlot(0)).get(1);
