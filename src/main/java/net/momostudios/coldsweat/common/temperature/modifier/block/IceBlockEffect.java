@@ -15,10 +15,10 @@ public class IceBlockEffect extends BlockEffect
         if (hasBlock(state))
         {
             double temp =
-                    state.getBlock() == Blocks.ICE ? -0.05 :
-                    state.getBlock() == Blocks.PACKED_ICE ? -0.1 :
-                    state.getBlock() == Blocks.BLUE_ICE ? -0.2 : 0;
-            return MathHelperCS.interpolate(temp, 0, distance, 7);
+                    state.getBlock() == Blocks.ICE ? 0.4 :
+                    state.getBlock() == Blocks.PACKED_ICE ? 0.6 :
+                    state.getBlock() == Blocks.BLUE_ICE ? 0.8 : 0;
+            return -MathHelperCS.interpolate(temp, 0, distance, 1.5);
         }
         return 0;
     }
