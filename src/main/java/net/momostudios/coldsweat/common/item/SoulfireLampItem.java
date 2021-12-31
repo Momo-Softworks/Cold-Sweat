@@ -1,6 +1,8 @@
 package net.momostudios.coldsweat.common.item;
 
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -10,13 +12,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.common.temperature.modifier.SoulLampTempModifier;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.momostudios.coldsweat.core.network.message.RequestSoundMessage;
+import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.PlayerHelper;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
 import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
 
@@ -44,8 +44,7 @@ public class SoulfireLampItem extends Item
                 setFuel(stack, 64);
             }
 
-            if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") &&
-            temp > ConfigCache.getInstance().maxTemp)
+            if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max)
             {
                 if (getFuel(stack) > 0)
                 {
@@ -77,11 +76,12 @@ public class SoulfireLampItem extends Item
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", true);
-                    player.world.playMovingSound(null, player, ModSounds.SOUL_LAMP_ON, SoundCategory.PLAYERS, (float) Math.random() / 5f + 0.9f, 2F);
 
                     // In case the player is on a server
-                    if (player instanceof ServerPlayerEntity)
-                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new RequestSoundMessage(1));
+                    if (!worldIn.isRemote)
+                    {
+                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(1, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
+                    }
                 }
             }
             else
@@ -90,14 +90,15 @@ public class SoulfireLampItem extends Item
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);
-                    player.world.playMovingSound(null, player, ModSounds.SOUL_LAMP_OFF, SoundCategory.PLAYERS, (float) Math.random() / 5f + 0.9f, 2F);
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
                     // In case the player is on a server
-                    if (player instanceof ServerPlayerEntity)
-                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new RequestSoundMessage(2));
+                    if (!worldIn.isRemote)
+                    {
+                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(2, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
+                    }
                 }
             }
         }
