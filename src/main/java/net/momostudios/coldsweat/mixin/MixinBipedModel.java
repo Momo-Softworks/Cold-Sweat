@@ -35,7 +35,7 @@ public class MixinBipedModel
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT);
         float armRot = MathHelperCS.toRadians(p_241654_1_.getPersistentData().getFloat("rightArmRot"));
-        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
+        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
         float rightArmRot = armRot + rotOffset;
 
         switch(this.rightArmPose)
