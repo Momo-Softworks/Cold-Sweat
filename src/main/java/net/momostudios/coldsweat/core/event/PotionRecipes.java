@@ -21,7 +21,7 @@ public class PotionRecipes
         event.enqueueWork(() ->
         {
             ItemStack awkward = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTION), Potions.AWKWARD);
-            ItemStack packedIce = new ItemStack(Items.PACKED_ICE);
+            ItemStack packedIce = new ItemStack(Items.PRISMARINE_CRYSTALS);
             ItemStack iceResPotion = PotionUtils.addPotionToItemStack(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get());
             BrewingRecipeRegistry.addRecipe(Ingredient.fromStacks(awkward), Ingredient.fromStacks(packedIce), iceResPotion);
         });
