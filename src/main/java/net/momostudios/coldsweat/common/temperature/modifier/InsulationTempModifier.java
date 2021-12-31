@@ -21,7 +21,7 @@ public class InsulationTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
-        return temp.get() / Math.max(1d, (int) getArgument("amount") / 15d);
+        return temp.get() / Math.max(1d, (int) getArgument("amount") / 10d);
     }
 
     public String getID()
