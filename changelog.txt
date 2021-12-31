@@ -149,7 +149,6 @@ Release 2.1:
 - New Item: Soulfire Lamp
     - Cools the player down when in the Nether (and nearby players, too!)
     - Requires Warped or Crimson stems as fuel (will be changed to a custom item in the future)
-    - Has cool sounds for when it is lit or extinguished
 - Re-introduced the grace period from pre-2.0 versions
     - The player will be given the grace effect upon respawning or entering the world for the first time
     - "Grace" is a new potion effect that replaces Tolerance (which went unused until now!)
@@ -168,8 +167,11 @@ Release 2.1:
         - The Hearth will not use any fuel if there are no players in the area
         - If the temperature in the area is habitable, the Hearth will not use any fuel
         - It now must have over 3/4 of an item's fuel value missing to consume fuel
+    - Now plays a sound when it runs out of fuel
     - The Hearth's code is now up to 800x more efficient (~20,000-40,000ms -> ~50-200ms of lag over 60 seconds)
+- Made the Overworld slightly warmer by default (requires config reset)
 - Sleeping through the night now brings your temperature closer to 0 (divides it by 4)
+- Ice Resistance potions are now brewed with Prismarine Cystals
 - Added new sounds for when the player is freezing
 - Active nether portals now give off heat in the overworld
 - The ambient temperature gauge now smoothly transitions to new temperatures
@@ -189,15 +191,16 @@ Release 2.1:
 - Added Portuguese translation by @Joymachs and @Vellar on our Discord server
 
 Fixes:
-- Fixed crash with Waterskins in the player's hotbar
+- Fixed a crash with Waterskins in the player's hotbar
 - Fixed incorrect math for converting temperatures to/from Celsius
+- Fixed Icebox and Boiler not working properly with Hoppers
 - Fixed Ice Resistance Potion recipe not showing in JEI
 - Fixed an issue that caused the player's temperature to sometimes not be saved properly upon leaving the world
-- Fixed a bug that prevented the Hearth from spreading through some non-solid blocks
+- Fixed a few bugs that made the Hearth have strange spreading behavior
 - Fixed Icebox and Soul Campfire not cooling the area around them
-- Fixed multiple bugs with the Hearth that would cause it to not detect ceilings or solid blocks properly
 - Fixed the /temperature command sending an incorrect message when setting another player's temperature
 - Fixed Hearth spawning too many particles in small spaces
+- Fixed temperature configs not working properly on servers
 
 Technical Changes:
 - BlockEffects and TempModifiers are now stored in a map instead of a list
