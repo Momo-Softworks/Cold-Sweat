@@ -288,7 +288,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     if (this.ticksExisted % 5 == 0)
                         world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
                 }
-                else if (Math.random() < 0.008)
+                else if (Math.random() < 0.016)
                 {
                     double xr = Math.random();
                     double yr = Math.random();
