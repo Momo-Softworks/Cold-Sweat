@@ -27,11 +27,11 @@ public class TimeTempModifier extends TempModifier
                 if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
                         BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                 {
-                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 1;
+                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
                 }
                 else
                 {
-                    timeTemp += (Math.cos(world.getDayTime() / 3819.7186342) / 4d) - 0.1;
+                    timeTemp += (Math.sin(world.getDayTime() / 3819.7186342) / 4d) - 0.125;
                 }
             }
 
