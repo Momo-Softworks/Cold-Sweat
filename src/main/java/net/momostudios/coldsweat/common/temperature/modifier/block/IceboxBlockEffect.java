@@ -15,8 +15,7 @@ public class IceboxBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && ((IceboxTileEntity) player.world.getTileEntity(pos)).getFuel() > 0)
         {
-            double temp = -0.04;
-            return Math.min(0, temp * (9 - distance));
+            return MathHelperCS.interpolate(-0.27, 0, distance, 7);
         }
         return 0;
     }

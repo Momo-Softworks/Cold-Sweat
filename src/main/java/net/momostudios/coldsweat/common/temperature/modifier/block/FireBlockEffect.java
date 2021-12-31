@@ -14,8 +14,7 @@ public class FireBlockEffect extends BlockEffect
     {
         if (hasBlock(state))
         {
-            double temp = 0.01;
-            return Math.max(0, temp * (9 - distance));
+            return MathHelperCS.interpolate(0.2, 0, distance, 7);
         }
         return 0;
     }
@@ -28,6 +27,6 @@ public class FireBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertUnits(40, Units.F, Units.MC, false);
+        return MathHelperCS.convertUnits(32, Units.F, Units.MC, false);
     }
 }

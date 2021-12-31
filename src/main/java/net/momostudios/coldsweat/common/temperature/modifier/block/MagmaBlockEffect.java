@@ -12,7 +12,7 @@ public class MagmaBlockEffect extends BlockEffect
     @Override
     public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
     {
-        return 0.25 / Math.max(distance, 1);
+        return MathHelperCS.interpolate(0.25, 0, distance, 7);
     }
 
     @Override

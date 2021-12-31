@@ -41,12 +41,6 @@ public class MathHelperCS
         }
     }
 
-    public static boolean isEvenPosition(BlockPos pos, boolean xOffset, boolean yOffset, boolean zOffset) {
-        return (xOffset == (pos.getX() % 2 == 0)) &&
-               (yOffset == (pos.getY() % 2 == 0)) &&
-               (zOffset == (pos.getZ() % 2 == 0));
-    }
-
     public static float toRadians(float input) {
         return input * (float) (Math.PI / 180);
     }
@@ -61,5 +55,9 @@ public class MathHelperCS
 
     public static boolean isBetween(Number value, Number min, Number max) {
         return value.doubleValue() >= min.doubleValue() && value.doubleValue() <= max.doubleValue();
+    }
+
+    public static double interpolate(double pointA, double pointB, double factor, double spread) {
+        return ((1 / spread) * clamp(factor, 0, spread)) * (pointB - pointA) + pointA;
     }
 }

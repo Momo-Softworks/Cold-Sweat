@@ -14,7 +14,7 @@ public class BoilerBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(BoilerBlock.LIT))
         {
-            return MathHelperCS.convertUnits(10, Units.F, Units.MC, false) / distance;
+            return MathHelperCS.interpolate(0.27, 0, distance, 7);
         }
         return 0;
     }
