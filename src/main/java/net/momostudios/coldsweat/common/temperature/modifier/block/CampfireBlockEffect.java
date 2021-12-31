@@ -15,8 +15,7 @@ public class CampfireBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(CampfireBlock.LIT))
         {
-            double temp = 0.03;
-            return Math.max(0, temp * (9 - distance));
+            return MathHelperCS.interpolate(0.27, 0, distance, 7);
         }
         return 0;
     }

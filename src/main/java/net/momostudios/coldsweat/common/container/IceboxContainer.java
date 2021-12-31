@@ -6,12 +6,14 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 import java.util.Objects;
@@ -27,18 +29,7 @@ public class IceboxContainer extends Container
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
 
         // Tile Entity
-        for (int in = 0; in < 9; in++)
-        {
-            this.addSlot(new Slot(te, in, 8 + in * 18, 35)
-            {
-                @Override
-                public boolean isItemValid(ItemStack stack) {
-                    return stack.getItem() instanceof FilledWaterskinItem;
-                }
-            });
-        }
-
-        this.addSlot(new Slot(te, 9, 80, 62)
+        this.addSlot(new Slot(te, 0, 80, 62)
         {
             @Override
             public boolean isItemValid(ItemStack stack)
@@ -46,6 +37,17 @@ public class IceboxContainer extends Container
                 return !te.getFuelItem(stack).isEmpty();
             }
         });
+
+        for (int in = 1; in < 10; in++)
+        {
+            this.addSlot(new Slot(te, in, -10 + in * 18, 35)
+            {
+                @Override
+                public boolean isItemValid(ItemStack stack) {
+                    return stack.getItem() instanceof FilledWaterskinItem;
+                }
+            });
+        }
 
         // Main player inventory
         for (int row = 0; row < 3; row++)
@@ -97,11 +99,12 @@ public class IceboxContainer extends Container
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
+
         if (slot != null && slot.getHasStack())
         {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
-            if (index <= 9)
+            if (MathHelperCS.isBetween(index, 0, 9))
             {
                 if (!this.mergeItemStack(itemstack1, 10, 46, true))
                 {
@@ -110,18 +113,18 @@ public class IceboxContainer extends Container
 
                 slot.onSlotChange(itemstack1, itemstack);
             }
-            else if (index > 9)
+            else
             {
                 if (itemstack.getItem() == ModItems.FILLED_WATERSKIN)
                 {
-                    if (!this.mergeItemStack(itemstack1, 0, 9, false))
+                    if (!this.mergeItemStack(itemstack1, 1, 10, false))
                     {
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (!this.te.getFuelItem(itemstack).isEmpty())
                 {
-                    if (!this.mergeItemStack(itemstack1, 9, 10, false))
+                    if (!this.mergeItemStack(itemstack1, 0, 1, false))
                     {
                         return ItemStack.EMPTY;
                     }
@@ -135,11 +138,6 @@ public class IceboxContainer extends Container
             else
             {
                 slot.onSlotChanged();
-            }
-
-            if (itemstack1.getCount() == itemstack.getCount())
-            {
-                return ItemStack.EMPTY;
             }
 
             slot.onTake(playerIn, itemstack1);

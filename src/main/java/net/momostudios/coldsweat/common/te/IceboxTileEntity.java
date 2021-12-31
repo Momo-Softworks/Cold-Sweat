@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.common.te;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
@@ -10,6 +11,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -22,13 +24,16 @@ import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class IceboxTileEntity extends LockableLootTileEntity implements ITickableTileEntity
+public class IceboxTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
 {
+    public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    public static int[] FUEL_SLOT = {0};
     public static int slots = 10;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
@@ -79,17 +84,19 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
             }
         }
 
-        if (!getFuelItem(this.getItemInSlot(9)).isEmpty())
+        if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
         {
-            ItemStack fuel = this.getItemInSlot(9);
-            int amount = (int) getFuelItem(this.getItemInSlot(9)).get(1);
+            List fuelItem = getFuelItem(this.getItemInSlot(0));
+
+            ItemStack fuel = (ItemStack) fuelItem.get(0);
+            int amount = (int) fuelItem.get(1);
             if (this.getFuel() <= Math.max(1000 - amount, 900))
             {
                 if (fuel.hasContainerItem())
                 {
-                    this.setItemInSlot(9, fuel.getContainerItem());
+                    this.setItemInSlot(0, fuel.getContainerItem());
                 }
-                else this.getItemInSlot(9).shrink(1);
+                else this.getItemInSlot(0).shrink(1);
                 this.setFuel(this.getFuel() + amount);
             }
         }
@@ -155,6 +162,36 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
     public void setFuel(int amount)
     {
         this.getTileData().putInt("fuel", Math.min(amount, 1000));
+    }
+
+    public int[] getSlotsForFace(Direction side)
+    {
+        if (side == Direction.DOWN)
+        {
+            return WATERSKIN_SLOTS;
+        }
+        else
+        {
+            return side == Direction.UP ? WATERSKIN_SLOTS : FUEL_SLOT;
+        }
+    }
+
+    @Override
+    public boolean canInsertItem(int index, ItemStack itemStackIn, @Nullable Direction direction)
+    {
+        return this.isItemValidForSlot(index, itemStackIn);
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, Direction direction)
+    {
+        return index != 0;
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack)
+    {
+        return index == 0 ? !getFuelItem(stack).isEmpty() : stack.getItem() == ModItems.FILLED_WATERSKIN;
     }
 
     @Override
