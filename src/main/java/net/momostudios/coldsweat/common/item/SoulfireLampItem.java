@@ -104,6 +104,12 @@ public class SoulfireLampItem extends Item
         }
     }
 
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
+    {
+        return slotChanged;
+    }
+
     private void setFuel(ItemStack stack, float fuel)
     {
         stack.getOrCreateTag().putFloat("fuel", fuel);

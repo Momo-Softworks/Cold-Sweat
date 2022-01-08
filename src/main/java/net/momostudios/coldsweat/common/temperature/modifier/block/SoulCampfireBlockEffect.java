@@ -5,8 +5,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
@@ -27,7 +25,7 @@ public class SoulCampfireBlockEffect extends BlockEffect
                     entity.getPersistentData().putBoolean("isInSoulFire", true);
             });
 
-            return MathHelperCS.interpolate(-0.2, 0, distance, 7);
+            return MathHelperCS.blend(-0.2, 0, distance, 0, 7);
         }
         return 0;
     }

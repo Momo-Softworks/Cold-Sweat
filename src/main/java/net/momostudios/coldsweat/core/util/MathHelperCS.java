@@ -57,7 +57,17 @@ public class MathHelperCS
         return value.doubleValue() >= min.doubleValue() && value.doubleValue() <= max.doubleValue();
     }
 
-    public static double interpolate(double pointA, double pointB, double factor, double spread) {
-        return ((1 / spread) * clamp(factor, 0, spread)) * (pointB - pointA) + pointA;
+    /**
+     * Returns a number between the two given values {@code pointA} and {@code pointB}, based on factor.<br>
+     * If {@code factor} = 0, returns {@code pointA}. If {@code factor} = {@code range}, returns {@code pointB}.<br>
+     * @param pointA The first value.
+     * @param pointB The second value.
+     * @param factor The "progress" between pointA and pointB.
+     * @param rangeMin The minimum of the range of values over which to interpolate.
+     * @param rangeMax The maximum of the range of values over which to interpolate.
+     * @return
+     */
+    public static double blend(double pointA, double pointB, double factor, double rangeMin, double rangeMax) {
+        return ((1 / (rangeMax - rangeMin)) * clamp(factor, rangeMin, rangeMax)) * (pointB - pointA) + pointA;
     }
 }
