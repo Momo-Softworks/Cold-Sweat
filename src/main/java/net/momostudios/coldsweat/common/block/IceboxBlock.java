@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -41,7 +42,7 @@ import java.util.Random;
 public class IceboxBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-
+    public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
     public static Properties getProperties()
     {
         return Properties
@@ -60,7 +61,7 @@ public class IceboxBlock extends Block
     public IceboxBlock(Properties properties)
     {
         super(IceboxBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(FROSTED, false));
     }
 
     @SuppressWarnings("deprecation")
@@ -127,7 +128,7 @@ public class IceboxBlock extends Block
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, FROSTED);
     }
 
     @Override
@@ -138,7 +139,7 @@ public class IceboxBlock extends Block
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
-        if (worldIn.getTileEntity(pos) != null && ((IceboxTileEntity) worldIn.getTileEntity(pos)).getFuel() > 0)
+        if (worldIn.getTileEntity(pos) != null && stateIn.get(FROSTED))
         {
             double d0 = (double)pos.getX() + 0.5D;
             double d1 = (double)pos.getY();

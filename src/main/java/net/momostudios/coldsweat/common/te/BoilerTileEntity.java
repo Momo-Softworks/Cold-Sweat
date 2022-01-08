@@ -11,11 +11,15 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.BoilerBlock;
@@ -36,6 +40,21 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public static int slots = 10;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
+    private int fuel;
+
+    protected final IIntArray fuelData = new IIntArray() {
+        public int get(int index) {
+            return fuel;
+        }
+
+        public void set(int index, int value) {
+            fuel = value;
+        }
+
+        public int size() {
+            return 1;
+        }
+    };
 
     public BoilerTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -67,86 +86,96 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
         this.ticksExisted++;
         this.ticksExisted %= 1000;
 
-        if (this.getFuel() > 0)
+        if (!this.world.isRemote)
         {
-            if (this.ticksExisted % 20 == 0)
+            if (this.getFuel() > 0)
             {
-                world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, true));
-                boolean hasItemStacks = false;
-                for (int i = 0; i < 10; i++) {
-                    if (this.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && this.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
-                    {
-                        hasItemStacks = true;
-                        this.getItemInSlot(i).getOrCreateTag().putInt("temperature", this.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
-                    }
-                }
-                if (hasItemStacks) this.setFuel(this.getFuel() - 1);
-            }
-        }
-        else
-        {
-            world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, false));
-        }
+                if (!world.getBlockState(pos).get(BoilerBlock.LIT))
+                    world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, true));
 
-        if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
-        {
-            List fuelItem = getFuelItem(this.getItemInSlot(0));
-
-            ItemStack fuel = (ItemStack) fuelItem.get(0);
-            int amount = (int) fuelItem.get(1);
-            if (this.getFuel() <= Math.max(1000 - amount, 900))
-            {
-                if (fuel.hasContainerItem())
+                if (this.ticksExisted % 20 == 0)
                 {
-                    this.setItemInSlot(0, fuel.getContainerItem());
+                    boolean hasItemStacks = false;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (this.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && this.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
+                        {
+                            hasItemStacks = true;
+                            this.getItemInSlot(i).getOrCreateTag().putInt("temperature", this.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
+                        }
+                    }
+                    if (hasItemStacks) this.setFuel(this.getFuel() - 1);
                 }
-                else this.getItemInSlot(0).shrink(1);
-                this.setFuel(this.getFuel() + amount);
+            }
+            else if (world.getBlockState(pos).get(BoilerBlock.LIT))
+            {
+                world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, false));
+            }
+
+            int itemFuel = getItemFuel(this.getItemInSlot(0));
+            if (itemFuel > 0)
+            {
+                ItemStack item = this.getItemInSlot(0);
+                if (this.getFuel() <= 1000 - itemFuel * 0.75)
+                {
+                    if (item.hasContainerItem())
+                    {
+                        this.setItemInSlot(0, item.getContainerItem());
+                    }
+                    else
+                    {
+                        this.getItemInSlot(0).shrink(1);
+                    }
+
+                    this.setFuel(this.getFuel() + itemFuel);
+                }
             }
         }
     }
 
-    public List getFuelItem(ItemStack item)
+    public int getItemFuel(ItemStack item)
     {
-        List returnList = new ArrayList();
-        for (Object iterator : new ItemSettingsConfig().boilerItems())
+        int fuel = 0;
+        for (List<String> testIndex : new ItemSettingsConfig().boilerItems())
         {
-            List<String> testIndex = (List<String>) iterator;
             String testItem = testIndex.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                returnList = Arrays.asList(item, Integer.parseInt(testIndex.get(1)));
+                fuel = Integer.parseInt(testIndex.get(1));
+                break;
             }
         }
-        return returnList;
+        return fuel;
     }
 
     public ItemStack getItemInSlot(int index)
     {
-        return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(null).getStackInSlot(index);
+        return getCap().map(c -> c.getStackInSlot(index)).orElse(ItemStack.EMPTY);
     }
 
     public void setItemInSlot(int index, ItemStack stack)
     {
-        this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability ->
+        getCap().ifPresent(capability ->
         {
-            if (stack != null && stack != capability.getStackInSlot(index))
-            {
-                capability.extractItem(index, capability.getStackInSlot(index).getCount(), false);
-            }
+            capability.getStackInSlot(index).shrink(capability.getStackInSlot(index).getCount());
             capability.insertItem(index, stack, false);
         });
     }
 
     public int getFuel()
     {
-        return this.getTileData().getInt("fuel");
+        return fuelData.get(0);
     }
 
     public void setFuel(int amount)
     {
-        this.getTileData().putInt("fuel", Math.min(amount, 1000));
+        fuelData.set(0, Math.min(amount, 1000));
+    }
+
+    public LazyOptional<IItemHandler> getCap()
+    {
+        return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
     }
 
     public int[] getSlotsForFace(Direction side)
@@ -164,19 +193,19 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, @Nullable Direction direction)
     {
-        return this.isItemValidForSlot(index, itemStackIn);
+        return index == 0 || getCap().map(h -> canInsertItem(index, itemStackIn, direction)).orElse(false);
     }
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, Direction direction)
     {
-        return index != 0;
+        return getItemFuel(stack) == 0;
     }
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {
-        return index == 0 ? !getFuelItem(stack).isEmpty() : stack.getItem() == ModItems.FILLED_WATERSKIN;
+        return true;
     }
 
     @Override
@@ -187,28 +216,24 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     @Override
     protected Container createMenu(int id, PlayerInventory player)
     {
-        return new BoilerContainer(id, player, this);
+        return new BoilerContainer(id, player, this, fuelData);
     }
 
     @Override
     public void read(BlockState state, CompoundNBT nbt)
     {
         super.read(state, nbt);
-        this.items = NonNullList.withSize(getSizeInventory(), ItemStack.EMPTY);
-        if (!this.checkLootAndRead(nbt))
-        {
-            ItemStackHelper.loadAllItems(nbt, this.items);
-        }
+        this.setFuel(nbt.getInt("fuel"));
+        this.items = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
+        ItemStackHelper.loadAllItems(nbt, this.items);
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound)
     {
         super.write(compound);
-        if (!this.checkLootAndWrite(compound))
-        {
-            ItemStackHelper.saveAllItems(compound, items);
-        }
+        compound.putInt("fuel", this.getFuel());
+        ItemStackHelper.saveAllItems(compound, items);
         return compound;
     }
 }

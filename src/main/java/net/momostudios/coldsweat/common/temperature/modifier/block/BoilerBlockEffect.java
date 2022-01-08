@@ -14,7 +14,7 @@ public class BoilerBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(BoilerBlock.LIT))
         {
-            return MathHelperCS.interpolate(0.27, 0, distance, 7);
+            return MathHelperCS.blend(0.27, 0, distance, 0, 7);
         }
         return 0;
     }

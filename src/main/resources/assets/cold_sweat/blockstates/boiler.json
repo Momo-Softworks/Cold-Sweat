@@ -20,6 +20,7 @@
       "model": "cold_sweat:block/boiler_off",
       "y": 270
     },
+
     "facing=north,lit=true":
     {
       "model": "cold_sweat:block/boiler_on"

@@ -6,9 +6,10 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.IntArray;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
@@ -22,22 +23,30 @@ public class IceboxContainer extends Container
 {
     public final IceboxTileEntity te;
     private final IWorldPosCallable canInteractWithCallable;
+    private IIntArray fuelData;
+
     public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te)
+    {
+        this(windowId, playerInv, te, new IntArray(1));
+    }
+
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te, IIntArray fuelData)
     {
         super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
+        this.fuelData = fuelData;
 
-        // Tile Entity
+        // Fuel slot
         this.addSlot(new Slot(te, 0, 80, 62)
         {
             @Override
-            public boolean isItemValid(ItemStack stack)
-            {
-                return !te.getFuelItem(stack).isEmpty();
+            public boolean isItemValid(ItemStack stack) {
+                return te.getItemFuel(stack) > 0;
             }
         });
 
+        // Waterskins
         for (int in = 1; in < 10; in++)
         {
             this.addSlot(new Slot(te, in, -10 + in * 18, 35)
@@ -63,6 +72,8 @@ public class IceboxContainer extends Container
         {
             this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
         }
+
+        this.trackIntArray(fuelData);
     }
 
     public IceboxContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
@@ -72,7 +83,7 @@ public class IceboxContainer extends Container
 
     public int getFuel()
     {
-        return te.getTileData().getInt("fuel");
+        return this.fuelData.get(0);
     }
 
 
@@ -119,16 +130,19 @@ public class IceboxContainer extends Container
                 {
                     if (!this.mergeItemStack(itemstack1, 1, 10, false))
                     {
+                        slot.onSlotChange(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (!this.te.getFuelItem(itemstack).isEmpty())
+                else if (this.te.getItemFuel(itemstack) > 0)
                 {
                     if (!this.mergeItemStack(itemstack1, 0, 1, false))
                     {
+                        slot.onSlotChange(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
+                return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty())

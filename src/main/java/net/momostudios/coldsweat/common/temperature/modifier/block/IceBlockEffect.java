@@ -18,7 +18,7 @@ public class IceBlockEffect extends BlockEffect
                     state.getBlock() == Blocks.ICE ? 0.4 :
                     state.getBlock() == Blocks.PACKED_ICE ? 0.6 :
                     state.getBlock() == Blocks.BLUE_ICE ? 0.8 : 0;
-            return -MathHelperCS.interpolate(temp, 0, distance, 1.5);
+            return -MathHelperCS.blend(temp, 0, distance, 0, 1.5);
         }
         return 0;
     }

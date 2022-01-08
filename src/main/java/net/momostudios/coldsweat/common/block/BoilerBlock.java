@@ -71,7 +71,7 @@ public class BoilerBlock extends Block
     public BoilerBlock(Properties properties)
     {
         super(BoilerBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(LIT, Boolean.valueOf(false)));
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(LIT, false));
     }
 
     @SuppressWarnings("deprecation")
@@ -151,9 +151,9 @@ public class BoilerBlock extends Block
     {
         if (stateIn.get(LIT))
         {
-            double d0 = (double)pos.getX() + 0.5D;
-            double d1 = (double)pos.getY();
-            double d2 = (double)pos.getZ() + 0.5D;
+            double d0 = pos.getX() + 0.5D;
+            double d1 = pos.getY();
+            double d2 = pos.getZ() + 0.5D;
             Direction direction = stateIn.get(FACING);
             Direction.Axis direction$axis = direction.getAxis();
             double d3 = 0.52D;

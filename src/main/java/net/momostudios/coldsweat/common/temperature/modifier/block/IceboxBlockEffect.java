@@ -4,7 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
-import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.Units;
 
@@ -13,9 +12,9 @@ public class IceboxBlockEffect extends BlockEffect
     @Override
     public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
     {
-        if (this.hasBlock(state) && ((IceboxTileEntity) player.world.getTileEntity(pos)).getFuel() > 0)
+        if (this.hasBlock(state) && state.get(IceboxBlock.FROSTED))
         {
-            return MathHelperCS.interpolate(-0.27, 0, distance, 7);
+            return MathHelperCS.blend(-0.27, 0, distance, 0, 7);
         }
         return 0;
     }

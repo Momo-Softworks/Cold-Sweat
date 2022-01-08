@@ -2,13 +2,14 @@ package net.momostudios.coldsweat.common.container;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.IntArray;
 import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.BoilerTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
@@ -16,28 +17,38 @@ import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
 public class BoilerContainer extends Container
 {
     public final BoilerTileEntity te;
     private final IWorldPosCallable canInteractWithCallable;
+    private IIntArray fuelData;
+
     public BoilerContainer(final int windowId, final PlayerInventory playerInv, final BoilerTileEntity te)
+    {
+        this(windowId, playerInv, te, new IntArray(1));
+    }
+
+    public BoilerContainer(final int windowId, final PlayerInventory playerInv, final BoilerTileEntity te, IIntArray fuelData)
     {
         super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
         this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
+        this.fuelData = fuelData;
 
-        // Tile Entity
+        // Fuel slot
         this.addSlot(new Slot(te, 0, 80, 62)
         {
             @Override
-            public boolean isItemValid(ItemStack stack)
-            {
-                return !te.getFuelItem(stack).isEmpty();
+            public boolean isItemValid(ItemStack stack) {
+                return te.getItemFuel(stack) > 0;
             }
         });
 
+        // Waterskins
         for (int in = 1; in < 10; in++)
         {
             this.addSlot(new Slot(te, in, -10 + in * 18, 35)
@@ -63,6 +74,8 @@ public class BoilerContainer extends Container
         {
             this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
         }
+
+        this.trackIntArray(fuelData);
     }
 
     public BoilerContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
@@ -72,7 +85,7 @@ public class BoilerContainer extends Container
 
     public int getFuel()
     {
-        return te.getTileData().getInt("fuel");
+        return this.fuelData.get(0);
     }
 
 
@@ -119,16 +132,19 @@ public class BoilerContainer extends Container
                 {
                     if (!this.mergeItemStack(itemstack1, 1, 10, false))
                     {
+                        slot.onSlotChange(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (!this.te.getFuelItem(itemstack).isEmpty())
+                else if (this.te.getItemFuel(itemstack) > 0)
                 {
                     if (!this.mergeItemStack(itemstack1, 0, 1, false))
                     {
+                        slot.onSlotChange(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
+                return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty())
