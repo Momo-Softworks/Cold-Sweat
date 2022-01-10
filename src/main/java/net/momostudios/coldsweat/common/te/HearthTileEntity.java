@@ -179,18 +179,21 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     ConfigCache config = ConfigCache.getInstance();
                     for (PlayerEntity player : affectedPlayers)
                     {
-                        if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
-                            player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
-
                         Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
-                        double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") : playerTemp.get();
+                        double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHe arthTemp") : playerTemp.get();
 
-                        if ((temp < config.maxTemp && this.getHotFuel() > 0))
+                        if ((temp < config.minTemp && this.getHotFuel() > 0))
                         {
+                            if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
+                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
+
                             shouldUseHotFuel = true;
                         }
-                        if (temp > config.minTemp && this.getColdFuel() > 0)
+                        if (temp > config.maxTemp && this.getColdFuel() > 0)
                         {
+                            if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
+                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
+
                             shouldUseColdFuel = true;
                         }
                     }
@@ -355,7 +358,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         this.getTileData().putInt("hot_fuel", Math.min(amount, MAX_FUEL));
 
-        if (this.getColdFuel() == 0 && this.getHotFuel() == 0 && prevFuel > 0)
+        if (amount == 0 && prevFuel > 0)
             world.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
     }
 
@@ -365,7 +368,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         this.getTileData().putInt("cold_fuel", Math.min(amount, MAX_FUEL));
 
-        if (this.getColdFuel() == 0 && this.getHotFuel() == 0 && prevFuel > 0)
+        if (amount == 0 && prevFuel > 0)
             world.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
     }
 
