@@ -1,7 +1,7 @@
 {
   "variants":
   {
-    "facing=northfrosted=false":
+    "facing=north,frosted=false":
     {
       "model": "cold_sweat:block/icebox"
     },
