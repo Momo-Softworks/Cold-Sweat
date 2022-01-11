@@ -46,7 +46,7 @@ public class WorldTemperatureConfig
             .defineList("Dimension Temperature Offsets", Arrays.asList(
                     Arrays.asList("minecraft:overworld", "0.2"),
                     Arrays.asList("minecraft:the_nether", "0.3"),
-                    Arrays.asList("minecraft:the_end", "-0.2")
+                    Arrays.asList("minecraft:the_end", "-0.1")
             ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
 
