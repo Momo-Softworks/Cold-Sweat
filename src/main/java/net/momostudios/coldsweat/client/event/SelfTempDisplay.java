@@ -38,7 +38,7 @@ public class SelfTempDisplay
             PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
 
             if (playerCap == null || entity.ticksExisted % 40 == 0)
-                playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(null);
+                playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
 
             int temp = (int) playerCap.get(PlayerTemp.Types.COMPOSITE);
 
