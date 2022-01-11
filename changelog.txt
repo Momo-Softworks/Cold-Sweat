@@ -147,36 +147,36 @@ Technical Changes:
 Release 2.1:
 - MASSIVE performance improvements (especially for the Hearth)!
 - New Item: Soulfire Lamp
-    - Cools the player down when in the Nether (and nearby players, too!)
+    - Cools you down when in the Nether (and nearby players, too!)
     - Requires Warped or Crimson stems as fuel (will be changed to a custom item in the future)
 - Re-introduced the grace period from pre-2.0 versions
-    - The player will be given the grace effect upon respawning or entering the world for the first time
+    - The grace period prevents temperature-related damage for a while
+    - Everyone is given the grace effect upon respawning or entering the world for the first time
     - "Grace" is a new potion effect that replaces Tolerance (which went unused until now!)
     - The length is configurable (default: 5 minutes)
     - It can also be disabled if you prefer
 - Water now cools you down
     - When you get out, it takes a bit of time to dry off/warm up
-    - In cold biomes, the effect is greater, so be careful!
-    - The speed at which you warm up depends on the ambient temperature
-- Changes to how weather affects the player:
+    - The effect is greater in cold biomes, so be careful!
+    - Dry off faster by standing somewhere hot
+- Changes to how weather affects players:
     - Snow no longer does anything (It doesn't really make sense)
-    - Rain makes the player wet, similar to how water does
+    - Rain makes you wet, similar to how water does
 - Hearth updates:
     - The Hearth now only consumes the necessary fuel to function
         - If it is hot, for example, it will only use cold fuel
-        - The Hearth will not use any fuel if there are no players in the area
-        - If the temperature in the area is habitable, the Hearth will not use any fuel
+        - The Hearth will only give insulation to players who need it (won't consume fuel otherwise)
         - It now must have over 3/4 of an item's fuel value missing to consume fuel
-    - Now plays a sound when it runs out of fuel
+    - Now plays a sound when it runs out of the needed fuel type
     - The Hearth's code is now up to 800x more efficient (~20,000-40,000ms -> ~50-200ms of lag over 60 seconds)
 - Made the Overworld slightly warmer by default (requires config reset)
 - Sleeping through the night now brings your temperature closer to 0 (divides it by 4)
 - Ice Resistance potions are now brewed with Prismarine Cystals
-- Added new sounds for when the player is freezing
-- Active nether portals now give off heat in the overworld
+- Added new sounds for freezing damage
+- Active nether portals now give off heat in the Overworld
 - The ambient temperature gauge now smoothly transitions to new temperatures
 - The /temperature command can no longer be used to set config settings
-- Limited the number of total blocks the Hearth can affect to 2000
+- Limited the number of total blocks the Hearth can affect to 4000
     - This is to prevent lag from tons of hearths
 - Leather armor now insulates based on what piece of armor it is (configurable)
     - i.e. a leather chestplate insulates more than a leather helmet
@@ -187,8 +187,9 @@ Release 2.1:
 - New textures for Boiler and Icebox fuel gauges
 - Compacted Boiler & Icebox GUIs
 
-- Added Polish translation by @Lifus_Crustus on our Discord server
-- Added Portuguese translation by @Joymachs and @Vellar on our Discord server
+- Added Polish translation thanks to @Lifus_Crustus on our Discord server
+- Added Portuguese translation thanks to @Joymachs and @Vellar on our Discord server
+- Updated Russian translation thanks to @Xemay on our Discord server
 
 Fixes:
 - Fixed a crash with Waterskins in the player's hotbar
@@ -234,7 +235,7 @@ Technical Changes:
         - Has two phases:
             - Pre: Called before getValue() is called (cancellable)
             - Post: Called after getValue() is called
-- Replaced all temperature unit conversion methods with on method: MathHelperCS.convertUnits()
+- Replaced all temperature unit conversion methods with one method: MathHelperCS.convertUnits()
 - The Hearth now uses the capability system instead of NBT
         - This should increase performance and prevent issues with the NBT data limit on some servers
 - "fuel_items.toml" config file changes:
@@ -246,6 +247,18 @@ Technical Changes:
 - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
 - Removed some defunct recipes that would throw errors in server consoles
 
+2.1.1
+- Changed the recipe of the Soulfire Lamp to require a golden nugget at the top
+- Revised the icons for all three potion effects (some more than others)
+- Icicles now form on the sides of the Icebox when it has fuel (to easily see if it's fueled without having to open it)
+- The end is now slightly warmer (it's still uninhabitable, but you can stay there a lot longer now)
+
+- Added Chinese translation courtesy of 6371peter on GitHub
+
+Fixes:
+- Fixed the Soulfire Lamp & Waterskins "bobbing" randomly when held in some cases
+- Fixed GUI-related crash that occurred in some rare scenarios
+- Fixed crash when attempting to shift-click invalid items into an Icebox or Boiler
+
 TO-DO
-- Added Italian translation courtesy of @SniperFoxy on our Discord server
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
