@@ -48,8 +48,7 @@ public class BlockTempModifier extends TempModifier
                         {
                             if (MathHelperCS.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
                             {
-                                totalTemp += be.getTemperature(player, state, blockpos,
-                                        Math.sqrt(player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5)));
+                                totalTemp += be.getTemperature(player, state, blockpos, MathHelperCS.getDistance(player, blockpos.add(0.5, 0.5, 0.5)));
                             }
                         }
                     } catch (Exception e) {}
