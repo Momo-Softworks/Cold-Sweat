@@ -14,4 +14,6 @@ public class ParticleTypesInit
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, ColdSweat.MOD_ID);
 
     public static final RegistryObject<BasicParticleType> HEARTH_AIR = PARTICLES.register("hearth_air", () -> new BasicParticleType(true));
+    public static final RegistryObject<BasicParticleType> STEAM = PARTICLES.register("steam", () -> new BasicParticleType(true));
+    public static final RegistryObject<BasicParticleType> MIST = PARTICLES.register("mist", () -> new BasicParticleType(true));
 }

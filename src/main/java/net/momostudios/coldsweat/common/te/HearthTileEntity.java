@@ -174,13 +174,16 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 // Add new positions
                 cap.ifPresent(cap2 -> cap2.addAll(positions2));
 
-                if (world != null && !world.isRemote)
+                if (world != null && !world.isRemote && !affectedPlayers.isEmpty())
                 {
+                    shouldUseHotFuel = false;
+                    shouldUseColdFuel = false;
+
                     ConfigCache config = ConfigCache.getInstance();
                     for (PlayerEntity player : affectedPlayers)
                     {
                         Temperature playerTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT);
-                        double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHe arthTemp") : playerTemp.get();
+                        double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") : playerTemp.get();
 
                         if ((temp < config.minTemp && this.getHotFuel() > 0))
                         {
@@ -258,7 +261,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         int coldFuel = getColdFuel();
         int hotFuel = getHotFuel();
 
-        if (Math.random() < coldFuel / 2000d)
+        if (Math.random() < coldFuel / 3000d)
         {
             double d0 = pos.getX() + 0.5d;
             double d1 = pos.getY() + 2d;
@@ -266,7 +269,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             double d3 = (Math.random() - 0.5) / 4;
             double d4 = (Math.random() - 0.5) / 4;
             double d5 = (Math.random() - 0.5) / 4;
-            world.addParticle(ParticleTypes.CLOUD, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
+            world.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.02D, 0.0D);
         }
         if (Math.random() < hotFuel / 2000d)
         {

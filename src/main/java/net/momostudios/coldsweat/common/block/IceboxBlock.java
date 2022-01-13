@@ -32,6 +32,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
+import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 
@@ -139,16 +140,16 @@ public class IceboxBlock extends Block
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
-        if (worldIn.getTileEntity(pos) != null && stateIn.get(FROSTED))
+        if (stateIn.get(FROSTED))
         {
-            double d0 = (double)pos.getX() + 0.5D;
-            double d1 = (double)pos.getY();
-            double d2 = (double)pos.getZ() + 0.5D;
-            double d5 = pos.getX() + 0.5 + (Math.random() * 2 - 1);
-            double d6 = pos.getY() + 0.5 + (Math.random() * 2 - 1);
-            double d7 = pos.getZ() + 0.5 + (Math.random() * 2 - 1);
-            worldIn.addParticle(ParticleTypes.CLOUD, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
-            //worldIn.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+            double d0 = pos.getX() + 0.5;
+            double d1 = pos.getY();
+            double d2 = pos.getZ() + 0.5;
+            boolean side = rand.nextBoolean();
+            double d5 = side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            double d6 = Math.random() * 0.3;
+            double d7 = !side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            worldIn.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
         }
     }
 }

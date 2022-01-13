@@ -16,5 +16,7 @@ public class ParticleUtil
     public static void registerParticles(ParticleFactoryRegisterEvent event)
     {
         Minecraft.getInstance().particles.registerFactory(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
+        Minecraft.getInstance().particles.registerFactory(ParticleTypesInit.STEAM.get(), SteamParticle.SteamFactory::new);
+        Minecraft.getInstance().particles.registerFactory(ParticleTypesInit.MIST.get(), SteamParticle.MistFactory::new);
     }
 }
