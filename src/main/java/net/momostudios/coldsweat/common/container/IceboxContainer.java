@@ -142,6 +142,22 @@ public class IceboxContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
+                else if (MathHelperCS.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
+                {
+                    if (!this.mergeItemStack(itemstack1, 10, 36, false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (MathHelperCS.isBetween(index, 10, inventorySlots.size() - 9))
+                {
+                    if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
                 return ItemStack.EMPTY;
             }
 
