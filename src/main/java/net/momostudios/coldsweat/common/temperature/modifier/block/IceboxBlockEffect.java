@@ -14,7 +14,7 @@ public class IceboxBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(IceboxBlock.FROSTED))
         {
-            return MathHelperCS.blend(-0.27, 0, distance, 0, 7);
+            return MathHelperCS.blend(-0.27, 0, distance, 0.5, 5);
         }
         return 0;
     }

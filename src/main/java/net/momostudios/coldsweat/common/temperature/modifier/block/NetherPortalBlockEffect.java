@@ -13,7 +13,7 @@ public class NetherPortalBlockEffect extends BlockEffect
     public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
     {
         boolean isInOverworld = player.world.getDimensionKey().getLocation().toString().equals(DimensionType.OVERWORLD.getLocation().toString());
-        return MathHelperCS.blend(isInOverworld ? 0.3 : -0.2, 0, distance, 0, 7);
+        return MathHelperCS.blend(isInOverworld ? 0.3 : -0.2, 0, distance, 0, 3);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class LavaBlockEffect extends BlockEffect
         if (hasBlock(state))
         {
             double temp = 0.05 + (15 - state.get(FlowingFluidBlock.LEVEL)) / 80d;
-            return MathHelperCS.blend(temp, 0, distance, 0, 7);
+            return MathHelperCS.blend(temp, 0, distance, 0.5, 7);
         }
         return 0;
     }

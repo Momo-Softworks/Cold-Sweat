@@ -14,7 +14,7 @@ public class FurnaceBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(AbstractFurnaceBlock.LIT))
         {
-            return MathHelperCS.blend(0.32, 0, distance, 0, 7);
+            return MathHelperCS.blend(0.32, 0, distance, 0.5, 7);
         }
         return 0;
     }

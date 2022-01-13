@@ -24,7 +24,7 @@ public class SoulFireBlockEffect extends BlockEffect
                     entity.getPersistentData().putBoolean("isInSoulFire", true);
             });
 
-            return MathHelperCS.blend(-0.2, 0, distance, 0, 7);
+            return MathHelperCS.blend(-0.2, 0, distance, 0.5, 7);
         }
         return 0;
     }
