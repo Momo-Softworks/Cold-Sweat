@@ -250,15 +250,22 @@ Technical Changes:
 2.1.1
 - Changed the recipe of the Soulfire Lamp to require a golden nugget at the top
 - Revised the icons for all three potion effects (some more than others)
-- Icicles now form on the sides of the Icebox when it has fuel (to easily see if it's fueled without having to open it)
+- The Icebox now has much clearer visual indication for when it has fuel (new particles / texture)
 - The end is now slightly warmer (it's still uninhabitable, but you can stay there a lot longer now)
+- Custom particles now respect the player's particle settings ("minimal" setting disables all custom particles)
+- You no longer have to sneak to equip a minecart with insulation
 
 - Added Chinese translation courtesy of 6371peter on GitHub
 
 Fixes:
-- Fixed the Soulfire Lamp & Waterskins "bobbing" randomly when held in some cases
-- Fixed GUI-related crash that occurred in some rare scenarios
-- Fixed crash when attempting to shift-click invalid items into an Icebox or Boiler
+- Fixed shift-clicking items in a GUI not working or crashing in some cases
+- Fixed the Soulfire Lamp & Waterskins "bobbing" randomly when held
+- Fixed HUD-related crash that occurred in some rare scenarios
+
+Technical Changes:
+- The Hearth no longer gives Insulation to players in habitable areas
+- The Hearth now uses block bounding box shape for spread detection (much more reliable)
+- Rebalanced block temperatures to have differing radii (radiuses)
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
