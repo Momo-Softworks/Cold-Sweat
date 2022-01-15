@@ -37,8 +37,9 @@ public class MinecartEventHandler
         double y = event.getPos().getY();
         double z = event.getPos().getZ();
         World world = event.getWorld();
-        if (entity instanceof MinecartEntity && sourceentity.isSneaking() && sourceentity.getHeldItemMainhand().getItem() == ModItems.MINECART_INSULATION)
+        if (entity instanceof MinecartEntity && sourceentity.getHeldItemMainhand().getItem() == ModItems.MINECART_INSULATION)
         {
+            event.setCanceled(true);
             if (!sourceentity.abilities.isCreativeMode)
             {
                 sourceentity.getHeldItemMainhand().shrink(1);
