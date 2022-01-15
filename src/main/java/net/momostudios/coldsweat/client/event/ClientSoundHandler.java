@@ -44,7 +44,8 @@ public class ClientSoundHandler
                     sound = SoundEvents.AMBIENT_CAVE;
             }
 
-            Minecraft.getInstance().getSoundHandler().play(new EntityTickableSound(sound, SoundCategory.PLAYERS, volume, pitch, entity));
+            if (entity != null)
+                Minecraft.getInstance().getSoundHandler().play(new EntityTickableSound(sound, SoundCategory.PLAYERS, volume, pitch, entity));
 
             playDamageSound = -1;
             volume = 1f;
