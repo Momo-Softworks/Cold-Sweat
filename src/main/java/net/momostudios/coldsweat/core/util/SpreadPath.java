@@ -1,0 +1,82 @@
+package net.momostudios.coldsweat.core.util;
+
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3i;
+
+public class SpreadPath
+{
+    public Direction origin;
+    public int x;
+    public int y;
+    public int z;
+
+    public SpreadPath(BlockPos pos)
+    {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
+        this.origin = Direction.UP;
+    }
+
+    public SpreadPath(BlockPos pos, Direction origin)
+    {
+        this.origin = origin;
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
+    }
+
+    public SpreadPath(int x, int y, int z, Direction origin)
+    {
+        this.origin = origin;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public int getX()
+    {
+        return x;
+    }
+    public int getY()
+    {
+        return y;
+    }
+    public int getZ()
+    {
+        return z;
+    }
+
+    public BlockPos getPos()
+    {
+        return new BlockPos(this.x, this.y, this.z);
+    }
+
+    public SpreadPath offset(Direction dir)
+    {
+        return new SpreadPath(this.x + dir.getXOffset(), this.y + dir.getYOffset(), this.z + dir.getZOffset(), dir);
+    }
+
+    public SpreadPath offset(int x, int y, int z)
+    {
+        return new SpreadPath(this.x + x, this.y + y, this.z + z, this.origin);
+    }
+
+    public SpreadPath offset(BlockPos pos)
+    {
+        return new SpreadPath(this.x + pos.getX(), this.y + pos.getY(), this.z + pos.getZ(), this.origin);
+    }
+
+    public boolean withinDistance(Vector3i vector, double distance) {
+        return distanceSq((double)vector.getX(), (double)vector.getY(), (double)vector.getZ(), false) < distance * distance;
+    }
+
+    public double distanceSq(double x, double y, double z, boolean useCenter) {
+        double d0 = useCenter ? 0.5D : 0.0D;
+        double d1 = (double)this.getX() + d0 - x;
+        double d2 = (double)this.getY() + d0 - y;
+        double d3 = (double)this.getZ() + d0 - z;
+        return d1 * d1 + d2 * d2 + d3 * d3;
+    }
+}

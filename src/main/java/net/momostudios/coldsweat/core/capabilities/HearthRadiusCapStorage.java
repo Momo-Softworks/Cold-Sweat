@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.momostudios.coldsweat.core.util.MathHelperCS;
 import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.core.util.SpreadPath;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -21,9 +22,9 @@ public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorage
         CompoundNBT nbt = new CompoundNBT();
         ListNBT list = new ListNBT();
 
-        for (BlockPos pos : instance.getHashSet())
+        for (SpreadPath pos : instance.getHashSet())
         {
-            list.add(LongNBT.valueOf(pos.toLong()));
+            list.add(LongNBT.valueOf(pos.getPos().toLong()));
         }
         nbt.put("points", list);
         return nbt;
@@ -37,7 +38,7 @@ public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorage
         instance.clear();
         for (INBT inbt : nbt.getList("points", 11))
         {
-            instance.add(BlockPos.fromLong(((LongNBT) inbt).getLong()));
+            instance.add(new SpreadPath(BlockPos.fromLong(((LongNBT) inbt).getLong())));
         }
     }
 }

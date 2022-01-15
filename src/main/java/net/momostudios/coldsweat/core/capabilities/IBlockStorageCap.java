@@ -1,21 +1,26 @@
 package net.momostudios.coldsweat.core.capabilities;
 
 import net.minecraft.util.math.BlockPos;
+import net.momostudios.coldsweat.core.util.SpreadPath;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 public interface IBlockStorageCap
 {
-    HashSet<BlockPos> getHashSet();
+    HashSet<SpreadPath> getHashSet();
+    HashSet<BlockPos> getPositions();
 
-    void setHashSet(HashSet<BlockPos> list);
+    void setPaths(HashSet<SpreadPath> list);
 
-    void add(BlockPos pos);
+    void add(SpreadPath pos);
 
-    void addAll (List<BlockPos> posList);
+    void addPaths(Collection<SpreadPath> posList);
 
-    void remove(BlockPos pos);
+    void addPoints(Collection<BlockPos> posList);
+
+    void remove(SpreadPath pos);
 
     void clear();
 }

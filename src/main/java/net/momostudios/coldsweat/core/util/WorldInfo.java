@@ -1,21 +1,25 @@
 package net.momostudios.coldsweat.core.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.block.TrapDoorBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientChunkProvider;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.Half;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.*;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
@@ -72,40 +76,72 @@ public class WorldInfo
 
     public static boolean canSeeSky(World world, BlockPos pos)
     {
-        if (!world.canSeeSky(pos)) return false;
+        Chunk chunk = world.getChunkProvider().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
 
-        for (int i = 0; i < 255 - pos.getY(); i++)
+        for (int i = 0; i < 255 - y; i++)
         {
-            if (!isBlockSpreadable(world, pos.up(i), pos.up(i + 1)))
+            BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
+
+            if (state.isAir())
             {
-                return false;
+                continue;
             }
+
+            if (isFullSide(state, Direction.DOWN, pos.up(i), world) || isFullSide(state, Direction.UP, pos.up(i), world))
+                return false;
         }
         return true;
     }
 
-    public static boolean isBlockSpreadable(World world, @Nonnull BlockPos fromPos, @Nonnull BlockPos toPos)
+    public static boolean canSpreadThrough(World world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
     {
-        BlockState state = world.getBlockState(fromPos);
-        BlockState state2 = world.getBlockState(toPos);
-        Direction dir = Direction.getFacingFromVector(toPos.getX() - fromPos.getX(), toPos.getY() - fromPos.getY(), toPos.getZ() - fromPos.getZ());
+        BlockPos pos = path.getPos();
+        BlockState state = world.getChunkProvider().getChunk(pos.getX() >> 4, pos.getZ() >> 4, false).getBlockState(pos);
 
-        return
-            // Outlet side of original block is not solid
-            !state.isSolidSide(world, fromPos, dir) &&
+        if (state.isSolidSide(world, pos, toDir))
+            return false;
 
-            // Inlet side of new pos is not solid
-            (!state2.isSolidSide(world, toPos, dir.getOpposite()) ||
-
-            // Block is air or no sides solid
-            state2.getMaterial() == Material.AIR || !state2.getShape(world, toPos).equals(VoxelShapes.create(0, 0, 0, 1, 1, 1)) ||
-
-            // Block is a hearth
-            state2.getBlock() == ModBlocks.HEARTH || state2.getBlock() == ModBlocks.HEARTH_TOP);
+        return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : !state.isSolidSide(world, pos, fromDir.getOpposite());
     }
 
     public static double distance(Vector3i pos1, Vector3i pos2)
     {
         return Math.sqrt(pos1.distanceSq(pos2));
+    }
+
+    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, World world)
+    {
+        if (state.isSolidSide(world, pos, dir))
+            return true;
+        if (state.isAir())
+            return false;
+
+
+        VoxelShape shape = state.getRenderShape(world, pos);
+        final double[] area = {0};
+        if (!shape.isEmpty())
+        {
+            for (AxisAlignedBB bb : shape.toBoundingBoxList())
+            {
+                switch (dir.getAxis())
+                {
+                    case X:
+                        area[0] += (bb.maxY - bb.minY) * (bb.maxZ - bb.minZ);
+                        break;
+                    case Y:
+                        area[0] += (bb.maxX - bb.minX) * (bb.maxZ - bb.minZ);
+                        break;
+                    case Z:
+                        area[0] += (bb.maxX - bb.minX) * (bb.maxY - bb.minY);
+                        break;
+                }
+                if (area[0] >= 1)
+                    return true;
+            }
+        }
+        return false;
     }
 }
