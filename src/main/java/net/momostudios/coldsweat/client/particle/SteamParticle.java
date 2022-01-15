@@ -1,6 +1,8 @@
 package net.momostudios.coldsweat.client.particle;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.BasicParticleType;
@@ -79,6 +81,9 @@ public class SteamParticle extends SpriteTexturedParticle
     @Override
     public void tick()
     {
+        if (Minecraft.getInstance().gameSettings.particles == ParticleStatus.MINIMAL)
+            this.setExpired();
+
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
@@ -130,7 +135,10 @@ public class SteamParticle extends SpriteTexturedParticle
 
         @Override
         public Particle makeParticle(BasicParticleType typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            return new SteamParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
+            if (Minecraft.getInstance().gameSettings.particles != ParticleStatus.MINIMAL)
+                return new SteamParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
+            else
+                return null;
         }
     }
 
@@ -145,7 +153,11 @@ public class SteamParticle extends SpriteTexturedParticle
 
         @Override
         public Particle makeParticle(BasicParticleType typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            return new SteamParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, true);
+            ParticleStatus status = Minecraft.getInstance().gameSettings.particles;
+            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
+                return new SteamParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, true);
+            else
+                return null;
         }
     }
 }
