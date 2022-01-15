@@ -1,32 +1,16 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
 import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientChunkProvider;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.state.properties.Half;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
-import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.momostudios.coldsweat.common.te.HearthTileEntity;
-import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class WorldInfo
@@ -81,17 +65,20 @@ public class WorldInfo
         int y = pos.getY();
         int z = pos.getZ();
 
-        for (int i = 0; i < 255 - y; i++)
+        if (chunk != null)
         {
-            BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
-
-            if (state.isAir())
+            for (int i = 0; i < 255 - y; i++)
             {
-                continue;
-            }
+                BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
 
-            if (isFullSide(state, Direction.DOWN, pos.up(i), world) || isFullSide(state, Direction.UP, pos.up(i), world))
-                return false;
+                if (state.isAir())
+                {
+                    continue;
+                }
+
+                if (isFullSide(state, Direction.UP, pos.up(i), world))
+                    return false;
+            }
         }
         return true;
     }
@@ -99,12 +86,17 @@ public class WorldInfo
     public static boolean canSpreadThrough(World world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
     {
         BlockPos pos = path.getPos();
-        BlockState state = world.getChunkProvider().getChunk(pos.getX() >> 4, pos.getZ() >> 4, false).getBlockState(pos);
+        Chunk chunk = world.getChunkProvider().getChunk(pos.getX() >> 4, pos.getZ() >> 4, false);
+        if (chunk != null)
+        {
+            BlockState state = chunk.getBlockState(pos);
 
-        if (state.isSolidSide(world, pos, toDir))
-            return false;
+            if (state.isSolidSide(world, pos, toDir))
+                return false;
 
-        return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : !state.isSolidSide(world, pos, fromDir.getOpposite());
+            return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : !state.isSolidSide(world, pos, fromDir.getOpposite());
+        }
+        return false;
     }
 
     public static double distance(Vector3i pos1, Vector3i pos2)
