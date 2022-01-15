@@ -19,6 +19,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
+import net.momostudios.coldsweat.core.util.MathHelperCS;
 
 public class SewingContainer extends Container
 {
@@ -254,7 +255,7 @@ public class SewingContainer extends Container
         {
             itemstack = slot.getStack().copy();
             // Take from either input
-            if (((slot.getSlotIndex() == 0 || slot.getSlotIndex() == 1)) && slot.inventory instanceof SewingInventory)
+            if ((MathHelperCS.isBetween(index, 0, 1)) && slot.inventory instanceof SewingInventory)
             {
                 if (playerIn.inventory.addItemStackToInventory(itemstack))
                 {
@@ -289,6 +290,52 @@ public class SewingContainer extends Container
                 slot.putStack(ItemStack.EMPTY);
                 this.inventory.setInventorySlotContents(0, itemstack);
                 this.getSlot(0).onSlotChanged();
+            }
+            else if (MathHelperCS.isBetween(index, 3, 29))
+            {
+                for (int i = 30; i < 38; i++)
+                {
+                    Slot slot1 = playerIn.container.getSlot(i);
+                    if (slot1.isItemValid(itemstack) && slot1.getStack().isEmpty())
+                    {
+                        if (itemstack.getCount() > slot1.getSlotStackLimit())
+                        {
+                            slot1.putStack(itemstack.split(slot1.getSlotStackLimit()));
+                            slot1.onSlotChanged();
+                            itemstack.shrink(slot1.getSlotStackLimit());
+                        }
+                        else
+                        {
+                            slot1.putStack(itemstack);
+                            slot1.onSlotChanged();
+                            slot.putStack(ItemStack.EMPTY);
+                        }
+                        break;
+                    }
+                }
+            }
+            else if (MathHelperCS.isBetween(index, 30, 38))
+            {
+                for (int i = 3; i < 29; i++)
+                {
+                    Slot slot1 = playerIn.container.getSlot(i);
+                    if (slot1.isItemValid(itemstack) && slot1.getStack().isEmpty())
+                    {
+                        if (itemstack.getCount() > slot1.getSlotStackLimit())
+                        {
+                            slot1.putStack(itemstack.split(slot1.getSlotStackLimit()));
+                            slot1.onSlotChanged();
+                            itemstack.shrink(slot1.getSlotStackLimit());
+                        }
+                        else
+                        {
+                            slot1.putStack(itemstack);
+                            slot1.onSlotChanged();
+                            slot.putStack(ItemStack.EMPTY);
+                        }
+                        break;
+                    }
+                }
             }
             else
             {
