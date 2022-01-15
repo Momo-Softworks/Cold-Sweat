@@ -2,9 +2,7 @@ package net.momostudios.coldsweat.client.event;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
-import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
@@ -12,8 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
+import net.momostudios.coldsweat.util.registrylists.ModSounds;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientSoundHandler

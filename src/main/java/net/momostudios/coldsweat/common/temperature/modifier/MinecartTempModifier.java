@@ -1,11 +1,8 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.INBT;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-
-import java.util.List;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 public class MinecartTempModifier extends TempModifier
 {

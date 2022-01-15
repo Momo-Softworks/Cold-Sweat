@@ -6,9 +6,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemStack;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import javax.annotation.Nullable;
 

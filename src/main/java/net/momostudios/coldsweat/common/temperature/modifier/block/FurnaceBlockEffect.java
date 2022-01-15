@@ -4,8 +4,8 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.Units;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.Units;
 
 public class FurnaceBlockEffect extends BlockEffect
 {

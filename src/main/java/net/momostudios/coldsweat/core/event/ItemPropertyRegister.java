@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.momostudios.coldsweat.client.itemproperties.SoulfireLampOverride;
 import net.momostudios.coldsweat.client.itemproperties.ThermometerOverride;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ItemPropertyRegister

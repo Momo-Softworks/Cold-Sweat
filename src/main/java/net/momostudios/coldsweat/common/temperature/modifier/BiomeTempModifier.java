@@ -1,14 +1,12 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.config.WorldTemperatureConfig;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.util.WorldInfo;
 
 import java.util.List;
 

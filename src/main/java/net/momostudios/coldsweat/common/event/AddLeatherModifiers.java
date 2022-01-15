@@ -11,8 +11,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
-import net.momostudios.coldsweat.core.util.ItemEntry;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.ItemEntry;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

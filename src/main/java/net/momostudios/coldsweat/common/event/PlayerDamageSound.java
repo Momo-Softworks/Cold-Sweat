@@ -1,18 +1,13 @@
 package net.momostudios.coldsweat.common.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
-import net.momostudios.coldsweat.core.util.CustomDamageTypes;
+import net.momostudios.coldsweat.util.CustomDamageTypes;
 
 @Mod.EventBusSubscriber
 public class PlayerDamageSound

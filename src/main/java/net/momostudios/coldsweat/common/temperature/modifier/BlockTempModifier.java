@@ -2,18 +2,11 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.registrylists.ModBlocks;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import net.momostudios.coldsweat.util.MathHelperCS;
 
 public class BlockTempModifier extends TempModifier
 {

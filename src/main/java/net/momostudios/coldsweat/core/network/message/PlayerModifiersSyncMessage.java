@@ -6,12 +6,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.core.util.NBTHelper;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.NBTHelper;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import java.util.ArrayList;
 import java.util.List;

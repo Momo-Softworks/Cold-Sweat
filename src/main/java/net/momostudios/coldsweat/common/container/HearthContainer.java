@@ -2,7 +2,6 @@ package net.momostudios.coldsweat.common.container;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -12,7 +11,7 @@ import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.util.MathHelperCS;
 
 import java.util.Objects;
 

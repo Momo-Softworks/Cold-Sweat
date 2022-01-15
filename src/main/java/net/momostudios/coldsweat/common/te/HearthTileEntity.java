@@ -1,6 +1,5 @@
 package net.momostudios.coldsweat.common.te;
 
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,9 +32,9 @@ import net.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
-import net.momostudios.coldsweat.core.util.*;
-import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
-import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
+import net.momostudios.coldsweat.util.*;
+import net.momostudios.coldsweat.util.registrylists.ModEffects;
+import net.momostudios.coldsweat.util.registrylists.ModSounds;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;

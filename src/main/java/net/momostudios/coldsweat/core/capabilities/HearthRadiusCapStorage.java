@@ -4,14 +4,9 @@ import net.minecraft.nbt.*;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.core.util.SpreadPath;
+import net.momostudios.coldsweat.util.SpreadPath;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorageCap>
 {

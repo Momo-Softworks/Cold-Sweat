@@ -15,7 +15,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay

@@ -26,7 +26,7 @@ import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 import javax.annotation.Nullable;
 import java.util.List;

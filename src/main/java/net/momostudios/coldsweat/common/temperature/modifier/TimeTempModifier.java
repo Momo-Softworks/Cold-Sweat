@@ -1,6 +1,5 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
-import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
@@ -8,9 +7,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.util.WorldInfo;
 
 public class TimeTempModifier extends TempModifier
 {

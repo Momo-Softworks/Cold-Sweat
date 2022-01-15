@@ -7,14 +7,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.CustomDamageTypes;
-import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-
-import java.util.List;
+import net.momostudios.coldsweat.util.CustomDamageTypes;
+import net.momostudios.coldsweat.util.registrylists.ModEffects;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PlayerTempUpdater

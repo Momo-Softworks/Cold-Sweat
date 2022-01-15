@@ -18,8 +18,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.modifier.MinecartTempModifier;
 import net.momostudios.coldsweat.core.init.BlockInit;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class MinecartEventHandler

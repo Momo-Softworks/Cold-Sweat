@@ -2,9 +2,7 @@ package net.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -15,10 +13,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.core.util.Units;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.Units;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class AmbientGaugeDisplay

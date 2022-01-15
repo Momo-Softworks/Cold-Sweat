@@ -11,12 +11,9 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.core.util.NBTHelper;
-import net.momostudios.coldsweat.core.util.PlayerHelper;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.momostudios.coldsweat.util.NBTHelper;
+import net.momostudios.coldsweat.util.PlayerHelper;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class StorePlayerData

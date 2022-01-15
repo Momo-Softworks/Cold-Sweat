@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.CreativeScreen;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemGroup;
@@ -27,10 +26,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.SoulLampInputMessage;
-import net.momostudios.coldsweat.core.util.ItemEntry;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
-
-import java.util.List;
+import net.momostudios.coldsweat.util.ItemEntry;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SoulLampPutFuel

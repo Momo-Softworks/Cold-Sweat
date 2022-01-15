@@ -4,8 +4,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.Units;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.Units;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

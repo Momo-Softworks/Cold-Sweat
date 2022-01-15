@@ -19,7 +19,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
+import net.momostudios.coldsweat.util.MathHelperCS;
 
 public class SewingContainer extends Container
 {

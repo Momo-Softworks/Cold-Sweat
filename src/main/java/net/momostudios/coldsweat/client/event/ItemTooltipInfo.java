@@ -11,7 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber
 public class ItemTooltipInfo

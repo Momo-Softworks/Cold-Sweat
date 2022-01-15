@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
@@ -18,19 +17,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.ClientConfigSendMessage;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.Units;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.Units;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
-import java.util.Objects;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ConfigScreen

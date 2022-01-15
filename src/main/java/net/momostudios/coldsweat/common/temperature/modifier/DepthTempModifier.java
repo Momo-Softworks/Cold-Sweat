@@ -3,10 +3,9 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.WorldInfo;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.WorldInfo;
 
 public class DepthTempModifier extends TempModifier
 {

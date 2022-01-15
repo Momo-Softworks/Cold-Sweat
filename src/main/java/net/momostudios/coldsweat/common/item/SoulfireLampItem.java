@@ -1,13 +1,9 @@
 package net.momostudios.coldsweat.common.item;
 
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -16,9 +12,8 @@ import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-import net.momostudios.coldsweat.core.util.registrylists.ModSounds;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 public class SoulfireLampItem extends Item
 {

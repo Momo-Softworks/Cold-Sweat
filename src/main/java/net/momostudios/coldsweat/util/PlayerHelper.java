@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 public class PlayerHelper
 {

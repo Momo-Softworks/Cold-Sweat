@@ -13,12 +13,11 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 public class FilledWaterskinItem extends Item
 {

@@ -1,24 +1,19 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.MinecraftForge;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.core.event.StorePlayerData;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class PlayerTemp
 {

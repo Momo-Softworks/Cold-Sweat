@@ -1,7 +1,6 @@
 package net.momostudios.coldsweat.common.command.impl;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,8 +13,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.momostudios.coldsweat.common.command.BaseCommand;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import java.util.Collection;
 

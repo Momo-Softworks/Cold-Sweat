@@ -14,8 +14,8 @@ import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 import java.util.Objects;
 

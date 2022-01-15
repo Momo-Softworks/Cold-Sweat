@@ -16,7 +16,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -26,11 +25,9 @@ import net.momostudios.coldsweat.common.block.BoilerBlock;
 import net.momostudios.coldsweat.common.container.BoilerContainer;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BoilerTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory

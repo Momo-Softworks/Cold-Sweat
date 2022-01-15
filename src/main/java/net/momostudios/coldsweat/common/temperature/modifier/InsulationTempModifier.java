@@ -1,14 +1,7 @@
 package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.NumberNBT;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
-
-import java.util.List;
 
 public class InsulationTempModifier extends TempModifier
 {

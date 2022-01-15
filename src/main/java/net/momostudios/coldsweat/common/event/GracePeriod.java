@@ -6,7 +6,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
+import net.momostudios.coldsweat.util.registrylists.ModEffects;
 
 @Mod.EventBusSubscriber
 public class GracePeriod

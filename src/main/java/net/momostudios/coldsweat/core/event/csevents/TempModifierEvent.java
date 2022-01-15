@@ -9,10 +9,8 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.core.event.StorePlayerData;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 /**

@@ -3,7 +3,7 @@ package net.momostudios.coldsweat.core.capabilities;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import java.util.ArrayList;
 import java.util.List;

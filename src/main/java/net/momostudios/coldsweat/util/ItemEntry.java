@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
 public class ItemEntry
 {

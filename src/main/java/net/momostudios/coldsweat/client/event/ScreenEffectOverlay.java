@@ -1,14 +1,6 @@
 package net.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IngameGui;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class ScreenEffectOverlay

@@ -7,10 +7,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.HandSide;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.registrylists.ModItems;
-import net.momostudios.coldsweat.core.util.PlayerHelper;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 public class SoulLampTempModifier extends TempModifier
 {

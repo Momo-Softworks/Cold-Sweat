@@ -4,7 +4,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 import javax.annotation.Nullable;
 

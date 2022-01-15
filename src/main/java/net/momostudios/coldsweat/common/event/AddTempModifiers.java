@@ -1,10 +1,8 @@
 package net.momostudios.coldsweat.common.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.HandSide;
-import net.minecraft.world.DimensionType;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
+import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -12,11 +10,8 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.util.MathHelperCS;
-import net.momostudios.coldsweat.core.util.registrylists.ModEffects;
-import net.momostudios.coldsweat.core.util.PlayerHelper;
-import net.momostudios.coldsweat.core.util.PlayerTemp;
+import net.momostudios.coldsweat.util.registrylists.ModEffects;
+import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddTempModifiers
@@ -89,9 +84,15 @@ public class AddTempModifiers
     }
 
     @SubscribeEvent
-    public static void onSleep(PlayerSleepInBedEvent event)
+    public static void onSleep(SleepFinishedTimeEvent event)
     {
-        Temperature temp = PlayerTemp.getTemperature(event.getPlayer(), PlayerTemp.Types.BODY);
-        PlayerTemp.setTemperature(event.getPlayer(), new Temperature(temp.get() / 4), PlayerTemp.Types.BODY);
+        event.getWorld().getPlayers().forEach(player ->
+        {
+            if (player.isSleeping())
+            {
+                Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
+                PlayerTemp.setTemperature(player, new Temperature(temp.get() / 4), PlayerTemp.Types.BODY);
+            }
+        });
     }
 }

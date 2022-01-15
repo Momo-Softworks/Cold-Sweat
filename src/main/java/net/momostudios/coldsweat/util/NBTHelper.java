@@ -1,13 +1,6 @@
-package net.momostudios.coldsweat.core.util;
+package net.momostudios.coldsweat.util;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.*;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.common.world.TempModifierEntries;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class NBTHelper
 {
