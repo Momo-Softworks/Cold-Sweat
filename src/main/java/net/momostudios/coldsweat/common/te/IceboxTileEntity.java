@@ -24,11 +24,13 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
 import net.momostudios.coldsweat.common.container.IceboxContainer;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
+import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.util.registrylists.ModItems;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
 
 public class IceboxTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
 {
@@ -129,6 +131,20 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
                 }
             }
 
+        }
+        else
+        {
+            if (world.getBlockState(pos).get(IceboxBlock.FROSTED) && world.getGameTime() % 3 == 0 &&  Math.random() < 0.5)
+            {
+                double d0 = pos.getX() + 0.5;
+                double d1 = pos.getY();
+                double d2 = pos.getZ() + 0.5;
+                boolean side = new Random().nextBoolean();
+                double d5 = side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
+                double d6 = Math.random() * 0.3;
+                double d7 = !side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
+                world.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
+            }
         }
     }
 
