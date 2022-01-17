@@ -261,6 +261,7 @@ Fixes:
 - Fixed shift-clicking items in a GUI not working or crashing in some cases
 - Fixed the Soulfire Lamp & Waterskins "bobbing" randomly when held
 - Fixed HUD-related crash that occurred in some rare scenarios
+- Fixed beds restoring the player's temperature without actually sleeping in it
 
 Technical Changes:
 - The Hearth no longer gives Insulation to players in habitable areas
