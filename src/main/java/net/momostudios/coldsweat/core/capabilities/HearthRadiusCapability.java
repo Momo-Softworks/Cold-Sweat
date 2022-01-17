@@ -6,7 +6,9 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.util.SpreadPath;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 public class HearthRadiusCapability implements IBlockStorageCap
@@ -19,39 +21,27 @@ public class HearthRadiusCapability implements IBlockStorageCap
         HEARTH_BLOCKS = capability;
     }
 
-    HashSet<SpreadPath> paths = new HashSet<>();
-    HashSet<BlockPos> points = new HashSet<>();
+    LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
 
     @Override
-    public HashSet<SpreadPath> getHashSet() {
+    public LinkedHashMap<BlockPos, SpreadPath> getMap() {
         return paths;
     }
 
     @Override
-    public HashSet<BlockPos> getPositions() {
-        return points;
-    }
-
-    @Override
-    public void setPaths(HashSet<SpreadPath> list)
+    public void setPaths(LinkedHashMap<BlockPos, SpreadPath> map)
     {
-        this.paths = list;
-        this.points = paths.stream().map(SpreadPath::getPos).collect(Collectors.toCollection(HashSet::new));
+        this.paths = map;
     }
 
     @Override
-    public void add(SpreadPath pos) {
-        paths.add(pos);
+    public void set(SpreadPath pos) {
+        paths.put(pos.getPos(), pos);
     }
 
     @Override
-    public void addPaths(Collection<SpreadPath> posList) {
-        paths.addAll(posList);
-    }
-
-    @Override
-    public void addPoints(Collection<BlockPos> posList) {
-        points.addAll(posList);
+    public void addPaths(LinkedHashMap<BlockPos, SpreadPath> map) {
+        paths.putAll(map);
     }
 
     @Override

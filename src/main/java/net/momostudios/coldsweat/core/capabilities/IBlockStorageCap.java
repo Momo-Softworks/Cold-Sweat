@@ -4,20 +4,19 @@ import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.util.SpreadPath;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public interface IBlockStorageCap
 {
-    HashSet<SpreadPath> getHashSet();
-    HashSet<BlockPos> getPositions();
+    LinkedHashMap<BlockPos, SpreadPath> getMap();
 
-    void setPaths(HashSet<SpreadPath> list);
+    void setPaths(LinkedHashMap<BlockPos, SpreadPath> list);
 
-    void add(SpreadPath pos);
+    void set(SpreadPath pos);
 
-    void addPaths(Collection<SpreadPath> posList);
-
-    void addPoints(Collection<BlockPos> posList);
+    void addPaths(LinkedHashMap<BlockPos, SpreadPath> posList);
 
     void remove(SpreadPath pos);
 

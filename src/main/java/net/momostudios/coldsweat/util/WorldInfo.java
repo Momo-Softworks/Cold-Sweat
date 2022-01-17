@@ -76,7 +76,7 @@ public class WorldInfo
                     continue;
                 }
 
-                if (isFullSide(state, Direction.UP, pos.up(i), world))
+                if (state.isSolidSide(world, pos.up(i), Direction.DOWN) || isFullSide(state, Direction.UP, pos.up(i), world))
                     return false;
             }
         }

@@ -14,26 +14,11 @@ public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorage
     @Nullable
     public INBT writeNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction)
     {
-        CompoundNBT nbt = new CompoundNBT();
-        ListNBT list = new ListNBT();
-
-        for (SpreadPath pos : instance.getHashSet())
-        {
-            list.add(LongNBT.valueOf(pos.getPos().toLong()));
-        }
-        nbt.put("points", list);
-        return nbt;
+        return new CompoundNBT();
     }
 
     @Override
     public void readNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction, INBT nbtData)
     {
-        CompoundNBT nbt = (CompoundNBT) nbtData;
-
-        instance.clear();
-        for (INBT inbt : nbt.getList("points", 11))
-        {
-            instance.add(new SpreadPath(BlockPos.fromLong(((LongNBT) inbt).getLong())));
-        }
     }
 }

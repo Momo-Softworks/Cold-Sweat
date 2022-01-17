@@ -38,7 +38,6 @@ import net.momostudios.coldsweat.util.registrylists.ModSounds;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
@@ -92,9 +91,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             cache.put(pos, cap);
             cap.addListener(self -> cache.put(pos, self));
         }
-        if (cap.orElse(new HearthRadiusCapability()).getHashSet().isEmpty())
+        if (cap.orElse(new HearthRadiusCapability()).getMap().isEmpty())
         {
-            cap.ifPresent(cap2 -> cap2.add(new SpreadPath(pos)));
+            cap.ifPresent(cap2 -> cap2.set(new SpreadPath(pos)));
         }
 
         this.ticksExisted = (this.ticksExisted + 1) % 1000;
@@ -109,18 +108,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
             // Represents the NBT list
-            HashSet<SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getHashSet();
-            HashSet<BlockPos> poss = cap.orElse(new HearthRadiusCapability()).getPositions();
+            LinkedHashMap<BlockPos, SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getMap();
 
             if (pathList.size() > 0)
             {
                 // Create temporary list to add back to the NBT
-                HashSet<SpreadPath> newPaths = new HashSet<>();
-                HashSet<BlockPos> newPoints = new HashSet<>();
+                LinkedHashMap<BlockPos, SpreadPath> newPaths = new LinkedHashMap<>();
 
                 /*
                  Partition all points into multiple lists (max of 19)
                 */
+                int index = 0;
                 // Size of each partition
                 int partSize = 300;
                 // Number of partitions
@@ -131,14 +129,23 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Iterates over the specified partition of the list of BlockPos
-                for (SpreadPath spreadPath : pathList.stream().skip(firstIndex).limit(lastIndex - firstIndex).collect(Collectors.toCollection(HashSet::new)))
+                for (Map.Entry<BlockPos, SpreadPath> entry : pathList.entrySet())
                 {
+                    // Stop after we reach the maximum number of iterations for this partition
+                    if (index < firstIndex || index - firstIndex >= partSize)
+                    {
+                        index++;
+                        continue;
+                    }
+
                     // Reset every 4 seconds
                     if (this.ticksExisted % 80 == 0)
                     {
                         reset();
                         break;
                     }
+
+                    SpreadPath spreadPath = entry.getValue();
 
                     // Create detection box for PlayerEntities
                     int x = spreadPath.getX();
@@ -147,7 +154,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     AxisAlignedBB aabb = new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1);
 
                     // Add players to affectedPlayers
-                    affectedPlayers.addAll(world.getEntitiesWithinAABB(PlayerEntity.class, aabb));
+                    for (PlayerEntity player : world.getPlayers())
+                    {
+                        if (aabb.contains(player.getPosX(), player.getPosY(), player.getPosZ()))
+                            affectedPlayers.add(player);
+                    }
 
                     // Check in all 6 directions
                     for (Direction direction : Direction.values())
@@ -159,12 +170,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                             if (testpos.withinDistance(pos, 20))
                             {
-                                if (!newPoints.contains(testpos.getPos()) && !poss.contains(testpos.getPos())
-                                && WorldInfo.canSpreadThrough(world, spreadPath, direction, spreadPath.origin)
-                                && (!WorldInfo.canSeeSky(world, testpos.getPos())))
+                                if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
+                                && !WorldInfo.canSeeSky(world, testpos.getPos())
+                                && WorldInfo.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
                                 {
-                                    newPaths.add(testpos);
-                                    newPoints.add(testpos.getPos());
+                                    newPaths.put(testpos.getPos(), testpos);
                                 }
                             }
                         }
@@ -173,10 +183,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             reset();
                         }
                     }
+                    index++;
                 }
                 // Add new positions
                 cap.ifPresent(cap2 -> cap2.addPaths(newPaths));
-                cap.ifPresent(cap2 -> cap2.addPoints(newPaths.stream().map(SpreadPath::getPos).collect(Collectors.toList())));
 
                 if (world != null && !world.isRemote && !affectedPlayers.isEmpty())
                 {
@@ -297,7 +307,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         cap.ifPresent(c ->
         {
             // Spawn particles if enabled
-            for (SpreadPath blockPos : c.getHashSet())
+            for (BlockPos blockPos : c.getMap().keySet())
             {
                 if (Minecraft.getInstance().gameSettings.showDebugInfo)
                 {
@@ -320,8 +330,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     private void reset()
     {
-        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 -> cap2.setPaths(new HashSet<>(Arrays.asList(new SpreadPath(pos)))));
-        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 -> cap2.setPaths(new HashSet<>(Arrays.asList(new SpreadPath(pos)))));
+        LinkedHashMap<BlockPos, SpreadPath> map = new LinkedHashMap<>();
+        map.put(pos, new SpreadPath(pos));
+        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 -> cap2.setPaths(map));
     }
 
     public List getFuelItem(ItemStack item)
