@@ -251,7 +251,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Drain fuel
-        if (this.ticksExisted % 40 == 0)
+        if (this.ticksExisted % 80 == 0)
         {
             if (this.getColdFuel() > 0 && shouldUseColdFuel)
             {
