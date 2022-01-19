@@ -22,7 +22,7 @@ public class DrawConfigButton
     @SubscribeEvent
     public static void eventHandler(GuiScreenEvent.InitGuiEvent event)
     {
-        if (event.getGui() instanceof OptionsScreen)
+        if (event.getGui() instanceof OptionsScreen && ColdSweatConfig.getInstance().isButtonShowing())
         {
             event.addWidget(
                 new ImageButton(event.getGui().width / 2 - 183, event.getGui().height / 6 + 120 - 10, 24, 24, 0, 40, 24,

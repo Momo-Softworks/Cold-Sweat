@@ -32,9 +32,13 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.IntValue gracePeriodLength;
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
 
+    private static final ForgeConfigSpec.BooleanValue showConfigButton;
+
 
     static 
     {
+        showConfigButton = BUILDER.comment("Show the config menu button in the Options menu").define("ShowConfigButton", true);
+
         /*
          Difficulty
          */
@@ -134,6 +138,11 @@ public class ColdSweatConfig
     /*
      * Non-private values for use elsewhere
      */
+    public boolean isButtonShowing()
+    {
+        return showConfigButton.get();
+    }
+
     public int getDifficulty() {
         return difficulty.get();
     }
