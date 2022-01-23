@@ -86,6 +86,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3337641")
     runtimeOnly fg.deobf("curse.maven:jei-238222:3514175")
+    compileOnly fg.deobf("curse.maven:betterweather-400714:3420517")
 }
 
 mixin {

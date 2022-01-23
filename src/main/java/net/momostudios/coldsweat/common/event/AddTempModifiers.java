@@ -34,6 +34,8 @@ public class AddTempModifiers
                 PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
                     PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
+                if (ModList.get().isLoaded("betterweather"))
+                    PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerTemp.Types.AMBIENT, false);
 
                 // Hearth
                 if (player.isPotionActive(ModEffects.INSULATION))
