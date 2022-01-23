@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 
 public class NetherPortalBlockEffect extends BlockEffect
 {
@@ -13,7 +13,7 @@ public class NetherPortalBlockEffect extends BlockEffect
     public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
     {
         boolean isInOverworld = player.world.getDimensionKey().getLocation().toString().equals(DimensionType.OVERWORLD.getLocation().toString());
-        return MathHelperCS.blend(isInOverworld ? 0.3 : -0.2, 0, distance, 0, 3);
+        return CSMath.blend(isInOverworld ? 0.3 : -0.2, 0, distance, 0, 3);
     }
 
     @Override
@@ -25,11 +25,11 @@ public class NetherPortalBlockEffect extends BlockEffect
     @Override
     public double maxTemp()
     {
-        return 1.8;
+        return 1;
     }
     @Override
     public double minTemp()
     {
-        return -1.2;
+        return -1;
     }
 }

@@ -10,15 +10,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import javax.annotation.Nullable;
 
 @OnlyIn(Dist.CLIENT)
-public class SoulfireLampOverride implements IItemPropertyGetter
+public class NetherbrineLampOverride implements IItemPropertyGetter
 {
     @Override
     public float call(ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity)
     {
         if (stack.getOrCreateTag().getBoolean("isOn"))
         {
-            return stack.getOrCreateTag().getInt("fuel") > 43 ? 1 :
-                   stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 3;
+            return stack.getOrCreateTag().getInt("fuel") > 43 ? 3 :
+                   stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
         }
         else
         {

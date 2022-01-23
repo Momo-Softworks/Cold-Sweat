@@ -71,10 +71,10 @@ public class AddTempModifiers
                 }
             }
 
-            // Soul Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerTemp.hasModifier(player, SoulLampTempModifier.class, PlayerTemp.Types.AMBIENT))
+            // Nether Lamp
+            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerTemp.hasModifier(player, NetherLampTempModifier.class, PlayerTemp.Types.AMBIENT))
             {
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof NetherLampTempModifier);
             }
             else
             {
