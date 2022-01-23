@@ -1,15 +1,20 @@
 package net.momostudios.coldsweat.util;
 
 import net.minecraft.block.*;
+import net.minecraft.util.AxisRotation;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapePart;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,23 +121,23 @@ public class WorldInfo
         final double[] area = {0};
         if (!shape.isEmpty())
         {
-            for (AxisAlignedBB bb : shape.toBoundingBoxList())
+            shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
             {
-                switch (dir.getAxis())
-                {
-                    case X:
-                        area[0] += (bb.maxY - bb.minY) * (bb.maxZ - bb.minZ);
-                        break;
-                    case Y:
-                        area[0] += (bb.maxX - bb.minX) * (bb.maxZ - bb.minZ);
-                        break;
-                    case Z:
-                        area[0] += (bb.maxX - bb.minX) * (bb.maxY - bb.minY);
-                        break;
-                }
-                if (area[0] >= 1)
-                    return true;
-            }
+                if (area[0] < 1)
+                    switch (dir.getAxis())
+                    {
+                        case X:
+                            area[0] = (maxY - minY) * (maxZ - minZ);
+                            break;
+                        case Y:
+                            area[0] = (maxX - minX) * (maxZ - minZ);
+                            break;
+                        case Z:
+                            area[0] = (maxX - minX) * (maxY - minY);
+                            break;
+                    }
+            });
+            return area[0] >= 1;
         }
         return false;
     }

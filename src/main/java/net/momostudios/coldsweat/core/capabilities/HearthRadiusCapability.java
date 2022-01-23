@@ -41,7 +41,12 @@ public class HearthRadiusCapability implements IBlockStorageCap
 
     @Override
     public void addPaths(LinkedHashMap<BlockPos, SpreadPath> map) {
-        paths.putAll(map);
+        map.forEach((pos, path) -> {
+            if (!paths.containsKey(pos))
+            {
+                paths.put(pos, path);
+            }
+        });
     }
 
     @Override
