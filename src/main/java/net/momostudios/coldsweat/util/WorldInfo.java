@@ -99,7 +99,7 @@ public class WorldInfo
             if (state.isSolidSide(world, pos, toDir))
                 return false;
 
-            return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : !state.isSolidSide(world, pos, fromDir.getOpposite());
+            return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : fromDir != null && !state.isSolidSide(world, pos, fromDir.getOpposite());
         }
         return false;
     }
@@ -127,13 +127,13 @@ public class WorldInfo
                     switch (dir.getAxis())
                     {
                         case X:
-                            area[0] = (maxY - minY) * (maxZ - minZ);
+                            area[0] += (maxY - minY) * (maxZ - minZ);
                             break;
                         case Y:
-                            area[0] = (maxX - minX) * (maxZ - minZ);
+                            area[0] += (maxX - minX) * (maxZ - minZ);
                             break;
                         case Z:
-                            area[0] = (maxX - minX) * (maxY - minY);
+                            area[0] += (maxX - minX) * (maxY - minY);
                             break;
                     }
             });
