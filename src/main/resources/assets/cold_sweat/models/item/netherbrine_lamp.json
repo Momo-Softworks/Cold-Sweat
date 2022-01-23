@@ -158,8 +158,8 @@
 	"overrides":
 	[
 		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/netherbrine_lamp_off" },
-		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/netherbrine_lamp_dim" },
-		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/netherbrine_lamp_flickering" },
+		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/netherbrine_lamp_flickering" },
+		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/netherbrine_lamp_dim" },
 		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/netherbrine_lamp_full" }
 	]
 }
