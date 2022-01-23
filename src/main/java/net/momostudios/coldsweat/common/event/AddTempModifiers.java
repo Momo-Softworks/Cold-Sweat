@@ -34,6 +34,8 @@ public class AddTempModifiers
                 PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
                     PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
+                if (ModList.get().isLoaded("betterweather"))
+                    PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerTemp.Types.AMBIENT, false);
 
                 // Hearth
                 if (player.isPotionActive(ModEffects.INSULATION))
@@ -71,10 +73,10 @@ public class AddTempModifiers
                 }
             }
 
-            // Soul Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerTemp.hasModifier(player, SoulLampTempModifier.class, PlayerTemp.Types.AMBIENT))
+            // Nether Lamp
+            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerTemp.hasModifier(player, NetherLampTempModifier.class, PlayerTemp.Types.AMBIENT))
             {
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof SoulLampTempModifier);
+                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof NetherLampTempModifier);
             }
             else
             {

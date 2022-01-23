@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.common.temperature.modifier.sereneseasons;
+package net.momostudios.coldsweat.common.temperature.modifier.compat;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.momostudios.coldsweat.common.temperature.Temperature;

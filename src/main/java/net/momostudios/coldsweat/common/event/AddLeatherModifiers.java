@@ -20,6 +20,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddLeatherModifiers
 {
+    private static int leatherBootsInsulation = -1;
+    private static int leatherPantsInsulation = -1;
+    private static int leatherChestInsulation = -1;
+    private static int leatherHelmetInsulation = -1;
+
     @SubscribeEvent
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
@@ -43,28 +48,96 @@ public class AddLeatherModifiers
                 {
                     int helmetInsulation = getInsulatingArmor(helmetItem).value;
 
-                    if (helmetItem.getOrCreateTag().getBoolean("insulated") || helmetInsulation > 0)
+                    if (bootsItem.getOrCreateTag().getBoolean("insulated"))
+                    {
+                        if (leatherHelmetInsulation == -1)
+                        {
+                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            {
+                                if (list.get(0).equals("leather_boots"))
+                                {
+                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    break;
+                                }
+                            }
+                            if (leatherHelmetInsulation == -1)
+                                leatherHelmetInsulation = 4;
+                        }
+                        leatherMultiplier += leatherHelmetInsulation;
+                    }
+                    else if (helmetInsulation > 0)
                         leatherMultiplier += helmetInsulation;
                 }
                 if (chestplateItem != null)
                 {
                     int chestInsulation = getInsulatingArmor(chestplateItem).value;
 
-                    if (chestplateItem.getOrCreateTag().getBoolean("insulated") || chestInsulation > 0)
+                    if (bootsItem.getOrCreateTag().getBoolean("insulated"))
+                    {
+                        if (leatherChestInsulation == -1)
+                        {
+                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            {
+                                if (list.get(0).equals("leather_boots"))
+                                {
+                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    break;
+                                }
+                            }
+                            if (leatherChestInsulation == -1)
+                                leatherChestInsulation = 4;
+                        }
+                        leatherMultiplier += leatherChestInsulation;
+                    }
+                    else if (chestInsulation > 0)
                         leatherMultiplier += chestInsulation;
                 }
                 if (leggingsItem != null)
                 {
                     int legsInsulation = getInsulatingArmor(leggingsItem).value;
 
-                    if (leggingsItem.getOrCreateTag().getBoolean("insulated") || legsInsulation > 0)
+                    if (bootsItem.getOrCreateTag().getBoolean("insulated"))
+                    {
+                        if (leatherPantsInsulation == -1)
+                        {
+                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            {
+                                if (list.get(0).equals("leather_boots"))
+                                {
+                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    break;
+                                }
+                            }
+                            if (leatherPantsInsulation == -1)
+                                leatherPantsInsulation = 4;
+                        }
+                        leatherMultiplier += leatherPantsInsulation;
+                    }
+                    else if (legsInsulation > 0)
                         leatherMultiplier += legsInsulation;
                 }
                 if (bootsItem != null)
                 {
                     int bootsInsulation = getInsulatingArmor(bootsItem).value;
 
-                    if (leggingsItem.getOrCreateTag().getBoolean("insulated") || bootsInsulation > 0)
+                    if (bootsItem.getOrCreateTag().getBoolean("insulated"))
+                    {
+                        if (leatherBootsInsulation == -1)
+                        {
+                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            {
+                                if (list.get(0).equals("leather_boots"))
+                                {
+                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    break;
+                                }
+                            }
+                            if (leatherBootsInsulation == -1)
+                                leatherBootsInsulation = 4;
+                        }
+                        leatherMultiplier += leatherBootsInsulation;
+                    }
+                    else if (bootsInsulation > 0)
                         leatherMultiplier += bootsInsulation;
                 }
 

@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraftforge.client.model.animation.Animation;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,8 +34,8 @@ public class MixinBipedModel
     private void func_241654_b_(LivingEntity p_241654_1_)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT);
-        float armRot = MathHelperCS.toRadians(p_241654_1_.getPersistentData().getFloat("rightArmRot"));
-        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
+        float armRot = CSMath.toRadians(p_241654_1_.getPersistentData().getFloat("rightArmRot"));
+        float rotOffset = CSMath.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
         float rightArmRot = armRot + rotOffset;
 
         switch(this.rightArmPose)
@@ -79,8 +79,8 @@ public class MixinBipedModel
     private void func_241655_c_(LivingEntity p_241655_1_)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(p_241655_1_, HandSide.LEFT);
-        float armRot = MathHelperCS.toRadians(p_241655_1_.getPersistentData().getFloat("leftArmRot"));
-        float rotOffset = MathHelperCS.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
+        float armRot = CSMath.toRadians(p_241655_1_.getPersistentData().getFloat("leftArmRot"));
+        float rotOffset = CSMath.toRadians(Animation.getPartialTickTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
         float leftArmRot = armRot + rotOffset;
 
         switch(this.leftArmPose)

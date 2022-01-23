@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class WaterTempModifier extends TempModifier
@@ -28,7 +28,7 @@ public class WaterTempModifier extends TempModifier
             double factor = Math.min(-0.01, -0.01 - temp.get() / 50);
             double addAmount = player.isInWater() ? 0.3 : player.world.isRainingAt(player.getPosition()) ? 0.05 : factor;
 
-            setArgument("strength", MathHelperCS.clamp(strength + addAmount, 0, 10));
+            setArgument("strength", CSMath.clamp(strength + addAmount, 0, 10));
 
             if (!player.isInWater() && strength > 0.0)
             {
@@ -42,7 +42,7 @@ public class WaterTempModifier extends TempModifier
             }
             double ambientEffect = Math.min(0, temp.get() - ConfigCache.getInstance().minTemp);
 
-            return temp.get() + MathHelperCS.convertUnits(-strength, Units.F, Units.MC, false) + ambientEffect * (strength / 40);
+            return temp.get() + CSMath.convertUnits(-strength, Units.F, Units.MC, false) + ambientEffect * (strength / 40);
         }
         // Remove the modifier if an exception is thrown
         catch (Exception e)

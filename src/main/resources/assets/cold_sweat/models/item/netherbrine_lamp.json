@@ -1,12 +1,13 @@
 {
+	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "cold_sweat:items/soulfire_lamp/soulfire_lamp_glow",
-		"1": "cold_sweat:items/soulfire_lamp/soulfire_lamp_ornaments",
-		"2": "cold_sweat:items/soulfire_lamp/soulfire_lamp_top_0",
-		"3": "cold_sweat:items/soulfire_lamp/soulfire_lamp_top_1",
-		"4": "cold_sweat:items/soulfire_lamp/soulfire_lamp_bottom_0",
-		"5": "cold_sweat:items/soulfire_lamp/soulfire_lamp_bottom_1",
-		"particle": "cold_sweat:items/soulfire_lamp/soulfire_lamp_glow"
+		"0": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_body_0",
+		"1": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_ornaments",
+		"2": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_top_0",
+		"3": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_top_1",
+		"4": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_bottom_0",
+		"5": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_bottom_1",
+		"particle": "cold_sweat:items/netherbrine_lamp/netherbrine_lamp_body_1"
 	},
 	"elements": [
 		{
@@ -18,7 +19,7 @@
 				"east": {"uv": [0, 4, 8, 16], "texture": "#0"},
 				"south": {"uv": [0, 4, 8, 16], "texture": "#0"},
 				"west": {"uv": [0, 4, 8, 16], "texture": "#0"},
-				"up": {"uv": [0, 0, 8, 8], "texture": "#missing"},
+				"up": {"uv": [10, 10, 16, 16], "texture": "#1"},
 				"down": {"uv": [0, 0, 8, 8], "texture": "#missing"}
 			}
 		},
@@ -84,7 +85,7 @@
 				"south": {"uv": [10, 6, 16, 8], "texture": "#1"},
 				"west": {"uv": [10, 8, 16, 10], "texture": "#1"},
 				"up": {"uv": [10, 0, 16, 6], "texture": "#1"},
-				"down": {"uv": [0, 0, 6, 6], "texture": "#missing"}
+				"down": {"uv": [2, 2, 8, 8], "texture": "#5"}
 			}
 		},
 		{
@@ -98,6 +99,19 @@
 				"west": {"uv": [0, 0, 7, 7], "texture": "#1"},
 				"up": {"uv": [0, 0, 0, 7], "texture": "#missing"},
 				"down": {"uv": [0, 0, 0, 7], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "heart",
+			"from": [5.5, 8, 5.5],
+			"to": [10.5, 13, 10.5],
+			"faces": {
+				"north": {"uv": [10, 11, 15, 16], "texture": "#0"},
+				"east": {"uv": [10, 11, 15, 16], "texture": "#0"},
+				"south": {"uv": [10, 11, 15, 16], "texture": "#0"},
+				"west": {"uv": [10, 11, 15, 16], "texture": "#0"},
+				"up": {"uv": [10, 6, 15, 11], "texture": "#0"},
+				"down": {"uv": [10, 1, 15, 6], "texture": "#0"}
 			}
 		}
 	],
@@ -115,12 +129,12 @@
 		"firstperson_righthand": {
 			"rotation": [0, 101, 0],
 			"translation": [2, 0.5, 0],
-			"scale": [0.4, 0.5, 0.5]
+			"scale": [0.33, 0.5, 0.5]
 		},
 		"firstperson_lefthand": {
 			"rotation": [0, 101, 0],
-			"translation": [2, 0.5, 0],
-			"scale": [0.4, 0.5, 0.5]
+			"translation": [2, 1.75, 0],
+			"scale": [0.33, 0.5, 0.5]
 		},
 		"ground": {
 			"translation": [0, 3.5, 0],
@@ -143,9 +157,9 @@
 	},
 	"overrides":
 	[
-		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/soulfire_lamp_off" },
-		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/soulfire_lamp_full" },
-		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/soulfire_lamp_dim" },
-		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/soulfire_lamp_flickering" }
+		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/netherbrine_lamp_off" },
+		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/netherbrine_lamp_dim" },
+		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/netherbrine_lamp_flickering" },
+		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/netherbrine_lamp_full" }
 	]
 }

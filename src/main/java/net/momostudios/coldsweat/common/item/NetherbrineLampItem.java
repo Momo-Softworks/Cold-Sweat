@@ -7,17 +7,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.common.temperature.modifier.SoulLampTempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.NetherLampTempModifier;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerTemp;
 
-public class SoulfireLampItem extends Item
+public class NetherbrineLampItem extends Item
 {
-    public SoulfireLampItem()
+    public NetherbrineLampItem()
     {
         super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1));
     }
@@ -29,7 +29,7 @@ public class SoulfireLampItem extends Item
         {
             PlayerEntity player = (PlayerEntity) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = PlayerTemp.hasModifier(player, SoulLampTempModifier.class, PlayerTemp.Types.AMBIENT) ?
+            double temp = PlayerTemp.hasModifier(player, NetherLampTempModifier.class, PlayerTemp.Types.AMBIENT) ?
                     player.getPersistentData().getDouble("preLampTemp") : PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
 
             // Fuel the item on creation
@@ -45,13 +45,13 @@ public class SoulfireLampItem extends Item
                 {
                     // Drain fuel
                     if (player.ticksExisted % 10 == 0 && !(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.02f * (float) MathHelperCS.clamp(temp - ConfigCache.getInstance().maxTemp, 1, 3));
+                        addFuel(stack, -0.02f * (float) CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1, 3));
 
                     // Give effect to nearby players
                     AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
                     worldIn.getEntitiesWithinAABB(PlayerEntity.class, bb).forEach(e ->
                     {
-                        PlayerTemp.addModifier(e, new SoulLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                        PlayerTemp.addModifier(e, new NetherLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
 
                         e.getPersistentData().putInt("soulLampTimeout", 5);
                     });
@@ -69,8 +69,11 @@ public class SoulfireLampItem extends Item
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {
-                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                    stack.getOrCreateTag().putBoolean("isOn", true);
+                    if (!worldIn.isRemote)
+                    {
+                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                        stack.getOrCreateTag().putBoolean("isOn", true);
+                    }
 
                     // In case the player is on a server
                     if (!worldIn.isRemote)
@@ -83,8 +86,11 @@ public class SoulfireLampItem extends Item
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && stack.getOrCreateTag().getBoolean("isOn"))
                 {
-                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                    stack.getOrCreateTag().putBoolean("isOn", false);
+                    if (!worldIn.isRemote)
+                    {
+                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                        stack.getOrCreateTag().putBoolean("isOn", false);
+                    }
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);

@@ -52,7 +52,8 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierEvent.Init.Modifier event)
     {
-        String sereneseasons = "net.momostudios.coldsweat.common.temperature.modifier.sereneseasons.SereneSeasonsTempModifier";
+        String sereneseasons = "net.momostudios.coldsweat.common.temperature.modifier.compat.SereneSeasonsTempModifier";
+        String betterweather = "net.momostudios.coldsweat.common.temperature.modifier.compat.BetterWeatherTempModifier";
         try
         {
             event.addModifier(BlockTempModifier.class);
@@ -62,10 +63,14 @@ public class InitTempModifiers
             event.addModifier(MinecartTempModifier.class);
             event.addModifier(TimeTempModifier.class);
             event.addModifier(WaterskinTempModifier.class);
-            event.addModifier(SoulLampTempModifier.class);
+            event.addModifier(NetherLampTempModifier.class);
             if (ModList.get().isLoaded("sereneseasons")) event.addModifier((Class<TempModifier>) Class.forName(sereneseasons));
+            if (ModList.get().isLoaded("betterweather")) event.addModifier((Class<TempModifier>) Class.forName(betterweather));
             event.addModifier(WaterTempModifier.class);
             event.addModifier(HearthTempModifier.class);
+
+            if (ModList.get().isLoaded("sereneseasons") && ModList.get().isLoaded("betterweather"))
+                ColdSweat.LOGGER.warn("Multiple seasons mods are present! This may cause issues!");
         }
         catch (Exception e) {
             ColdSweat.LOGGER.error("Registering TempModifiers failed!");

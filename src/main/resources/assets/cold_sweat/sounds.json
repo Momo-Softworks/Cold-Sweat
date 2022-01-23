@@ -14,24 +14,24 @@
       }
     ]
   },
-  "item.soulfire_lamp.on":
+  "item.netherbrine_lamp.on":
   {
-    "subtitle": "item.soulfire_lamp.on",
+    "subtitle": "item.netherbrine_lamp.on",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/soulfire_lamp/soulfire_lamp_on",
+        "name": "cold_sweat:item/netherbrine_lamp/netherbrine_lamp_on",
         "stream": true
       }
     ]
   },
-  "item.soulfire_lamp.off":
+  "item.netherbrine_lamp.off":
   {
-    "subtitle": "item.soulfire_lamp.off",
+    "subtitle": "item.netherbrine_lamp.off",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/soulfire_lamp/soulfire_lamp_off",
+        "name": "cold_sweat:item/netherbrine_lamp/netherbrine_lamp_off",
         "stream": true
       }
     ]

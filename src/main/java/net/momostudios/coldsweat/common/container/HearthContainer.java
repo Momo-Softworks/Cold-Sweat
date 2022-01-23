@@ -11,7 +11,7 @@ import net.minecraft.util.IWorldPosCallable;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ContainerInit;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 
 import java.util.Objects;
 
@@ -113,7 +113,7 @@ public class HearthContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (MathHelperCS.isBetween(index, inventorySlots.size() - 9, inventorySlots.size() - 1))
+                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size() - 1))
                 {
                     if (!this.mergeItemStack(itemstack1, 1, inventorySlots.size() - 10, false))
                     {
@@ -121,7 +121,7 @@ public class HearthContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (MathHelperCS.isBetween(index, 1, inventorySlots.size() - 10))
+                else if (CSMath.isBetween(index, 1, inventorySlots.size() - 10))
                 {
                     if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
                     {

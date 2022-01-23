@@ -32,10 +32,10 @@ public class ClientSoundHandler
                     sound = ModSounds.FREEZE;
                     break;
                 case 1:
-                    sound = ModSounds.SOUL_LAMP_ON;
+                    sound = ModSounds.NETHER_LAMP_ON;
                     break;
                 case 2:
-                    sound = ModSounds.SOUL_LAMP_OFF;
+                    sound = ModSounds.NETHER_LAMP_OFF;
                     break;
                 default:
                     sound = SoundEvents.AMBIENT_CAVE;

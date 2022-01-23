@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.block.BoilerBlock;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class BoilerBlockEffect extends BlockEffect
@@ -14,7 +14,7 @@ public class BoilerBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(BoilerBlock.LIT))
         {
-            return MathHelperCS.blend(0.27, 0, distance, 0.5, 7);
+            return CSMath.blend(0.27, 0, distance, 0.5, 7);
         }
         return 0;
     }
@@ -27,6 +27,6 @@ public class BoilerBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertUnits(40, Units.F, Units.MC, false);
+        return CSMath.convertUnits(40, Units.F, Units.MC, false);
     }
 }
