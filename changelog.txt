@@ -279,6 +279,5 @@ Technical Changes:
 
 - Fixed crash that occurs when the Hearth is near an unloaded chunk
 
-
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
