@@ -8,12 +8,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerTemp;
 import net.momostudios.coldsweat.util.Units;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
@@ -21,6 +22,7 @@ import net.momostudios.coldsweat.util.registrylists.ModItems;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class AmbientGaugeDisplay
 {
+    private static double prevClientTemp = 0;
     public static double clientTemp = 0;
 
     static ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
@@ -31,7 +33,7 @@ public class AmbientGaugeDisplay
         PlayerEntity player = Minecraft.getInstance().player;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
-        (MathHelperCS.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
+        (CSMath.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
         player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showAmbient))
         {
             // Variables
@@ -43,7 +45,7 @@ public class AmbientGaugeDisplay
             boolean bobbing = CCS.iconBobbing();
 
             // Get player ambient temperature
-            double temp = MathHelperCS.convertUnits(clientTemp, CCS.celsius() ? Units.C : Units.F, Units.MC, true);
+            double temp = CSMath.convertUnits(clientTemp, CCS.celsius() ? Units.C : Units.F, Units.MC, true);
 
             // Set default color (white)
             int color = 14737376;
@@ -96,8 +98,9 @@ public class AmbientGaugeDisplay
             int bob = temp > max || temp < min ? (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15) : 15;
 
             // Render text
-            Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + (int) (clientTemp + CCS.tempOffset()) + "",
-                    (scaleX / 2f) + 107 + (Integer.toString((int) (clientTemp + CCS.tempOffset())).length() * -3), scaleY - bob, color);
+            int blendedTemp = (int) CSMath.blend(prevClientTemp, clientTemp, Animation.getPartialTickTime(), 0, 1);
+            Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + (blendedTemp + CCS.tempOffset()) + "",
+                    (scaleX / 2f) + 107 + (Integer.toString(blendedTemp + CCS.tempOffset()).length() * -3), scaleY - bob, color);
         }
     }
 
@@ -108,8 +111,9 @@ public class AmbientGaugeDisplay
         {
             boolean celsius = CCS.celsius();
 
-            double tempReadout = MathHelperCS.convertUnits(PlayerTemp.getTemperature(Minecraft.getInstance().player, PlayerTemp.Types.AMBIENT).get(),
+            double tempReadout = CSMath.convertUnits(PlayerTemp.getTemperature(Minecraft.getInstance().player, PlayerTemp.Types.AMBIENT).get(),
                     Units.MC, celsius ? Units.C : Units.F, true);
+            prevClientTemp = clientTemp;
 
             clientTemp = clientTemp + (tempReadout - clientTemp) / 10.0;
         }
