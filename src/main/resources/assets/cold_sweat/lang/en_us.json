@@ -5,7 +5,7 @@
   "block.cold_sweat.sewing_table":      "Sewing Table",
 
   "item.cold_sweat.minecart_insulation": "Minecart Insulation",
-  "item.cold_sweat.soulfire_lamp":       "Soulfire Lamp",
+  "item.cold_sweat.netherbrine_lamp":       "Netherbrine Lamp",
   "item.cold_sweat.thermometer":         "Thermometer",
   "item.cold_sweat.waterskin":           "Waterskin",
   "item.cold_sweat.waterskin.filled":    "Filled",
@@ -31,8 +31,8 @@
   "death.attack.hot.player":    "%1$s died of heatstroke whilst fighting %2$s",
 
   "entity.player.damage.freeze": "Player freezes",
-  "item.soulfire_lamp.on":       "Soulfire Lamp Ignites",
-  "item.soulfire_lamp.off":      "Soulfire Lamp Extinguishes",
+  "item.netherbrine_lamp.on":       "Netherbrine Lamp Ignites",
+  "item.netherbrine_lamp.off":      "Netherbrine Lamp Extinguishes",
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.temperature_details":  "Temperature Management",
