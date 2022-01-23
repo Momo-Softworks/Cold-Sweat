@@ -6,7 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class SoulFireBlockEffect extends BlockEffect
@@ -24,7 +24,7 @@ public class SoulFireBlockEffect extends BlockEffect
                     entity.getPersistentData().putBoolean("isInSoulFire", true);
             });
 
-            return MathHelperCS.blend(-0.2, 0, distance, 0.5, 7);
+            return CSMath.blend(-0.2, 0, distance, 0.5, 7);
         }
         return 0;
     }
@@ -37,6 +37,6 @@ public class SoulFireBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertUnits(-32, Units.F, Units.MC, false);
+        return CSMath.convertUnits(-32, Units.F, Units.MC, false);
     }
 }

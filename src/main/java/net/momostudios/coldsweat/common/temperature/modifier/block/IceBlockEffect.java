@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class IceBlockEffect extends BlockEffect
@@ -18,7 +18,7 @@ public class IceBlockEffect extends BlockEffect
                     state.getBlock() == Blocks.ICE ? 0.2 :
                     state.getBlock() == Blocks.PACKED_ICE ? 0.3 :
                     state.getBlock() == Blocks.BLUE_ICE ? 0.4 : 0;
-            return -MathHelperCS.blend(temp, 0, distance, 0.5, 1.5);
+            return -CSMath.blend(temp, 0, distance, 0.5, 1.5);
         }
         return 0;
     }
@@ -33,6 +33,6 @@ public class IceBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertUnits(-30, Units.F, Units.MC, false);
+        return CSMath.convertUnits(-30, Units.F, Units.MC, false);
     }
 }

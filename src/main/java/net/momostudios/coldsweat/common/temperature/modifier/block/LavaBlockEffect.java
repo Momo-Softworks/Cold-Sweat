@@ -5,7 +5,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class LavaBlockEffect extends BlockEffect
@@ -16,7 +16,7 @@ public class LavaBlockEffect extends BlockEffect
         if (hasBlock(state))
         {
             double temp = 0.05 + (15 - state.get(FlowingFluidBlock.LEVEL)) / 80d;
-            return MathHelperCS.blend(temp, 0, distance, 0.5, 7);
+            return CSMath.blend(temp, 0, distance, 0.5, 7);
         }
         return 0;
     }
@@ -29,6 +29,6 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxTemp() {
-        return MathHelperCS.convertUnits(1000, Units.F, Units.MC, false);
+        return CSMath.convertUnits(1000, Units.F, Units.MC, false);
     }
 }

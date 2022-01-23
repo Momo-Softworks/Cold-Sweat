@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.block.IceboxBlock;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.Units;
 
 public class IceboxBlockEffect extends BlockEffect
@@ -14,7 +14,7 @@ public class IceboxBlockEffect extends BlockEffect
     {
         if (this.hasBlock(state) && state.get(IceboxBlock.FROSTED))
         {
-            return MathHelperCS.blend(-0.27, 0, distance, 0.5, 5);
+            return CSMath.blend(-0.27, 0, distance, 0.5, 5);
         }
         return 0;
     }
@@ -27,6 +27,6 @@ public class IceboxBlockEffect extends BlockEffect
 
     @Override
     public double minTemp() {
-        return MathHelperCS.convertUnits(-40, Units.F, Units.MC, false);
+        return CSMath.convertUnits(-40, Units.F, Units.MC, false);
     }
 }

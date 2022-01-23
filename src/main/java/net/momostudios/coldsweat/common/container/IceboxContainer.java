@@ -14,7 +14,7 @@ import net.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 import java.util.Objects;
@@ -115,7 +115,7 @@ public class IceboxContainer extends Container
         {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
-            if (MathHelperCS.isBetween(index, 0, 9))
+            if (CSMath.isBetween(index, 0, 9))
             {
                 if (!this.mergeItemStack(itemstack1, 10, 46, true))
                 {
@@ -142,7 +142,7 @@ public class IceboxContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (MathHelperCS.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
+                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
                 {
                     if (!this.mergeItemStack(itemstack1, 10, 36, false))
                     {
@@ -150,7 +150,7 @@ public class IceboxContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (MathHelperCS.isBetween(index, 10, inventorySlots.size() - 9))
+                else if (CSMath.isBetween(index, 10, inventorySlots.size() - 9))
                 {
                     if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
                     {

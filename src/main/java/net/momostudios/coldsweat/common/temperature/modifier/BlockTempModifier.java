@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 
 public class BlockTempModifier extends TempModifier
 {
@@ -39,9 +39,9 @@ public class BlockTempModifier extends TempModifier
                         BlockEffect be = BlockEffectEntries.getEntries().getEntryFor(state.getBlock());
                         if (be != null)
                         {
-                            if (MathHelperCS.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
+                            if (CSMath.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
                             {
-                                totalTemp += be.getTemperature(player, state, blockpos, MathHelperCS.getDistance(player, blockpos.add(0.5, 0.5, 0.5)));
+                                totalTemp += be.getTemperature(player, state, blockpos, CSMath.getDistance(player, blockpos.add(0.5, 0.5, 0.5)));
                             }
                         }
                     } catch (Exception e) {}

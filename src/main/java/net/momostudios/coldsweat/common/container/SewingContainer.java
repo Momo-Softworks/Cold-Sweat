@@ -19,7 +19,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.core.init.ContainerInit;
 import net.momostudios.coldsweat.core.init.BlockInit;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 
 public class SewingContainer extends Container
 {
@@ -255,7 +255,7 @@ public class SewingContainer extends Container
         {
             itemstack = slot.getStack().copy();
             // Take from either input
-            if ((MathHelperCS.isBetween(index, 0, 1)) && slot.inventory instanceof SewingInventory)
+            if ((CSMath.isBetween(index, 0, 1)) && slot.inventory instanceof SewingInventory)
             {
                 if (playerIn.inventory.addItemStackToInventory(itemstack))
                 {
@@ -291,7 +291,7 @@ public class SewingContainer extends Container
                 this.inventory.setInventorySlotContents(0, itemstack);
                 this.getSlot(0).onSlotChanged();
             }
-            else if (MathHelperCS.isBetween(index, 3, 29))
+            else if (CSMath.isBetween(index, 3, 29))
             {
                 for (int i = 30; i < 38; i++)
                 {
@@ -314,7 +314,7 @@ public class SewingContainer extends Container
                     }
                 }
             }
-            else if (MathHelperCS.isBetween(index, 30, 38))
+            else if (CSMath.isBetween(index, 30, 38))
             {
                 for (int i = 3; i < 29; i++)
                 {

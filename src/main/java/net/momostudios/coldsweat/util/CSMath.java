@@ -3,7 +3,7 @@ package net.momostudios.coldsweat.util;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
-public class MathHelperCS
+public class CSMath
 {
     /**
      * Converts a double temperature to a different unit. If {@code from} and {@code to} are the same, returns {@code value}.<br>

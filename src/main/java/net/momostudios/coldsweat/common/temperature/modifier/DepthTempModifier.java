@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.util.MathHelperCS;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.WorldInfo;
 
 public class DepthTempModifier extends TempModifier
@@ -40,7 +40,7 @@ public class DepthTempModifier extends TempModifier
 
         // Gets the depth
         double factor = Math.max(0, weightedHeight - surfaceNumber);
-        double level = MathHelperCS.clamp((-1/30d) * factor + 1, 0, 1);
+        double level = CSMath.clamp((-1/30d) * factor + 1, 0, 1);
         return midTemp.get() + (temp.get() - midTemp.get()) * level;
     }
 
