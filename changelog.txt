@@ -268,5 +268,16 @@ Technical Changes:
 - The Hearth now uses block bounding box shape for spread detection (much more reliable)
 - Rebalanced block temperatures to have differing radii (radiuses)
 
+2.1.2
+- The Soulfire Lamp is now the Netherbrine Lamp
+      - Nothing serious has changed, but this rework brings it into closer parity with its crafting recipe
+- Lowered the rate at which the Hearth consumes fuel
+- Added compatibility for Better Weather
+- Fixed major underlying bug with armor insulation that made it not work properly
+- The ambient temperature gauge now smooths on a per-frame basis instead of per-tick
+    - This basically just makes it smoother for higher framerates (above ~30FPS)
+
+- Fixed crash that occurs when the Hearth is near an unloaded chunk
+
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
