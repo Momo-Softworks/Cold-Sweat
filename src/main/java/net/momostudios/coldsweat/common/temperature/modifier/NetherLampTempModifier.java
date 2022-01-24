@@ -20,6 +20,6 @@ public class NetherLampTempModifier extends TempModifier
 
     @Override
     public String getID() {
-        return "cold_sweat:netherbrine_lamp";
+        return "cold_sweat:nethernile_lamp";
     }
 }

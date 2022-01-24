@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import javax.annotation.Nullable;
 
 @OnlyIn(Dist.CLIENT)
-public class NetherbrineLampOverride implements IItemPropertyGetter
+public class NethernileLampOverride implements IItemPropertyGetter
 {
     @Override
     public float call(ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity)

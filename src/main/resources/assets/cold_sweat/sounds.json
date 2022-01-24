@@ -14,24 +14,24 @@
       }
     ]
   },
-  "item.netherbrine_lamp.on":
+  "item.nethernile_lamp.on":
   {
-    "subtitle": "item.netherbrine_lamp.on",
+    "subtitle": "item.nethernile_lamp.on",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/netherbrine_lamp/netherbrine_lamp_on",
+        "name": "cold_sweat:item/nethernile_lamp/nethernile_lamp_on",
         "stream": true
       }
     ]
   },
-  "item.netherbrine_lamp.off":
+  "item.nethernile_lamp.off":
   {
-    "subtitle": "item.netherbrine_lamp.off",
+    "subtitle": "item.nethernile_lamp.off",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/netherbrine_lamp/netherbrine_lamp_off",
+        "name": "cold_sweat:item/nethernile_lamp/nethernile_lamp_off",
         "stream": true
       }
     ]

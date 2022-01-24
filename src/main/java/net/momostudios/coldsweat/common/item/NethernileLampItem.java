@@ -15,9 +15,9 @@ import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerTemp;
 
-public class NetherbrineLampItem extends Item
+public class NethernileLampItem extends Item
 {
-    public NetherbrineLampItem()
+    public NethernileLampItem()
     {
         super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1));
     }
