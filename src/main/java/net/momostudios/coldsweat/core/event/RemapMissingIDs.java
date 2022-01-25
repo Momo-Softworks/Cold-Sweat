@@ -15,7 +15,7 @@ public class RemapMissingIDs
         event.getAllMappings().forEach(mapping -> {
             if (mapping.key.toString().equals("cold_sweat:soulfire_lamp"))
             {
-                mapping.remap(ModItems.NETHERNILE_LAMP);
+                mapping.remap(ModItems.HELLSPRING_LAMP);
             }
         });
     }

@@ -26,7 +26,7 @@ public class PlayerHelper
 
     public static boolean holdingLamp(LivingEntity player, HandSide hand)
     {
-        return PlayerHelper.getItemInHand(player, hand).getItem() == ModItems.NETHERNILE_LAMP;
+        return PlayerHelper.getItemInHand(player, hand).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
     public static void updateModifiers(PlayerEntity player)

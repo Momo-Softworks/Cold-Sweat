@@ -269,7 +269,7 @@ Technical Changes:
 - Rebalanced block temperatures to have differing radii (radiuses)
 
 2.1.2
-- The Soulfire Lamp is now the Nethernile Lamp
+- The Soulfire Lamp is now the Hellspring Lamp
       - Nothing serious has changed, but this rework brings it into closer parity with its crafting recipe
 - Lowered the rate at which the Hearth consumes fuel
 - Added compatibility for Better Weather

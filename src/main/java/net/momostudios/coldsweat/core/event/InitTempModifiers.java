@@ -63,7 +63,7 @@ public class InitTempModifiers
             event.addModifier(MinecartTempModifier.class);
             event.addModifier(TimeTempModifier.class);
             event.addModifier(WaterskinTempModifier.class);
-            event.addModifier(NetherLampTempModifier.class);
+            event.addModifier(HellLampTempModifier.class);
             if (ModList.get().isLoaded("sereneseasons")) event.addModifier((Class<TempModifier>) Class.forName(sereneseasons));
             if (ModList.get().isLoaded("betterweather")) event.addModifier((Class<TempModifier>) Class.forName(betterweather));
             event.addModifier(WaterTempModifier.class);

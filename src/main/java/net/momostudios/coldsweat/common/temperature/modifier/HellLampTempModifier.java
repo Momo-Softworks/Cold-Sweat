@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
 
-public class NetherLampTempModifier extends TempModifier
+public class HellLampTempModifier extends TempModifier
 {
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
@@ -20,6 +20,6 @@ public class NetherLampTempModifier extends TempModifier
 
     @Override
     public String getID() {
-        return "cold_sweat:nethernile_lamp";
+        return "cold_sweat:hellspring_lamp";
     }
 }

@@ -6,7 +6,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.momostudios.coldsweat.client.itemproperties.NethernileLampOverride;
+import net.momostudios.coldsweat.client.itemproperties.HellspringLampOverride;
 import net.momostudios.coldsweat.client.itemproperties.ThermometerOverride;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
@@ -21,7 +21,7 @@ public class ItemPropertyRegister
 
     public static void registerPropertyOverride()
     {
-        ItemModelsProperties.registerProperty(ModItems.NETHERNILE_LAMP, new ResourceLocation("cold_sweat:soulfire_state"), new NethernileLampOverride());
+        ItemModelsProperties.registerProperty(ModItems.HELLSPRING_LAMP, new ResourceLocation("cold_sweat:soulfire_state"), new HellspringLampOverride());
         ItemModelsProperties.registerProperty(ModItems.THERMOMETER, new ResourceLocation("cold_sweat:temperature"), new ThermometerOverride());
     }
 }

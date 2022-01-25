@@ -30,7 +30,7 @@ import net.momostudios.coldsweat.util.ItemEntry;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class SoulLampPutFuel
+public class HellLampPutFuel
 {
     static int time = 0;
 
@@ -48,7 +48,7 @@ public class SoulLampPutFuel
                 ItemStack holdingStack = player.inventory.getItemStack();
                 ItemStack slotStack = slot.getStack();
 
-                if (slot.canTakeStack(player) && slot.isEnabled() && inventoryScreen.getSlotUnderMouse().getStack().getItem() == ModItems.NETHERNILE_LAMP &&
+                if (slot.canTakeStack(player) && slot.isEnabled() && inventoryScreen.getSlotUnderMouse().getStack().getItem() == ModItems.HELLSPRING_LAMP &&
                 !holdingStack.isEmpty() && getItemEntry(holdingStack).value > 0)
                 {
                     if (slotStack.getOrCreateTag().getFloat("fuel") < 63)
@@ -70,7 +70,7 @@ public class SoulLampPutFuel
         if (event.getGui() instanceof ContainerScreen)
         {
             ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getGui();
-            if (inventoryScreen.getSlotUnderMouse() != null && inventoryScreen.getSlotUnderMouse().getStack().getItem() == ModItems.NETHERNILE_LAMP)
+            if (inventoryScreen.getSlotUnderMouse() != null && inventoryScreen.getSlotUnderMouse().getStack().getItem() == ModItems.HELLSPRING_LAMP)
             {
                 int fuelValue = getItemEntry(Minecraft.getInstance().player.inventory.getItemStack()).value * Minecraft.getInstance().player.inventory.getItemStack().getCount();
                 if (!Minecraft.getInstance().player.inventory.getItemStack().isEmpty())

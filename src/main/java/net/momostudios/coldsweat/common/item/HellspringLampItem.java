@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.common.temperature.modifier.NetherLampTempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.HellLampTempModifier;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -15,9 +15,9 @@ import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerTemp;
 
-public class NethernileLampItem extends Item
+public class HellspringLampItem extends Item
 {
-    public NethernileLampItem()
+    public HellspringLampItem()
     {
         super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1));
     }
@@ -29,7 +29,7 @@ public class NethernileLampItem extends Item
         {
             PlayerEntity player = (PlayerEntity) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = PlayerTemp.hasModifier(player, NetherLampTempModifier.class, PlayerTemp.Types.AMBIENT) ?
+            double temp = PlayerTemp.hasModifier(player, HellLampTempModifier.class, PlayerTemp.Types.AMBIENT) ?
                     player.getPersistentData().getDouble("preLampTemp") : PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
 
             // Fuel the item on creation
@@ -51,7 +51,7 @@ public class NethernileLampItem extends Item
                     AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
                     worldIn.getEntitiesWithinAABB(PlayerEntity.class, bb).forEach(e ->
                     {
-                        PlayerTemp.addModifier(e, new NetherLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                        PlayerTemp.addModifier(e, new HellLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
 
                         e.getPersistentData().putInt("soulLampTimeout", 5);
                     });

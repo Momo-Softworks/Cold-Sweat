@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.util.PlayerHelper;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class HandleSoulLampAnim
+public class HandleHellLampAnim
 {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)

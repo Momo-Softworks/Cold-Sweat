@@ -14,24 +14,24 @@
       }
     ]
   },
-  "item.nethernile_lamp.on":
+  "item.hellspring_lamp.on":
   {
-    "subtitle": "item.nethernile_lamp.on",
+    "subtitle": "item.hellspring_lamp.on",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/nethernile_lamp/nethernile_lamp_on",
+        "name": "cold_sweat:item/hellspring_lamp/hellspring_lamp_on",
         "stream": true
       }
     ]
   },
-  "item.nethernile_lamp.off":
+  "item.hellspring_lamp.off":
   {
-    "subtitle": "item.nethernile_lamp.off",
+    "subtitle": "item.hellspring_lamp.off",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/nethernile_lamp/nethernile_lamp_off",
+        "name": "cold_sweat:item/hellspring_lamp/hellspring_lamp_off",
         "stream": true
       }
     ]

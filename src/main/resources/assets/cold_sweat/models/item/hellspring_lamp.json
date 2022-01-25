@@ -1,13 +1,13 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "cold_sweat:items/nethernile_lamp/nethernile_lamp_body_0",
-		"1": "cold_sweat:items/nethernile_lamp/nethernile_lamp_ornaments",
-		"2": "cold_sweat:items/nethernile_lamp/nethernile_lamp_top_0",
-		"3": "cold_sweat:items/nethernile_lamp/nethernile_lamp_top_1",
-		"4": "cold_sweat:items/nethernile_lamp/nethernile_lamp_bottom_0",
-		"5": "cold_sweat:items/nethernile_lamp/nethernile_lamp_bottom_1",
-		"particle": "cold_sweat:items/nethernile_lamp/nethernile_lamp_body_1"
+		"0": "cold_sweat:items/hellspring_lamp/hellspring_lamp_body_0",
+		"1": "cold_sweat:items/hellspring_lamp/hellspring_lamp_ornaments",
+		"2": "cold_sweat:items/hellspring_lamp/hellspring_lamp_top_0",
+		"3": "cold_sweat:items/hellspring_lamp/hellspring_lamp_top_1",
+		"4": "cold_sweat:items/hellspring_lamp/hellspring_lamp_bottom_0",
+		"5": "cold_sweat:items/hellspring_lamp/hellspring_lamp_bottom_1",
+		"particle": "cold_sweat:items/hellspring_lamp/hellspring_lamp_body_1"
 	},
 	"elements": [
 		{
@@ -157,9 +157,9 @@
 	},
 	"overrides":
 	[
-		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/nethernile_lamp_off" },
-		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/nethernile_lamp_flickering" },
-		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/nethernile_lamp_dim" },
-		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/nethernile_lamp_full" }
+		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/hellspring_lamp_off" },
+		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/hellspring_lamp_flickering" },
+		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/hellspring_lamp_dim" },
+		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/hellspring_lamp_full" }
 	]
 }
