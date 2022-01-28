@@ -91,7 +91,7 @@ public class WorldInfo
     public static boolean canSpreadThrough(World world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
     {
         BlockPos pos = path.getPos();
-        Chunk chunk = world.getChunkProvider().getChunk(pos.getX() >> 4, pos.getZ() >> 4, false);
+        Chunk chunk = world.getChunkProvider().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk != null)
         {
             BlockState state = chunk.getBlockState(pos);
