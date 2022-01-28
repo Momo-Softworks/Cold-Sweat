@@ -1,6 +1,6 @@
 package net.momostudios.coldsweat.common.world;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 
 import javax.annotation.Nullable;
@@ -38,11 +38,11 @@ public class BlockEffectEntries
     }
 
     @Nullable
-    public BlockEffect getEntryFor(Block block)
+    public BlockEffect getEntryFor(BlockState block)
     {
         for (BlockEffect blockEffect : getList())
         {
-            if (blockEffect.hasBlock(block.getDefaultState()))
+            if (blockEffect.hasBlock(block))
                 return blockEffect;
         }
         return null;
