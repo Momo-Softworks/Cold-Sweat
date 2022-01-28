@@ -9,6 +9,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
+import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.CustomDamageTypes;
 import net.momostudios.coldsweat.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.util.PlayerTemp;
@@ -22,97 +23,89 @@ public class PlayerTempUpdater
         if (event.phase == TickEvent.Phase.END)
         {
             PlayerEntity player = event.player;
-
-            /*
-             * Runs the calculate() method for every TempModifier on the player
-             */
-            double ambientTemp = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT), player).get();
-            double bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get();
             ConfigCache config = ConfigCache.getInstance();
 
+            double ambientTemp = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT), player).get();
+            Temperature bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
+
+            // Apply ambient temperature modifiers
             PlayerTemp.setTemperature(player, new Temperature(ambientTemp), PlayerTemp.Types.AMBIENT);
 
             double maxTemp = config.maxTemp;
             double minTemp = config.minTemp;
 
-            Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
+            double tempRate = 7.0d;
 
             //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
-            if (ambientTemp > maxTemp && !player.isCreative())
+            if (ambientTemp > maxTemp && !player.isCreative() && !player.isSpectator())
             {
-                temp.add((float) new Temperature((float) Math.abs(maxTemp - ambientTemp) / 7f)
+                bodyTemp.add(new Temperature((float) Math.abs(maxTemp - ambientTemp) / tempRate)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
             }
             //Return the player's temperature back to 0
-            else if (bodyTemp > 0)
+            else if (bodyTemp.get() > 0)
             {
-                temp.add((float) -Math.min(Math.max(0.1, Math.abs(ambientTemp - maxTemp) / 5f) * config.rate, bodyTemp));
+                // Limits the return rate to (config.rate / 10) per tick
+                // Also sets the temperature to zero if it's close enough to not matter
+                bodyTemp.add(-CSMath.clamp((Math.abs(ambientTemp - maxTemp) / tempRate) * config.rate, bodyTemp.get(), config.rate / 10));
             }
 
             //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
-            if (ambientTemp < minTemp && !player.isCreative())
+            if (ambientTemp < minTemp && !player.isCreative() && !player.isSpectator())
             {
-                temp.add((float) -new Temperature((float) Math.abs(minTemp - ambientTemp) / 7f)
+                bodyTemp.add(-new Temperature((float) Math.abs(minTemp - ambientTemp) / tempRate)
                         .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
             }
             //Return the player's temperature back to 0
-            else if (bodyTemp < 0)
+            else if (bodyTemp.get() < 0)
             {
-                temp.add((float) Math.min(Math.max(0.1, Math.abs(ambientTemp - minTemp) / 5f) * config.rate, -bodyTemp));
+                // Limits the return rate to (config.rate / 10) per tick
+                // Also sets the temperature to zero if it's close enough to not matter
+                bodyTemp.add(CSMath.clamp((Math.abs(ambientTemp - minTemp) / tempRate) * config.rate, -bodyTemp.get(), config.rate / 10));
             }
 
-            //Calculates the player's temperature
+            // Calculate body/base temperatures with modifiers
+            Temperature body = bodyTemp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player);
+            Temperature base = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player);
+
+            // Set the player's body temperature
+            PlayerTemp.setTemperature(player, body, PlayerTemp.Types.BODY);
+
+            // Set the player's base temperature
+            PlayerTemp.setTemperature(player, base, PlayerTemp.Types.BASE);
+
+            // Sets the player's composite temperature to BASE + BODY
             PlayerTemp.setTemperature
             (
                 player,
-                temp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player),
-                PlayerTemp.Types.BODY
-            );
-            PlayerTemp.setTemperature
-            (
-                player,
-                new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player),
-                PlayerTemp.Types.BASE
-            );
-            PlayerTemp.setTemperature
-            (
-                player,
-                PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player).add(
-                        PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player)),
+                new Temperature(CSMath.clamp(base.add(body).get(), -150, 150)),
                 PlayerTemp.Types.COMPOSITE
             );
-
-            //Ensure a maximum and minimum cap of 150 or -150 for body temperature (does not include base offset)
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get() > 150)
-            {
-                PlayerTemp.setTemperature(player, new Temperature(150), PlayerTemp.Types.BODY);
-            }
-            if (PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get() < -150)
-            {
-                PlayerTemp.setTemperature(player, new Temperature(-150), PlayerTemp.Types.BODY);
-            }
 
             //Deal damage to the player if temperature is critical
             boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && config.fireRes;
             boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && config.iceRes;
             if (player.ticksExisted % 40 == 0)
             {
-                boolean scales = config.damageScaling;
-                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
+                boolean damageScaling = config.damageScaling;
+                Temperature composite = PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE);
+
+                if (composite.get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
                 {
-                    player.attackEntityFrom(scales ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2);
+                    player.attackEntityFrom(damageScaling ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2f);
                 }
-                if (PlayerTemp.getTemperature(player, PlayerTemp.Types.COMPOSITE).get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
+                if (composite.get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
                 {
-                    player.attackEntityFrom(scales ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2);
+                    player.attackEntityFrom(damageScaling ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2f);
                 }
             }
         }
     }
 
     @SubscribeEvent
-    public static void worldTickEvent(TickEvent.WorldTickEvent event)
+    public static void serverSyncConfigToCache(TickEvent.WorldTickEvent event)
     {
+        // Syncs the server's config files to the cache
         if (!event.world.isRemote && event.world.getGameTime() % 20 == 0)
             ConfigCache.getInstance().writeValues(ColdSweatConfig.getInstance());
     }

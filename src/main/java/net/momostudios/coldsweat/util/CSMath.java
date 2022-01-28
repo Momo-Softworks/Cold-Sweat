@@ -2,6 +2,7 @@ package net.momostudios.coldsweat.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class CSMath
 {
@@ -66,16 +67,16 @@ public class CSMath
      * @param factor The "progress" between pointA and pointB.
      * @param rangeMin The minimum of the range of values over which to interpolate.
      * @param rangeMax The maximum of the range of values over which to interpolate.
-     * @return
+     * @return The interpolated value.
      */
     public static double blend(double pointA, double pointB, double factor, double rangeMin, double rangeMax) {
         return ((1 / (rangeMax - rangeMin)) * (clamp(factor, rangeMin, rangeMax) - rangeMin)) * (pointB - pointA) + pointA;
     }
 
-    public static double getDistance(Entity entity, BlockPos pos) {
-        double xDistance = Math.max(0, Math.abs(entity.getPosX() - pos.getX()) - entity.getWidth() / 2);
-        double yDistance = Math.max(0, Math.abs((entity.getPosY() + entity.getHeight() / 2) - pos.getY()) - entity.getHeight() / 2);
-        double zDistance = Math.max(0, Math.abs(entity.getPosZ() - pos.getZ()) - entity.getWidth() / 2);
+    public static double getDistance(Entity entity, Vector3d pos) {
+        double xDistance = Math.max(0, Math.abs(entity.getPosX() - pos.x) - entity.getWidth() / 2);
+        double yDistance = Math.max(0, Math.abs((entity.getPosY() + entity.getHeight() / 2) - pos.y) - entity.getHeight() / 2);
+        double zDistance = Math.max(0, Math.abs(entity.getPosZ() - pos.z) - entity.getWidth() / 2);
         return Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
     }
 }
