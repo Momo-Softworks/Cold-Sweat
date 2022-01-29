@@ -44,8 +44,7 @@ public class WorldTemperatureConfig
         BUILDER.push("DimensionTemperatureOffset");
         dimensionOffsets = BUILDER
             .defineList("Dimension Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:overworld", "0.2"),
-                    Arrays.asList("minecraft:the_nether", "0.3"),
+                    Arrays.asList("minecraft:the_nether", "0.5"),
                     Arrays.asList("minecraft:the_end", "-0.1")
             ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
@@ -71,7 +70,36 @@ public class WorldTemperatureConfig
         BUILDER.push("BiomeTemperatureOffsets");
         biomeOffsets = BUILDER
             .defineList("Biome Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:soul_sand_valley", "-0.5")
+                    Arrays.asList("minecraft:soul_sand_valley", "-0.5"),
+
+                    Arrays.asList("minecraft:plains", "0.3"),
+
+                    Arrays.asList("minecraft:bamboo_jungle", "0.2"),
+                    Arrays.asList("minecraft:bamboo_jungle_hills", "0.2"),
+                    Arrays.asList("minecraft:jungle", "0.2"),
+                    Arrays.asList("minecraft:jungle_hills", "0.2"),
+                    Arrays.asList("minecraft:jungle_edge", "0.2"),
+                    Arrays.asList("minecraft:modified_jungle", "0.2"),
+                    Arrays.asList("minecraft:modified_jungle_edge", "0.2"),
+
+                    Arrays.asList("minecraft:desert", "-0.2"),
+                    Arrays.asList("minecraft:desert_hills", "-0.2"),
+                    Arrays.asList("minecraft:desert_lakes", "-0.3"),
+
+                    Arrays.asList("minecraft:giant_spruce_taiga", "0.2"),
+                    Arrays.asList("minecraft:giant_spruce_taiga_hills", "0.2"),
+
+                    Arrays.asList("minecraft:savanna", "0.2"),
+                    Arrays.asList("minecraft:savanna_plateau", "0.2"),
+                    Arrays.asList("minecraft:shattered_savanna_plateau", "0.2"),
+
+                    Arrays.asList("minecraft:taiga", "0.2"),
+                    Arrays.asList("minecraft:taiga_hills", "0.2"),
+                    Arrays.asList("minecraft:taiga_mountains", "0.2"),
+                    Arrays.asList("minecraft:snowy_taiga", "0.2"),
+                    Arrays.asList("minecraft:snowy_taiga_hills", "0.2"),
+                    Arrays.asList("minecraft:snowy_taiga_mountains", "0.2"),
+                    Arrays.asList("minecraft:snowy_mountains", "0.2")
             ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
         BUILDER.pop();
 
