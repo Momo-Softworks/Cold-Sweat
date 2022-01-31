@@ -47,7 +47,7 @@ public class PlayerTempUpdater
             {
                 // Limits the return rate to (config.rate / 10) per tick
                 // Also sets the temperature to zero if it's close enough to not matter
-                bodyTemp.add(-CSMath.clamp((Math.abs(ambientTemp - maxTemp) / tempRate) * config.rate, bodyTemp.get(), config.rate / 10));
+                bodyTemp.add(-getBodyReturnRate(ambientTemp, maxTemp, config.rate, bodyTemp.get()));
             }
 
             //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
@@ -61,7 +61,7 @@ public class PlayerTempUpdater
             {
                 // Limits the return rate to (config.rate / 10) per tick
                 // Also sets the temperature to zero if it's close enough to not matter
-                bodyTemp.add(CSMath.clamp((Math.abs(ambientTemp - minTemp) / tempRate) * config.rate, -bodyTemp.get(), config.rate / 10));
+                bodyTemp.add(getBodyReturnRate(ambientTemp, minTemp, config.rate, bodyTemp.get()));
             }
 
             // Calculate body/base temperatures with modifiers
@@ -100,6 +100,14 @@ public class PlayerTempUpdater
                 }
             }
         }
+    }
+
+    // Used for returning the player's temperature back to 0
+    private static double getBodyReturnRate(double ambient, double cap, double rate, double bodyTemp)
+    {
+        double tempRate = 7.0d;
+        double changeBy = Math.max((Math.abs(ambient - cap) / tempRate) * rate, Math.abs(rate / 10));
+        return Math.min(Math.abs(bodyTemp), changeBy);
     }
 
     @SubscribeEvent
