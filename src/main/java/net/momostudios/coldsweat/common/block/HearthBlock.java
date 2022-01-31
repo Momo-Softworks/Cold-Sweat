@@ -13,16 +13,12 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -32,15 +28,15 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 
 import java.util.*;
 
@@ -125,10 +121,40 @@ public class HearthBlock extends Block
     {
         if (!worldIn.isRemote)
         {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if (te instanceof HearthTileEntity)
+            if (worldIn.getTileEntity(pos) instanceof HearthTileEntity)
             {
-                NetworkHooks.openGui((ServerPlayerEntity) player, (HearthTileEntity) te, pos);
+                HearthTileEntity te = (HearthTileEntity) worldIn.getTileEntity(pos);
+                ItemStack stack = player.getHeldItem(hand);
+                int itemFuel = te.getItemFuel(stack);
+
+                if (itemFuel != 0 && (itemFuel > 0 ? te.getHotFuel() : te.getColdFuel()) < HearthTileEntity.MAX_FUEL)
+                {
+                    if (!player.isCreative())
+                    {
+                        if (stack.hasContainerItem())
+                        {
+                            ItemStack container = stack.getContainerItem();
+                            stack.shrink(1);
+                            player.inventory.addItemStackToInventory(container);
+                        }
+                        else
+                        {
+                            stack.shrink(1);
+                        }
+                    }
+                    te.addFuel(itemFuel);
+                    te.updateFuelState();
+
+                    worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY,
+                            SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+                            new HearthFuelSyncMessage(te.getPos(), te.getHotFuel(), te.getColdFuel()));
+                }
+                else
+                {
+                    NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+                }
             }
         }
         return ActionResultType.SUCCESS;

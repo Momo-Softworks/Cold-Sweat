@@ -20,6 +20,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
@@ -32,6 +33,8 @@ import net.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
+import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import net.momostudios.coldsweat.util.*;
 import net.momostudios.coldsweat.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.util.registrylists.ModSounds;
@@ -53,7 +56,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     private boolean shouldUseHotFuel = false;
     private boolean shouldUseColdFuel = false;
 
-    protected static int MAX_FUEL = 1000;
+    public static final int MAX_FUEL = 1000;
 
     public HearthTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -225,33 +228,23 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Input fuel types
-        if (!getFuelItem(this.getItemInSlot(0)).isEmpty())
+        if (getItemFuel(this.getItemInSlot(0)) != 0)
         {
             ItemStack fuel = this.getItemInSlot(0);
-            int amount = (int) getFuelItem(this.getItemInSlot(0)).get(1);
-            if (this.getHotFuel() <= MAX_FUEL - amount * 0.75 && amount > 0)
+            int amount = getItemFuel(this.getItemInSlot(0));
+            if ((amount > 0 ? getHotFuel() : getColdFuel()) <= MAX_FUEL - Math.abs(amount) * 0.75)
             {
                 if (fuel.hasContainerItem() && fuel.getCount() == 1)
                 {
                     this.setItemInSlot(0, fuel.getContainerItem());
                 }
                 else this.getItemInSlot(0).shrink(1);
-                this.setHotFuel(this.getHotFuel() + amount);
-            }
-
-            if (this.getColdFuel() <= MAX_FUEL + amount * 0.75 && amount < 0)
-            {
-                if (fuel.hasContainerItem() && fuel.getCount() == 1)
-                {
-                    this.setItemInSlot(0, fuel.getContainerItem());
-                }
-                else this.getItemInSlot(0).shrink(1);
-                this.setColdFuel(this.getColdFuel() - amount);
+                this.addFuel(amount);
             }
         }
 
         // Drain fuel
-        if (this.ticksExisted % 80 == 0)
+        if (!world.isRemote && this.ticksExisted % 80 == 0)
         {
             if (this.getColdFuel() > 0 && shouldUseColdFuel)
             {
@@ -263,18 +256,16 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             }
         }
 
+        // Update fuel for clients
+        if (!world.isRemote && ticksExisted % 40 == 0)
+        {
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HearthFuelSyncMessage(pos, getHotFuel(), getColdFuel()));
+        }
+
         // Update BlockState
         if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
         {
-            BlockState state = world.getBlockState(pos);
-            int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
-            int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
-
-            BlockState desiredState = state.with(HearthBlock.WATER, waterLevel).with(HearthBlock.LAVA, lavaLevel);
-            if (state.get(HearthBlock.WATER) != waterLevel || state.get(HearthBlock.LAVA) != lavaLevel)
-            {
-                world.setBlockState(pos, desiredState);
-            }
+            updateFuelState();
         }
 
         // Particles
@@ -335,19 +326,18 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 -> cap2.setPaths(map));
     }
 
-    public List getFuelItem(ItemStack item)
+    public int getItemFuel(ItemStack item)
     {
-        List returnList = Arrays.asList(item, 0);
         for (List<String> iterator : new ItemSettingsConfig().hearthItems())
         {
             String testItem = iterator.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                returnList = Arrays.asList(item, Integer.parseInt(iterator.get(1)));
+                return Integer.parseInt(iterator.get(1));
             }
         }
-        return returnList;
+        return 0;
     }
 
     public ItemStack getItemInSlot(int index)
@@ -400,6 +390,31 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         if (amount == 0 && prevFuel > 0)
             world.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+    }
+
+    public void addFuel(int amount)
+    {
+        if (amount > 0)
+        {
+            setHotFuel(getHotFuel() + Math.abs(amount));
+        }
+        else if (amount < 0)
+        {
+            setColdFuel(getColdFuel() + Math.abs(amount));
+        }
+    }
+
+    public void updateFuelState()
+    {
+        BlockState state = world.getBlockState(pos);
+        int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
+        int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
+
+        BlockState desiredState = state.with(HearthBlock.WATER, waterLevel).with(HearthBlock.LAVA, lavaLevel);
+        if (state.get(HearthBlock.WATER) != waterLevel || state.get(HearthBlock.LAVA) != lavaLevel)
+        {
+            world.setBlockState(pos, desiredState);
+        }
     }
 
     @Override

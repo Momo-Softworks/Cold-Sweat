@@ -31,9 +31,7 @@ public class HearthContainer extends Container
             @Override
             public boolean isItemValid(ItemStack stack)
             {
-                if (!te.getFuelItem(stack).isEmpty())
-                    return (int) te.getFuelItem(stack).get(1) != 0;
-                else return false;
+                return te.getItemFuel(stack) != 0;
             }
         });
 
@@ -106,7 +104,7 @@ public class HearthContainer extends Container
             }
             else
             {
-                if ((int) this.te.getFuelItem(itemstack).get(1) != 0)
+                if (this.te.getItemFuel(itemstack)!= 0)
                 {
                     if (!this.mergeItemStack(itemstack1, 0, 1, false))
                     {

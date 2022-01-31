@@ -34,6 +34,7 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(5, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
         INSTANCE.registerMessage(6, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
         INSTANCE.registerMessage(7, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
+        INSTANCE.registerMessage(8, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
     }
     
     public static void writeConfigCacheToBuffer(ConfigCache config, PacketBuffer buffer)
