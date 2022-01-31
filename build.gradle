@@ -23,6 +23,9 @@ java {
     archivesBaseName = 'ColdSweat'
     toolchain.languageVersion = JavaLanguageVersion.of(8)
 }
+compileJava {
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+}
 
 minecraft {
     mappings channel: 'snapshot', version: '20210309-1.16.5'

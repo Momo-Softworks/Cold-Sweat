@@ -5,7 +5,7 @@
   "block.cold_sweat.sewing_table":      "Tavolo Da Cucito",
 
   "item.cold_sweat.minecart_insulation": "Insulazione Per Carrello Da Miniera",
-  "item.cold_sweat.soulfire_lamp":       "Soulfire Lamp",
+  "item.cold_sweat.hellspring_lamp":     "Lampada Hellspring",
   "item.cold_sweat.thermometer":         "Termometro",
   "item.cold_sweat.waterskin":           "Otre",
   "item.cold_sweat.waterskin.filled":    "Pieno",
@@ -45,35 +45,19 @@
   "cold_sweat.config.difficulty.hard.name":         "Difficile",
   "cold_sweat.config.difficulty.custom.name":       "Personalizzata",
 
-  "cold_sweat.config.difficulty.super_easy.description1":  "La temperatura minima abitabile è §940§r °F / §94.5§r °C",
-  "cold_sweat.config.difficulty.super_easy.description2":  "La temperatura massima abitabile è §c120§r °F / §c49§r °C",
-  "cold_sweat.config.difficulty.super_easy.description3":  "Tasso di variazione della temperatura corporea ridotto del §e50%§r",
-  "cold_sweat.config.difficulty.super_easy.description4":  "Temperatura Ambientale §l§nis§r é visibile senza un termometro",
-  "cold_sweat.config.difficulty.super_easy.description5":  "Il danno fa §l§nnot§r in base alla difficoltà del gioco",
-  "cold_sweat.config.difficulty.super_easy.description6":  "Le pozioni di resistenza al fuoco e freddo sono §l§nenabled§r",
+  "cold_sweat.config.difficulty.description.min_temp":        "La temperatura minima abitabile è %d",
+  "cold_sweat.config.difficulty.description.max_temp":        "La temperatura massima abitabile è %d",
+  "cold_sweat.config.difficulty.description.rate.decrease":   "Tasso di variazione della temperatura corporea ridotto del %d",
+  "cold_sweat.config.difficulty.description.rate.increase":   "Tasso di variazione della temperatura corporea aumentata del %d",
+  "cold_sweat.config.difficulty.description.rate.normal":     "Tasso di variazione della temperatura corporea è normale",
+  "cold_sweat.config.difficulty.description.ambient_on":      "Temperatura Ambientale %dis%d é visibile senza un termometro",
+  "cold_sweat.config.difficulty.description.ambient_off":     "Temperatura Ambientale è %dnot%d visibile senza un termometro",
+  "cold_sweat.config.difficulty.description.scaling_on":      "Il danno %dfa%d scala secondo la difficoltà del gioco",
+  "cold_sweat.config.difficulty.description.scaling_off":     "Il danno %dnon%d scala in base alla difficoltà del gioco",
+  "cold_sweat.config.difficulty.description.potions_on":      "Le pozioni di resistenza al fuoco e freddo sono %denabled%d",
+  "cold_sweat.config.difficulty.description.potions_off":     "Le pozioni di resistenza al fuoco e freddo sono %ddisabled%d",
 
-  "cold_sweat.config.difficulty.easy.description1":  "La temperatura minima abitabile è §945§r °F / §97§r °C",
-  "cold_sweat.config.difficulty.easy.description2":  "La temperatura massima abitabile è §c115§r °F / §c46§r °C",
-  "cold_sweat.config.difficulty.easy.description3":  "Tasso di variazione della temperatura corporea ridotto del §e25%§r",
-  "cold_sweat.config.difficulty.easy.description4":  "Temperatura Ambientale §l§nis§r é visibile senza un termometro",
-  "cold_sweat.config.difficulty.easy.description5":  "Il danno fa §l§nnot§r in base alla difficoltà del gioco",
-  "cold_sweat.config.difficulty.easy.description6":  "Le pozioni di resistenza al fuoco e freddo sono §l§nenabled§r",
-
-  "cold_sweat.config.difficulty.normal.description1":  "La temperatura minima abitabile è §950§r °F / §910§r °C",
-  "cold_sweat.config.difficulty.normal.description2":  "La temperatura massima abitabile è §c110§r °F / §c43§r °C",
-  "cold_sweat.config.difficulty.normal.description3":  "Tasso di variazione della temperatura corporea è normale",
-  "cold_sweat.config.difficulty.normal.description4":  "Temperatura Ambientale è §l§nnot§r Temperatura Ambientale",
-  "cold_sweat.config.difficulty.normal.description5":  "Il danno varia §l§ndoes§r in base alla difficoltà del gioco",
-  "cold_sweat.config.difficulty.normal.description6":  "Le pozioni di resistenza al fuoco e freddo sono §l§ndisabled§r",
-
-  "cold_sweat.config.difficulty.hard.description1":  "La temperatura minima abitabile è §960§r °F / §915.5§r °C",
-  "cold_sweat.config.difficulty.hard.description2":  "La temperatura massima abitabile è §c100§r °F / §c37.5§r °C",
-  "cold_sweat.config.difficulty.hard.description3":  "Tasso di variazione della temperatura corporea aumentata del §e50%§r",
-  "cold_sweat.config.difficulty.hard.description4":  "Temperatura Ambientale è §l§nnot§r visibile senza un termometro",
-  "cold_sweat.config.difficulty.hard.description5":  "Il danno varia §l§ndoes§r in base alla difficoltà del gioco",
-  "cold_sweat.config.difficulty.hard.description6":  "Le pozioni di resistenza al fuoco e freddo sono §l§ndisabled§r",
-
-  "cold_sweat.config.difficulty.custom.description1":  "Utilizzando Impostazioni Personalizzate",
+  "cold_sweat.config.difficulty.description.custom":  "Utilizzando Impostazioni Personalizzate",
 
   "cold_sweat.config.animal_temperature.name":      "Temperatura dell'animale",
   "cold_sweat.config.units.name":                   "Unità",
@@ -100,5 +84,5 @@
   "commands.cold_sweat.temperature.set.self.result":  "Imposta la tua temperatura a",
   "commands.cold_sweat.temperature.set.other.result": "Imposta la temperatura di %d a",
   "commands.cold_sweat.temperature.set.all.result":   "Imposta la temperatura di %d giocatori a",
-  "commands.cold_sweat.temperature.get.result":       "La temperatura corporea di %d è",
+  "commands.cold_sweat.temperature.get.result":       "La temperatura corporea di %d è"
 }

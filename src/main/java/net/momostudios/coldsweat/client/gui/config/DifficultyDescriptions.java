@@ -1,74 +1,106 @@
 package net.momostudios.coldsweat.client.gui.config;
 
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.momostudios.coldsweat.util.CSMath;
+import net.momostudios.coldsweat.util.Units;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class DifficultyDescriptions
 {
-    public static List<ITextComponent> getListFor(int difficulty)
+    private static final String bl = TextFormatting.BLUE.toString();
+    private static final String rd = TextFormatting.RED.toString();
+    private static final String ye = TextFormatting.YELLOW.toString();
+    private static final String rs = TextFormatting.RESET.toString();
+    private static final String bold = TextFormatting.BOLD.toString();
+    private static final String under = TextFormatting.UNDERLINE.toString();
+
+    public static List<String> getListFor(int difficulty)
     {
-        return  difficulty == 0 ? superEasyDescription() :
-                difficulty == 1 ? easyDescription() :
-                difficulty == 2 ? normalDescription() :
-                difficulty == 3 ? hardDescription() :
-                                  customDescription();
+        switch (difficulty)
+        {
+            case 0:
+                return superEasyDescription();
+            case 1:
+                return easyDescription();
+            case 2:
+                return normalDescription();
+            case 3:
+                return hardDescription();
+            default:
+                return customDescription();
+        }
     }
 
-    public static List<ITextComponent> superEasyDescription()
+    public static List<String> superEasyDescription()
     {
         return Arrays.asList(
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description1"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description2"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description3"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description4"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description5"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.description6")
+                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(40, bl)),
+                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(120, rd)),
+                getTrans("cold_sweat.config.difficulty.description.rate.decrease", ye+"50%"+rs),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.ambient_on", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_off", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_on", bold + under, rs).getString()
         );
     }
 
-    public static List<ITextComponent> easyDescription()
+    public static List<String> easyDescription()
     {
         return Arrays.asList(
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description1"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description2"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description3"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description4"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description5"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.easy.description6")
+                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(45, bl)),
+                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(110, rd)),
+                getTrans("cold_sweat.config.difficulty.description.rate.decrease", ye+"25%"+rs),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.ambient_on", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_off", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_on", bold + under, rs).getString()
         );
     }
 
-    public static List<ITextComponent> normalDescription()
+    public static List<String> normalDescription()
     {
         return Arrays.asList(
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description1"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description2"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description3"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description4"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description5"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.normal.description6")
+                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(50, bl)),
+                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(100, rd)),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.rate.normal").getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.ambient_off", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_on", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_off", bold + under, rs).getString()
         );
     }
 
-    public static List<ITextComponent> hardDescription()
+    public static List<String> hardDescription()
     {
         return Arrays.asList(
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description1"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description2"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description3"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description4"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description5"),
-                new TranslationTextComponent("cold_sweat.config.difficulty.hard.description6")
+                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(60, bl)),
+                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(90, rd)),
+                getTrans("cold_sweat.config.difficulty.description.rate.increase", ye+"50%"+rs),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.ambient_off", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_on", bold + under, rs).getString(),
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_off", bold + under, rs).getString()
         );
     }
 
-    public static List<ITextComponent> customDescription()
+    public static List<String> customDescription()
     {
-        return Arrays.asList(
-                new TranslationTextComponent("cold_sweat.config.difficulty.custom.description1")
+        return Collections.singletonList(
+                new TranslationTextComponent("cold_sweat.config.difficulty.description.custom").getString()
         );
+    }
+
+    private static String getTrans(String key, Object... args)
+    {
+        return new TranslationTextComponent(key, args).getString();
+    }
+
+    private static String getTemp(double temp, String color)
+    {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return color + temp + rs + " °F / " + color + df.format(CSMath.convertUnits(temp, Units.F, Units.C, true)) + rs + " °C";
     }
 }
