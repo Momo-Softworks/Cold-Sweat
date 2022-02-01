@@ -1,6 +1,7 @@
 package net.momostudios.coldsweat.util;
 
 import net.minecraft.block.*;
+import net.minecraft.block.material.Material;
 import net.minecraft.util.AxisRotation;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.*;
@@ -21,8 +22,8 @@ import java.util.List;
 public class WorldInfo
 {
     /**
-     * Iterates through every other block until it reaches minecraft:air, then returns the Y value
-     * Ignores minecraft:cave_air
+     * Iterates through every other block until it reaches minecraft:air, then returns the Y value<br>
+     * Ignores minecraft:cave_air<br>
      * This is different from {@code world.getHeight()} because it attempts to ignore blocks that are floating in the air
      */
     public static int getGroundLevel(BlockPos pos, World world)
@@ -31,7 +32,7 @@ public class WorldInfo
         {
             BlockPos pos2 = new BlockPos(pos.getX(), c, pos.getZ());
             BlockState state = world.getBlockState(pos2);
-            if (!state.isSolid() && state.getBlock() != Blocks.CAVE_AIR)
+            if (state.getMaterial() == Material.AIR && state.getBlock() != Blocks.CAVE_AIR)
             {
                 return c;
             }
@@ -40,7 +41,7 @@ public class WorldInfo
     }
 
     /**
-     * Gets the average biome temperature in a grid of BlockPos 3 blocks apart
+     * Gets the average biome temperature in a grid of BlockPos 3 blocks apart<br>
      * Search area scales with the number of samples
      * @param pos is the center of the search box
      * @param samples is the number of checks performed. Higher samples = more accurate but more resource-intensive too
