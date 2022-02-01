@@ -51,8 +51,12 @@ public abstract class TempModifier
      */
     public void setArgument(String name, Object arg) {
         if (arg.getClass().equals(args.get(name).getClass()))
+        {
             args.put(name, arg);
-        else throw new IllegalArgumentException("Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg);
+        }
+        else throw new IllegalArgumentException(
+                "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg +
+                " (expected " + args.get(name).getClass().getName() + ")");
     }
 
     public final Map<String, Object> getArguments() {
