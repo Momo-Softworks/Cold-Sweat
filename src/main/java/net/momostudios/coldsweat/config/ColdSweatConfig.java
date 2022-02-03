@@ -10,6 +10,9 @@ import net.momostudios.coldsweat.util.Units;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ColdSweatConfig
 {
@@ -33,6 +36,8 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
 
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockEffects;
 
 
     static 
@@ -92,6 +97,20 @@ public class ColdSweatConfig
                 gracePeriodEnabled = BUILDER
                 .comment("Enables the grace period (default: true)")
                 .define("Grace Period Enabled", true);
+        BUILDER.pop();
+
+        BUILDER.push("Block Effects");
+        blockEffects = BUILDER
+                .comment("Allows for adding simple BlockEffects without the use of Java mods",
+                         "Format (All temperatures are in Minecraft units):",
+                         "[\"block ids (separated by \",\")\", <temperature>, <range (<= 7)>, <*true/false: weaken over distance>, <*max effect (temperature)>, <*min effect (temperature)>]",
+                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
+                         "(the effect of the example below (torch) is so low that it does barely anything. It's purely for demonstration)")
+                .defineList("BlockEffects", Arrays.asList
+                        (
+                            Arrays.asList("minecraft:torch,minecraft:wall_torch", 0.01, 4, true, 0.02)
+                        ),
+                it -> it instanceof List);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -185,6 +204,10 @@ public class ColdSweatConfig
         return gracePeriodEnabled.get();
     }
 
+    public List<? extends List<Object>> getBlockEffects()
+    {
+        return blockEffects.get();
+    }
 
     /*
      * Safe set methods for config values

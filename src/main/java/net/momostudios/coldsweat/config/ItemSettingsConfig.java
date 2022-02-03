@@ -93,7 +93,7 @@ public final class ItemSettingsConfig
         /*
           Soulfire Lamp Items
          */
-        BUILDER.push("SoulfireLampItems");
+        BUILDER.push("HellspringLampItems");
         soulLampItems = BUILDER
                 .comment("Defines the items that the Ice Box can use as fuel and their values",
                         "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
