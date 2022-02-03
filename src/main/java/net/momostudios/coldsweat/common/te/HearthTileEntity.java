@@ -106,7 +106,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         if (insulationLevel < 2400)
             this.getTileData().putInt("insulationLevel", insulationLevel + 1);
 
-        if ((this.getHotFuel() > 0 || this.getColdFuel() > 0))
+        if (world != null && (this.getHotFuel() > 0 || this.getColdFuel() > 0))
         {
             List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
@@ -157,10 +157,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     AxisAlignedBB aabb = new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1);
 
                     // Add players to affectedPlayers
-                    for (PlayerEntity player : world.getPlayers())
+                    for (PlayerEntity player : world.getEntitiesWithinAABB(PlayerEntity.class, aabb))
                     {
-                        if (aabb.contains(player.getPosX(), player.getPosY(), player.getPosZ()))
-                            affectedPlayers.add(player);
+                        affectedPlayers.add(player);
                     }
 
                     // Check in all 6 directions
@@ -191,14 +190,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 // Add new positions
                 cap.ifPresent(cap2 -> cap2.addPaths(newPaths));
 
-                if (world != null && !world.isRemote && !affectedPlayers.isEmpty())
+                if (!world.isRemote && !affectedPlayers.isEmpty())
                 {
                     shouldUseHotFuel = false;
                     shouldUseColdFuel = false;
 
                     ConfigCache config = ConfigCache.getInstance();
 
-                    for (PlayerEntity player : affectedPlayers)
+                    for (PlayerEntity player: affectedPlayers)
                     {
                         // Get the player's temperature
                         double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
@@ -206,21 +205,24 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
                         if ((temp < config.minTemp && this.getHotFuel() > 0))
                         {
-                            // If the player doesn't have the effect or the time left is less than 90 ticks, add the effect
-                            if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
-                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
-
                             // Tell the hearth to use hot fuel
                             shouldUseHotFuel = true;
                         }
                         if (temp > config.maxTemp && this.getColdFuel() > 0)
                         {
-                            // If the player doesn't have the effect or the time left is less than 90 ticks, add the effect
-                            if (!player.isPotionActive(ModEffects.INSULATION) || player.getActivePotionEffect(ModEffects.INSULATION).getDuration() < 90)
-                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, Math.max(0, insulationLevel / 240 - 1), false, false));
-
                             // Tell the hearth to use cold fuel
                             shouldUseColdFuel = true;
+                        }
+
+                        if (shouldUseHotFuel || shouldUseColdFuel)
+                        {
+                            int effectLevel = Math.max(0, insulationLevel / 240 - 1);
+                            EffectInstance effect = player.getActivePotionEffect(ModEffects.INSULATION);
+
+                            if (effect == null || effect.getDuration() < 90 || effect.getAmplifier() != effectLevel)
+                            {
+                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
+                            }
                         }
                     }
                 }
@@ -323,7 +325,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {
         LinkedHashMap<BlockPos, SpreadPath> map = new LinkedHashMap<>();
         map.put(pos, new SpreadPath(pos));
-        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 -> cap2.setPaths(map));
+        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 ->
+        {
+            cap2.clear();
+            cap2.addPaths(map);
+        });
     }
 
     public int getItemFuel(ItemStack item)
