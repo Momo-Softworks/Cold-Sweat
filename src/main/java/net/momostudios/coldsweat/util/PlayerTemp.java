@@ -1,7 +1,6 @@
 package net.momostudios.coldsweat.util;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
@@ -62,7 +61,7 @@ public class PlayerTemp
                     ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
             });
             // Update for player's client
-            if (player instanceof ServerPlayerEntity)
+            if (!player.world.isRemote)
             {
                 PlayerHelper.updateModifiers(player);
             }
@@ -102,7 +101,7 @@ public class PlayerTemp
             cap.getModifiers(type).removeAll(toRemove);
         });
         // Update for player's client
-        if (player instanceof ServerPlayerEntity)
+        if (!player.world.isRemote)
         {
             PlayerHelper.updateModifiers(player);
         }

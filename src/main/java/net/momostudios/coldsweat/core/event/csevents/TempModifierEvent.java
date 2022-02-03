@@ -227,13 +227,13 @@ public class TempModifierEvent extends Event
 
             /**
              * Adds a new {@link BlockEffect} to the registry.
-             * @param clazz The class of the BlockEffect to add.
+             * @param blockEffect The BlockEffect to add.
              * @throws InstantiationException If the BlockEffect doesn't have a default constructor.
              * @throws IllegalAccessException If the default constructor is not accessible.
              */
-            public void addBlockEffect(Class<? extends BlockEffect> clazz) throws InstantiationException, IllegalAccessException
+            public void addBlockEffect(BlockEffect blockEffect) throws InstantiationException, IllegalAccessException
             {
-                this.getPool().add(clazz.newInstance());
+                this.getPool().add(blockEffect);
             }
         }
     }

@@ -22,17 +22,15 @@ public class PlayerModifiersSyncMessage
     public List<TempModifier> body;
     public List<TempModifier> base;
     public List<TempModifier> rate;
-    PlayerEntity player;
 
     public PlayerModifiersSyncMessage() {
     }
 
-    public PlayerModifiersSyncMessage(PlayerEntity player, List<TempModifier> ambient, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
+    public PlayerModifiersSyncMessage(List<TempModifier> ambient, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
         this.ambient = ambient;
         this.body = body;
         this.base = base;
         this.rate = rate;
-        this.player = player;
     }
 
     public static void encode(PlayerModifiersSyncMessage message, PacketBuffer buffer)
@@ -46,7 +44,6 @@ public class PlayerModifiersSyncMessage
     public static PlayerModifiersSyncMessage decode(PacketBuffer buffer)
     {
         return new PlayerModifiersSyncMessage(
-                null,
                 readFromNBT(buffer.readCompoundTag()),
                 readFromNBT(buffer.readCompoundTag()),
                 readFromNBT(buffer.readCompoundTag()),
@@ -69,16 +66,7 @@ public class PlayerModifiersSyncMessage
 
             if (modifier != null && modifier.getID() != null)
             {
-                // Write the modifier's data to a CompoundNBT
-                CompoundNBT modifierNBT = new CompoundNBT();
-                modifierNBT.putString("id", modifier.getID());
-
-                // Add the modifier's arguments
-                modifier.getArguments().forEach((name, value) ->
-                {
-                    modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
-                });
-                nbt.put(String.valueOf(i), modifierNBT);
+                nbt.put(String.valueOf(i), NBTHelper.modifierToNBT(modifier));
             }
         }
 
@@ -90,18 +78,10 @@ public class PlayerModifiersSyncMessage
         List<TempModifier> modifiers = new ArrayList<>();
         for (String key : nbt.keySet())
         {
-            CompoundNBT modifierNBT = nbt.getCompound(key);
-            String id = modifierNBT.getString("id");
-            TempModifier modifier = TempModifierEntries.getEntries().getEntryFor(id);
+            TempModifier modifier = NBTHelper.NBTToModifier(nbt.getCompound(key));
 
             if (modifier != null)
-            {
-                for (String arg : modifierNBT.keySet())
-                {
-                    modifier.addArgument(arg, NBTHelper.getObjectFromINBT(modifierNBT.get(arg)));
-                }
                 modifiers.add(modifier);
-            }
         }
         return modifiers;
     }
@@ -119,13 +99,13 @@ public class PlayerModifiersSyncMessage
                 cap.clearModifiers(PlayerTemp.Types.AMBIENT);
                 cap.getModifiers(PlayerTemp.Types.AMBIENT).addAll(message.ambient);
 
-                cap.getModifiers(PlayerTemp.Types.BODY).clear();
+                cap.clearModifiers(PlayerTemp.Types.BODY);
                 cap.getModifiers(PlayerTemp.Types.BODY).addAll(message.body);
 
-                cap.getModifiers(PlayerTemp.Types.BASE).clear();
+                cap.clearModifiers(PlayerTemp.Types.BASE);
                 cap.getModifiers(PlayerTemp.Types.BASE).addAll(message.base);
 
-                cap.getModifiers(PlayerTemp.Types.RATE).clear();
+                cap.clearModifiers(PlayerTemp.Types.RATE);
                 cap.getModifiers(PlayerTemp.Types.RATE).addAll(message.rate);
             });
         });

@@ -7,12 +7,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
+import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.CustomDamageTypes;
 import net.momostudios.coldsweat.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.util.PlayerTemp;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PlayerTempUpdater
@@ -25,48 +29,37 @@ public class PlayerTempUpdater
             PlayerEntity player = event.player;
             ConfigCache config = ConfigCache.getInstance();
 
-            double ambientTemp = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT), player).get();
+            // Tick expiration time for ambient modifiers
+            Temperature ambient = tickModifiers(new Temperature(), player, PlayerTemp.getModifiers(player, PlayerTemp.Types.AMBIENT));
+            double ambientTemp = ambient.get();
+
             Temperature bodyTemp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
 
             // Apply ambient temperature modifiers
-            PlayerTemp.setTemperature(player, new Temperature(ambientTemp), PlayerTemp.Types.AMBIENT);
+            PlayerTemp.setTemperature(player, ambient, PlayerTemp.Types.AMBIENT);
 
             double maxTemp = config.maxTemp;
             double minTemp = config.minTemp;
 
             double tempRate = 7.0d;
 
-            //Increase body temperature when ambientTemp is above maximum (with rate modifiers)
-            if (ambientTemp > maxTemp && !player.isCreative() && !player.isSpectator())
+            if (ambientTemp > maxTemp && bodyTemp.get() >= 0 ||
+                ambientTemp < minTemp && bodyTemp.get() <= 0)
             {
-                bodyTemp.add(new Temperature((float) Math.abs(maxTemp - ambientTemp) / tempRate)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
+                boolean isOver = ambientTemp > maxTemp;
+                double difference = Math.abs(ambientTemp - (isOver ? maxTemp : minTemp));
+                double changeBy = Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * (isOver ? 1 : -1);
+                bodyTemp.add(new Temperature(changeBy).with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get());
             }
-            //Return the player's temperature back to 0
-            else if (bodyTemp.get() > 0)
+            else
             {
-                // Limits the return rate to (config.rate / 10) per tick
-                // Also sets the temperature to zero if it's close enough to not matter
-                bodyTemp.add(-getBodyReturnRate(ambientTemp, maxTemp, config.rate, bodyTemp.get()));
-            }
-
-            //Decrease body temperature when ambientTemp is below minimum (with rate modifiers)
-            if (ambientTemp < minTemp && !player.isCreative() && !player.isSpectator())
-            {
-                bodyTemp.add(-new Temperature((float) Math.abs(minTemp - ambientTemp) / tempRate)
-                        .with(PlayerTemp.getModifiers(player, PlayerTemp.Types.RATE), player).get() * config.rate);
-            }
-            //Return the player's temperature back to 0
-            else if (bodyTemp.get() < 0)
-            {
-                // Limits the return rate to (config.rate / 10) per tick
-                // Also sets the temperature to zero if it's close enough to not matter
-                bodyTemp.add(getBodyReturnRate(ambientTemp, minTemp, config.rate, bodyTemp.get()));
+                // Return the player's body temperature to 0
+                bodyTemp.add(getBodyReturnRate(ambientTemp, bodyTemp.get() > 0 ? maxTemp : minTemp, config.rate, bodyTemp.get()));
             }
 
             // Calculate body/base temperatures with modifiers
-            Temperature body = bodyTemp.with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY), player);
-            Temperature base = new Temperature().with(PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE), player);
+            Temperature body = tickModifiers(bodyTemp, player, PlayerTemp.getModifiers(player, PlayerTemp.Types.BODY));
+            Temperature base = tickModifiers(new Temperature(), player, PlayerTemp.getModifiers(player, PlayerTemp.Types.BASE));
 
             // Set the player's body temperature
             PlayerTemp.setTemperature(player, body, PlayerTemp.Types.BODY);
@@ -106,8 +99,19 @@ public class PlayerTempUpdater
     private static double getBodyReturnRate(double ambient, double cap, double rate, double bodyTemp)
     {
         double tempRate = 7.0d;
-        double changeBy = Math.max((Math.abs(ambient - cap) / tempRate) * rate, Math.abs(rate / 10));
-        return Math.min(Math.abs(bodyTemp), changeBy);
+        double changeBy = Math.max((Math.abs(ambient - cap) / tempRate) * rate, Math.abs(rate / 30));
+        return Math.min(Math.abs(bodyTemp), changeBy) * (bodyTemp > 0 ? -1 : 1);
+    }
+
+    private static Temperature tickModifiers(Temperature temp, PlayerEntity player, List<TempModifier> modifiers)
+    {
+        modifiers.removeIf(modifier ->
+        {
+            modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+            return (modifier.getExpireTicks() != -1 && modifier.getTicksExisted() > modifier.getExpireTicks());
+        });
+
+        return temp.with(modifiers, player);
     }
 
     @SubscribeEvent

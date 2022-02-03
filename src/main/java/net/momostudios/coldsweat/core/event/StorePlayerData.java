@@ -27,9 +27,9 @@ public class StorePlayerData
     {
         PlayerEntity player = event.getPlayer();
         ColdSweat.LOGGER.debug("Loading temperature data for player " + player.getName().getString() +
-                " A: " + player.getPersistentData().getDouble(ambientTemp) +
-                " Bo: " + player.getPersistentData().getDouble(bodyTemp) +
-                " Ba: " + player.getPersistentData().getDouble(baseTemp));
+                " Ambient: " + player.getPersistentData().getDouble(ambientTemp) +
+                " Body: " + player.getPersistentData().getDouble(bodyTemp) +
+                " Base: " + player.getPersistentData().getDouble(baseTemp));
 
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
@@ -43,23 +43,14 @@ public class StorePlayerData
             {
                 // Get the list of modifiers from the player's persistent data
                 ListNBT modifiers = player.getPersistentData().getList(PlayerTemp.getModifierTag(type), 10);
+
                 // For each modifier in the list
                 modifiers.forEach(modifier ->
                 {
                     CompoundNBT modifierNBT = (CompoundNBT) modifier;
 
-                    // Create a new modifier from the CompoundNBT
-                    TempModifier newModifier = TempModifierEntries.getEntries().getEntryFor(modifierNBT.getString("id"));
-
-                    modifierNBT.keySet().forEach(key ->
-                    {
-                        // Add the modifier's arguments
-                        if (newModifier != null && key != null)
-                        newModifier.addArgument(key, NBTHelper.getObjectFromINBT(modifierNBT.get(key)));
-                    });
-
                     // Add the modifier to the player's temperature
-                    cap.getModifiers(type).add(newModifier);
+                    cap.getModifiers(type).add(NBTHelper.NBTToModifier(modifierNBT));
                 });
             }
         });
@@ -88,17 +79,9 @@ public class StorePlayerData
                 ListNBT modifiers = new ListNBT();
                 for (TempModifier modifier : cap.getModifiers(type))
                 {
-                    // Write the modifier's data to a CompoundNBT
-                    CompoundNBT modifierNBT = new CompoundNBT();
-                    modifierNBT.putString("id", modifier.getID());
-
-                    // Add the modifier's arguments
-                    modifier.getArguments().forEach((name, value) ->
-                    {
-                        modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
-                    });
-                    modifiers.add(modifierNBT);
+                    modifiers.add(NBTHelper.modifierToNBT(modifier));
                 }
+
                 // Write the list of modifiers to the player's persistent data
                 player.getPersistentData().put(PlayerTemp.getModifierTag(type), modifiers);
             }

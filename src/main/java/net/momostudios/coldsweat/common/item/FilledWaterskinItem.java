@@ -47,7 +47,7 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate), PlayerTemp.Types.BODY, true);
+                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate).expires(1), PlayerTemp.Types.BODY, true);
             }
         }
     }
@@ -58,7 +58,7 @@ public class FilledWaterskinItem extends Item
         ActionResult<ItemStack> ar = super.onItemRightClick(world, entity, hand);
         ItemStack itemstack = ar.getResult();
 
-        PlayerTemp.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")), PlayerTemp.Types.BODY, true);
+        PlayerTemp.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), PlayerTemp.Types.BODY, true);
 
         world.playSound(entity.getPosX(), entity.getPosY(), entity.getPosZ(),
         ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("ambient.underwater.exit")),
@@ -78,6 +78,12 @@ public class FilledWaterskinItem extends Item
         if (world instanceof ServerWorld)
             ((ServerWorld) world).spawnParticle(ParticleTypes.FALLING_WATER, entity.getPosX(), (entity.getPosY() + (entity.getHeight())), entity.getPosZ(), 50, 0.3, 0.3, 0.3, 0.05);
         return ar;
+    }
+
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
+    {
+        return slotChanged;
     }
 
     public String getTranslationKey(ItemStack stack)
