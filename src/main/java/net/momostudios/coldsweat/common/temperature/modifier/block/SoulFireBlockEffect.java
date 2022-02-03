@@ -36,7 +36,12 @@ public class SoulFireBlockEffect extends BlockEffect
     }
 
     @Override
-    public double minTemp() {
+    public double minEffect() {
         return CSMath.convertUnits(-32, Units.F, Units.MC, false);
+    }
+
+    @Override
+    public double minTemperature() {
+        return CSMath.convertUnits(400, Units.F, Units.MC, true);
     }
 }

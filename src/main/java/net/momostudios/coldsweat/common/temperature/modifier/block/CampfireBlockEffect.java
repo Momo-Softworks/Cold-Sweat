@@ -27,7 +27,12 @@ public class CampfireBlockEffect extends BlockEffect
     }
 
     @Override
-    public double maxTemp() {
+    public double maxEffect() {
         return CSMath.convertUnits(40, Units.F, Units.MC, false);
+    }
+
+    @Override
+    public double maxTemperature() {
+        return CSMath.convertUnits(400, Units.F, Units.MC, true);
     }
 }

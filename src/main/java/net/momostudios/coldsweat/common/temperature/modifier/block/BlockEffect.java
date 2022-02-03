@@ -21,8 +21,8 @@ public abstract class BlockEffect
      * The maximum temperature this block can emit, no matter how many there are near the player <br>
      * @return a double representing the temperature, in Minecraft units
      */
-    public double maxTemp() {
-        return Integer.MAX_VALUE;
+    public double maxEffect() {
+        return Double.MAX_VALUE;
     }
 
     /**
@@ -30,7 +30,23 @@ public abstract class BlockEffect
      * (Useful for blocks with negative temperature) <br>
      * @return a double representing the temperature, in Minecraft units
      */
-    public double minTemp() {
-        return Integer.MIN_VALUE;
+    public double minEffect() {
+        return -Double.MAX_VALUE;
+    }
+
+    /**
+     * The maximum ambient temperature for this BlockEffect to be effective<br>
+     * @return a double representing the temperature, in Minecraft units
+     */
+    public double maxTemperature() {
+        return Double.MAX_VALUE;
+    }
+
+    /**
+     * The minimum ambient temperature for this BlockEffect to be effective<br>
+     * @return a double representing the temperature, in Minecraft units
+     */
+    public double minTemperature() {
+        return -Double.MAX_VALUE;
     }
 }

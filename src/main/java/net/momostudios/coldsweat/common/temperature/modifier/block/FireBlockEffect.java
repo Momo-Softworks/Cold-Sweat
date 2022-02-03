@@ -26,7 +26,12 @@ public class FireBlockEffect extends BlockEffect
     }
 
     @Override
-    public double maxTemp() {
+    public double maxEffect() {
         return CSMath.convertUnits(32, Units.F, Units.MC, false);
+    }
+
+    @Override
+    public double maxTemperature() {
+        return CSMath.convertUnits(400, Units.F, Units.MC, true);
     }
 }

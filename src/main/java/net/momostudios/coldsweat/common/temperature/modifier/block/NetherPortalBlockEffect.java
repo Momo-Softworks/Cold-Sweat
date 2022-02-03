@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.momostudios.coldsweat.util.CSMath;
+import net.momostudios.coldsweat.util.Units;
 
 public class NetherPortalBlockEffect extends BlockEffect
 {
@@ -23,12 +24,13 @@ public class NetherPortalBlockEffect extends BlockEffect
     }
 
     @Override
-    public double maxTemp()
+    public double maxEffect()
     {
         return 1;
     }
+
     @Override
-    public double minTemp()
+    public double minEffect()
     {
         return -1;
     }
