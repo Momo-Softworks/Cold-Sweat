@@ -48,8 +48,10 @@ public class BlockTempModifier extends TempModifier
 
                         if (be == null) continue;
 
+
                         // Is totalTemp within the bounds of the BlockEffect's min/max allowed temps?
-                        if (CSMath.isBetween(totalTemp, be.minTemp(), be.maxTemp()))
+                        if (CSMath.isBetween(totalTemp, be.minEffect(), be.maxEffect())
+                        && CSMath.isBetween(temp.get() + totalTemp, be.minTemperature(), be.maxTemperature()))
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vector3d pos = new Vector3d(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5);
@@ -114,8 +116,8 @@ public class BlockTempModifier extends TempModifier
                 }
             }
         }
+        
         setArgument("value", totalTemp);
-
         return temp.get() + totalTemp;
     }
 
