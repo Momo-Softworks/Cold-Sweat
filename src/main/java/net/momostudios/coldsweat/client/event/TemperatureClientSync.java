@@ -21,10 +21,7 @@ public class TemperatureClientSync
         {
             for (PlayerEntity player : event.world.getPlayers())
             {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
-                        new PlayerTempSyncMessage(
-                                PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY).get(),
-                                PlayerTemp.getTemperature(player, PlayerTemp.Types.BASE).get()));
+                PlayerHelper.updateTemperature(player);
             }
         }
 

@@ -10,6 +10,7 @@ public class SpreadPath
     public int x;
     public int y;
     public int z;
+    public int step = 0;
 
     public SpreadPath(BlockPos pos)
     {
@@ -35,6 +36,15 @@ public class SpreadPath
         this.z = z;
     }
 
+    public SpreadPath(int x, int y, int z, Direction origin, int step)
+    {
+        this.origin = origin;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.step = step;
+    }
+
     public int getX()
     {
         return x;
@@ -55,21 +65,21 @@ public class SpreadPath
 
     public SpreadPath offset(Direction dir)
     {
-        return new SpreadPath(this.x + dir.getXOffset(), this.y + dir.getYOffset(), this.z + dir.getZOffset(), dir);
+        return new SpreadPath(this.x + dir.getXOffset(), this.y + dir.getYOffset(), this.z + dir.getZOffset(), dir, this.step + 1);
     }
 
     public SpreadPath offset(int x, int y, int z)
     {
-        return new SpreadPath(this.x + x, this.y + y, this.z + z, this.origin);
+        return new SpreadPath(this.x + x, this.y + y, this.z + z, this.origin, this.step + 1);
     }
 
     public SpreadPath offset(BlockPos pos)
     {
-        return new SpreadPath(this.x + pos.getX(), this.y + pos.getY(), this.z + pos.getZ(), this.origin);
+        return new SpreadPath(this.x + pos.getX(), this.y + pos.getY(), this.z + pos.getZ(), this.origin, this.step + 1);
     }
 
     public boolean withinDistance(Vector3i vector, double distance) {
-        return distanceSq((double)vector.getX(), (double)vector.getY(), (double)vector.getZ(), false) < distance * distance;
+        return distanceSq(vector.getX(), vector.getY(), vector.getZ(), false) < distance * distance;
     }
 
     public double distanceSq(double x, double y, double z, boolean useCenter) {

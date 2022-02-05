@@ -3,7 +3,8 @@
   "compatibilityLevel": "JAVA_8",
   "package": "net.momostudios.coldsweat.mixin",
   "client": [
-    "MixinBipedModel"
+    "MixinBipedModel",
+    "XPBarMixin"
   ],
   "injectors":
   {

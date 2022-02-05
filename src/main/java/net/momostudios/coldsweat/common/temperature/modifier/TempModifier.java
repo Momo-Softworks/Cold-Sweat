@@ -21,9 +21,12 @@ import java.util.Map;
 public abstract class TempModifier
 {
     Map<String, Object> args = new HashMap<>();
+    int expireTicks = -1;
+    int ticksExisted = 0;
 
     /**
-     * REQUIRED default constructor.
+     * Default constructor.<br>
+     * REQUIRED if the TempModifier has arguments.
      */
     public TempModifier() {}
 
@@ -89,6 +92,29 @@ public abstract class TempModifier
             return post.getTemperature().get();
         }
         else return pre.getTemperature().get();
+    }
+
+    /**
+     * Sets the amount of ticks this TempModifier will last before it is automatically removed.<br>
+     * @param ticks the number of ticks this modifier will last.
+     * @return this TempModifier instance.
+     */
+    public TempModifier expires(int ticks)
+    {
+        expireTicks = ticks;
+        return this;
+    }
+    public int getExpireTicks()
+    {
+        return expireTicks;
+    }
+    public int getTicksExisted()
+    {
+        return ticksExisted;
+    }
+    public void setTicksExisted(int ticks)
+    {
+        ticksExisted = ticks;
     }
 
     /**
