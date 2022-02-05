@@ -18,22 +18,15 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.momostudios.coldsweat.common.te.IceboxTileEntity;
-import net.momostudios.coldsweat.core.init.ParticleTypesInit;
 import net.momostudios.coldsweat.core.init.TileEntityInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 
@@ -72,10 +65,35 @@ public class IceboxBlock extends Block
     {
         if (!worldIn.isRemote)
         {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if (te instanceof IceboxTileEntity)
+            if (worldIn.getTileEntity(pos) instanceof IceboxTileEntity)
             {
-                NetworkHooks.openGui((ServerPlayerEntity) player, (IceboxTileEntity) te, pos);
+                IceboxTileEntity te = (IceboxTileEntity) worldIn.getTileEntity(pos);
+                ItemStack stack = player.getHeldItem(hand);
+                int itemFuel = te.getItemFuel(stack);
+
+                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxTileEntity.MAX_FUEL)
+                {
+                    if (!player.isCreative())
+                    {
+                        if (stack.hasContainerItem())
+                        {
+                            ItemStack container = stack.getContainerItem();
+                            stack.shrink(1);
+                            player.inventory.addItemStackToInventory(container);
+                        }
+                        else
+                        {
+                            stack.shrink(1);
+                        }
+                    }
+                    te.setFuel(te.getFuel() + itemFuel);
+
+                    worldIn.playSound(null, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                }
+                else
+                {
+                    NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+                }
             }
         }
         return ActionResultType.SUCCESS;

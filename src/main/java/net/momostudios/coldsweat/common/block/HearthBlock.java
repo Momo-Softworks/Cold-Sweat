@@ -126,8 +126,9 @@ public class HearthBlock extends Block
                 HearthTileEntity te = (HearthTileEntity) worldIn.getTileEntity(pos);
                 ItemStack stack = player.getHeldItem(hand);
                 int itemFuel = te.getItemFuel(stack);
+                int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
 
-                if (itemFuel != 0 && (itemFuel > 0 ? te.getHotFuel() : te.getColdFuel()) < HearthTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthTileEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {

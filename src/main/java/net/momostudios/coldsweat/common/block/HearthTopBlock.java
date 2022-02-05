@@ -15,10 +15,7 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
@@ -30,20 +27,23 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.common.te.HearthTileEntity;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ItemInit;
+import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class HearthTopBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<Direction, VoxelShape>();
+    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -61,7 +61,7 @@ public class HearthTopBlock extends Block
     public HearthTopBlock(Properties properties)
     {
         super(HearthTopBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(LIT, Boolean.FALSE));
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
         runCalculation(VoxelShapes.or(
             makeCuboidShape(3, -15, 4, 13, 3, 12), // Shell
             makeCuboidShape(8, 3, 6, 12, 15, 10), // Exhaust 1
@@ -107,10 +107,41 @@ public class HearthTopBlock extends Block
     {
         if (!worldIn.isRemote)
         {
-            TileEntity te = worldIn.getTileEntity(pos.down());
-            if (te instanceof HearthTileEntity)
+            if (worldIn.getTileEntity(pos.down()) instanceof HearthTileEntity)
             {
-                NetworkHooks.openGui((ServerPlayerEntity) player, (HearthTileEntity) te, pos.down());
+                HearthTileEntity te = (HearthTileEntity) worldIn.getTileEntity(pos.down());
+                ItemStack stack = player.getHeldItem(hand);
+                int itemFuel = te.getItemFuel(stack);
+                int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
+
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthTileEntity.MAX_FUEL)
+                {
+                    if (!player.isCreative())
+                    {
+                        if (stack.hasContainerItem())
+                        {
+                            ItemStack container = stack.getContainerItem();
+                            stack.shrink(1);
+                            player.inventory.addItemStackToInventory(container);
+                        }
+                        else
+                        {
+                            stack.shrink(1);
+                        }
+                    }
+                    te.addFuel(itemFuel);
+                    te.updateFuelState();
+
+                    worldIn.playSound(null, pos.down(), itemFuel > 0 ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY,
+                            SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+                            new HearthFuelSyncMessage(te.getPos(), te.getHotFuel(), te.getColdFuel()));
+                }
+                else
+                {
+                    NetworkHooks.openGui((ServerPlayerEntity) player, te, pos.down());
+                }
             }
         }
         return ActionResultType.SUCCESS;
@@ -157,11 +188,11 @@ public class HearthTopBlock extends Block
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LIT);
+        builder.add(FACING);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing()).with(LIT, false);
+        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing());
     }
 }

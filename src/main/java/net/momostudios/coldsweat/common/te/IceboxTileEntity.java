@@ -37,6 +37,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
     public static int slots = 10;
+    public static int MAX_FUEL = 1000;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
     private int fuel;
@@ -116,7 +117,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
             if (itemFuel > 0)
             {
                 ItemStack item = this.getItemInSlot(0);
-                if (this.getFuel() <= 1000 - itemFuel * 0.75)
+                if (this.getFuel() <= MAX_FUEL - itemFuel * 0.75)
                 {
                     if (item.hasContainerItem())
                     {
@@ -185,7 +186,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
 
     public void setFuel(int amount)
     {
-        fuelData.set(0, Math.min(amount, 1000));
+        fuelData.set(0, Math.min(amount, MAX_FUEL));
     }
 
     public LazyOptional<IItemHandler> getCap()
