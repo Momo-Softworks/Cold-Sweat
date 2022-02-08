@@ -2,10 +2,11 @@ package net.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 import java.util.function.Supplier;
 
@@ -38,14 +39,18 @@ public class PlayerTempSyncMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            ClientPlayerEntity player = Minecraft.getInstance().player;
-
-            if (player != null)
-            player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+            Entity ent = Minecraft.getInstance().getRenderViewEntity();
+            if (ent instanceof ClientPlayerEntity && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.isSpectator())
             {
-                cap.set(PlayerTemp.Types.BODY, message.body);
-                cap.set(PlayerTemp.Types.BASE, message.base);
-            });
+                ClientPlayerEntity player = (ClientPlayerEntity) ent;
+
+                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+                {
+                    cap.set(PlayerHelper.Types.BODY, message.body);
+                    cap.set(PlayerHelper.Types.BASE, message.base);
+                    cap.set(PlayerHelper.Types.COMPOSITE, message.body + message.base);
+                });
+            }
         });
         context.setPacketHandled(true);
     }

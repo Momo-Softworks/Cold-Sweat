@@ -9,7 +9,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.util.NBTHelper;
 import net.momostudios.coldsweat.util.PlayerHelper;
@@ -18,9 +17,9 @@ import net.momostudios.coldsweat.util.PlayerTemp;
 @Mod.EventBusSubscriber
 public class StorePlayerData
 {
-    static String ambientTemp = PlayerTemp.getTempTag(PlayerTemp.Types.AMBIENT);
-    static String bodyTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BODY);
-    static String baseTemp = PlayerTemp.getTempTag(PlayerTemp.Types.BASE);
+    static String ambientTemp = PlayerHelper.getTempTag(PlayerHelper.Types.AMBIENT);
+    static String bodyTemp = PlayerHelper.getTempTag(PlayerHelper.Types.BODY);
+    static String baseTemp = PlayerHelper.getTempTag(PlayerHelper.Types.BASE);
 
     @SubscribeEvent
     public static void onJoin(PlayerEvent.PlayerLoggedInEvent event)
@@ -33,16 +32,16 @@ public class StorePlayerData
 
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
-            cap.set(PlayerTemp.Types.AMBIENT, player.getPersistentData().getDouble(ambientTemp));
-            cap.set(PlayerTemp.Types.BODY, player.getPersistentData().getDouble(bodyTemp));
-            cap.set(PlayerTemp.Types.BASE, player.getPersistentData().getDouble(baseTemp));
+            cap.set(PlayerHelper.Types.AMBIENT, player.getPersistentData().getDouble(ambientTemp));
+            cap.set(PlayerHelper.Types.BODY, player.getPersistentData().getDouble(bodyTemp));
+            cap.set(PlayerHelper.Types.BASE, player.getPersistentData().getDouble(baseTemp));
 
             // Load the player's modifiers
-            PlayerTemp.Types[] validTypes = {PlayerTemp.Types.AMBIENT, PlayerTemp.Types.BODY, PlayerTemp.Types.BASE, PlayerTemp.Types.RATE};
-            for (PlayerTemp.Types type : validTypes)
+            PlayerHelper.Types[] validTypes = {PlayerHelper.Types.AMBIENT, PlayerHelper.Types.BODY, PlayerHelper.Types.BASE, PlayerHelper.Types.RATE};
+            for (PlayerHelper.Types type : validTypes)
             {
                 // Get the list of modifiers from the player's persistent data
-                ListNBT modifiers = player.getPersistentData().getList(PlayerTemp.getModifierTag(type), 10);
+                ListNBT modifiers = player.getPersistentData().getList(PlayerHelper.getModifierTag(type), 10);
 
                 // For each modifier in the list
                 modifiers.forEach(modifier ->
@@ -68,13 +67,13 @@ public class StorePlayerData
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
             // Save the player's temperature data
-            player.getPersistentData().putDouble(ambientTemp, cap.get(PlayerTemp.Types.AMBIENT));
-            player.getPersistentData().putDouble(bodyTemp, cap.get(PlayerTemp.Types.BODY));
-            player.getPersistentData().putDouble(baseTemp, cap.get(PlayerTemp.Types.BASE));
+            player.getPersistentData().putDouble(ambientTemp, cap.get(PlayerHelper.Types.AMBIENT));
+            player.getPersistentData().putDouble(bodyTemp, cap.get(PlayerHelper.Types.BODY));
+            player.getPersistentData().putDouble(baseTemp, cap.get(PlayerHelper.Types.BASE));
 
             // Save the player's modifiers
-            PlayerTemp.Types[] validTypes = {PlayerTemp.Types.AMBIENT, PlayerTemp.Types.BODY, PlayerTemp.Types.BASE, PlayerTemp.Types.RATE};
-            for (PlayerTemp.Types type : validTypes)
+            PlayerHelper.Types[] validTypes = {PlayerHelper.Types.AMBIENT, PlayerHelper.Types.BODY, PlayerHelper.Types.BASE, PlayerHelper.Types.RATE};
+            for (PlayerHelper.Types type : validTypes)
             {
                 ListNBT modifiers = new ListNBT();
                 for (TempModifier modifier : cap.getModifiers(type))
@@ -83,7 +82,7 @@ public class StorePlayerData
                 }
 
                 // Write the list of modifiers to the player's persistent data
-                player.getPersistentData().put(PlayerTemp.getModifierTag(type), modifiers);
+                player.getPersistentData().put(PlayerHelper.getModifierTag(type), modifiers);
             }
         });
     }

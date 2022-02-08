@@ -10,6 +10,9 @@ import net.minecraft.util.math.shapes.VoxelShapePart;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
@@ -19,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorldInfo
+public class WorldHelper
 {
     /**
      * Iterates through every other block until it reaches minecraft:air, then returns the Y value<br>
@@ -141,5 +144,35 @@ public class WorldInfo
             return area[0] >= 1;
         }
         return false;
+    }
+
+    public static void schedule(Runnable runnable, int delayTicks)
+    {
+        new Object()
+        {
+            private int ticks = 0;
+
+            public void start()
+            {
+                MinecraftForge.EVENT_BUS.register(this);
+            }
+
+            @SubscribeEvent
+            public void tick(TickEvent.ServerTickEvent event)
+            {
+                if (event.phase == TickEvent.Phase.END)
+                {
+                    ticks++;
+                    if (ticks >= delayTicks)
+                        run();
+                }
+            }
+
+            private void run()
+            {
+                runnable.run();
+                MinecraftForge.EVENT_BUS.unregister(this);
+            }
+        }.start();
     }
 }

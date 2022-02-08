@@ -13,7 +13,7 @@ import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 public class HellspringLampItem extends Item
 {
@@ -29,8 +29,8 @@ public class HellspringLampItem extends Item
         {
             PlayerEntity player = (PlayerEntity) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = PlayerTemp.hasModifier(player, HellLampTempModifier.class, PlayerTemp.Types.AMBIENT) ?
-                    player.getPersistentData().getDouble("preLampTemp") : PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
+            double temp = PlayerHelper.hasModifier(player, HellLampTempModifier.class, PlayerHelper.Types.AMBIENT) ?
+                    player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, PlayerHelper.Types.AMBIENT).get();
 
             // Fuel the item on creation
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
@@ -51,7 +51,7 @@ public class HellspringLampItem extends Item
                     AxisAlignedBB bb = new AxisAlignedBB(player.getPosX() - 2, player.getPosY() - 2, player.getPosZ() - 2, player.getPosX() + 2, player.getPosY() + 2, player.getPosZ() + 2);
                     worldIn.getEntitiesWithinAABB(PlayerEntity.class, bb).forEach(e ->
                     {
-                        PlayerTemp.addModifier(e, new HellLampTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                        PlayerHelper.addModifier(e, new HellLampTempModifier(), PlayerHelper.Types.AMBIENT, false);
 
                         e.getPersistentData().putInt("soulLampTimeout", 5);
                     });

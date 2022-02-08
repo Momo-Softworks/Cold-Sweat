@@ -18,8 +18,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.common.temperature.modifier.MinecartTempModifier;
 import net.momostudios.coldsweat.core.init.BlockInit;
+import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
-import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber
 public class MinecartEventHandler
@@ -82,7 +82,7 @@ public class MinecartEventHandler
             PlayerEntity player = event.player;
             if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
             {
-                PlayerTemp.addModifier(player, new MinecartTempModifier(), PlayerTemp.Types.RATE, false);
+                PlayerHelper.addModifier(player, new MinecartTempModifier(), PlayerHelper.Types.RATE, false);
             }
         }
     }

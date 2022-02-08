@@ -3,7 +3,7 @@ package net.momostudios.coldsweat.core.capabilities;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class PlayerTempCapability
     List<TempModifier> baseModifiers = new ArrayList<>();
     List<TempModifier> rateModifiers = new ArrayList<>();
 
-    public double get(PlayerTemp.Types type)
+    public double get(PlayerHelper.Types type)
     {
         switch (type)
         {
@@ -39,7 +39,7 @@ public class PlayerTempCapability
         }
     }
 
-    public void set(PlayerTemp.Types type, double value)
+    public void set(PlayerHelper.Types type, double value)
     {
         switch (type)
         {
@@ -51,7 +51,7 @@ public class PlayerTempCapability
         }
     }
 
-    public List<TempModifier> getModifiers(PlayerTemp.Types type)
+    public List<TempModifier> getModifiers(PlayerHelper.Types type)
     {
         switch (type)
         {
@@ -63,7 +63,7 @@ public class PlayerTempCapability
         }
     }
 
-    public boolean hasModifier(PlayerTemp.Types type, Class<? extends TempModifier> mod)
+    public boolean hasModifier(PlayerHelper.Types type, Class<? extends TempModifier> mod)
     {
         switch (type)
         {
@@ -79,7 +79,7 @@ public class PlayerTempCapability
     /**
      * Do NOT use this! <br>
      */
-    public void clearModifiers(PlayerTemp.Types type)
+    public void clearModifiers(PlayerHelper.Types type)
     {
         switch (type)
         {

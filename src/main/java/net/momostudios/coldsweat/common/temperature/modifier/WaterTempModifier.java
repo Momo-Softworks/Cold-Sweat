@@ -11,7 +11,7 @@ public class WaterTempModifier extends TempModifier
 {
     public WaterTempModifier()
     {
-        addArgument("strength", 1d);
+        addArgument("strength", 0.01);
     }
 
     public WaterTempModifier(double strength)
@@ -22,13 +22,16 @@ public class WaterTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
+        double maxTemp = ConfigCache.getInstance().maxTemp;
+        double minTemp = ConfigCache.getInstance().minTemp;
+
         try
         {
-            double strength = (double) getArgument("strength");
-            double factor = Math.min(-0.01, -0.01 - temp.get() / 50);
-            double addAmount = player.isInWater() ? 0.3 : player.world.isRainingAt(player.getPosition()) ? 0.05 : factor;
+            double strength = getArgument("strength", Double.class);
+            double factor = Math.min(-0.0003, -0.0003 - (temp.get() / 800));
+            double addAmount = player.isInWaterOrBubbleColumn() ? 0.01 : player.world.isRainingAt(player.getPosition()) ? 0.005 : factor;
 
-            setArgument("strength", CSMath.clamp(strength + addAmount, 0, 10));
+            setArgument("strength", CSMath.clamp(strength + addAmount, 0, Math.abs(CSMath.average(maxTemp, minTemp) - temp.get()) / 2));
 
             if (!player.isInWater() && strength > 0.0)
             {
@@ -40,13 +43,13 @@ public class WaterTempModifier extends TempModifier
                     player.world.addParticle(ParticleTypes.FALLING_WATER, player.getPosX() + randX, player.getPosY() + randY, player.getPosZ() + randZ, 0, 0, 0);
                 }
             }
-            double ambientEffect = Math.min(0, temp.get() - ConfigCache.getInstance().minTemp);
 
-            return temp.get() + CSMath.convertUnits(-strength, Units.F, Units.MC, false) + ambientEffect * (strength / 40);
+            return temp.get() - strength;
         }
         // Remove the modifier if an exception is thrown
         catch (Exception e)
         {
+            e.printStackTrace();
             args.remove("strength");
             args.put("strength", 1d);
             return temp.get();

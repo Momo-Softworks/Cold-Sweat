@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.Units;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
@@ -111,7 +111,7 @@ public class AmbientGaugeDisplay
         {
             boolean celsius = CCS.celsius();
 
-            double tempReadout = CSMath.convertUnits(PlayerTemp.getTemperature(Minecraft.getInstance().player, PlayerTemp.Types.AMBIENT).get(),
+            double tempReadout = CSMath.convertUnits(PlayerHelper.getTemperature(Minecraft.getInstance().player, PlayerHelper.Types.AMBIENT).get(),
                     Units.MC, celsius ? Units.C : Units.F, true);
             prevClientTemp = clientTemp;
 

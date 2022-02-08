@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.util.WorldInfo;
+import net.momostudios.coldsweat.util.WorldHelper;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class BiomeTempModifier extends TempModifier
         if (player.world.getGameTime() % 5 == 0)
         {
             double worldTemp = 0;
-            for (BlockPos blockPos : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.getPosition(), 200, 6))
             {
                 Biome biome = player.world.getBiome(blockPos);
                 worldTemp += biome.getTemperature(blockPos) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation());

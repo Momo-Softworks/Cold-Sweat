@@ -16,8 +16,8 @@ import net.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifi
 import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
-import net.momostudios.coldsweat.util.PlayerTemp;
 
 public class FilledWaterskinItem extends Item
 {
@@ -47,7 +47,7 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerTemp.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate).expires(1), PlayerTemp.Types.BODY, true);
+                PlayerHelper.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate).expires(1), PlayerHelper.Types.BODY, true);
             }
         }
     }
@@ -58,7 +58,7 @@ public class FilledWaterskinItem extends Item
         ActionResult<ItemStack> ar = super.onItemRightClick(world, entity, hand);
         ItemStack itemstack = ar.getResult();
 
-        PlayerTemp.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), PlayerTemp.Types.BODY, true);
+        PlayerHelper.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), PlayerHelper.Types.BODY, true);
 
         world.playSound(entity.getPosX(), entity.getPosY(), entity.getPosZ(),
         ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("ambient.underwater.exit")),

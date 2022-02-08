@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.util.WorldInfo;
+import net.momostudios.coldsweat.util.WorldHelper;
 
 public class TimeTempModifier extends TempModifier
 {
@@ -19,7 +19,7 @@ public class TimeTempModifier extends TempModifier
         {
             float timeTemp = 0;
             World world = player.world;
-            for (BlockPos iterator : WorldInfo.getNearbyPositions(player.getPosition(), 200, 6))
+            for (BlockPos iterator : WorldHelper.getNearbyPositions(player.getPosition(), 200, 6))
             {
                 RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, world.func_241828_r().getRegistry(Registry.BIOME_KEY).getKey(world.getBiome(iterator)));
                 if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&

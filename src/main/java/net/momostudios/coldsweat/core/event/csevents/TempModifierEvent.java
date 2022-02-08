@@ -9,7 +9,7 @@ import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 import java.util.function.Predicate;
 
@@ -24,7 +24,7 @@ public class TempModifierEvent extends Event
      * <br>
      * {@link #duplicatesAllowed} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #player} is the player the TempModifier is being applied to. <br>
-     * {@link #type} determines the modifier's {@link PlayerTemp.Types}. It will never be {@link PlayerTemp.Types#COMPOSITE} <br>
+     * {@link #type} determines the modifier's {@link PlayerHelper.Types}. It will never be {@link PlayerHelper.Types#COMPOSITE} <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being added.<br>
@@ -37,13 +37,13 @@ public class TempModifierEvent extends Event
         private PlayerEntity player;
         private TempModifier modifier;
         public boolean duplicatesAllowed;
-        public PlayerTemp.Types type;
+        public PlayerHelper.Types type;
 
         public void setDuplicatesAllowed(boolean allowDuplicates) {
             this.duplicatesAllowed = allowDuplicates;
         }
 
-        public void setModifierType(PlayerTemp.Types newType) {
+        public void setModifierType(PlayerHelper.Types newType) {
             this.type = newType;
         }
 
@@ -59,7 +59,7 @@ public class TempModifierEvent extends Event
             return player;
         }
 
-        public Add(TempModifier modifier, PlayerEntity player, PlayerTemp.Types type, boolean duplicates)
+        public Add(TempModifier modifier, PlayerEntity player, PlayerHelper.Types type, boolean duplicates)
         {
             duplicatesAllowed = duplicates;
             this.player = player;
@@ -73,7 +73,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be removed. <br>
      * <br>
      * {@link #player} is the player the TempModifier is being removed from. <br>
-     * {@link #type} is the modifier's {@link PlayerTemp.Types}. It will never be {@link PlayerTemp.Types#COMPOSITE}. <br>
+     * {@link #type} is the modifier's {@link PlayerHelper.Types}. It will never be {@link PlayerHelper.Types#COMPOSITE}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
      * <br>
@@ -86,11 +86,11 @@ public class TempModifierEvent extends Event
     public static class Remove extends TempModifierEvent
     {
         public final PlayerEntity player;
-        public final PlayerTemp.Types type;
+        public final PlayerHelper.Types type;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(PlayerEntity player, PlayerTemp.Types type, int count, Predicate<TempModifier> condition)
+        public Remove(PlayerEntity player, PlayerHelper.Types type, int count, Predicate<TempModifier> condition)
         {
             this.player = player;
             this.type = type;

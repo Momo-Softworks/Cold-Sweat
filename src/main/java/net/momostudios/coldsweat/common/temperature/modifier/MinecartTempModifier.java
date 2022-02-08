@@ -2,7 +2,7 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 public class MinecartTempModifier extends TempModifier
 {
@@ -11,7 +11,7 @@ public class MinecartTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
-        PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier.getID().equals(getID()));
+        PlayerHelper.removeModifiers(player, PlayerHelper.Types.RATE, 1, modifier -> modifier.getID().equals(getID()));
 
         return 0;
     }

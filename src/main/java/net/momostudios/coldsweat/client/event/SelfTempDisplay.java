@@ -4,18 +4,18 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.CSMath;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 @Mod.EventBusSubscriber
 public class SelfTempDisplay
@@ -23,24 +23,25 @@ public class SelfTempDisplay
     static PlayerTempCapability playerCap = null;
 
     @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent(priority = EventPriority.NORMAL)
+    @SubscribeEvent
     public static void eventHandler(RenderGameOverlayEvent event)
     {
         ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-        if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof PlayerEntity &&
-        !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR && !((PlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode &&
-        !mc.getRenderViewEntity().isSpectator())
+
+        if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof ClientPlayerEntity &&
+        !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR
+        && !((ClientPlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode && !mc.getRenderViewEntity().isSpectator())
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
-            PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
+            ClientPlayerEntity entity = (ClientPlayerEntity) Minecraft.getInstance().getRenderViewEntity();
 
             if (playerCap == null || entity.ticksExisted % 40 == 0)
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
 
-            int temp = (int) playerCap.get(PlayerTemp.Types.COMPOSITE);
+            int temp = (int) playerCap.get(PlayerHelper.Types.COMPOSITE);
 
             int threatLevel = 0;
 
@@ -65,14 +66,14 @@ public class SelfTempDisplay
                     temp > 130 && temp <= 140 ? 16771509 :
                     temp > 140 ? 16777215 : 0;
 
-            if      (temp >= 100)   {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");   threatLevel = 2;}
-            else if (temp >= 66)    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");   threatLevel = 1;}
-            else if (temp >= 33)    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png");}
-            else if (temp >= 0)     {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");}
-            else if (temp > -33)    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");}
-            else if (temp > -66)    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png");}
-            else if (temp > -100)   {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");  threatLevel = 1;}
-            else                    {icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");  threatLevel = 2;}
+            if      (temp >= 100)   { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");   threatLevel = 2; }
+            else if (temp >= 66)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");   threatLevel = 1; }
+            else if (temp >= 33)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png"); }
+            else if (temp >= 0)     { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (temp > -33)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (temp > -66)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png"); }
+            else if (temp > -100)   { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");  threatLevel = 1; }
+            else                    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");  threatLevel = 2; }
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             int threatOffset = 0;
@@ -82,20 +83,21 @@ public class SelfTempDisplay
                 if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
             }
 
+            // Render Icon
             mc.getTextureManager().bindTexture(icon);
-            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(),
-                scaleY - 51 + threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 + threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 
+            // Render Readout
             FontRenderer fontRenderer = mc.fontRenderer;
             int scaledWidth = mc.getMainWindow().getScaledWidth();
             int scaledHeight = mc.getMainWindow().getScaledHeight();
             MatrixStack matrixStack = event.getMatrixStack();
 
-            String s = "" + (int) Math.min(Math.abs(temp), 100);
+            String s = "" + (int) Math.ceil(Math.min(Math.abs(temp), 100));
             float i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2f + CCS.tempGaugeX();
-            float j1 = scaledHeight - 31f - 7f + CCS.tempGaugeY();
-            if (temp > 100 || temp < -100)
+            float j1 = scaledHeight - 31f - 8f + CCS.tempGaugeY();
+            if (!CSMath.isBetween(temp, -100, 100))
             {
                 fontRenderer.drawString(matrixStack, s, i1 + 2f, j1, colorBG2);
                 fontRenderer.drawString(matrixStack, s, i1 - 2f, j1, colorBG2);

@@ -2,7 +2,6 @@ package net.momostudios.coldsweat.common.temperature.modifier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.util.PlayerTemp;
 
 public class WaterskinTempModifier extends TempModifier
 {

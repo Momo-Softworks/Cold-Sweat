@@ -12,7 +12,7 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import net.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.momostudios.coldsweat.util.ItemEntry;
-import net.momostudios.coldsweat.util.PlayerTemp;
+import net.momostudios.coldsweat.util.PlayerHelper;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -143,11 +143,11 @@ public class AddLeatherModifiers
 
                 if (leatherMultiplier > 0)
                 {
-                    if (PlayerTemp.hasModifier(player, InsulationTempModifier.class, PlayerTemp.Types.RATE))
+                    if (PlayerHelper.hasModifier(player, InsulationTempModifier.class, PlayerHelper.Types.RATE))
                     {
                         AtomicBoolean shouldRemove = new AtomicBoolean(false);
                         int multiplier = leatherMultiplier;
-                        PlayerTemp.forEachModifier(player, PlayerTemp.Types.RATE, modifier ->
+                        PlayerHelper.forEachModifier(player, PlayerHelper.Types.RATE, modifier ->
                         {
                             if (modifier instanceof InsulationTempModifier)
                             {
@@ -164,12 +164,12 @@ public class AddLeatherModifiers
                         // Reset the modifier if it throws an error
                         if (shouldRemove.get())
                         {
-                            PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, 1, modifier -> modifier instanceof InsulationTempModifier);
+                            PlayerHelper.removeModifiers(player, PlayerHelper.Types.RATE, 1, modifier -> modifier instanceof InsulationTempModifier);
                         }
                     }
-                    else PlayerTemp.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerTemp.Types.RATE, false);
+                    else PlayerHelper.addModifier(player, new InsulationTempModifier(leatherMultiplier), PlayerHelper.Types.RATE, false);
                 }
-                else PlayerTemp.removeModifiers(player, PlayerTemp.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof InsulationTempModifier);
+                else PlayerHelper.removeModifiers(player, PlayerHelper.Types.RATE, Integer.MAX_VALUE, modifier -> modifier instanceof InsulationTempModifier);
             }
         }
     }

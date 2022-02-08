@@ -173,8 +173,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             if (testpos.withinDistance(pos, 20))
                             {
                                 if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
-                                && !WorldInfo.canSeeSky(world, testpos.getPos())
-                                && WorldInfo.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
+                                && !WorldHelper.canSeeSky(world, testpos.getPos())
+                                && WorldHelper.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
                                 {
                                     newPaths.put(testpos.getPos(), testpos);
                                 }
@@ -201,7 +201,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     {
                         // Get the player's temperature
                         double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
-                                PlayerTemp.getTemperature(player, PlayerTemp.Types.AMBIENT).get();
+                                PlayerHelper.getTemperature(player, PlayerHelper.Types.AMBIENT).get();
 
                         if ((temp < config.minTemp && this.getHotFuel() > 0))
                         {

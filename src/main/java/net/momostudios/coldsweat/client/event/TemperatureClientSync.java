@@ -1,13 +1,9 @@
 package net.momostudios.coldsweat.client.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.PlayerTemp;
 

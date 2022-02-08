@@ -10,8 +10,8 @@ import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.world.TempModifierEntries;
+import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.registrylists.ModEffects;
-import net.momostudios.coldsweat.util.PlayerTemp;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddTempModifiers
@@ -28,22 +28,22 @@ public class AddTempModifiers
              */
             if (player.ticksExisted % 20 == 0)
             {
-                PlayerTemp.addModifier(player, new BiomeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                PlayerTemp.addModifier(player, new TimeTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                PlayerTemp.addModifier(player, new DepthTempModifier(), PlayerTemp.Types.AMBIENT, false);
-                PlayerTemp.addModifier(player, new BlockTempModifier(), PlayerTemp.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new BiomeTempModifier(), PlayerHelper.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new TimeTempModifier(), PlayerHelper.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new DepthTempModifier(), PlayerHelper.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new BlockTempModifier(), PlayerHelper.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
-                    PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerTemp.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerHelper.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("betterweather"))
-                    PlayerTemp.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerTemp.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);
 
                 // Hearth
                 if (player.isPotionActive(ModEffects.INSULATION))
                 {
                     int potionLevel = player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1;
-                    if (PlayerTemp.hasModifier(player, HearthTempModifier.class, PlayerTemp.Types.AMBIENT))
+                    if (PlayerHelper.hasModifier(player, HearthTempModifier.class, PlayerHelper.Types.AMBIENT))
                     {
-                        PlayerTemp.forEachModifier(player, PlayerTemp.Types.AMBIENT, (modifier) ->
+                        PlayerHelper.forEachModifier(player, PlayerHelper.Types.AMBIENT, (modifier) ->
                         {
                             if (modifier instanceof HearthTempModifier)
                             {
@@ -52,31 +52,32 @@ public class AddTempModifiers
                         });
                     }
                     else
-                        PlayerTemp.addModifier(player, new HearthTempModifier(potionLevel), PlayerTemp.Types.AMBIENT, false);
+                        PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel), PlayerHelper.Types.AMBIENT, false);
                 }
-                else if (PlayerTemp.hasModifier(player, HearthTempModifier.class, PlayerTemp.Types.AMBIENT))
+                else if (PlayerHelper.hasModifier(player, HearthTempModifier.class, PlayerHelper.Types.AMBIENT))
                 {
-                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
+                    PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
                 }
             }
 
             // Water / Rain
             if (player.ticksExisted % 5 == 0)
             {
-                if (player.isInWater() || player.world.isRainingAt(player.getPosition()))
+                if (player.isInWaterRainOrBubbleColumn())
                 {
-                    PlayerTemp.addModifier(player, new WaterTempModifier(0.15), PlayerTemp.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, new WaterTempModifier(0.01), PlayerHelper.Types.AMBIENT, false);
                 }
-                else if (PlayerTemp.hasModifier(player, WaterTempModifier.class, PlayerTemp.Types.AMBIENT))
+                else if (PlayerHelper.hasModifier(player, WaterTempModifier.class, PlayerHelper.Types.AMBIENT))
                 {
-                    PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
+                    PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier ->
+                            modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
                 }
             }
 
             // Nether Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerTemp.hasModifier(player, HellLampTempModifier.class, PlayerTemp.Types.AMBIENT))
+            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, PlayerHelper.Types.AMBIENT))
             {
-                PlayerTemp.removeModifiers(player, PlayerTemp.Types.AMBIENT, 1, modifier -> modifier instanceof HellLampTempModifier);
+                PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier -> modifier instanceof HellLampTempModifier);
             }
             else
             {
@@ -92,8 +93,8 @@ public class AddTempModifiers
         {
             if (player.isSleeping())
             {
-                Temperature temp = PlayerTemp.getTemperature(player, PlayerTemp.Types.BODY);
-                PlayerTemp.setTemperature(player, new Temperature(temp.get() / 4), PlayerTemp.Types.BODY);
+                Temperature temp = PlayerHelper.getTemperature(player, PlayerHelper.Types.BODY);
+                PlayerHelper.setTemperature(player, new Temperature(temp.get() / 4), PlayerHelper.Types.BODY);
             }
         });
     }

@@ -10,7 +10,7 @@ import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
 import net.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.WorldInfo;
+import net.momostudios.coldsweat.util.WorldHelper;
 
 public class BlockTempModifier extends TempModifier
 {
@@ -81,8 +81,8 @@ public class BlockTempModifier extends TempModifier
 
                                 if (!bpos1.equals(new BlockPos(prevPos1)) && !bpos1.equals(blockpos)
                                 && !chunk.getBlockState(bpos1).isAir()
-                                && WorldInfo.isFullSide(chunk.getBlockState(bpos1), dir1, bpos1, player.world)
-                                && WorldInfo.isFullSide(chunk.getBlockState(bpos1), dir1.getOpposite(), bpos1, player.world))
+                                && WorldHelper.isFullSide(chunk.getBlockState(bpos1), dir1, bpos1, player.world)
+                                && WorldHelper.isFullSide(chunk.getBlockState(bpos1), dir1.getOpposite(), bpos1, player.world))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
@@ -95,8 +95,8 @@ public class BlockTempModifier extends TempModifier
 
                                 if (!bpos2.equals(new BlockPos(prevPos2)) && !bpos2.equals(blockpos)
                                 && !chunk.getBlockState(bpos2).isAir()
-                                && WorldInfo.isFullSide(chunk.getBlockState(bpos2), dir2, bpos2, player.world)
-                                && WorldInfo.isFullSide(chunk.getBlockState(bpos2), dir2.getOpposite(), bpos2, player.world))
+                                && WorldHelper.isFullSide(chunk.getBlockState(bpos2), dir2, bpos2, player.world)
+                                && WorldHelper.isFullSide(chunk.getBlockState(bpos2), dir2.getOpposite(), bpos2, player.world))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
