@@ -25,6 +25,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraftforge.fml.common.Mod;
+import net.momostudios.coldsweat.client.event.RearrangeHotbar;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.config.ConfigCache;
@@ -847,6 +848,7 @@ public class ConfigScreen
             customHotbarButton.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").getString() + ": " +
                 (this.customHotbar ? ON : OFF)));
             CLIENT_CONFIG.setCustomHotbar(this.customHotbar);
+            RearrangeHotbar.customHotbar = this.customHotbar;
         }
 
         private void toggleIconBobbing()

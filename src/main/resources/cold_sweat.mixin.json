@@ -4,7 +4,7 @@
   "package": "net.momostudios.coldsweat.mixin",
   "client": [
     "MixinBipedModel",
-    "XPBarMixin"
+    "MixinXPBar"
   ],
   "injectors":
   {
