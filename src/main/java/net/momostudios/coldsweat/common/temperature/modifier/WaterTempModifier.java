@@ -35,7 +35,7 @@ public class WaterTempModifier extends TempModifier
 
             if (!player.isInWater() && strength > 0.0)
             {
-                if (Math.random() < strength / 40.0)
+                if (Math.random() < strength)
                 {
                     double randX = player.getWidth() * (Math.random() - 0.5);
                     double randY = player.getHeight() * Math.random();

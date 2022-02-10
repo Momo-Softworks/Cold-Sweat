@@ -39,10 +39,9 @@ public class PlayerTempSyncMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            Entity ent = Minecraft.getInstance().getRenderViewEntity();
-            if (ent instanceof ClientPlayerEntity && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.isSpectator())
+            if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.isSpectator())
             {
-                ClientPlayerEntity player = (ClientPlayerEntity) ent;
+                ClientPlayerEntity player = Minecraft.getInstance().player;
 
                 player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
                 {

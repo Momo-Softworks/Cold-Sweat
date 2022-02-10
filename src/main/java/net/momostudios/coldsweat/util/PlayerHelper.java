@@ -39,13 +39,39 @@ public class PlayerHelper
      */
     public static void setTemperature(PlayerEntity player, Temperature value, Types type)
     {
+        setTemperature(player, value, type, true);
+    }
+
+    public static void setTemperature(PlayerEntity player, Temperature value, Types type, boolean sync)
+    {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
-            if ((int) capability.get(type) != (int) value.get() && type != Types.AMBIENT)
+            if (sync && !player.world.isRemote && (int) capability.get(type) != (int) value.get())
             {
-                updateTemperature(player);
+                updateTemperature(player,
+                        type == Types.BODY ? value : getTemperature(player, Types.BODY),
+                        type == Types.BASE ? value : getTemperature(player, Types.BASE));
             }
             capability.set(type, value.get());
+        });
+    }
+
+    public static void addTemperature(PlayerEntity player, Temperature value, Types type)
+    {
+        addTemperature(player, value, type, true);
+    }
+
+    public static void addTemperature(PlayerEntity player, Temperature value, Types type, boolean sync)
+    {
+        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
+        {
+            capability.set(type, value.get() + capability.get(type));
+            if (sync && !player.world.isRemote)
+            {
+                updateTemperature(player,
+                        type == Types.BODY ? value : getTemperature(player, Types.BODY),
+                        type == Types.BASE ? value : getTemperature(player, Types.BASE));
+            }
         });
     }
 
@@ -129,23 +155,14 @@ public class PlayerHelper
     public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
     {
         List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
-        List<TempModifier> toRemove = new ArrayList<>();
-        mods.forEach(mod ->
-        {
-            if (mod == null || mod.getID() == null)
-            {
-                ColdSweat.LOGGER.error("Found TempModifier with null ID! Removing...");
-                toRemove.add(mod);
-            }
-        });
-        mods.removeAll(toRemove);
+        mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
         return mods;
     }
 
     /**
      * @param modClass The class of the TempModifier to check for
      * @param type The type of TempModifier to check for
-     * @return true if the player has the specified TempModifier of the specified type
+     * @return true if the player has a TempModifier that extends the given class
      */
     public static boolean hasModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type)
     {
@@ -242,15 +259,15 @@ public class PlayerHelper
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
                 new PlayerModifiersSyncMessage(
-                        PlayerHelper.getModifiers(player, PlayerHelper.Types.AMBIENT),
+                        getModifiers(player, PlayerHelper.Types.AMBIENT),
                         new ArrayList<>(),
                         new ArrayList<>(),
                         new ArrayList<>()));
     }
 
-    public static void updateTemperature(PlayerEntity player)
+    public static void updateTemperature(PlayerEntity player, Temperature bodyTemp, Temperature baseTemp)
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
-                new PlayerTempSyncMessage(PlayerHelper.getTemperature(player, PlayerHelper.Types.BODY).get(), PlayerHelper.getTemperature(player, PlayerHelper.Types.BASE).get()));
+                new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get()));
     }
 }

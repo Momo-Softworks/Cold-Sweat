@@ -50,7 +50,7 @@ public class Temperature
     public Temperature add(double amount)
     {
         temp += amount;
-        return new Temperature(temp + amount);
+        return new Temperature(temp);
     }
     /**
      * Adds to the actual value of the temperature
@@ -58,7 +58,8 @@ public class Temperature
      */
     public Temperature add(Temperature amount)
     {
-        return new Temperature(temp + amount.get());
+        temp += amount.get();
+        return new Temperature(temp);
     }
 
     /**

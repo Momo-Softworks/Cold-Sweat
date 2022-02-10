@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 
 public class PlayerTemp
 {
+    //TODO: Remove these methods and use PlayerHelper instead
     @Deprecated // Use PlayerHelper instead
     public static Temperature getTemperature(PlayerEntity player, PlayerHelper.Types type)
     {
@@ -28,7 +29,7 @@ public class PlayerTemp
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static void setTemperature(PlayerEntity player, PlayerHelper.Types type, Temperature temp)
+    public static void setTemperature(PlayerEntity player, Temperature temp, PlayerHelper.Types type)
     {
         PlayerHelper.setTemperature(player, temp, type);
     }

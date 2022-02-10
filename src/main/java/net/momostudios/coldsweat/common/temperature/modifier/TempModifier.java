@@ -35,16 +35,35 @@ public abstract class TempModifier
      * @param name is the name of the argument. Used to retrieve the argument in {@link #getArgument(String)}
      * @param arg is value of the argument. It is stored in the {@link PlayerEntity} NBT.
      */
-    public void addArgument(String name, Object arg) {
+    public void addArgument(String name, Object arg)
+    {
         args.put(name, arg);
     }
 
     /**
-     * @param name the name of the argument
-     * @return the value of the argument on this TempModifier instance with the specified name.
+     * @param name The name of the argument
+     * @return A generic object with the value of the requested argument.
      */
-    public Object getArgument(String name) {
+    public Object getArgument(String name)
+    {
         return args.get(name);
+    }
+
+    /**
+     *
+     * @param name The name of the argument
+     * @param clazz The class of the argument
+     * @return The value of the requested argument for this TempModifier instance, cast to the specified class.
+     */
+    public <T> T getArgument(String name, Class<T> clazz)
+    {
+        if (!clazz.equals(args.get(name).getClass()))
+        {
+            throw new IllegalArgumentException(
+                    "Argument type mismatch trying to get argument \"" + name + "\" of " + this.getID() +
+                    " (expected " + clazz.getName() + " but got " + args.get(name).getClass().getName() + ")");
+        }
+        return clazz.cast(args.get(name));
     }
 
     /**
@@ -52,7 +71,8 @@ public abstract class TempModifier
      * @param name The name of the argument
      * @param arg The new value of the argument
      */
-    public void setArgument(String name, Object arg) {
+    public void setArgument(String name, Object arg)
+    {
         if (arg.getClass().equals(args.get(name).getClass()))
         {
             args.put(name, arg);

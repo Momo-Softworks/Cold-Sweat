@@ -17,7 +17,9 @@ public class TemperatureClientSync
         {
             for (PlayerEntity player : event.world.getPlayers())
             {
-                PlayerHelper.updateTemperature(player);
+                PlayerHelper.updateTemperature(player,
+                        PlayerHelper.getTemperature(player, PlayerHelper.Types.BODY),
+                        PlayerHelper.getTemperature(player, PlayerHelper.Types.BASE));
             }
         }
 
