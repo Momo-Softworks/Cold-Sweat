@@ -80,10 +80,10 @@ public class ColdSweatConfig
          */
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
-                .comment("Minimum habitable temperature (default: 0.25, on a scale of 0 - 2)")
+                .comment("Minimum habitable temperature (default: " + CSMath.convertUnits(50, Units.F, Units.MC, true) + ")")
                 .defineInRange("Minimum Habitable Temperature", CSMath.convertUnits(50, Units.F, Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
-                .comment("Maximum habitable temperature (default: 1.75, on a scale of 0 - 2)")
+                .comment("Maximum habitable temperature (default: " + CSMath.convertUnits(100, Units.F, Units.MC, true) + ")")
                 .defineInRange("Maximum Habitable Temperature", CSMath.convertUnits(100, Units.F, Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
