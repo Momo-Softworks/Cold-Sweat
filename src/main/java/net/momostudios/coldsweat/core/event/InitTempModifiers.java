@@ -1,6 +1,5 @@
 package net.momostudios.coldsweat.core.event;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -10,7 +9,6 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.modifier.*;
 import net.momostudios.coldsweat.common.temperature.modifier.block.*;
@@ -20,7 +18,6 @@ import net.momostudios.coldsweat.config.ColdSweatConfig;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 import net.momostudios.coldsweat.util.CSMath;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -148,7 +145,7 @@ public class InitTempModifiers
             event.addModifier(BiomeTempModifier.class);
             event.addModifier(DepthTempModifier.class);
             event.addModifier(InsulationTempModifier.class);
-            event.addModifier(MinecartTempModifier.class);
+            event.addModifier(MountTempModifier.class);
             event.addModifier(TimeTempModifier.class);
             event.addModifier(WaterskinTempModifier.class);
             event.addModifier(HellLampTempModifier.class);

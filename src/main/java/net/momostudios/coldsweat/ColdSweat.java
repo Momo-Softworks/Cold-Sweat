@@ -10,10 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.config.ColdSweatConfig;
-import net.momostudios.coldsweat.config.ItemSettingsConfig;
-import net.momostudios.coldsweat.config.WorldTemperatureConfig;
+import net.momostudios.coldsweat.config.*;
 import net.momostudios.coldsweat.core.init.*;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +43,7 @@ public class ColdSweat
         ItemSettingsConfig.setup();
         ColdSweatConfig.setup();
         ClientSettingsConfig.setup();
+        EntitySettingsConfig.setup();
     }
 
     // Register Commands

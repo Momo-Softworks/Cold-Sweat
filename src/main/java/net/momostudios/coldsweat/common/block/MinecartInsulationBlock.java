@@ -6,8 +6,12 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.ToolType;
 import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 public class MinecartInsulationBlock extends Block
 {
@@ -24,6 +28,11 @@ public class MinecartInsulationBlock extends Block
     public static Item.Properties getItemProperties()
     {
         return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+    }
+
+    public Item asItem()
+    {
+        return ModItems.MINECART_INSULATION;
     }
 
     public MinecartInsulationBlock(Properties properties)

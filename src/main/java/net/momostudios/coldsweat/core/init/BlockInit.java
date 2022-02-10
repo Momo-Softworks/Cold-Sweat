@@ -20,7 +20,7 @@ public class BlockInit
     public static Block sewingTableBlock = new SewingTableBlock(SewingTableBlock.getProperties());
     public static final RegistryObject<Block> SEWING_TABLE = BLOCKS.register("sewing_table", () -> sewingTableBlock);
 
-    public static Block minecartInsulationBlock = new SewingTableBlock(SewingTableBlock.getProperties());
+    public static Block minecartInsulationBlock = new MinecartInsulationBlock(MinecartInsulationBlock.getProperties());
     public static final RegistryObject<Block> MINECART_INSULATION = BLOCKS.register("minecart_insulation", () -> minecartInsulationBlock);
 
     public static Block hearthBlock = new HearthBlock(HearthBlock.getProperties());

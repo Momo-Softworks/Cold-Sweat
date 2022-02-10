@@ -16,10 +16,13 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.momostudios.coldsweat.common.temperature.modifier.MinecartTempModifier;
+import net.momostudios.coldsweat.common.temperature.modifier.MountTempModifier;
+import net.momostudios.coldsweat.config.EntitySettingsConfig;
 import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.util.PlayerHelper;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
+
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class MinecartEventHandler
@@ -53,36 +56,29 @@ public class MinecartEventHandler
     }
 
     @SubscribeEvent
-    public static void onMinecartBroken(EntityLeaveWorldEvent event)
-    {
-        if (event != null && event.getEntity() != null)
-        {
-            Entity entity = event.getEntity();
-            double x = entity.getPosX();
-            double y = entity.getPosY();
-            double z = entity.getPosZ();
-            World world = entity.world;
-            if (entity instanceof MinecartEntity && ((MinecartEntity) entity).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
-            {
-                if (world instanceof World && !world.isRemote())
-                {
-                    ItemEntity entityToSpawn = new ItemEntity(world, x, y, z, new ItemStack(ModItems.MINECART_INSULATION, 1));
-                    entityToSpawn.setPickupDelay(10);
-                    world.addEntity(entityToSpawn);
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void playerRidingMinecart(TickEvent.PlayerTickEvent event)
+    public static void playerRiding(TickEvent.PlayerTickEvent event)
     {
         if (event.phase == TickEvent.Phase.END)
         {
             PlayerEntity player = event.player;
-            if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
+            if (player.getRidingEntity() != null)
             {
-                PlayerHelper.addModifier(player, new MinecartTempModifier(), PlayerHelper.Types.RATE, false);
+                if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
+                {
+                    PlayerHelper.addModifier(player, new MountTempModifier(1).expires(1), PlayerHelper.Types.RATE, false);
+                }
+                else
+                {
+                    for (List<Object> entity : EntitySettingsConfig.INSTANCE.insulatedEntities())
+                    {
+                        if (ForgeRegistries.ENTITIES.getKey(player.getRidingEntity().getType()).toString().equals(entity.get(0)))
+                        {
+                            Number number = (Number) entity.get(1);
+                            double value = number.doubleValue();
+                            PlayerHelper.addModifier(player, new MountTempModifier(value).expires(1), PlayerHelper.Types.RATE, false);
+                        }
+                    }
+                }
             }
         }
     }
