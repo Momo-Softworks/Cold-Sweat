@@ -4,7 +4,9 @@
   "package": "net.momostudios.coldsweat.mixin",
   "client": [
     "MixinBipedModel",
-    "MixinXPBar"
+    "MixinXPBar",
+    "MixinWorld",
+    "MixinMinecart"
   ],
   "injectors":
   {
