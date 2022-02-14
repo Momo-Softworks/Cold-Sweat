@@ -141,18 +141,18 @@ public class InitTempModifiers
         String betterweather = "net.momostudios.coldsweat.common.temperature.modifier.compat.BetterWeatherTempModifier";
         try
         {
-            event.addModifier(BlockTempModifier.class);
-            event.addModifier(BiomeTempModifier.class);
-            event.addModifier(DepthTempModifier.class);
-            event.addModifier(InsulationTempModifier.class);
-            event.addModifier(MountTempModifier.class);
-            event.addModifier(TimeTempModifier.class);
-            event.addModifier(WaterskinTempModifier.class);
-            event.addModifier(HellLampTempModifier.class);
-            if (ModList.get().isLoaded("sereneseasons")) event.addModifier((Class<TempModifier>) Class.forName(sereneseasons));
-            if (ModList.get().isLoaded("betterweather")) event.addModifier((Class<TempModifier>) Class.forName(betterweather));
-            event.addModifier(WaterTempModifier.class);
-            event.addModifier(HearthTempModifier.class);
+            event.addModifier(new BlockTempModifier());
+            event.addModifier(new BiomeTempModifier());
+            event.addModifier(new DepthTempModifier());
+            event.addModifier(new InsulationTempModifier());
+            event.addModifier(new MountTempModifier());
+            event.addModifier(new TimeTempModifier());
+            event.addModifier(new WaterskinTempModifier());
+            event.addModifier(new HellLampTempModifier());
+            if (ModList.get().isLoaded("sereneseasons")) event.addModifier((TempModifier) Class.forName(sereneseasons).newInstance());
+            if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
+            event.addModifier(new WaterTempModifier());
+            event.addModifier(new HearthTempModifier());
 
             if (ModList.get().isLoaded("sereneseasons") && ModList.get().isLoaded("betterweather"))
                 ColdSweat.LOGGER.warn("Multiple seasons mods are present! This may cause issues!");
