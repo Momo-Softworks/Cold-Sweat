@@ -26,7 +26,7 @@ public abstract class TempModifier
 
     /**
      * Default constructor.<br>
-     * REQUIRED if the TempModifier has arguments.
+     * REQUIRED
      */
     public TempModifier() {}
 

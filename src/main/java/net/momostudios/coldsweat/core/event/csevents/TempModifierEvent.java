@@ -206,13 +206,13 @@ public class TempModifierEvent extends Event
 
             /**
              * Adds a new {@link TempModifier} to the registry.
-             * @param clazz The class of the TempModifier to add.
+             * @param modifier the {@link TempModifier} to add.
              * @throws InstantiationException If the TempModifier has no default constructor.
              * @throws IllegalAccessException If the default constructor is not accessible.
              */
-            public void addModifier(Class<? extends TempModifier> clazz) throws InstantiationException, IllegalAccessException
+            public void addModifier(TempModifier modifier) throws InstantiationException, IllegalAccessException
             {
-                this.getPool().add(clazz.newInstance());
+                this.getPool().add(modifier);
             }
         }
 
