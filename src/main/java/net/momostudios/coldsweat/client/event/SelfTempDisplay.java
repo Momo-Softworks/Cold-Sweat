@@ -17,12 +17,11 @@ import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerHelper;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class SelfTempDisplay
 {
     static PlayerTempCapability playerCap = null;
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void eventHandler(RenderGameOverlayEvent event)
     {
