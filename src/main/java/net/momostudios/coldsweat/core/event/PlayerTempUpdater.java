@@ -107,13 +107,19 @@ public class PlayerTempUpdater
 
     private static Temperature tickModifiers(Temperature temp, PlayerEntity player, List<TempModifier> modifiers)
     {
+        Temperature result = temp.with(modifiers, player);
+
         modifiers.removeIf(modifier ->
         {
-            modifier.setTicksExisted(modifier.getTicksExisted() + 1);
-            return (modifier.getExpireTicks() != -1 && modifier.getTicksExisted() > modifier.getExpireTicks());
+            if (modifier.getExpireTicks() != -1)
+            {
+                modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+                return modifier.getTicksExisted() >= modifier.getExpireTicks();
+            }
+            return false;
         });
 
-        return temp.with(modifiers, player);
+        return result;
     }
 
     @SubscribeEvent
