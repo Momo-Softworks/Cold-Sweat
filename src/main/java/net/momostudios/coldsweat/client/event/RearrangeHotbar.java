@@ -1,27 +1,29 @@
 package net.momostudios.coldsweat.client.event;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class RearrangeHotbar
 {
     public static boolean customHotbar = ClientSettingsConfig.getInstance().customHotbar();
-    static boolean hasShifted = false;
+    static boolean hasShiftedUp = false;
+    static boolean hasShiftedDown = false;
 
     @SubscribeEvent
     public static void onOverlayRenderPre(RenderGameOverlayEvent.Pre event)
     {
         if (ClientSettingsConfig.getInstance().customHotbar())
         {
-            if (hasShifted)
+            if (hasShiftedUp)
             {
                 event.getMatrixStack().translate(0, 2, 0);
-                hasShifted = false;
+                hasShiftedUp = false;
             }
 
             if (event.getType() == RenderGameOverlayEvent.ElementType.HEALTH ||
@@ -29,17 +31,29 @@ public class RearrangeHotbar
                 event.getType() == RenderGameOverlayEvent.ElementType.FOOD ||
                 event.getType() == RenderGameOverlayEvent.ElementType.HEALTHMOUNT ||
                 event.getType() == RenderGameOverlayEvent.ElementType.AIR ||
-                event.getType() == RenderGameOverlayEvent.ElementType.TEXT ||
-                event.getType() == RenderGameOverlayEvent.ElementType.JUMPBAR)
+                event.getType() == RenderGameOverlayEvent.ElementType.TEXT)
             {
                 event.getMatrixStack().translate(0, -2, 0);
-                hasShifted = true;
+                hasShiftedUp = true;
+            }
+            if (event.getType() == RenderGameOverlayEvent.ElementType.JUMPBAR)
+            {
+                event.getMatrixStack().translate(0, -1, 0);
+                hasShiftedDown = true;
             }
         }
-        else if (hasShifted)
+        else
         {
-            event.getMatrixStack().translate(0, 2, 0);
-            hasShifted = false;
+            if (hasShiftedUp)
+            {
+                event.getMatrixStack().translate(0, 2, 0);
+            }
+            if (hasShiftedDown)
+            {
+                event.getMatrixStack().translate(0, 1, 0);
+            }
+            hasShiftedUp = false;
+            hasShiftedDown = false;
         }
     }
 
