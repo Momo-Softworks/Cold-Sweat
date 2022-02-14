@@ -25,7 +25,7 @@ import net.momostudios.coldsweat.util.registrylists.ModItems;
 import java.util.List;
 
 @Mod.EventBusSubscriber
-public class MinecartEventHandler
+public class MountEventHandler
 {
     @SubscribeEvent
     public static void onMinecartRightclick(PlayerInteractEvent.EntityInteract event)
