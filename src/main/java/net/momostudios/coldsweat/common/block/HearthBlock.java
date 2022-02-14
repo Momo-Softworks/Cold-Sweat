@@ -171,18 +171,6 @@ public class HearthBlock extends Block
         }
     }
 
-    @Override
-    public boolean removedByPlayer(BlockState blockstate, World world, BlockPos pos, PlayerEntity entity, boolean willHarvest, FluidState fluid)
-    {
-        if (world.getBlockState(pos.up()).getBlock() == BlockInit.HEARTH_TOP.get())
-        {
-            world.destroyBlock(pos, !entity.isCreative());
-            world.destroyBlock(pos.up(), false);
-        }
-
-        return super.removedByPlayer(blockstate, world, pos, entity, willHarvest, fluid);
-    }
-
     @SuppressWarnings("deprecation")
     @Override
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
@@ -190,7 +178,7 @@ public class HearthBlock extends Block
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
         if (worldIn.getBlockState(pos.up()).getBlock() != BlockInit.HEARTH_TOP.get())
         {
-            worldIn.destroyBlock(pos, true);
+            worldIn.destroyBlock(pos, false);
         }
     }
 
@@ -226,6 +214,11 @@ public class HearthBlock extends Block
     {
         if (!state.matchesBlock(newState.getBlock()))
         {
+            if (world.getBlockState(pos.up()).getBlock() == BlockInit.HEARTH_TOP.get())
+            {
+                world.destroyBlock(pos.up(), false);
+            }
+
             TileEntity tileentity = world.getTileEntity(pos);
             if (tileentity instanceof HearthTileEntity) {
                 InventoryHelper.dropInventoryItems(world, pos, (HearthTileEntity) tileentity);

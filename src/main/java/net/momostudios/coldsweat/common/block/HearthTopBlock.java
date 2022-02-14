@@ -7,6 +7,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
@@ -33,11 +34,9 @@ import net.momostudios.coldsweat.core.init.BlockInit;
 import net.momostudios.coldsweat.core.init.ItemInit;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
+import net.momostudios.coldsweat.util.registrylists.ModItems;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class HearthTopBlock extends Block
 {
@@ -158,14 +157,18 @@ public class HearthTopBlock extends Block
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public boolean removedByPlayer(BlockState blockstate, World world, BlockPos pos, PlayerEntity entity, boolean willHarvest, FluidState fluid)
+    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (world.getBlockState(pos.down()).getBlock() == BlockInit.HEARTH.get())
+        if (!state.matchesBlock(newState.getBlock()))
         {
-            world.destroyBlock(pos.down(), !entity.isCreative());
+            if (world.getBlockState(pos.down()).getBlock() == BlockInit.HEARTH.get())
+            {
+                world.destroyBlock(pos.down(), false);
+            }
         }
-        return super.removedByPlayer(blockstate, world, pos, entity, willHarvest, fluid);
+        super.onReplaced(state, world, pos, newState, isMoving);
     }
 
     @Override
@@ -175,9 +178,11 @@ public class HearthTopBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {
-        return null;
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+        List<ItemStack> dropsOriginal = super.getDrops(state, builder);
+        if (!dropsOriginal.isEmpty())
+            return dropsOriginal;
+        return Collections.singletonList(new ItemStack(ItemInit.HEARTH.get(), 1));
     }
 
     @Override
