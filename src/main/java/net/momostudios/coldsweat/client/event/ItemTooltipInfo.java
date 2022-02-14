@@ -11,6 +11,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
+import net.momostudios.coldsweat.util.CSMath;
+import net.momostudios.coldsweat.util.Units;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
 @Mod.EventBusSubscriber
@@ -26,10 +28,11 @@ public class ItemTooltipInfo
             double temp = event.getItemStack().getOrCreateTag().getDouble("temperature");
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";
-            temp = celsius ? (int) (22 + ((temp - 32) * 5/8) / 2) : (int) (75 + temp / 2);
+            temp = temp / 2 + 75;
+            if (celsius) temp = CSMath.convertUnits(temp, Units.F, Units.C, true);
 
             event.getToolTip().add(1, new StringTextComponent("\u00a77" + new TranslationTextComponent(
-                "item." + ColdSweat.MOD_ID + ".waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)"));
+                "item." + ColdSweat.MOD_ID + ".waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)\u00a7r"));
         }
         else if ((event.getItemStack().getItem() instanceof ArmorItem || event.getItemStack().getItem() instanceof BucketItem) &&
                   event.getItemStack().getOrCreateTag().getBoolean("insulated"))
