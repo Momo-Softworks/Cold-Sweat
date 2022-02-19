@@ -17,7 +17,7 @@ import net.momostudios.coldsweat.util.PlayerTemp;
 @Mod.EventBusSubscriber
 public class StorePlayerData
 {
-    static String ambientTemp = PlayerHelper.getTempTag(PlayerHelper.Types.AMBIENT);
+    /*static String ambientTemp = PlayerHelper.getTempTag(PlayerHelper.Types.AMBIENT);
     static String bodyTemp = PlayerHelper.getTempTag(PlayerHelper.Types.BODY);
     static String baseTemp = PlayerHelper.getTempTag(PlayerHelper.Types.BASE);
 
@@ -82,5 +82,5 @@ public class StorePlayerData
                 player.getPersistentData().put(PlayerHelper.getModifierTag(type), modifiers);
             }
         });
-    }
+    }*/
 }

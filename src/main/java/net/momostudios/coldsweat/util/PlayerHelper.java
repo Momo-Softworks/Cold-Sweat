@@ -7,7 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
@@ -251,8 +250,8 @@ public class PlayerHelper
     {
         if (!player.world.isRemote)
         {
-            ColdSweatPacketHandler.INSTANCE.sendTo(new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), ambientTemp.get()),
-                    ((ServerPlayerEntity) player).connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+                    new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), ambientTemp.get()));
         }
     }
 }

@@ -1,10 +1,26 @@
 package net.momostudios.coldsweat.core.capabilities;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.potion.Effects;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
+import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.momostudios.coldsweat.config.ConfigCache;
+import net.momostudios.coldsweat.util.CSMath;
+import net.momostudios.coldsweat.util.CustomDamageTypes;
+import net.momostudios.coldsweat.util.NBTHelper;
 import net.momostudios.coldsweat.util.PlayerHelper;
+import net.momostudios.coldsweat.util.registrylists.ModEffects;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,5 +105,100 @@ public class PlayerTempCapability
             case RATE:     { this.rateModifiers.clear(); break; }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.clearModifiers(): " + type);
         }
+    }
+
+    public void tickUpdate(PlayerEntity player)
+    {
+        ConfigCache config = ConfigCache.getInstance();
+
+        // Tick expiration time for ambient modifiers
+        Temperature ambient = tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.AMBIENT));
+        double ambientTemp = ambient.get();
+
+        // Apply ambient temperature modifiers
+        set(PlayerHelper.Types.AMBIENT, ambient.get());
+
+        Temperature bodyTemp = tickModifiers(new Temperature(get(PlayerHelper.Types.BODY)), player, getModifiers(PlayerHelper.Types.BODY));
+
+        Temperature base = tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.BASE));
+
+        double maxTemp = config.maxTemp;
+        double minTemp = config.minTemp;
+
+        double tempRate = 7.0d;
+
+        if ((ambientTemp > maxTemp && bodyTemp.get() >= 0) ||
+                (ambientTemp < minTemp && bodyTemp.get() <= 0))
+        {
+            boolean isOver = ambientTemp > maxTemp;
+            double difference = Math.abs(ambientTemp - (isOver ? maxTemp : minTemp));
+            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * (isOver ? 1 : -1));
+            set(PlayerHelper.Types.BODY, bodyTemp.add(tickModifiers(changeBy, player, getModifiers(PlayerHelper.Types.RATE))).get());
+        }
+        else
+        {
+            // Return the player's body temperature to 0
+            Temperature returnRate = new Temperature(getBodyReturnRate(ambientTemp, bodyTemp.get() > 0 ? maxTemp : minTemp, config.rate, bodyTemp.get()));
+            set(PlayerHelper.Types.BODY, bodyTemp.add(returnRate).get());
+        }
+
+        // Calculate body/base temperatures with modifiers
+        Temperature composite = base.add(bodyTemp);
+
+        // Sets the player's base temperature
+        set(PlayerHelper.Types.BASE, base.get());
+
+        if (composite.get() != get(PlayerHelper.Types.COMPOSITE) || player.ticksExisted % 3 == 0)
+        {
+            PlayerHelper.updateTemperature(player,
+                    new Temperature(get(PlayerHelper.Types.BODY)),
+                    new Temperature(get(PlayerHelper.Types.BASE)),
+                    new Temperature(get(PlayerHelper.Types.AMBIENT)));
+        }
+
+        // Sets the player's composite temperature to BASE + BODY
+        set(PlayerHelper.Types.COMPOSITE, CSMath.clamp(composite.get(), -150, 150));
+
+        //Deal damage to the player if temperature is critical
+        boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && config.fireRes;
+        boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && config.iceRes;
+        if (player.ticksExisted % 40 == 0)
+        {
+            boolean damageScaling = config.damageScaling;
+
+            if (composite.get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
+            {
+                player.attackEntityFrom(damageScaling ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2f);
+            }
+            if (composite.get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
+            {
+                player.attackEntityFrom(damageScaling ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2f);
+            }
+        }
+    }
+
+    // Used for returning the player's temperature back to 0
+    private static double getBodyReturnRate(double ambient, double cap, double rate, double bodyTemp)
+    {
+        double tempRate = 7.0d;
+        double changeBy = Math.max((Math.abs(ambient - cap) / tempRate) * rate, Math.abs(rate / 30));
+        return Math.min(Math.abs(bodyTemp), changeBy) * (bodyTemp > 0 ? -1 : 1);
+    }
+
+    private static Temperature tickModifiers(Temperature temp, PlayerEntity player, List<TempModifier> modifiers)
+    {
+        Temperature result = temp.with(modifiers, player);
+
+        modifiers.removeIf(modifier ->
+        {
+            if (modifier.getExpireTicks() != -1)
+            {
+                modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+                return modifier.getTicksExisted() >= modifier.getExpireTicks();
+            }
+            return false;
+        });
+
+        return result;
     }
 }

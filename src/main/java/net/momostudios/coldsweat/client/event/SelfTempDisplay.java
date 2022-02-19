@@ -33,6 +33,7 @@ public class SelfTempDisplay
         !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR
         && !((PlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode && !mc.getRenderViewEntity().isSpectator())
         {
+
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
             PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();

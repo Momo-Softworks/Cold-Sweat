@@ -13,21 +13,20 @@ import net.momostudios.coldsweat.core.network.message.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ColdSweatPacketHandler
 {
-    public static final SimpleChannel INSTANCE = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(ColdSweat.MOD_ID))
-            .clientAcceptedVersions(s-> Objects.equals(s,"1"))
-            .serverAcceptedVersions(s -> Objects.equals(s,"1"))
-            .networkProtocolVersion(()->"1")
-            .simpleChannel();
+    private static final String PROTOCOL_VERSION = "0.1.1";
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(ColdSweat.MOD_ID, "main"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
 
     public static void init()
     {
-        INSTANCE.messageBuilder(PlayerTempSyncMessage.class, 0)
-                .encoder(PlayerTempSyncMessage::encode).decoder(PlayerTempSyncMessage::decode).consumer(PlayerTempSyncMessage::handle).add();
-
+        INSTANCE.registerMessage(0, PlayerTempSyncMessage.class, PlayerTempSyncMessage::encode, PlayerTempSyncMessage::decode, PlayerTempSyncMessage::handle);
         INSTANCE.registerMessage(1, SoulLampInputMessage.class, SoulLampInputMessage::encode, SoulLampInputMessage::decode, SoulLampInputMessage::handle);
         INSTANCE.registerMessage(2, SoulLampInputClientMessage.class, SoulLampInputClientMessage::encode, SoulLampInputClientMessage::decode, SoulLampInputClientMessage::handle);
         INSTANCE.registerMessage(3, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);

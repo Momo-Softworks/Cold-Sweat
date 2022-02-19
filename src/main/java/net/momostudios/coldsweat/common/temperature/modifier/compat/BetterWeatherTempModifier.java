@@ -10,7 +10,6 @@ public class BetterWeatherTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, PlayerEntity player)
     {
-        /*
         double t = temp.get();
         Season season = Season.getSeason(player.world);
         if (season != null && player.world.getDimensionType().isNatural())
@@ -54,8 +53,7 @@ public class BetterWeatherTempModifier extends TempModifier
             }
         }
         else
-            return t;*/
-        return temp.get();
+            return t;
     }
 
     @Override
