@@ -134,13 +134,13 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public int getItemFuel(ItemStack item)
     {
         int fuel = 0;
-        for (List<String> testIndex : new ItemSettingsConfig().boilerItems())
+        for (List<?> testIndex : new ItemSettingsConfig().boilerItems())
         {
-            String testItem = testIndex.get(0);
+            String testItem = (String) testIndex.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                fuel = Integer.parseInt(testIndex.get(1));
+                fuel = ((Number) testIndex.get(1)).intValue();
                 break;
             }
         }

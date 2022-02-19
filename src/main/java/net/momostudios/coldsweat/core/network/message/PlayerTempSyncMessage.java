@@ -2,8 +2,9 @@ package net.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.util.PlayerHelper;
@@ -14,43 +15,60 @@ public class PlayerTempSyncMessage
 {
     public double body;
     public double base;
+    public double ambient;
 
     public PlayerTempSyncMessage() {
     }
 
-    public PlayerTempSyncMessage(double body, double base){
+    public PlayerTempSyncMessage(double body, double base, double ambient){
         this.body = body;
         this.base = base;
+        this.ambient = ambient;
     }
 
     public static void encode(PlayerTempSyncMessage message, PacketBuffer buffer)
     {
         buffer.writeDouble(message.body);
         buffer.writeDouble(message.base);
+        buffer.writeDouble(message.ambient);
     }
 
     public static PlayerTempSyncMessage decode(PacketBuffer buffer)
     {
-        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble());
+        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
 
     public static void handle(PlayerTempSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() ->
+
+        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.ambient)));
+
+        context.setPacketHandled(true);
+    }
+
+    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double ambient)
+    {
+        return new DistExecutor.SafeRunnable()
         {
-            if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.isSpectator())
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void run()
             {
                 ClientPlayerEntity player = Minecraft.getInstance().player;
 
-                player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+                if (player != null && !player.isSpectator())
                 {
-                    cap.set(PlayerHelper.Types.BODY, message.body);
-                    cap.set(PlayerHelper.Types.BASE, message.base);
-                    cap.set(PlayerHelper.Types.COMPOSITE, message.body + message.base);
-                });
+                    player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+                    {
+                        cap.set(PlayerHelper.Types.BODY, body);
+                        cap.set(PlayerHelper.Types.BASE, base);
+                        cap.set(PlayerHelper.Types.COMPOSITE, body + base);
+                        cap.set(PlayerHelper.Types.AMBIENT, ambient);
+                    });
+                }
             }
-        });
-        context.setPacketHandled(true);
+        };
     }
 }

@@ -25,18 +25,18 @@ public class PlayerTempUpdater
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            PlayerEntity player = event.player;
-            ConfigCache config = ConfigCache.getInstance();
-
-            // Tick expiration time for ambient modifiers
-            Temperature ambient = tickModifiers(new Temperature(), player, PlayerHelper.getModifiers(player, PlayerHelper.Types.AMBIENT));
-            double ambientTemp = ambient.get();
-
-            // Apply ambient temperature modifiers
-            PlayerHelper.setTemperature(player, ambient, PlayerHelper.Types.AMBIENT, false);
-
             if (!event.player.world.isRemote)
             {
+                PlayerEntity player = event.player;
+                ConfigCache config = ConfigCache.getInstance();
+
+                // Tick expiration time for ambient modifiers
+                Temperature ambient = tickModifiers(new Temperature(), player, PlayerHelper.getModifiers(player, PlayerHelper.Types.AMBIENT));
+                double ambientTemp = ambient.get();
+
+                // Apply ambient temperature modifiers
+                PlayerHelper.setTemperature(player, ambient, PlayerHelper.Types.AMBIENT, false);
+
                 Temperature bodyTemp = tickModifiers(PlayerHelper.getTemperature(player, PlayerHelper.Types.BODY),
                         player, PlayerHelper.getModifiers(player, PlayerHelper.Types.BODY));
 
@@ -55,26 +55,31 @@ public class PlayerTempUpdater
                     Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * (isOver ? 1 : -1));
                     PlayerHelper.setTemperature(player,
                             bodyTemp.add(tickModifiers(changeBy, player, PlayerHelper.getModifiers(player, PlayerHelper.Types.RATE))),
-                            PlayerHelper.Types.BODY);
+                            PlayerHelper.Types.BODY, false);
                 }
                 else
                 {
                     // Return the player's body temperature to 0
                     Temperature returnRate = new Temperature(getBodyReturnRate(ambientTemp, bodyTemp.get() > 0 ? maxTemp : minTemp, config.rate, bodyTemp.get()));
-                    PlayerHelper.setTemperature(player,
-                            bodyTemp.add(tickModifiers(returnRate, player, PlayerHelper.getModifiers(player, PlayerHelper.Types.RATE))),
-                            PlayerHelper.Types.BODY);
+                    PlayerHelper.setTemperature(player, bodyTemp.add(returnRate), PlayerHelper.Types.BODY, false);
                 }
 
                 // Calculate body/base temperatures with modifiers
                 Temperature composite = base.add(bodyTemp);
+
+                // Sets the player's base temperature
+                PlayerHelper.setTemperature
+                (
+                    player, base, PlayerHelper.Types.BASE, false
+                );
 
                 // Sets the player's composite temperature to BASE + BODY
                 PlayerHelper.setTemperature
                 (
                     player,
                     new Temperature(CSMath.clamp(composite.get(), -150, 150)),
-                    PlayerHelper.Types.COMPOSITE, false
+                    PlayerHelper.Types.COMPOSITE,
+                    (int) PlayerHelper.getTemperature(player, PlayerHelper.Types.COMPOSITE).get() != (int) composite.get() || player.ticksExisted % 3 == 0
                 );
 
                 //Deal damage to the player if temperature is critical

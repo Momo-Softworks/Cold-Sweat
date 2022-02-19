@@ -53,9 +53,6 @@ public class StorePlayerData
                 });
             }
         });
-
-        if (player instanceof ServerPlayerEntity)
-            PlayerHelper.updateModifiers(player);
     }
 
     @SubscribeEvent

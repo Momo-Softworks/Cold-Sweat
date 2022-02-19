@@ -266,18 +266,49 @@ Fixes:
 Technical Changes:
 - The Hearth no longer gives Insulation to players in habitable areas
 - The Hearth now uses block bounding box shape for spread detection (much more reliable)
-- Rebalanced block temperatures to have differing radii (radiuses)
+- Rebalanced block temperatures to have differing areas of effect
 
 2.1.2
 - The Soulfire Lamp is now the Hellspring Lamp
       - Nothing serious has changed, but this rework brings it into closer parity with its crafting recipe
+      - The ID has changed, but don't worry! Old worlds should update to the new ID automatically
+      - Translation keys have changed, meaning its name will default to "Hellspring Lamp" in all languages
 - Lowered the rate at which the Hearth consumes fuel
 - Added compatibility for Better Weather
-- Fixed major underlying bug with armor insulation that made it not work properly
-- The ambient temperature gauge now smooths on a per-frame basis instead of per-tick
-    - This basically just makes it smoother for higher framerates (above ~30FPS)
+- The ambient temperature gauge now smooths out transitions on a per-frame basis instead of per-tick
+      - This basically just makes it smoother for higher framerates
 
+Fixes:
+- Fixed major underlying bug with armor insulation that made it not work properly
 - Fixed crash that occurs when the Hearth is near an unloaded chunk
+
+2.1.3
+- The effects of temperature-emitting are now blocked if there are solid blocks in the way
+- Added config option to insulate all non-living rideable entities (so you would be insulated inside a modded plane, for example)
+- Rebalanced a lot of Overworld biome temperatures (requires deleting world-temperatures.toml)
+- Translation improvements:
+      - Some elements of the config GUI will now move around/stretch to accommodate longer words
+      - Removed a lot of repetitive translation keys & cleaned them up, making translating much easier (we've updated all existing languages)
+      - Fixed some outdated translation keys (Russian, Polish)
+      - Fixed some things in the config GUI not updating after changing the language (like ON/OFF labels)
+- Added the ability to right-click fuel items into the Boiler, Icebox, and Hearth right from your hand
+- Going into caves will now have a much more smooth/noticeable effect on temperature thanks to a much smarter (and more efficient) algorithm
+      - The amount of temperature-dampening depends on how far you are from an opening to the surface (natural light) and your y level (deeper is better)
+      - As a result of this new system, shade (kind of) helps against extreme temperatures
+- It is now possible to add temperature-affecting blocks via configs
+
+Fixes:
+- Fixed insulated minecarts dropping Minecart Insulation upon loading the world, allowing for duplication
+
+Technical Changes:
+- TempModifiers can now be queued to expire automatically by calling TempModifier#expire(int ticks) when adding it to the player
+- TempModifier#getArgument() can now accept a Class argument to cast the return value to
+- Merged PlayerTemp class into PlayerHelper class (old methods are now deprecated and will be removed in a future version)
+- WorldInfo has been changed to WorldHelper
+- Added new method to WorldHelper: schedule(Runnable runnable, int delayTicks)
+      - Queues the given Runnable to be executed on the main thread after the given delay
+- Blocks broken underground will now place cave air instead of normal are upon breaking (used for the new cave calculations)
+- Made minecarts drop the block they carrying when destroyed
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

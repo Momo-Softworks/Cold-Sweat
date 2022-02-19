@@ -13,28 +13,28 @@ import net.momostudios.coldsweat.core.network.message.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ColdSweatPacketHandler
 {
-    private static final String PROTOCOL_VERSION = "0.1.0";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(ColdSweat.MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
+    public static final SimpleChannel INSTANCE = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(ColdSweat.MOD_ID))
+            .clientAcceptedVersions(s-> Objects.equals(s,"1"))
+            .serverAcceptedVersions(s -> Objects.equals(s,"1"))
+            .networkProtocolVersion(()->"1")
+            .simpleChannel();
 
     public static void init()
     {
-        INSTANCE.registerMessage(0, PlayerTempSyncMessage.class, PlayerTempSyncMessage::encode, PlayerTempSyncMessage::decode, PlayerTempSyncMessage::handle);
-        INSTANCE.registerMessage(1, PlayerModifiersSyncMessage.class, PlayerModifiersSyncMessage::encode, PlayerModifiersSyncMessage::decode, PlayerModifiersSyncMessage::handle);
-        INSTANCE.registerMessage(2, SoulLampInputMessage.class, SoulLampInputMessage::encode, SoulLampInputMessage::decode, SoulLampInputMessage::handle);
-        INSTANCE.registerMessage(3, SoulLampInputClientMessage.class, SoulLampInputClientMessage::encode, SoulLampInputClientMessage::decode, SoulLampInputClientMessage::handle);
-        INSTANCE.registerMessage(4, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
-        INSTANCE.registerMessage(5, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
-        INSTANCE.registerMessage(6, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
-        INSTANCE.registerMessage(7, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
-        INSTANCE.registerMessage(8, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
+        INSTANCE.messageBuilder(PlayerTempSyncMessage.class, 0)
+                .encoder(PlayerTempSyncMessage::encode).decoder(PlayerTempSyncMessage::decode).consumer(PlayerTempSyncMessage::handle).add();
+
+        INSTANCE.registerMessage(1, SoulLampInputMessage.class, SoulLampInputMessage::encode, SoulLampInputMessage::decode, SoulLampInputMessage::handle);
+        INSTANCE.registerMessage(2, SoulLampInputClientMessage.class, SoulLampInputClientMessage::encode, SoulLampInputClientMessage::decode, SoulLampInputClientMessage::handle);
+        INSTANCE.registerMessage(3, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
+        INSTANCE.registerMessage(4, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
+        INSTANCE.registerMessage(5, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
+        INSTANCE.registerMessage(6, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
+        INSTANCE.registerMessage(7, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
     }
     
     public static void writeConfigCacheToBuffer(ConfigCache config, PacketBuffer buffer)

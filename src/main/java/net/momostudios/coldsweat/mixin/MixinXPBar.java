@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(IngameGui.class)
+@Mixin(value = IngameGui.class, priority = 900)
 public class MixinXPBar
 {
     @Shadow

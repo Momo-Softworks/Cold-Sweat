@@ -103,7 +103,7 @@ public class WorldHelper
             if (state.isSolidSide(world, pos, toDir))
                 return false;
 
-            return fromDir == toDir ? !isFullSide(state, toDir, pos, world) : fromDir != null && !state.isSolidSide(world, pos, fromDir.getOpposite());
+            return !isFullSide(state, toDir, pos, world) && !state.isSolidSide(world, pos.offset(toDir), toDir.getOpposite());
         }
         return false;
     }

@@ -10,7 +10,6 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.common.temperature.Temperature;
 import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 

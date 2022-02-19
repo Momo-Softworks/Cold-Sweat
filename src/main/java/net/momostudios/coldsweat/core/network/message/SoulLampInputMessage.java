@@ -7,6 +7,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -58,7 +59,7 @@ public class SoulLampInputMessage
             if (!player.isCreative())
                 container.putStackInSlot(message.putSlot, stack1);
 
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new SoulLampInputClientMessage(stack));
+            ColdSweatPacketHandler.INSTANCE.sendTo(new SoulLampInputClientMessage(stack), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
         });
         context.setPacketHandled(true);
     }

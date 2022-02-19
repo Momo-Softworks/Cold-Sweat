@@ -5,7 +5,9 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.momostudios.coldsweat.util.SpreadPath;
 
+import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HearthRadiusCapability implements IBlockStorageCap
 {
@@ -17,15 +19,17 @@ public class HearthRadiusCapability implements IBlockStorageCap
         HEARTH_BLOCKS = capability;
     }
 
-    LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
+    ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();
 
+    @Nonnull
     @Override
-    public LinkedHashMap<BlockPos, SpreadPath> getMap() {
+    public ConcurrentHashMap<BlockPos, SpreadPath> getMap()
+    {
         return paths;
     }
 
     @Override
-    public void setPaths(LinkedHashMap<BlockPos, SpreadPath> map)
+    public void setPaths(ConcurrentHashMap<BlockPos, SpreadPath> map)
     {
         this.paths = map;
     }
@@ -36,7 +40,7 @@ public class HearthRadiusCapability implements IBlockStorageCap
     }
 
     @Override
-    public void addPaths(LinkedHashMap<BlockPos, SpreadPath> map) {
+    public void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map) {
         map.forEach((pos, path) -> {
             if (!paths.containsKey(pos))
             {

@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.momostudios.coldsweat.ColdSweat;
 import net.momostudios.coldsweat.common.temperature.Temperature;
@@ -15,7 +16,6 @@ import net.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import net.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import net.momostudios.coldsweat.util.registrylists.ModItems;
 
@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 public class PlayerHelper
 {
     /**
-     * Returns the player's temperature AFTER {@link TempModifier}s are calculated.
+     * Returns the player's temperature of the specified type.
      */
     public static Temperature getTemperature(PlayerEntity player, Types type)
     {
@@ -46,11 +46,12 @@ public class PlayerHelper
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
-            if (sync && !player.world.isRemote && (int) capability.get(type) != (int) value.get())
+            if (sync && !player.world.isRemote)
             {
                 updateTemperature(player,
                         type == Types.BODY ? value : getTemperature(player, Types.BODY),
-                        type == Types.BASE ? value : getTemperature(player, Types.BASE));
+                        type == Types.BASE ? value : getTemperature(player, Types.BASE),
+                        type == Types.AMBIENT ? value : getTemperature(player, Types.AMBIENT));
             }
             capability.set(type, value.get());
         });
@@ -70,7 +71,8 @@ public class PlayerHelper
             {
                 updateTemperature(player,
                         type == Types.BODY ? value : getTemperature(player, Types.BODY),
-                        type == Types.BASE ? value : getTemperature(player, Types.BASE));
+                        type == Types.BASE ? value : getTemperature(player, Types.BASE),
+                        type == Types.AMBIENT ? value : getTemperature(player, Types.AMBIENT));
             }
         });
     }
@@ -99,11 +101,6 @@ public class PlayerHelper
                 else
                     ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
             });
-            // Update for player's client
-            if (!player.world.isRemote)
-            {
-                updateModifiers(player);
-            }
         }
     }
 
@@ -139,11 +136,6 @@ public class PlayerHelper
             }
             cap.getModifiers(type).removeAll(toRemove);
         });
-        // Update for player's client
-        if (!player.world.isRemote)
-        {
-            updateModifiers(player);
-        }
     }
 
     /**
@@ -255,19 +247,12 @@ public class PlayerHelper
         return getItemInHand(player, hand).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
-    public static void updateModifiers(PlayerEntity player)
+    public static void updateTemperature(PlayerEntity player, Temperature bodyTemp, Temperature baseTemp, Temperature ambientTemp)
     {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
-                new PlayerModifiersSyncMessage(
-                        getModifiers(player, PlayerHelper.Types.AMBIENT),
-                        new ArrayList<>(),
-                        new ArrayList<>(),
-                        new ArrayList<>()));
-    }
-
-    public static void updateTemperature(PlayerEntity player, Temperature bodyTemp, Temperature baseTemp)
-    {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
-                new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get()));
+        if (!player.world.isRemote)
+        {
+            ColdSweatPacketHandler.INSTANCE.sendTo(new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), ambientTemp.get()),
+                    ((ServerPlayerEntity) player).connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+        }
     }
 }

@@ -40,6 +40,7 @@ import net.momostudios.coldsweat.util.registrylists.ModEffects;
 import net.momostudios.coldsweat.util.registrylists.ModSounds;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
@@ -111,12 +112,12 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
             // Represents the NBT list
-            LinkedHashMap<BlockPos, SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getMap();
+            ConcurrentHashMap<BlockPos, SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getMap();
 
             if (pathList.size() > 0)
             {
                 // Create temporary list to add back to the NBT
-                LinkedHashMap<BlockPos, SpreadPath> newPaths = new LinkedHashMap<>();
+                ConcurrentHashMap<BlockPos, SpreadPath> newPaths = new ConcurrentHashMap<>();
 
                 /*
                  Partition all points into multiple lists (max of 19)
@@ -173,8 +174,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             if (testpos.withinDistance(pos, 20))
                             {
                                 if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
-                                && !WorldHelper.canSeeSky(world, testpos.getPos())
-                                && WorldHelper.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
+                                        && !WorldHelper.canSeeSky(world, testpos.getPos())
+                                        && WorldHelper.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
                                 {
                                     newPaths.put(testpos.getPos(), testpos);
                                 }
@@ -297,33 +298,33 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         // Air Particles
         if (world.isRemote && world.getTileEntity(pos).getTileData().getBoolean("showRadius"))
-        cap.ifPresent(c ->
-        {
-            // Spawn particles if enabled
-            for (BlockPos blockPos : c.getMap().keySet())
+            cap.ifPresent(c ->
             {
-                if (Minecraft.getInstance().gameSettings.showDebugInfo)
+                // Spawn particles if enabled
+                for (BlockPos blockPos : c.getMap().keySet())
                 {
-                    if (this.ticksExisted % 5 == 0)
-                        world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
-                }
-                else if (Math.random() < 0.016)
-                {
-                    double xr = Math.random();
-                    double yr = Math.random();
-                    double zr = Math.random();
-                    double xm = Math.random() / 20 - 0.025;
-                    double zm = Math.random() / 20 - 0.025;
+                    if (Minecraft.getInstance().gameSettings.showDebugInfo)
+                    {
+                        if (this.ticksExisted % 5 == 0)
+                            world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                    }
+                    else if (Math.random() < 0.016)
+                    {
+                        double xr = Math.random();
+                        double yr = Math.random();
+                        double zr = Math.random();
+                        double xm = Math.random() / 20 - 0.025;
+                        double zm = Math.random() / 20 - 0.025;
 
-                    world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                        world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                    }
                 }
-            }
-        });
+            });
     }
 
     private void reset()
     {
-        LinkedHashMap<BlockPos, SpreadPath> map = new LinkedHashMap<>();
+        ConcurrentHashMap<BlockPos, SpreadPath> map = new ConcurrentHashMap<>();
         map.put(pos, new SpreadPath(pos));
         getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 ->
         {
@@ -334,13 +335,13 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public int getItemFuel(ItemStack item)
     {
-        for (List<String> iterator : new ItemSettingsConfig().hearthItems())
+        for (List<?> iterator : new ItemSettingsConfig().hearthItems())
         {
-            String testItem = iterator.get(0);
+            String testItem = (String) iterator.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                return Integer.parseInt(iterator.get(1));
+                return ((Number) iterator.get(1)).intValue();
             }
         }
         return 0;

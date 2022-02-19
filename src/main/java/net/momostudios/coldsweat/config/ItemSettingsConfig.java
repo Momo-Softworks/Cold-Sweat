@@ -17,12 +17,13 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> boilerItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> iceBoxItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> hearthItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> iceBoxItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<String>>> insulatingArmor;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
 
     public static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
 
@@ -32,35 +33,37 @@ public final class ItemSettingsConfig
           Boiler Items
          */
         BUILDER.push("BoilerFuelItems");
-            boilerItems = BUILDER
-                .comment("Defines the items that the Boiler can use as fuel and their values",
-                        "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
-                .defineList("Boiler", Arrays.asList
-                (
-                    Arrays.asList("minecraft:coal", "37"),
-                    Arrays.asList("minecraft:charcoal", "37"),
-                    Arrays.asList("minecraft:coal_block", "333"),
-                    Arrays.asList("minecraft:magma_block", "333"),
-                    Arrays.asList("minecraft:lava_bucket", "1000")
-                ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        boilerItems = BUILDER
+            .comment("Defines the items that the Boiler can use as fuel and their values",
+                    "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
+            .defineList("Boiler", Arrays.asList
+                    (
+                        Arrays.asList("minecraft:coal", 37),
+                        Arrays.asList("minecraft:charcoal", 37),
+                        Arrays.asList("minecraft:coal_block", 333),
+                        Arrays.asList("minecraft:magma_block", 333),
+                        Arrays.asList("minecraft:lava_bucket", 1000)
+                    ),
+                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
           Ice Box Items
          */
         BUILDER.push("IceboxFuelItems");
-            iceBoxItems = BUILDER
-                .comment("Defines the items that the Ice Box can use as fuel and their values",
-                        "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
-                .defineList("Icebox", Arrays.asList
-                (
-                    Arrays.asList("minecraft:snowball", "37"),
-                    Arrays.asList("minecraft:clay", "37"),
-                    Arrays.asList("minecraft:snow_block", "333"),
-                    Arrays.asList("minecraft:water_bucket", "333"),
-                    Arrays.asList("minecraft:ice", "333"),
-                    Arrays.asList("minecraft:packed_ice", "1000")
-                ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+        iceBoxItems = BUILDER
+            .comment("Defines the items that the Ice Box can use as fuel and their values",
+                    "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
+            .defineList("Icebox", Arrays.asList
+                    (
+                        Arrays.asList("minecraft:snowball", 37),
+                        Arrays.asList("minecraft:clay", 37),
+                        Arrays.asList("minecraft:snow_block", 333),
+                        Arrays.asList("minecraft:water_bucket", 333),
+                        Arrays.asList("minecraft:ice", 333),
+                        Arrays.asList("minecraft:packed_ice", 1000)
+                    ),
+                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -70,24 +73,25 @@ public final class ItemSettingsConfig
         hearthItems = BUILDER
             .comment("Defines the items that the Hearth can use as fuel and their values",
                     "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]",
-                    "(cold items are a negative number)")
+                    "(negative values indicate cold fuel)")
             .defineList("Hearth", Arrays.asList
-                (
-                    // Hot
-                    Arrays.asList("minecraft:coal", "37"),
-                    Arrays.asList("minecraft:charcoal", "37"),
-                    Arrays.asList("minecraft:coal_block", "333"),
-                    Arrays.asList("minecraft:magma_block", "333"),
-                    Arrays.asList("minecraft:lava_bucket", "1000"),
+                    (
+                        // Hot
+                        Arrays.asList("minecraft:coal", 37),
+                        Arrays.asList("minecraft:charcoal", 37),
+                        Arrays.asList("minecraft:coal_block", 333),
+                        Arrays.asList("minecraft:magma_block", 333),
+                        Arrays.asList("minecraft:lava_bucket", 1000),
 
-                    // Cold
-                    Arrays.asList("minecraft:snowball", "-37"),
-                    Arrays.asList("minecraft:clay", "-37"),
-                    Arrays.asList("minecraft:snow_block", "-333"),
-                    Arrays.asList("minecraft:water_bucket", "-333"),
-                    Arrays.asList("minecraft:ice", "-333"),
-                    Arrays.asList("minecraft:packed_ice", "-1000")
-                ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+                        // Cold
+                        Arrays.asList("minecraft:snowball", -37),
+                        Arrays.asList("minecraft:clay", -37),
+                        Arrays.asList("minecraft:snow_block", -333),
+                        Arrays.asList("minecraft:water_bucket", -333),
+                        Arrays.asList("minecraft:ice", -333),
+                        Arrays.asList("minecraft:packed_ice", -1000)
+                    ),
+                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -95,19 +99,20 @@ public final class ItemSettingsConfig
          */
         BUILDER.push("HellspringLampItems");
         soulLampItems = BUILDER
-                .comment("Defines the items that the Ice Box can use as fuel and their values",
-                        "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
-                .defineList("Soulfire Lamp", Arrays.asList
-                        (
-                                "minecraft:warped_stem",
-                                "minecraft:warped_hyphae",
-                                "minecraft:stripped_warped_stem",
-                                "minecraft:stripped_warped_hyphae",
-                                "minecraft:crimson_stem",
-                                "minecraft:crimson_hyphae",
-                                "minecraft:stripped_crimson_stem",
-                                "minecraft:stripped_crimson_hyphae"
-                        ), it -> it instanceof String);
+            .comment("Defines the items that the Ice Box can use as fuel and their values",
+                    "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
+            .defineList("Soulfire Lamp", Arrays.asList
+                    (
+                            "minecraft:warped_stem",
+                            "minecraft:warped_hyphae",
+                            "minecraft:stripped_warped_stem",
+                            "minecraft:stripped_warped_hyphae",
+                            "minecraft:crimson_stem",
+                            "minecraft:crimson_hyphae",
+                            "minecraft:stripped_crimson_stem",
+                            "minecraft:stripped_crimson_hyphae"
+                    ),
+                    it -> it instanceof String);
         BUILDER.pop();
 
         /*
@@ -118,12 +123,13 @@ public final class ItemSettingsConfig
             .comment("Defines the items that can be used for insulating armor in the Sewing Table",
                     "Format: [[item-id-1], [item-id-2], ...etc]")
             .defineList("Sewing Table", Arrays.asList
-                (
-                    "minecraft:leather_helmet",
-                    "minecraft:leather_chestplate",
-                    "minecraft:leather_leggings",
-                    "minecraft:leather_boots"
-                ), it -> it instanceof String);
+                    (
+                        "minecraft:leather_helmet",
+                        "minecraft:leather_chestplate",
+                        "minecraft:leather_leggings",
+                        "minecraft:leather_boots"
+                    ),
+                    it -> it instanceof String);
         BUILDER.pop();
 
         /*
@@ -135,11 +141,27 @@ public final class ItemSettingsConfig
                     "Format: [[item-id-1, amount-1], [item-id-2, amount-2], ...etc]")
             .defineList("Insulating Armor Items", Arrays.asList
                     (
-                            Arrays.asList("minecraft:leather_helmet", "4"),
-                            Arrays.asList("minecraft:leather_chestplate", "7"),
-                            Arrays.asList("minecraft:leather_leggings", "5"),
-                            Arrays.asList("minecraft:leather_boots", "4")
-                    ), it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof String);
+                            Arrays.asList("minecraft:leather_helmet", 4),
+                            Arrays.asList("minecraft:leather_chestplate", 7),
+                            Arrays.asList("minecraft:leather_leggings", 5),
+                            Arrays.asList("minecraft:leather_boots", 4)
+                    ),
+                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
+        BUILDER.pop();
+
+        /*
+         Temperature-Affecting Foods
+         */
+        BUILDER.push("TemperatureFoods");
+        temperatureFoods = BUILDER
+            .comment("Defines items that affect the player's temperature when consumed",
+                    "Format: [[item-id-1, amount-1], [item-id-2, amount-2], ...etc]",
+                    "Negative values are cold foods, positive values are hot foods")
+            .defineList("Temperature-Affecting Foods", Arrays.asList
+                    (
+                            // nothing here
+                    ),
+                    it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -151,7 +173,8 @@ public final class ItemSettingsConfig
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
 
         // Create the config folder
-        try {
+        try
+        {
             Files.createDirectory(csConfigPath);
         }
         catch (Exception e) {}
@@ -164,17 +187,17 @@ public final class ItemSettingsConfig
         return new ItemSettingsConfig();
     }
 
-    public List<? extends List<String>> boilerItems()
+    public List<? extends List<?>> boilerItems()
     {
         return boilerItems.get();
     }
 
-    public List<? extends List<String>> iceboxItems()
+    public List<? extends List<?>> iceboxItems()
     {
         return iceBoxItems.get();
     }
 
-    public List<? extends List<String>> hearthItems()
+    public List<? extends List<?>> hearthItems()
     {
         return hearthItems.get();
     }
@@ -184,7 +207,7 @@ public final class ItemSettingsConfig
         return insulatingItems.get();
     }
 
-    public List<? extends List<String>> insulatingArmor()
+    public List<? extends List<?>> insulatingArmor()
     {
         return insulatingArmor.get();
     }
@@ -192,5 +215,10 @@ public final class ItemSettingsConfig
     public List<? extends String> soulLampItems()
     {
         return soulLampItems.get();
+    }
+
+    public List<? extends List<?>> temperatureFoods()
+    {
+        return temperatureFoods.get();
     }
 }

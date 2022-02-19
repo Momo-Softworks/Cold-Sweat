@@ -52,11 +52,11 @@ public class AddLeatherModifiers
                     {
                         if (leatherHelmetInsulation == -1)
                         {
-                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            for (List<?> list : ItemSettingsConfig.getInstance().insulatingArmor())
                             {
                                 if (list.get(0).equals("leather_boots"))
                                 {
-                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    leatherMultiplier += ((Number) list.get(1)).doubleValue();
                                     break;
                                 }
                             }
@@ -76,11 +76,11 @@ public class AddLeatherModifiers
                     {
                         if (leatherChestInsulation == -1)
                         {
-                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            for (List<?> list : ItemSettingsConfig.getInstance().insulatingArmor())
                             {
                                 if (list.get(0).equals("leather_boots"))
                                 {
-                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    leatherMultiplier += ((Number) list.get(1)).doubleValue();
                                     break;
                                 }
                             }
@@ -100,11 +100,11 @@ public class AddLeatherModifiers
                     {
                         if (leatherPantsInsulation == -1)
                         {
-                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            for (List<?> list : ItemSettingsConfig.getInstance().insulatingArmor())
                             {
                                 if (list.get(0).equals("leather_boots"))
                                 {
-                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    leatherMultiplier += ((Number) list.get(1)).doubleValue();
                                     break;
                                 }
                             }
@@ -124,11 +124,11 @@ public class AddLeatherModifiers
                     {
                         if (leatherBootsInsulation == -1)
                         {
-                            for (List<String> list : ItemSettingsConfig.getInstance().insulatingArmor())
+                            for (List<?> list : ItemSettingsConfig.getInstance().insulatingArmor())
                             {
                                 if (list.get(0).equals("leather_boots"))
                                 {
-                                    leatherMultiplier += Integer.parseInt(list.get(1));
+                                    leatherMultiplier += ((Number) list.get(1)).doubleValue();
                                     break;
                                 }
                             }
@@ -177,11 +177,11 @@ public class AddLeatherModifiers
     public static ItemEntry getInsulatingArmor(ItemStack stack)
     {
         String id = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
-        for (List<String> s : ItemSettingsConfig.getInstance().insulatingArmor())
+        for (List<?> s : ItemSettingsConfig.getInstance().insulatingArmor())
         {
             if (s.get(0).equals(id))
             {
-                return new ItemEntry(id, Integer.parseInt(s.get(1)));
+                return new ItemEntry(id, ((Number) s.get(1)).intValue());
             }
         }
         return new ItemEntry(id, 0);

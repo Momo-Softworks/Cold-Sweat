@@ -153,6 +153,7 @@ public class InitTempModifiers
             if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
             event.addModifier(new WaterTempModifier());
             event.addModifier(new HearthTempModifier());
+            event.addModifier(new FoodTempModifier());
 
             if (ModList.get().isLoaded("sereneseasons") && ModList.get().isLoaded("betterweather"))
                 ColdSweat.LOGGER.warn("Multiple seasons mods are present! This may cause issues!");

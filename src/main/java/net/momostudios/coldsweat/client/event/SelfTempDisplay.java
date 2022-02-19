@@ -4,23 +4,24 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.momostudios.coldsweat.config.ClientSettingsConfig;
+import net.momostudios.coldsweat.config.ConfigCache;
 import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.momostudios.coldsweat.util.CSMath;
 import net.momostudios.coldsweat.util.PlayerHelper;
+import net.momostudios.coldsweat.util.Units;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SelfTempDisplay
 {
-    static PlayerTempCapability playerCap = null;
+    public static PlayerTempCapability playerCap = null;
 
     @SubscribeEvent
     public static void eventHandler(RenderGameOverlayEvent event)
@@ -28,19 +29,21 @@ public class SelfTempDisplay
         ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-
-        if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof ClientPlayerEntity &&
+        if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof PlayerEntity &&
         !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR
-        && !((ClientPlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode && !mc.getRenderViewEntity().isSpectator())
+        && !((PlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode && !mc.getRenderViewEntity().isSpectator())
         {
             int scaleX = event.getWindow().getScaledWidth();
             int scaleY = event.getWindow().getScaledHeight();
-            ClientPlayerEntity entity = (ClientPlayerEntity) Minecraft.getInstance().getRenderViewEntity();
+            PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
 
             if (playerCap == null || entity.ticksExisted % 40 == 0)
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
 
             int temp = (int) playerCap.get(PlayerHelper.Types.COMPOSITE);
+            double ambient = CSMath.convertUnits(AmbientGaugeDisplay.clientTemp, Units.F, Units.MC, true);
+            double max = ConfigCache.getInstance().maxTemp;
+            double min = ConfigCache.getInstance().minTemp;
 
             int threatLevel = 0;
 
@@ -54,25 +57,25 @@ public class SelfTempDisplay
                     temp > 0 ? 5376516 :
                     0;
             int colorBG2 =
-                    temp < -100 && temp >= -110 ? 6866175 :
-                    temp < -110 && temp >= -120 ? 7390719 :
-                    temp < -120 && temp >= -130 ? 9824511 :
-                    temp < -130 && temp >= -140 ? 12779519 :
+                    CSMath.isBetween(temp, -110, -100) ? 6866175 :
+                    CSMath.isBetween(temp, -120, -110) ? 7390719 :
+                    CSMath.isBetween(temp, -130, -120) ? 9824511 :
+                    CSMath.isBetween(temp, -140, -130) ? 12779519 :
                     temp < - 140 ?                16777215 :
-                    temp > 100 && temp <= 110 ? 16744509 :
-                    temp > 110 && temp <= 120 ? 16755544 :
-                    temp > 120 && temp <= 130 ? 16766325 :
-                    temp > 130 && temp <= 140 ? 16771509 :
+                    CSMath.isBetween(temp, 100, 110) ? 16744509 :
+                    CSMath.isBetween(temp, 110, 120) ? 16755544 :
+                    CSMath.isBetween(temp, 120, 130) ? 16766325 :
+                    CSMath.isBetween(temp, 130, 140) ? 16771509 :
                     temp > 140 ? 16777215 : 0;
 
-            if      (temp >= 100)   { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");   threatLevel = 2; }
-            else if (temp >= 66)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");   threatLevel = 1; }
-            else if (temp >= 33)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png"); }
-            else if (temp >= 0)     { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
-            else if (temp > -33)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
-            else if (temp > -66)    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png"); }
-            else if (temp > -100)   { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");  threatLevel = 1; }
-            else                    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");  threatLevel = 2; }
+            if      (ambient >= CSMath.blend(min, max, 1.00, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");  threatLevel = 2; }
+            else if (ambient >= CSMath.blend(min, max, 0.80, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");  threatLevel = 1; }
+            else if (ambient >= CSMath.blend(min, max, 0.64, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png"); }
+            else if (ambient >= CSMath.blend(min, max, 0.48, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (ambient >= CSMath.blend(min, max, 0.32, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (ambient >= CSMath.blend(min, max, 0.16, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png"); }
+            else if (ambient >= CSMath.blend(min, max, 0.00, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png"); threatLevel = 1; }
+            else                                                    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png"); threatLevel = 2; }
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             int threatOffset = 0;
