@@ -1,5 +1,7 @@
-package net.momostudios.coldsweat.common.item;
+package dev.momostudios.coldsweat.common.item;
 
+import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -7,13 +9,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.PacketDistributor;
-import net.momostudios.coldsweat.common.temperature.modifier.HellLampTempModifier;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.momostudios.coldsweat.core.network.message.PlaySoundMessage;
-import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.common.temperature.modifier.HellLampTempModifier;
+import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.PlayerHelper;
 
 public class HellspringLampItem extends Item
 {
@@ -25,7 +26,7 @@ public class HellspringLampItem extends Item
     @Override
     public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof PlayerEntity)
+        if (entityIn instanceof PlayerEntity && !worldIn.isRemote)
         {
             PlayerEntity player = (PlayerEntity) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
@@ -39,7 +40,17 @@ public class HellspringLampItem extends Item
                 setFuel(stack, 64);
             }
 
-            if ((isSelected || player.getHeldItemOffhand() == stack) && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max)
+            boolean validDimension = false;
+            for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
+            {
+                if (worldIn.getDimensionKey().getLocation().toString().equals(id))
+                {
+                    validDimension = true;
+                    break;
+                }
+            }
+
+            if ((isSelected || player.getHeldItemOffhand() == stack) && validDimension && temp > max)
             {
                 if (getFuel(stack) > 0)
                 {
@@ -64,42 +75,28 @@ public class HellspringLampItem extends Item
                 stack.getOrCreateTag().putInt("stateChangeTimer", stack.getOrCreateTag().getInt("stateChangeTimer") - 1);
             }
 
-            if (stack.getOrCreateTag().getInt("fuel") > 0 && player.world.getDimensionKey().getLocation().getPath().equals("the_nether") && temp > max &&
+            if (stack.getOrCreateTag().getInt("fuel") > 0 && validDimension && temp > max &&
             (isSelected || player.getHeldItemOffhand() == stack))
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {
-                    if (!worldIn.isRemote)
-                    {
-                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                        stack.getOrCreateTag().putBoolean("isOn", true);
-                    }
+                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                    stack.getOrCreateTag().putBoolean("isOn", true);
 
-                    // In case the player is on a server
-                    if (!worldIn.isRemote)
-                    {
-                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(1, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
-                    }
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(1, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
                 }
             }
             else
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && stack.getOrCreateTag().getBoolean("isOn"))
                 {
-                    if (!worldIn.isRemote)
-                    {
-                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                        stack.getOrCreateTag().putBoolean("isOn", false);
-                    }
+                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                    stack.getOrCreateTag().putBoolean("isOn", false);
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    // In case the player is on a server
-                    if (!worldIn.isRemote)
-                    {
-                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(2, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
-                    }
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(2, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUniqueID()));
                 }
             }
         }
