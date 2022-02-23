@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
-    public static int slots = 10;
+    public static int slots = 1;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
 
     // List of all hearths in loaded chunks
