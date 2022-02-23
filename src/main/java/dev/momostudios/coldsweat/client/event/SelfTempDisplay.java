@@ -1,27 +1,27 @@
-package net.momostudios.coldsweat.client.event;
+package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.momostudios.coldsweat.config.ClientSettingsConfig;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.PlayerHelper;
-import net.momostudios.coldsweat.util.Units;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
+import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.PlayerHelper;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SelfTempDisplay
 {
     public static PlayerTempCapability playerCap = null;
+    static int iconBob = 0;
 
     @SubscribeEvent
     public static void eventHandler(RenderGameOverlayEvent event)
@@ -42,9 +42,6 @@ public class SelfTempDisplay
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
 
             int temp = (int) playerCap.get(PlayerHelper.Types.COMPOSITE);
-            double ambient = CSMath.convertUnits(AmbientGaugeDisplay.clientTemp, Units.F, Units.MC, true);
-            double max = ConfigCache.getInstance().maxTemp;
-            double min = ConfigCache.getInstance().minTemp;
 
             int threatLevel = 0;
 
@@ -69,26 +66,26 @@ public class SelfTempDisplay
                     CSMath.isBetween(temp, 130, 140) ? 16771509 :
                     temp > 140 ? 16777215 : 0;
 
-            if      (ambient >= CSMath.blend(min, max, 1.00, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");  threatLevel = 2; }
-            else if (ambient >= CSMath.blend(min, max, 0.80, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");  threatLevel = 1; }
-            else if (ambient >= CSMath.blend(min, max, 0.64, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png"); }
-            else if (ambient >= CSMath.blend(min, max, 0.48, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
-            else if (ambient >= CSMath.blend(min, max, 0.32, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
-            else if (ambient >= CSMath.blend(min, max, 0.16, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png"); }
-            else if (ambient >= CSMath.blend(min, max, 0.00, 0, 1)) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png"); threatLevel = 1; }
-            else                                                    { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png"); threatLevel = 2; }
+            if      (temp >= 100) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");  threatLevel = 2; }
+            else if (temp >= 66)  { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");  threatLevel = 1; }
+            else if (temp >= 33)  { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png"); }
+            else if (temp >= 0)   { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (temp >= -33) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png"); }
+            else if (temp >= -66) { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png"); }
+            else if (temp >= -100){ icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png"); threatLevel = 1; }
+            else                  { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png"); threatLevel = 2; }
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             int threatOffset = 0;
             if (CCS.iconBobbing())
             {
-                if (threatLevel == 1) threatOffset = entity.ticksExisted % 10 == 0 && Math.random() < 0.5 ? 1 : 0;
+                if (threatLevel == 1) threatOffset = iconBob;
                 if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
             }
 
             // Render Icon
             mc.getTextureManager().bindTexture(icon);
-            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 + threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 
             // Render Readout
@@ -117,6 +114,12 @@ public class SelfTempDisplay
             fontRenderer.drawString(matrixStack, s, i1, j1 - 1, colorBG);
             fontRenderer.drawString(matrixStack, s, i1, j1, color);
         }
+    }
+
+    @SubscribeEvent
+    public static void setRandomIconOffset(TickEvent.ClientTickEvent event)
+    {
+        iconBob = Math.random() < 0.1 ? 1 : 0;
     }
 }
 
