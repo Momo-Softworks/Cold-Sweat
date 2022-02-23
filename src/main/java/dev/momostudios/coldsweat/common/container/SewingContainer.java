@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -123,7 +124,6 @@ public class SewingContainer extends Container
     {
         ItemStack slot0Item = this.getSlot(0).getStack();
         ItemStack slot1Item = this.getSlot(1).getStack();
-        ItemStack slot2Item = this.getSlot(2).getStack();
         ItemStack result = ItemStack.EMPTY;
 
         // Insulated Armor
@@ -251,101 +251,77 @@ public class SewingContainer extends Container
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
+
         if (slot != null && slot.getHasStack())
         {
-            itemstack = slot.getStack().copy();
-            // Take from either input
-            if ((CSMath.isBetween(index, 0, 1)) && slot.inventory instanceof SewingInventory)
+            ItemStack itemstack1 = slot.getStack();
+            itemstack = itemstack1.copy();
+            if (CSMath.isBetween(index, 0, 2))
             {
-                if (playerIn.inventory.addItemStackToInventory(itemstack))
+                if (!this.mergeItemStack(itemstack1, 3, 39, true))
                 {
-                    slot.putStack(ItemStack.EMPTY);
-                    slot.onTake(playerIn, itemstack);
+                    return ItemStack.EMPTY;
                 }
-            }
-            // Take from output
-            else if (slot.getSlotIndex() == 2 && slot.inventory instanceof SewingInventory)
-            {
-                for (int i = this.getSlot(0).getStack().getCount(); i > 0; i--)
-                {
-                    if (playerIn.addItemStackToInventory(itemstack))
-                    {
-                        slot.putStack(ItemStack.EMPTY);
-                        slot.onTake(playerIn, itemstack);
-                        this.testForRecipe();
-                    }
-                    else break;
-                }
-            }
-            // Put into slot 1 (insulation item)
-            else if (this.getSlot(1).isItemValid(itemstack) && this.inventory.getStackInSlot(1).isEmpty())
-            {
-                slot.putStack(ItemStack.EMPTY);
-                this.inventory.setInventorySlotContents(1, itemstack);
-                this.getSlot(1).onSlotChanged();
-            }
-            // Put into slot 0 (base item)
-            else if (this.getSlot(0).isItemValid(itemstack) && this.inventory.getStackInSlot(0).isEmpty())
-            {
-                slot.putStack(ItemStack.EMPTY);
-                this.inventory.setInventorySlotContents(0, itemstack);
-                this.getSlot(0).onSlotChanged();
-            }
-            else if (CSMath.isBetween(index, 3, 29))
-            {
-                for (int i = 30; i < 38; i++)
-                {
-                    Slot slot1 = playerIn.container.getSlot(i);
-                    if (slot1.isItemValid(itemstack) && slot1.getStack().isEmpty())
-                    {
-                        if (itemstack.getCount() > slot1.getSlotStackLimit())
-                        {
-                            slot1.putStack(itemstack.split(slot1.getSlotStackLimit()));
-                            slot1.onSlotChanged();
-                            itemstack.shrink(slot1.getSlotStackLimit());
-                        }
-                        else
-                        {
-                            slot1.putStack(itemstack);
-                            slot1.onSlotChanged();
-                            slot.putStack(ItemStack.EMPTY);
-                        }
-                        break;
-                    }
-                }
-            }
-            else if (CSMath.isBetween(index, 30, 38))
-            {
-                for (int i = 3; i < 29; i++)
-                {
-                    Slot slot1 = playerIn.container.getSlot(i);
-                    if (slot1.isItemValid(itemstack) && slot1.getStack().isEmpty())
-                    {
-                        if (itemstack.getCount() > slot1.getSlotStackLimit())
-                        {
-                            slot1.putStack(itemstack.split(slot1.getSlotStackLimit()));
-                            slot1.onSlotChanged();
-                            itemstack.shrink(slot1.getSlotStackLimit());
-                        }
-                        else
-                        {
-                            slot1.putStack(itemstack);
-                            slot1.onSlotChanged();
-                            slot.putStack(ItemStack.EMPTY);
-                        }
-                        break;
-                    }
-                }
+
+                slot.onSlotChange(itemstack1, itemstack);
             }
             else
             {
+                if (isInsulatingItem(itemstack1))
+                {
+                    if (!this.mergeItemStack(itemstack1, 1, 2, false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (itemstack1.getItem() instanceof ArmorItem)
+                {
+                    if (!this.mergeItemStack(itemstack1, 0, 1, false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (index == 2)
+                {
+                    if (!this.mergeItemStack(itemstack1, 3, 39, false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
+                {
+                    if (!this.mergeItemStack(itemstack1, 3, 29, false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
+                else if (CSMath.isBetween(index, 3, inventorySlots.size() - 9))
+                {
+                    if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
+                    {
+                        slot.onSlotChange(itemstack1, itemstack);
+                        return ItemStack.EMPTY;
+                    }
+                }
                 return ItemStack.EMPTY;
             }
+
+            if (itemstack1.isEmpty())
+            {
+                slot.putStack(ItemStack.EMPTY);
+            }
+            else
+            {
+                slot.onSlotChanged();
+            }
+
+            slot.onTake(playerIn, itemstack1);
         }
-        else
-        {
-            return ItemStack.EMPTY;
-        }
+
         return itemstack;
     }
 }
