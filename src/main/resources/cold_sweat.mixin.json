@@ -1,7 +1,7 @@
 {
   "required": true,
   "compatibilityLevel": "JAVA_8",
-  "package": "net.momostudios.coldsweat.mixin",
+  "package": "dev.momostudios.coldsweat.mixin",
   "client": [
     "MixinBipedModel",
     "MixinXPBar"
