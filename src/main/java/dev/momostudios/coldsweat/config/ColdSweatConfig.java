@@ -1,16 +1,15 @@
-package net.momostudios.coldsweat.config;
+package dev.momostudios.coldsweat.config;
 
+import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.Units;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.Units;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +33,8 @@ public class ColdSweatConfig
 
     private static final ForgeConfigSpec.IntValue gracePeriodLength;
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
+
+    private static final ForgeConfigSpec.DoubleValue hearthEffect;
 
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
 
@@ -103,7 +104,7 @@ public class ColdSweatConfig
         blockEffects = BUILDER
                 .comment("Allows for adding simple BlockEffects without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[\"block ids (separated by \",\")\", <temperature>, <range (<= 7)>, <*true/false: weaken over distance>, <*max effect (temperature)>, <*min effect (temperature)>]",
+                         "[\"block ids (separated by \",\")\", <temperature>, <range (max 7)>, <*true/false: weaken over distance>, <*max effect (temperature)>, <*min effect (temperature)>]",
                          "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
                          "(the effect of the example below (torch) is so low that it does barely anything. It's purely for demonstration)")
                 .defineList("BlockEffects", Arrays.asList
@@ -111,6 +112,12 @@ public class ColdSweatConfig
                             Arrays.asList("minecraft:torch,minecraft:wall_torch", 0.01, 4, true, 0.02)
                         ),
                 it -> it instanceof List);
+        BUILDER.pop();
+
+        BUILDER.push("Hearth Strength");
+        hearthEffect = BUILDER
+                .comment("How strong the hearth is (default: 0.5)")
+                .defineInRange("Hearth Strength", 0.5, 0, 1.0);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -207,6 +214,11 @@ public class ColdSweatConfig
     public List<? extends List<Object>> getBlockEffects()
     {
         return blockEffects.get();
+    }
+
+    public double getHearthEffect()
+    {
+        return hearthEffect.get();
     }
 
     /*

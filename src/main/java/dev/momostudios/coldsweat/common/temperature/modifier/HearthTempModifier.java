@@ -1,8 +1,10 @@
-package net.momostudios.coldsweat.common.temperature.modifier;
+package dev.momostudios.coldsweat.common.temperature.modifier;
 
+import dev.momostudios.coldsweat.util.CSMath;
 import net.minecraft.entity.player.PlayerEntity;
-import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
+import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.config.ConfigCache;
 
 public class HearthTempModifier extends TempModifier
 {
@@ -28,7 +30,7 @@ public class HearthTempModifier extends TempModifier
         double mid = (min + max) / 2;
 
         int hearthEffect = (int) this.getArgument("strength");
-        return temp.get() + ((mid - temp.get()) / 10) * hearthEffect;
+        return CSMath.blend(temp.get(), CSMath.weightedAverage(temp.get(), mid, 1 - ColdSweatConfig.getInstance().getHearthEffect(), 1.0), hearthEffect, 0, 10);
     }
 
     public String getID()
