@@ -28,7 +28,9 @@ public class WorldTemperatureConfig
          */
         BUILDER.comment("Notation: [[\"dimension1\", \"temperature1\"], [\"dimension2\", \"temperature2\"]... etc]",
             "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end",
-            "Note: all temperatures are in Minecraft units")
+            "Note: all temperatures are in Minecraft units",
+            "°F to MC = (x - 32) / 42",
+            "°C to MC = x / 23.3")
             .push("Dimensions");
 
         BUILDER.push("DimensionTemperatureOffset");
