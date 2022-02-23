@@ -1,24 +1,19 @@
-package net.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.util.AxisRotation;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapePart;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +71,7 @@ public class WorldHelper
 
         if (chunk != null)
         {
-            for (int i = 0; i < 255 - y; i++)
+            for (int i = 1; i < 255 - y; i++)
             {
                 BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
 
@@ -85,7 +80,7 @@ public class WorldHelper
                     continue;
                 }
 
-                if (state.isSolidSide(world, pos.up(i), Direction.DOWN) || isFullSide(state, Direction.UP, pos.up(i), world))
+                if (isFullSide(state, Direction.DOWN, pos.up(i), world) || isFullSide(state, Direction.UP, pos.up(i), world))
                     return false;
             }
         }
@@ -103,7 +98,7 @@ public class WorldHelper
             if (state.isSolidSide(world, pos, toDir))
                 return false;
 
-            return !isFullSide(state, toDir, pos, world) && !state.isSolidSide(world, pos.offset(toDir), toDir.getOpposite());
+            return !isFullSide(state, toDir, pos.offset(toDir), world) && !state.isSolidSide(world, pos, toDir.getOpposite());
         }
         return false;
     }
@@ -119,7 +114,6 @@ public class WorldHelper
             return true;
         if (state.isAir())
             return false;
-
 
         VoxelShape shape = state.getRenderShape(world, pos);
         final double[] area = {0};
