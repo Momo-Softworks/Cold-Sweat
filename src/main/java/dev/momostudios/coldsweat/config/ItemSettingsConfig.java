@@ -1,14 +1,12 @@
-package net.momostudios.coldsweat.config;
+package dev.momostudios.coldsweat.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +18,8 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> iceBoxItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> hellLampItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> hellLampDimensions;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
@@ -98,8 +97,8 @@ public final class ItemSettingsConfig
           Soulfire Lamp Items
          */
         BUILDER.push("HellspringLampItems");
-        soulLampItems = BUILDER
-            .comment("Defines the items that the Ice Box can use as fuel and their values",
+        hellLampItems = BUILDER
+            .comment("Defines the items that the Hellspring Lamp can use as fuel and their values",
                     "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
             .defineList("Soulfire Lamp", Arrays.asList
                     (
@@ -164,6 +163,20 @@ public final class ItemSettingsConfig
                     it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
+        /*
+         Hellspring Lamp Dimensions
+         */
+        BUILDER.push("HellspringLampValidDimensions");
+        hellLampDimensions = BUILDER
+                .comment("Defines the dimensions that the Hellspring Lamp can be used in",
+                        "Format: [[dimension-id-1], [dimension-id-2], ...etc]")
+                .defineList("Hellspring Lamp", Arrays.asList
+                        (
+                                "minecraft:the_nether"
+                        ),
+                        it -> it instanceof String);
+        BUILDER.pop();
+
         SPEC = BUILDER.build();
     }
 
@@ -214,11 +227,16 @@ public final class ItemSettingsConfig
 
     public List<? extends String> soulLampItems()
     {
-        return soulLampItems.get();
+        return hellLampItems.get();
     }
 
     public List<? extends List<?>> temperatureFoods()
     {
         return temperatureFoods.get();
+    }
+
+    public List<? extends String> hellLampDimensions()
+    {
+        return hellLampDimensions.get();
     }
 }
