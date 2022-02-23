@@ -1,5 +1,6 @@
-package net.momostudios.coldsweat.core.network;
+package dev.momostudios.coldsweat.core.network;
 
+import dev.momostudios.coldsweat.core.network.message.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -7,9 +8,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.momostudios.coldsweat.ColdSweat;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.core.network.message.*;
+import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.config.ConfigCache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +27,14 @@ public class ColdSweatPacketHandler
     public static void init()
     {
         INSTANCE.registerMessage(0, PlayerTempSyncMessage.class, PlayerTempSyncMessage::encode, PlayerTempSyncMessage::decode, PlayerTempSyncMessage::handle);
-        INSTANCE.registerMessage(1, SoulLampInputMessage.class, SoulLampInputMessage::encode, SoulLampInputMessage::decode, SoulLampInputMessage::handle);
-        INSTANCE.registerMessage(2, SoulLampInputClientMessage.class, SoulLampInputClientMessage::encode, SoulLampInputClientMessage::decode, SoulLampInputClientMessage::handle);
-        INSTANCE.registerMessage(3, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
-        INSTANCE.registerMessage(4, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
-        INSTANCE.registerMessage(5, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
-        INSTANCE.registerMessage(6, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
-        INSTANCE.registerMessage(7, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
+        INSTANCE.registerMessage(1, PlayerModifiersSyncMessage.class, PlayerModifiersSyncMessage::encode, PlayerModifiersSyncMessage::decode, PlayerModifiersSyncMessage::handle);
+        INSTANCE.registerMessage(2, SoulLampInputMessage.class, SoulLampInputMessage::encode, SoulLampInputMessage::decode, SoulLampInputMessage::handle);
+        INSTANCE.registerMessage(3, SoulLampInputClientMessage.class, SoulLampInputClientMessage::encode, SoulLampInputClientMessage::decode, SoulLampInputClientMessage::handle);
+        INSTANCE.registerMessage(4, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
+        INSTANCE.registerMessage(5, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
+        INSTANCE.registerMessage(6, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
+        INSTANCE.registerMessage(7, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
+        INSTANCE.registerMessage(8, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
     }
     
     public static void writeConfigCacheToBuffer(ConfigCache config, PacketBuffer buffer)
@@ -82,7 +83,7 @@ public class ColdSweatPacketHandler
         return tag;
     }
 
-    public static List<? extends List<String>> getListOfLists(CompoundNBT tag)
+    public static List<? extends List<String>> readListOfLists(CompoundNBT tag)
     {
         List<List<String>> list = new ArrayList<>();
         for (int i = 0; i < tag.size(); i++)

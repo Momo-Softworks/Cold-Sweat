@@ -1,38 +1,24 @@
-package net.momostudios.coldsweat.core.capabilities;
+package dev.momostudios.coldsweat.core.capabilities;
 
+import dev.momostudios.coldsweat.util.CSDamageTypes;
+import dev.momostudios.coldsweat.util.registrylists.ModEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.momostudios.coldsweat.common.temperature.Temperature;
-import net.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.momostudios.coldsweat.config.ConfigCache;
-import net.momostudios.coldsweat.util.CSMath;
-import net.momostudios.coldsweat.util.CustomDamageTypes;
-import net.momostudios.coldsweat.util.NBTHelper;
-import net.momostudios.coldsweat.util.PlayerHelper;
-import net.momostudios.coldsweat.util.registrylists.ModEffects;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
+import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.PlayerHelper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerTempCapability
 {
-    public static Capability<PlayerTempCapability> TEMPERATURE;
-
     @CapabilityInject(PlayerTempCapability.class)
-    private static void onTempInit(Capability<PlayerTempCapability> capability)
-    {
-        TEMPERATURE = capability;
-    }
+    public static Capability<PlayerTempCapability> TEMPERATURE = null;
 
     double ambiTemp;
     double bodyTemp;
@@ -107,6 +93,14 @@ public class PlayerTempCapability
         }
     }
 
+    public void tickClient(PlayerEntity player)
+    {
+        tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.AMBIENT));
+        tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.BODY));
+        tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.BASE));
+        tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.RATE));
+    }
+
     public void tickUpdate(PlayerEntity player)
     {
         ConfigCache config = ConfigCache.getInstance();
@@ -142,11 +136,11 @@ public class PlayerTempCapability
             set(PlayerHelper.Types.BODY, bodyTemp.add(returnRate).get());
         }
 
-        // Calculate body/base temperatures with modifiers
-        Temperature composite = base.add(bodyTemp);
-
         // Sets the player's base temperature
         set(PlayerHelper.Types.BASE, base.get());
+
+        // Calculate body/base temperatures with modifiers
+        Temperature composite = base.add(bodyTemp);
 
         if (composite.get() != get(PlayerHelper.Types.COMPOSITE) || player.ticksExisted % 3 == 0)
         {
@@ -168,11 +162,11 @@ public class PlayerTempCapability
 
             if (composite.get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
             {
-                player.attackEntityFrom(damageScaling ? CustomDamageTypes.HOT_SCALED : CustomDamageTypes.HOT, 2f);
+                player.attackEntityFrom(damageScaling ? CSDamageTypes.HOT_SCALED : CSDamageTypes.HOT, 2f);
             }
             if (composite.get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
             {
-                player.attackEntityFrom(damageScaling ? CustomDamageTypes.COLD_SCALED : CustomDamageTypes.COLD, 2f);
+                player.attackEntityFrom(damageScaling ? CSDamageTypes.COLD_SCALED : CSDamageTypes.COLD, 2f);
             }
         }
     }

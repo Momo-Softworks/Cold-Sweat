@@ -1,4 +1,4 @@
-package net.momostudios.coldsweat.core.network.message;
+package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -6,8 +6,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import net.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import dev.momostudios.coldsweat.util.PlayerHelper;
 
 import java.util.function.Supplier;
 
@@ -51,8 +51,6 @@ public class PlayerTempSyncMessage
     {
         return new DistExecutor.SafeRunnable()
         {
-            private static final long serialVersionUID = 1L;
-
             @Override
             public void run()
             {
