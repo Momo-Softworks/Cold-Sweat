@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.mixin;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.CSMath;
 import dev.momostudios.coldsweat.util.PlayerHelper;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -30,7 +31,7 @@ public class MixinBipedModel
      * @author iMikul
      * @reason Adds functions for the Soulfire Lamp
      */
-    @Overwrite
+    @Overwrite(remap = ColdSweat.remapMixins)
     private void func_241654_b_(LivingEntity p_241654_1_)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(p_241654_1_, HandSide.RIGHT);
@@ -75,7 +76,7 @@ public class MixinBipedModel
      * @author iMikul
      * @reason Adds functions for the Soulfire Lamp
      */
-    @Overwrite
+    @Overwrite(remap = ColdSweat.remapMixins)
     private void func_241655_c_(LivingEntity p_241655_1_)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(p_241655_1_, HandSide.LEFT);

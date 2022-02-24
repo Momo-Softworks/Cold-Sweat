@@ -23,6 +23,7 @@ public class ColdSweat
 {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "cold_sweat";
+    public static final boolean remapMixins = false;
 
     public ColdSweat()
     {

@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.mixin;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -14,7 +15,7 @@ public class MixinMinecart
 {
     AbstractMinecartEntity minecart = (AbstractMinecartEntity) (Object) this;
 
-    @Inject(method = "killMinecart(Lnet/minecraft/util/DamageSource;)V", at = @At("HEAD"))
+    @Inject(method = "killMinecart(Lnet/minecraft/util/DamageSource;)V", at = @At("HEAD"), remap = ColdSweat.remapMixins)
     public void killMinecart(DamageSource source, CallbackInfo ci)
     {
         if (minecart.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS))

@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.mixin;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -23,7 +24,7 @@ public class MixinXPBar
      * @author iMikul
      * @reason Move XP bar elements to make room for body temperature readout
      */
-    @Overwrite
+    @Overwrite(remap = ColdSweat.remapMixins)
     public void renderExpBar(MatrixStack matrixStack, int xPos)
     {
         Minecraft mc = Minecraft.getInstance();
