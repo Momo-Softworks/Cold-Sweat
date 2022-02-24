@@ -103,7 +103,8 @@ public class PlayerHelper
                     ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
                 }
 
-                updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
+                if (!player.world.isRemote)
+                    updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
             });
         }
     }
@@ -138,7 +139,8 @@ public class PlayerHelper
                 return false;
             });
 
-            updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
+            if (!player.world.isRemote)
+                updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
         });
     }
 
