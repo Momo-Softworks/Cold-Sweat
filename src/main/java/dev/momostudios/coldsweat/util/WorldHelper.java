@@ -2,12 +2,14 @@ package dev.momostudios.coldsweat.util;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,6 +28,11 @@ public class WorldHelper
      */
     public static int getGroundLevel(BlockPos pos, World world)
     {
+        // If Minecraft's height calculation is correct, use that
+        int mcHeight = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+        if (pos.getY() >= mcHeight)
+            return mcHeight;
+
         for (int c = 0; c < 255; c++)
         {
             BlockPos pos2 = new BlockPos(pos.getX(), c, pos.getZ());
