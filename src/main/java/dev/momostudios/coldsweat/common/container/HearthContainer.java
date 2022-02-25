@@ -18,12 +18,10 @@ import java.util.Objects;
 public class HearthContainer extends Container
 {
     public final HearthTileEntity te;
-    private final IWorldPosCallable canInteractWithCallable;
     public HearthContainer(final int windowId, final PlayerInventory playerInv, final HearthTileEntity te)
     {
         super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
-        this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
 
         // Tile Entity
         this.addSlot(new Slot(te, 0, 80, 48)
@@ -81,7 +79,7 @@ public class HearthContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.HEARTH.get());
+        return isWithinUsableDistance(IWorldPosCallable.of(te.getWorld(), te.getPos()), playerIn, BlockInit.HEARTH.get());
     }
 
     @Override

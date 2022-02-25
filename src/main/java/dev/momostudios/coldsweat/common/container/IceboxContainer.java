@@ -22,7 +22,6 @@ import java.util.Objects;
 public class IceboxContainer extends Container
 {
     public final IceboxTileEntity te;
-    private final IWorldPosCallable canInteractWithCallable;
     private IIntArray fuelData;
 
     public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te)
@@ -34,7 +33,6 @@ public class IceboxContainer extends Container
     {
         super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
-        this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
         this.fuelData = fuelData;
 
         // Fuel slot
@@ -102,7 +100,7 @@ public class IceboxContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.ICEBOX.get());
+        return isWithinUsableDistance(IWorldPosCallable.of(te.getWorld(), te.getPos()), playerIn, BlockInit.ICEBOX.get());
     }
 
     @Override

@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.container;
 import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import dev.momostudios.coldsweat.common.te.BoilerTileEntity;
 import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.util.registrylists.ModBlocks;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -14,7 +15,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIntArray;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.IntArray;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.CSMath;
 
 import java.util.Objects;
@@ -22,7 +22,6 @@ import java.util.Objects;
 public class BoilerContainer extends Container
 {
     public final BoilerTileEntity te;
-    private final IWorldPosCallable canInteractWithCallable;
     private IIntArray fuelData;
 
     public BoilerContainer(final int windowId, final PlayerInventory playerInv, final BoilerTileEntity te)
@@ -34,7 +33,6 @@ public class BoilerContainer extends Container
     {
         super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
-        this.canInteractWithCallable = IWorldPosCallable.of(te.getWorld(), te.getPos());
         this.fuelData = fuelData;
 
         // Fuel slot
@@ -102,7 +100,7 @@ public class BoilerContainer extends Container
     @Override
     public boolean canInteractWith(PlayerEntity playerIn)
     {
-        return isWithinUsableDistance(canInteractWithCallable, playerIn, BlockInit.BOILER.get());
+        return isWithinUsableDistance(IWorldPosCallable.of(te.getWorld(), te.getPos()), playerIn, ModBlocks.BOILER);
     }
 
     @Override
