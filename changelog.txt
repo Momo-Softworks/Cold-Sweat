@@ -17,11 +17,13 @@
 - Added a Russian translation courtesy of @Xemay on our Discord server
 
 
+------------------------------------------------------------------------------------------------------------------------
 2.0.3.1
 - Fixed a bug that caused Cold Sweat to spam errors into the console in some cases
 - Rebalanced temperature-emitting blocks to have a limited effect
 
 
+------------------------------------------------------------------------------------------------------------------------
 2.1 Beta 1
 - New Item: Soulfire Lamp
     - Cools the player down when in the Nether
@@ -74,6 +76,7 @@
     - Removed some defunct recipes that would throw errors in server consoles
 
 
+------------------------------------------------------------------------------------------------------------------------
 2.1 Beta 2
 - The Soulfire Lamp no longer requires ingredients from the Nether to craft
     - Now crafted with a Heart of the Sea
@@ -122,6 +125,7 @@
                      (boolean) absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
 
 
+------------------------------------------------------------------------------------------------------------------------
 2.1 Beta 3
 - Switched the Soulfire Lamp holding animation to the Mixin system to improve performance/compatibility
 - Re-introduced the grace period from pre-2.0 versions
@@ -144,6 +148,8 @@ Technical Changes:
 - Added new translation key for the Grace effect: "effect.grace" (subtitle)
 - Added new translation keys for Soulfire Lamp sounds: "item.soulfire_lamp.on" & "item.soulfire_lamp.off"
 
+
+------------------------------------------------------------------------------------------------------------------------
 Release 2.1:
 - MASSIVE performance improvements (especially for the Hearth)!
 - New Item: Soulfire Lamp
@@ -247,6 +253,8 @@ Technical Changes:
 - Fixed a bug that would sometimes cause extreme lag when searching for temperature-affecting blocks
 - Removed some defunct recipes that would throw errors in server consoles
 
+
+------------------------------------------------------------------------------------------------------------------------
 2.1.1
 - Changed the recipe of the Soulfire Lamp to require a golden nugget at the top
 - Revised the icons for all three potion effects (some more than others)
@@ -268,6 +276,8 @@ Technical Changes:
 - The Hearth now uses block bounding box shape for spread detection (much more reliable)
 - Rebalanced block temperatures to have differing areas of effect
 
+
+------------------------------------------------------------------------------------------------------------------------
 2.1.2
 - The Soulfire Lamp is now the Hellspring Lamp
       - Nothing serious has changed, but this rework brings it into closer parity with its crafting recipe
@@ -282,6 +292,8 @@ Fixes:
 - Fixed major underlying bug with armor insulation that made it not work properly
 - Fixed crash that occurs when the Hearth is near an unloaded chunk
 
+
+------------------------------------------------------------------------------------------------------------------------
 2.1.3
 - The effects of temperature-emitting are now blocked if there are solid blocks in the way
 - Added config option to insulate all non-living rideable entities (so you would be insulated inside a modded plane, for example)
@@ -309,6 +321,37 @@ Technical Changes:
       - Queues the given Runnable to be executed on the main thread after the given delay
 - Blocks broken underground will now place cave air instead of normal are upon breaking (used for the new cave calculations)
 - Made minecarts drop the block they carrying when destroyed
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.4
+- Food items can now be configured to affect the player's body temperature when eaten
+- The "steve head" icon above the hotbar now displays the ambient temperature instead of the player's body temperature
+- Config files that use numbers no longer require quotes around them
+
+Fixes:
+- Fixed crash with the Hearth caused by "ConcurrentModificationException"
+- Fixed issue that made the player's temperature return to 0 very slowly in some cases
+
+Technical Changes:
+- TempModifiers are now registered with an instance instead of class reference
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.5
+-Fixed an issue that caused the two newest players on a multiplayer server to have their ambient temperatures "linked"
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.6
+- The dimensions in which the Hellspring Lamp works are now configurable
+- The Hearth now has a less powerful effect on the ambient temperature (configurable)
+
+Fixes:
+- Fixed hotbar temperature icon not working properly in Celsius mode
+- Fixed crash caused by conflictions with modded capabilities
+- Fixed TempModifiers not syncing to client
+- Fixed the top half of the Hearth being named "block.cold_sweat.hearth_top"
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
