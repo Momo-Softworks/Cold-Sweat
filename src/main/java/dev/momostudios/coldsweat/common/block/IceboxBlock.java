@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -19,18 +19,21 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import dev.momostudios.coldsweat.common.te.IceboxTileEntity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 public class IceboxBlock extends Block
@@ -112,7 +115,7 @@ public class IceboxBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return TileEntityInit.ICEBOX_TILE_ENTITY_TYPE.get().create();
+        return BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get().create();
     }
 
     @SuppressWarnings("deprecation")

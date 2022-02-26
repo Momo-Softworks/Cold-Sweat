@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.registrylists;
 
 import dev.momostudios.coldsweat.core.init.ItemInit;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public class ModItems
 {

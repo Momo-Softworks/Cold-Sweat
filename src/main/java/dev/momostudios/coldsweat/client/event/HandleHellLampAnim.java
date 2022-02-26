@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.client.event;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,11 +17,11 @@ public class HandleHellLampAnim
     {
         if (event.phase == TickEvent.Phase.START)
         {
-            PlayerEntity player = event.player;
+            Player player = event.player;
 
             float rightArmRot = player.getPersistentData().getFloat("rightArmRot");
 
-            if (PlayerHelper.holdingLamp(player, HandSide.RIGHT))
+            if (PlayerHelper.holdingLamp(player, )
             {
                 if (rightArmRot < 70)
                     player.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 2);

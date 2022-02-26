@@ -2,14 +2,21 @@ package dev.momostudios.coldsweat.core.network;
 
 import dev.momostudios.coldsweat.core.network.message.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +44,7 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(8, HearthFuelSyncMessage.class, HearthFuelSyncMessage::encode, HearthFuelSyncMessage::decode, HearthFuelSyncMessage::handle);
     }
     
-    public static void writeConfigCacheToBuffer(ConfigCache config, PacketBuffer buffer)
+    public static void writeConfigCacheToBuffer(ConfigCache config, FriendlyByteBuf buffer)
     {
         buffer.writeInt(config.difficulty);
         buffer.writeDouble(config.minTemp);
@@ -51,7 +58,7 @@ public class ColdSweatPacketHandler
         buffer.writeBoolean(config.gracePeriodEnabled);
     }
 
-    public static ConfigCache readConfigCacheFromBuffer(PacketBuffer buffer)
+    public static ConfigCache readConfigCacheFromBuffer(FriendlyByteBuf buffer)
     {
         ConfigCache config = new ConfigCache();
         config.difficulty = buffer.readInt();
@@ -67,28 +74,28 @@ public class ColdSweatPacketHandler
         return config;
     }
 
-    public static CompoundNBT writeListOfLists(List<? extends List<String>> list)
+    public static CompoundTag writeListOfLists(List<? extends List<String>> list)
     {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         for (int i = 0; i < list.size(); i++)
         {
             List<String> sublist = list.get(i);
-            ListNBT subtag = new ListNBT();
+            ListTag subtag = new ListTag();
             for (int j = 0; j < sublist.size(); j++)
             {
-                subtag.add(StringNBT.valueOf(sublist.get(j)));
+                subtag.add(StringTag.valueOf(sublist.get(j)));
             }
             tag.put("" + i, subtag);
         }
         return tag;
     }
 
-    public static List<? extends List<String>> readListOfLists(CompoundNBT tag)
+    public static List<? extends List<String>> readListOfLists(CompoundTag tag)
     {
         List<List<String>> list = new ArrayList<>();
         for (int i = 0; i < tag.size(); i++)
         {
-            ListNBT subtag = tag.getList("" + i, 8);
+            ListTag subtag = tag.getList("" + i, 8);
             List<String> sublist = new ArrayList<>();
             for (int j = 0; j < subtag.size(); j++)
             {

@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.core.init;
 
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.ParticleType;
 import net.minecraftforge.fml.RegistryObject;

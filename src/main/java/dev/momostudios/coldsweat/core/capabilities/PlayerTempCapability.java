@@ -2,10 +2,9 @@ package dev.momostudios.coldsweat.core.capabilities;
 
 import dev.momostudios.coldsweat.util.CSDamageTypes;
 import dev.momostudios.coldsweat.util.registrylists.ModEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.config.ConfigCache;
@@ -17,7 +16,6 @@ import java.util.List;
 
 public class PlayerTempCapability
 {
-    @CapabilityInject(PlayerTempCapability.class)
     public static Capability<PlayerTempCapability> TEMPERATURE = null;
 
     double ambiTemp;
@@ -93,7 +91,7 @@ public class PlayerTempCapability
         }
     }
 
-    public void tickClient(PlayerEntity player)
+    public void tickClient(Player player)
     {
         tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.AMBIENT));
         tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.BODY));
@@ -101,7 +99,7 @@ public class PlayerTempCapability
         tickModifiers(new Temperature(), player, getModifiers(PlayerHelper.Types.RATE));
     }
 
-    public void tickUpdate(PlayerEntity player)
+    public void tickUpdate(Player player)
     {
         ConfigCache config = ConfigCache.getInstance();
 
@@ -142,7 +140,7 @@ public class PlayerTempCapability
         // Calculate body/base temperatures with modifiers
         Temperature composite = base.add(bodyTemp);
 
-        if (composite.get() != get(PlayerHelper.Types.COMPOSITE) || player.ticksExisted % 3 == 0)
+        if (composite.get() != get(PlayerHelper.Types.COMPOSITE) || player.tickCount % 3 == 0)
         {
             PlayerHelper.updateTemperature(player,
                     new Temperature(get(PlayerHelper.Types.BODY)),
@@ -154,19 +152,19 @@ public class PlayerTempCapability
         set(PlayerHelper.Types.COMPOSITE, CSMath.clamp(composite.get(), -150, 150));
 
         //Deal damage to the player if temperature is critical
-        boolean hasFireResistance = player.isPotionActive(Effects.FIRE_RESISTANCE) && config.fireRes;
-        boolean hasIceResistance = player.isPotionActive(ModEffects.ICE_RESISTANCE) && config.iceRes;
-        if (player.ticksExisted % 40 == 0)
+        boolean hasFireResistance = player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes;
+        boolean hasIceResistance = player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes;
+        if (player.tickCount % 40 == 0)
         {
             boolean damageScaling = config.damageScaling;
 
-            if (composite.get() >= 100 && !hasFireResistance && !player.isPotionActive(ModEffects.GRACE))
+            if (composite.get() >= 100 && !hasFireResistance && !player.hasEffect(ModEffects.GRACE))
             {
-                player.attackEntityFrom(damageScaling ? CSDamageTypes.HOT_SCALED : CSDamageTypes.HOT, 2f);
+                player.hurt(damageScaling ? CSDamageTypes.HOT_SCALED : CSDamageTypes.HOT, 2f);
             }
-            if (composite.get() <= -100 && !hasIceResistance && !player.isPotionActive(ModEffects.GRACE))
+            if (composite.get() <= -100 && !hasIceResistance && !player.hasEffect(ModEffects.GRACE))
             {
-                player.attackEntityFrom(damageScaling ? CSDamageTypes.COLD_SCALED : CSDamageTypes.COLD, 2f);
+                player.hurt(damageScaling ? CSDamageTypes.COLD_SCALED : CSDamageTypes.COLD, 2f);
             }
         }
     }
@@ -179,7 +177,7 @@ public class PlayerTempCapability
         return Math.min(Math.abs(bodyTemp), changeBy) * (bodyTemp > 0 ? -1 : 1);
     }
 
-    private static Temperature tickModifiers(Temperature temp, PlayerEntity player, List<TempModifier> modifiers)
+    private static Temperature tickModifiers(Temperature temp, Player player, List<TempModifier> modifiers)
     {
         Temperature result = temp.with(modifiers, player);
 

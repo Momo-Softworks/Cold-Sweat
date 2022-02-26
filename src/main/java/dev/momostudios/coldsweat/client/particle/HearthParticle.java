@@ -1,18 +1,20 @@
 package dev.momostudios.coldsweat.client.particle;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class HearthParticle extends SpriteTexturedParticle
+public class HearthParticle extends TextureSheetParticle implements ParticleOptions
 {
-    private IAnimatedSprite ageSprite;
-    protected HearthParticle(ClientWorld world, double x, double y, double z, double vx, double vy, double vz, IAnimatedSprite spriteSet)
+    private SpriteSet ageSprite;
+    protected HearthParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet)
     {
         super(world, x, y, z);
         float size = 0.5f;
@@ -31,23 +33,23 @@ public class HearthParticle extends SpriteTexturedParticle
     }
 
     @Override
-    public IParticleRenderType getRenderType() {
-        return IParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     @Override
     public void tick()
     {
         super.tick();
-        this.selectSpriteWithAge(this.ageSprite);
+        this.setSpriteFromAge(this.ageSprite);
 
         if (this.age < 10)
-            this.particleAlpha += 0.02f;
+            this.alpha += 0.02f;
         else if (this.age > 32)
-            this.particleAlpha -= 0.02f;
+            this.alpha -= 0.02f;
 
-        if (this.particleAlpha <= 0.06  && this.age > 10)
-            this.setExpired();
+        if (this.alpha <= 0.06  && this.age > 10)
+            this.remove();
     }
 
     @OnlyIn(Dist.CLIENT)

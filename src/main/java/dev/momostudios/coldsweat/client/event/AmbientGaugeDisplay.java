@@ -9,13 +9,12 @@ import dev.momostudios.coldsweat.util.PlayerHelper;
 import dev.momostudios.coldsweat.util.Units;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -31,15 +30,15 @@ public class AmbientGaugeDisplay
     @SubscribeEvent
     public static void renderAmbientTemperature(RenderGameOverlayEvent.Post event)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
-        (CSMath.isBetween(player.inventory.getSlotFor(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
-        player.getHeldItemOffhand().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showAmbient))
+        (CSMath.isBetween(player.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
+        player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showAmbient))
         {
             // Variables
-            int scaleX = event.getWindow().getScaledWidth();
-            int scaleY = event.getWindow().getScaledHeight();
+            int scaleX = event.getWindow().getGuiScaledWidth();
+            int scaleY = event.getWindow().getGuiScaledHeight();
             double min = ConfigCache.getInstance().minTemp;
             double max = ConfigCache.getInstance().maxTemp;
             double mid = (min + max) / 2;
@@ -79,9 +78,9 @@ public class AmbientGaugeDisplay
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
-            Minecraft.getInstance().getTextureManager().bindTexture(gaugeTexture);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            AbstractGui.blit(event.getMatrixStack(), (scaleX / 2) + 94, scaleY - 19, 0, 0, 25, 16, 25, 16);
+            Minecraft.getInstance().getTextureManager().bindForSetup(gaugeTexture);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94, scaleY - 19, 0, 0, 25, 16, 25, 16);
 
             RenderSystem.disableBlend();
 
@@ -96,11 +95,11 @@ public class AmbientGaugeDisplay
                 color = 4236031;
 
             // Sets the text bobbing offset (or none if disabled)
-            int bob = temp > max || temp < min ? (player.ticksExisted % 2 == 0 && bobbing ? 16 : 15) : 15;
+            int bob = temp > max || temp < min ? (player.tickCount % 2 == 0 && bobbing ? 16 : 15) : 15;
 
             // Render text
-            int blendedTemp = (int) CSMath.blend(prevClientTemp, clientTemp, Animation.getPartialTickTime(), 0, 1);
-            Minecraft.getInstance().fontRenderer.drawString(event.getMatrixStack(), "" + (blendedTemp + CCS.tempOffset()) + "",
+            int blendedTemp = (int) CSMath.blend(prevClientTemp, clientTemp, Minecraft.getInstance().getFrameTime(), 0, 1);
+            Minecraft.getInstance().font.draw(event.getMatrixStack(), "" + (blendedTemp + CCS.tempOffset()) + "",
                     (scaleX / 2f) + 107 + (Integer.toString(blendedTemp + CCS.tempOffset()).length() * -3), scaleY - bob, color);
         }
     }

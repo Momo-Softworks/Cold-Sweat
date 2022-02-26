@@ -9,15 +9,15 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.network.PacketDistributor;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +29,7 @@ public class PlayerHelper
     /**
      * Returns the player's temperature of the specified type.
      */
-    public static Temperature getTemperature(PlayerEntity player, Types type)
+    public static Temperature getTemperature(Player player, Types type)
     {
         return new Temperature(player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
     }
@@ -37,16 +37,16 @@ public class PlayerHelper
     /**
      * Use {@link TempModifier}s for over-time effects.
      */
-    public static void setTemperature(PlayerEntity player, Temperature value, Types type)
+    public static void setTemperature(Player player, Temperature value, Types type)
     {
         setTemperature(player, value, type, true);
     }
 
-    public static void setTemperature(PlayerEntity player, Temperature value, Types type, boolean sync)
+    public static void setTemperature(Player player, Temperature value, Types type, boolean sync)
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
-            if (sync && !player.world.isRemote)
+            if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
                         type == Types.BODY ? value : getTemperature(player, Types.BODY),
@@ -57,17 +57,17 @@ public class PlayerHelper
         });
     }
 
-    public static void addTemperature(PlayerEntity player, Temperature value, Types type)
+    public static void addTemperature(Player player, Temperature value, Types type)
     {
         addTemperature(player, value, type, true);
     }
 
-    public static void addTemperature(PlayerEntity player, Temperature value, Types type, boolean sync)
+    public static void addTemperature(Player player, Temperature value, Types type, boolean sync)
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get() + capability.get(type));
-            if (sync && !player.world.isRemote)
+            if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
                         type == Types.BODY ? value : getTemperature(player, Types.BODY),
@@ -83,7 +83,7 @@ public class PlayerHelper
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(PlayerEntity player, TempModifier modifier, Types type, boolean duplicates)
+    public static void addModifier(Player player, TempModifier modifier, Types type, boolean duplicates)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, duplicates);
         MinecraftForge.EVENT_BUS.post(event);
@@ -103,7 +103,7 @@ public class PlayerHelper
                     ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
                 }
 
-                if (!player.world.isRemote)
+                if (!player.level.isClientSide)
                     updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
             });
         }
@@ -116,7 +116,7 @@ public class PlayerHelper
      * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifiers(PlayerEntity player, Types type, int count, Predicate<TempModifier> condition)
+    public static void removeModifiers(Player player, Types type, int count, Predicate<TempModifier> condition)
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
@@ -139,7 +139,7 @@ public class PlayerHelper
                 return false;
             });
 
-            if (!player.world.isRemote)
+            if (!player.level.isClientSide)
                 updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
         });
     }
@@ -150,7 +150,7 @@ public class PlayerHelper
      * @param type determines which TempModifier list to pull from
      * @returns a NEW list of all TempModifiers of the specified type
      */
-    public static List<TempModifier> getModifiers(PlayerEntity player, Types type)
+    public static List<TempModifier> getModifiers(Player player, Types type)
     {
         List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
         mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
@@ -162,7 +162,7 @@ public class PlayerHelper
      * @param type The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
      */
-    public static boolean hasModifier(PlayerEntity player, Class<? extends TempModifier> modClass, Types type)
+    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Types type)
     {
         return player.getCapability(PlayerTempCapability.TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
@@ -172,7 +172,7 @@ public class PlayerHelper
      * @param type determines which TempModifier list to pull from
      * @param action the action(s) to perform on each TempModifier
      */
-    public static void forEachModifier(PlayerEntity player, Types type, Consumer<TempModifier> action)
+    public static void forEachModifier(Player player, Types type, Consumer<TempModifier> action)
     {
         player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
         {
@@ -238,35 +238,35 @@ public class PlayerHelper
         }
     }
 
-    public static ItemStack getItemInHand(LivingEntity player, HandSide hand)
+    public static ItemStack getItemInHand(LivingEntity player, HumanoidArm hand)
     {
-        return player.getHeldItem(hand == player.getPrimaryHand() ? Hand.MAIN_HAND : Hand.OFF_HAND);
+        return player.getItemInHand(hand == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
     }
 
-    public static HandSide getHandSide(Hand hand, PlayerEntity player)
+    public static HumanoidArm getArmFromHand(InteractionHand hand, Player player)
     {
-        return hand == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
+        return hand == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HumanoidArm.RIGHT ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
     }
 
-    public static boolean holdingLamp(LivingEntity player, HandSide hand)
+    public static boolean holdingLamp(LivingEntity player, HumanoidArm arm)
     {
-        return getItemInHand(player, hand).getItem() == ModItems.HELLSPRING_LAMP;
+        return getItemInHand(player, arm).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
-    public static void updateTemperature(PlayerEntity player, Temperature bodyTemp, Temperature baseTemp, Temperature ambientTemp)
+    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature ambientTemp)
     {
-        if (!player.world.isRemote)
+        if (!player.level.isClientSide)
         {
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                     new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), ambientTemp.get()));
         }
     }
 
-    public static void updateModifiers(PlayerEntity player, List<TempModifier> body, List<TempModifier> ambient, List<TempModifier> base, List<TempModifier> rate)
+    public static void updateModifiers(Player player, List<TempModifier> body, List<TempModifier> ambient, List<TempModifier> base, List<TempModifier> rate)
     {
-        if (!player.world.isRemote)
+        if (!player.level.isClientSide)
         {
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player),
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                     new PlayerModifiersSyncMessage(body, ambient, base, rate));
         }
     }

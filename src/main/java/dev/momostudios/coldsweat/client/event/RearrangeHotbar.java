@@ -26,7 +26,7 @@ public class RearrangeHotbar
                 hasShiftedUp = false;
             }
 
-            if (event.getType() == RenderGameOverlayEvent.ElementType.HEALTH ||
+            if (event.getType() == RenderGameOverlayEvent.ElementType.LAYER ||
                 event.getType() == RenderGameOverlayEvent.ElementType.ARMOR ||
                 event.getType() == RenderGameOverlayEvent.ElementType.FOOD ||
                 event.getType() == RenderGameOverlayEvent.ElementType.HEALTHMOUNT ||

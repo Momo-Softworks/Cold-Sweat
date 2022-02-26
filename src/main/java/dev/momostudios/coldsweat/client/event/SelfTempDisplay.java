@@ -1,15 +1,17 @@
 package dev.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,21 +26,19 @@ public class SelfTempDisplay
     static int iconBob = 0;
 
     @SubscribeEvent
-    public static void eventHandler(RenderGameOverlayEvent event)
+    public static void eventHandler(RenderGameOverlayEvent.PostLayer event)
     {
         ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-        if (mc.getRenderViewEntity() != null && mc.getRenderViewEntity() instanceof PlayerEntity &&
-        !event.isCancelable() && event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR
-        && !((PlayerEntity) mc.getRenderViewEntity()).abilities.isCreativeMode && !mc.getRenderViewEntity().isSpectator())
+        if (mc.cameraEntity instanceof Player && event.getOverlay() == ForgeIngameGui.HOTBAR_ELEMENT
+        && !((Player) mc.cameraEntity).isCreative() && !mc.cameraEntity.isSpectator())
         {
+            int scaleX = event.getWindow().getGuiScaledWidth();
+            int scaleY = event.getWindow().getGuiScaledHeight();
+            Player entity = (Player) Minecraft.getInstance().cameraEntity;
 
-            int scaleX = event.getWindow().getScaledWidth();
-            int scaleY = event.getWindow().getScaledHeight();
-            PlayerEntity entity = (PlayerEntity) Minecraft.getInstance().getRenderViewEntity();
-
-            if (playerCap == null || entity.ticksExisted % 40 == 0)
+            if (playerCap == null || entity.tickCount % 40 == 0)
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
 
             int temp = (int) playerCap.get(PlayerHelper.Types.COMPOSITE);
@@ -80,39 +80,39 @@ public class SelfTempDisplay
             if (CCS.iconBobbing())
             {
                 if (threatLevel == 1) threatOffset = iconBob;
-                if (threatLevel == 2) threatOffset = entity.ticksExisted % 2 == 0 ? 1 : 0;
+                if (threatLevel == 2) threatOffset = entity.tickCount % 2 == 0 ? 1 : 0;
             }
 
             // Render Icon
-            mc.getTextureManager().bindTexture(icon);
-            mc.ingameGUI.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+            mc.getTextureManager().bindForSetup(icon);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 
             // Render Readout
-            FontRenderer fontRenderer = mc.fontRenderer;
-            int scaledWidth = mc.getMainWindow().getScaledWidth();
-            int scaledHeight = mc.getMainWindow().getScaledHeight();
-            MatrixStack matrixStack = event.getMatrixStack();
+            Font fontRenderer = mc.font;
+            int scaledWidth = mc.getWindow().getGuiScaledWidth();
+            int scaledHeight = mc.getWindow().getGuiScaledHeight();
+            PoseStack matrixStack = event.getMatrixStack();
 
             String s = "" + (int) Math.ceil(Math.min(Math.abs(temp), 100));
-            float i1 = (scaledWidth - fontRenderer.getStringWidth(s)) / 2f + CCS.tempGaugeX();
+            float i1 = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempGaugeX();
             float j1 = scaledHeight - 31f - 8f + CCS.tempGaugeY();
             if (!CSMath.isBetween(temp, -100, 100))
             {
-                fontRenderer.drawString(matrixStack, s, i1 + 2f, j1, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1 - 2f, j1, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1, j1 + 2f, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1, j1 - 2f, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1 + 1f, j1 + 1f, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1 + 1f, j1 - 1f, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1 - 1f, j1 - 1f, colorBG2);
-                fontRenderer.drawString(matrixStack, s, i1 - 1f, j1 + 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 + 2f, j1, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 - 2f, j1, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1, j1 + 2f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1, j1 - 2f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 + 1f, j1 + 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 + 1f, j1 - 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 - 1f, j1 - 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, i1 - 1f, j1 + 1f, colorBG2);
             }
-            fontRenderer.drawString(matrixStack, s, i1 + 1, j1, colorBG);
-            fontRenderer.drawString(matrixStack, s, i1 - 1, j1, colorBG);
-            fontRenderer.drawString(matrixStack, s, i1, j1 + 1, colorBG);
-            fontRenderer.drawString(matrixStack, s, i1, j1 - 1, colorBG);
-            fontRenderer.drawString(matrixStack, s, i1, j1, color);
+            fontRenderer.draw(matrixStack, s, i1 + 1, j1, colorBG);
+            fontRenderer.draw(matrixStack, s, i1 - 1, j1, colorBG);
+            fontRenderer.draw(matrixStack, s, i1, j1 + 1, colorBG);
+            fontRenderer.draw(matrixStack, s, i1, j1 - 1, colorBG);
+            fontRenderer.draw(matrixStack, s, i1, j1, color);
         }
     }
 

@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.config.ConfigCache;
 
 import javax.annotation.Nonnull;
@@ -29,20 +29,20 @@ public abstract class ConfigPageBase extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
-    public ITextComponent sectionOneTitle()
+    public BaseComponent sectionOneTitle()
     {
-        return new TranslationTextComponent("cold_sweat.config.section.temperature_details");
+        return new TranslatableComponent("cold_sweat.config.section.temperature_details");
     }
 
     @Nullable
-    public ITextComponent sectionTwoTitle()
+    public BaseComponent sectionTwoTitle()
     {
-        return new TranslationTextComponent("cold_sweat.config.section.other");
+        return new TranslatableComponent("cold_sweat.config.section.other");
     }
 
     public ConfigPageBase(Screen parentScreen, ConfigCache configCache)
     {
-        super(new TranslationTextComponent("cold_sweat.config.title"));
+        super(new TranslatableComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
         this.configCache = configCache;
     }
@@ -55,42 +55,42 @@ public abstract class ConfigPageBase extends Screen
     @Override
     protected void init()
     {
-        this.addButton(new Button(
+        this.addWidget(new Button(
             this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
             this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
             BOTTOM_BUTTON_WIDTH, 20,
-            new TranslationTextComponent("gui.done"),
+            new TranslatableComponent("gui.done"),
             button -> this.close())
         );
 
         // Navigation
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20,
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.displayGuiScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configCache)));
+                mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configCache)));
         if (this.index() < ConfigScreen.LAST_PAGE)
-            this.addButton(nextNavButton);
+            this.addWidget(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20,
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.displayGuiScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configCache)));
+                mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configCache)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
-            this.addButton(prevNavButton);
+            this.addWidget(prevNavButton);
     }
 
     @Override
-    public void render(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
     {
         this.renderBackground(matrixStack);
 
         drawCenteredString(matrixStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        drawString(matrixStack, this.font, new StringTextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
+        drawString(matrixStack, this.font, new TextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
 
         // Section 1 Title
         drawString(matrixStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
 
-        Minecraft.getInstance().getTextureManager().bindTexture(divider);
+        Minecraft.getInstance().getTextureManager().bindForSetup(divider);
         this.blit(matrixStack, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 155);
 
         if (this.sectionTwoTitle() != null)
@@ -98,7 +98,7 @@ public abstract class ConfigPageBase extends Screen
             // Section 2 Title
             drawString(matrixStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
 
-            mc.getTextureManager().bindTexture(divider);
+            mc.getTextureManager().bindForSetup(divider);
             this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
@@ -120,6 +120,6 @@ public abstract class ConfigPageBase extends Screen
     public void close()
     {
         this.onClose();
-        Minecraft.getInstance().displayGuiScreen(this.parentScreen);
+        Minecraft.getInstance().setScreen(this.parentScreen);
     }
 }

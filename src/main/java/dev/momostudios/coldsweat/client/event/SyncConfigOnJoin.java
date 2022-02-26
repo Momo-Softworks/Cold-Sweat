@@ -19,7 +19,7 @@ public class SyncConfigOnJoin
     {
         if (event.getEntity() == Minecraft.getInstance().player)
         {
-            if (!Minecraft.getInstance().isSingleplayer())
+            if (!Minecraft.getInstance().isLocalServer())
             {
                 ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(true));
             }

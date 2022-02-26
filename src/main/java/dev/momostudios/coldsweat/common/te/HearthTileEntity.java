@@ -5,7 +5,7 @@ import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import dev.momostudios.coldsweat.util.PlayerHelper;
@@ -20,13 +20,11 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -83,7 +81,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public HearthTileEntity()
     {
-        this(TileEntityInit.HEARTH_TILE_ENTITY_TYPE.get());
+        this(BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get());
     }
 
     public void tick()

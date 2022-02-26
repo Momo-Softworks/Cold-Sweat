@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.common.effect;
 
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectType;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 
 import javax.annotation.Nonnull;
 
-public class InsulatedEffect extends Effect
+public class InsulatedEffect extends MobEffect
 {
     public InsulatedEffect() {
-        super(EffectType.BENEFICIAL, 7355178);
+        super(MobEffectCategory.BENEFICIAL, 7355178);
     }
 
     @Nonnull

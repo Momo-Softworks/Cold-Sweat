@@ -2,24 +2,21 @@ package dev.momostudios.coldsweat.common.te;
 
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.LockableLootTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -32,7 +29,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class IceboxTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
+public class IceboxTileEntity extends BaseContainerBlockEntity
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -41,44 +38,16 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
     private int fuel;
+    BlockPos pos = this.getBlockPos();
 
-    protected final IIntArray fuelData = new IIntArray() {
-        public int get(int index) {
-            return fuel;
-        }
-
-        public void set(int index, int value) {
-            fuel = value;
-        }
-
-        public int size() {
-            return 1;
-        }
-    };
-
-    public IceboxTileEntity(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
-    }
-
-    @Override
-    protected ITextComponent getDefaultName() {
-        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".icebox");
-    }
-
-    @Override
-    protected NonNullList<ItemStack> getItems() {
-        return this.items;
-    }
-
-    @Override
-    protected void setItems(NonNullList<ItemStack> itemsIn)
+    public IceboxTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
     {
-        this.items = itemsIn;
+        super(type, pos, state);
     }
 
-    public IceboxTileEntity()
-    {
-        this(TileEntityInit.ICEBOX_TILE_ENTITY_TYPE.get());
+    @Override
+    protected Component getDefaultName() {
+        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".icebox");
     }
 
     public void tick()
@@ -86,12 +55,12 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
         this.ticksExisted++;
         this.ticksExisted %= 1000;
 
-        if (!this.world.isRemote)
+        if (!this.level.isClientSide)
         {
             if (this.getFuel() > 0)
             {
-                if (!world.getBlockState(pos).get(IceboxBlock.FROSTED))
-                    world.setBlockState(pos, world.getBlockState(pos).with(IceboxBlock.FROSTED, true));
+                if (!level.getBlockState(pos).getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, level.getBlockState(pos).setValue(IceboxBlock.FROSTED, true), 3);
 
                 if (this.ticksExisted % 20 == 0)
                 {
@@ -109,8 +78,8 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
             }
             else
             {
-                if (world.getBlockState(pos).get(IceboxBlock.FROSTED))
-                    world.setBlockState(pos, world.getBlockState(pos).with(IceboxBlock.FROSTED, false));
+                if (level.getBlockState(pos).getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, level.getBlockState(pos).setValue(IceboxBlock.FROSTED, false), 3);
             }
 
             int itemFuel = getItemFuel(this.getItemInSlot(0));
@@ -135,7 +104,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
         }
         else
         {
-            if (world.getBlockState(pos).get(IceboxBlock.FROSTED) && world.getGameTime() % 3 == 0 &&  Math.random() < 0.5)
+            if (level.getBlockState(pos).getValue(IceboxBlock.FROSTED) && level.getGameTime() % 3 == 0 &&  Math.random() < 0.5)
             {
                 double d0 = pos.getX() + 0.5;
                 double d1 = pos.getY();
@@ -144,7 +113,7 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
                 double d5 = side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
                 double d6 = Math.random() * 0.3;
                 double d7 = !side ? Math.random() * 2 - 1 : (Math.random() < 0.5 ? 0.55 : -0.55);
-                world.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
+                level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
             }
         }
     }
@@ -181,12 +150,12 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
 
     public int getFuel()
     {
-        return fuelData.get(0);
+        return fuel;
     }
 
     public void setFuel(int amount)
     {
-        fuelData.set(0, Math.min(amount, MAX_FUEL));
+        fuel = Math.min(amount, MAX_FUEL);
     }
 
     public LazyOptional<IItemHandler> getCap()
@@ -194,62 +163,78 @@ public class IceboxTileEntity extends LockableLootTileEntity implements ITickabl
         return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
     }
 
-    public int[] getSlotsForFace(Direction side)
+    @Override
+    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
-        if (side == Direction.DOWN)
-        {
-            return WATERSKIN_SLOTS;
-        }
-        else
-        {
-            return side == Direction.UP ? WATERSKIN_SLOTS : FUEL_SLOT;
-        }
+        return new IceboxContainer(id, playerInv, this, getFuel());
     }
 
     @Override
-    public boolean canInsertItem(int index, ItemStack itemStackIn, @Nullable Direction direction)
+    public void load(CompoundTag nbt)
     {
-        return index == 0 || getCap().map(h -> canInsertItem(index, itemStackIn, direction)).orElse(false);
+        super.load(nbt);
+        this.setFuel(nbt.getInt("fuel"));
+        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     }
 
     @Override
-    public boolean canExtractItem(int index, ItemStack stack, Direction direction)
+    public void saveAdditional(CompoundTag compound)
     {
-        return getItemFuel(stack) == 0;
+        super.saveAdditional(compound);
+        compound.putInt("fuel", this.getFuel());
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack)
+    public int getContainerSize()
     {
-        return true;
-    }
-
-    @Override
-    public int getSizeInventory() {
         return slots;
     }
 
     @Override
-    protected Container createMenu(int id, PlayerInventory player)
+    public boolean isEmpty()
     {
-        return new IceboxContainer(id, player, this, fuelData);
+        return items.isEmpty();
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt)
+    public ItemStack getItem(int slot)
     {
-        super.read(state, nbt);
-        this.setFuel(nbt.getInt("fuel"));
-        this.items = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(nbt, this.items);
+        return items.get(slot);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound)
+    public ItemStack removeItem(int slot, int count)
     {
-        super.write(compound);
-        compound.putInt("fuel", this.getFuel());
-        ItemStackHelper.saveAllItems(compound, items);
-        return compound;
+        ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
+
+        if (!itemstack.isEmpty())
+        {
+            this.setChanged();
+        }
+        return itemstack;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot)
+    {
+        return ContainerHelper.removeItem(items, slot, items.get(slot).getCount());
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack itemstack)
+    {
+        items.set(slot, itemstack);
+    }
+
+    @Override
+    public boolean stillValid(Player player)
+    {
+        return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
+    }
+
+    @Override
+    public void clearContent()
+    {
+        items.clear();
     }
 }

@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.te.HearthTileEntity;
 import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
@@ -23,7 +23,6 @@ import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -195,7 +194,7 @@ public class HearthBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return TileEntityInit.HEARTH_TILE_ENTITY_TYPE.get().create();
+        return BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get().create();
     }
 
     @SuppressWarnings("deprecation")

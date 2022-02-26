@@ -33,7 +33,7 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
         BlockInit.BLOCKS.register(bus);
-        TileEntityInit.TILE_ENTITY_TYPE.register(bus);
+        BlockEntityInit.TILE_ENTITY_TYPE.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
         EffectInit.EFFECTS.register(bus);

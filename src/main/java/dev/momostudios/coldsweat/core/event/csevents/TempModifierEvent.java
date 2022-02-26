@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.core.event.csevents;
 
 import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
@@ -34,7 +34,7 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        private PlayerEntity player;
+        private Player player;
         private TempModifier modifier;
         public boolean duplicatesAllowed;
         public PlayerHelper.Types type;
@@ -55,11 +55,11 @@ public class TempModifierEvent extends Event
             this.modifier = modifier;
         }
 
-        public final PlayerEntity getPlayer() {
+        public final Player getPlayer() {
             return player;
         }
 
-        public Add(TempModifier modifier, PlayerEntity player, PlayerHelper.Types type, boolean duplicates)
+        public Add(TempModifier modifier, Player player, PlayerHelper.Types type, boolean duplicates)
         {
             duplicatesAllowed = duplicates;
             this.player = player;
@@ -85,12 +85,12 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Remove extends TempModifierEvent
     {
-        public final PlayerEntity player;
+        public final Player player;
         public final PlayerHelper.Types type;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(PlayerEntity player, PlayerHelper.Types type, int count, Predicate<TempModifier> condition)
+        public Remove(Player player, PlayerHelper.Types type, int count, Predicate<TempModifier> condition)
         {
             this.player = player;
             this.type = type;
@@ -130,11 +130,11 @@ public class TempModifierEvent extends Event
         @Cancelable
         public static class Pre extends Tick
         {
-            public final PlayerEntity player;
+            public final Player player;
             private TempModifier modifier;
             private Temperature temperature;
 
-            public Pre(TempModifier modifier, PlayerEntity player, Temperature temperature)
+            public Pre(TempModifier modifier, Player player, Temperature temperature)
             {
                 this.player = player;
                 this.modifier = modifier;
@@ -160,11 +160,11 @@ public class TempModifierEvent extends Event
          */
         public static class Post extends Tick
         {
-            public final PlayerEntity player;
+            public final Player player;
             private TempModifier modifier;
             private Temperature temperature;
 
-            public Post(TempModifier modifier, PlayerEntity player, Temperature temperature)
+            public Post(TempModifier modifier, Player player, Temperature temperature)
             {
                 this.player = player;
                 this.modifier = modifier;

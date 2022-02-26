@@ -1,26 +1,26 @@
 package dev.momostudios.coldsweat.util;
 
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 public class CSDamageTypes
 {
     public static final DamageSource COLD = (new DamageSource("cold"))
-        .setDamageBypassesArmor()
-        .setDamageIsAbsolute();
+        .bypassArmor()
+        .bypassMagic();
 
     public static final DamageSource HOT  = (new DamageSource("hot"))
-        .setDamageBypassesArmor()
-        .setFireDamage()
-        .setDamageIsAbsolute();
+        .bypassArmor()
+        .bypassMagic()
+        .setIsFire();
 
     public static final DamageSource COLD_SCALED = (new DamageSource("cold"))
-        .setDamageBypassesArmor()
-        .setDifficultyScaled()
-        .setDamageIsAbsolute();
+        .bypassArmor()
+        .bypassMagic()
+        .setScalesWithDifficulty();
 
     public static final DamageSource HOT_SCALED  = (new DamageSource("hot"))
-        .setDamageBypassesArmor()
-        .setFireDamage()
-        .setDifficultyScaled()
-        .setDamageIsAbsolute();
+        .bypassArmor()
+        .bypassMagic()
+        .setIsFire()
+        .setScalesWithDifficulty();
 }

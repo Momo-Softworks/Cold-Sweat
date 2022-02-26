@@ -1,10 +1,10 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -16,14 +16,14 @@ public class SoulLampInputClientMessage
         this.holdingStack = stack;
     }
 
-    public static void encode(SoulLampInputClientMessage message, PacketBuffer buffer)
+    public static void encode(SoulLampInputClientMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeItemStack(message.holdingStack);
+        buffer.writeItemStack(message.holdingStack, true);
     }
 
-    public static SoulLampInputClientMessage decode(PacketBuffer buffer)
+    public static SoulLampInputClientMessage decode(FriendlyByteBuf buffer)
     {
-        return new SoulLampInputClientMessage(buffer.readItemStack());
+        return new SoulLampInputClientMessage(buffer.readItem());
     }
 
     public static void handle(SoulLampInputClientMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -35,9 +35,9 @@ public class SoulLampInputClientMessage
             {
                 if (Minecraft.getInstance().player != null)
                 {
-                    ClientPlayerEntity player = Minecraft.getInstance().player;
+                    LocalPlayer player = Minecraft.getInstance().player;
 
-                    player.inventory.setItemStack(message.holdingStack);
+                    player.containerMenu.setCarried(message.holdingStack);
                 }
             });
         }

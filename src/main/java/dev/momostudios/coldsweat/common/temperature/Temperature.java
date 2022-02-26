@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.temperature;
 
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class Temperature
      * @param player the player this modifier should use
      * @param modifier the modifier being applied to the {@code Temperature}
      */
-    public Temperature with(@Nonnull TempModifier modifier, @Nonnull PlayerEntity player)
+    public Temperature with(@Nonnull TempModifier modifier, @Nonnull Player player)
     {
         return new Temperature(modifier.calculate(new Temperature(temp), player));
     }
@@ -83,7 +84,7 @@ public class Temperature
      * @param player the player this list of modifiers should use
      * @param modifiers the list of modifiers being applied to the {@code Temperature}
      */
-    public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull PlayerEntity player)
+    public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull Player player)
     {
         Temperature temp2 = new Temperature(this.temp);
         for(TempModifier modifier : new ArrayList<>(modifiers))

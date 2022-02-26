@@ -1,23 +1,21 @@
 package dev.momostudios.coldsweat.common.te;
 
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.LockableLootTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -30,7 +28,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BoilerTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
+public class BoilerTileEntity extends BaseContainerBlockEntity
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -40,43 +38,15 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public int ticksExisted;
     private int fuel;
 
-    protected final IIntArray fuelData = new IIntArray() {
-        public int get(int index) {
-            return fuel;
-        }
-
-        public void set(int index, int value) {
-            fuel = value;
-        }
-
-        public int size() {
-            return 1;
-        }
-    };
-
-    public BoilerTileEntity(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
-    }
-
-    @Override
-    protected ITextComponent getDefaultName() {
-        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".boiler");
-    }
-
-    @Override
-    protected NonNullList<ItemStack> getItems() {
-        return this.items;
-    }
-
-    @Override
-    protected void setItems(NonNullList<ItemStack> itemsIn)
+    public BoilerTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
     {
-        this.items = itemsIn;
+        super(type, pos, state);
     }
 
-    public BoilerTileEntity()
-    {
-        this(TileEntityInit.BOILER_TILE_ENTITY_TYPE.get());
+
+    @Override
+    protected Component getDefaultName() {
+        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
     public void tick()
@@ -84,12 +54,12 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
         this.ticksExisted++;
         this.ticksExisted %= 1000;
 
-        if (!this.world.isRemote)
+        if (!this.level.isClientSide)
         {
             if (this.getFuel() > 0)
             {
-                if (!world.getBlockState(pos).get(BoilerBlock.LIT))
-                    world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, true));
+                if (!level.getBlockState(getBlockPos()).getValue(BoilerBlock.LIT))
+                    level.setBlock(getBlockPos(), level.getBlockState(getBlockPos()).setValue(BoilerBlock.LIT, true), 3);
 
                 if (this.ticksExisted % 20 == 0)
                 {
@@ -105,9 +75,9 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
                     if (hasItemStacks) this.setFuel(this.getFuel() - 1);
                 }
             }
-            else if (world.getBlockState(pos).get(BoilerBlock.LIT))
+            else if (level.getBlockState(getBlockPos()).getValue(BoilerBlock.LIT))
             {
-                world.setBlockState(pos, world.getBlockState(pos).with(BoilerBlock.LIT, false));
+                level.setBlock(getBlockPos(), level.getBlockState(getBlockPos()).setValue(BoilerBlock.LIT, false), 3);
             }
 
             int itemFuel = getItemFuel(this.getItemInSlot(0));
@@ -163,12 +133,12 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
 
     public int getFuel()
     {
-        return fuelData.get(0);
+        return this.fuel;
     }
 
     public void setFuel(int amount)
     {
-        fuelData.set(0, Math.min(amount, MAX_FUEL));
+        fuel = Math.min(amount, MAX_FUEL);
     }
 
     public LazyOptional<IItemHandler> getCap()
@@ -189,49 +159,77 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     @Override
-    public boolean canInsertItem(int index, ItemStack itemStackIn, @Nullable Direction direction)
+    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
-        return index == 0 || getCap().map(h -> canInsertItem(index, itemStackIn, direction)).orElse(false);
+        return new BoilerContainer(id, playerInv, this, getFuel());
     }
 
     @Override
-    public boolean canExtractItem(int index, ItemStack stack, Direction direction)
+    public void load(CompoundTag nbt)
     {
-        return getItemFuel(stack) == 0;
+        super.load(nbt);
+        this.setFuel(nbt.getInt("fuel"));
+        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack)
+    public void saveAdditional(CompoundTag compound)
     {
-        return true;
+        super.saveAdditional(compound);
+        compound.putInt("fuel", this.getFuel());
     }
 
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize()
+    {
         return slots;
     }
 
     @Override
-    protected Container createMenu(int id, PlayerInventory player)
+    public boolean isEmpty()
     {
-        return new BoilerContainer(id, player, this, fuelData);
+        return items.isEmpty();
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt)
+    public ItemStack getItem(int slot)
     {
-        super.read(state, nbt);
-        this.setFuel(nbt.getInt("fuel"));
-        this.items = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(nbt, this.items);
+        return items.get(slot);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound)
+    public ItemStack removeItem(int slot, int count)
     {
-        super.write(compound);
-        compound.putInt("fuel", this.getFuel());
-        ItemStackHelper.saveAllItems(compound, items);
-        return compound;
+        ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
+
+        if (!itemstack.isEmpty())
+        {
+            this.setChanged();
+        }
+        return itemstack;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot)
+    {
+        return ContainerHelper.removeItem(items, slot, items.get(slot).getCount());
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack itemstack)
+    {
+        items.set(slot, itemstack);
+    }
+
+    @Override
+    public boolean stillValid(Player player)
+    {
+        return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
+    }
+
+    @Override
+    public void clearContent()
+    {
+        items.clear();
     }
 }

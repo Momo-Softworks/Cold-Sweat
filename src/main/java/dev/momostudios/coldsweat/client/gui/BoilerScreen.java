@@ -3,29 +3,34 @@ package dev.momostudios.coldsweat.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.BoilerContainer;
+import net.minecraft.world.entity.player.Inventory;
 
 public class BoilerScreen extends ContainerScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
     private static final ResourceLocation FUEL_GAUGE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/lava_gauge.png");
-    ITextComponent name = new TranslationTextComponent("block." + ColdSweat.MOD_ID + ".boiler");
+    Component name = new TranslatableComponent("block." + ColdSweat.MOD_ID + ".boiler");
     int titleX = this.xSize / 2 - name.toString().length() / 18;
     int fuelLevel;
 
-    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    public BoilerScreen(BoilerContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.guiLeft = 0;
-        this.guiTop = 0;
-        this.xSize = 175;
-        this.ySize = 201;
-        this.fuelLevel = screenContainer.te.getTileData().getInt("fuel");
+        this.leftPos = 0;
+        this.topPos = 0;
+        this.width = 175;
+        this.height = 201;
+        this.fuelLevel = screenContainer.te..getInt("fuel");
     }
 
     @Override

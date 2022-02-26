@@ -21,14 +21,14 @@ version = 'r2.1.7'
 
 java {
     archivesBaseName = 'ColdSweat'
-    toolchain.languageVersion = JavaLanguageVersion.of(8)
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 compileJava {
     [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20210309-1.16.5'
+    mappings channel: 'official', version: '1.18.1'
     runs {
         client {
             workingDirectory project.file('run')
@@ -84,7 +84,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.5'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.88'
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     runtimeOnly fg.deobf("curse.maven:mediumcore-506676:3652025")
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3429976")

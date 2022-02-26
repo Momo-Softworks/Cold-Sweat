@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.temperature.modifier;
 
 import dev.momostudios.coldsweat.core.event.InitTempModifiers;
 import dev.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 
@@ -34,7 +34,7 @@ public abstract class TempModifier
     /**
      * Adds a new argument to this TempModifier.<br>
      * @param name is the name of the argument. Used to retrieve the argument in {@link #getArgument(String)}
-     * @param arg is value of the argument. It is stored in the {@link PlayerEntity} NBT.
+     * @param arg is value of the argument. It is stored in the {@link Player} NBT.
      */
     public void addArgument(String name, Object arg)
     {
@@ -91,15 +91,15 @@ public abstract class TempModifier
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
      * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.<br>
      * <br>
-     * Do not call this method directly. Use {@link #calculate(Temperature, PlayerEntity)} instead.<br>
+     * Do not call this method directly. Use {@link #calculate(Temperature, Player)} instead.<br>
      * <br>
      * @param temp should usually represent the player's body temperature or ambient temperature.<br>
      * @param player the player that is being affected by the modifier.<br>
      * @return the new {@link Temperature}.<br>
      */
-    public abstract double getResult(Temperature temp, PlayerEntity player);
+    public abstract double getResult(Temperature temp, Player player);
 
-    public final double calculate(Temperature temp, PlayerEntity player)
+    public final double calculate(Temperature temp, Player player)
     {
         TempModifierEvent.Tick.Pre pre = new TempModifierEvent.Tick.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
