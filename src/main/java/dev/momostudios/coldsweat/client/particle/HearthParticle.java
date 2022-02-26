@@ -1,17 +1,16 @@
 package dev.momostudios.coldsweat.client.particle;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.settings.ParticleStatus;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.particles.BasicParticleType;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 @OnlyIn(Dist.CLIENT)
-public class HearthParticle extends TextureSheetParticle implements ParticleOptions
+public class HearthParticle extends TextureSheetParticle
 {
     private SpriteSet ageSprite;
     protected HearthParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet)
@@ -20,16 +19,14 @@ public class HearthParticle extends TextureSheetParticle implements ParticleOpti
         float size = 0.5f;
         this.ageSprite = spriteSet;
 
-        this.particleAlpha = 0.0f;
+        this.alpha = 0.0f;
         this.setSize(size, size);
-        this.particleScale = 0.4f + (float) (Math.random() / 2.5f);
-        this.maxAge = 40;
-        this.particleGravity = -0.01f;
-        this.canCollide = true;
-        this.motionX = vx * 1;
-        this.motionY = vy * 1;
-        this.motionZ = vz * 1;
-        this.selectSpriteWithAge(spriteSet);
+        this.scale(0.4f + (float) (Math.random() / 2.5f));
+        this.lifetime = 40;
+        this.gravity = -0.01f;
+        this.hasPhysics = true;
+        this.setParticleSpeed(vx, vy, vz);
+        this.setSpriteFromAge(spriteSet);
     }
 
     @Override
@@ -53,18 +50,14 @@ public class HearthParticle extends TextureSheetParticle implements ParticleOpti
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class Factory implements IParticleFactory<BasicParticleType>
+    public record Factory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
     {
-        public final IAnimatedSprite sprite;
-
-        public Factory(IAnimatedSprite sprite) {
-            this.sprite = sprite;
-        }
-
+        @Nullable
         @Override
-        public Particle makeParticle(BasicParticleType typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            if (Minecraft.getInstance().gameSettings.particles != ParticleStatus.MINIMAL)
-                return new HearthParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        {
+            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
+                return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
             else
                 return null;
         }

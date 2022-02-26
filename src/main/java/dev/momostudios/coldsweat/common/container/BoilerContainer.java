@@ -1,24 +1,9 @@
 package dev.momostudios.coldsweat.common.container;
 
-import com.google.common.primitives.ImmutableIntArray;
 import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
-import dev.momostudios.coldsweat.common.te.BoilerTileEntity;
+import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.ContainerInit;
-import dev.momostudios.coldsweat.util.registrylists.ModBlocks;
-import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.IntArray;
-import dev.momostudios.coldsweat.util.CSMath;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -30,14 +15,9 @@ import java.util.Objects;
 
 public class BoilerContainer extends AbstractContainerMenu
 {
-    public final BoilerTileEntity te;
+    public final BoilerBlockEntity te;
 
-    public BoilerContainer(final int windowId, final Inventory playerInv, final BoilerTileEntity te)
-    {
-        this(windowId, playerInv, te, 1);
-    }
-
-    public BoilerContainer(final int windowId, final Inventory playerInv, final BoilerTileEntity te, int fuel)
+    public BoilerContainer(final int windowId, final Inventory playerInv, final BoilerBlockEntity te)
     {
         super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
@@ -57,7 +37,7 @@ public class BoilerContainer extends AbstractContainerMenu
             this.addSlot(new Slot(te, in, -10 + in * 18, 35)
             {
                 @Override
-                public boolean isItemValid(ItemStack stack) {
+                public boolean mayPlace(ItemStack stack) {
                     return stack.getItem() instanceof FilledWaterskinItem;
                 }
             });
@@ -90,25 +70,25 @@ public class BoilerContainer extends AbstractContainerMenu
     }
 
 
-    private static BoilerTileEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
+    private static BoilerBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof BoilerTileEntity)
+        if (te instanceof BoilerBlockEntity)
         {
-            return (BoilerTileEntity) te;
+            return (BoilerBlockEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean canInteractWith(Player playerIn)
+    public boolean stillValid(Player playerIn)
     {
-        return isWithinUsableDistance(IWorldPosCallable.of(te.getWorld(), te.getPos()), playerIn, ModBlocks.BOILER);
+        return playerIn.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
     }
 
-    @Override
+    /*@Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
@@ -183,5 +163,5 @@ public class BoilerContainer extends AbstractContainerMenu
     public boolean stillValid(Player player)
     {
         return player.distanceToSqr(te.) <= 64;
-    }
+    }*/
 }

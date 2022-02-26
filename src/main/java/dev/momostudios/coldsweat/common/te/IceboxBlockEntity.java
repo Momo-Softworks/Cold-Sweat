@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class IceboxTileEntity extends BaseContainerBlockEntity
+public class IceboxBlockEntity extends BaseContainerBlockEntity
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -40,7 +40,7 @@ public class IceboxTileEntity extends BaseContainerBlockEntity
     private int fuel;
     BlockPos pos = this.getBlockPos();
 
-    public IceboxTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    public IceboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
     {
         super(type, pos, state);
     }
@@ -166,7 +166,7 @@ public class IceboxTileEntity extends BaseContainerBlockEntity
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
-        return new IceboxContainer(id, playerInv, this, getFuel());
+        return new IceboxContainer(id, playerInv, this);
     }
 
     @Override

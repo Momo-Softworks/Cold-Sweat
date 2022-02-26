@@ -1,19 +1,19 @@
 package dev.momostudios.coldsweat.core.itemgroup;
 
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 
-public class ColdSweatGroup extends ItemGroup
+public class ColdSweatGroup extends CreativeModeTab
 {
-    public static final ColdSweatGroup COLD_SWEAT = new ColdSweatGroup(ItemGroup.GROUPS.length, "cold_sweat");
-    public ColdSweatGroup(int index, String label)
+    public static final ColdSweatGroup COLD_SWEAT = new ColdSweatGroup("cold_sweat");
+    public ColdSweatGroup(String label)
     {
-        super(index, label);
+        super(label);
     }
 
     @Override
-    public ItemStack createIcon() {
+    public ItemStack makeIcon() {
         return new ItemStack(ModItems.FILLED_WATERSKIN);
     }
 }

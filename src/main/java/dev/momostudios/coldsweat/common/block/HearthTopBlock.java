@@ -14,7 +14,6 @@ import net.minecraft.loot.LootContext;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
@@ -27,7 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
-import dev.momostudios.coldsweat.common.te.HearthTileEntity;
+import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
@@ -101,14 +100,14 @@ public class HearthTopBlock extends Block
     {
         if (!worldIn.isRemote)
         {
-            if (worldIn.getTileEntity(pos.down()) instanceof HearthTileEntity)
+            if (worldIn.getTileEntity(pos.down()) instanceof HearthBlockEntity)
             {
-                HearthTileEntity te = (HearthTileEntity) worldIn.getTileEntity(pos.down());
+                HearthBlockEntity te = (HearthBlockEntity) worldIn.getTileEntity(pos.down());
                 ItemStack stack = player.getHeldItem(hand);
                 int itemFuel = te.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
 
-                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthBlockEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {

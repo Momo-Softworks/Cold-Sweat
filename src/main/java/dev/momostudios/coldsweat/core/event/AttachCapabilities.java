@@ -15,7 +15,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.te.HearthTileEntity;
+import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import dev.momostudios.coldsweat.core.capabilities.IBlockStorageCap;
@@ -108,7 +108,7 @@ public class AttachCapabilities
     @SubscribeEvent
     public static void attachCapabilityToTileHandler(AttachCapabilitiesEvent<TileEntity> event)
     {
-        if (!(event.getObject() instanceof HearthTileEntity)) return;
+        if (!(event.getObject() instanceof HearthBlockEntity)) return;
 
         HearthRadiusCapability backend = new HearthRadiusCapability();
         LazyOptional<IBlockStorageCap> optionalStorage = LazyOptional.of(() -> backend);

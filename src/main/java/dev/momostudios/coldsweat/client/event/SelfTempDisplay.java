@@ -31,12 +31,10 @@ public class SelfTempDisplay
         ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-        if (mc.cameraEntity instanceof Player && event.getOverlay() == ForgeIngameGui.HOTBAR_ELEMENT
-        && !((Player) mc.cameraEntity).isCreative() && !mc.cameraEntity.isSpectator())
+        if (mc.cameraEntity instanceof Player entity && event.getOverlay() == ForgeIngameGui.HOTBAR_ELEMENT && !entity.isCreative() && !entity.isSpectator())
         {
             int scaleX = event.getWindow().getGuiScaledWidth();
             int scaleY = event.getWindow().getGuiScaledHeight();
-            Player entity = (Player) Minecraft.getInstance().cameraEntity;
 
             if (playerCap == null || entity.tickCount % 40 == 0)
                 playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());

@@ -1,45 +1,46 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.te.BoilerTileEntity;
+import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
-public class BoilerBlock extends Block
+public class BoilerBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -47,44 +48,43 @@ public class BoilerBlock extends Block
     public static Properties getProperties()
     {
         return Properties
-                .create(Material.ROCK)
+                .of(Material.STONE)
                 .sound(SoundType.STONE)
-                .hardnessAndResistance(2f, 10f)
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
-                .setLightLevel(getLightValueLit(13));
+                .destroyTime(2f)
+                .explosionResistance(10f)
+                .strength(1)
+                .lightLevel(getLightValueLit(13));
     }
 
-    private static ToIntFunction<BlockState> getLightValueLit(int lightValue) {
-        return (state) -> {
-            return state.get(BlockStateProperties.LIT) ? lightValue : 0;
-        };
+    private static ToIntFunction<BlockState> getLightValueLit(int lightValue)
+    {
+        return (state) -> state.getValue(BlockStateProperties.LIT) ? lightValue : 0;
     }
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public BoilerBlock(Properties properties)
+    public BoilerBlock()
     {
-        super(BoilerBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(LIT, false));
+        super(getProperties());
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LIT, false));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isRemote)
+        if (!worldIn.isClientSide)
         {
-            if (worldIn.getTileEntity(pos) instanceof BoilerTileEntity)
+            if (worldIn.getBlockEntity(pos) instanceof BoilerBlockEntity)
             {
-                BoilerTileEntity te = (BoilerTileEntity) worldIn.getTileEntity(pos);
-                ItemStack stack = player.getHeldItem(hand);
+                BoilerBlockEntity te = (BoilerBlockEntity) worldIn.getBlockEntity(pos);
+                ItemStack stack = player.getItemInHand(hand);
                 int itemFuel = te.getItemFuel(stack);
 
-                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < BoilerTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < BoilerBlockEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {
@@ -92,7 +92,7 @@ public class BoilerBlock extends Block
                         {
                             ItemStack container = stack.getContainerItem();
                             stack.shrink(1);
-                            player.inventory.addItemStackToInventory(container);
+                            player.getInventory().add(container);
                         }
                         else
                         {
@@ -101,32 +101,15 @@ public class BoilerBlock extends Block
                     }
                     te.setFuel(te.getFuel() + itemFuel);
 
-                    worldIn.playSound(null, pos, SoundEvents.ITEM_BUCKET_EMPTY_LAVA, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    worldIn.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else
                 {
-                    NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
                 }
             }
         }
-        return ActionResultType.SUCCESS;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        return tileEntity instanceof INamedContainerProvider ? (INamedContainerProvider) tileEntity : null;
-    }
-
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get().create();
+        return InteractionResult.SUCCESS;
     }
 
     @SuppressWarnings("deprecation")
@@ -140,52 +123,60 @@ public class BoilerBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (!state.matchesBlock(newState.getBlock()))
+        if (state.getBlock() != newState.getBlock())
         {
-            TileEntity tileentity = world.getTileEntity(pos);
-            if (tileentity instanceof BoilerTileEntity) {
-                InventoryHelper.dropInventoryItems(world, pos, (BoilerTileEntity) tileentity);
-                world.updateComparatorOutputLevel(pos, this);
+            BlockEntity tileentity = world.getBlockEntity(pos);
+            if (tileentity instanceof BoilerBlockEntity te)
+            {
+                Containers.dropContents(world, pos, te);
+                world.updateNeighborsAt(pos, this);
             }
         }
-        super.onReplaced(state, world, pos, newState, isMoving);
+        super.onRemove(state, world, pos, newState, isMoving);
     }
 
     @Override
-    public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction)
+    public BlockState rotate(BlockState state, Rotation direction)
     {
-        return state.with(FACING, direction.rotate(state.get(FACING)));
+        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, LIT);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite()).with(LIT, false);
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random rand)
     {
-        if (stateIn.get(LIT))
+        if (stateIn.getValue(LIT))
         {
             double d0 = pos.getX() + 0.5D;
             double d1 = pos.getY();
             double d2 = pos.getZ() + 0.5D;
-            Direction direction = stateIn.get(FACING);
+            Direction direction = stateIn.getValue(FACING);
             Direction.Axis direction$axis = direction.getAxis();
-            double d3 = 0.52D;
+
             double d4 = rand.nextDouble() * 0.6D - 0.3D;
-            double d5 = direction$axis == Direction.Axis.X ? (double)direction.getXOffset() * 0.52D : d4;
+            double d5 = direction$axis == Direction.Axis.X ? (double)direction.getStepX() * 0.52D : d4;
             double d6 = rand.nextDouble() * 6.0D / 16.0D + 0.2;
-            double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getZOffset() * 0.52D : d4;
+            double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getStepZ() * 0.52D : d4;
             worldIn.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
             worldIn.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
         }
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    {
+        return new BoilerBlockEntity(BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get(), pos, state);
     }
 }

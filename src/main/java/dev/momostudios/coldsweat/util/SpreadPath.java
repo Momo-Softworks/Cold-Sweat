@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.util;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 
 public class SpreadPath
 {
@@ -65,7 +65,7 @@ public class SpreadPath
 
     public SpreadPath offset(Direction dir)
     {
-        return new SpreadPath(this.x + dir.getXOffset(), this.y + dir.getYOffset(), this.z + dir.getZOffset(), dir, this.step + 1);
+        return new SpreadPath(this.x + dir.getStepX(), this.y + dir.getStepY(), this.z + dir.getStepZ(), dir, this.step + 1);
     }
 
     public SpreadPath offset(int x, int y, int z)
@@ -78,7 +78,7 @@ public class SpreadPath
         return new SpreadPath(this.x + pos.getX(), this.y + pos.getY(), this.z + pos.getZ(), this.origin, this.step + 1);
     }
 
-    public boolean withinDistance(Vector3i vector, double distance) {
+    public boolean withinDistance(Vec3i vector, double distance) {
         return distanceSq(vector.getX(), vector.getY(), vector.getZ(), false) < distance * distance;
     }
 

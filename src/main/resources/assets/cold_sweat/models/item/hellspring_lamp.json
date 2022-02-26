@@ -157,9 +157,9 @@
 	},
 	"overrides":
 	[
-		{ "predicate": { "cold_sweat:soulfire_state": 0 },  "model": "cold_sweat:item/hellspring_lamp_off" },
-		{ "predicate": { "cold_sweat:soulfire_state": 1 },  "model": "cold_sweat:item/hellspring_lamp_flickering" },
-		{ "predicate": { "cold_sweat:soulfire_state": 2 },  "model": "cold_sweat:item/hellspring_lamp_dim" },
-		{ "predicate": { "cold_sweat:soulfire_state": 3 },  "model": "cold_sweat:item/hellspring_lamp_full" }
+		{ "predicate": { "cold_sweat:hellspring_state": 0 },  "model": "cold_sweat:item/hellspring_lamp_off" },
+		{ "predicate": { "cold_sweat:hellspring_state": 1 },  "model": "cold_sweat:item/hellspring_lamp_flickering" },
+		{ "predicate": { "cold_sweat:hellspring_state": 2 },  "model": "cold_sweat:item/hellspring_lamp_dim" },
+		{ "predicate": { "cold_sweat:hellspring_state": 3 },  "model": "cold_sweat:item/hellspring_lamp_full" }
 	]
 }

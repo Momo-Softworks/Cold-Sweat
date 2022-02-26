@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.common.te;
 
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -13,8 +12,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -25,10 +24,9 @@ import dev.momostudios.coldsweat.common.block.BoilerBlock;
 import dev.momostudios.coldsweat.common.container.BoilerContainer;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-public class BoilerTileEntity extends BaseContainerBlockEntity
+public class BoilerBlockEntity extends RandomizableContainerBlockEntity
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -38,7 +36,7 @@ public class BoilerTileEntity extends BaseContainerBlockEntity
     public int ticksExisted;
     private int fuel;
 
-    public BoilerTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    public BoilerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
     {
         super(type, pos, state);
     }
@@ -146,37 +144,25 @@ public class BoilerTileEntity extends BaseContainerBlockEntity
         return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
     }
 
-    public int[] getSlotsForFace(Direction side)
-    {
-        if (side == Direction.DOWN)
-        {
-            return WATERSKIN_SLOTS;
-        }
-        else
-        {
-            return side == Direction.UP ? WATERSKIN_SLOTS : FUEL_SLOT;
-        }
-    }
-
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
-        return new BoilerContainer(id, playerInv, this, getFuel());
+        return new BoilerContainer(id, playerInv, this);
     }
 
     @Override
-    public void load(CompoundTag nbt)
+    public void load(CompoundTag tag)
     {
-        super.load(nbt);
-        this.setFuel(nbt.getInt("fuel"));
+        super.load(tag);
+        this.setFuel(tag.getInt("fuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound)
+    public void saveAdditional(CompoundTag tag)
     {
-        super.saveAdditional(compound);
-        compound.putInt("fuel", this.getFuel());
+        super.saveAdditional(tag);
+        tag.putInt("fuel", this.getFuel());
     }
 
     @Override
@@ -231,5 +217,17 @@ public class BoilerTileEntity extends BaseContainerBlockEntity
     public void clearContent()
     {
         items.clear();
+    }
+
+    @Override
+    protected NonNullList<ItemStack> getItems()
+    {
+        return this.items;
+    }
+
+    @Override
+    protected void setItems(NonNullList<ItemStack> items)
+    {
+        this.items = items;
     }
 }

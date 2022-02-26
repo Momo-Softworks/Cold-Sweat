@@ -24,19 +24,21 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
-import dev.momostudios.coldsweat.common.te.IceboxTileEntity;
+import dev.momostudios.coldsweat.common.te.IceboxBlockEntity;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-public class IceboxBlock extends Block
+public class IceboxBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
@@ -55,7 +57,7 @@ public class IceboxBlock extends Block
         return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public IceboxBlock(Properties properties)
+    public IceboxBlock()
     {
         super(IceboxBlock.getProperties());
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(FROSTED, false));
@@ -67,13 +69,13 @@ public class IceboxBlock extends Block
     {
         if (!worldIn.isRemote)
         {
-            if (worldIn.getTileEntity(pos) instanceof IceboxTileEntity)
+            if (worldIn.getTileEntity(pos) instanceof IceboxBlockEntity)
             {
-                IceboxTileEntity te = (IceboxTileEntity) worldIn.getTileEntity(pos);
+                IceboxBlockEntity te = (IceboxBlockEntity) worldIn.getTileEntity(pos);
                 ItemStack stack = player.getHeldItem(hand);
                 int itemFuel = te.getItemFuel(stack);
 
-                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {
@@ -134,8 +136,8 @@ public class IceboxBlock extends Block
         if (!state.matchesBlock(newState.getBlock()))
         {
             TileEntity tileentity = world.getTileEntity(pos);
-            if (tileentity instanceof IceboxTileEntity) {
-                InventoryHelper.dropInventoryItems(world, pos, (IceboxTileEntity) tileentity);
+            if (tileentity instanceof IceboxBlockEntity) {
+                InventoryHelper.dropInventoryItems(world, pos, (IceboxBlockEntity) tileentity);
                 world.updateComparatorOutputLevel(pos, this);
             }
         }

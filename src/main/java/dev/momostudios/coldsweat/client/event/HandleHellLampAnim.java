@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.client.event;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.HandSide;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -21,7 +20,7 @@ public class HandleHellLampAnim
 
             float rightArmRot = player.getPersistentData().getFloat("rightArmRot");
 
-            if (PlayerHelper.holdingLamp(player, )
+            if (PlayerHelper.holdingLamp(player, HumanoidArm.RIGHT))
             {
                 if (rightArmRot < 70)
                     player.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 2);
@@ -34,7 +33,7 @@ public class HandleHellLampAnim
 
             float leftArmRot = player.getPersistentData().getFloat("leftArmRot");
 
-            if (PlayerHelper.holdingLamp(player, HandSide.LEFT))
+            if (PlayerHelper.holdingLamp(player, HumanoidArm.LEFT))
             {
                 if (leftArmRot < 70)
                     player.getPersistentData().putFloat("leftArmRot", leftArmRot + (71 - leftArmRot) / 2);

@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.core.capabilities;
 
 import dev.momostudios.coldsweat.util.SpreadPath;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ConcurrentHashMap;

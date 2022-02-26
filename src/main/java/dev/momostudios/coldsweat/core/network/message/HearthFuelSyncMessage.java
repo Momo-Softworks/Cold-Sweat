@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
-import dev.momostudios.coldsweat.common.te.HearthTileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -24,14 +24,14 @@ public class HearthFuelSyncMessage
         this.coldFuel = coldFuel;
     }
 
-    public static void encode(HearthFuelSyncMessage message, PacketBuffer buffer)
+    public static void encode(HearthFuelSyncMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBlockPos(message.hearthPos);
         buffer.writeInt(message.hotFuel);
         buffer.writeInt(message.coldFuel);
     }
 
-    public static HearthFuelSyncMessage decode(PacketBuffer buffer)
+    public static HearthFuelSyncMessage decode(FriendlyByteBuf buffer)
     {
         return new HearthFuelSyncMessage(buffer.readBlockPos(), buffer.readInt(), buffer.readInt());
     }
@@ -41,10 +41,9 @@ public class HearthFuelSyncMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            TileEntity te = Minecraft.getInstance().world.getTileEntity(message.hearthPos);
-            if (te instanceof HearthTileEntity)
+            BlockEntity te = Minecraft.getInstance().level.getBlockEntity(message.hearthPos);
+            if (te instanceof HearthBlockEntity hearth)
             {
-                HearthTileEntity hearth = (HearthTileEntity) te;
                 hearth.setHotFuel(message.hotFuel);
                 hearth.setColdFuel(message.coldFuel);
             }

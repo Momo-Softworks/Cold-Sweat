@@ -1,30 +1,30 @@
 package dev.momostudios.coldsweat.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.ImageButton;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.SewingContainer;
+import net.minecraft.world.entity.player.Inventory;
 
-public class SewingScreen extends ContainerScreen<SewingContainer>
+public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    TranslationTextComponent name = new TranslationTextComponent("block." + ColdSweat.MOD_ID + ".sewing_table");
+    TranslatableComponent name = new TranslatableComponent("block." + ColdSweat.MOD_ID + ".sewing_table");
 
     ImageButton sewButton;
 
-    public SewingScreen(SewingContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.guiLeft = 0;
-        this.guiTop = 0;
-        this.xSize = 175;
-        this.ySize = 201;
+        this.leftPos = 0;
+        this.topPos = 0;
+        this.imageWidth = 175;
+        this.imageHeight = 201;
 
         /*sewButton = new ImageButton(this.getGuiLeft() + 145, this.getGuiTop() + 39, 16, 16, 0, 0, 16,
             new ResourceLocation("cold_sweat:textures/gui/screen/sew_button.png"), button ->
@@ -33,50 +33,43 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        //sewButton.setPosition(this.getGuiLeft() + 145, this.getGuiTop() + 39);
-        //sewButton.render(matrixStack, mouseX, mouseY, partialTicks);
+        this.renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
+        this.renderTooltip(poseStack, mouseX, mouseY);
 
-        this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
+        this.font.draw(poseStack, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
+        this.font.draw(poseStack, name, titleLabelX, 8f, 4210752);
     }
 
     @Override
     protected void init()
     {
         super.init();
-        this.titleX = this.xSize / 2 - this.font.getStringPropertyWidth(name) / 2;
+        this.titleLabelX = this.getXSize() / 2 - this.font.width(name) / 2;
         //this.children.add(sewButton);
-    }
-
-    @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y)
-    {
-        this.font.drawText(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX, (float) this.playerInventoryTitleY, 4210752);
-        this.font.drawText(matrixStack, name, titleX, 8f, 4210752);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.color4f(1f, 1f, 1f, 1f);
-        this.minecraft.textureManager.bindTexture(SEWING_GUI);
-        int x = (this.width - this.xSize) / 2;
-        int y = (this.height - this.ySize) / 2;
-        this.blit(matrixStack, x ,y, 0, 0, this.xSize, this.ySize);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        this.minecraft.textureManager.bindForSetup(SEWING_GUI);
+        int x = (this.width - this.getXSize()) / 2;
+        int y = (this.height - this.getYSize()) / 2;
+        this.blit(poseStack, x ,y, 0, 0, this.getXSize(), this.getYSize());
 
-        if (!container.getSlot(0).getHasStack())
+        if (!menu.getSlot(0).hasItem())
         {
-            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 0, 0, 16, 16);
+            this.minecraft.textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
+            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 0, 0, 16, 16);
         }
-        if (!container.getSlot(1).getHasStack())
+        if (!menu.getSlot(1).hasItem())
         {
-            this.minecraft.textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 16, 0, 16, 16);
+            this.minecraft.textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
+            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 16, 0, 16, 16);
         }
     }
 }

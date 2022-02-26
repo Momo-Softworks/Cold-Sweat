@@ -3,18 +3,17 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import dev.momostudios.coldsweat.common.temperature.modifier.WaterskinTempModifier;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.PlayerHelper;
@@ -23,14 +22,14 @@ public class FilledWaterskinItem extends Item
 {
     public FilledWaterskinItem()
     {
-        super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1).containerItem(ItemInit.WATERSKIN_REGISTRY.get()));
+        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN_REGISTRY.get()));
     }
 
     @Override
-    public void inventoryTick(ItemStack itemstack, World world, Entity entity, int slot, boolean selected)
+    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected)
     {
         super.inventoryTick(itemstack, world, entity, slot, selected);
-        if (entity instanceof PlayerEntity)
+        if (entity instanceof Player)
         {
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8)
@@ -47,36 +46,37 @@ public class FilledWaterskinItem extends Item
                     temp = -0.03;
                 }
 
-                PlayerHelper.addModifier((PlayerEntity) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate).expires(1), PlayerHelper.Types.BODY, true);
+                PlayerHelper.addModifier((Player) entity, new WaterskinTempModifier(temp * ConfigCache.getInstance().rate).expires(1), PlayerHelper.Types.BODY, true);
             }
         }
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity entity, Hand hand)
+    public InteractionResultHolder<ItemStack> use(Level world, Player entity, InteractionHand hand)
     {
-        ActionResult<ItemStack> ar = super.onItemRightClick(world, entity, hand);
-        ItemStack itemstack = ar.getResult();
+        InteractionResultHolder<ItemStack> ar = super.use(world, entity, hand);
+        ItemStack itemstack = ar.getObject();
 
         PlayerHelper.addModifier(entity, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), PlayerHelper.Types.BODY, true);
 
-        world.playSound(entity.getPosX(), entity.getPosY(), entity.getPosZ(),
-        ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("ambient.underwater.exit")),
-        SoundCategory.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+        world.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
-        if (!entity.inventory.hasItemStack(ModItems.WATERSKIN.getDefaultInstance()))
+        if (!entity.getInventory().contains(ModItems.WATERSKIN.getDefaultInstance()))
         {
-            entity.setHeldItem(hand, ModItems.WATERSKIN.getDefaultInstance());
+            entity.setItemInHand(hand, ModItems.WATERSKIN.getDefaultInstance());
         }
         else
         {
-            entity.addItemStackToInventory(ModItems.WATERSKIN.getDefaultInstance());
+            entity.addItem(ModItems.WATERSKIN.getDefaultInstance());
             itemstack.shrink(1);
         }
-        entity.swingArm(hand);
+        entity.swing(hand);
 
-        if (world instanceof ServerWorld)
-            ((ServerWorld) world).spawnParticle(ParticleTypes.FALLING_WATER, entity.getPosX(), (entity.getPosY() + (entity.getHeight())), entity.getPosZ(), 50, 0.3, 0.3, 0.3, 0.05);
+        for (int p = 0; p < 50; p++)
+        {
+            world.addParticle(ParticleTypes.FALLING_WATER, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(), 0.3, 0.3, 0.3);
+        }
+
         return ar;
     }
 

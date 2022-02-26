@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import dev.momostudios.coldsweat.util.PlayerHelper;
@@ -13,26 +12,29 @@ import dev.momostudios.coldsweat.util.SpreadPath;
 import dev.momostudios.coldsweat.util.WorldHelper;
 import dev.momostudios.coldsweat.util.registrylists.ModEffects;
 import dev.momostudios.coldsweat.util.registrylists.ModSounds;
-import net.minecraft.block.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.LockableLootTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.common.block.HearthBlock;
 import dev.momostudios.coldsweat.config.ConfigCache;
@@ -43,10 +45,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
+public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     public static int slots = 1;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
+    BlockPos pos = this.getBlockPos();
 
     // List of all hearths in loaded chunks
     private final Map<BlockPos, LazyOptional<IBlockStorageCap>> cache = new HashMap<>();
@@ -59,13 +62,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public static final int MAX_FUEL = 1000;
 
-    public HearthTileEntity(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public HearthBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    {
+        super(type, pos, state);
     }
 
     @Override
-    protected ITextComponent getDefaultName() {
-        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".hearth");
+    protected Component getDefaultName() {
+        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth");
     }
 
     @Override
@@ -79,18 +83,13 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         this.items = itemsIn;
     }
 
-    public HearthTileEntity()
-    {
-        this(BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get());
-    }
-
     public void tick()
     {
         // Add this tile entity's capability to the list of hearths
         LazyOptional<IBlockStorageCap> cap = cache.get(pos);
         if (cap == null)
         {
-            ICapabilityProvider provider = world.getTileEntity(pos);
+            ICapabilityProvider provider = level.getBlockEntity(pos);
             cap = provider.getCapability(HearthRadiusCapability.HEARTH_BLOCKS);
             cache.put(pos, cap);
             cap.addListener(self -> cache.put(pos, self));
@@ -107,9 +106,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         if (insulationLevel < 2400)
             this.getTileData().putInt("insulationLevel", insulationLevel + 1);
 
-        if (world != null && (this.getHotFuel() > 0 || this.getColdFuel() > 0))
+        if (level != null && (this.getHotFuel() > 0 || this.getColdFuel() > 0))
         {
-            List<PlayerEntity> affectedPlayers = new ArrayList<>();
+            List<Player> affectedPlayers = new ArrayList<>();
 
             // Represents the NBT list
             ConcurrentHashMap<BlockPos, SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getMap();
@@ -155,10 +154,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                     int x = spreadPath.getX();
                     int y = spreadPath.getY();
                     int z = spreadPath.getZ();
-                    AxisAlignedBB aabb = new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1);
+                    AABB aabb = new AABB(x, y, z, x + 1, y + 1, z + 1);
 
                     // Add players to affectedPlayers
-                    for (PlayerEntity player : world.getEntitiesWithinAABB(PlayerEntity.class, aabb))
+                    for (Player player : level.getEntitiesOfClass(Player.class, aabb))
                     {
                         affectedPlayers.add(player);
                     }
@@ -174,8 +173,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             if (testpos.withinDistance(pos, 20))
                             {
                                 if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
-                                        && !WorldHelper.canSeeSky(world, testpos.getPos())
-                                        && WorldHelper.canSpreadThrough(world, spreadPath, direction, spreadPath.origin))
+                                        && !WorldHelper.canSeeSky(level, testpos.getPos())
+                                        && WorldHelper.canSpreadThrough(level, spreadPath, direction, spreadPath.origin))
                                 {
                                     newPaths.put(testpos.getPos(), testpos);
                                 }
@@ -191,17 +190,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 // Add new positions
                 cap.ifPresent(cap2 -> cap2.addPaths(newPaths));
 
-                if (!world.isRemote && !affectedPlayers.isEmpty())
+                if (!level.isClientSide && !affectedPlayers.isEmpty())
                 {
                     shouldUseHotFuel = false;
                     shouldUseColdFuel = false;
 
                     ConfigCache config = ConfigCache.getInstance();
 
-                    for (PlayerEntity player: affectedPlayers)
+                    for (Player player: affectedPlayers)
                     {
                         // Get the player's temperature
-                        double temp = player.isPotionActive(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
+                        double temp = player.hasEffect(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
                                 PlayerHelper.getTemperature(player, PlayerHelper.Types.AMBIENT).get();
 
                         if ((temp < config.minTemp && this.getHotFuel() > 0))
@@ -218,11 +217,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         if (shouldUseHotFuel || shouldUseColdFuel)
                         {
                             int effectLevel = Math.max(0, insulationLevel / 240 - 1);
-                            EffectInstance effect = player.getActivePotionEffect(ModEffects.INSULATION);
+                            MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
 
                             if (effect == null || effect.getDuration() < 90 || effect.getAmplifier() != effectLevel)
                             {
-                                player.addPotionEffect(new EffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
+                                player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
                             }
                         }
                     }
@@ -247,7 +246,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Drain fuel
-        if (!world.isRemote && this.ticksExisted % 80 == 0)
+        if (!level.isClientSide && this.ticksExisted % 80 == 0)
         {
             if (this.getColdFuel() > 0 && shouldUseColdFuel)
             {
@@ -260,13 +259,13 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Update fuel for clients
-        if (!world.isRemote && ticksExisted % 40 == 0)
+        if (!level.isClientSide && ticksExisted % 40 == 0)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HearthFuelSyncMessage(pos, getHotFuel(), getColdFuel()));
         }
 
         // Update BlockState
-        if (this.ticksExisted % 5 == 0 && world.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
+        if (this.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
         {
             updateFuelState();
         }
@@ -283,7 +282,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             double d3 = (Math.random() - 0.5) / 4;
             double d4 = (Math.random() - 0.5) / 4;
             double d5 = (Math.random() - 0.5) / 4;
-            world.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+            level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
         }
         if (Math.random() < hotFuel / 2000d)
         {
@@ -293,20 +292,20 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             double d3 = (Math.random() - 0.5) / 2;
             double d4 = (Math.random() - 0.5) / 2;
             double d5 = (Math.random() - 0.5) / 2;
-            world.addParticle(ParticleTypes.LARGE_SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+            level.addParticle(ParticleTypes.LARGE_SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
         }
 
         // Air Particles
-        if (world.isRemote && world.getTileEntity(pos).getTileData().getBoolean("showRadius"))
+        if (level.isClientSide && level.getBlockEntity(pos).getTileData().getBoolean("showRadius"))
             cap.ifPresent(c ->
             {
                 // Spawn particles if enabled
                 for (BlockPos blockPos : c.getMap().keySet())
                 {
-                    if (Minecraft.getInstance().gameSettings.showDebugInfo)
+                    if (Minecraft.getInstance().options.renderDebug)
                     {
                         if (this.ticksExisted % 5 == 0)
-                            world.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                            level.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
                     }
                     else if (Math.random() < 0.016)
                     {
@@ -316,7 +315,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         double xm = Math.random() / 20 - 0.025;
                         double zm = Math.random() / 20 - 0.025;
 
-                        world.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                        level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
                     }
                 }
             });
@@ -386,7 +385,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         this.getTileData().putInt("hot_fuel", Math.min(amount, MAX_FUEL));
 
         if (amount == 0 && prevFuel > 0)
-            world.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
     }
 
     public void setColdFuel(int amount)
@@ -396,7 +395,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         this.getTileData().putInt("cold_fuel", Math.min(amount, MAX_FUEL));
 
         if (amount == 0 && prevFuel > 0)
-            world.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
     }
 
     public void addFuel(int amount)
@@ -413,47 +412,43 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public void updateFuelState()
     {
-        BlockState state = world.getBlockState(pos);
+        BlockState state = level.getBlockState(pos);
         int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
         int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
 
-        BlockState desiredState = state.with(HearthBlock.WATER, waterLevel).with(HearthBlock.LAVA, lavaLevel);
-        if (state.get(HearthBlock.WATER) != waterLevel || state.get(HearthBlock.LAVA) != lavaLevel)
+        BlockState desiredState = state.setValue(HearthBlock.WATER, waterLevel).setValue(HearthBlock.LAVA, lavaLevel);
+        if (state.getValue(HearthBlock.WATER) != waterLevel || state.getValue(HearthBlock.LAVA) != lavaLevel)
         {
-            world.setBlockState(pos, desiredState);
+            level.setBlock(pos, desiredState, 3);
         }
     }
 
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize()
+    {
         return slots;
     }
 
     @Override
-    protected Container createMenu(int id, PlayerInventory player)
+    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
-        return new HearthContainer(id, player, this);
+        return new HearthContainer(id, playerInv, this);
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt)
+    public void load(CompoundTag tag)
     {
-        super.read(state, nbt);
-        this.items = NonNullList.withSize(getSizeInventory(), ItemStack.EMPTY);
-        if (!this.checkLootAndRead(nbt))
-        {
-            ItemStackHelper.loadAllItems(nbt, this.items);
-        }
+        super.load(tag);
+        this.setColdFuel(tag.getInt("cold_fuel"));
+        this.setHotFuel(tag.getInt("hot_fuel"));
+        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound)
+    public void saveAdditional(CompoundTag tag)
     {
-        super.write(compound);
-        if (!this.checkLootAndWrite(compound))
-        {
-            ItemStackHelper.saveAllItems(compound, items);
-        }
-        return compound;
+        super.saveAdditional(tag);
+        tag.putInt("cold_fuel", this.getColdFuel());
+        tag.putInt("hot_fuel", this.getHotFuel());
     }
 }

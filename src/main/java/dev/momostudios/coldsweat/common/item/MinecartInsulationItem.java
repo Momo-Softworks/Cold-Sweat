@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.common.item;
 
-import net.minecraft.item.Item;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.minecraft.world.item.Item;
 
 public class MinecartInsulationItem extends Item
 {
     public MinecartInsulationItem()
     {
-        super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(1));
+        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1));
     }
 }

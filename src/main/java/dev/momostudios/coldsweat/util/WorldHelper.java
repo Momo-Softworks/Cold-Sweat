@@ -1,15 +1,15 @@
 package dev.momostudios.coldsweat.util;
 
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.Heightmap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,10 +26,10 @@ public class WorldHelper
      * Ignores minecraft:cave_air<br>
      * This is different from {@code world.getHeight()} because it attempts to ignore blocks that are floating in the air
      */
-    public static int getGroundLevel(BlockPos pos, World world)
+    public static int getGroundLevel(BlockPos pos, Level world)
     {
         // If Minecraft's height calculation is correct, use that
-        int mcHeight = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+        int mcHeight = world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
         if (pos.getY() >= mcHeight)
             return mcHeight;
 
@@ -62,16 +62,16 @@ public class WorldHelper
             for (int sz = 0; sz < sampleRoot; sz++)
             {
                 int length = interval * sampleRoot;
-                posList.add(pos.add(sx * interval - (length / 2), 0, sz * interval - (length / 2)));
+                posList.add(pos.offset(sx * interval - (length / 2), 0, sz * interval - (length / 2)));
             }
         }
 
         return posList;
     }
 
-    public static boolean canSeeSky(World world, BlockPos pos)
+    public static boolean canSeeSky(Level world, BlockPos pos)
     {
-        Chunk chunk = world.getChunkProvider().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
@@ -87,46 +87,46 @@ public class WorldHelper
                     continue;
                 }
 
-                if (isFullSide(state, Direction.DOWN, pos.up(i), world) || isFullSide(state, Direction.UP, pos.up(i), world))
+                if (isFullSide(state, Direction.DOWN, pos.above(i), world) || isFullSide(state, Direction.UP, pos.above(i), world))
                     return false;
             }
         }
         return true;
     }
 
-    public static boolean canSpreadThrough(World world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
+    public static boolean canSpreadThrough(Level world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
     {
         BlockPos pos = path.getPos();
-        Chunk chunk = world.getChunkProvider().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk != null)
         {
             BlockState state = chunk.getBlockState(pos);
 
-            if (state.isSolidSide(world, pos, toDir))
+            if (state.isFaceSturdy(world, pos, toDir))
                 return false;
 
-            return !isFullSide(state, toDir, pos.offset(toDir), world) && !state.isSolidSide(world, pos, toDir.getOpposite());
+            return !isFullSide(state, toDir, pos.relative(toDir), world) && !state.isFaceSturdy(world, pos, toDir.getOpposite());
         }
         return false;
     }
 
-    public static double distance(Vector3i pos1, Vector3i pos2)
+    public static double distance(Vec3i pos1, Vec3i pos2)
     {
-        return Math.sqrt(pos1.distanceSq(pos2));
+        return Math.sqrt(pos1.distSqr(pos2));
     }
 
-    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, World world)
+    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level world)
     {
-        if (state.isSolidSide(world, pos, dir))
+        if (state.isFaceSturdy(world, pos, dir))
             return true;
         if (state.isAir())
             return false;
 
-        VoxelShape shape = state.getRenderShape(world, pos);
+        VoxelShape shape = state.getShape(world, pos);
         final double[] area = {0};
         if (!shape.isEmpty())
         {
-            shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
+            shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
             {
                 if (area[0] < 1)
                     switch (dir.getAxis())

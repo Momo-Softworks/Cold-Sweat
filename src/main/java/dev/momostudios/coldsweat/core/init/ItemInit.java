@@ -1,10 +1,9 @@
 package dev.momostudios.coldsweat.core.init;
 
 import dev.momostudios.coldsweat.common.item.MinecartInsulationItem;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Rarity;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -17,6 +16,7 @@ import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import dev.momostudios.coldsweat.common.item.HellspringLampItem;
 import dev.momostudios.coldsweat.common.item.WaterskinItem;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.minecraftforge.registries.RegistryObject;
 
 @Mod.EventBusSubscriber
 public class ItemInit
@@ -28,7 +28,7 @@ public class ItemInit
     public static final RegistryObject<Item> FILLED_WATERSKIN_REGISTRY = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
     public static final RegistryObject<Item> MINECART_INSULATION_REGISTRY = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
     public static final RegistryObject<Item> THERMOMETER_REGISTRY = ITEMS.register("thermometer", () ->
-            new Item((new Item.Properties()).group(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON)));
+            new Item((new Item.Properties()).tab(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> HELLSPRING_LAMP_REGISTRY = ITEMS.register("hellspring_lamp", HellspringLampItem::new);
 
     //BlockItems

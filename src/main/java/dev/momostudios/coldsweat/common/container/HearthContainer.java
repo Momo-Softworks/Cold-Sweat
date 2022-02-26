@@ -1,24 +1,22 @@
 package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.core.init.ContainerInit;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IWorldPosCallable;
-import dev.momostudios.coldsweat.common.te.HearthTileEntity;
-import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.util.CSMath;
+import net.minecraft.network.FriendlyByteBuf;
+import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
 
-public class HearthContainer extends Container
+public class HearthContainer extends AbstractContainerMenu
 {
-    public final HearthTileEntity te;
-    public HearthContainer(final int windowId, final PlayerInventory playerInv, final HearthTileEntity te)
+    public final HearthBlockEntity te;
+    public HearthContainer(final int windowId, final Inventory playerInv, final HearthBlockEntity te)
     {
         super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
@@ -27,7 +25,7 @@ public class HearthContainer extends Container
         this.addSlot(new Slot(te, 0, 80, 48)
         {
             @Override
-            public boolean isItemValid(ItemStack stack)
+            public boolean mayPlace(ItemStack stack)
             {
                 return te.getItemFuel(stack) != 0;
             }
@@ -49,7 +47,7 @@ public class HearthContainer extends Container
         }
     }
 
-    public HearthContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
+    public HearthContainer(final int windowId, final Inventory playerInv, final FriendlyByteBuf data)
     {
         this(windowId, playerInv, getTileEntity(playerInv, data));
     }
@@ -64,25 +62,25 @@ public class HearthContainer extends Container
         return te.getTileData().getInt("cold_fuel");
     }
 
-    private static HearthTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static HearthBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final TileEntity te = playerInv.player.world.getTileEntity(data.readBlockPos());
-        if (te instanceof HearthTileEntity)
+        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        if (te instanceof HearthBlockEntity hearth)
         {
-            return (HearthTileEntity) te;
+            return hearth;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn)
+    public boolean stillValid(Player playerIn)
     {
-        return isWithinUsableDistance(IWorldPosCallable.of(te.getWorld(), te.getPos()), playerIn, BlockInit.HEARTH.get());
+        return playerIn.distanceToSqr(Vec3.atCenterOf(te.getBlockPos())) <= 64.0D;
     }
 
-    @Override
+    /*@Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
@@ -146,5 +144,5 @@ public class HearthContainer extends Container
         }
 
         return itemstack;
-    }
+    }*/
 }

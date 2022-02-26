@@ -2,20 +2,19 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipBlockStateContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.Vec3;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.BiomeTempModifier;
 
@@ -23,22 +22,21 @@ public class WaterskinItem extends Item
 {
     public WaterskinItem()
     {
-        super(new Properties().group(ColdSweatGroup.COLD_SWEAT).maxStackSize(16));
+        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(16));
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity entity, Hand hand)
+    public InteractionResultHolder<ItemStack> use(Level world, Player entity, InteractionHand hand)
     {
-        ActionResult<ItemStack> ar = super.onItemRightClick(world, entity, hand);
-        ItemStack itemstack = ar.getResult();
+        InteractionResultHolder<ItemStack> ar = super.use(world, entity, hand);
+        ItemStack itemstack = ar.getObject();
 
         //Get the block the player is looking at
-        Vector3d lookPos = entity.getEyePosition(1f).add(
-                entity.getLook(1f).x * 5,
-                entity.getLook(1f).y * 5,
-                entity.getLook(1f).z * 5);
-        BlockState lookingAt = world.getFluidState(world.rayTraceBlocks(new RayTraceContext(entity.getEyePosition(1f), lookPos,
-                RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.SOURCE_ONLY, entity)).getPos()).getBlockState();
+        Vec3 lookPos = entity.getEyePosition(1f).add(
+                entity.getLookAngle().x * 5,
+                entity.getLookAngle().y * 5,
+                entity.getLookAngle().z * 5);
+        BlockState lookingAt = world.getFluidState(world.isBlockInLine(new ClipBlockStateContext(entity.getEyePosition(1f), lookPos, (state) -> state.getFluidState().isSource())).getBlockPos()).createLegacyBlock();
 
         if (lookingAt.getMaterial() == Material.WATER)
         {
@@ -47,25 +45,24 @@ public class WaterskinItem extends Item
             //Replace 1 of the stack with a FilledWaterskinItem
             if (itemstack.getCount() > 1)
             {
-                if (!entity.addItemStackToInventory(filledWaterskin))
+                if (!entity.addItem(filledWaterskin))
                 {
-                    ItemEntity itementity = entity.dropItem(filledWaterskin, false);
+                    ItemEntity itementity = entity.drop(filledWaterskin, false);
                     if (itementity != null)
                     {
-                        itementity.setNoPickupDelay();
-                        itementity.setOwnerId(entity.getUniqueID());
+                        itementity.setNoPickUpDelay();
+                        itementity.setOwner(entity.getUUID());
                     }
                 }
                 itemstack.setCount(itemstack.getCount() - 1);
             }
             else
             {
-                entity.setHeldItem(hand, filledWaterskin);
+                entity.setItemInHand(hand, filledWaterskin);
             }
             //Play filling sound
-            world.playSound(null, entity.getPosition(), ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("ambient.underwater.enter")),
-            SoundCategory.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
-            entity.swingArm(hand);
+            world.playSound(null, entity, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
+            entity.swing(hand);
         }
         return ar;
     }

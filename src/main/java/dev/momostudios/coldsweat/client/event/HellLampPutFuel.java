@@ -1,36 +1,28 @@
 package dev.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.SoulLampInputMessage;
 import dev.momostudios.coldsweat.util.ItemEntry;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.screen.inventory.CreativeScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.CraftingResultSlot;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.GuiUtils;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
@@ -70,27 +62,26 @@ public class HellLampPutFuel
     }
 
     @SubscribeEvent
-    public static void renderLanternTooltip(GuiScreenEvent.DrawScreenEvent.Post event)
+    public static void renderLanternTooltip(ScreenEvent.DrawScreenEvent.Post event)
     {
-        if (event.getScreen() instanceof ContainerScreen)
+        if (event.getScreen() instanceof AbstractContainerScreen<?> inventoryScreen)
         {
-            ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getScreen();
-            if (inventoryScreen.getSlotUnderMouse() != null && inventoryScreen.getSlotUnderMouse().getStack().getItem() == ModItems.HELLSPRING_LAMP)
+            if (inventoryScreen.getSlotUnderMouse() != null && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.HELLSPRING_LAMP)
             {
-                int fuelValue = getItemEntry(Minecraft.getInstance().player.inventory.getItemStack()).value * Minecraft.getInstance().player.inventory.getItemStack().getCount();
-                if (!Minecraft.getInstance().player.inventory.getItemStack().isEmpty())
+                int fuelValue = getItemEntry(inventoryScreen.getMenu().getCarried()).value * inventoryScreen.getMenu().getCarried().getCount();
+                if (!inventoryScreen.getMenu().getCarried().isEmpty())
                 {
                     if (fuelValue > 0)
                     {
-                        float fuel = inventoryScreen.getSlotUnderMouse().getStack().getOrCreateTag().getFloat("fuel");
-                        int slotX = inventoryScreen.getSlotUnderMouse().xPos + ((ContainerScreen<?>) event.getScreen()).getGuiLeft();
-                        int slotY = inventoryScreen.getSlotUnderMouse().yPos + ((ContainerScreen<?>) event.getScreen()).getGuiTop();
+                        float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
+                        int slotX = inventoryScreen.getSlotUnderMouse().x + ((AbstractContainerScreen<?>) event.getScreen()).getGuiLeft();
+                        int slotY = inventoryScreen.getSlotUnderMouse().y + ((AbstractContainerScreen<?>) event.getScreen()).getGuiTop();
                         int bgColor = GuiUtils.DEFAULT_BACKGROUND_COLOR;
                         int borderColor = GuiUtils.DEFAULT_BORDER_COLOR_START;
                         int borderColor2 = GuiUtils.DEFAULT_BORDER_COLOR_END;
 
-                        MatrixStack ms = event.getMatrixStack();
-                        Matrix4f matrix = ms.getLast().getMatrix();
+                        PoseStack ms = event.getPoseStack();
+                        Matrix4f matrix = ms.last().pose();
                         if (event.getMouseY() < slotY + 8)
                             matrix.translate(new Vector3f(0, 32, 0));
                         GuiUtils.drawGradientRect(matrix, 400, slotX - 9, slotY - 14, slotX + 25, slotY - 1, bgColor, bgColor); // background
@@ -105,15 +96,15 @@ public class HellLampPutFuel
                         GuiUtils.drawGradientRect(matrix, 400, slotX - 9, slotY - 13, slotX - 8, slotY - 3, borderColor, borderColor2); // left border
                         GuiUtils.drawGradientRect(matrix, 400, slotX + 24, slotY - 13, slotX + 25, slotY - 3, borderColor, borderColor2); // right border
 
-                        Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
+                        Minecraft.getInstance().textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
                         event.getScreen().blit(ms, slotX - 7, slotY - 12, 400, 0, 0, 30, 8, 8, 30);
                         RenderSystem.enableBlend();
                         RenderSystem.defaultBlendFunc();
-                        RenderSystem.color4f(1f, 1f, 1f, 0.15f + (float) ((Math.sin(time / 5f) + 1f) / 2f) * 0.4f);
-                        Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_ghost.png"));
+                        RenderSystem.setShaderColor(1f, 1f, 1f, 0.15f + (float) ((Math.sin(time / 5f) + 1f) / 2f) * 0.4f);
+                        Minecraft.getInstance().textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_ghost.png"));
                         event.getScreen().blit(ms, slotX - 7, slotY - 12, 400, 0, 0, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 8, 30);
-                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
-                        Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
+                        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
+                        Minecraft.getInstance().textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
                         event.getScreen().blit(ms, slotX - 7, slotY - 12, 400, 0, 0, (int) (fuel / 2.1333f), 8, 8, 30);
                     }
                 }
@@ -121,17 +112,12 @@ public class HellLampPutFuel
                 {
                     int mouseX = event.getMouseX();
                     int mouseY = event.getMouseY();
-                    MatrixStack ms = event.getMatrixStack();
-                    float fuel = inventoryScreen.getSlotUnderMouse().getStack().getOrCreateTag().getFloat("fuel");
+                    PoseStack ms = event.getPoseStack();
+                    float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
 
-                    if (event.getScreen() instanceof CreativeScreen && ((CreativeScreen) event.getScreen()).getSelectedTabIndex() == ItemGroup.SEARCH.getIndex())
-                    {
-                        event.getMatrixStack().translate(0, 10, 0);
-                    }
-
-                    Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
+                    Minecraft.getInstance().textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
                     event.getScreen().blit(ms, mouseX + 12, mouseY, 400, 0, 0, 30, 8, 8, 30);
-                    Minecraft.getInstance().textureManager.bindTexture(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
+                    Minecraft.getInstance().textureManager.bindForSetup(new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
                     event.getScreen().blit(ms, mouseX + 12, mouseY, 400, 0, 0, (int) (fuel / 2.1333f), 8, 8, 30);
                 }
             }
@@ -156,6 +142,6 @@ public class HellLampPutFuel
                 return new ItemEntry(entry, 1);
             }
         }
-        return new ItemEntry(ForgeRegistries.ITEMS.getKey(Items.AIR).toString(), 0);
+        return new ItemEntry("minecraft:air", 0);
     }
 }
