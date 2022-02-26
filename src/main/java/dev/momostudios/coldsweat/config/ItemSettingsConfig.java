@@ -120,7 +120,7 @@ public final class ItemSettingsConfig
         BUILDER.push("InsulatorItems");
         insulatingItems = BUILDER
             .comment("Defines the items that can be used for insulating armor in the Sewing Table",
-                    "Format: [[item-id-1], [item-id-2], ...etc]")
+                    "Format: [[\"item-id-1\"], [\"item-id-2\"], ...etc]")
             .defineList("Sewing Table", Arrays.asList
                     (
                         "minecraft:leather_helmet",
@@ -137,7 +137,7 @@ public final class ItemSettingsConfig
         BUILDER.push("InsulatingArmor");
         insulatingArmor = BUILDER
             .comment("Defines the items that provide insulation when worn",
-                    "Format: [[item-id-1, amount-1], [item-id-2, amount-2], ...etc]")
+                    "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
             .defineList("Insulating Armor Items", Arrays.asList
                     (
                             Arrays.asList("minecraft:leather_helmet", 4),

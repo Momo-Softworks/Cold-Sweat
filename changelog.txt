@@ -353,5 +353,14 @@ Fixes:
 - Fixed TempModifiers not syncing to client
 - Fixed the top half of the Hearth being named "block.cold_sweat.hearth_top"
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.7
+- Fixed the Hellspring Lamp not working due to improper configs
+- Fixed buggy shift-click behavior in the Sewing Table
+- Fixed Water not affecting the ambient temperature properly in some cases
+- Fixed occasional crash when syncing the player's temperature from the server to the client in singleplayer
+- Added some more detailed explanaitons to some config files
+
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
