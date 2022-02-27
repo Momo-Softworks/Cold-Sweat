@@ -1,18 +1,18 @@
 package dev.momostudios.coldsweat.common.temperature.modifier.block;
 
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.momostudios.coldsweat.util.CSMath;
 import dev.momostudios.coldsweat.util.Units;
 
 public class IceboxBlockEffect extends BlockEffect
 {
     @Override
-    public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
+    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
-        if (this.hasBlock(state) && state.get(IceboxBlock.FROSTED))
+        if (this.hasBlock(state) && state.getValue(IceboxBlock.FROSTED))
         {
             return CSMath.blend(-0.27, 0, distance, 0.5, 5);
         }

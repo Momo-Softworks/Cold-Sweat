@@ -177,6 +177,6 @@ public class BoilerBlock extends Block implements EntityBlock
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {
-        return new BoilerBlockEntity(BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get(), pos, state);
+        return new BoilerBlockEntity(pos, state);
     }
 }

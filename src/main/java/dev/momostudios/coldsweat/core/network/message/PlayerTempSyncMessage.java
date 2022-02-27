@@ -1,13 +1,13 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.network.NetworkEvent;
 import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import dev.momostudios.coldsweat.util.PlayerHelper;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -26,14 +26,14 @@ public class PlayerTempSyncMessage
         this.ambient = ambient;
     }
 
-    public static void encode(PlayerTempSyncMessage message, PacketBuffer buffer)
+    public static void encode(PlayerTempSyncMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeDouble(message.body);
         buffer.writeDouble(message.base);
         buffer.writeDouble(message.ambient);
     }
 
-    public static PlayerTempSyncMessage decode(PacketBuffer buffer)
+    public static PlayerTempSyncMessage decode(FriendlyByteBuf buffer)
     {
         return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
@@ -54,7 +54,7 @@ public class PlayerTempSyncMessage
             @Override
             public void run()
             {
-                ClientPlayerEntity player = Minecraft.getInstance().player;
+                LocalPlayer player = Minecraft.getInstance().player;
 
                 if (player != null && !player.isSpectator())
                 {

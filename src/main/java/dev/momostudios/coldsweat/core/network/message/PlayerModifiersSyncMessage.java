@@ -1,16 +1,16 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.network.NetworkEvent;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
 import dev.momostudios.coldsweat.util.NBTHelper;
 import dev.momostudios.coldsweat.util.PlayerHelper;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,26 +33,26 @@ public class PlayerModifiersSyncMessage
         this.rate = rate;
     }
 
-    public static void encode(PlayerModifiersSyncMessage message, PacketBuffer buffer)
+    public static void encode(PlayerModifiersSyncMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeCompoundTag(writeToNBT(message, PlayerHelper.Types.AMBIENT));
-        buffer.writeCompoundTag(writeToNBT(message, PlayerHelper.Types.BODY));
-        buffer.writeCompoundTag(writeToNBT(message, PlayerHelper.Types.BASE));
-        buffer.writeCompoundTag(writeToNBT(message, PlayerHelper.Types.RATE));
+        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.AMBIENT));
+        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.BODY));
+        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.BASE));
+        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.RATE));
     }
 
-    public static PlayerModifiersSyncMessage decode(PacketBuffer buffer)
+    public static PlayerModifiersSyncMessage decode(FriendlyByteBuf buffer)
     {
         return new PlayerModifiersSyncMessage(
-                readFromNBT(buffer.readCompoundTag()),
-                readFromNBT(buffer.readCompoundTag()),
-                readFromNBT(buffer.readCompoundTag()),
-                readFromNBT(buffer.readCompoundTag()));
+                readFromNBT(buffer.readNbt()),
+                readFromNBT(buffer.readNbt()),
+                readFromNBT(buffer.readNbt()),
+                readFromNBT(buffer.readNbt()));
     }
 
-    private static CompoundNBT writeToNBT(PlayerModifiersSyncMessage message, PlayerHelper.Types type)
+    private static CompoundTag writeToNBT(PlayerModifiersSyncMessage message, PlayerHelper.Types type)
     {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         List<TempModifier> referenceList =
                 type == PlayerHelper.Types.AMBIENT ? message.ambient :
                 type == PlayerHelper.Types.BODY ? message.body :
@@ -66,19 +66,19 @@ public class PlayerModifiersSyncMessage
 
             if (modifier != null && modifier.getID() != null)
             {
-                nbt.put(String.valueOf(i), NBTHelper.modifierToNBT(modifier));
+                nbt.put(String.valueOf(i), NBTHelper.modifierToTag(modifier));
             }
         }
 
         return nbt;
     }
 
-    private static List<TempModifier> readFromNBT(CompoundNBT nbt)
+    private static List<TempModifier> readFromNBT(CompoundTag nbt)
     {
         List<TempModifier> modifiers = new ArrayList<>();
-        for (String key : nbt.keySet())
+        for (String key : nbt.getAllKeys())
         {
-            TempModifier modifier = NBTHelper.NBTToModifier(nbt.getCompound(key));
+            TempModifier modifier = NBTHelper.TagToModifier(nbt.getCompound(key));
 
             if (modifier != null)
                 modifiers.add(modifier);
@@ -101,7 +101,7 @@ public class PlayerModifiersSyncMessage
             @Override
             public void run()
             {
-                ClientPlayerEntity player = Minecraft.getInstance().player;
+                LocalPlayer player = Minecraft.getInstance().player;
 
                 if (player != null)
                 {

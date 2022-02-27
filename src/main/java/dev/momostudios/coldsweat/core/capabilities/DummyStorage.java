@@ -1,23 +1,21 @@
 package dev.momostudios.coldsweat.core.capabilities;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
-public class DummyStorage implements Capability.IStorage<PlayerTempCapability>
+public class DummyStorage
 {
     @Nullable
-    @Override
-    public INBT writeNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction side)
+    public Tag writeNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction side)
     {
-        return new CompoundNBT();
+        return new CompoundTag();
     }
 
-    @Override
-    public void readNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction side, INBT nbt)
+    public void readNBT(Capability<PlayerTempCapability> capability, PlayerTempCapability instance, Direction side, Tag nbt)
     {
     }
 }

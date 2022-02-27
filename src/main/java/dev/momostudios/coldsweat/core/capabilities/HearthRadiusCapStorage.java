@@ -1,22 +1,20 @@
 package dev.momostudios.coldsweat.core.capabilities;
 
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
-import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
-public class HearthRadiusCapStorage implements Capability.IStorage<IBlockStorageCap>
+public class HearthRadiusCapStorage
 {
-    @Override
     @Nullable
-    public INBT writeNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction)
+    public Tag writeNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction)
     {
-        return new CompoundNBT();
+        return new CompoundTag();
     }
 
-    @Override
-    public void readNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction, INBT nbtData)
+    public void readNBT(Capability<IBlockStorageCap> capability, IBlockStorageCap instance, Direction direction, Tag nbtData)
     {
     }
 }

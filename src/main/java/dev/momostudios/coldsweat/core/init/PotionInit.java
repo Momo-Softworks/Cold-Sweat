@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.init;
 
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Potion;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
+import net.minecraftforge.registries.RegistryObject;
 
 public class PotionInit
 {
@@ -17,7 +17,7 @@ public class PotionInit
 
     static
     {
-        POTIONS = DeferredRegister.create(ForgeRegistries.POTION_TYPES, ColdSweat.MOD_ID);
-        ICE_RESISTANCE_POTION = POTIONS.register("ice_resistance", () -> new Potion(new EffectInstance(EffectInit.ICE_RESISTANCE_EFFECT_REGISTRY.get(), 9600)));
+        POTIONS = DeferredRegister.create(ForgeRegistries.POTIONS, ColdSweat.MOD_ID);
+        ICE_RESISTANCE_POTION = POTIONS.register("ice_resistance", () -> new Potion(new MobEffectInstance(EffectInit.ICE_RESISTANCE_EFFECT_REGISTRY.get(), 9600)));
     }
 }

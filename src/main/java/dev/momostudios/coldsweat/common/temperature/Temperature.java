@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature;
 
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;

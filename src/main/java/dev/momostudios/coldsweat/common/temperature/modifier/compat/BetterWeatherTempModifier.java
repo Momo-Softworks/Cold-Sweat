@@ -1,18 +1,18 @@
-package dev.momostudios.coldsweat.common.temperature.modifier.compat;
+/*package dev.momostudios.coldsweat.common.temperature.modifier.compat;
 
 import corgitaco.betterweather.api.season.Season;
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.minecraft.world.entity.player.Player;
 
 public class BetterWeatherTempModifier extends TempModifier
 {
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
         double t = temp.get();
-        Season season = Season.getSeason(player.world);
-        if (season != null && player.world.getDimensionType().isNatural())
+        Season season = Season.getSeason(player.level);
+        if (season != null && player.level.getDimensionType().isNatural())
         {
             switch (season.getKey())
             {
@@ -60,4 +60,4 @@ public class BetterWeatherTempModifier extends TempModifier
     public String getID() {
         return "betterweather:season";
     }
-}
+}*/

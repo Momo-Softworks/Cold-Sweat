@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
 import dev.momostudios.coldsweat.util.CSMath;
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import net.minecraft.world.entity.player.Player;
 
 public class HellLampTempModifier extends TempModifier
 {
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
         player.getPersistentData().putDouble("preLampTemp", temp.get());
 

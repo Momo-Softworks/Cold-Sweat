@@ -4,8 +4,8 @@ import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.capabilities.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -33,7 +33,7 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
         BlockInit.BLOCKS.register(bus);
-        BlockEntityInit.TILE_ENTITY_TYPE.register(bus);
+        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
         EffectInit.EFFECTS.register(bus);
@@ -60,8 +60,8 @@ public class ColdSweat
     @SubscribeEvent
     public void commonSetup(final FMLCommonSetupEvent event)
     {
-        CapabilityManager.INSTANCE.register(IBlockStorageCap.class, new HearthRadiusCapStorage(), HearthRadiusCapability::new);
-        CapabilityManager.INSTANCE.register(PlayerTempCapability.class, new DummyStorage(), PlayerTempCapability::new);
+        //CapabilityManager.INSTANCE.register(IBlockStorageCap.class, new HearthRadiusCapStorage(), HearthRadiusCapability::new);
+        //CapabilityManager.INSTANCE.register(PlayerTempCapability.class, new DummyStorage(), PlayerTempCapability::new);
         ColdSweatPacketHandler.init();
     }
 
@@ -69,6 +69,6 @@ public class ColdSweat
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        RenderTypeLookup.setRenderLayer(BlockInit.HEARTH.get(), RenderType.getCutoutMipped());
+        ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH.get(), RenderType.cutoutMipped());
     }
 }

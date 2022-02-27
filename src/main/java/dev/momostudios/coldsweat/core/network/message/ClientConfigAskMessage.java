@@ -1,13 +1,13 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.WorldTemperatureConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -19,11 +19,11 @@ public class ClientConfigAskMessage
         this.onJoin = onJoin;
     }
 
-    public static void encode(ClientConfigAskMessage message, PacketBuffer buffer) {
+    public static void encode(ClientConfigAskMessage message, FriendlyByteBuf buffer) {
         buffer.writeBoolean(message.onJoin);
     }
 
-    public static ClientConfigAskMessage decode(PacketBuffer buffer)
+    public static ClientConfigAskMessage decode(FriendlyByteBuf buffer)
     {
         return new ClientConfigAskMessage(buffer.readBoolean());
     }

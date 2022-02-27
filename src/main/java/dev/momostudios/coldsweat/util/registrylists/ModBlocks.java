@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.registrylists;
 
-import net.minecraft.block.Block;
 import dev.momostudios.coldsweat.core.init.BlockInit;
+import net.minecraft.world.level.block.Block;
 
 public class ModBlocks
 {

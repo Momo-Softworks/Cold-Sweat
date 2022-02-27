@@ -1,13 +1,15 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
 import dev.momostudios.coldsweat.util.WorldHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
@@ -18,32 +20,39 @@ public class BiomeTempModifier extends TempModifier
     }
 
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
-        if (player.world.getGameTime() % 5 == 0)
+        if (player.level.getGameTime() % 5 == 0)
         {
-            double worldTemp = 0;
-            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.getPosition(), 200, 6))
+            Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "getHeightAdjustedTemperature", BlockPos.class);
+            getTemperature.setAccessible(true);
+
+            try
             {
-                Biome biome = player.world.getBiome(blockPos);
-                worldTemp += biome.getTemperature(blockPos) + getTemperatureOffset(biome.getRegistryName(), player.world.getDimensionKey().getLocation());
-
-                // Should temperature be overridden by config
-                TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
-                TempOverride dimensionOverride = dimensionOverride(player.world.getDimensionKey().getLocation());
-
-                if (dimensionOverride.override)
+                double worldTemp = 0;
+                for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
                 {
-                    setArgument("value", dimensionOverride.value);
-                    return dimensionOverride.value;
+                    Biome biome = player.level.getBiome(blockPos);
+                    worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().getRegistryName());
+
+                    // Should temperature be overridden by config
+                    TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
+                    TempOverride dimensionOverride = dimensionOverride(player.level.dimension().getRegistryName());
+
+                    if (dimensionOverride.override)
+                    {
+                        setArgument("value", dimensionOverride.value);
+                        return dimensionOverride.value;
+                    }
+                    if (biomeOverride.override)
+                    {
+                        setArgument("value", biomeOverride.value);
+                        return biomeOverride.value;
+                    }
                 }
-                if (biomeOverride.override)
-                {
-                    setArgument("value", biomeOverride.value);
-                    return biomeOverride.value;
-                }
+                setArgument("value", temp.get() + (worldTemp / 200));
             }
-            setArgument("value", temp.get() + (worldTemp / 200));
+            catch (Exception e) {}
         }
         return (double) getArgument("value");
     }

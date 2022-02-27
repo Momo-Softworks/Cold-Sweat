@@ -1,12 +1,11 @@
 package dev.momostudios.coldsweat.common.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 
@@ -15,16 +14,14 @@ public class MinecartInsulationBlock extends Block
     public static Properties getProperties()
     {
         return Properties
-                .create(Material.WOOL)
-                .sound(SoundType.CLOTH)
-                .hardnessAndResistance(2f, 5f)
-                .harvestTool(ToolType.HOE)
-                .harvestLevel(1);
+                .of(Material.WOOL)
+                .sound(SoundType.WOOL)
+                .strength(2f, 5f);
     }
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
     public Item asItem()
@@ -35,11 +32,11 @@ public class MinecartInsulationBlock extends Block
     public MinecartInsulationBlock(Properties properties)
     {
         super(MinecartInsulationBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState());
+        this.registerDefaultState(this.defaultBlockState());
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState();
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState();
     }
 }

@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
+import net.minecraft.world.entity.player.Player;
 
 public class InsulationTempModifier extends TempModifier
 {
@@ -12,7 +12,7 @@ public class InsulationTempModifier extends TempModifier
     }
 
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
         return temp.get() / Math.max(1d, (int) getArgument("amount") / 10d);
     }

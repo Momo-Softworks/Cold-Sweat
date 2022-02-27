@@ -1,37 +1,37 @@
 package dev.momostudios.coldsweat.common.block;
 
+import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
+import dev.momostudios.coldsweat.common.te.IceboxBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.network.NetworkHooks;
-import dev.momostudios.coldsweat.common.te.IceboxBlockEntity;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,34 +45,32 @@ public class IceboxBlock extends Block implements EntityBlock
     public static Properties getProperties()
     {
         return Properties
-                .create(Material.WOOD)
+                .of(Material.WOOD)
                 .sound(SoundType.WOOD)
-                .hardnessAndResistance(2f, 5f)
-                .harvestTool(ToolType.AXE)
-                .harvestLevel(1);
+                .strength(2f, 5f);
     }
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
     public IceboxBlock()
     {
         super(IceboxBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(FROSTED, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isRemote)
+        if (!worldIn.isClientSide)
         {
-            if (worldIn.getTileEntity(pos) instanceof IceboxBlockEntity)
+            if (worldIn.getBlockEntity(pos) instanceof IceboxBlockEntity)
             {
-                IceboxBlockEntity te = (IceboxBlockEntity) worldIn.getTileEntity(pos);
-                ItemStack stack = player.getHeldItem(hand);
+                IceboxBlockEntity te = (IceboxBlockEntity) worldIn.getBlockEntity(pos);
+                ItemStack stack = player.getItemInHand(hand);
                 int itemFuel = te.getItemFuel(stack);
 
                 if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
@@ -83,7 +81,7 @@ public class IceboxBlock extends Block implements EntityBlock
                         {
                             ItemStack container = stack.getContainerItem();
                             stack.shrink(1);
-                            player.inventory.addItemStackToInventory(container);
+                            player.getInventory().add(container);
                         }
                         else
                         {
@@ -92,32 +90,23 @@ public class IceboxBlock extends Block implements EntityBlock
                     }
                     te.setFuel(te.getFuel() + itemFuel);
 
-                    worldIn.playSound(null, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    worldIn.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else
                 {
-                    NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        return tileEntity instanceof INamedContainerProvider ? (INamedContainerProvider) tileEntity : null;
-    }
 
+    @Nullable
     @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get().create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    {
+        return new IceboxBlockEntity(pos, state);
     }
 
     @SuppressWarnings("deprecation")
@@ -131,32 +120,33 @@ public class IceboxBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (!state.matchesBlock(newState.getBlock()))
+        if (state.getBlock() != newState.getBlock())
         {
-            TileEntity tileentity = world.getTileEntity(pos);
-            if (tileentity instanceof IceboxBlockEntity) {
-                InventoryHelper.dropInventoryItems(world, pos, (IceboxBlockEntity) tileentity);
-                world.updateComparatorOutputLevel(pos, this);
+            BlockEntity tileentity = world.getBlockEntity(pos);
+            if (tileentity instanceof IceboxBlockEntity te)
+            {
+                Containers.dropContents(world, pos, te);
+                world.updateNeighborsAt(pos, this);
             }
         }
-        super.onReplaced(state, world, pos, newState, isMoving);
+        super.onRemove(state, world, pos, newState, isMoving);
     }
 
     @Override
-    public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction)
+    public BlockState rotate(BlockState state, Rotation direction)
     {
-        return state.with(FACING, direction.rotate(state.get(FACING)));
+        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, FROSTED);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
     }
 }

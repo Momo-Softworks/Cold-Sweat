@@ -2,9 +2,7 @@ package dev.momostudios.coldsweat.core.init;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.*;
-import net.minecraft.block.Block;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -25,9 +23,9 @@ public class BlockInit
     public static Block minecartInsulationBlock = new MinecartInsulationBlock(MinecartInsulationBlock.getProperties());
     public static final RegistryObject<Block> MINECART_INSULATION = BLOCKS.register("minecart_insulation", () -> minecartInsulationBlock);
 
-    public static Block hearthBlock = new HearthBlock(HearthBlock.getProperties());
+    public static Block hearthBlock = new HearthBlock();
     public static final RegistryObject<Block> HEARTH = BLOCKS.register("hearth", () -> hearthBlock);
 
-    public static Block hearthTopBlock = new HearthTopBlock(HearthBlock.getProperties());
+    public static Block hearthTopBlock = new HearthTopBlock();
     public static final RegistryObject<Block> HEARTH_TOP = BLOCKS.register("hearth_top", () -> hearthTopBlock);
 }

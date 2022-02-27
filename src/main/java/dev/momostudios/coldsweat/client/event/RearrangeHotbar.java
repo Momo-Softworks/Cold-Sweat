@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -16,7 +17,7 @@ public class RearrangeHotbar
     static boolean hasShiftedDown = false;
 
     @SubscribeEvent
-    public static void onOverlayRenderPre(RenderGameOverlayEvent.Pre event)
+    public static void onOverlayRenderPre(RenderGameOverlayEvent.PreLayer event)
     {
         if (ClientSettingsConfig.getInstance().customHotbar())
         {
@@ -26,17 +27,17 @@ public class RearrangeHotbar
                 hasShiftedUp = false;
             }
 
-            if (event.getType() == RenderGameOverlayEvent.ElementType.LAYER ||
-                event.getType() == RenderGameOverlayEvent.ElementType.ARMOR ||
-                event.getType() == RenderGameOverlayEvent.ElementType.FOOD ||
-                event.getType() == RenderGameOverlayEvent.ElementType.HEALTHMOUNT ||
-                event.getType() == RenderGameOverlayEvent.ElementType.AIR ||
-                event.getType() == RenderGameOverlayEvent.ElementType.TEXT)
+            if (event.getOverlay() == ForgeIngameGui.HOTBAR_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.ARMOR_LEVEL_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.FOOD_LEVEL_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.MOUNT_HEALTH_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.AIR_LEVEL_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.ITEM_NAME_ELEMENT)
             {
                 event.getMatrixStack().translate(0, -2, 0);
                 hasShiftedUp = true;
             }
-            if (event.getType() == RenderGameOverlayEvent.ElementType.JUMPBAR)
+            if (event.getOverlay() == ForgeIngameGui.JUMP_BAR_ELEMENT)
             {
                 event.getMatrixStack().translate(0, -1, 0);
                 hasShiftedDown = true;
@@ -60,7 +61,7 @@ public class RearrangeHotbar
     @SubscribeEvent
     public static void updateCustomHotbar(TickEvent.ClientTickEvent event)
     {
-        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.ticksExisted % 20 == 0)
+        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.tickCount % 20 == 0)
         {
             customHotbar = ClientSettingsConfig.getInstance().customHotbar();
         }

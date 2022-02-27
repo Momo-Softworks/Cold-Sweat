@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.te;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.core.capabilities.HearthRadiusCapability;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -62,9 +63,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public static final int MAX_FUEL = 1000;
 
-    public HearthBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    public HearthBlockEntity(BlockPos pos, BlockState state)
     {
-        super(type, pos, state);
+        super(BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get(), pos, state);
     }
 
     @Override

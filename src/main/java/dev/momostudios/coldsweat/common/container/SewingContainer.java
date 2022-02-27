@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.core.init.ContainerInit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -96,6 +97,12 @@ public class SewingContainer extends AbstractContainerMenu
         {
             this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
+    }
+
+    public SewingContainer(int i, Inventory inventory, FriendlyByteBuf friendlyByteBuf)
+    {
+        this(i, inventory);
+        this.pos = BlockPos.of(friendlyByteBuf.readLong());
     }
 
     private void takeInput()

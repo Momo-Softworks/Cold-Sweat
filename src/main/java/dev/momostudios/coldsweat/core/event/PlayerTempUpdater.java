@@ -14,9 +14,9 @@ public class PlayerTempUpdater
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote)
+        if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide)
         {
-            if (event.player.ticksExisted % 20 == 0)
+            if (event.player.tickCount % 20 == 0)
             {
                 event.player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
                 {
@@ -37,7 +37,7 @@ public class PlayerTempUpdater
     public static void serverSyncConfigToCache(TickEvent.WorldTickEvent event)
     {
         // Syncs the server's config files to the cache
-        if (!event.world.isRemote && event.world.getGameTime() % 20 == 0)
+        if (!event.world.isClientSide && event.world.getGameTime() % 20 == 0)
             ConfigCache.getInstance().writeValues(ColdSweatConfig.getInstance());
     }
 }

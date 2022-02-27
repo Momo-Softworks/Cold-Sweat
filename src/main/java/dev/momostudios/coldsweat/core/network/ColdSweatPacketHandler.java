@@ -1,18 +1,11 @@
 package dev.momostudios.coldsweat.core.network;
 
 import dev.momostudios.coldsweat.core.network.message.*;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringNBT;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraftforge.network.NetworkRegistry;

@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.util;
 
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -12,43 +12,43 @@ public class PlayerTemp
 {
     //TODO: Remove these methods and use PlayerHelper instead
     @Deprecated // Use PlayerHelper instead
-    public static Temperature getTemperature(PlayerEntity player, PlayerHelper.Types type)
+    public static Temperature getTemperature(Player player, PlayerHelper.Types type)
     {
         return PlayerHelper.getTemperature(player, type);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static void setTemperature(PlayerEntity player, Temperature temp, PlayerHelper.Types type)
+    public static void setTemperature(Player player, Temperature temp, PlayerHelper.Types type)
     {
         PlayerHelper.setTemperature(player, temp, type);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static void addModifier(PlayerEntity player, TempModifier modifier, PlayerHelper.Types type, boolean duplicates)
+    public static void addModifier(Player player, TempModifier modifier, PlayerHelper.Types type, boolean duplicates)
     {
         PlayerHelper.addModifier(player, modifier, type, duplicates);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static void removeModifiers(PlayerEntity player, PlayerHelper.Types type, int count, Predicate<TempModifier> condition)
+    public static void removeModifiers(Player player, PlayerHelper.Types type, int count, Predicate<TempModifier> condition)
     {
         PlayerHelper.removeModifiers(player, type, count, condition);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static List<TempModifier> getModifiers(PlayerEntity player, PlayerHelper.Types type)
+    public static List<TempModifier> getModifiers(Player player, PlayerHelper.Types type)
     {
         return PlayerHelper.getModifiers(player, type);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static boolean hasModifier(PlayerEntity player, Class<? extends TempModifier> modClass, PlayerHelper.Types type)
+    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, PlayerHelper.Types type)
     {
         return PlayerHelper.hasModifier(player, modClass, type);
     }
 
     @Deprecated // Use PlayerHelper instead
-    public static void forEachModifier(PlayerEntity player, PlayerHelper.Types type, Consumer<TempModifier> action)
+    public static void forEachModifier(Player player, PlayerHelper.Types type, Consumer<TempModifier> action)
     {
         PlayerHelper.forEachModifier(player, type, action);
     }

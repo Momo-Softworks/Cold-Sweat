@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.PlayerHelper;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -16,9 +16,8 @@ public class PlayerEatFood
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntityLiving() instanceof PlayerEntity && event.getItem().isFood() && !event.getEntityLiving().world.isRemote)
+        if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
         {
-            PlayerEntity player = (PlayerEntity) event.getEntityLiving();
             for (List<?> list : ItemSettingsConfig.getInstance().temperatureFoods())
             {
                 if (list.get(0).equals(event.getItem().getItem().getRegistryName().toString()))

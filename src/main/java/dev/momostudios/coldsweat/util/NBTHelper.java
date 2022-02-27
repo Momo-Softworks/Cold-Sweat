@@ -6,96 +6,96 @@ import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 
 public class NBTHelper
 {
-    public static Object getObjectFromINBT(INBT inbt)
+    public static Object getObjectFromTag(Tag inbt)
     {
-        if (inbt instanceof StringNBT)
+        if (inbt instanceof StringTag)
         {
-            return ((StringNBT) inbt).getString();
+            return ((StringTag) inbt).getAsString();
         }
-        else if (inbt instanceof IntNBT)
+        else if (inbt instanceof IntTag)
         {
-            return ((IntNBT) inbt).getInt();
+            return ((IntTag) inbt).getId();
         }
-        else if (inbt instanceof FloatNBT)
+        else if (inbt instanceof FloatTag)
         {
-            return ((FloatNBT) inbt).getFloat();
+            return ((FloatTag) inbt).getAsFloat();
         }
-        else if (inbt instanceof DoubleNBT)
+        else if (inbt instanceof DoubleTag)
         {
-            return ((DoubleNBT) inbt).getDouble();
+            return ((DoubleTag) inbt).getAsDouble();
         }
-        else if (inbt instanceof ShortNBT)
+        else if (inbt instanceof ShortTag)
         {
-            return ((ShortNBT) inbt).getShort();
+            return ((ShortTag) inbt).getAsShort();
         }
-        else if (inbt instanceof LongNBT)
+        else if (inbt instanceof LongTag)
         {
-            return ((LongNBT) inbt).getLong();
+            return ((LongTag) inbt).getAsLong();
         }
-        else if (inbt instanceof IntArrayNBT)
+        else if (inbt instanceof IntArrayTag)
         {
-            return ((IntArrayNBT) inbt).getIntArray();
+            return ((IntArrayTag) inbt).getAsIntArray();
         }
-        else if (inbt instanceof LongArrayNBT)
+        else if (inbt instanceof LongArrayTag)
         {
-            return ((LongArrayNBT) inbt).getAsLongArray();
+            return ((LongArrayTag) inbt).getAsLongArray();
         }
-        else if (inbt instanceof ByteArrayNBT)
+        else if (inbt instanceof ByteArrayTag)
         {
-            return ((ByteArrayNBT) inbt).getByteArray();
+            return ((ByteArrayTag) inbt).getAsByteArray();
         }
-        else if (inbt instanceof ByteNBT)
+        else if (inbt instanceof ByteTag)
         {
-            return ((ByteNBT) inbt).getByte() != 0;
+            return ((ByteTag) inbt).getAsByte() != 0;
         }
-        else throw new UnsupportedOperationException("Unsupported NBT type: " + inbt.getClass().getName());
+        else throw new UnsupportedOperationException("Unsupported Tag type: " + inbt.getClass().getName());
     }
 
-    public static INBT getINBTFromObject(Object object)
+    public static Tag getTagFromObject(Object object)
     {
         if (object instanceof String)
         {
-            return StringNBT.valueOf((String) object);
+            return StringTag.valueOf((String) object);
         }
         else if (object instanceof Integer)
         {
-            return IntNBT.valueOf((Integer) object);
+            return IntTag.valueOf((Integer) object);
         }
         else if (object instanceof Float)
         {
-            return FloatNBT.valueOf((Float) object);
+            return FloatTag.valueOf((Float) object);
         }
         else if (object instanceof Double)
         {
-            return DoubleNBT.valueOf((Double) object);
+            return DoubleTag.valueOf((Double) object);
         }
         else if (object instanceof Byte)
         {
-            return ByteNBT.valueOf((Byte) object);
+            return ByteTag.valueOf((Byte) object);
         }
         else if (object instanceof Short)
         {
-            return ShortNBT.valueOf((Short) object);
+            return ShortTag.valueOf((Short) object);
         }
         else if (object instanceof Long)
         {
-            return LongNBT.valueOf((Long) object);
+            return LongTag.valueOf((Long) object);
         }
         else if (object instanceof int[])
         {
-            return new IntArrayNBT((int[]) object);
+            return new IntArrayTag((int[]) object);
         }
         else if (object instanceof long[])
         {
-            return new LongArrayNBT((long[]) object);
+            return new LongArrayTag((long[]) object);
         }
         else if (object instanceof byte[])
         {
-            return new ByteArrayNBT((byte[]) object);
+            return new ByteArrayTag((byte[]) object);
         }
         else if (object instanceof Boolean)
         {
-            return ByteNBT.valueOf((Boolean) object ? (byte) 1 : (byte) 0);
+            return ByteTag.valueOf((Boolean) object ? (byte) 1 : (byte) 0);
         }
         else
         {
@@ -103,48 +103,48 @@ public class NBTHelper
         }
     }
 
-    public static CompoundNBT modifierToNBT(TempModifier modifier)
+    public static CompoundTag modifierToTag(TempModifier modifier)
     {
-        // Write the modifier's data to a CompoundNBT
-        CompoundNBT modifierNBT = new CompoundNBT();
-        modifierNBT.putString("id", modifier.getID());
+        // Write the modifier's data to a CompoundTag
+        CompoundTag modifierTag = new CompoundTag();
+        modifierTag.putString("id", modifier.getID());
 
         // Add the modifier's arguments
         modifier.getArguments().forEach((name, value) ->
         {
-            modifierNBT.put(name, NBTHelper.getINBTFromObject(value));
+            modifierTag.put(name, getTagFromObject(value));
         });
 
         // Read the modifier's expiration time
         if (modifier.getExpireTicks() != -1)
-            modifierNBT.putInt("expireTicks", modifier.getExpireTicks());
+            modifierTag.putInt("expireTicks", modifier.getExpireTicks());
 
         // Read the modifier's ticks left
         if (modifier.getTicksExisted() > 0)
-            modifierNBT.putInt("ticksLeft", modifier.getTicksExisted());
+            modifierTag.putInt("ticksLeft", modifier.getTicksExisted());
 
-        return modifierNBT;
+        return modifierTag;
     }
 
-    public static TempModifier NBTToModifier(CompoundNBT modifierNBT)
+    public static TempModifier TagToModifier(CompoundTag modifierTag)
     {
-        // Create a new modifier from the CompoundNBT
-        TempModifier newModifier = TempModifierEntries.getEntries().getEntryFor(modifierNBT.getString("id"));
+        // Create a new modifier from the CompoundTag
+        TempModifier newModifier = TempModifierEntries.getEntries().getEntryFor(modifierTag.getString("id"));
 
-        modifierNBT.keySet().forEach(key ->
+        modifierTag.getAllKeys().forEach(key ->
         {
             // Add the modifier's arguments
             if (newModifier != null && key != null)
-                newModifier.addArgument(key, NBTHelper.getObjectFromINBT(modifierNBT.get(key)));
+                newModifier.addArgument(key, getObjectFromTag(modifierTag.get(key)));
         });
 
         // Set the modifier's expiration time
-        if (modifierNBT.contains("expireTicks"))
-            newModifier.expires(modifierNBT.getInt("expireTicks"));
+        if (modifierTag.contains("expireTicks"))
+            newModifier.expires(modifierTag.getInt("expireTicks"));
 
         // Set the modifier's ticks left
-        if (modifierNBT.contains("ticksLeft"))
-            newModifier.setTicksExisted(modifierNBT.getInt("ticksLeft"));
+        if (modifierTag.contains("ticksLeft"))
+            newModifier.setTicksExisted(modifierTag.getInt("ticksLeft"));
 
         return newModifier;
     }

@@ -6,7 +6,7 @@ import dev.momostudios.coldsweat.common.temperature.modifier.*;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import dev.momostudios.coldsweat.util.PlayerHelper;
 import dev.momostudios.coldsweat.util.registrylists.ModEffects;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -21,12 +21,12 @@ public class AddTempModifiers
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            PlayerEntity player = event.player;
+            Player player = event.player;
 
             /*
              * Add TempModifiers if not present
              */
-            if (player.ticksExisted % 20 == 0)
+            if (player.tickCount % 20 == 0)
             {
                 PlayerHelper.addModifier(player, new BiomeTempModifier(), PlayerHelper.Types.AMBIENT, false);
                 PlayerHelper.addModifier(player, new TimeTempModifier(), PlayerHelper.Types.AMBIENT, false);
@@ -34,13 +34,15 @@ public class AddTempModifiers
                 PlayerHelper.addModifier(player, new BlockTempModifier(), PlayerHelper.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerHelper.Types.AMBIENT, false);
+                /*
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);
+                */
 
                 // Hearth
-                if (player.isPotionActive(ModEffects.INSULATION))
+                if (player.hasEffect(ModEffects.INSULATION))
                 {
-                    int potionLevel = player.getActivePotionEffect(ModEffects.INSULATION).getAmplifier() + 1;
+                    int potionLevel = player.getEffect(ModEffects.INSULATION).getAmplifier() + 1;
                     if (PlayerHelper.hasModifier(player, HearthTempModifier.class, PlayerHelper.Types.AMBIENT))
                     {
                         PlayerHelper.forEachModifier(player, PlayerHelper.Types.AMBIENT, (modifier) ->
@@ -61,9 +63,9 @@ public class AddTempModifiers
             }
 
             // Water / Rain
-            if (player.ticksExisted % 5 == 0)
+            if (player.tickCount % 5 == 0)
             {
-                if (player.isInWaterRainOrBubbleColumn())
+                if (player.isInWaterRainOrBubble())
                 {
                     PlayerHelper.addModifier(player, new WaterTempModifier(0.01), PlayerHelper.Types.AMBIENT, false);
                 }
@@ -89,7 +91,7 @@ public class AddTempModifiers
     @SubscribeEvent
     public static void onSleep(SleepFinishedTimeEvent event)
     {
-        event.getWorld().getPlayers().forEach(player ->
+        event.getWorld().players().forEach(player ->
         {
             if (player.isSleeping())
             {

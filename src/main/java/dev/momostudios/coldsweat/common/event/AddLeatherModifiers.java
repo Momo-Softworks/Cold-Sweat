@@ -5,10 +5,10 @@ import dev.momostudios.coldsweat.common.temperature.modifier.InsulationTempModif
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.ItemEntry;
 import dev.momostudios.coldsweat.util.PlayerHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -30,19 +30,19 @@ public class AddLeatherModifiers
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            PlayerEntity player = event.player;
-            if (player.ticksExisted % 10 == 0)
+            Player player = event.player;
+            if (player.tickCount % 10 == 0)
             {
-                ItemStack helmetItem = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
-                ItemStack chestplateItem = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
-                ItemStack leggingsItem = player.getItemStackFromSlot(EquipmentSlotType.LEGS);
-                ItemStack bootsItem = player.getItemStackFromSlot(EquipmentSlotType.FEET);
+                ItemStack helmetItem     = player.getItemBySlot(EquipmentSlot.HEAD);
+                ItemStack chestplateItem = player.getItemBySlot(EquipmentSlot.CHEST);
+                ItemStack leggingsItem   = player.getItemBySlot(EquipmentSlot.LEGS);
+                ItemStack bootsItem      = player.getItemBySlot(EquipmentSlot.FEET);
 
                 int leatherMultiplier = 0;
-                leatherMultiplier += (helmetItem.getItem() instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDamageReduceAmount() : 0) * 2;
-                leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDamageReduceAmount() : 0) * 2;
-                leatherMultiplier += (leggingsItem.getItem() instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDamageReduceAmount() : 0) * 2;
-                leatherMultiplier += (bootsItem.getItem() instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDamageReduceAmount() : 0) * 2;
+                leatherMultiplier += (helmetItem.getItem()     instanceof ArmorItem ? ((ArmorItem) helmetItem.getItem()).getDefense() : 0) * 2;
+                leatherMultiplier += (chestplateItem.getItem() instanceof ArmorItem ? ((ArmorItem) chestplateItem.getItem()).getDefense() : 0) * 2;
+                leatherMultiplier += (leggingsItem.getItem()   instanceof ArmorItem ? ((ArmorItem) leggingsItem.getItem()).getDefense() : 0) * 2;
+                leatherMultiplier += (bootsItem.getItem()      instanceof ArmorItem ? ((ArmorItem) bootsItem.getItem()).getDefense() : 0) * 2;
 
                 if (helmetItem != null)
                 {

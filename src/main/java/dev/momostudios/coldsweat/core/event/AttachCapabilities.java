@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.core.event;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -32,13 +32,13 @@ public class AttachCapabilities
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(final AttachCapabilitiesEvent<Entity> event)
     {
-        if (!(event.getObject() instanceof PlayerEntity)) return;
+        if (!(event.getObject() instanceof Player)) return;
 
         PlayerTempCapability backend = new PlayerTempCapability();
         LazyOptional<PlayerTempCapability> optionalStorage = LazyOptional.of(() -> backend);
         Capability<PlayerTempCapability> capability = PlayerTempCapability.TEMPERATURE;
 
-        ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
+        ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
         {
             @Nonnull
             @Override
@@ -52,9 +52,9 @@ public class AttachCapabilities
             }
 
             @Override
-            public CompoundNBT serializeNBT()
+            public CompoundTag serializeNBT()
             {
-                CompoundNBT nbt = new CompoundNBT();
+                CompoundTag nbt = new CompoundTag();
 
                 // Save the player's temperature data
                 nbt.putDouble(PlayerHelper.getTempTag(PlayerHelper.Types.BODY), backend.get(PlayerHelper.Types.BODY));
@@ -64,10 +64,10 @@ public class AttachCapabilities
                 PlayerHelper.Types[] validTypes = {PlayerHelper.Types.BODY, PlayerHelper.Types.BASE, PlayerHelper.Types.RATE};
                 for (PlayerHelper.Types type : validTypes)
                 {
-                    ListNBT modifiers = new ListNBT();
+                    ListTag modifiers = new ListTag();
                     for (TempModifier modifier : backend.getModifiers(type))
                     {
-                        modifiers.add(NBTHelper.modifierToNBT(modifier));
+                        modifiers.add(NBTHelper.modifierToTag(modifier));
                     }
 
                     // Write the list of modifiers to the player's persistent data
@@ -77,7 +77,7 @@ public class AttachCapabilities
             }
 
             @Override
-            public void deserializeNBT(CompoundNBT nbt)
+            public void deserializeNBT(CompoundTag nbt)
             {
                 backend.set(PlayerHelper.Types.BODY, nbt.getDouble(PlayerHelper.getTempTag(PlayerHelper.Types.BODY)));
                 backend.set(PlayerHelper.Types.BASE, nbt.getDouble(PlayerHelper.getTempTag(PlayerHelper.Types.BASE)));
@@ -87,15 +87,15 @@ public class AttachCapabilities
                 for (PlayerHelper.Types type : validTypes)
                 {
                     // Get the list of modifiers from the player's persistent data
-                    ListNBT modifiers = nbt.getList(PlayerHelper.getModifierTag(type), 10);
+                    ListTag modifiers = nbt.getList(PlayerHelper.getModifierTag(type), 10);
 
                     // For each modifier in the list
                     modifiers.forEach(modifier ->
                     {
-                        CompoundNBT modifierNBT = (CompoundNBT) modifier;
+                        CompoundTag modifierNBT = (CompoundTag) modifier;
 
                         // Add the modifier to the player's temperature
-                        backend.getModifiers(type).add(NBTHelper.NBTToModifier(modifierNBT));
+                        backend.getModifiers(type).add(NBTHelper.TagToModifier(modifierNBT));
                     });
                 }
             }
@@ -106,7 +106,7 @@ public class AttachCapabilities
     }
 
     @SubscribeEvent
-    public static void attachCapabilityToTileHandler(AttachCapabilitiesEvent<TileEntity> event)
+    public static void attachCapabilityToTileHandler(AttachCapabilitiesEvent<BlockEntity> event)
     {
         if (!(event.getObject() instanceof HearthBlockEntity)) return;
 

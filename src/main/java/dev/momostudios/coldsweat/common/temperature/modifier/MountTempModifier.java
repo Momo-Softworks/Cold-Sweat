@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
+import net.minecraft.world.entity.player.Player;
 
 public class MountTempModifier extends TempModifier
 {
@@ -14,7 +14,7 @@ public class MountTempModifier extends TempModifier
     }
 
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
         return temp.get() * (1.0D - getArgument("strength", Double.class));
     }

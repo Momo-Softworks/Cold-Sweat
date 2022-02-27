@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.minecart.MinecartEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,27 +28,26 @@ public class MountEventHandler
     public static void onMinecartRightclick(PlayerInteractEvent.EntityInteract event)
     {
         Entity entity = event.getTarget();
-        PlayerEntity sourceentity = event.getPlayer();
-        if (event.getHand() != sourceentity.getActiveHand())
+        Player sourceentity = event.getPlayer();
+        if (event.getHand() != sourceentity.getUsedItemHand())
         {
             return;
         }
         double x = event.getPos().getX();
         double y = event.getPos().getY();
         double z = event.getPos().getZ();
-        World world = event.getWorld();
-        if (entity instanceof MinecartEntity && sourceentity.getHeldItemMainhand().getItem() == ModItems.MINECART_INSULATION)
+        Level world = event.getWorld();
+        if (entity instanceof Minecart minecart && sourceentity.getMainHandItem().getItem() == ModItems.MINECART_INSULATION)
         {
             event.setCanceled(true);
-            if (!sourceentity.abilities.isCreativeMode)
+            if (!sourceentity.isCreative())
             {
-                sourceentity.getHeldItemMainhand().shrink(1);
+                sourceentity.getMainHandItem().shrink(1);
             }
-            sourceentity.swing(Hand.MAIN_HAND, true);
-            world.playSound(null, new BlockPos(x, y, z), ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.llama.swag")),
-                SoundCategory.NEUTRAL, 1f, (float) ((Math.random() / 5) + 0.9));
-            ((MinecartEntity) entity).setDisplayTile(BlockInit.MINECART_INSULATION.get().getDefaultState());
-            ((MinecartEntity) entity).setDisplayTileOffset(5);
+            sourceentity.swing(InteractionHand.MAIN_HAND, true);
+            world.playSound(null, new BlockPos(x, y, z), SoundEvents.LLAMA_SWAG, SoundSource.NEUTRAL, 1f, (float) ((Math.random() / 5) + 0.9));
+            minecart.setDisplayBlockState(BlockInit.MINECART_INSULATION.get().defaultBlockState());
+            minecart.setDisplayOffset(5);
         }
     }
 
@@ -57,10 +56,10 @@ public class MountEventHandler
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            PlayerEntity player = event.player;
-            if (player.getRidingEntity() != null)
+            Player player = event.player;
+            if (player.getVehicle() != null)
             {
-                if (player.getRidingEntity() instanceof MinecartEntity && ((MinecartEntity) player.getRidingEntity()).getDisplayTile().getBlock() == BlockInit.MINECART_INSULATION.get())
+                if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == BlockInit.MINECART_INSULATION.get())
                 {
                     PlayerHelper.addModifier(player, new MountTempModifier(1).expires(1), PlayerHelper.Types.RATE, false);
                 }
@@ -68,7 +67,7 @@ public class MountEventHandler
                 {
                     for (List<Object> entity : EntitySettingsConfig.INSTANCE.insulatedEntities())
                     {
-                        if (ForgeRegistries.ENTITIES.getKey(player.getRidingEntity().getType()).toString().equals(entity.get(0)))
+                        if (ForgeRegistries.ENTITIES.getKey(player.getVehicle().getType()).toString().equals(entity.get(0)))
                         {
                             Number number = (Number) entity.get(1);
                             double value = number.doubleValue();

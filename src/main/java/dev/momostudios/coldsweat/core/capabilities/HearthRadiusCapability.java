@@ -1,21 +1,24 @@
 package dev.momostudios.coldsweat.core.capabilities;
 
 import dev.momostudios.coldsweat.util.SpreadPath;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class HearthRadiusCapability implements IBlockStorageCap
 {
     public static Capability<IBlockStorageCap> HEARTH_BLOCKS;
 
-    @CapabilityInject(IBlockStorageCap.class)
-    private static void onCapInit(Capability<IBlockStorageCap> capability)
+    @SubscribeEvent
+    private static void onCapInit(RegisterCapabilitiesEvent event)
     {
-        HEARTH_BLOCKS = capability;
+        event.register(HearthRadiusCapability.class);
     }
 
     ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();

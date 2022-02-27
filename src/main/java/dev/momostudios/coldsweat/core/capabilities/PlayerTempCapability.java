@@ -10,13 +10,23 @@ import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.CSMath;
 import dev.momostudios.coldsweat.util.PlayerHelper;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PlayerTempCapability
 {
     public static Capability<PlayerTempCapability> TEMPERATURE = null;
+
+    @SubscribeEvent
+    private static void onCapInit(RegisterCapabilitiesEvent event)
+    {
+        event.register(PlayerTempCapability.class);
+    }
 
     double ambiTemp;
     double bodyTemp;

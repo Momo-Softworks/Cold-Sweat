@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -18,12 +18,12 @@ public class ClientConfigSendMessage
         this.configCache = config;
     }
 
-    public static void encode(ClientConfigSendMessage message, PacketBuffer buffer)
+    public static void encode(ClientConfigSendMessage message, FriendlyByteBuf buffer)
     {
         ColdSweatPacketHandler.writeConfigCacheToBuffer(message.configCache, buffer);
     }
 
-    public static ClientConfigSendMessage decode(PacketBuffer buffer)
+    public static ClientConfigSendMessage decode(FriendlyByteBuf buffer)
     {
         return new ClientConfigSendMessage(ColdSweatPacketHandler.readConfigCacheFromBuffer(buffer));
     }

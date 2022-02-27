@@ -1,7 +1,10 @@
 package dev.momostudios.coldsweat.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.vector.Vector3d;
+import com.mojang.math.Vector3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
@@ -79,9 +82,9 @@ public class CSMath
 
     public static double getDistance(Entity entity, Vector3d pos)
     {
-        double xDistance = Math.max(0, Math.abs(entity.getPosX() - pos.x) - entity.getWidth() / 2);
-        double yDistance = Math.max(0, Math.abs((entity.getPosY() + entity.getHeight() / 2) - pos.y) - entity.getHeight() / 2);
-        double zDistance = Math.max(0, Math.abs(entity.getPosZ() - pos.z) - entity.getWidth() / 2);
+        double xDistance = Math.max(0, Math.abs(entity.getX() - pos.x) - entity.getBbWidth() / 2);
+        double yDistance = Math.max(0, Math.abs((entity.getY() + entity.getBbHeight() / 2) - pos.y) - entity.getBbHeight() / 2);
+        double zDistance = Math.max(0, Math.abs(entity.getZ() - pos.z) - entity.getBbWidth() / 2);
         return Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
     }
 
@@ -126,5 +129,30 @@ public class CSMath
             weightSum += entry.getValue();
         }
         return sum / weightSum;
+    }
+
+    public static Vec3 vectorToVec(Vector3d vec)
+    {
+        return new Vec3(vec.x, vec.y, vec.z);
+    }
+
+    public static Direction getDirectionFromVector(double x, double y, double z) {
+        Direction direction = Direction.NORTH;
+        double f = Float.MIN_VALUE;
+
+        for(Direction direction1 : Direction.values()) {
+            double f1 = x * (float)direction1.getStepX() + y * (float)direction1.getStepY() + z * (float)direction1.getStepZ();
+            if (f1 > f) {
+                f = f1;
+                direction = direction1;
+            }
+        }
+
+        return direction;
+    }
+
+    public static BlockPos offsetDirection(BlockPos pos, Direction direction)
+    {
+        return pos.offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
     }
 }

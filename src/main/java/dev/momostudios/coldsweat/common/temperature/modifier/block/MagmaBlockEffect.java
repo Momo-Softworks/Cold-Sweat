@@ -1,8 +1,9 @@
 package dev.momostudios.coldsweat.common.temperature.modifier.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.momostudios.coldsweat.util.CSMath;
 import dev.momostudios.coldsweat.util.Units;
 
@@ -10,7 +11,7 @@ public class MagmaBlockEffect extends BlockEffect
 {
 
     @Override
-    public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
+    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
         return CSMath.blend(0.2, 0, distance, 0.5, 3);
     }
@@ -18,7 +19,7 @@ public class MagmaBlockEffect extends BlockEffect
     @Override
     public boolean hasBlock(BlockState block)
     {
-        return block.getBlock() == net.minecraft.block.Blocks.MAGMA_BLOCK;
+        return block.getBlock() == Blocks.MAGMA_BLOCK;
     }
 
     @Override

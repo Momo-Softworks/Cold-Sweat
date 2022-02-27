@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.world;
 
-import net.minecraft.block.BlockState;
 import dev.momostudios.coldsweat.common.temperature.modifier.block.BlockEffect;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

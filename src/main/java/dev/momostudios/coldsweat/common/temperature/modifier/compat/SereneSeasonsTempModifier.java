@@ -1,18 +1,18 @@
 package dev.momostudios.coldsweat.common.temperature.modifier.compat;
 
-import net.minecraft.entity.player.PlayerEntity;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import net.minecraft.world.entity.player.Player;
 import sereneseasons.api.season.SeasonHelper;
 
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
         double t = temp.get();
-        if (player.world.getDimensionType().isNatural())
-            switch (SeasonHelper.getSeasonState(player.world).getSubSeason())
+        if (player.level.dimensionType().natural())
+            switch (SeasonHelper.getSeasonState(player.level).getSubSeason())
             {
                 case EARLY_AUTUMN: return t + 0.2f;
                 case MID_AUTUMN: return t;

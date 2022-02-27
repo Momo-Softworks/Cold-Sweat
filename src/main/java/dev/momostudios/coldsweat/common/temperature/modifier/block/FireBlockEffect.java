@@ -1,16 +1,16 @@
 package dev.momostudios.coldsweat.common.temperature.modifier.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.util.CSMath;
 import dev.momostudios.coldsweat.util.Units;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FireBlockEffect extends BlockEffect
 {
     @Override
-    public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
+    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
         if (hasBlock(state))
         {

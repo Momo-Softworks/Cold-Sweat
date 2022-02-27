@@ -1,35 +1,36 @@
 package dev.momostudios.coldsweat.mixin;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.IngameGui;
-import net.minecraft.util.ResourceLocation;
 import dev.momostudios.coldsweat.client.event.RearrangeHotbar;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = IngameGui.class, priority = 900)
+@Mixin(value = Gui.class, priority = 900)
 public class MixinXPBar
 {
     @Shadow
-    protected int scaledWidth;
+    protected int screenWidth;
     @Shadow
-    protected int scaledHeight;
+    protected int screenHeight;
 
     /**
      * @author iMikul
      * @reason Move XP bar elements to make room for body temperature readout
      */
     @Overwrite(remap = ColdSweat.remapMixins)
-    public void renderExpBar(MatrixStack matrixStack, int xPos)
+    public void renderExperienceBar(PoseStack matrixStack, int xPos)
     {
         Minecraft mc = Minecraft.getInstance();
-        IngameGui gui = (IngameGui) (Object) this;
-        FontRenderer fontRenderer = gui.getFontRenderer();
+        Gui gui = (Gui) (Object) this;
+        Font fontRenderer = gui.getFont();
         if (RearrangeHotbar.customHotbar)
         {
             xPos += 10;
@@ -37,83 +38,83 @@ public class MixinXPBar
             if (mc.player != null)
             {
                 // Draw XP bar
-                mc.getProfiler().startSection("expBar");
-                mc.getTextureManager().bindTexture(new ResourceLocation("cold_sweat:textures/gui/overlay/xp_bars.png"));
-                int i = mc.player.xpBarCap();
+                mc.getProfiler().push("expBar");
+                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/xp_bars.png"));
+                int i = mc.player.totalExperience;
                 if (i > 0)
                 {
-                    int l = scaledHeight - 32 + 2;
+                    int l = screenHeight - 32 + 2;
                     // Render shorter bar to make room for experience level
                     if (mc.player.experienceLevel > 0)
                     {
-                        int k = (int) (mc.player.experience * 167.88F) + 2;
-                        Minecraft.getInstance().ingameGUI.blit(matrixStack, xPos, l, 10, 64, 182, 5);
+                        int k = (int) (mc.player.experienceProgress * 167.88F) + 2;
+                        gui.blit(matrixStack, xPos, l, 10, 64, 182, 5);
                         if (k > 0)
                         {
-                            Minecraft.getInstance().ingameGUI.blit(matrixStack, xPos, l, 10, 69, k, 5);
+                            gui.blit(matrixStack, xPos, l, 10, 69, k, 5);
                         }
                     }
                     // Render full bar if player is level 0
                     else
                     {
-                        int k = (int) (mc.player.experience * 183.0F);
-                        Minecraft.getInstance().ingameGUI.blit(matrixStack, xPos - 10, l, 0, 74, 182, 5);
+                        int k = (int) (mc.player.totalExperience * 183.0F);
+                        gui.blit(matrixStack, xPos - 10, l, 0, 74, 182, 5);
                         if (k > 0)
                         {
-                            Minecraft.getInstance().ingameGUI.blit(matrixStack, xPos - 10, l, 0, 79, k, 5);
+                            gui.blit(matrixStack, xPos - 10, l, 0, 79, k, 5);
                         }
                     }
                 }
-                mc.getProfiler().endSection();
+                mc.getProfiler().pop();
 
                 // Draw XP level
                 if (mc.player.experienceLevel > 0)
                 {
-                    mc.getProfiler().startSection("expLevel");
+                    mc.getProfiler().push("expLevel");
                     String s = "" + mc.player.experienceLevel;
 
-                    int i1 = (fontRenderer.getStringWidth(s) < 8) ?
-                            scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 82
-                            : (fontRenderer.getStringWidth(s) < 13) ? scaledWidth / 2 - fontRenderer.getStringWidth(s) / 2 - 84
-                            : scaledWidth / 2 - fontRenderer.getStringWidth(s) - 78;
-                    int j1 = scaledHeight - 31;
+                    int i1 = (fontRenderer.width(s) < 8) ?
+                            screenWidth / 2 - fontRenderer.width(s) / 2 - 82
+                            : (fontRenderer.width(s) < 13) ? screenWidth / 2 - fontRenderer.width(s) / 2 - 84
+                            : screenWidth / 2 - fontRenderer.width(s) - 78;
+                    int j1 = screenHeight - 31;
 
-                    fontRenderer.drawString(matrixStack, s, (float) (i1 + 1), (float) j1, 0);
-                    fontRenderer.drawString(matrixStack, s, (float) (i1 - 1), (float) j1, 0);
-                    fontRenderer.drawString(matrixStack, s, (float) i1, (float) (j1 + 1), 0);
-                    fontRenderer.drawString(matrixStack, s, (float) i1, (float) (j1 - 1), 0);
-                    fontRenderer.drawString(matrixStack, s, (float) i1, (float) j1, 8453920);
-                    mc.getProfiler().endSection();
+                    fontRenderer.draw(matrixStack, s, (float) (i1 + 1), (float) j1, 0);
+                    fontRenderer.draw(matrixStack, s, (float) (i1 - 1), (float) j1, 0);
+                    fontRenderer.draw(matrixStack, s, (float) i1, (float) (j1 + 1), 0);
+                    fontRenderer.draw(matrixStack, s, (float) i1, (float) (j1 - 1), 0);
+                    fontRenderer.draw(matrixStack, s, (float) i1, (float) j1, 8453920);
+                    mc.getProfiler().pop();
                 }
             }
         }
         else
         {
-            mc.getProfiler().startSection("expBar");
-            mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-            int i = mc.player.xpBarCap();
+            mc.getProfiler().push("expBar");
+            RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+            int i = mc.player.totalExperience;
             if (i > 0) {
                 int j = 182;
-                int k = (int)(mc.player.experience * 183.0F);
-                int l = this.scaledHeight - 32 + 3;
+                int k = (int)(mc.player.experienceProgress * 183.0F);
+                int l = this.screenHeight - 32 + 3;
                 gui.blit(matrixStack, xPos, l, 0, 64, 182, 5);
                 if (k > 0) {
                     gui.blit(matrixStack, xPos, l, 0, 69, k, 5);
                 }
             }
 
-            mc.getProfiler().endSection();
+            mc.getProfiler().pop();
             if (mc.player.experienceLevel > 0) {
-                mc.getProfiler().startSection("expLevel");
+                mc.getProfiler().push("expLevel");
                 String s = "" + mc.player.experienceLevel;
-                int i1 = (this.scaledWidth - fontRenderer.getStringWidth(s)) / 2;
-                int j1 = this.scaledHeight - 31 - 4;
-                fontRenderer.drawString(matrixStack, s, (float)(i1 + 1), (float)j1, 0);
-                fontRenderer.drawString(matrixStack, s, (float)(i1 - 1), (float)j1, 0);
-                fontRenderer.drawString(matrixStack, s, (float)i1, (float)(j1 + 1), 0);
-                fontRenderer.drawString(matrixStack, s, (float)i1, (float)(j1 - 1), 0);
-                fontRenderer.drawString(matrixStack, s, (float)i1, (float)j1, 8453920);
-                mc.getProfiler().endSection();
+                int i1 = (this.screenWidth - fontRenderer.width(s)) / 2;
+                int j1 = this.screenHeight - 31 - 4;
+                fontRenderer.draw(matrixStack, s, (float)(i1 + 1), (float)j1, 0);
+                fontRenderer.draw(matrixStack, s, (float)(i1 - 1), (float)j1, 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)(j1 + 1), 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)(j1 - 1), 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)j1, 8453920);
+                mc.getProfiler().pop();
             }
         }
     }

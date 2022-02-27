@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.te;
 
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.util.registrylists.ModItems;
 import net.minecraft.core.BlockPos;
@@ -40,9 +41,9 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity
     private int fuel;
     BlockPos pos = this.getBlockPos();
 
-    public IceboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+    public IceboxBlockEntity(BlockPos pos, BlockState state)
     {
-        super(type, pos, state);
+        super(BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get(), pos, state);
     }
 
     @Override

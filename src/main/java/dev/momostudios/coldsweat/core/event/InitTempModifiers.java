@@ -6,10 +6,10 @@ import dev.momostudios.coldsweat.common.temperature.modifier.block.*;
 import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import dev.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -90,7 +90,7 @@ public class InitTempModifiers
                             new BlockEffect()
                             {
                                 @Override
-                                public double getTemperature(PlayerEntity player, BlockState state, BlockPos pos, double distance)
+                                public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
                                 {
                                     return finalWeaken ? CSMath.blend(finalTemp, 0, distance, 0.5, finalRange) : finalTemp;
                                 }
@@ -150,7 +150,7 @@ public class InitTempModifiers
             event.addModifier(new WaterskinTempModifier());
             event.addModifier(new HellLampTempModifier());
             if (ModList.get().isLoaded("sereneseasons")) event.addModifier((TempModifier) Class.forName(sereneseasons).newInstance());
-            if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
+            //if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
             event.addModifier(new WaterTempModifier());
             event.addModifier(new HearthTempModifier());
             event.addModifier(new FoodTempModifier());

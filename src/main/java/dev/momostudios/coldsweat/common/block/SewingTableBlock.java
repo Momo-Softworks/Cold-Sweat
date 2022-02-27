@@ -1,75 +1,64 @@
 package dev.momostudios.coldsweat.common.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.BlockHitResult;
 import dev.momostudios.coldsweat.common.container.SewingContainer;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 
-public class SewingTableBlock extends Block
+public class SewingTableBlock extends Block implements MenuProvider
 {
     public static Properties getProperties()
     {
         return Properties
-                .create(Material.WOOD)
+                .of(Material.WOOD)
                 .sound(SoundType.WOOD)
-                .hardnessAndResistance(2f, 5f)
-                .harvestTool(ToolType.AXE)
-                .harvestLevel(1);
+                .strength(2f, 5f);
     }
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().group(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
     public SewingTableBlock(Properties properties)
     {
         super(SewingTableBlock.getProperties());
-        this.setDefaultState(this.stateContainer.getBaseState());
+        this.registerDefaultState(this.defaultBlockState());
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (worldIn.isRemote)
+        if (worldIn.isClientSide)
         {
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         else
         {
-            player.openContainer(state.getContainer(worldIn, pos));
-            return ActionResultType.CONSUME;
+            player.openMenu(this);
+            return InteractionResult.CONSUME;
         }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos)
-    {
-        return new SimpleNamedContainerProvider((id, inventory, player) -> {
-            return new SewingContainer(id, inventory, IWorldPosCallable.of(worldIn, pos));
-        }, new TranslationTextComponent("container.cold_sweat.sewing_table"));
     }
 
     @SuppressWarnings("deprecation")
@@ -82,7 +71,20 @@ public class SewingTableBlock extends Block
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState();
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState();
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int windowID, Inventory inv, Player player)
+    {
+        return new SewingContainer(windowID, inv);
     }
 }

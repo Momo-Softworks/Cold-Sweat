@@ -1,29 +1,29 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
 import dev.momostudios.coldsweat.util.WorldHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 
 public class TimeTempModifier extends TempModifier
 {
     @Override
-    public double getResult(Temperature temp, PlayerEntity player)
+    public double getResult(Temperature temp, Player player)
     {
-        if (!player.world.getDimensionType().doesFixedTimeExist())
+        if (!player.level.dimensionType().hasFixedTime())
         {
             float timeTemp = 0;
-            World world = player.world;
-            for (BlockPos iterator : WorldHelper.getNearbyPositions(player.getPosition(), 200, 6))
+            Level world = player.level;
+            for (BlockPos iterator : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
-                RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, world.func_241828_r().getRegistry(Registry.BIOME_KEY).getKey(world.getBiome(iterator)));
+                ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, world.getBiome(iterator).getRegistryName());
                 if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
-                        BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+                    BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                 {
                     timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
                 }

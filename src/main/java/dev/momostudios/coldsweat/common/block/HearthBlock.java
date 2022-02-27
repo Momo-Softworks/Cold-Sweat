@@ -11,21 +11,30 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -33,15 +42,16 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
-public class HearthBlock extends Block
+public class HearthBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty WATER = IntegerProperty.create("water", 0, 2);
     public static final IntegerProperty LAVA = IntegerProperty.create("lava", 0, 2);
 
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<Direction, VoxelShape>();
+    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -50,8 +60,8 @@ public class HearthBlock extends Block
                 .sound(SoundType.STONE)
                 .destroyTime(2.0F)
                 .explosionResistance(2.0F)
-                .dynamicShape()
-                .lightLevel(s -> 0);
+                .noOcclusion()
+                .dynamicShape();
     }
 
     public static Item.Properties getItemProperties()
@@ -59,7 +69,7 @@ public class HearthBlock extends Block
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1);
     }
 
-    public HearthBlock(Properties properties)
+    public HearthBlock()
     {
         super(HearthBlock.getProperties());
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
@@ -148,47 +158,29 @@ public class HearthBlock extends Block
         return InteractionResult.SUCCESS;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
-        if (worldIn.isAirBlock(pos.up()))
+        if (level.getBlockState(pos.above()).isAir())
         {
-            worldIn.setBlockState(pos.up(), BlockInit.HEARTH_TOP.get().getDefaultState().with(HearthTopBlock.FACING, state.get(FACING)), 2);
+            level.setBlock(pos.above(), BlockInit.HEARTH_TOP.get().defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        }
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+    {
+        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+        if (level.getBlockState(pos.above()).getBlock() != BlockInit.HEARTH_TOP.get())
+        {
+            this.destroy(level, pos, state);
         }
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
     {
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
-        if (worldIn.getBlockState(pos.up()).getBlock() != BlockInit.HEARTH_TOP.get())
-        {
-            worldIn.destroyBlock(pos, false);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        return tileEntity instanceof INamedContainerProvider ? (INamedContainerProvider) tileEntity : null;
-    }
-
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get().create();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         List<ItemStack> dropsOriginal = super.getDrops(state, builder);
         if (!dropsOriginal.isEmpty())
             return dropsOriginal;
@@ -197,37 +189,44 @@ public class HearthBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (!state.matchesBlock(newState.getBlock()))
+        if (state.getBlock() != newState.getBlock())
         {
-            if (world.getBlockState(pos.up()).getBlock() == BlockInit.HEARTH_TOP.get())
+            if (level.getBlockState(pos.above()).getBlock() == BlockInit.HEARTH_TOP.get())
             {
-                world.destroyBlock(pos.up(), false);
+                level.destroyBlock(pos.above(), false);
             }
 
-            TileEntity tileentity = world.getTileEntity(pos);
+            BlockEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity) {
-                InventoryHelper.dropInventoryItems(world, pos, (HearthBlockEntity) tileentity);
-                world.updateComparatorOutputLevel(pos, this);
+                Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
+                level.updateNeighborsAt(pos, this);
             }
         }
-        super.onReplaced(state, world, pos, newState, isMoving);
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
+    @Nullable
     @Override
-    public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction)
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {
-        return state.with(FACING, direction.rotate(state.get(FACING)));
+        return BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get().create(pos, state);
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    public BlockState rotate(BlockState state, Rotation direction)
+    {
+        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATER, LAVA);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing()).with(WATER, 0).with(LAVA, 0);
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0);
     }
 }

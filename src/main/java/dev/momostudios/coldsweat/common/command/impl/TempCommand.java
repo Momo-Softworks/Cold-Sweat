@@ -7,13 +7,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.util.PlayerHelper;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
 
@@ -24,7 +24,7 @@ public class TempCommand extends BaseCommand
     }
 
     @Override
-    public LiteralArgumentBuilder<CommandSource> setExecution()
+    public LiteralArgumentBuilder<CommandSourceStack> setExecution()
     {
         return builder
                 .then(Commands.literal("set")
@@ -43,28 +43,29 @@ public class TempCommand extends BaseCommand
                 );
     }
 
-    private int executeSetPlayerTemp(CommandSource source, Collection<ServerPlayerEntity> players, int amount) throws CommandSyntaxException
+    private int executeSetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players, int amount) throws CommandSyntaxException
     {
         if (players.size() == 1)
         {
-            if (players.contains(source.asPlayer()))
+            if (players.contains(source.getPlayerOrException()))
             {
                 //Set the sender's body temperature
                 PlayerHelper.setTemperature(players.iterator().next(), new Temperature(amount), PlayerHelper.Types.BODY);
 
                 //Print success message to all players
-                for (PlayerEntity player : source.asPlayer().world.getPlayers())
+                for (Player player : source.getPlayerOrException().level.players())
                 {
                     //Determine if the message is being sent to the sender or another player
-                    TranslationTextComponent message = player == source.asPlayer() ?
-                    new TranslationTextComponent("commands.cold_sweat.temperature.set.self.result") :
-                    new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", source.asPlayer().getScoreboardName());
+                    TranslatableComponent message = player == source.getPlayerOrException() ?
+                    new TranslatableComponent("commands.cold_sweat.temperature.set.self.result") :
+                    new TranslatableComponent("commands.cold_sweat.temperature.set.other.result", source.getPlayerOrException().getName().getString());
 
                     //Compose the message
-                    player.sendStatusMessage(new StringTextComponent(
-                    "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
+                    player.sendMessage(new TextComponent(
+                    "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
                     message.getString()  +
-                    " \u00a7f" + PlayerHelper.getTemperature(source.asPlayer(), PlayerHelper.Types.BODY).get() + "\u00a7r"), false);
+                    " \u00a7f" + PlayerHelper.getTemperature(source.getPlayerOrException(), PlayerHelper.Types.BODY).get() + "\u00a7r"),
+                    source.getPlayerOrException().getUUID());
                 }
             }
             else
@@ -73,47 +74,49 @@ public class TempCommand extends BaseCommand
                 PlayerHelper.setTemperature(players.iterator().next(), new Temperature(amount), PlayerHelper.Types.BODY);
 
                 //Print success message to all players
-                for (PlayerEntity player : source.asPlayer().world.getPlayers())
+                for (Player player : source.getPlayerOrException().level.players())
                 {
                     //Compose the message
-                    player.sendStatusMessage(new StringTextComponent(
-                    "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-                    new TranslationTextComponent("commands.cold_sweat.temperature.set.other.result", players.iterator().next().getScoreboardName()).getString()  +
-                    " \u00a7f" + PlayerHelper.getTemperature(players.iterator().next(), PlayerHelper.Types.BODY).get() + "\u00a7r"), false);
+                    player.sendMessage(new TextComponent(
+                    "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
+                    new TranslatableComponent("commands.cold_sweat.temperature.set.other.result", players.iterator().next().getScoreboardName()).getString()  +
+                    " \u00a7f" + PlayerHelper.getTemperature(players.iterator().next(), PlayerHelper.Types.BODY).get() + "\u00a7r"),
+                    source.getPlayerOrException().getUUID());
                 }
             }
         }
         else
         {
             int playerCount = 0;
-            for (ServerPlayerEntity player : players)
+            for (ServerPlayer player : players)
             {
                 PlayerHelper.setTemperature(player, new Temperature(amount), PlayerHelper.Types.BODY);
                 playerCount++;
             }
 
             //Print success message to all players
-            for (PlayerEntity player : source.asPlayer().world.getPlayers())
+            for (Player player : source.getPlayerOrException().level.players())
             {
                 //Compose the message
-                player.sendStatusMessage(new StringTextComponent(
-                "\u00a77\u00a7o[" + source.asPlayer().getScoreboardName() + "]: " +
-                new TranslationTextComponent("commands.cold_sweat.temperature.set.all.result", playerCount).getString()  +
-                " \u00a7f" + amount + "\u00a7r"), false);
+                player.sendMessage(new TextComponent(
+                "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
+                new TranslatableComponent("commands.cold_sweat.temperature.set.all.result", playerCount).getString()  +
+                " \u00a7f" + amount + "\u00a7r"), player.getUUID());
             }
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeGetPlayerTemp(CommandSource source, Collection<ServerPlayerEntity> players) throws CommandSyntaxException
+    private int executeGetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players) throws CommandSyntaxException
     {
-        for (ServerPlayerEntity player : players)
+        for (ServerPlayer player : players)
         {
             //Compose the message
-            source.asPlayer().sendStatusMessage(new StringTextComponent(
+            source.getPlayerOrException().sendMessage(new TextComponent(
             "\u00a77" +
-            new TranslationTextComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
-            " \u00a7f" + (int) PlayerHelper.getTemperature(player, PlayerHelper.Types.COMPOSITE).get() + "\u00a7r"), false);
+            new TranslatableComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
+            " \u00a7f" + (int) PlayerHelper.getTemperature(player, PlayerHelper.Types.COMPOSITE).get() + "\u00a7r"),
+            source.getPlayerOrException().getUUID());
         }
         return Command.SINGLE_SUCCESS;
     }

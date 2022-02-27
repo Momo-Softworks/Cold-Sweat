@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.client.event.ClientSoundHandler;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -23,16 +23,16 @@ public class PlaySoundMessage
         this.entityID = entityID;
     }
 
-    public static void encode(PlaySoundMessage message, PacketBuffer buffer) {
+    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer) {
         buffer.writeInt(message.soundID);
         buffer.writeFloat(message.volume);
         buffer.writeFloat(message.pitch);
-        buffer.writeUniqueId(message.entityID);
+        buffer.writeUUID(message.entityID);
     }
 
-    public static PlaySoundMessage decode(PacketBuffer buffer)
+    public static PlaySoundMessage decode(FriendlyByteBuf buffer)
     {
-        return new PlaySoundMessage(buffer.readInt(), buffer.readFloat(), buffer.readFloat(), buffer.readUniqueId());
+        return new PlaySoundMessage(buffer.readInt(), buffer.readFloat(), buffer.readFloat(), buffer.readUUID());
     }
 
     public static void handle(PlaySoundMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -57,7 +57,7 @@ public class PlaySoundMessage
 
                 ClientSoundHandler.volume = message.volume;
                 ClientSoundHandler.pitch = message.pitch;
-                ClientSoundHandler.entity = Minecraft.getInstance().world.getPlayerByUuid(message.entityID);
+                ClientSoundHandler.entity = Minecraft.getInstance().level.getPlayerByUUID(message.entityID);
             }
         });
         context.setPacketHandled(true);

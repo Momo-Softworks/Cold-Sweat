@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.core.init;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.common.command.impl.TempCommand;
@@ -14,7 +14,7 @@ public class CommandInit
 
     public static void registerCommands(final RegisterCommandsEvent event)
     {
-        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         commands.add(new TempCommand("temperature", 2, true));
         commands.add(new TempCommand("temp", 2, true));
