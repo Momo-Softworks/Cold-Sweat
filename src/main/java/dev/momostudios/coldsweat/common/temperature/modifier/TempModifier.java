@@ -6,8 +6,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TempModifiers are applied to entities to dynamically change their temperature.<br>
@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public abstract class TempModifier
 {
-    Map<String, Object> args = new HashMap<>();
+    ConcurrentHashMap<String, Object> args = new ConcurrentHashMap<>();
     int expireTicks = -1;
     int ticksExisted = 0;
 
@@ -58,13 +58,16 @@ public abstract class TempModifier
      */
     public <T> T getArgument(String name, Class<T> clazz)
     {
-        if (!clazz.equals(args.get(name).getClass()))
+        try
+        {
+            return (T) args.get(name);
+        }
+        catch (Exception e)
         {
             throw new IllegalArgumentException(
                     "Argument type mismatch trying to get argument \"" + name + "\" of " + this.getID() +
-                    " (expected " + clazz.getName() + " but got " + args.get(name).getClass().getName() + ")");
+                            " (expected " + clazz.getName() + " but got " + args.get(name).getClass().getName() + ")");
         }
-        return clazz.cast(args.get(name));
     }
 
     /**
@@ -81,6 +84,11 @@ public abstract class TempModifier
         else throw new IllegalArgumentException(
                 "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg +
                 " (expected " + args.get(name).getClass().getName() + ")");
+    }
+
+    public void clearArgument(String name)
+    {
+        args.remove(name);
     }
 
     public final Map<String, Object> getArguments() {
