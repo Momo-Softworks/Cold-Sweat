@@ -14,7 +14,6 @@ public class RearrangeHotbar
 {
     public static boolean customHotbar = ClientSettingsConfig.getInstance().customHotbar();
     static boolean hasShiftedUp = false;
-    static boolean hasShiftedDown = false;
 
     @SubscribeEvent
     public static void onOverlayRenderPre(RenderGameOverlayEvent.PreLayer event)
@@ -27,20 +26,15 @@ public class RearrangeHotbar
                 hasShiftedUp = false;
             }
 
-            if (event.getOverlay() == ForgeIngameGui.HOTBAR_ELEMENT ||
-                event.getOverlay() == ForgeIngameGui.ARMOR_LEVEL_ELEMENT ||
+            if (event.getOverlay() == ForgeIngameGui.PLAYER_HEALTH_ELEMENT ||
                 event.getOverlay() == ForgeIngameGui.FOOD_LEVEL_ELEMENT ||
+                event.getOverlay() == ForgeIngameGui.ARMOR_LEVEL_ELEMENT ||
                 event.getOverlay() == ForgeIngameGui.MOUNT_HEALTH_ELEMENT ||
                 event.getOverlay() == ForgeIngameGui.AIR_LEVEL_ELEMENT ||
                 event.getOverlay() == ForgeIngameGui.ITEM_NAME_ELEMENT)
             {
                 event.getMatrixStack().translate(0, -2, 0);
                 hasShiftedUp = true;
-            }
-            if (event.getOverlay() == ForgeIngameGui.JUMP_BAR_ELEMENT)
-            {
-                event.getMatrixStack().translate(0, -1, 0);
-                hasShiftedDown = true;
             }
         }
         else
@@ -49,12 +43,7 @@ public class RearrangeHotbar
             {
                 event.getMatrixStack().translate(0, 2, 0);
             }
-            if (hasShiftedDown)
-            {
-                event.getMatrixStack().translate(0, 1, 0);
-            }
             hasShiftedUp = false;
-            hasShiftedDown = false;
         }
     }
 
