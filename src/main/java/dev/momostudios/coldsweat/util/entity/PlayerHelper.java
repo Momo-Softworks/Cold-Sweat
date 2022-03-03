@@ -1,14 +1,18 @@
-package dev.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
 import dev.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
-import dev.momostudios.coldsweat.util.registrylists.ModItems;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -16,11 +20,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -29,50 +33,50 @@ public class PlayerHelper
     /**
      * Returns the player's temperature of the specified type.
      */
-    public static Temperature getTemperature(Player player, Types type)
+    public static Temperature getTemperature(Player player, Temperature.Types type)
     {
-        return new Temperature(player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
+        return new Temperature(player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
     }
 
     /**
      * Use {@link TempModifier}s for over-time effects.
      */
-    public static void setTemperature(Player player, Temperature value, Types type)
+    public static void setTemperature(Player player, Temperature value, Temperature.Types type)
     {
         setTemperature(player, value, type, true);
     }
 
-    public static void setTemperature(Player player, Temperature value, Types type, boolean sync)
+    public static void setTemperature(Player player, Temperature value, Temperature.Types type, boolean sync)
     {
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
+        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
-                        type == Types.BODY ? value : getTemperature(player, Types.BODY),
-                        type == Types.BASE ? value : getTemperature(player, Types.BASE),
-                        type == Types.AMBIENT ? value : getTemperature(player, Types.AMBIENT));
+                        type == Temperature.Types.BODY ? value : getTemperature(player, Temperature.Types.BODY),
+                        type == Temperature.Types.BASE ? value : getTemperature(player, Temperature.Types.BASE),
+                        type == Temperature.Types.AMBIENT ? value : getTemperature(player, Temperature.Types.AMBIENT));
             }
             capability.set(type, value.get());
         });
     }
 
-    public static void addTemperature(Player player, Temperature value, Types type)
+    public static void addTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature value, Temperature.Types type)
     {
         addTemperature(player, value, type, true);
     }
 
-    public static void addTemperature(Player player, Temperature value, Types type, boolean sync)
+    public static void addTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature value, Temperature.Types type, boolean sync)
     {
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(capability ->
+        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get() + capability.get(type));
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
-                        type == Types.BODY ? value : getTemperature(player, Types.BODY),
-                        type == Types.BASE ? value : getTemperature(player, Types.BASE),
-                        type == Types.AMBIENT ? value : getTemperature(player, Types.AMBIENT));
+                        type == Temperature.Types.BODY ? value : getTemperature(player, Temperature.Types.BODY),
+                        type == Temperature.Types.BASE ? value : getTemperature(player, Temperature.Types.BASE),
+                        type == Temperature.Types.AMBIENT ? value : getTemperature(player, Temperature.Types.AMBIENT));
             }
         });
     }
@@ -83,13 +87,13 @@ public class PlayerHelper
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(Player player, TempModifier modifier, Types type, boolean duplicates)
+    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, boolean duplicates)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, duplicates);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
-            player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+            player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 if (TempModifierEntries.getEntries().getMap().containsKey(event.getModifier().getID()))
                 {
@@ -104,7 +108,7 @@ public class PlayerHelper
                 }
 
                 if (!player.level.isClientSide)
-                    updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
+                    updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.AMBIENT), cap.getModifiers(Temperature.Types.RATE));
             });
         }
     }
@@ -116,9 +120,9 @@ public class PlayerHelper
      * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifiers(Player player, Types type, int count, Predicate<TempModifier> condition)
+    public static void removeModifiers(Player player, Temperature.Types type, int count, Predicate<TempModifier> condition)
     {
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
             AtomicInteger removed = new AtomicInteger(0);
             cap.getModifiers(type).removeIf(modifier ->
@@ -140,7 +144,7 @@ public class PlayerHelper
             });
 
             if (!player.level.isClientSide)
-                updateModifiers(player, cap.getModifiers(Types.BODY), cap.getModifiers(Types.BASE), cap.getModifiers(Types.AMBIENT), cap.getModifiers(Types.RATE));
+                updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.AMBIENT), cap.getModifiers(Temperature.Types.RATE));
         });
     }
 
@@ -150,9 +154,9 @@ public class PlayerHelper
      * @param type determines which TempModifier list to pull from
      * @returns a NEW list of all TempModifiers of the specified type
      */
-    public static List<TempModifier> getModifiers(Player player, Types type)
+    public static List<TempModifier> getModifiers(Player player, Temperature.Types type)
     {
-        List<TempModifier> mods =  player.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
+        List<TempModifier> mods =  player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
         mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
         return mods;
     }
@@ -162,9 +166,9 @@ public class PlayerHelper
      * @param type The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
      */
-    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Types type)
+    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Temperature.Types type)
     {
-        return player.getCapability(PlayerTempCapability.TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
+        return player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
 
     /**
@@ -172,9 +176,9 @@ public class PlayerHelper
      * @param type determines which TempModifier list to pull from
      * @param action the action(s) to perform on each TempModifier
      */
-    public static void forEachModifier(Player player, Types type, Consumer<TempModifier> action)
+    public static void forEachModifier(Player player, Temperature.Types type, Consumer<TempModifier> action)
     {
-        player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
             if (cap.getModifiers(type) != null)
             {
@@ -183,23 +187,15 @@ public class PlayerHelper
         });
     }
 
-    /**
-     * Defines all types of temperature in Cold Sweat. <br>
-     * These are used to get the player's temperature and/or to apply modifiers to it. <br>
-     * <br>
-     * {@link #AMBIENT}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #BODY}: The temperature of the player's body. <br>
-     * {@link #BASE}: A static offset applied to the player's body temperature. <br>
-     * {@link #COMPOSITE}: The sum of the player's body and base temperatures. (CANNOT be set) <br>
-     * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
-     */
-    public enum Types
+    public static void forEachModifier(Player player, Temperature.Types type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
-        AMBIENT,
-        BODY,
-        BASE,
-        COMPOSITE,
-        RATE
+        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        {
+            if (cap.getModifiers(type) != null)
+            {
+                CSMath.breakableForEach(cap.getModifiers(type), action);
+            }
+        });
     }
 
     /**
@@ -208,7 +204,7 @@ public class PlayerHelper
      * @param type The type of TempModifier to be stored
      * @return The NBT tag name for the given type
      */
-    public static String getModifierTag(Types type)
+    public static String getModifierTag(Temperature.Types type)
     {
         switch (type)
         {
@@ -223,10 +219,10 @@ public class PlayerHelper
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
-     * @param type The type of Temperature to be stored. ({@link Types#AMBIENT} should only be stored when needed to prevent lag)
+     * @param type The type of Temperature to be stored. ({@link Temperature.Types#AMBIENT} should only be stored when needed to prevent lag)
      * @return The NBT tag name for the given type
      */
-    public static String getTempTag(Types type)
+    public static String getTempTag(Temperature.Types type)
     {
         switch (type)
         {
@@ -253,7 +249,7 @@ public class PlayerHelper
         return getItemInHand(player, arm).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
-    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature ambientTemp)
+    public static void updateTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature bodyTemp, dev.momostudios.coldsweat.common.temperature.Temperature baseTemp, dev.momostudios.coldsweat.common.temperature.Temperature ambientTemp)
     {
         if (!player.level.isClientSide)
         {
