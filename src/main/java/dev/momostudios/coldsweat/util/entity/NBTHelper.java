@@ -1,5 +1,6 @@
-package dev.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util.entity;
 
+import dev.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
@@ -8,41 +9,41 @@ public class NBTHelper
 {
     public static Object getObjectFromTag(Tag inbt)
     {
-        if (inbt instanceof StringTag)
+        if (inbt instanceof StringTag stringnbt)
         {
-            return ((StringTag) inbt).getAsString();
+            return stringnbt.getAsString();
         }
-        else if (inbt instanceof IntTag)
+        else if (inbt instanceof IntTag intnbt)
         {
-            return ((IntTag) inbt).getId();
+            return intnbt.getAsInt();
         }
-        else if (inbt instanceof FloatTag)
+        else if (inbt instanceof FloatTag floatnbt)
         {
-            return ((FloatTag) inbt).getAsFloat();
+            return floatnbt.getAsFloat();
         }
-        else if (inbt instanceof DoubleTag)
+        else if (inbt instanceof DoubleTag dbnbt)
         {
-            return ((DoubleTag) inbt).getAsDouble();
+            return dbnbt.getAsDouble();
         }
-        else if (inbt instanceof ShortTag)
+        else if (inbt instanceof ShortTag shortnbt)
         {
-            return ((ShortTag) inbt).getAsShort();
+            return shortnbt.getAsShort();
         }
-        else if (inbt instanceof LongTag)
+        else if (inbt instanceof LongTag longnbt)
         {
-            return ((LongTag) inbt).getAsLong();
+            return longnbt.getAsLong();
         }
-        else if (inbt instanceof IntArrayTag)
+        else if (inbt instanceof IntArrayTag int2nbt)
         {
-            return ((IntArrayTag) inbt).getAsIntArray();
+            return int2nbt.getAsIntArray();
         }
-        else if (inbt instanceof LongArrayTag)
+        else if (inbt instanceof LongArrayTag long2nbt)
         {
-            return ((LongArrayTag) inbt).getAsLongArray();
+            return long2nbt.getAsLongArray();
         }
-        else if (inbt instanceof ByteArrayTag)
+        else if (inbt instanceof ByteArrayTag byte2nbt)
         {
-            return ((ByteArrayTag) inbt).getAsByteArray();
+            return byte2nbt.getAsByteArray();
         }
         else if (inbt instanceof ByteTag)
         {
@@ -53,49 +54,45 @@ public class NBTHelper
 
     public static Tag getTagFromObject(Object object)
     {
-        if (object instanceof String)
+        if (object instanceof String str)
         {
-            return StringTag.valueOf((String) object);
+            return StringTag.valueOf(str);
         }
-        else if (object instanceof Integer)
+        else if (object instanceof Integer intr)
         {
-            return IntTag.valueOf((Integer) object);
+            return IntTag.valueOf(intr);
         }
-        else if (object instanceof Float)
+        else if (object instanceof Float flt)
         {
-            return FloatTag.valueOf((Float) object);
+            return FloatTag.valueOf(flt);
         }
-        else if (object instanceof Double)
+        else if (object instanceof Double dbl)
         {
-            return DoubleTag.valueOf((Double) object);
+            return DoubleTag.valueOf(dbl);
         }
-        else if (object instanceof Byte)
+        else if (object instanceof Short shrt)
         {
-            return ByteTag.valueOf((Byte) object);
+            return ShortTag.valueOf(shrt);
         }
-        else if (object instanceof Short)
+        else if (object instanceof Long lng)
         {
-            return ShortTag.valueOf((Short) object);
+            return LongTag.valueOf(lng);
         }
-        else if (object instanceof Long)
+        else if (object instanceof int[] intarr)
         {
-            return LongTag.valueOf((Long) object);
+            return new IntArrayTag(intarr);
         }
-        else if (object instanceof int[])
+        else if (object instanceof long[] lngarr)
         {
-            return new IntArrayTag((int[]) object);
+            return new LongArrayTag(lngarr);
         }
-        else if (object instanceof long[])
+        else if (object instanceof byte[] bytearr)
         {
-            return new LongArrayTag((long[]) object);
+            return new ByteArrayTag(bytearr);
         }
-        else if (object instanceof byte[])
+        else if (object instanceof Boolean bool)
         {
-            return new ByteArrayTag((byte[]) object);
-        }
-        else if (object instanceof Boolean)
-        {
-            return ByteTag.valueOf((Boolean) object ? (byte) 1 : (byte) 0);
+            return ByteTag.valueOf(bool ? (byte) 1 : (byte) 0);
         }
         else
         {
@@ -135,7 +132,9 @@ public class NBTHelper
         {
             // Add the modifier's arguments
             if (newModifier != null && key != null)
+            {
                 newModifier.addArgument(key, getObjectFromTag(modifierTag.get(key)));
+            }
         });
 
         // Set the modifier's expiration time
