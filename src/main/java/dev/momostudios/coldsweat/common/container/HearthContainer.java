@@ -1,8 +1,9 @@
 package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
-import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -54,12 +55,12 @@ public class HearthContainer extends AbstractContainerMenu
 
     public int getHotFuel()
     {
-        return te.getTileData().getInt("hot_fuel");
+        return te.getHotFuel();
     }
 
     public int getColdFuel()
     {
-        return te.getTileData().getInt("cold_fuel");
+        return te.getColdFuel();
     }
 
     private static HearthBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
@@ -80,46 +81,46 @@ public class HearthContainer extends AbstractContainerMenu
         return playerIn.distanceToSqr(Vec3.atCenterOf(te.getBlockPos())) <= 64.0D;
     }
 
-    /*@Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
+    @Override
+    public ItemStack quickMoveStack(Player player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack())
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem())
         {
-            ItemStack itemstack1 = slot.getStack();
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (index == 0)
             {
-                if (!this.mergeItemStack(itemstack1, 1, 37, true))
+                if (!this.moveItemStackTo(itemstack1, 1, 37, true))
                 {
                     return ItemStack.EMPTY;
                 }
 
-                slot.onSlotChange(itemstack1, itemstack);
+                slot.onQuickCraft(itemstack1, itemstack);
             }
             else
             {
                 if (this.te.getItemFuel(itemstack)!= 0)
                 {
-                    if (!this.mergeItemStack(itemstack1, 0, 1, false))
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size() - 1))
+                else if (CSMath.isBetween(index, slots.size() - 9, slots.size() - 1))
                 {
-                    if (!this.mergeItemStack(itemstack1, 1, inventorySlots.size() - 10, false))
+                    if (!this.moveItemStackTo(itemstack1, 1, slots.size() - 10, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, 1, inventorySlots.size() - 10))
+                else if (CSMath.isBetween(index, 1, slots.size() - 10))
                 {
-                    if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
+                    if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -128,11 +129,11 @@ public class HearthContainer extends AbstractContainerMenu
 
             if (itemstack1.isEmpty())
             {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             }
             else
             {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
             if (itemstack1.getCount() == itemstack.getCount())
@@ -140,9 +141,9 @@ public class HearthContainer extends AbstractContainerMenu
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(playerIn, itemstack1);
+            slot.onTake(player, itemstack1);
         }
 
         return itemstack;
-    }*/
+    }
 }

@@ -1,8 +1,10 @@
 package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
-import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -66,6 +68,7 @@ public class BoilerContainer extends AbstractContainerMenu
 
     public int getFuel()
     {
+        System.out.println("Fuel: " + this.te.getFuel());
         return this.te.getFuel();
     }
 
@@ -88,56 +91,56 @@ public class BoilerContainer extends AbstractContainerMenu
         return playerIn.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
     }
 
-    /*@Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index)
+    @Override
+    public ItemStack quickMoveStack(Player player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack())
+        if (slot != null && slot.hasItem())
         {
-            ItemStack itemstack1 = slot.getStack();
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (CSMath.isBetween(index, 0, 9))
             {
-                if (!this.mergeItemStack(itemstack1, 10, 46, true))
+                if (!this.moveItemStackTo(itemstack1, 10, 46, true))
                 {
                     return ItemStack.EMPTY;
                 }
 
-                slot.onSlotChange(itemstack1, itemstack);
+                slot.onQuickCraft(itemstack1, itemstack);
             }
             else
             {
                 if (itemstack.getItem() == ModItems.FILLED_WATERSKIN)
                 {
-                    if (!this.mergeItemStack(itemstack1, 1, 10, false))
+                    if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (this.te.getItemFuel(itemstack) > 0)
                 {
-                    if (!this.mergeItemStack(itemstack1, 0, 1, false))
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
+                else if (CSMath.isBetween(index, slots.size() - 9, slots.size()))
                 {
-                    if (!this.mergeItemStack(itemstack1, 10, 36, false))
+                    if (!this.moveItemStackTo(itemstack1, 10, 36, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, 10, inventorySlots.size() - 9))
+                else if (CSMath.isBetween(index, 10, slots.size() - 9))
                 {
-                    if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
+                    if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -146,22 +149,16 @@ public class BoilerContainer extends AbstractContainerMenu
 
             if (itemstack1.isEmpty())
             {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             }
             else
             {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
-            slot.onTake(playerIn, itemstack1);
+            slot.onTake(player, itemstack1);
         }
 
         return itemstack;
     }
-
-    @Override
-    public boolean stillValid(Player player)
-    {
-        return player.distanceToSqr(te.) <= 64;
-    }*/
 }

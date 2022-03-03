@@ -21,23 +21,15 @@ import dev.momostudios.coldsweat.common.container.HearthContainer;
 public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 {
     private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
-    private static final ResourceLocation COLD_FUEL_GAUGE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_cold_fuel.png");
-    private static final ResourceLocation HOT_FUEL_GAUGE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_hot_fuel.png");
     private static final ResourceLocation RADIUS_TOGGLE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_radius_toggle.png");
-    Component name = new TranslatableComponent("block." + ColdSweat.MOD_ID + ".hearth");
-    int titleX = 8;
-    int coldFuelLevel;
-    int hotFuelLevel;
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, titleIn);
+        super(screenContainer, inv, new TranslatableComponent("block." + ColdSweat.MOD_ID + ".hearth"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
-        this.imageHeight = 166;
-        this.hotFuelLevel = screenContainer.te.getTileData().getInt("hot_fuel");
-        this.coldFuelLevel = screenContainer.te.getTileData().getInt("cold_fuel");
+        this.imageHeight = 188;
     }
 
     @SubscribeEvent
@@ -48,6 +40,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
             if (screen.isHoveringButton(event.getMouseX(), event.getMouseY()))
             {
                 boolean showRad = screen.menu.te.getTileData().getBoolean("showRadius");
+                System.out.println(showRad);
 
                 screen.menu.te.getTileData().putBoolean("showRadius", !showRad);
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !showRad ? 1.9f : 1.5f, 0.75f));
@@ -61,35 +54,30 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(poseStack, mouseX, mouseY);
-
-        this.font.draw(poseStack, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
-        this.font.draw(poseStack, name, titleX, 8f, 4210752);
-
-        int hotFuel = (int) (this.menu.getHotFuel() / 27.7);
-        int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
-
-        this.minecraft.textureManager.bindForSetup(HOT_FUEL_GAUGE);
-        blit(poseStack, 61, 66 - hotFuel, 12, hotFuel, 0, 36 - hotFuel, 12, hotFuel, 12, 36);
-
-        this.minecraft.textureManager.bindForSetup(COLD_FUEL_GAUGE);
-        blit(poseStack, 103, 66 - coldFuel, 12, coldFuel, 0, 36 - coldFuel, 12, coldFuel, 12, 36);
-
-        this.minecraft.textureManager.bindForSetup(RADIUS_TOGGLE);
-        blit(poseStack, 82, 68, isHoveringButton(mouseX, mouseY) ? 12 : 0, isRadiusShowing() ? 0 : 12, 12, 12, 24, 24);
-
-        if (isHoveringButton(mouseX, mouseY))
-            font.draw(poseStack, "Show Particles", 97, 71, 5592405);
     }
 
 
     @Override
-    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        this.minecraft.textureManager.bindForSetup(HEARTH_GUI);
+        RenderSystem.setShaderTexture(0, HEARTH_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
-        this.blit(matrixStack, x ,y, 0, 0, this.getXSize(), this.getYSize());
+        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+
+        int hotFuel =  (int) (this.menu.te.getHotFuel()  / 27.7);
+        int coldFuel = (int) (this.menu.te.getColdFuel() / 27.7);
+
+        // Render hot/cold fuel gauges
+        blit(poseStack, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, 36, 256, 256);
+        blit(poseStack, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, 36, 256, 256);
+
+        RenderSystem.setShaderTexture(0, RADIUS_TOGGLE);
+        blit(poseStack, leftPos + 82, topPos + 68, isHoveringButton(mouseX, mouseY) ? 12 : 0, isRadiusShowing() ? 0 : 12, 12, 12, 24, 24);
+
+        if (isHoveringButton(mouseX, mouseY))
+            font.draw(poseStack, "Show Particles", leftPos + 97, topPos + 71, 5592405);
     }
 
     boolean isHoveringButton(double mouseX, double mouseY)

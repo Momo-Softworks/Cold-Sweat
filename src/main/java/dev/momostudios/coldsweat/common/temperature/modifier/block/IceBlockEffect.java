@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.common.temperature.modifier.block;
 
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.Units;
+import dev.momostudios.coldsweat.util.math.CSMath;
 
 public class IceBlockEffect extends BlockEffect
 {
@@ -33,11 +33,11 @@ public class IceBlockEffect extends BlockEffect
 
     @Override
     public double minEffect() {
-        return CSMath.convertUnits(-30, Units.F, Units.MC, false);
+        return CSMath.convertUnits(-30, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double minTemperature() {
-        return CSMath.convertUnits(32, Units.F, Units.MC, true);
+        return CSMath.convertUnits(32, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

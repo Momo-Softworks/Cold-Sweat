@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -14,20 +14,20 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -59,7 +59,7 @@ public class HearthBlock extends Block implements EntityBlock
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
                 .destroyTime(2.0F)
-                .explosionResistance(2.0F)
+                .explosionResistance(10.0F)
                 .noOcclusion()
                 .dynamicShape();
     }
@@ -111,6 +111,12 @@ public class HearthBlock extends Block implements EntityBlock
     public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
     {
         return SHAPES.get(state.getValue(FACING));
+    }
+
+    @org.jetbrains.annotations.Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return type == BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get() ? HearthBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")
@@ -227,6 +233,6 @@ public class HearthBlock extends Block implements EntityBlock
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0);
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection()).setValue(WATER, 0).setValue(LAVA, 0);
     }
 }

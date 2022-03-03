@@ -1,9 +1,14 @@
 package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -12,21 +17,98 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+
+import javax.annotation.Nonnull;
 
 public class SewingContainer extends AbstractContainerMenu
 {
     BlockPos pos;
+    Inventory playerInventory;
+    SewingInventory sewingInventory;
+
+    public static class SewingInventory implements Container
+    {
+        private final NonNullList<ItemStack> stackList;
+        private final AbstractContainerMenu menu;
+
+        public SewingInventory(AbstractContainerMenu menu)
+        {
+            this.stackList = NonNullList.withSize(3, ItemStack.EMPTY);
+            this.menu = menu;
+        }
+
+        @Override
+        public int getContainerSize()
+        {
+            return 3;
+        }
+
+        @Override
+        public boolean isEmpty()
+        {
+            return !stackList.stream().anyMatch(stack -> !stack.isEmpty());
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack getItem(int index)
+        {
+            return stackList.get(index);
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack removeItem(int index, int count)
+        {
+            ItemStack itemstack = ContainerHelper.removeItem(this.stackList, index, count);
+            if (!itemstack.isEmpty()) {
+                this.menu.slotsChanged(this);
+            }
+
+            return itemstack;
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack removeItemNoUpdate(int index)
+        {
+            return ContainerHelper.takeItem(this.stackList, index);
+        }
+
+        @Override
+        public void setItem(int index, ItemStack stack)
+        {
+            this.stackList.set(index, stack);
+            this.menu.slotsChanged(this);
+        }
+
+        @Override
+        public void setChanged() {}
+
+        @Override
+        public boolean stillValid(Player player)
+        {
+            return true;
+        }
+
+        @Override
+        public void clearContent()
+        {
+            stackList.clear();
+        }
+    }
 
     public SewingContainer(final int windowId, final Inventory playerInv)
     {
         super(ContainerInit.SEWING_CONTAINER_TYPE.get(), windowId);
+        this.pos = playerInv.player.blockPosition();
+        this.playerInventory = playerInv;
+        sewingInventory = new SewingInventory(this);
 
         // Input 1
-        this.addSlot(new Slot(playerInv, 0, 43, 26)
+        this.addSlot(new Slot(sewingInventory, 0, 43, 26)
         {
             @Override
             public boolean mayPlace(ItemStack stack)
@@ -44,12 +126,13 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public void setChanged()
             {
+                super.setChanged();
                 SewingContainer.this.testForRecipe();
             }
         });
 
         // Input 2
-        this.addSlot(new Slot(playerInv, 1, 43, 53)
+        this.addSlot(new Slot(sewingInventory, 1, 43, 53)
         {
             @Override
             public boolean mayPlace(ItemStack stack) {
@@ -58,18 +141,18 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public void onTake(Player player, ItemStack stack)
             {
-                if (this.getItem().isEmpty())
-                    SewingContainer.this.takeInput();
+                SewingContainer.this.takeInput();
             }
             @Override
             public void setChanged()
             {
+                super.setChanged();
                 SewingContainer.this.testForRecipe();
             }
         });
 
         // Output
-        this.addSlot(new Slot(playerInv, 2, 121, 39)
+        this.addSlot(new Slot(sewingInventory, 2, 121, 39)
         {
             @Override
             public boolean mayPlace(ItemStack stack) {
@@ -77,8 +160,9 @@ public class SewingContainer extends AbstractContainerMenu
             }
 
             @Override
-            public void onTake(Player thePlayer, ItemStack stack)
+            public void onTake(Player player, ItemStack stack)
             {
+                super.onTake(player, stack);
                 SewingContainer.this.takeOutput();
             }
         });
@@ -102,32 +186,37 @@ public class SewingContainer extends AbstractContainerMenu
     public SewingContainer(int i, Inventory inventory, FriendlyByteBuf friendlyByteBuf)
     {
         this(i, inventory);
-        this.pos = BlockPos.of(friendlyByteBuf.readLong());
+        try {
+            this.pos = BlockPos.of(friendlyByteBuf.readLong());
+        } catch (Exception e) {}
     }
 
     private void takeInput()
     {
-        this.getSlot(2).set(ItemStack.EMPTY);
+        this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
     private void takeOutput()
     {
-        this.getSlot(0).getItem().shrink(1);
-        this.getSlot(1).getItem().shrink(1);
+        this.sewingInventory.getItem(0).shrink(1);
+        this.setRemoteSlot(0, this.sewingInventory.getItem(0));
+
+        this.sewingInventory.getItem(1).shrink(1);
+        this.setRemoteSlot(1, this.sewingInventory.getItem(1));
     }
     private ItemStack testForRecipe()
     {
-        ItemStack slot0Item = this.getSlot(0).getItem();
-        ItemStack slot1Item = this.getSlot(1).getItem();
+        ItemStack slot0Item = this.sewingInventory.getItem(0);
+        ItemStack slot1Item = this.sewingInventory.getItem(1);
         ItemStack result = ItemStack.EMPTY;
 
         // Insulated Armor
         if (slot0Item.getItem() instanceof ArmorItem && this.isInsulatingItem(slot1Item) &&
         // Do slot types match OR is insulating item NOT armor
-        (!(slot1Item.getItem() instanceof ArmorItem) || slot0Item.getItem().getEquipmentSlot(slot0Item).equals(slot1Item.getItem().getEquipmentSlot(slot1Item))))
+        (!(slot1Item.getItem() instanceof ArmorItem) || LivingEntity.getEquipmentSlotForItem(slot0Item).equals(LivingEntity.getEquipmentSlotForItem(slot1Item))))
         {
-            ItemStack processed = this.getSlot(0).getItem().copy();
+            ItemStack processed = slot0Item.copy();
             processed.getOrCreateTag().putBoolean("insulated", true);
-            this.getSlot(2).set(processed);
+            this.sewingInventory.setItem(2, processed);
             result = processed;
         }
         return result;
@@ -158,87 +247,88 @@ public class SewingContainer extends AbstractContainerMenu
         playerIn.drop(getCarried(), false);
         setCarried(ItemStack.EMPTY);
 
-        for (int i = 0; i < 3; i++)
+        // Drop the contents of the input slots
+        for (int i = 0; i < 2; i++)
         {
             ItemStack itemStack = this.getSlot(i).getItem();
-            if (i != 2)
-                if (!playerinventory.add(itemStack))
+            if (!playerinventory.add(itemStack))
+            {
+                ItemEntity itementity = playerinventory.player.drop(itemStack, false);
+                if (itementity != null)
                 {
-                    ItemEntity itementity = playerinventory.player.drop(itemStack, false);
-                    if (itementity != null)
-                    {
-                        itementity.setNoPickUpDelay();
-                        itementity.setOwner(playerinventory.player.getUUID());
-                    }
+                    itementity.setNoPickUpDelay();
+                    itementity.setOwner(playerinventory.player.getUUID());
                 }
+            }
         }
-
     }
 
     @Override
     public boolean stillValid(Player playerIn)
     {
-        return playerIn.distanceToSqr(Vec3.atCenterOf(this.pos)) <= 64.0D;
+        if (this.pos != null)
+            return playerIn.distanceToSqr(Vec3.atCenterOf(this.pos)) <= 64.0D;
+        else return true;
     }
 
-    /*@Override
-    public ItemStack transferStackInSlot(Player playerIn, int index)
+    @Override
+    public ItemStack quickMoveStack(Player player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack())
+        if (slot != null && slot.hasItem())
         {
-            ItemStack itemstack1 = slot.getStack();
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (CSMath.isBetween(index, 0, 2))
             {
-                if (!this.mergeItemStack(itemstack1, 3, 39, true))
+                if (!this.moveItemStackTo(itemstack1, 3, 39, true))
                 {
                     return ItemStack.EMPTY;
                 }
 
-                slot.onSlotChange(itemstack1, itemstack);
+                slot.onQuickCraft(itemstack1, itemstack);
             }
             else
             {
                 if (isInsulatingItem(itemstack1))
                 {
-                    if (!this.mergeItemStack(itemstack1, 1, 2, false))
+                    if (!this.moveItemStackTo(itemstack1, 1, 2, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (itemstack1.getItem() instanceof ArmorItem)
                 {
-                    if (!this.mergeItemStack(itemstack1, 0, 1, false))
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (index == 2)
                 {
-                    if (!this.mergeItemStack(itemstack1, 3, 39, false))
+                    if (!this.moveItemStackTo(itemstack1, 3, 39, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, inventorySlots.size() - 9, inventorySlots.size()))
+                else if (CSMath.isBetween(index, slots.size() - 9, slots.size()))
                 {
-                    if (!this.mergeItemStack(itemstack1, 3, 29, false))
+                    if (!this.moveItemStackTo(itemstack1, 3, 29, false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, 3, inventorySlots.size() - 9))
+                else if (CSMath.isBetween(index, 3, slots.size() - 9))
                 {
-                    if (!this.mergeItemStack(itemstack1, inventorySlots.size() - 9, inventorySlots.size(), false))
+                    if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {
-                        slot.onSlotChange(itemstack1, itemstack);
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -247,16 +337,16 @@ public class SewingContainer extends AbstractContainerMenu
 
             if (itemstack1.isEmpty())
             {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             }
             else
             {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
-            slot.onTake(playerIn, itemstack1);
+            slot.onTake(player, itemstack1);
         }
 
         return itemstack;
-    }*/
+    }
 }

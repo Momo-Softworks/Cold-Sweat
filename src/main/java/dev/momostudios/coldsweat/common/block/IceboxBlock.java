@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
-import dev.momostudios.coldsweat.common.te.IceboxBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraft.core.BlockPos;
@@ -22,6 +21,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -35,7 +36,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 
 public class IceboxBlock extends Block implements EntityBlock
@@ -59,6 +59,12 @@ public class IceboxBlock extends Block implements EntityBlock
     {
         super(IceboxBlock.getProperties());
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return type == BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get() ? IceboxBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

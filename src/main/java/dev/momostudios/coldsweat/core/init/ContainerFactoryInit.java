@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.core.init;
 
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -16,9 +17,9 @@ public class ContainerFactoryInit
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event)
     {
-        //ScreenManager.registerFactory(ContainerInit.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
-        //ScreenManager.registerFactory(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
-        //ScreenManager.registerFactory(ContainerInit.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
-        //ScreenManager.registerFactory(ContainerInit.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
+        MenuScreens.register(ContainerInit.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
+        MenuScreens.register(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
+        MenuScreens.register(ContainerInit.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
+        MenuScreens.register(ContainerInit.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
     }
 }

@@ -4,9 +4,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
-import dev.momostudios.coldsweat.common.te.HearthBlockEntity;
-import dev.momostudios.coldsweat.common.te.IceboxBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
 import net.minecraftforge.registries.RegistryObject;
 
 public class BlockEntityInit

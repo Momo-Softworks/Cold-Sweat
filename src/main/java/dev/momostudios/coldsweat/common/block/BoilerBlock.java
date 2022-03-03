@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.te.BoilerBlockEntity;
+import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraft.core.BlockPos;
@@ -22,6 +22,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,7 +54,6 @@ public class BoilerBlock extends Block implements EntityBlock
                 .sound(SoundType.STONE)
                 .destroyTime(2f)
                 .explosionResistance(10f)
-                .strength(1)
                 .lightLevel(getLightValueLit(13));
     }
 
@@ -72,15 +73,20 @@ public class BoilerBlock extends Block implements EntityBlock
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LIT, false));
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return type == BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get() ? BoilerBlockEntity::tick : null;
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (!worldIn.isClientSide)
         {
-            if (worldIn.getBlockEntity(pos) instanceof BoilerBlockEntity)
+            if (worldIn.getBlockEntity(pos) instanceof BoilerBlockEntity te)
             {
-                BoilerBlockEntity te = (BoilerBlockEntity) worldIn.getBlockEntity(pos);
                 ItemStack stack = player.getItemInHand(hand);
                 int itemFuel = te.getItemFuel(stack);
 

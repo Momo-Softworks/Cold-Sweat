@@ -1,19 +1,22 @@
-package dev.momostudios.coldsweat.common.te;
+package dev.momostudios.coldsweat.common.blockentity;
 
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
-import dev.momostudios.coldsweat.util.registrylists.ModItems;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
@@ -27,7 +30,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
 import java.util.List;
 
-public class BoilerBlockEntity extends RandomizableContainerBlockEntity
+public class BoilerBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -35,66 +38,84 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity
     public static int MAX_FUEL = 1000;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
-    private int fuel;
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
         super(BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get(), pos, state);
     }
 
+    @Override
+    public CompoundTag getUpdateTag()
+    {
+        CompoundTag tag = super.getUpdateTag();
+        tag.putInt("fuel", this.getFuel());
+        return tag;
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
 
     @Override
     protected Component getDefaultName() {
         return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
-    public void tick()
+    @Override
+    public Component getDisplayName() {
+        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+    }
+
+    public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
     {
-        this.ticksExisted++;
-        this.ticksExisted %= 1000;
-
-        if (!this.level.isClientSide)
+        if (te instanceof BoilerBlockEntity boilerTE)
         {
-            if (this.getFuel() > 0)
-            {
-                if (!level.getBlockState(getBlockPos()).getValue(BoilerBlock.LIT))
-                    level.setBlock(getBlockPos(), level.getBlockState(getBlockPos()).setValue(BoilerBlock.LIT, true), 3);
+            boilerTE.ticksExisted++;
+            boilerTE.ticksExisted %= 1000;
 
-                if (this.ticksExisted % 20 == 0)
+            if (!level.isClientSide)
+            {
+                if (boilerTE.getFuel() > 0)
                 {
-                    boolean hasItemStacks = false;
-                    for (int i = 0; i < 10; i++)
+                    if (!state.getValue(BoilerBlock.LIT))
+                        level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+
+                    if (boilerTE.ticksExisted % 20 == 0)
                     {
-                        if (this.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && this.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
+                        boolean hasItemStacks = false;
+                        for (int i = 0; i < 10; i++)
                         {
-                            hasItemStacks = true;
-                            this.getItemInSlot(i).getOrCreateTag().putInt("temperature", this.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
+                            if (boilerTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
+                            {
+                                hasItemStacks = true;
+                                boilerTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
+                            }
                         }
+                        if (hasItemStacks) boilerTE.setFuel(boilerTE.getFuel() - 1);
                     }
-                    if (hasItemStacks) this.setFuel(this.getFuel() - 1);
-                }
-            }
-            else if (level.getBlockState(getBlockPos()).getValue(BoilerBlock.LIT))
-            {
-                level.setBlock(getBlockPos(), level.getBlockState(getBlockPos()).setValue(BoilerBlock.LIT, false), 3);
-            }
-
-            int itemFuel = getItemFuel(this.getItemInSlot(0));
-            if (itemFuel > 0)
-            {
-                ItemStack item = this.getItemInSlot(0);
-                if (this.getFuel() <= MAX_FUEL - itemFuel * 0.75)
+                } else if (state.getValue(BoilerBlock.LIT))
                 {
-                    if (item.hasContainerItem())
-                    {
-                        this.setItemInSlot(0, item.getContainerItem());
-                    }
-                    else
-                    {
-                        this.getItemInSlot(0).shrink(1);
-                    }
+                    level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+                }
 
-                    this.setFuel(this.getFuel() + itemFuel);
+                int itemFuel = boilerTE.getItemFuel(boilerTE.getItemInSlot(0));
+                if (itemFuel > 0)
+                {
+                    ItemStack item = boilerTE.getItemInSlot(0);
+                    if (boilerTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
+                    {
+                        if (item.hasContainerItem())
+                        {
+                            boilerTE.setItemInSlot(0, item.getContainerItem());
+                        }
+                        else
+                        {
+                            boilerTE.getItemInSlot(0).shrink(1);
+                        }
+
+                        boilerTE.setFuel(boilerTE.getFuel() + itemFuel);
+                    }
                 }
             }
         }
@@ -132,12 +153,12 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity
 
     public int getFuel()
     {
-        return this.fuel;
+        return this.getTileData().getInt("fuel");
     }
 
     public void setFuel(int amount)
     {
-        fuel = Math.min(amount, MAX_FUEL);
+        this.getTileData().putInt("fuel", Math.min(amount, MAX_FUEL));
     }
 
     public LazyOptional<IItemHandler> getCap()

@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import dev.momostudios.coldsweat.common.container.SewingContainer;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -56,7 +58,7 @@ public class SewingTableBlock extends Block implements MenuProvider
         }
         else
         {
-            player.openMenu(this);
+            NetworkHooks.openGui((ServerPlayer)player, this, pos);
             return InteractionResult.CONSUME;
         }
     }

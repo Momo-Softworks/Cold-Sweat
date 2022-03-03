@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.core.capabilities;
+package dev.momostudios.coldsweat.common.capability;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
