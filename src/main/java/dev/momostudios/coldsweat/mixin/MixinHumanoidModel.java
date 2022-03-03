@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -16,13 +16,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HumanoidModel.class)
-public class MixinBipedModel
+public class MixinHumanoidModel
 {
-    @Shadow
-    public HumanoidModel.ArmPose rightArmPose;
-
-    @Shadow
-    public HumanoidModel.ArmPose leftArmPose;
+    HumanoidModel model = (HumanoidModel) (Object) this;
 
     @Final
     @Shadow
@@ -48,7 +44,7 @@ public class MixinBipedModel
         float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
         float rightArmRot = armRot + rotOffset;
 
-        switch (this.rightArmPose)
+        switch (model.rightArmPose)
         {
             case EMPTY -> {
                 this.rightArm.xRot = this.rightArm.xRot - rightArmRot;
@@ -78,7 +74,7 @@ public class MixinBipedModel
         float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
         float leftArmRot = armRot + rotOffset;
 
-        switch (this.leftArmPose)
+        switch (model.leftArmPose)
         {
             case EMPTY -> {
                 this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
