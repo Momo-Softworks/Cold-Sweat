@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import dev.momostudios.coldsweat.util.WorldHelper;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
@@ -33,11 +33,11 @@ public class BiomeTempModifier extends TempModifier
                 for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
                 {
                     Biome biome = player.level.getBiome(blockPos);
-                    worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().getRegistryName());
+                    worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().location());
 
                     // Should temperature be overridden by config
                     TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
-                    TempOverride dimensionOverride = dimensionOverride(player.level.dimension().getRegistryName());
+                    TempOverride dimensionOverride = dimensionOverride(player.level.dimension().location());
 
                     if (dimensionOverride.override)
                     {
@@ -52,7 +52,8 @@ public class BiomeTempModifier extends TempModifier
                 }
                 setArgument("value", temp.get() + (worldTemp / 200));
             }
-            catch (Exception e) {}
+            catch (Exception e) {
+            }
         }
         return (double) getArgument("value");
     }
