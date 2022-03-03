@@ -1,13 +1,20 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.*;
-import dev.momostudios.coldsweat.core.capabilities.*;
+import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -60,8 +67,6 @@ public class ColdSweat
     @SubscribeEvent
     public void commonSetup(final FMLCommonSetupEvent event)
     {
-        //CapabilityManager.INSTANCE.register(IBlockStorageCap.class, new HearthRadiusCapStorage(), HearthRadiusCapability::new);
-        //CapabilityManager.INSTANCE.register(PlayerTempCapability.class, new DummyStorage(), PlayerTempCapability::new);
         ColdSweatPacketHandler.init();
     }
 
@@ -70,5 +75,44 @@ public class ColdSweat
     public void clientSetup(final FMLClientSetupEvent event)
     {
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH.get(), RenderType.cutoutMipped());
+
+        event.enqueueWork(() ->
+        {
+            ItemProperties.register(ModItems.HELLSPRING_LAMP, new ResourceLocation(ColdSweat.MOD_ID, "hellspring_state"), (stack, level, entity, id) ->
+            {
+                if (stack.getOrCreateTag().getBoolean("isOn"))
+                {
+                    return stack.getOrCreateTag().getInt("fuel") > 43 ? 3 :
+                            stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
+                }
+                return 0;
+            });
+
+            ItemProperties.register(ModItems.THERMOMETER, new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, entity, id) ->
+            {
+                Player player = Minecraft.getInstance().player;
+                if (player != null)
+                {
+                    ConfigCache config = ConfigCache.getInstance();
+                    float minTemp = (float) config.minTemp;
+                    float maxTemp = (float) config.maxTemp;
+
+                    float ambientTemp = (float) PlayerHelper.getTemperature(player, Temperature.Types.AMBIENT).get();
+
+                    float ambientAdjusted = ambientTemp - minTemp;
+                    float tempScaleFactor = 1 / ((maxTemp - minTemp) / 2);
+
+                    return ambientAdjusted * tempScaleFactor - 1;
+                }
+                return 1;
+            });
+        });
+    }
+
+    @SubscribeEvent
+    public static void onCapInit(RegisterCapabilitiesEvent event)
+    {
+        event.register(ITemperatureCap.class);
+        event.register(IBlockStorageCap.class);
     }
 }
