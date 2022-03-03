@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.util;
 
-public class ItemEntry
+public class ConfigEntry
 {
     public String id;
     public int value;
 
-    public ItemEntry(String id, int value)
+    public ConfigEntry(String id, int value)
     {
         this.id = id;
         this.value = value;

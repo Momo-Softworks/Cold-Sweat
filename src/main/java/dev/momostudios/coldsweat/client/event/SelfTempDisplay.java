@@ -3,7 +3,10 @@ package dev.momostudios.coldsweat.client.event;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -16,13 +19,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SelfTempDisplay
 {
-    public static PlayerTempCapability playerCap = null;
+    public static ITemperatureCap playerCap = null;
     static int iconBob = 0;
 
     @SubscribeEvent
@@ -37,9 +39,9 @@ public class SelfTempDisplay
             int scaleY = event.getWindow().getGuiScaledHeight();
 
             if (playerCap == null || entity.tickCount % 40 == 0)
-                playerCap = entity.getCapability(PlayerTempCapability.TEMPERATURE).orElse(new PlayerTempCapability());
+                playerCap = entity.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
 
-            int temp = (int) playerCap.get(PlayerHelper.Types.COMPOSITE);
+            int temp = (int) playerCap.get(Temperature.Types.COMPOSITE);
 
             int threatLevel = 0;
 
@@ -82,7 +84,7 @@ public class SelfTempDisplay
             }
 
             // Render Icon
-            mc.getTextureManager().bindForSetup(icon);
+            RenderSystem.setShaderTexture(0, icon);
             GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 

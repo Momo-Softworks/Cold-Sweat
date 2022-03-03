@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.config.ConfigCache;
-import dev.momostudios.coldsweat.util.registrylists.ModEffects;
+import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;

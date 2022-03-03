@@ -1,6 +1,6 @@
-package dev.momostudios.coldsweat.core.capabilities;
+package dev.momostudios.coldsweat.common.capability;
 
-import dev.momostudios.coldsweat.util.SpreadPath;
+import dev.momostudios.coldsweat.util.world.SpreadPath;
 import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;

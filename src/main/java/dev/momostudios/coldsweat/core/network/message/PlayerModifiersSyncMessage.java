@@ -1,5 +1,7 @@
 package dev.momostudios.coldsweat.core.network.message;
 
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -7,9 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import dev.momostudios.coldsweat.util.NBTHelper;
-import dev.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
@@ -23,9 +23,6 @@ public class PlayerModifiersSyncMessage
     public List<TempModifier> base;
     public List<TempModifier> rate;
 
-    public PlayerModifiersSyncMessage() {
-    }
-
     public PlayerModifiersSyncMessage(List<TempModifier> ambient, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
         this.ambient = ambient;
         this.body = body;
@@ -35,10 +32,10 @@ public class PlayerModifiersSyncMessage
 
     public static void encode(PlayerModifiersSyncMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.AMBIENT));
-        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.BODY));
-        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.BASE));
-        buffer.writeNbt(writeToNBT(message, PlayerHelper.Types.RATE));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.AMBIENT));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.BODY));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.BASE));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.RATE));
     }
 
     public static PlayerModifiersSyncMessage decode(FriendlyByteBuf buffer)
@@ -50,13 +47,13 @@ public class PlayerModifiersSyncMessage
                 readFromNBT(buffer.readNbt()));
     }
 
-    private static CompoundTag writeToNBT(PlayerModifiersSyncMessage message, PlayerHelper.Types type)
+    private static CompoundTag writeToNBT(PlayerModifiersSyncMessage message, Temperature.Types type)
     {
         CompoundTag nbt = new CompoundTag();
         List<TempModifier> referenceList =
-                type == PlayerHelper.Types.AMBIENT ? message.ambient :
-                type == PlayerHelper.Types.BODY ? message.body :
-                type == PlayerHelper.Types.BASE ? message.base :
+                type == Temperature.Types.AMBIENT ? message.ambient :
+                type == Temperature.Types.BODY ? message.body :
+                type == Temperature.Types.BASE ? message.base :
                 message.rate;
 
         // Iterate modifiers and write to NBT
@@ -96,30 +93,26 @@ public class PlayerModifiersSyncMessage
 
     public static DistExecutor.SafeRunnable syncTemperature(PlayerModifiersSyncMessage message)
     {
-        return new DistExecutor.SafeRunnable()
+        return () ->
         {
-            @Override
-            public void run()
+            LocalPlayer player = Minecraft.getInstance().player;
+
+            if (player != null)
             {
-                LocalPlayer player = Minecraft.getInstance().player;
-
-                if (player != null)
+                player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
-                    player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
-                    {
-                        cap.clearModifiers(PlayerHelper.Types.AMBIENT);
-                        cap.getModifiers(PlayerHelper.Types.AMBIENT).addAll(message.ambient);
+                    cap.clearModifiers(Temperature.Types.AMBIENT);
+                    cap.getModifiers(Temperature.Types.AMBIENT).addAll(message.ambient);
 
-                        cap.clearModifiers(PlayerHelper.Types.BODY);
-                        cap.getModifiers(PlayerHelper.Types.BODY).addAll(message.body);
+                    cap.clearModifiers(Temperature.Types.BODY);
+                    cap.getModifiers(Temperature.Types.BODY).addAll(message.body);
 
-                        cap.clearModifiers(PlayerHelper.Types.BASE);
-                        cap.getModifiers(PlayerHelper.Types.BASE).addAll(message.base);
+                    cap.clearModifiers(Temperature.Types.BASE);
+                    cap.getModifiers(Temperature.Types.BASE).addAll(message.base);
 
-                        cap.clearModifiers(PlayerHelper.Types.RATE);
-                        cap.getModifiers(PlayerHelper.Types.RATE).addAll(message.rate);
-                    });
-                }
+                    cap.clearModifiers(Temperature.Types.RATE);
+                    cap.getModifiers(Temperature.Types.RATE).addAll(message.rate);
+                });
             }
         };
     }

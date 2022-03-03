@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.registrylists;
+package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import net.minecraft.world.item.Item;

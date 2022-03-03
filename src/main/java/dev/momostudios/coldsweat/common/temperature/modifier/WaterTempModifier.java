@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.core.particles.ParticleTypes;
@@ -49,8 +49,8 @@ public class WaterTempModifier extends TempModifier
         catch (Exception e)
         {
             e.printStackTrace();
-            args.remove("strength");
-            args.put("strength", 1d);
+            clearArgument("strength");
+            setArgument("strength", 1d);
             return temp.get();
         }
     }

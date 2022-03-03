@@ -1,37 +1,38 @@
 package dev.momostudios.coldsweat.core.event;
 
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
+import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
-import dev.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID)
 public class PlayerTempUpdater
 {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide)
+        if (event.phase == TickEvent.Phase.START && !event.player.level.isClientSide)
         {
             if (event.player.tickCount % 20 == 0)
             {
-                event.player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+                event.player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
                     PlayerHelper.updateModifiers(event.player,
-                            cap.getModifiers(PlayerHelper.Types.BODY),
-                            cap.getModifiers(PlayerHelper.Types.BASE),
-                            cap.getModifiers(PlayerHelper.Types.AMBIENT),
-                            cap.getModifiers(PlayerHelper.Types.RATE));
+                            cap.getModifiers(Temperature.Types.BODY),
+                            cap.getModifiers(Temperature.Types.BASE),
+                            cap.getModifiers(Temperature.Types.AMBIENT),
+                            cap.getModifiers(Temperature.Types.RATE));
                 });
             }
 
-            event.player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap -> cap.tickUpdate(event.player));
+            event.player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap -> cap.tickUpdate(event.player));
         }
     }
-
 
     @SubscribeEvent
     public static void serverSyncConfigToCache(TickEvent.WorldTickEvent event)

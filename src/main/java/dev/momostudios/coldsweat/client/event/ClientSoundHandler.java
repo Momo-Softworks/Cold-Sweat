@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import dev.momostudios.coldsweat.util.registrylists.ModSounds;
+import dev.momostudios.coldsweat.util.registries.ModSounds;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientSoundHandler

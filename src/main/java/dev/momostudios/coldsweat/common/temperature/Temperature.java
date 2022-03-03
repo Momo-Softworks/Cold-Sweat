@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -86,10 +85,36 @@ public class Temperature
     public Temperature with(@Nonnull List<TempModifier> modifiers, @Nonnull Player player)
     {
         Temperature temp2 = new Temperature(this.temp);
-        for(TempModifier modifier : new ArrayList<>(modifiers))
+        for (TempModifier modifier : modifiers)
         {
             temp2.set(modifier.calculate(temp2, player));
         }
         return temp2;
+    }
+
+    /**
+     * Defines all temperature stats in Cold Sweat. <br>
+     * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
+     * <br>
+     * {@link #AMBIENT}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
+     * {@link #BODY}: The temperature of the player's body. <br>
+     * {@link #BASE}: A static offset applied to the player's body temperature. <br>
+     * {@link #COMPOSITE}: The sum of the player's body and base temperatures. (CANNOT be set) <br>
+     * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
+     */
+    public enum Types
+    {
+        AMBIENT,
+        BODY,
+        BASE,
+        COMPOSITE,
+        RATE
+    }
+
+    public enum Units
+    {
+        F,
+        C,
+        MC
     }
 }

@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import dev.momostudios.coldsweat.util.WorldHelper;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;

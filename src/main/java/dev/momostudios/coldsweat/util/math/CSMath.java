@@ -1,12 +1,19 @@
-package dev.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util.math;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class CSMath
 {
@@ -18,31 +25,31 @@ public class CSMath
      * @param absolute Used when dealing with ambient temperatures with Minecraft units.
      * @return The converted temperature.
      */
-    public static double convertUnits(double value, Units from, Units to, boolean absolute)
+    public static double convertUnits(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
     {
         switch (from)
         {
             case C:
-                switch (to)
+                return switch (to)
                 {
-                    case C: return value;
-                    case F: return value * 1.8 + 32d;
-                    case MC: return value / 23.333333333d;
-                }
+                    case C -> value;
+                    case F -> value * 1.8 + 32d;
+                    case MC -> value / 23.333333333d;
+                };
             case F:
-                switch (to)
+                return switch (to)
                 {
-                    case C: return (value - 32) / 1.8;
-                    case F: return value;
-                    case MC: return (value - (absolute ? 32d : 0d)) / 42d;
-                }
+                    case C -> (value - 32) / 1.8;
+                    case F -> value;
+                    case MC -> (value - (absolute ? 32d : 0d)) / 42d;
+                };
             case MC:
-                switch (to)
+                return switch (to)
                 {
-                    case C: return value * 23.333333333d;
-                    case F: return value * 42d + (absolute ? 32d : 0d);
-                    case MC: return value;
-                }
+                    case C -> value * 23.333333333d;
+                    case F -> value * 42d + (absolute ? 32d : 0d);
+                    case MC -> value;
+                };
             default: return value;
         }
     }
@@ -55,8 +62,8 @@ public class CSMath
         return input * (float) (180 / Math.PI);
     }
 
-    public static double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(value, max));
+    public static <T extends Number> T clamp(T value, T min, T max) {
+        return value.doubleValue() < min.doubleValue() ? min : value.doubleValue() > max.doubleValue() ? max : value;
     }
 
     public static boolean isBetween(Number value, Number min, Number max) {
@@ -154,5 +161,35 @@ public class CSMath
     public static BlockPos offsetDirection(BlockPos pos, Direction direction)
     {
         return pos.offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
+    }
+
+    public static <T> void breakableForEach(Collection<T> collection, BiConsumer<T, InterruptableStreamer<T>> consumer)
+    {
+        new InterruptableStreamer<T>(collection).run(consumer);
+    }
+
+    /**
+     * A deobfuscated version of GuiComponent's innerBlit function.
+     */
+    public static void blit(Matrix4f matrix, int leftX, int rightX, int bottomY, int topY, int level, float leftU, float rightU, float bottomV, float topV)
+    {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(matrix, (float) leftX,  (float) topY,    (float) level).uv(leftU,  topV).endVertex();
+        bufferbuilder.vertex(matrix, (float) rightX, (float) topY,    (float) level).uv(rightU, topV).endVertex();
+        bufferbuilder.vertex(matrix, (float) rightX, (float) bottomY, (float) level).uv(rightU, bottomV).endVertex();
+        bufferbuilder.vertex(matrix, (float) leftX,  (float) bottomY, (float) level).uv(leftU,  bottomV).endVertex();
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
+    }
+
+    public static void tryCatch(Runnable runnable)
+    {
+        try
+        {
+            runnable.run();
+        }
+        catch (Throwable throwable) {}
     }
 }

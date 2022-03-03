@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.core.network.message;
 
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import dev.momostudios.coldsweat.util.PlayerHelper;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -58,12 +58,12 @@ public class PlayerTempSyncMessage
 
                 if (player != null && !player.isSpectator())
                 {
-                    player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(cap ->
+                    player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.set(PlayerHelper.Types.BODY, body);
-                        cap.set(PlayerHelper.Types.BASE, base);
-                        cap.set(PlayerHelper.Types.COMPOSITE, body + base);
-                        cap.set(PlayerHelper.Types.AMBIENT, ambient);
+                        cap.set(Temperature.Types.BODY, body);
+                        cap.set(Temperature.Types.BASE, base);
+                        cap.set(Temperature.Types.COMPOSITE, body + base);
+                        cap.set(Temperature.Types.AMBIENT, ambient);
                     });
                 }
             }

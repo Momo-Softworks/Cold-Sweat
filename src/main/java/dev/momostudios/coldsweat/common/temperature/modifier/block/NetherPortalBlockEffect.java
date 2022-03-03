@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class NetherPortalBlockEffect extends BlockEffect

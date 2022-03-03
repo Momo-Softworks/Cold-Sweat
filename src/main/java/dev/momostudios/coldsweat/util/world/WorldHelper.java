@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,9 +22,9 @@ import java.util.List;
 public class WorldHelper
 {
     /**
-     * Iterates through every other block until it reaches minecraft:air, then returns the Y value<br>
+     * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
      * Ignores minecraft:cave_air<br>
-     * This is different from {@code world.getHeight()} because it attempts to ignore blocks that are floating in the air
+     * This is different from {@code world.getHeight()} because it attempts to ignore floating blocks
      */
     public static int getGroundLevel(BlockPos pos, Level world)
     {

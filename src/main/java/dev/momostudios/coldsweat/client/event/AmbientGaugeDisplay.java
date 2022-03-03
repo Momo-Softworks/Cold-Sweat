@@ -1,13 +1,12 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
-import dev.momostudios.coldsweat.core.capabilities.PlayerTempCapability;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.PlayerHelper;
-import dev.momostudios.coldsweat.util.Units;
-import dev.momostudios.coldsweat.util.registrylists.ModItems;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +44,7 @@ public class AmbientGaugeDisplay
             boolean bobbing = CCS.iconBobbing();
 
             // Get player ambient temperature
-            double temp = CSMath.convertUnits(clientTemp, CCS.celsius() ? Units.C : Units.F, Units.MC, true);
+            double temp = CSMath.convertUnits(clientTemp, CCS.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Set default color (white)
             int color = 14737376;
@@ -78,7 +77,7 @@ public class AmbientGaugeDisplay
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
-            Minecraft.getInstance().getTextureManager().bindForSetup(gaugeTexture);
+            RenderSystem.setShaderTexture(0, gaugeTexture);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94, scaleY - 19, 0, 0, 25, 16, 25, 16);
 
@@ -109,11 +108,11 @@ public class AmbientGaugeDisplay
     {
         if (Minecraft.getInstance().player != null)
         {
-            Minecraft.getInstance().player.getCapability(PlayerTempCapability.TEMPERATURE).ifPresent(temp ->
+            Minecraft.getInstance().player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(temp ->
             {
                 boolean celsius = CCS.celsius();
 
-                double tempReadout = CSMath.convertUnits(temp.get(PlayerHelper.Types.AMBIENT), Units.MC, celsius ? Units.C : Units.F, true);
+                double tempReadout = CSMath.convertUnits(temp.get(Temperature.Types.AMBIENT), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                 prevClientTemp = clientTemp;
 
                 clientTemp = clientTemp + (tempReadout - clientTemp) / 10.0;

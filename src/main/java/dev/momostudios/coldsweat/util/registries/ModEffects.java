@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.registrylists;
+package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.core.init.EffectInit;
 import net.minecraft.world.effect.MobEffect;

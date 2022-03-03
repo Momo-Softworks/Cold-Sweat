@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.gui.config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.core.network.message.ClientConfigSendMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,9 +27,7 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.Units;
-import org.lwjgl.opengl.GL11;
+import dev.momostudios.coldsweat.util.math.CSMath;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -265,8 +264,8 @@ public class ConfigScreen
             // Super Easy
             if (configCache.difficulty == 0)
             {
-                configCache.minTemp = CSMath.convertUnits(40, Units.F, Units.MC, true);
-                configCache.maxTemp = CSMath.convertUnits(120, Units.F, Units.MC, true);
+                configCache.minTemp = CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true);
+                configCache.maxTemp = CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true);
                 configCache.rate = 0.5;
                 configCache.showAmbient = false;
                 configCache.damageScaling = false;
@@ -276,8 +275,8 @@ public class ConfigScreen
             // Easy
             else if (configCache.difficulty == 1)
             {
-                configCache.minTemp = CSMath.convertUnits(45, Units.F, Units.MC, true);
-                configCache.maxTemp = CSMath.convertUnits(110, Units.F, Units.MC, true);
+                configCache.minTemp = CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true);
+                configCache.maxTemp = CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true);
                 configCache.rate = 0.75;
                 configCache.showAmbient = false;
                 configCache.damageScaling = false;
@@ -287,8 +286,8 @@ public class ConfigScreen
             // Normal
             else if (configCache.difficulty == 2)
             {
-                configCache.minTemp = CSMath.convertUnits(50, Units.F, Units.MC, true);
-                configCache.maxTemp = CSMath.convertUnits(100, Units.F, Units.MC, true);
+                configCache.minTemp = CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true);
+                configCache.maxTemp = CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true);
                 configCache.rate = 1.0;
                 configCache.showAmbient = true;
                 configCache.damageScaling = true;
@@ -298,8 +297,8 @@ public class ConfigScreen
             // Hard
             else if (configCache.difficulty == 3)
             {
-                configCache.minTemp = CSMath.convertUnits(60, Units.F, Units.MC, true);
-                configCache.maxTemp = CSMath.convertUnits(90, Units.F, Units.MC, true);
+                configCache.minTemp = CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true);
+                configCache.maxTemp = CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true);
                 configCache.rate = 1.5;
                 configCache.showAmbient = true;
                 configCache.damageScaling = true;
@@ -421,7 +420,7 @@ public class ConfigScreen
 
             this.maxTempInput = new EditBox(font, maxBoxX, this.height / 4 + 52, 51, 22, new TextComponent(""));
             this.maxTempInput.setValue(String.valueOf(twoPlaces.format(
-                    CSMath.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+                    CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
 
             // Min Temperature
             int minBoxX = getWidth("cold_sweat.config.min_temperature.name", font) < 98 ?
@@ -429,7 +428,7 @@ public class ConfigScreen
 
             this.minTempInput = new EditBox(font, minBoxX, this.height / 4 + 84, 51, 22, new TextComponent(""));
             this.minTempInput.setValue(String.valueOf(twoPlaces.format(
-                    CSMath.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+                    CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
 
             // Rate Multiplier
             int rateBoxX = getWidth("cold_sweat.config.rate_multiplier.name", font) < 98 ?
@@ -533,8 +532,8 @@ public class ConfigScreen
             rateMultInput.tick();
             if (mc.player != null && mc.player.getPermissionLevel() < 2)
             {
-                maxTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
-                minTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+                maxTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
+                minTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
                 rateMultInput.setValue(String.valueOf(configCache.rate));
             }
         }
@@ -550,12 +549,12 @@ public class ConfigScreen
 
             try
             {
-                configCache.maxTemp = CSMath.convertUnits(Double.parseDouble(maxTempInput.getValue()), celsius ? Units.C : Units.F, Units.MC, true);
+                configCache.maxTemp = CSMath.convertUnits(Double.parseDouble(maxTempInput.getValue()), celsius ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             } catch (Exception e) {}
 
             try
             {
-                configCache.minTemp = CSMath.convertUnits(Double.parseDouble(minTempInput.getValue()), celsius ? Units.C : Units.F, Units.MC, true);
+                configCache.minTemp = CSMath.convertUnits(Double.parseDouble(minTempInput.getValue()), celsius ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             } catch (Exception e) {}
 
             try
@@ -582,8 +581,8 @@ public class ConfigScreen
                 (this.celsius ? new TranslatableComponent("cold_sweat.config.celsius.name").getString() :
                                 new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString())));
 
-            minTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.minTemp, Units.MC, celsius ? Units.C : Units.F, true))));
-            maxTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.maxTemp, Units.MC, celsius ? Units.C : Units.F, true))));
+            minTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
+            maxTempInput.setValue(String.valueOf(twoPlaces.format(CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true))));
         }
 
         public void toggleIceRes()

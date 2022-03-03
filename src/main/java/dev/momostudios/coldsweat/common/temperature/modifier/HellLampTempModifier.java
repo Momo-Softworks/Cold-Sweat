@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
-import dev.momostudios.coldsweat.util.CSMath;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.world.entity.player.Player;
