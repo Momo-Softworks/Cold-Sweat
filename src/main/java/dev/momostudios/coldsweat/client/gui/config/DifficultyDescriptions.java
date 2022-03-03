@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.Units;
+import dev.momostudios.coldsweat.util.math.CSMath;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -99,6 +99,6 @@ public class DifficultyDescriptions
     private static String getTemp(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + temp + rs + " °F / " + color + df.format(CSMath.convertUnits(temp, Units.F, Units.C, true)) + rs + " °C";
+        return color + temp + rs + " °F / " + color + df.format(CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true)) + rs + " °C";
     }
 }

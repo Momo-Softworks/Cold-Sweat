@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.Units;
+import dev.momostudios.coldsweat.common.temperature.Temperature;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -81,11 +81,11 @@ public class ColdSweatConfig
          */
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
-                .comment("Minimum habitable temperature (default: " + CSMath.convertUnits(50, Units.F, Units.MC, true) + ")")
-                .defineInRange("Minimum Habitable Temperature", CSMath.convertUnits(50, Units.F, Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Minimum habitable temperature (default: " + CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true) + ")")
+                .defineInRange("Minimum Habitable Temperature", CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
-                .comment("Maximum habitable temperature (default: " + CSMath.convertUnits(100, Units.F, Units.MC, true) + ")")
-                .defineInRange("Maximum Habitable Temperature", CSMath.convertUnits(100, Units.F, Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Maximum habitable temperature (default: " + CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true) + ")")
+                .defineInRange("Maximum Habitable Temperature", CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
