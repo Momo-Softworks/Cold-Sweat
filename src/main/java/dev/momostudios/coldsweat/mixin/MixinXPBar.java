@@ -40,8 +40,6 @@ public class MixinXPBar
                 // Draw XP bar
                 mc.getProfiler().push("expBar");
                 RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/xp_bars.png"));
-                int i = mc.player.totalExperience;
-                if (i > 0)
                 {
                     int l = screenHeight - 32 + 2;
                     // Render shorter bar to make room for experience level
@@ -57,7 +55,7 @@ public class MixinXPBar
                     // Render full bar if player is level 0
                     else
                     {
-                        int k = (int) (mc.player.totalExperience * 183.0F);
+                        int k = (int) (mc.player.experienceProgress * 183.0F);
                         gui.blit(matrixStack, xPos - 10, l, 0, 74, 182, 5);
                         if (k > 0)
                         {
