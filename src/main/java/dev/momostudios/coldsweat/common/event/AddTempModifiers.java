@@ -4,8 +4,9 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.*;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
-import dev.momostudios.coldsweat.util.PlayerHelper;
-import dev.momostudios.coldsweat.util.registrylists.ModEffects;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.registries.ModEffects;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
@@ -28,12 +29,12 @@ public class AddTempModifiers
              */
             if (player.tickCount % 20 == 0)
             {
-                PlayerHelper.addModifier(player, new BiomeTempModifier(), PlayerHelper.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new TimeTempModifier(), PlayerHelper.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new DepthTempModifier(), PlayerHelper.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new BlockTempModifier(), PlayerHelper.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new BiomeTempModifier(), Temperature.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new TimeTempModifier(), Temperature.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new DepthTempModifier(), Temperature.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new BlockTempModifier(), Temperature.Types.AMBIENT, false);
                 if (ModList.get().isLoaded("sereneseasons"))
-                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), PlayerHelper.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), Temperature.Types.AMBIENT, false);
                 /*
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);
@@ -42,23 +43,9 @@ public class AddTempModifiers
                 // Hearth
                 if (player.hasEffect(ModEffects.INSULATION))
                 {
-                    int potionLevel = player.getEffect(ModEffects.INSULATION).getAmplifier() + 1;
-                    if (PlayerHelper.hasModifier(player, HearthTempModifier.class, PlayerHelper.Types.AMBIENT))
-                    {
-                        PlayerHelper.forEachModifier(player, PlayerHelper.Types.AMBIENT, (modifier) ->
-                        {
-                            if (modifier instanceof HearthTempModifier)
-                            {
-                                modifier.setArgument("strength", potionLevel);
-                            }
-                        });
-                    }
-                    else
-                        PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel), PlayerHelper.Types.AMBIENT, false);
-                }
-                else if (PlayerHelper.hasModifier(player, HearthTempModifier.class, PlayerHelper.Types.AMBIENT))
-                {
-                    PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier -> modifier instanceof HearthTempModifier);
+                    MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
+                    int potionLevel = effect.getAmplifier() + 1;
+                    PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(effect.getDuration()), Temperature.Types.AMBIENT, false);
                 }
             }
 
@@ -67,19 +54,19 @@ public class AddTempModifiers
             {
                 if (player.isInWaterRainOrBubble())
                 {
-                    PlayerHelper.addModifier(player, new WaterTempModifier(0.01), PlayerHelper.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, new WaterTempModifier(0.01), Temperature.Types.AMBIENT, false);
                 }
-                else if (PlayerHelper.hasModifier(player, WaterTempModifier.class, PlayerHelper.Types.AMBIENT))
+                else
                 {
-                    PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier ->
+                    PlayerHelper.removeModifiers(player, Temperature.Types.AMBIENT, 999, modifier ->
                             modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
                 }
             }
 
             // Nether Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, PlayerHelper.Types.AMBIENT))
+            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.AMBIENT))
             {
-                PlayerHelper.removeModifiers(player, PlayerHelper.Types.AMBIENT, 1, modifier -> modifier instanceof HellLampTempModifier);
+                PlayerHelper.removeModifiers(player, Temperature.Types.AMBIENT, 1, modifier -> modifier instanceof HellLampTempModifier);
             }
             else
             {
@@ -95,8 +82,8 @@ public class AddTempModifiers
         {
             if (player.isSleeping())
             {
-                Temperature temp = PlayerHelper.getTemperature(player, PlayerHelper.Types.BODY);
-                PlayerHelper.setTemperature(player, new Temperature(temp.get() / 4), PlayerHelper.Types.BODY);
+                dev.momostudios.coldsweat.common.temperature.Temperature temp = PlayerHelper.getTemperature(player, Temperature.Types.BODY);
+                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.common.temperature.Temperature(temp.get() / 4), Temperature.Types.BODY);
             }
         });
     }
