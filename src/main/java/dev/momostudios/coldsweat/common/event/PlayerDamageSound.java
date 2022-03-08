@@ -6,7 +6,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
-import dev.momostudios.coldsweat.util.entity.CSDamageSource;
+import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import net.minecraftforge.network.PacketDistributor;
 
 @Mod.EventBusSubscriber
@@ -15,7 +15,7 @@ public class PlayerDamageSound
     @SubscribeEvent
     public static void onPlayerHurt(LivingHurtEvent event)
     {
-        if (event.getSource().equals(CSDamageSource.COLD))
+        if (event.getSource().equals(ModDamageSources.COLD))
         {
             if (event.getEntity() instanceof Player && !event.getEntity().level.isClientSide)
             {

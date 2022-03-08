@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.util.entity;
 
 import net.minecraft.world.damagesource.DamageSource;
 
-public class CSDamageSource
+public class ModDamageSources
 {
     public static final DamageSource COLD = (new DamageSource("cold"))
         .bypassArmor()
