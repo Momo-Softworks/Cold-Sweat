@@ -1,9 +1,17 @@
 package dev.momostudios.coldsweat.client.particle;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -21,7 +29,7 @@ public class HearthParticle extends TextureSheetParticle
 
         this.alpha = 0.0f;
         this.setSize(size, size);
-        this.scale(0.4f + (float) (Math.random() / 2.5f));
+        this.scale(3f + (float) Math.random());
         this.lifetime = 40;
         this.gravity = -0.01f;
         this.hasPhysics = true;
@@ -31,7 +39,7 @@ public class HearthParticle extends TextureSheetParticle
 
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
     }
 
     @Override

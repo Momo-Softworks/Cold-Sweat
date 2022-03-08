@@ -30,6 +30,7 @@ public class VaporParticle extends TextureSheetParticle
         this.alpha = 0.0f;
         this.maxAlpha = (float) (Math.random() / 3 + 0.2f);
         this.scale(3f + (float) (Math.random() / 2.5f));
+        this.setSize(quadSize / 10f, quadSize / 10f);
         this.lifetime = 40;
         this.hasPhysics = true;
         this.setParticleSpeed(vx, vy, vz);
@@ -40,8 +41,9 @@ public class VaporParticle extends TextureSheetParticle
 
     @Nonnull
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public ParticleRenderType getRenderType()
+    {
+        return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
     }
 
     @Override
