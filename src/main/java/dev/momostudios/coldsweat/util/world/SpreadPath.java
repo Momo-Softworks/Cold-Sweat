@@ -11,6 +11,7 @@ public class SpreadPath
     public int y;
     public int z;
     public int step = 0;
+    public boolean isFrozen = false;
 
     public SpreadPath(BlockPos pos)
     {
