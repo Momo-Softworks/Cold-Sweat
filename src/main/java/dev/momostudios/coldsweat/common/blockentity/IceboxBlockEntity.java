@@ -72,64 +72,59 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
             iceboxTE.ticksExisted++;
             iceboxTE.ticksExisted %= 1000;
 
-            if (!level.isClientSide)
+            if (iceboxTE.getFuel() > 0)
             {
-                if (iceboxTE.getFuel() > 0)
-                {
-                    if (!state.getValue(IceboxBlock.FROSTED))
-                        level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
+                if (!state.getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
-                    if (iceboxTE.ticksExisted % 20 == 0)
+                if (iceboxTE.ticksExisted % 20 == 0)
+                {
+                    boolean hasItemStacks = false;
+                    for (int i = 0; i < 10; i++)
                     {
-                        boolean hasItemStacks = false;
-                        for (int i = 0; i < 10; i++)
+                        if (iceboxTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") > -50)
                         {
-                            if (iceboxTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") > -50)
-                            {
-                                hasItemStacks = true;
-                                iceboxTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") - 1);
-                            }
+                            hasItemStacks = true;
+                            iceboxTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") - 1);
                         }
-                        if (hasItemStacks) iceboxTE.setFuel(iceboxTE.getFuel() - 1);
                     }
-                } else
-                {
-                    if (state.getValue(IceboxBlock.FROSTED))
-                        level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+                    if (hasItemStacks) iceboxTE.setFuel(iceboxTE.getFuel() - 1);
                 }
-
-                int itemFuel = iceboxTE.getItemFuel(iceboxTE.getItemInSlot(0));
-                if (itemFuel > 0)
-                {
-                    ItemStack item = iceboxTE.getItemInSlot(0);
-                    if (iceboxTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
-                    {
-                        if (item.hasContainerItem())
-                        {
-                            iceboxTE.setItemInSlot(0, item.getContainerItem());
-                        } else
-                        {
-                            iceboxTE.getItemInSlot(0).shrink(1);
-                        }
-
-                        iceboxTE.setFuel(iceboxTE.getFuel() + itemFuel);
-                    }
-                }
-
             }
             else
             {
-                if (state.getValue(IceboxBlock.FROSTED) && level.getGameTime() % 3 == 0 && Math.random() < 0.5)
+                if (state.getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+            }
+
+            int itemFuel = iceboxTE.getItemFuel(iceboxTE.getItemInSlot(0));
+            if (itemFuel > 0)
+            {
+                ItemStack item = iceboxTE.getItemInSlot(0);
+                if (iceboxTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
                 {
-                    double d0 = pos.getX() + 0.5;
-                    double d1 = pos.getY();
-                    double d2 = pos.getZ() + 0.5;
-                    boolean side = new Random().nextBoolean();
-                    double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
-                    double d6 = Math.random() * 0.3;
-                    double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
-                    level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
+                    if (item.hasContainerItem())
+                    {
+                        iceboxTE.setItemInSlot(0, item.getContainerItem());
+                    } else
+                    {
+                        iceboxTE.getItemInSlot(0).shrink(1);
+                    }
+
+                    iceboxTE.setFuel(iceboxTE.getFuel() + itemFuel);
                 }
+            }
+
+            if (state.getValue(IceboxBlock.FROSTED) && level.getGameTime() % 3 == 0 && Math.random() < 0.5)
+            {
+                double d0 = pos.getX() + 0.5;
+                double d1 = pos.getY();
+                double d2 = pos.getZ() + 0.5;
+                boolean side = new Random().nextBoolean();
+                double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+                double d6 = Math.random() * 0.3;
+                double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+                level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
             }
         }
     }
