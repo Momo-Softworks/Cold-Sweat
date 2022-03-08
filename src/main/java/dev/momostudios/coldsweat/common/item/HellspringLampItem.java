@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.item;
 
+import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.minecraft.world.entity.Entity;
@@ -12,8 +13,8 @@ import dev.momostudios.coldsweat.common.temperature.modifier.HellLampTempModifie
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.util.CSMath;
-import dev.momostudios.coldsweat.util.PlayerHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraftforge.network.PacketDistributor;
 
 public class HellspringLampItem extends Item
@@ -30,8 +31,8 @@ public class HellspringLampItem extends Item
         {
             Player player = (Player) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = PlayerHelper.hasModifier(player, HellLampTempModifier.class, PlayerHelper.Types.AMBIENT) ?
-                    player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, PlayerHelper.Types.AMBIENT).get();
+            double temp = PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD) ?
+                    player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
             // Fuel the item on creation
             if (!stack.getOrCreateTag().getBoolean("hasTicked"))
@@ -43,7 +44,7 @@ public class HellspringLampItem extends Item
             boolean validDimension = false;
             for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
             {
-                if (worldIn.dimension().toString().equals(id))
+                if (worldIn.dimension().location().toString().equals(id))
                 {
                     validDimension = true;
                     break;
@@ -56,13 +57,13 @@ public class HellspringLampItem extends Item
                 {
                     // Drain fuel
                     if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.02f * (float) CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1, 3));
+                        addFuel(stack, -0.02d * CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1d, 3d));
 
                     // Give effect to nearby players
-                    AABB bb = new AABB(player.getX() - 2, player.getY() - 2, player.getZ() - 2, player.getX() + 2, player.getY() + 2, player.getZ() + 2);
+                    AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
                     worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
                     {
-                        PlayerHelper.addModifier(e, new HellLampTempModifier(), PlayerHelper.Types.AMBIENT, false);
+                        PlayerHelper.addModifier(e, new HellLampTempModifier(), Temperature.Types.WORLD, false);
 
                         e.getPersistentData().putInt("soulLampTimeout", 5);
                     });
@@ -108,16 +109,16 @@ public class HellspringLampItem extends Item
         return slotChanged;
     }
 
-    private void setFuel(ItemStack stack, float fuel)
+    private void setFuel(ItemStack stack, double fuel)
     {
-        stack.getOrCreateTag().putFloat("fuel", fuel);
+        stack.getOrCreateTag().putDouble("fuel", fuel);
     }
-    private void addFuel(ItemStack stack, float fuel)
+    private void addFuel(ItemStack stack, double fuel)
     {
         setFuel(stack, getFuel(stack) + fuel);
     }
-    private float getFuel(ItemStack stack)
+    private double getFuel(ItemStack stack)
     {
-        return stack.getOrCreateTag().getFloat("fuel");
+        return stack.getOrCreateTag().getDouble("fuel");
     }
 }
