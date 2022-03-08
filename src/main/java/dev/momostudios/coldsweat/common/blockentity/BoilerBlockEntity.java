@@ -74,48 +74,46 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
             boilerTE.ticksExisted++;
             boilerTE.ticksExisted %= 1000;
 
-            if (!level.isClientSide)
+            if (boilerTE.getFuel() > 0)
             {
-                if (boilerTE.getFuel() > 0)
-                {
-                    if (!state.getValue(BoilerBlock.LIT))
-                        level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+                if (!state.getValue(BoilerBlock.LIT))
+                    level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
 
-                    if (boilerTE.ticksExisted % 20 == 0)
-                    {
-                        boolean hasItemStacks = false;
-                        for (int i = 0; i < 10; i++)
-                        {
-                            if (boilerTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
-                            {
-                                hasItemStacks = true;
-                                boilerTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
-                            }
-                        }
-                        if (hasItemStacks) boilerTE.setFuel(boilerTE.getFuel() - 1);
-                    }
-                } else if (state.getValue(BoilerBlock.LIT))
+                if (boilerTE.ticksExisted % 20 == 0)
                 {
-                    level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+                    boolean hasItemStacks = false;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (boilerTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
+                        {
+                            hasItemStacks = true;
+                            boilerTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
+                        }
+                    }
+                    if (hasItemStacks) boilerTE.setFuel(boilerTE.getFuel() - 1);
                 }
+            }
+            else if (state.getValue(BoilerBlock.LIT))
+            {
+                level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+            }
 
-                int itemFuel = boilerTE.getItemFuel(boilerTE.getItemInSlot(0));
-                if (itemFuel > 0)
+            int itemFuel = boilerTE.getItemFuel(boilerTE.getItemInSlot(0));
+            if (itemFuel > 0)
+            {
+                ItemStack item = boilerTE.getItemInSlot(0);
+                if (boilerTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
                 {
-                    ItemStack item = boilerTE.getItemInSlot(0);
-                    if (boilerTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
+                    if (item.hasContainerItem())
                     {
-                        if (item.hasContainerItem())
-                        {
-                            boilerTE.setItemInSlot(0, item.getContainerItem());
-                        }
-                        else
-                        {
-                            boilerTE.getItemInSlot(0).shrink(1);
-                        }
-
-                        boilerTE.setFuel(boilerTE.getFuel() + itemFuel);
+                        boilerTE.setItemInSlot(0, item.getContainerItem());
                     }
+                    else
+                    {
+                        boilerTE.getItemInSlot(0).shrink(1);
+                    }
+
+                    boilerTE.setFuel(boilerTE.getFuel() + itemFuel);
                 }
             }
         }

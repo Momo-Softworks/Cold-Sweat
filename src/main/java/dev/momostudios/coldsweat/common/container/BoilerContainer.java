@@ -68,7 +68,6 @@ public class BoilerContainer extends AbstractContainerMenu
 
     public int getFuel()
     {
-        System.out.println("Fuel: " + this.te.getFuel());
         return this.te.getFuel();
     }
 
