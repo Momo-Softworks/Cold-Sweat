@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.util.entity;
 
-import dev.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
@@ -113,12 +112,12 @@ public class NBTHelper
         });
 
         // Read the modifier's expiration time
-        if (modifier.getExpireTicks() != -1)
-            modifierTag.putInt("expireTicks", modifier.getExpireTicks());
+        if (modifier.getExpireTime() != -1)
+            modifierTag.putInt("expireTicks", modifier.getExpireTime());
 
         // Read the modifier's ticks left
-        if (modifier.getTicksExisted() > 0)
-            modifierTag.putInt("ticksLeft", modifier.getTicksExisted());
+        if (modifier.ticksExisted() > 0)
+            modifierTag.putInt("ticksLeft", modifier.ticksExisted());
 
         return modifierTag;
     }

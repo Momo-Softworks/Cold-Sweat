@@ -30,7 +30,7 @@ public class WaterTempModifier extends TempModifier
             double returnRate = Math.min(-0.0003, -0.0003 - (temp.get() / 800));
             double addAmount = player.isInWaterOrBubble() ? 0.01 : player.level.isRainingAt(player.blockPosition()) ? 0.005 : returnRate;
 
-            setArgument("strength", CSMath.clamp(strength + addAmount, 0, Math.abs(CSMath.average(maxTemp, minTemp) - temp.get()) / 2));
+            setArgument("strength", CSMath.clamp(strength + addAmount, 0d, Math.abs(CSMath.average(maxTemp, minTemp) - temp.get()) / 2));
 
             if (!player.isInWater() && strength > 0.0)
             {

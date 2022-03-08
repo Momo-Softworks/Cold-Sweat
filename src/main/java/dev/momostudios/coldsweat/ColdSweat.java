@@ -1,18 +1,23 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.client.event.WorldTempGaugeDisplay;
+import dev.momostudios.coldsweat.client.renderer.HearthBlockEntityRenderer;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -39,6 +44,8 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
+        bus.addListener(this::onCapInit);
+        bus.addListener(this::registerBlockRenderers);
         BlockInit.BLOCKS.register(bus);
         BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
         ContainerInit.CONTAINER_TYPES.register(bus);
@@ -94,15 +101,13 @@ public class ColdSweat
                 if (player != null)
                 {
                     ConfigCache config = ConfigCache.getInstance();
-                    float minTemp = (float) config.minTemp;
-                    float maxTemp = (float) config.maxTemp;
+                    double minTemp = config.minTemp;
+                    double maxTemp = config.maxTemp;
 
-                    float ambientTemp = (float) PlayerHelper.getTemperature(player, Temperature.Types.AMBIENT).get();
+                    double worldTemp = (float) CSMath.convertUnits(WorldTempGaugeDisplay.clientTemp, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
-                    float ambientAdjusted = ambientTemp - minTemp;
-                    float tempScaleFactor = 1 / ((maxTemp - minTemp) / 2);
-
-                    return ambientAdjusted * tempScaleFactor - 1;
+                    double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
+                    return (float) worldTempAdjusted;
                 }
                 return 1;
             });
@@ -110,9 +115,14 @@ public class ColdSweat
     }
 
     @SubscribeEvent
-    public static void onCapInit(RegisterCapabilitiesEvent event)
+    public void onCapInit(RegisterCapabilitiesEvent event)
     {
         event.register(ITemperatureCap.class);
-        event.register(IBlockStorageCap.class);
+    }
+
+    @SubscribeEvent
+    public void registerBlockRenderers(EntityRenderersEvent.RegisterRenderers event)
+    {
+        event.registerBlockEntityRenderer(BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get(), (BlockEntityRendererProvider<BlockEntity>) ctx -> new HearthBlockEntityRenderer());
     }
 }

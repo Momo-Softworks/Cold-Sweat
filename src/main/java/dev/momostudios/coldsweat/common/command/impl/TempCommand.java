@@ -115,7 +115,7 @@ public class TempCommand extends BaseCommand
             source.getPlayerOrException().sendMessage(new TextComponent(
             "\u00a77" +
             new TranslatableComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
-            " \u00a7f" + (int) PlayerHelper.getTemperature(player, Temperature.Types.COMPOSITE).get() + "\u00a7r"),
+            " \u00a7f" + (int) PlayerHelper.getTemperature(player, Temperature.Types.TOTAL).get() + "\u00a7r"),
             source.getPlayerOrException().getUUID());
         }
         return Command.SINGLE_SUCCESS;
