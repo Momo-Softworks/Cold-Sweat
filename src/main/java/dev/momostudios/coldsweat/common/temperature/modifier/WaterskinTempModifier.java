@@ -5,7 +5,10 @@ import net.minecraft.world.entity.player.Player;
 
 public class WaterskinTempModifier extends TempModifier
 {
-    public WaterskinTempModifier() {}
+    public WaterskinTempModifier()
+    {
+        addArgument("temperature", 0);
+    }
 
     public WaterskinTempModifier(double temp)
     {

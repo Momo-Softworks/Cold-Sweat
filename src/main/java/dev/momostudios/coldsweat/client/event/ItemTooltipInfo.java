@@ -27,16 +27,17 @@ public class ItemTooltipInfo
             double temp = event.getItemStack().getOrCreateTag().getDouble("temperature");
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";
-            temp = temp / 2 + 75;
+            temp = temp / 2 + 95;
             if (celsius) temp = CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
+            temp += ClientSettingsConfig.getInstance().tempOffset() / 2;
 
-            event.getToolTip().add(1, new TextComponent("\u00a77" + new TextComponent(
-                "item." + ColdSweat.MOD_ID + ".waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)\u00a7r"));
+            event.getToolTip().add(1, new TextComponent("\u00a77" + new TranslatableComponent(
+                "item.cold_sweat.waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)\u00a7r"));
         }
         else if ((event.getItemStack().getItem() instanceof ArmorItem) && event.getItemStack().getOrCreateTag().getBoolean("insulated"))
         {
             event.getToolTip().add(1, new TextComponent("\u00a7d" +
-                new TranslatableComponent("modifier." + ColdSweat.MOD_ID + ".insulated").getString() + "\u00a7r"));
+                new TranslatableComponent("modifier.cold_sweat.insulated").getString() + "\u00a7r"));
         }
         else if (event.getItemStack().getItem() == ModItems.HELLSPRING_LAMP)
         {
