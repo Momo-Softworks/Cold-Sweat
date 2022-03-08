@@ -33,14 +33,13 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
     }
 
     @SubscribeEvent
-    public static void onMouseClick(ScreenEvent.MouseClickedEvent event)
+    public static void onMouseClick(ScreenEvent.MouseClickedEvent.Pre event)
     {
         if (Minecraft.getInstance().screen instanceof HearthScreen screen)
         {
             if (screen.isHoveringButton(event.getMouseX(), event.getMouseY()))
             {
                 boolean showRad = screen.menu.te.getTileData().getBoolean("showRadius");
-                System.out.println(showRad);
 
                 screen.menu.te.getTileData().putBoolean("showRadius", !showRad);
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !showRad ? 1.9f : 1.5f, 0.75f));
