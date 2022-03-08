@@ -1,9 +1,10 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
@@ -20,17 +21,17 @@ public class PlayerTempUpdater
         {
             if (event.player.tickCount % 20 == 0)
             {
-                event.player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
                     PlayerHelper.updateModifiers(event.player,
                             cap.getModifiers(Temperature.Types.BODY),
                             cap.getModifiers(Temperature.Types.BASE),
-                            cap.getModifiers(Temperature.Types.AMBIENT),
+                            cap.getModifiers(Temperature.Types.WORLD),
                             cap.getModifiers(Temperature.Types.RATE));
                 });
             }
 
-            event.player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap -> cap.tickUpdate(event.player));
+            event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap -> cap.tickUpdate(event.player));
         }
     }
 

@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
-import dev.momostudios.coldsweat.common.capability.HearthRadiusCapability;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.BlockInit;
@@ -19,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -36,20 +36,18 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.common.block.HearthBlock;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.common.capability.IBlockStorageCap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class HearthBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider
+public class HearthBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider, ISpreadingArea
 {
     public static int slots = 1;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
@@ -81,7 +79,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         CompoundTag tag = super.getUpdateTag();
         tag.putInt("hotFuel",  this.getHotFuel());
         tag.putInt("coldFuel", this.getColdFuel());
-        tag.putBoolean("showRadius", this.getTileData().getBoolean("showRadius"));
         return tag;
     }
 
@@ -101,251 +98,255 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.items = itemsIn;
     }
 
-
-    public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
+    public static <T extends BlockEntity> void tickSelf(Level level, BlockPos pos, BlockState state, T te)
     {
-        if (te instanceof HearthBlockEntity hearth)
+        if (level.getBlockEntity(pos) instanceof HearthBlockEntity hearth)
         {
-            // Set to 'true' if a player in the area needs insulation
-            boolean shouldUseHotFuel = false;
-            boolean shouldUseColdFuel = false;
+            hearth.tick();
+        }
+    }
+    
+    public void tick()
+    {
+        // Set to 'true' if a player in the area needs insulation
+        boolean shouldUseHotFuel = false;
+        boolean shouldUseColdFuel = false;
 
-            // Add this tile entity's capability to the list of hearths
-            LazyOptional<IBlockStorageCap> cap = hearth.getCapability(HearthRadiusCapability.HEARTH_BLOCKS);
-            if (cap.orElse(new HearthRadiusCapability()).getMap().isEmpty())
+        this.ticksExisted = (this.ticksExisted + 1) % 1000;
+
+        // Gradually increases insulation amount
+        int insulationLevel = this.getTileData().getInt("insulationLevel");
+        if (insulationLevel < 2400)
+            this.getTileData().putInt("insulationLevel", insulationLevel + 1);
+
+        if (level != null && (this.getHotFuel() > 0 || this.getColdFuel() > 0))
+        {
+            List<Player> affectedPlayers = new ArrayList<>();
+
+            // Represents the NBT list
+            ConcurrentHashMap<BlockPos, SpreadPath> pathList = this.getPathMap();
+
+            if (pathList.isEmpty())
             {
-                cap.ifPresent(cap2 -> cap2.set(new SpreadPath(pos)));
+                this.addPath(new SpreadPath(this.getBlockPos(), Direction.UP));
             }
 
-            hearth.ticksExisted = (hearth.ticksExisted + 1) % 1000;
-
-            // Gradually increases insulation amount
-            int insulationLevel = hearth.getTileData().getInt("insulationLevel");
-            if (insulationLevel < 2400)
-                hearth.getTileData().putInt("insulationLevel", insulationLevel + 1);
-
-            if (level != null && (hearth.getHotFuel() > 0 || hearth.getColdFuel() > 0))
+            if (pathList.size() > 0)
             {
-                List<Player> affectedPlayers = new ArrayList<>();
-
-                // Represents the NBT list
-                ConcurrentHashMap<BlockPos, SpreadPath> pathList = cap.orElse(new HearthRadiusCapability()).getMap();
-
-                if (pathList.size() > 0)
-                {
-                    // Create temporary list to add back to the NBT
-                    ConcurrentHashMap<BlockPos, SpreadPath> newPaths = new ConcurrentHashMap<>();
+                // Create temporary list to add back to the NBT
+                ConcurrentHashMap<BlockPos, SpreadPath> newPaths = new ConcurrentHashMap<>();
 
                 /*
                  Partition all points into multiple lists (max of 19)
                 */
-                    int index = 0;
-                    // Size of each partition
-                    int partSize = 300;
-                    // Number of partitions
-                    int partitionCount = (int) Math.ceil(pathList.size() / (double) partSize);
-                    // Index of the last point being worked on this tick
-                    int lastIndex = Math.min(pathList.size(), partSize * (hearth.ticksExisted % partitionCount + 1) + 1);
-                    // Index of the first point being worked on this tick
-                    int firstIndex = Math.max(0, lastIndex - partSize);
+                int index = 0;
+                // Size of each partition
+                int partSize = 350;
+                // Number of partitions
+                int partitionCount = (int) Math.ceil(pathList.size() / (double) partSize);
+                // Index of the last point being worked on this tick
+                int lastIndex = Math.min(pathList.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
+                // Index of the first point being worked on this tick
+                int firstIndex = Math.max(0, lastIndex - partSize);
 
-                    // Iterates over the specified partition of the list of BlockPos
-                    for (Map.Entry<BlockPos, SpreadPath> entry : pathList.entrySet())
+                // Iterates over the specified partition of the list of BlockPos
+                for (Map.Entry<BlockPos, SpreadPath> entry : pathList.entrySet())
+                {
+                    // Stop after we reach the maximum number of iterations for this partition
+                    if (index < firstIndex || index - firstIndex >= partSize)
                     {
-                        // Stop after we reach the maximum number of iterations for this partition
-                        if (index < firstIndex || index - firstIndex >= partSize)
-                        {
-                            index++;
-                            continue;
-                        }
+                        index++;
+                        continue;
+                    }
 
-                        // Reset every 4 seconds
-                        if (hearth.ticksExisted % 80 == 0)
-                        {
-                            hearth.reset();
-                            break;
-                        }
+                    // Reset every 4 seconds
+                    if (this.ticksExisted % 80 == 0)
+                    {
+                        this.resetPaths();
+                        break;
+                    }
 
-                        SpreadPath spreadPath = entry.getValue();
+                    SpreadPath spreadPath = entry.getValue();
 
-                        // Create detection box for PlayerEntities
-                        int x = spreadPath.getX();
-                        int y = spreadPath.getY();
-                        int z = spreadPath.getZ();
-                        AABB aabb = new AABB(x, y, z, x + 1, y + 1, z + 1);
+                    // Create detection box for PlayerEntities
+                    int x = spreadPath.getX();
+                    int y = spreadPath.getY();
+                    int z = spreadPath.getZ();
+                    AABB aabb = new AABB(x, y, z, x + 1, y + 1, z + 1);
 
-                        // Add players to affectedPlayers
-                        for (Player player : level.getEntitiesOfClass(Player.class, aabb))
+                    // Add players to affectedPlayers
+                    for(Player player : level.players())
+                    {
+                        if (aabb.intersects(player.getBoundingBox()))
                         {
                             affectedPlayers.add(player);
                         }
-
-                        // Check in all 6 directions
-                        for (Direction direction : Direction.values())
-                        {
-                            if (pathList.size() < 4000)
-                            {
-                                // Create new BlockPos with an offset of [direction] from [blockPos]
-                                SpreadPath testpos = spreadPath.offset(direction);
-
-                                if (testpos.withinDistance(pos, 20))
-                                {
-                                    if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
-                                            && !WorldHelper.canSeeSky(level, testpos.getPos())
-                                            && WorldHelper.canSpreadThrough(level, spreadPath, direction, spreadPath.origin))
-                                    {
-                                        newPaths.put(testpos.getPos(), testpos);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                hearth.reset();
-                            }
-                        }
-                        index++;
                     }
-                    // Add new positions
-                    cap.ifPresent(cap2 -> cap2.addPaths(newPaths));
 
-                    if (!level.isClientSide && !affectedPlayers.isEmpty())
+                    index++;
+                    if (spreadPath.isFrozen) continue;
+
+                    // Check in all 6 directions
+                    for (Direction direction : Direction.values())
                     {
-                        ConfigCache config = ConfigCache.getInstance();
-
-                        for (Player player : affectedPlayers)
+                        if (pathList.size() < 6000)
                         {
-                            // Get the player's temperature
-                            double temp = player.hasEffect(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
-                                    PlayerHelper.getTemperature(player, Temperature.Types.AMBIENT).get();
+                            // Create new BlockPos with an offset of [direction] from [blockPos]
+                            SpreadPath testpos = spreadPath.offset(direction);
 
-                            if ((temp < config.minTemp && hearth.getHotFuel() > 0))
+                            if (testpos.withinDistance(pos, 20))
                             {
-                                // Tell the hearth to use hot fuel
-                                shouldUseHotFuel = true;
-                            }
-                            if (temp > config.maxTemp && hearth.getColdFuel() > 0)
-                            {
-                                // Tell the hearth to use cold fuel
-                                shouldUseColdFuel = true;
-                            }
-
-                            if (shouldUseHotFuel || shouldUseColdFuel)
-                            {
-                                int effectLevel = Math.max(0, insulationLevel / 240 - 1);
-                                MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
-
-                                if (effect == null || effect.getDuration() < 90 || effect.getAmplifier() != effectLevel)
+                                if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
+                                        && !WorldHelper.canSeeSky(level, testpos.getPos())
+                                        && WorldHelper.canSpreadThrough(level, spreadPath, direction, spreadPath.origin))
                                 {
-                                    player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
+                                    newPaths.put(testpos.getPos(), testpos);
                                 }
                             }
                         }
-                    }
-                }
-            }
-
-            // Input fuel types
-            if (getItemFuel(hearth.getItemInSlot(0)) != 0)
-            {
-                ItemStack fuel = hearth.getItemInSlot(0);
-                int amount = getItemFuel(hearth.getItemInSlot(0));
-                if ((amount > 0 ? hearth.getHotFuel() : hearth.getColdFuel()) <= MAX_FUEL - Math.abs(amount) * 0.75)
-                {
-                    if (fuel.hasContainerItem() && fuel.getCount() == 1)
-                    {
-                        hearth.setItemInSlot(0, fuel.getContainerItem());
-                    }
-                    else hearth.getItemInSlot(0).shrink(1);
-                    hearth.addFuel(amount);
-                }
-            }
-
-            // Drain fuel
-            if (!level.isClientSide && hearth.ticksExisted % 80 == 0)
-            {
-                if (hearth.getColdFuel() > 0 && shouldUseColdFuel)
-                {
-                    hearth.setColdFuel(hearth.getColdFuel() - 1);
-                }
-                if (hearth.getHotFuel() > 0 && shouldUseHotFuel)
-                {
-                    hearth.setHotFuel(hearth.getHotFuel() - 1);
-                }
-            }
-
-            // Update fuel for clients
-            if (!level.isClientSide && hearth.ticksExisted % 40 == 0)
-            {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HearthFuelSyncMessage(pos, hearth.getHotFuel(), hearth.getColdFuel()));
-            }
-
-            // Update BlockState
-            if (hearth.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
-            {
-                hearth.updateFuelState();
-            }
-
-            // Particles
-            int coldFuel = hearth.getColdFuel();
-            int hotFuel = hearth.getHotFuel();
-
-            if (Math.random() < coldFuel / 3000d)
-            {
-                double d0 = pos.getX() + 0.5d;
-                double d1 = pos.getY() + 2d;
-                double d2 = pos.getZ() + 0.5d;
-                double d3 = (Math.random() - 0.5) / 4;
-                double d4 = (Math.random() - 0.5) / 4;
-                double d5 = (Math.random() - 0.5) / 4;
-                level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
-            }
-            if (Math.random() < hotFuel / 2000d)
-            {
-                double d0 = pos.getX() + 0.5d;
-                double d1 = pos.getY() + 2d;
-                double d2 = pos.getZ() + 0.5d;
-                double d3 = (Math.random() - 0.5) / 2;
-                double d4 = (Math.random() - 0.5) / 2;
-                double d5 = (Math.random() - 0.5) / 2;
-                level.addParticle(ParticleTypes.LARGE_SMOKE, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
-            }
-
-            // Air Particles
-            if (level.isClientSide && level.getBlockEntity(pos).getTileData().getBoolean("showRadius"))
-                cap.ifPresent(c ->
-                {
-                    // Spawn particles if enabled
-                    for (BlockPos blockPos : c.getMap().keySet())
-                    {
-                        if (Minecraft.getInstance().options.renderDebug)
+                        else
                         {
-                            if (hearth.ticksExisted % 5 == 0)
-                                level.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
-                        }
-                        else if (Math.random() < 0.016)
-                        {
-                            double xr = Math.random();
-                            double yr = Math.random();
-                            double zr = Math.random();
-                            double xm = Math.random() / 20 - 0.025;
-                            double zm = Math.random() / 20 - 0.025;
-
-                            level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                            this.resetPaths();
                         }
                     }
-                });
+                    spreadPath.isFrozen = true;
+                }
+                // Add new positions
+                this.addPaths(newPaths);
+
+                if (!level.isClientSide && !affectedPlayers.isEmpty())
+                {
+                    ConfigCache config = ConfigCache.getInstance();
+
+                    for (Player player : affectedPlayers)
+                    {
+                        // Get the player's temperature
+                        double temp = player.hasEffect(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
+                                PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
+
+                        if ((temp < config.minTemp && this.getHotFuel() > 0))
+                        {
+                            // Tell the hearth to use hot fuel
+                            shouldUseHotFuel = true;
+                        }
+                        if (temp > config.maxTemp && this.getColdFuel() > 0)
+                        {
+                            // Tell the hearth to use cold fuel
+                            shouldUseColdFuel = true;
+                        }
+
+                        if (shouldUseHotFuel || shouldUseColdFuel)
+                        {
+                            int effectLevel = Math.max(0, insulationLevel / 240 - 1);
+                            MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
+
+                            if (effect == null || effect.getDuration() < 90 || effect.getAmplifier() != effectLevel)
+                            {
+                                player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Input fuel types
+        if (getItemFuel(this.getItemInSlot(0)) != 0)
+        {
+            ItemStack fuel = this.getItemInSlot(0);
+            int amount = getItemFuel(this.getItemInSlot(0));
+            if ((amount > 0 ? this.getHotFuel() : this.getColdFuel()) <= MAX_FUEL - Math.abs(amount) * 0.75)
+            {
+                if (fuel.hasContainerItem() && fuel.getCount() == 1)
+                {
+                    this.setItemInSlot(0, fuel.getContainerItem());
+                }
+                else this.getItemInSlot(0).shrink(1);
+                this.addFuel(amount);
+            }
+        }
+
+        // Drain fuel
+        if (!level.isClientSide && this.ticksExisted % 80 == 0)
+        {
+            if (this.getColdFuel() > 0 && shouldUseColdFuel)
+            {
+                this.setColdFuel(this.getColdFuel() - 1);
+            }
+            if (this.getHotFuel() > 0 && shouldUseHotFuel)
+            {
+                this.setHotFuel(this.getHotFuel() - 1);
+            }
+        }
+
+        // Update fuel for clients
+        if (!level.isClientSide && this.ticksExisted % 40 == 0)
+        {
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HearthFuelSyncMessage(pos, this.getHotFuel(), this.getColdFuel()));
+        }
+
+        // Update BlockState
+        if (this.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
+        {
+            this.updateFuelState();
+        }
+
+        // Particles
+        int coldFuel = this.getColdFuel();
+        int hotFuel = this.getHotFuel();
+
+        if (Math.random() < coldFuel / 3000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 1.8d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 4;
+            double d4 = (Math.random() - 0.5) / 4;
+            double d5 = (Math.random() - 0.5) / 4;
+            level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+        }
+        if (Math.random() < hotFuel / 3000d)
+        {
+            double d0 = pos.getX() + 0.5d;
+            double d1 = pos.getY() + 1.8d;
+            double d2 = pos.getZ() + 0.5d;
+            double d3 = (Math.random() - 0.5) / 2;
+            double d4 = (Math.random() - 0.5) / 2;
+            double d5 = (Math.random() - 0.5) / 2;
+            SimpleParticleType particle = Math.random() < 0.5 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE;
+            level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+        }
+
+        // Air Particles
+        if (level.isClientSide && this.getTileData().getBoolean("showRadius"))
+        {
+            // Spawn particles if enabled
+            for (BlockPos blockPos : this.getPathMap().keySet())
+            {
+                if (Minecraft.getInstance().options.renderDebug)
+                {
+                    if (this.ticksExisted % 5 == 0)
+                        level.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
+                }
+                else if (Math.random() < 0.016)
+                {
+                    double xr = Math.random();
+                    double yr = Math.random();
+                    double zr = Math.random();
+                    double xm = Math.random() / 20 - 0.025;
+                    double zm = Math.random() / 20 - 0.025;
+
+                    level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
+                }
+            }
         }
     }
 
-    private void reset()
+    public void resetPaths()
     {
         ConcurrentHashMap<BlockPos, SpreadPath> map = new ConcurrentHashMap<>();
         map.put(pos, new SpreadPath(pos));
-        getCapability(HearthRadiusCapability.HEARTH_BLOCKS).ifPresent(cap2 ->
-        {
-            cap2.clear();
-            cap2.addPaths(map);
-        });
+        this.setPathMap(map);
     }
 
     public static int getItemFuel(ItemStack item)
@@ -466,5 +467,45 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         super.saveAdditional(tag);
         tag.putInt("coldFuel", this.getColdFuel());
         tag.putInt("hotFuel", this.getHotFuel());
+    }
+
+    ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();
+
+    @Override
+    public ConcurrentHashMap<BlockPos, SpreadPath> getPathMap()
+    {
+        return paths;
+    }
+
+    @Override
+    public void setPathMap(ConcurrentHashMap<BlockPos, SpreadPath> map)
+    {
+        this.paths.clear();
+        this.paths.putAll(map);
+    }
+
+    @Override
+    public void addPath(SpreadPath pos) {
+        paths.put(pos.getPos(), pos);
+    }
+
+    @Override
+    public void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map) {
+        map.forEach((pos, path) -> {
+            if (!paths.containsKey(pos))
+            {
+                paths.put(pos, path);
+            }
+        });
+    }
+
+    @Override
+    public void remove(SpreadPath pos) {
+        paths.remove(pos.getPos());
+    }
+
+    @Override
+    public void clear() {
+        paths.clear();
     }
 }
