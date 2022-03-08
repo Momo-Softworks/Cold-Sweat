@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
@@ -19,7 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class AmbientGaugeDisplay
+public class WorldTempGaugeDisplay
 {
     private static double prevClientTemp = 0;
     public static double clientTemp = 0;
@@ -27,13 +27,13 @@ public class AmbientGaugeDisplay
     static ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
 
     @SubscribeEvent
-    public static void renderAmbientTemperature(RenderGameOverlayEvent.Post event)
+    public static void renderWorldTemperature(RenderGameOverlayEvent.Post event)
     {
         Player player = Minecraft.getInstance().player;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
         (CSMath.isBetween(player.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
-        player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showAmbient))
+        player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showWorldTemp))
         {
             // Variables
             int scaleX = event.getWindow().getGuiScaledWidth();
@@ -43,15 +43,15 @@ public class AmbientGaugeDisplay
             double mid = (min + max) / 2;
             boolean bobbing = CCS.iconBobbing();
 
-            // Get player ambient temperature
+            // Get player world temperature
             double temp = CSMath.convertUnits(clientTemp, CCS.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Set default color (white)
             int color = 14737376;
 
             // Set default gauge texture
-            ResourceLocation gaugeTexture = new ResourceLocation("cold_sweat:textures/gui/overlay/ambient/temp_gauge_normal.png");
-            String gaugeLocation = "cold_sweat:textures/gui/overlay/ambient/";
+            ResourceLocation gaugeTexture;
+            String gaugeLocation = "cold_sweat:textures/gui/overlay/world_temp_gauge/";
 
             // Set gauge texture based on temperature
             if (temp > max)
@@ -108,11 +108,11 @@ public class AmbientGaugeDisplay
     {
         if (Minecraft.getInstance().player != null)
         {
-            Minecraft.getInstance().player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(temp ->
+            Minecraft.getInstance().player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(temp ->
             {
                 boolean celsius = CCS.celsius();
 
-                double tempReadout = CSMath.convertUnits(temp.get(Temperature.Types.AMBIENT), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                double tempReadout = CSMath.convertUnits(temp.get(Temperature.Types.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                 prevClientTemp = clientTemp;
 
                 clientTemp = clientTemp + (tempReadout - clientTemp) / 10.0;

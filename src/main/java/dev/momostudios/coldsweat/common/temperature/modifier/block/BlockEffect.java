@@ -10,7 +10,7 @@ public abstract class BlockEffect
      * @param state is the {@link BlockState} of the block
      * @param pos is the position of the block
      * @param distance is the distance between the player and the block
-     * @return the temperature of the block. This is ADDED to the ambient temperature.
+     * @return the temperature of the block. This is ADDED to the world temperature.
      * Temperature is on the Minecraft scale, in which 0 is a snow biome and 2 is a desert (see {@link LavaBlockEffect} for an example)
      */
     public abstract double getTemperature(Player player, BlockState state, BlockPos pos, double distance);
@@ -35,7 +35,7 @@ public abstract class BlockEffect
     }
 
     /**
-     * The maximum ambient temperature for this BlockEffect to be effective<br>
+     * The maximum world temperature for this BlockEffect to be effective<br>
      * @return a double representing the temperature, in Minecraft units
      */
     public double maxTemperature() {
@@ -43,7 +43,7 @@ public abstract class BlockEffect
     }
 
     /**
-     * The minimum ambient temperature for this BlockEffect to be effective<br>
+     * The minimum world temperature for this BlockEffect to be effective<br>
      * @return a double representing the temperature, in Minecraft units
      */
     public double minTemperature() {

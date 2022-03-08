@@ -24,6 +24,9 @@ public abstract class TempModifier
     ConcurrentHashMap<String, Object> args = new ConcurrentHashMap<>();
     int expireTicks = -1;
     int ticksExisted = 0;
+    int tickRate = 1;
+    double storedValue = 0;
+    boolean isUnset = true;
 
     /**
      * Default constructor.<br>
@@ -34,7 +37,7 @@ public abstract class TempModifier
     /**
      * Adds a new argument to this TempModifier.<br>
      * @param name is the name of the argument. Used to retrieve the argument in {@link #getArgument(String)}
-     * @param arg is value of the argument. It is stored in the {@link Player} NBT.
+     * @param arg is value of the argument. It is stored in the {@link Player}'s NBT.
      */
     public void addArgument(String name, Object arg)
     {
@@ -101,43 +104,44 @@ public abstract class TempModifier
      * <br>
      * Do not call this method directly. Use {@link #calculate(Temperature, Player)} instead.<br>
      * <br>
-     * @param temp should usually represent the player's body temperature or ambient temperature.<br>
+     * @param temp should usually represent the player's body temperature or world temperature.<br>
      * @param player the player that is being affected by the modifier.<br>
      * @return the new {@link Temperature}.<br>
      */
     public abstract double getResult(Temperature temp, Player player);
 
-    public final double calculate(Temperature temp, Player player)
+    public double calculate(Temperature temp, Player player)
     {
         TempModifierEvent.Tick.Pre pre = new TempModifierEvent.Tick.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
-        if (!pre.isCanceled())
-        {
-            double value = getResult(pre.getTemperature(), player);
 
-            TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
-            MinecraftForge.EVENT_BUS.post(post);
+        if (pre.isCanceled()) return pre.getTemperature().get();
 
-            return post.getTemperature().get();
-        }
-        else return pre.getTemperature().get();
+        double value = (player.tickCount % tickRate == 0 || isUnset) ? getResult(pre.getTemperature(), player) : storedValue;
+        storedValue = value;
+        isUnset = false;
+
+        TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
+        MinecraftForge.EVENT_BUS.post(post);
+
+        return post.getTemperature().get();
     }
 
     /**
-     * Sets the amount of ticks this TempModifier will last before it is automatically removed.<br>
+     * Sets the number of ticks this TempModifier will exist before it is automatically removed.<br>
      * @param ticks the number of ticks this modifier will last.
-     * @return this TempModifier instance.
+     * @return this TempModifier instance (allows for in-line building).
      */
     public TempModifier expires(int ticks)
     {
         expireTicks = ticks;
         return this;
     }
-    public int getExpireTicks()
+    public int getExpireTime()
     {
         return expireTicks;
     }
-    public int getTicksExisted()
+    public int ticksExisted()
     {
         return ticksExisted;
     }
@@ -147,8 +151,25 @@ public abstract class TempModifier
     }
 
     /**
+     * TempModifiers can be configured to run {@link TempModifier#getResult(Temperature, Player)} at a specified interval.<br>
+     * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
+     * <br>
+     * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
+     * Every other time {@code calculate()} is called, the stored value will be returned until X ticks have passed.<br>
+     * (new TempModifiers ALWAYS run {@code getResult()} when they are called for the first time).<br>
+     * <br>
+     * @param ticks the number of ticks between each call to {@code getResult()}.
+     * @return this TempModifier instance (allows for in-line building).
+     */
+    public TempModifier tickRate(int ticks)
+    {
+        tickRate = ticks;
+        return this;
+    }
+
+    /**
      * The ID is used to mark the TempModifier when it is stored in NBT
-     * @return the string ID of the TempModifier. You should include your mod's ID to prevent duplicate IDs.<br>
+     * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate IDs.<br>
      */
     public abstract String getID();
 }

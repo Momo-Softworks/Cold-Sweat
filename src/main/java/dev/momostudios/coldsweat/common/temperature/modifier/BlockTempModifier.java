@@ -15,19 +15,11 @@ import net.minecraft.world.phys.Vec3;
 
 public class BlockTempModifier extends TempModifier
 {
-    public BlockTempModifier()
-    {
-        addArgument("value", 0.0);
-    }
+    public BlockTempModifier() {}
 
     @Override
     public double getResult(Temperature temp, Player player)
     {
-        if (player.tickCount % 5 > 0)
-        {
-            return temp.get() + (double) this.getArgument("value");
-        }
-
         double totalTemp = 0;
 
         for (int x1 = -7; x1 < 14; x1++)
@@ -111,14 +103,11 @@ public class BlockTempModifier extends TempModifier
                             totalTemp += tempToAdd / blockDampening;
                         }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    catch (Exception e) {}
                 }
             }
         }
         
-        setArgument("value", totalTemp);
         return temp.get() + totalTemp;
     }
 

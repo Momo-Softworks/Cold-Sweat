@@ -16,46 +16,41 @@ public class BiomeTempModifier extends TempModifier
 {
     public BiomeTempModifier()
     {
-        addArgument("value", 0d);
     }
 
     @Override
     public double getResult(Temperature temp, Player player)
     {
-        if (player.level.getGameTime() % 5 == 0)
+        // get obfuscated name for getHeightAdjustedTemperature method in Biome class
+        Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
+        getTemperature.setAccessible(true);
+
+        try
         {
-            Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "getHeightAdjustedTemperature", BlockPos.class);
-            getTemperature.setAccessible(true);
-
-            try
+            double worldTemp = 0;
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
-                double worldTemp = 0;
-                for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
+                Biome biome = player.level.getBiome(blockPos);
+                worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().location());
+
+                // Should temperature be overridden by config
+                TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
+                TempOverride dimensionOverride = dimensionOverride(player.level.dimension().location());
+
+                if (dimensionOverride.override)
                 {
-                    Biome biome = player.level.getBiome(blockPos);
-                    worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().location());
-
-                    // Should temperature be overridden by config
-                    TempOverride biomeOverride = biomeOverride(biome.getRegistryName());
-                    TempOverride dimensionOverride = dimensionOverride(player.level.dimension().location());
-
-                    if (dimensionOverride.override)
-                    {
-                        setArgument("value", dimensionOverride.value);
-                        return dimensionOverride.value;
-                    }
-                    if (biomeOverride.override)
-                    {
-                        setArgument("value", biomeOverride.value);
-                        return biomeOverride.value;
-                    }
+                    return dimensionOverride.value;
                 }
-                setArgument("value", temp.get() + (worldTemp / 200));
+                if (biomeOverride.override)
+                {
+                    return biomeOverride.value;
+                }
             }
-            catch (Exception e) {
-            }
+            return temp.get() + (worldTemp / 200);
         }
-        return (double) getArgument("value");
+        catch (Exception e) {}
+
+        return temp.get();
     }
 
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
