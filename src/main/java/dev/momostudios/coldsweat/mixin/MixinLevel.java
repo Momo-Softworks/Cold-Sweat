@@ -16,19 +16,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Level.class)
 public class MixinLevel
 {
-    Level world = (Level) (Object) this;
+    Level level = (Level) (Object) this;
 
     @Inject(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z", at = @At("HEAD"), remap = ColdSweat.remapMixins)
-    public void setBlockState(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<Boolean> info)
+    public void setBlock(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<Boolean> info)
     {
         if (state.getBlock() == Blocks.AIR)
         {
             for (Direction value : Direction.values())
             {
-                if (world.getBlockState(CSMath.offsetDirection(pos, value)).getBlock().equals(Blocks.CAVE_AIR) && !world.canSeeSky(pos))
+                if (level.getBlockState(CSMath.offsetDirection(pos, value)).getBlock().equals(Blocks.CAVE_AIR) && !level.canSeeSky(pos))
                 {
-                    WorldHelper.schedule(() -> world.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 3), 1);
+                    WorldHelper.schedule(() ->
+                    {
+                        if (level.isLoaded(pos))
+                        {
+                            level.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 3);
+                        }
+                    }, 1);
                 }
+                break;
             }
         }
     }
