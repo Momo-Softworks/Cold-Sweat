@@ -16,8 +16,8 @@ import java.util.List;
 public class ColdSweatConfig
 {
     private static final ForgeConfigSpec SPEC;
-    private static ColdSweatConfig configReference = new ColdSweatConfig();
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ColdSweatConfig configReference = new ColdSweatConfig();
+    public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.IntValue difficulty;
 
@@ -29,7 +29,7 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue iceResistanceEffect;
 
     private static final ForgeConfigSpec.BooleanValue damageScaling;
-    private static final ForgeConfigSpec.BooleanValue showAmbient;
+    private static final ForgeConfigSpec.BooleanValue showWorldTemp;
 
     private static final ForgeConfigSpec.IntValue gracePeriodLength;
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
@@ -62,8 +62,8 @@ public class ColdSweatConfig
         iceResistanceEffect = BUILDER
                 .comment("Ice Resistance blocks all cold temperatures")
                 .define("Ice Resistance Immunity", true);
-        showAmbient = BUILDER
-            .comment("Thermometer item is required to see ambient temperature")
+        showWorldTemp = BUILDER
+            .comment("Thermometer item is required to see world temperature")
             .define("Require Thermometer", true);
         BUILDER.pop();
 
@@ -155,7 +155,7 @@ public class ColdSweatConfig
         setFireResistanceEffect(cache.fireRes);
         setIceResistanceEffect(cache.iceRes);
         setDamageScaling(cache.damageScaling);
-        setShowAmbient(cache.showAmbient);
+        setShowWorldTemp(cache.showWorldTemp);
         setGracePeriodLength(cache.gracePeriodLength);
         setGracePeriodEnabled(cache.gracePeriodEnabled);
         save();
@@ -181,8 +181,8 @@ public class ColdSweatConfig
         return iceResistanceEffect.get();
     }
 
-    public boolean showAmbientGauge() {
-        return showAmbient.get();
+    public boolean showWorldTempGauge() {
+        return showWorldTemp.get();
     }
 
     public boolean doDamageScaling() {
@@ -248,8 +248,8 @@ public class ColdSweatConfig
         iceResistanceEffect.set(isEffective);
     }
 
-    public void setShowAmbient(boolean required) {
-        showAmbient.set(required);
+    public void setShowWorldTemp(boolean required) {
+        showWorldTemp.set(required);
     }
 
     public void setDamageScaling(boolean enabled) {

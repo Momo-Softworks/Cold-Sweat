@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
@@ -26,6 +26,7 @@ public class SelfTempDisplay
 {
     public static ITemperatureCap playerCap = null;
     static int iconBob = 0;
+    static int bobTimer = 0;
 
     @SubscribeEvent
     public static void eventHandler(RenderGameOverlayEvent.PostLayer event)
@@ -39,9 +40,9 @@ public class SelfTempDisplay
             int scaleY = event.getWindow().getGuiScaledHeight();
 
             if (playerCap == null || entity.tickCount % 40 == 0)
-                playerCap = entity.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
+                playerCap = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
 
-            int temp = (int) playerCap.get(Temperature.Types.COMPOSITE);
+            int temp = (int) playerCap.get(Temperature.Types.TOTAL);
 
             int threatLevel = 0;
 
@@ -119,7 +120,9 @@ public class SelfTempDisplay
     @SubscribeEvent
     public static void setRandomIconOffset(TickEvent.ClientTickEvent event)
     {
-        iconBob = Math.random() < 0.1 ? 1 : 0;
+        bobTimer++;
+        iconBob = Math.random() < 0.3 && bobTimer >= 3 ? 1 : 0;
+        if (bobTimer >= 3) bobTimer = 0;
     }
 }
 

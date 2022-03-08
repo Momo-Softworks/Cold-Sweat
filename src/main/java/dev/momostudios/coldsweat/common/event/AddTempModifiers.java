@@ -14,13 +14,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AddTempModifiers
 {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END)
+        if (event.phase == TickEvent.Phase.START)
         {
             Player player = event.player;
 
@@ -29,12 +31,12 @@ public class AddTempModifiers
              */
             if (player.tickCount % 20 == 0)
             {
-                PlayerHelper.addModifier(player, new BiomeTempModifier(), Temperature.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new TimeTempModifier(), Temperature.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new DepthTempModifier(), Temperature.Types.AMBIENT, false);
-                PlayerHelper.addModifier(player, new BlockTempModifier(), Temperature.Types.AMBIENT, false);
+                PlayerHelper.addModifier(player, new BiomeTempModifier().tickRate(5), Temperature.Types.WORLD, false);
+                PlayerHelper.addModifier(player, new TimeTempModifier().tickRate(10), Temperature.Types.WORLD, false);
+                PlayerHelper.addModifier(player, new DepthTempModifier().tickRate(5), Temperature.Types.WORLD, false);
+                PlayerHelper.addModifier(player, new BlockTempModifier().tickRate(5), Temperature.Types.WORLD, false);
                 if (ModList.get().isLoaded("sereneseasons"))
-                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), Temperature.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
                 /*
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);
@@ -45,7 +47,9 @@ public class AddTempModifiers
                 {
                     MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
                     int potionLevel = effect.getAmplifier() + 1;
-                    PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(effect.getDuration()), Temperature.Types.AMBIENT, false);
+
+                    PlayerHelper.removeModifiers(player, Temperature.Types.BODY, 1, (modifier) -> modifier instanceof HearthTempModifier);
+                    PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(20), Temperature.Types.WORLD, 1);
                 }
             }
 
@@ -54,19 +58,19 @@ public class AddTempModifiers
             {
                 if (player.isInWaterRainOrBubble())
                 {
-                    PlayerHelper.addModifier(player, new WaterTempModifier(0.01), Temperature.Types.AMBIENT, false);
+                    PlayerHelper.addModifier(player, new WaterTempModifier(0.01), Temperature.Types.WORLD, false);
                 }
                 else
                 {
-                    PlayerHelper.removeModifiers(player, Temperature.Types.AMBIENT, 999, modifier ->
+                    PlayerHelper.removeModifiers(player, Temperature.Types.WORLD, 999, modifier ->
                             modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
                 }
             }
 
             // Nether Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.AMBIENT))
+            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD))
             {
-                PlayerHelper.removeModifiers(player, Temperature.Types.AMBIENT, 1, modifier -> modifier instanceof HellLampTempModifier);
+                PlayerHelper.removeModifiers(player, Temperature.Types.WORLD, 1, modifier -> modifier instanceof HellLampTempModifier);
             }
             else
             {

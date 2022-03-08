@@ -96,18 +96,18 @@ public class Temperature
      * Defines all temperature stats in Cold Sweat. <br>
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
-     * {@link #AMBIENT}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
+     * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
      * {@link #BODY}: The temperature of the player's body. <br>
      * {@link #BASE}: A static offset applied to the player's body temperature. <br>
-     * {@link #COMPOSITE}: The sum of the player's body and base temperatures. (CANNOT be set) <br>
+     * {@link #TOTAL}: The sum of the player's body and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
      */
     public enum Types
     {
-        AMBIENT,
+        WORLD,
         BODY,
         BASE,
-        COMPOSITE,
+        TOTAL,
         RATE
     }
 

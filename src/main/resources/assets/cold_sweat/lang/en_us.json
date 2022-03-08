@@ -13,9 +13,9 @@
 
   "modifier.cold_sweat.insulated":      "Insulated",
 
-  "effect.insulated":       "Insulated",
-  "effect.ice_resistance":  "Ice Resistance",
-  "effect.grace":           "Grace",
+  "effect.cold_sweat.insulated":        "Insulated",
+  "effect.cold_sweat.ice_resistance":   "Ice Resistance",
+  "effect.cold_sweat.grace":            "Grace",
   "item.minecraft.potion.effect.ice_resistance": "Potion of Ice Resistance",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Lingering Potion of Ice Resistance",
   "item.minecraft.splash_potion.effect.ice_resistance": "Splash Potion of Ice Resistance",
@@ -47,20 +47,18 @@
   "cold_sweat.config.difficulty.normal.name":       "Normal",
   "cold_sweat.config.difficulty.hard.name":         "Hard",
   "cold_sweat.config.difficulty.custom.name":       "Custom",
-
+  "cold_sweat.config.difficulty.description.custom":           "Using custom settings",
   "cold_sweat.config.difficulty.description.min_temp":         "Minimum habitable temperature is %d",
   "cold_sweat.config.difficulty.description.max_temp":         "Maximum habitable temperature is %d",
   "cold_sweat.config.difficulty.description.rate.decrease":    "Body temperature change rate is reduced by %d",
   "cold_sweat.config.difficulty.description.rate.increase":    "Body temperature change rate is increased by %d",
   "cold_sweat.config.difficulty.description.rate.normal":      "Body temperature change rate is normal",
-  "cold_sweat.config.difficulty.description.ambient_on":       "Ambient temperature %dis%d visible without a thermometer",
-  "cold_sweat.config.difficulty.description.ambient_off":      "Ambient temperature %dis not%d visible without a thermometer",
+  "cold_sweat.config.difficulty.description.world_temp_on":    "World temperature %dis%d visible without a thermometer",
+  "cold_sweat.config.difficulty.description.world_temp_off":   "World temperature %dis not%d visible without a thermometer",
   "cold_sweat.config.difficulty.description.scaling_on":       "Damage %ddoes%d scale with Minecraft difficulty",
   "cold_sweat.config.difficulty.description.scaling_off":      "Damage %ddoes not%d scale with Minecraft difficulty",
   "cold_sweat.config.difficulty.description.potions_on":       "Fire and Ice resistance potions are %denabled%d",
   "cold_sweat.config.difficulty.description.potions_off":      "Fire and Ice resistance potions are %ddisabled%d",
-
-  "cold_sweat.config.difficulty.description.custom":  "Using custom settings",
 
   "cold_sweat.config.animal_temperature.name":      "Animal Temperature",
   "cold_sweat.config.units.name":                   "Units",

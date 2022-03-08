@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,22 +15,22 @@ public class PlayerTempSyncMessage
 {
     public double body;
     public double base;
-    public double ambient;
+    public double world;
 
     public PlayerTempSyncMessage() {
     }
 
-    public PlayerTempSyncMessage(double body, double base, double ambient){
+    public PlayerTempSyncMessage(double body, double base, double world){
         this.body = body;
         this.base = base;
-        this.ambient = ambient;
+        this.world = world;
     }
 
     public static void encode(PlayerTempSyncMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeDouble(message.body);
         buffer.writeDouble(message.base);
-        buffer.writeDouble(message.ambient);
+        buffer.writeDouble(message.world);
     }
 
     public static PlayerTempSyncMessage decode(FriendlyByteBuf buffer)
@@ -42,12 +42,12 @@ public class PlayerTempSyncMessage
     {
         NetworkEvent.Context context = contextSupplier.get();
 
-        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.ambient)));
+        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.world)));
 
         context.setPacketHandled(true);
     }
 
-    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double ambient)
+    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double world)
     {
         return new DistExecutor.SafeRunnable()
         {
@@ -58,12 +58,12 @@ public class PlayerTempSyncMessage
 
                 if (player != null && !player.isSpectator())
                 {
-                    player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                    player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
                         cap.set(Temperature.Types.BODY, body);
                         cap.set(Temperature.Types.BASE, base);
-                        cap.set(Temperature.Types.COMPOSITE, body + base);
-                        cap.set(Temperature.Types.AMBIENT, ambient);
+                        cap.set(Temperature.Types.TOTAL, body + base);
+                        cap.set(Temperature.Types.WORLD, world);
                     });
                 }
             }

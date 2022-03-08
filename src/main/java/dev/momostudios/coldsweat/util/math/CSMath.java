@@ -22,7 +22,7 @@ public class CSMath
      * @param value The temperature to convert.
      * @param from The unit to convert from.
      * @param to The unit to convert to.
-     * @param absolute Used when dealing with ambient temperatures with Minecraft units.
+     * @param absolute Used when dealing with world temperatures with Minecraft units.
      * @return The converted temperature.
      */
     public static double convertUnits(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
@@ -71,20 +71,20 @@ public class CSMath
     }
 
     /**
-     * Returns a number between the two given values {@code pointA} and {@code pointB}, based on factor.<br>
-     * If {@code factor} = 0, returns {@code pointA}. If {@code factor} = {@code range}, returns {@code pointB}.<br>
-     * @param pointA The first value.
-     * @param pointB The second value.
-     * @param factor The "progress" between pointA and pointB.
+     * Returns a number between the two given values {@code blendMin} and {@code blendMax}, based on factor.<br>
+     * If {@code factor} = 0, returns {@code blendMin}. If {@code factor} = {@code range}, returns {@code blendMax}.<br>
+     * @param blendMin The minimum value.
+     * @param blendMax The maximum value.
+     * @param factor The "progress" between blendMin and blendMax.
      * @param rangeMin The minimum of the range of values over which to interpolate.
      * @param rangeMax The maximum of the range of values over which to interpolate.
      * @return The interpolated value.
      */
-    public static double blend(double pointA, double pointB, double factor, double rangeMin, double rangeMax)
+    public static double blend(double blendMin, double blendMax, double factor, double rangeMin, double rangeMax)
     {
-        if (factor <= rangeMin) return pointA;
-        if (factor >= rangeMax) return pointB;
-        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (pointB - pointA) + pointA;
+        if (factor <= rangeMin) return blendMin;
+        if (factor >= rangeMax) return blendMax;
+        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendMax - blendMin) + blendMin;
     }
 
     public static double getDistance(Entity entity, Vector3d pos)
