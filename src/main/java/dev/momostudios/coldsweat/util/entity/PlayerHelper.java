@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.CSCapabilities;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
@@ -35,7 +35,7 @@ public class PlayerHelper
      */
     public static Temperature getTemperature(Player player, Temperature.Types type)
     {
-        return new Temperature(player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
+        return new Temperature(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).get(type));
     }
 
     /**
@@ -48,35 +48,35 @@ public class PlayerHelper
 
     public static void setTemperature(Player player, Temperature value, Temperature.Types type, boolean sync)
     {
-        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
                         type == Temperature.Types.BODY ? value : getTemperature(player, Temperature.Types.BODY),
                         type == Temperature.Types.BASE ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.AMBIENT ? value : getTemperature(player, Temperature.Types.AMBIENT));
+                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD));
             }
             capability.set(type, value.get());
         });
     }
 
-    public static void addTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature value, Temperature.Types type)
+    public static void addTemperature(Player player, Temperature value, Temperature.Types type)
     {
         addTemperature(player, value, type, true);
     }
 
-    public static void addTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature value, Temperature.Types type, boolean sync)
+    public static void addTemperature(Player player, Temperature value, Temperature.Types type, boolean sync)
     {
-        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get() + capability.get(type));
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
-                        type == Temperature.Types.BODY ? value : getTemperature(player, Temperature.Types.BODY),
-                        type == Temperature.Types.BASE ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.AMBIENT ? value : getTemperature(player, Temperature.Types.AMBIENT));
+                        type == Temperature.Types.BODY  ? value : getTemperature(player, Temperature.Types.BODY),
+                        type == Temperature.Types.BASE  ? value : getTemperature(player, Temperature.Types.BASE),
+                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD));
             }
         });
     }
@@ -89,26 +89,42 @@ public class PlayerHelper
      */
     public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, boolean duplicates)
     {
-        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, duplicates);
+        addModifier(player, modifier, type, duplicates ? Integer.MAX_VALUE : 1);
+    }
+
+    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, int maxCount)
+    {
+        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, maxCount);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
-            player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
+                AtomicInteger duplicateCount = new AtomicInteger(0);
                 if (TempModifierEntries.getEntries().getMap().containsKey(event.getModifier().getID()))
                 {
-                    if (!cap.hasModifier(event.type, event.getModifier().getClass()) || event.duplicatesAllowed)
+                    CSMath.breakableForEach(cap.getModifiers(event.type), (mod, looper) ->
+                    {
+                        if (mod.getID().equals(event.getModifier().getID()))
+                        {
+                            if (duplicateCount.getAndIncrement() > event.maxCount)
+                            {
+                                looper.stop();
+                            }
+                        }
+                    });
+                    if (duplicateCount.get() < event.maxCount)
                     {
                         cap.getModifiers(event.type).add(event.getModifier());
                     }
                 }
                 else
                 {
-                    ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found!");
+                    ColdSweat.LOGGER.error("No TempModifier with ID " + modifier.getID() + " found! Is it not registered?");
                 }
 
                 if (!player.level.isClientSide)
-                    updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.AMBIENT), cap.getModifiers(Temperature.Types.RATE));
+                    updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.WORLD), cap.getModifiers(Temperature.Types.RATE));
             });
         }
     }
@@ -122,7 +138,7 @@ public class PlayerHelper
      */
     public static void removeModifiers(Player player, Temperature.Types type, int count, Predicate<TempModifier> condition)
     {
-        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
             AtomicInteger removed = new AtomicInteger(0);
             cap.getModifiers(type).removeIf(modifier ->
@@ -144,7 +160,7 @@ public class PlayerHelper
             });
 
             if (!player.level.isClientSide)
-                updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.AMBIENT), cap.getModifiers(Temperature.Types.RATE));
+                updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.WORLD), cap.getModifiers(Temperature.Types.RATE));
         });
     }
 
@@ -156,7 +172,7 @@ public class PlayerHelper
      */
     public static List<TempModifier> getModifiers(Player player, Temperature.Types type)
     {
-        List<TempModifier> mods =  player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
+        List<TempModifier> mods =  player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
         mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
         return mods;
     }
@@ -168,7 +184,7 @@ public class PlayerHelper
      */
     public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Temperature.Types type)
     {
-        return player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
+        return player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
 
     /**
@@ -178,7 +194,7 @@ public class PlayerHelper
      */
     public static void forEachModifier(Player player, Temperature.Types type, Consumer<TempModifier> action)
     {
-        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
             if (cap.getModifiers(type) != null)
             {
@@ -189,7 +205,7 @@ public class PlayerHelper
 
     public static void forEachModifier(Player player, Temperature.Types type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
-        player.getCapability(CSCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
             if (cap.getModifiers(type) != null)
             {
@@ -209,7 +225,7 @@ public class PlayerHelper
         switch (type)
         {
             case BODY :     return "body_temp_modifiers";
-            case AMBIENT :  return "ambient_temp_modifiers";
+            case WORLD:     return "world_temp_modifiers";
             case BASE :     return "base_temp_modifiers";
             case RATE :     return "rate_temp_modifiers";
             default : throw new IllegalArgumentException("PlayerTempHandler.getModifierTag() received illegal Type argument");
@@ -219,7 +235,7 @@ public class PlayerHelper
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
-     * @param type The type of Temperature to be stored. ({@link Temperature.Types#AMBIENT} should only be stored when needed to prevent lag)
+     * @param type The type of Temperature to be stored. ({@link Temperature.Types#WORLD} should only be stored when needed to prevent lag)
      * @return The NBT tag name for the given type
      */
     public static String getTempTag(Temperature.Types type)
@@ -227,9 +243,9 @@ public class PlayerHelper
         switch (type)
         {
             case BODY :      return "body_temperature";
-            case AMBIENT :   return "ambient_temperature";
+            case WORLD:      return "world_temperature";
             case BASE :      return "base_temperature";
-            case COMPOSITE : return "composite_temperature";
+            case TOTAL: return "composite_temperature";
             default : throw new IllegalArgumentException("PlayerTempHandler.getTempTag() received illegal Type argument");
         }
     }
@@ -249,21 +265,21 @@ public class PlayerHelper
         return getItemInHand(player, arm).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
-    public static void updateTemperature(Player player, dev.momostudios.coldsweat.common.temperature.Temperature bodyTemp, dev.momostudios.coldsweat.common.temperature.Temperature baseTemp, dev.momostudios.coldsweat.common.temperature.Temperature ambientTemp)
+    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp)
     {
         if (!player.level.isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                    new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), ambientTemp.get()));
+                    new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), worldTemp.get()));
         }
     }
 
-    public static void updateModifiers(Player player, List<TempModifier> body, List<TempModifier> ambient, List<TempModifier> base, List<TempModifier> rate)
+    public static void updateModifiers(Player player, List<TempModifier> body, List<TempModifier> world, List<TempModifier> base, List<TempModifier> rate)
     {
         if (!player.level.isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                    new PlayerModifiersSyncMessage(body, ambient, base, rate));
+                    new PlayerModifiersSyncMessage(body, world, base, rate));
         }
     }
 }
