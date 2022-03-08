@@ -149,31 +149,42 @@ public class WorldHelper
 
     public static void schedule(Runnable runnable, int delayTicks)
     {
-        new Object()
+        try
         {
-            private int ticks = 0;
-
-            public void start()
+            new Object()
             {
-                MinecraftForge.EVENT_BUS.register(this);
-            }
+                private int ticks = 0;
 
-            @SubscribeEvent
-            public void tick(TickEvent.ServerTickEvent event)
-            {
-                if (event.phase == TickEvent.Phase.END)
+                public void start()
                 {
-                    ticks++;
-                    if (ticks >= delayTicks)
-                        run();
+                    MinecraftForge.EVENT_BUS.register(this);
                 }
-            }
 
-            private void run()
+                @SubscribeEvent
+                public void tick(TickEvent.ServerTickEvent event)
+                {
+                    if (event.phase == TickEvent.Phase.END)
+                    {
+                        ticks++;
+                        if (ticks >= delayTicks)
+                            run();
+                    }
+                }
+
+                private void run()
+                {
+                    runnable.run();
+                    MinecraftForge.EVENT_BUS.unregister(this);
+                }
+            }.start();
+        }
+        catch (Exception e)
+        {
+            try
             {
                 runnable.run();
-                MinecraftForge.EVENT_BUS.unregister(this);
             }
-        }.start();
+            catch (Exception e1) {}
+        }
     }
 }
