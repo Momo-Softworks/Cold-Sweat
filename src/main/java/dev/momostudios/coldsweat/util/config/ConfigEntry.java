@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util;
+package dev.momostudios.coldsweat.util.config;
 
 public class ConfigEntry
 {

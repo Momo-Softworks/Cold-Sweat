@@ -67,7 +67,7 @@ public class ClientConfigRecieveMessage
                     {
                         displayScreen = ObfuscationReflectionHelper.findMethod(Minecraft.class, "func_147108_a", Class.forName("net.minecraft.client.gui.screen.Screen"));
                     }
-                    Constructor constructor = ObfuscationReflectionHelper.findConstructor(Class.forName("dev.momostudios.coldsweat.client.gui.config.ConfigScreen$PageOne"),
+                    Constructor constructor = ObfuscationReflectionHelper.findConstructor(Class.forName("dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne"),
                             Class.forName("net.minecraft.client.gui.screen.Screen"), ConfigCache.class);
                     displayScreen.invoke(Minecraft.getInstance(), constructor.newInstance(Minecraft.getInstance().screen, message.configCache));
                 } catch (Exception e)

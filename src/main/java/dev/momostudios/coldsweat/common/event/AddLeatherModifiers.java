@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.util.ConfigEntry;
+import dev.momostudios.coldsweat.util.config.ConfigEntry;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;

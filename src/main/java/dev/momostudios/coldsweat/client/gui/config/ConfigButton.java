@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
+import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.BaseComponent;
@@ -26,9 +27,9 @@ public class ConfigButton extends Button
         if (setsCustomDifficulty())
             configCache.difficulty = 4;
 
-        if (Minecraft.getInstance().screen instanceof ConfigScreen.PageOne)
+        if (Minecraft.getInstance().screen instanceof ConfigPageOne)
         {
-            ((ConfigScreen.PageOne) Minecraft.getInstance().screen).difficultyButton.setMessage(
+            ((ConfigPageOne) Minecraft.getInstance().screen).difficultyButton.setMessage(
                     new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
                     " (" + ConfigScreen.difficultyName(configCache.difficulty) + ")..."));
         }
