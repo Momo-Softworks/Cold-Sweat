@@ -61,6 +61,7 @@ public class HearthBlock extends Block implements EntityBlock
                 .destroyTime(2.0F)
                 .explosionResistance(10.0F)
                 .noOcclusion()
+                .lightLevel(state -> state.getValue(LAVA) * 3)
                 .dynamicShape();
     }
 
@@ -74,11 +75,9 @@ public class HearthBlock extends Block implements EntityBlock
         super(HearthBlock.getProperties());
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
         runCalculation(Shapes.or(
-            Block.box(3, 1, 4, 13, 19, 12), // Shell
-            Block.box(8, 19, 6, 12, 31, 10), // Exhaust 1
-            Block.box(6, 27.5, 5.5, 8, 31.5, 10.5), // Exhaust 2
-            Block.box(13, 5, 6, 16, 13, 10), // Water Canister
-            Block.box(0, 5, 6, 3, 13, 10))); // Lava Canister)
+            Block.box(3, 0, 3.5, 13, 18, 12.5), // Shell
+            Block.box(4, 18, 5, 9, 27, 10), // Exhaust
+            Block.box(-1, 3, 6, 17, 11, 10))); // Canisters
     }
 
     static void calculateShapes(Direction to, VoxelShape shape) {
@@ -113,10 +112,18 @@ public class HearthBlock extends Block implements EntityBlock
         return SHAPES.get(state.getValue(FACING));
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get() ? HearthBlockEntity::tick : null;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+    {
+        return type == BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get() ? HearthBlockEntity::tickSelf : null;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    {
+        return new HearthBlockEntity(pos, state);
     }
 
     @SuppressWarnings("deprecation")
@@ -128,7 +135,7 @@ public class HearthBlock extends Block implements EntityBlock
             if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
             {
                 ItemStack stack = player.getItemInHand(hand);
-                int itemFuel = te.getItemFuel(stack);
+                int itemFuel = HearthBlockEntity.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
 
                 if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthBlockEntity.MAX_FUEL)
@@ -213,13 +220,6 @@ public class HearthBlock extends Block implements EntityBlock
         super.onRemove(state, level, pos, newState, isMoving);
     }
 
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
-        return BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get().create(pos, state);
-    }
-
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
     {
@@ -233,6 +233,6 @@ public class HearthBlock extends Block implements EntityBlock
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection()).setValue(WATER, 0).setValue(LAVA, 0);
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0);
     }
 }

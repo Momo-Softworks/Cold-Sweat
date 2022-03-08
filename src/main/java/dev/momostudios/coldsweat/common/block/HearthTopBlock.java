@@ -51,11 +51,9 @@ public class HearthTopBlock extends Block
         super(HearthTopBlock.getProperties());
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
         runCalculation(Shapes.or(
-            Block.box(3, -15, 4, 13, 3, 12), // Shell
-            Block.box(8, 3, 6, 12, 15, 10), // Exhaust 1
-            Block.box(6, 11.5, 5.5, 8, 15.5, 10.5), // Exhaust 2
-            Block.box(13, -11, 6, 16, -3, 10), // Water Canister
-            Block.box(0, -11, 6, 3, -3, 10))); // Lava Canister)
+            Block.box(3, -16, 3.5, 13, 2, 12.5), // Shell
+            Block.box(4, 2, 5, 9, 11, 10), // Exhaust
+            Block.box(-1, -13, 6, 17, -5, 10))); // Canisters
     }
 
     static void calculateShapes(Direction to, VoxelShape shape) {
