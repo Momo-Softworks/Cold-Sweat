@@ -6,6 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.LivingEntity;
@@ -202,6 +204,10 @@ public class SewingContainer extends AbstractContainerMenu
 
         this.sewingInventory.getItem(1).shrink(1);
         this.setRemoteSlot(1, this.sewingInventory.getItem(1));
+
+        Player player = this.playerInventory.player;
+        player.level.playSound(null, player.blockPosition(), this.getCarried().getItem().getEquipSound(), SoundSource.BLOCKS, 1f, 1f);
+        player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
     }
     private ItemStack testForRecipe()
     {

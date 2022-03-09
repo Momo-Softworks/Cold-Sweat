@@ -79,9 +79,9 @@ public class HellLampRenderTT
             PoseStack ps = event.getPoseStack();
 
             RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
-            GuiComponent.blit(ps, event.getX(), event.getY(), 401, 0, 0, 30, 8, 30, 8);
+            GuiComponent.blit(ps, event.getX(), event.getY(), 0, 0, 0, 30, 8, 30, 8);
             RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
-            GuiComponent.blit(ps, event.getX(), event.getY(), 401, 0, 8, (int) (fuel / 2.1333f), 8, 30, 8);
+            GuiComponent.blit(ps, event.getX(), event.getY(), 0, 0, 8, (int) (fuel / 2.1333f), 8, 30, 8);
         }
     }
 
