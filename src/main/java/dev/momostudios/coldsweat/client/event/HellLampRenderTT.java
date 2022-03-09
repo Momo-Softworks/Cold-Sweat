@@ -1,15 +1,20 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.momostudios.coldsweat.client.event.csevents.RenderTooltipPostEvent;
 import dev.momostudios.coldsweat.util.config.ConfigEntry;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,7 +31,7 @@ public class HellLampRenderTT
     static int time = 0;
 
     @SubscribeEvent
-    public static void renderLampTT(ScreenEvent.DrawScreenEvent.Post event)
+    public static void renderInsertTooltip(ScreenEvent.DrawScreenEvent.Post event)
     {
         if (event.getScreen() instanceof AbstractContainerScreen<?> screen)
         {
@@ -60,18 +65,23 @@ public class HellLampRenderTT
 
                     }
                 }
-                else
-                {
-                    int mouseX   = event.getMouseX();
-                    int mouseY   = event.getMouseY();
-                    PoseStack ps = event.getPoseStack();
-
-                    RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
-                    event.getScreen().blit(ps, mouseX + 12, mouseY, 0, 0, 0, 30, 8, 30, 8);
-                    RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
-                    event.getScreen().blit(ps, mouseX + 12, mouseY, 0, 0, 8, (int) (fuel / 2.1333f), 8, 30, 8);
-                }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void renderNormalTooltip(RenderTooltipPostEvent event)
+    {
+        if (event.getItemStack().getItem() == ModItems.HELLSPRING_LAMP)
+        {
+            ItemStack stack = event.getItemStack();
+            float fuel = stack.getOrCreateTag().getFloat("fuel");
+            PoseStack ps = event.getPoseStack();
+
+            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
+            GuiComponent.blit(ps, event.getX(), event.getY(), 401, 0, 0, 30, 8, 30, 8);
+            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
+            GuiComponent.blit(ps, event.getX(), event.getY(), 401, 0, 8, (int) (fuel / 2.1333f), 8, 30, 8);
         }
     }
 

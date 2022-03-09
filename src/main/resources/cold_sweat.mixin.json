@@ -5,11 +5,12 @@
   "client": [
     "MixinContainerMenu",
     "MixinHumanoidModel",
+    "MixinScreen",
     "MixinXPBar"
   ],
   "mixins": [
-    "MixinMinecart",
-    "MixinLevel"
+    "MixinLevel",
+    "MixinMinecart"
   ],
   "injectors": {
     "defaultRequire": 1
