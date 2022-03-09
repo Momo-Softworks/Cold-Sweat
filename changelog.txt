@@ -12,8 +12,8 @@
 - Instead of going to 150, the player's temperature will now visually max out at 100
     - After 100, the readout will begin to glow as the critical temperature builds up further
     - Mechanically, it still works the same
-- Ambient temperature no longer affects players in creative mode
-- Fixed minor bug that would occasionally cause the ambient temperature to jitter
+- World temperature no longer affects players in creative mode
+- Fixed minor bug that would occasionally cause the world temperature to jitter
 - Added a Russian translation courtesy of @Xemay on our Discord server
 
 
@@ -85,7 +85,7 @@
 - Water now cools you down
     - When you get out, it takes a bit of time to warm up
     - In cold biomes, the effect is greater, so be careful!
-    - The speed at which you warm up also depends on the ambient temperature
+    - The speed at which you warm up also depends on the world temperature
 - Added new sounds for when the player is freezing
 - Sleeping through the night now brings your temperature closer to 0
 - Using the ingame config menu on a server now changes the server's configs if the player has OP permission level 2 or higher
@@ -122,7 +122,7 @@
         - arguments: (double) value: a double representing the temperature to convert
                      (Unit) from: the unit to convert from (Unit is a new enum in net.momostudios.util)
                      (Unit) to: the unit to convert to
-                     (boolean) absolute: if true, the offset of ambient temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
+                     (boolean) absolute: if true, the offset of world temperature is taken into account (for example, adds 32 degrees when converting Minecraft to Fahrenheit)
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -135,7 +135,7 @@
     - It can also be disabled if you prefer
 - New sounds for the Soulfire Lamp when it is lit or extinguished
 - Active nether portals now give off heat in the overworld
-- The ambient temperature gauge now smoothly transitions to new temperatures
+- The world temperature gauge now smoothly transitions to new temperatures
 - Massive performance improvements for things that affect temperature (mainly blocks, weather, and biomes)
 - Config options now appear greyed-out instead of disappearing if the player is not OP or has cheats disabled
 - Removed some blank space in Boiler & Icebox GUIs
@@ -180,7 +180,7 @@ Release 2.1:
 - Ice Resistance potions are now brewed with Prismarine Cystals
 - Added new sounds for freezing damage
 - Active nether portals now give off heat in the Overworld
-- The ambient temperature gauge now smoothly transitions to new temperatures
+- The world temperature gauge now smoothly transitions to new temperatures
 - The /temperature command can no longer be used to set config settings
 - Limited the number of total blocks the Hearth can affect to 4000
     - This is to prevent lag from tons of hearths
@@ -285,7 +285,7 @@ Technical Changes:
       - Translation keys have changed, meaning its name will default to "Hellspring Lamp" in all languages
 - Lowered the rate at which the Hearth consumes fuel
 - Added compatibility for Better Weather
-- The ambient temperature gauge now smooths out transitions on a per-frame basis instead of per-tick
+- The world temperature gauge now smooths out transitions on a per-frame basis instead of per-tick
       - This basically just makes it smoother for higher framerates
 
 Fixes:
@@ -326,7 +326,7 @@ Technical Changes:
 ------------------------------------------------------------------------------------------------------------------------
 2.1.4
 - Food items can now be configured to affect the player's body temperature when eaten
-- The "steve head" icon above the hotbar now displays the ambient temperature instead of the player's body temperature
+- The "steve head" icon above the hotbar now displays the world temperature instead of the player's body temperature
 - Config files that use numbers no longer require quotes around them
 
 Fixes:
@@ -339,13 +339,13 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.1.5
--Fixed an issue that caused the two newest players on a multiplayer server to have their ambient temperatures "linked"
+-Fixed an issue that caused the two newest players on a multiplayer server to have their world temperatures "linked"
 
 
 ------------------------------------------------------------------------------------------------------------------------
 2.1.6
 - The dimensions in which the Hellspring Lamp works are now configurable
-- The Hearth now has a less powerful effect on the ambient temperature (configurable)
+- The Hearth now has a less powerful effect on the world temperature (configurable)
 
 Fixes:
 - Fixed hotbar temperature icon not working properly in Celsius mode
@@ -358,9 +358,38 @@ Fixes:
 2.1.7
 - Fixed the Hellspring Lamp not working due to improper configs
 - Fixed buggy shift-click behavior in the Sewing Table
-- Fixed Water not affecting the ambient temperature properly in some cases
+- Fixed Water not affecting the world temperature properly in some cases
 - Fixed occasional crash when syncing the player's temperature from the server to the client in singleplayer
 - Added some more detailed explanaitons to some config files
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.8
+- Fixed mods with optional support (Serene Seasons, Better Weather) causing crashes when used with Cold Sweat
+- Fixed players taking temperature-related damage in spectator mode
+
+Technical Changes:
+- PlayerTemp and all its methods have been removed (deprecated since 2.1.3). Use PlayerHelper instead.
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.9
+- Updated to 1.18.1
+- Updated the Hearth's model, texture, item, etc. to look more "primitive" and less like a modern machine
+- Tweaked Waterskins to show more realistic temperatures when filled
+- Inserting fuel into the Hellspring Lamp is now handled by mixins to prevent client having power over the server
+    - The client was possibly able to "spawn in" a fake fuel item, then insert it into the lantern, and the server would accept it
+
+Fixes:
+- Waterskins now properly sample the biome's temperature when being filled (this has been broken since at least 2.1)
+- Fixed Minecart Insulation being consumed when right-clicking a minecart with insulation already applied
+
+Technical Changes:
+- The Hearth no longer uses the capability system (shouldn't impact anything in-game)
+- Many of the utility classes have been re-worked or removed. This will require compat mods to be updated.
+
+
+------------------------------------------------------------------------------------------------------------------------
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
