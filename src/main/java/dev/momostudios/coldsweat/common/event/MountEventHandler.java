@@ -27,31 +27,6 @@ import java.util.List;
 public class MountEventHandler
 {
     @SubscribeEvent
-    public static void onMinecartRightclick(PlayerInteractEvent.EntityInteract event)
-    {
-        Entity entity = event.getTarget();
-        Player sourceentity = event.getPlayer();
-        double x = event.getPos().getX();
-        double y = event.getPos().getY();
-        double z = event.getPos().getZ();
-        Level world = event.getWorld();
-
-        if (entity instanceof Minecart minecart && sourceentity.getItemInHand(event.getHand()).getItem() == ModItems.MINECART_INSULATION
-        && minecart.getDisplayBlockState().getBlock() != ModBlocks.MINECART_INSULATION)
-        {
-            event.setCanceled(true);
-            if (!sourceentity.isCreative())
-            {
-                sourceentity.getMainHandItem().shrink(1);
-            }
-            sourceentity.swing(InteractionHand.MAIN_HAND, true);
-            world.playSound(null, new BlockPos(x, y, z), SoundEvents.LLAMA_SWAG, SoundSource.NEUTRAL, 1f, (float) ((Math.random() / 5) + 0.9));
-            minecart.setDisplayBlockState(BlockInit.MINECART_INSULATION.get().defaultBlockState());
-            minecart.setDisplayOffset(5);
-        }
-    }
-
-    @SubscribeEvent
     public static void playerRiding(TickEvent.PlayerTickEvent event)
     {
         if (event.phase == TickEvent.Phase.END)
@@ -72,6 +47,7 @@ public class MountEventHandler
                             Number number = (Number) entity.get(1);
                             double value = number.doubleValue();
                             PlayerHelper.addModifier(player, new MountTempModifier(value).expires(1), Temperature.Types.RATE, false);
+                            break;
                         }
                     }
                 }
