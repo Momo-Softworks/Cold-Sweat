@@ -9,8 +9,6 @@ import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -30,13 +28,6 @@ public class ConfigPageDifficulty extends Screen
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
 
     ResourceLocation configButtons = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png");
-
-    Button doneButton = new Button(
-            this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
-            this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
-            BOTTOM_BUTTON_WIDTH, 20,
-            new TranslatableComponent("gui.done"),
-            button -> this.close());
 
     public ConfigPageDifficulty(Screen parentScreen, ConfigCache configCache)
     {

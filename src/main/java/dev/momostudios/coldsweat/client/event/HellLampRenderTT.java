@@ -1,9 +1,7 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.momostudios.coldsweat.client.event.csevents.RenderTooltipPostEvent;
 import dev.momostudios.coldsweat.util.config.ConfigEntry;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -11,10 +9,8 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,7 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)

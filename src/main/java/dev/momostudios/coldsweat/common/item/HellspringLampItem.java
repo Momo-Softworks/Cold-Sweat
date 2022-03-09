@@ -19,8 +19,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraftforge.network.PacketDistributor;
 
-import javax.annotation.Nonnull;
-
 public class HellspringLampItem extends Item
 {
     public HellspringLampItem()
@@ -37,13 +35,6 @@ public class HellspringLampItem extends Item
             double max = ConfigCache.getInstance().maxTemp;
             double temp = PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD) ?
                     player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
-
-            // Fuel the item on creation
-            /*if (!stack.getOrCreateTag().getBoolean("hasTicked"))
-            {
-                stack.getOrCreateTag().putBoolean("hasTicked", true);
-                setFuel(stack, 64);
-            }*/
 
             boolean validDimension = false;
             for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
