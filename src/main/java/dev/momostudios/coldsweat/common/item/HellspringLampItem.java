@@ -3,8 +3,10 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -16,6 +18,8 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraftforge.network.PacketDistributor;
+
+import javax.annotation.Nonnull;
 
 public class HellspringLampItem extends Item
 {
@@ -35,11 +39,11 @@ public class HellspringLampItem extends Item
                     player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
             // Fuel the item on creation
-            if (!stack.getOrCreateTag().getBoolean("hasTicked"))
+            /*if (!stack.getOrCreateTag().getBoolean("hasTicked"))
             {
                 stack.getOrCreateTag().putBoolean("hasTicked", true);
                 setFuel(stack, 64);
-            }
+            }*/
 
             boolean validDimension = false;
             for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
@@ -120,5 +124,17 @@ public class HellspringLampItem extends Item
     private double getFuel(ItemStack stack)
     {
         return stack.getOrCreateTag().getDouble("fuel");
+    }
+
+    @Override
+    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList) {
+        if (this.allowdedIn(tab))
+        {
+            ItemStack stack = new ItemStack(this);
+            stack.getOrCreateTag().putBoolean("isOn", true);
+            stack.getOrCreateTag().putDouble("fuel", 64);
+            itemList.add(stack);
+        }
+
     }
 }
