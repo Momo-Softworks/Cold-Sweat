@@ -137,8 +137,9 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierEvent.Init.Modifier event)
     {
-        String sereneseasons = "net.momostudios.coldsweat.common.temperature.modifier.compat.SereneSeasonsTempModifier";
-        String betterweather = "net.momostudios.coldsweat.common.temperature.modifier.compat.BetterWeatherTempModifier";
+        String sereneseasons = "dev.momostudios.coldsweat.common.temperature.modifier.compat.SereneSeasonsTempModifier";
+        String betterweather = "dev.momostudios.coldsweat.common.temperature.modifier.compat.BetterWeatherTempModifier";
+
         try
         {
             event.addModifier(new BlockTempModifier());
@@ -149,7 +150,7 @@ public class InitTempModifiers
             event.addModifier(new TimeTempModifier());
             event.addModifier(new WaterskinTempModifier());
             event.addModifier(new HellLampTempModifier());
-            if (ModList.get().isLoaded("sereneseasons")) event.addModifier((TempModifier) Class.forName(sereneseasons).newInstance());
+            if (ModList.get().isLoaded("sereneseasons")) event.addModifier((TempModifier) Class.forName(sereneseasons).getConstructor().newInstance());
             //if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
             event.addModifier(new WaterTempModifier());
             event.addModifier(new HearthTempModifier());
