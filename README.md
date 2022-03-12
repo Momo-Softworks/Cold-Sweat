@@ -1,5 +1,5 @@
 # Cold-Sweat
-This code is completely open as per our GNU GPL 3.0 license, HOWEVER, any project that directly samples code, assets, or otherwise from Cold Sweat must also list their project under the GNU General Public License 3.0 and attribute this project (also defined in the license).
+This project is completely open for reference and reproduction as per our GNU GPL 3.0 license; HOWEVER, any project that directly samples code, assets, or otherwise from Cold Sweat must also list their project under the GNU General Public License 3.0 and attribute this project (also defined in the license).
 
 ## Documentation
 Documentation for 3rd-party integration with Cold Sweat can be found here (WIP):  
