@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -168,13 +169,13 @@ public class PlayerHelper
      * Gets all TempModifiers of the specified type on the player
      * @param player is the player being sampled
      * @param type determines which TempModifier list to pull from
-     * @returns a NEW list of all TempModifiers of the specified type
+     * @return a NEW list of all TempModifiers of the specified type
      */
     public static List<TempModifier> getModifiers(Player player, Temperature.Types type)
     {
         List<TempModifier> mods =  player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
         mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
-        return mods;
+        return new ArrayList<>(mods);
     }
 
     /**
