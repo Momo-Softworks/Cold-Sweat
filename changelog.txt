@@ -373,7 +373,7 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.1.9
+2.1.9-b01
 - Updated to 1.18.1
 - Updated the Hearth's model, texture, item, etc. to look more "primitive" and less like a modern machine
 - Tweaked Waterskins to show more realistic temperatures when filled
@@ -387,6 +387,19 @@ Fixes:
 Technical Changes:
 - The Hearth no longer uses the capability system (shouldn't impact anything in-game)
 - Many of the utility classes have been re-worked or removed. This will require compat mods to be updated.
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.9-b02
+- Fixed crash caused by Serene Seasons
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.9-b03
+- Fixed various crashes that would occur during server startup
+- Fixed a rare crash that would occur when a block was removed in the world
+- Fixed bug that caused the Sewing GUI to pull its title from the wrong translation key
 
 
 ------------------------------------------------------------------------------------------------------------------------
