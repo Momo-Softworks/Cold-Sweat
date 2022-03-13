@@ -99,8 +99,8 @@ public final class ItemSettingsConfig
         BUILDER.push("HellspringLampItems");
         hellLampItems = BUILDER
             .comment("Defines the items that the Hellspring Lamp can use as fuel and their values",
-                    "Format: [[item-id-1, fuel-amount-1], [item-id-2, fuel-amount-2], ...etc]")
-            .defineList("Soulfire Lamp", Arrays.asList
+                    "Format: [item-id-1, item-id-2, ...etc]")
+            .defineList("Hellspring Lamp", Arrays.asList
                     (
                             "minecraft:warped_stem",
                             "minecraft:warped_hyphae",
@@ -169,7 +169,7 @@ public final class ItemSettingsConfig
         BUILDER.push("HellspringLampValidDimensions");
         hellLampDimensions = BUILDER
                 .comment("Defines the dimensions that the Hellspring Lamp can be used in",
-                        "Format: [[dimension-id-1], [dimension-id-2], ...etc]")
+                        "Format: [dimension-id-1, dimension-id-2, ...etc]")
                 .defineList("Hellspring Lamp", Arrays.asList
                         (
                                 "minecraft:the_nether"
