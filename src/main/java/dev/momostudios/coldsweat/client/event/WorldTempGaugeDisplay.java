@@ -9,8 +9,8 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -29,7 +29,7 @@ public class WorldTempGaugeDisplay
     @SubscribeEvent
     public static void renderWorldTemperature(RenderGameOverlayEvent.Post event)
     {
-        Player player = Minecraft.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
         (CSMath.isBetween(player.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
