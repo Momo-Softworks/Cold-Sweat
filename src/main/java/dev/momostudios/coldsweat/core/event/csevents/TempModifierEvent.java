@@ -194,7 +194,7 @@ public class TempModifierEvent extends Event
      */
     public static class Init extends TempModifierEvent
     {
-        public static class Modifier extends TempModifierEvent
+        public static class Modifier extends Init
         {
             /**
              * @return the map of registered {@link TempModifier}s.
@@ -206,16 +206,14 @@ public class TempModifierEvent extends Event
             /**
              * Adds a new {@link TempModifier} to the registry.
              * @param modifier the {@link TempModifier} to add.
-             * @throws InstantiationException If the TempModifier has no default constructor.
-             * @throws IllegalAccessException If the default constructor is not accessible.
              */
-            public void addModifier(TempModifier modifier) throws InstantiationException, IllegalAccessException
+            public void addModifier(TempModifier modifier)
             {
                 this.getPool().add(modifier);
             }
         }
 
-        public static class Block extends TempModifierEvent
+        public static class Block extends Init
         {
             /**
              * @return the map of registered {@link BlockEffect}s.
@@ -227,10 +225,8 @@ public class TempModifierEvent extends Event
             /**
              * Adds a new {@link BlockEffect} to the registry.
              * @param blockEffect The BlockEffect to add.
-             * @throws InstantiationException If the BlockEffect doesn't have a default constructor.
-             * @throws IllegalAccessException If the default constructor is not accessible.
              */
-            public void addBlockEffect(BlockEffect blockEffect) throws InstantiationException, IllegalAccessException
+            public void addBlockEffect(BlockEffect blockEffect)
             {
                 this.getPool().add(blockEffect);
             }
