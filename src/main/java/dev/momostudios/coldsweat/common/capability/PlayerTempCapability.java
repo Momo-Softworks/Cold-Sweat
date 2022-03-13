@@ -23,20 +23,21 @@ public class PlayerTempCapability implements ITemperatureCap
     double worldTemp;
     double bodyTemp;
     double baseTemp;
-    double compTemp;
+    double totalTemp;
+
     List<TempModifier> worldModifiers = new ArrayList<>();
-    List<TempModifier> bodyModifiers = new ArrayList<>();
-    List<TempModifier> baseModifiers = new ArrayList<>();
-    List<TempModifier> rateModifiers = new ArrayList<>();
+    List<TempModifier> bodyModifiers  = new ArrayList<>();
+    List<TempModifier> baseModifiers  = new ArrayList<>();
+    List<TempModifier> rateModifiers  = new ArrayList<>();
 
     public double get(Temperature.Types type)
     {
         switch (type)
         {
-            case WORLD:  return worldTemp;
+            case WORLD:    return worldTemp;
             case BODY:     return bodyTemp;
             case BASE:     return baseTemp;
-            case TOTAL:return compTemp;
+            case TOTAL:    return totalTemp;
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getValue(): " + type);
         }
     }
@@ -45,10 +46,10 @@ public class PlayerTempCapability implements ITemperatureCap
     {
         switch (type)
         {
-            case WORLD:  { this.worldTemp = value; break; }
-            case BODY:     { this.bodyTemp = value; break; }
-            case BASE:     { this.baseTemp = value; break; }
-            case TOTAL:{ this.compTemp = value; break; }
+            case WORLD:    { this.worldTemp = value; break; }
+            case BODY:     { this.bodyTemp  = value; break; }
+            case BASE:     { this.baseTemp  = value; break; }
+            case TOTAL:    { this.totalTemp = value; break; }
             default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.setValue(): " + type);
         }
     }
@@ -57,7 +58,7 @@ public class PlayerTempCapability implements ITemperatureCap
     {
         switch (type)
         {
-            case WORLD:  { return worldModifiers; }
+            case WORLD:    { return worldModifiers; }
             case BODY:     { return bodyModifiers; }
             case BASE:     { return baseModifiers; }
             case RATE:     { return rateModifiers; }
@@ -69,7 +70,7 @@ public class PlayerTempCapability implements ITemperatureCap
     {
         switch (type)
         {
-            case WORLD:  { return this.worldModifiers.stream().anyMatch(mod::isInstance); }
+            case WORLD:    { return this.worldModifiers.stream().anyMatch(mod::isInstance); }
             case BODY:     { return this.bodyModifiers.stream().anyMatch(mod::isInstance); }
             case BASE:     { return this.baseModifiers.stream().anyMatch(mod::isInstance); }
             case RATE:     { return this.rateModifiers.stream().anyMatch(mod::isInstance); }
