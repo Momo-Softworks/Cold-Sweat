@@ -44,7 +44,7 @@ public class ItemTooltipInfo
             event.getToolTip().add(1, new TextComponent("             "));
             if (Minecraft.getInstance().options.advancedItemTooltips)
             {
-                event.getToolTip().add(event.getToolTip().size() - 2, new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
+                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 2), new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
             }
         }
     }
