@@ -78,15 +78,18 @@ public abstract class TempModifier
      * @param name The name of the argument
      * @param arg The new value of the argument
      */
-    public void setArgument(String name, Object arg)
+    public <T> void setArgument(String name, T arg)
     {
-        if (arg.getClass().equals(args.get(name).getClass()))
+        try
         {
-            args.put(name, arg);
+            args.put(name, args.get(name).getClass().cast(arg));
         }
-        else throw new IllegalArgumentException(
-                "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg +
-                " (expected " + args.get(name).getClass().getName() + ")");
+        catch (Exception e)
+        {
+            throw new IllegalArgumentException(
+                    "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg +
+                    " (expected " + args.get(name).getClass().getName() + ")");
+        }
     }
 
     public void clearArgument(String name)
