@@ -18,7 +18,7 @@ public class MixinLevel
 {
     Level level = (Level) (Object) this;
 
-    @Inject(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z", at = @At("HEAD"), remap = ColdSweat.remapMixins)
+    @Inject(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z", at = @At("HEAD"), remap = ColdSweat.remapMixins, cancellable = true)
     public void setBlock(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<Boolean> info)
     {
         if (state.getBlock() == Blocks.AIR)
@@ -27,13 +27,8 @@ public class MixinLevel
             {
                 if (level.getBlockState(CSMath.offsetDirection(pos, value)).getBlock().equals(Blocks.CAVE_AIR) && !level.canSeeSky(pos))
                 {
-                    WorldHelper.schedule(() ->
-                    {
-                        if (level.isLoaded(pos))
-                        {
-                            level.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 3);
-                        }
-                    }, 1);
+                    level.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 3);
+                    info.cancel();
                 }
                 break;
             }
