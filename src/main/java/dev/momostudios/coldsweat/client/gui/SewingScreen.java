@@ -15,11 +15,11 @@ import javax.annotation.Nonnull;
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    TranslatableComponent name = new TranslatableComponent("block." + ColdSweat.MOD_ID + ".sewing_table");
+    TranslatableComponent name = new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table");
 
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("block." + ColdSweat.MOD_ID + ".sewing_table"));
+        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 175;
