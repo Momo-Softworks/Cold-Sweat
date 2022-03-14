@@ -46,7 +46,7 @@ public class AddTempModifiers
                     MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
                     int potionLevel = effect.getAmplifier() + 1;
 
-                    PlayerHelper.removeModifiers(player, Temperature.Types.BODY, 1, (modifier) -> modifier instanceof HearthTempModifier);
+                    PlayerHelper.removeModifiers(player, Temperature.Types.CORE, 1, (modifier) -> modifier instanceof HearthTempModifier);
                     PlayerHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(20), Temperature.Types.WORLD, 1);
                 }
             }
@@ -84,8 +84,8 @@ public class AddTempModifiers
         {
             if (player.isSleeping())
             {
-                dev.momostudios.coldsweat.common.temperature.Temperature temp = PlayerHelper.getTemperature(player, Temperature.Types.BODY);
-                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.common.temperature.Temperature(temp.get() / 4), Temperature.Types.BODY);
+                dev.momostudios.coldsweat.common.temperature.Temperature temp = PlayerHelper.getTemperature(player, Temperature.Types.CORE);
+                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.common.temperature.Temperature(temp.get() / 4), Temperature.Types.CORE);
             }
         });
     }

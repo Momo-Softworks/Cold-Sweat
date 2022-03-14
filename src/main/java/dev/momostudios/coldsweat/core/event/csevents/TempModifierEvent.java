@@ -23,7 +23,7 @@ public class TempModifierEvent extends Event
      * <br>
      * {@link #maxCount} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #player} is the player the TempModifier is being applied to. <br>
-     * {@link #type} determines the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#TOTAL} <br>
+     * {@link #type} determines the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#BODY} <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being added.<br>
@@ -72,7 +72,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be removed. <br>
      * <br>
      * {@link #player} is the player the TempModifier is being removed from. <br>
-     * {@link #type} is the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#TOTAL}. <br>
+     * {@link #type} is the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#BODY}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
      * <br>

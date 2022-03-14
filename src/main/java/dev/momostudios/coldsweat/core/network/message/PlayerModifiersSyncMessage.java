@@ -19,28 +19,37 @@ import java.util.function.Supplier;
 public class PlayerModifiersSyncMessage
 {
     public List<TempModifier> world;
-    public List<TempModifier> body;
+    public List<TempModifier> core;
     public List<TempModifier> base;
     public List<TempModifier> rate;
+    public List<TempModifier> hottest;
+    public List<TempModifier> coldest;
 
-    public PlayerModifiersSyncMessage(List<TempModifier> world, List<TempModifier> body, List<TempModifier> base, List<TempModifier> rate) {
+    public PlayerModifiersSyncMessage(List<TempModifier> world, List<TempModifier> core, List<TempModifier> base, List<TempModifier> rate, List<TempModifier> hottest, List<TempModifier> coldest)
+    {
         this.world = world;
-        this.body = body;
+        this.core = core;
         this.base = base;
         this.rate = rate;
+        this.hottest = hottest;
+        this.coldest = coldest;
     }
 
     public static void encode(PlayerModifiersSyncMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeNbt(writeToNBT(message, Temperature.Types.WORLD));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.BODY));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.CORE));
         buffer.writeNbt(writeToNBT(message, Temperature.Types.BASE));
         buffer.writeNbt(writeToNBT(message, Temperature.Types.RATE));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.HOTTEST));
+        buffer.writeNbt(writeToNBT(message, Temperature.Types.COLDEST));
     }
 
     public static PlayerModifiersSyncMessage decode(FriendlyByteBuf buffer)
     {
         return new PlayerModifiersSyncMessage(
+                readFromNBT(buffer.readNbt()),
+                readFromNBT(buffer.readNbt()),
                 readFromNBT(buffer.readNbt()),
                 readFromNBT(buffer.readNbt()),
                 readFromNBT(buffer.readNbt()),
@@ -51,10 +60,13 @@ public class PlayerModifiersSyncMessage
     {
         CompoundTag nbt = new CompoundTag();
         List<TempModifier> referenceList =
-                type == Temperature.Types.WORLD ? message.world :
-                type == Temperature.Types.BODY ? message.body :
-                type == Temperature.Types.BASE ? message.base :
-                message.rate;
+                type == Temperature.Types.WORLD   ? message.world :
+                type == Temperature.Types.CORE    ? message.core :
+                type == Temperature.Types.BASE    ? message.base :
+                type == Temperature.Types.RATE    ? message.rate :
+                type == Temperature.Types.HOTTEST ? message.hottest :
+                type == Temperature.Types.COLDEST ? message.coldest :
+                new ArrayList<>(0);
 
         // Iterate modifiers and write to NBT
         for (int i = 0; i < referenceList.size(); i++)
@@ -107,14 +119,20 @@ public class PlayerModifiersSyncMessage
                         cap.clearModifiers(Temperature.Types.WORLD);
                         cap.getModifiers(Temperature.Types.WORLD).addAll(message.world);
 
-                        cap.clearModifiers(Temperature.Types.BODY);
-                        cap.getModifiers(Temperature.Types.BODY).addAll(message.body);
+                        cap.clearModifiers(Temperature.Types.CORE);
+                        cap.getModifiers(Temperature.Types.CORE).addAll(message.core);
 
                         cap.clearModifiers(Temperature.Types.BASE);
                         cap.getModifiers(Temperature.Types.BASE).addAll(message.base);
 
                         cap.clearModifiers(Temperature.Types.RATE);
                         cap.getModifiers(Temperature.Types.RATE).addAll(message.rate);
+
+                        cap.clearModifiers(Temperature.Types.HOTTEST);
+                        cap.getModifiers(Temperature.Types.HOTTEST).addAll(message.hottest);
+
+                        cap.clearModifiers(Temperature.Types.COLDEST);
+                        cap.getModifiers(Temperature.Types.COLDEST).addAll(message.coldest);
                     });
                 }
             }

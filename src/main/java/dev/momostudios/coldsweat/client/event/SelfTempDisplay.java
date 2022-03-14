@@ -42,7 +42,7 @@ public class SelfTempDisplay
             if (playerCap == null || entity.tickCount % 40 == 0)
                 playerCap = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
 
-            int temp = (int) playerCap.get(Temperature.Types.TOTAL);
+            int temp = (int) playerCap.get(Temperature.Types.BODY);
 
             int threatLevel = 0;
 

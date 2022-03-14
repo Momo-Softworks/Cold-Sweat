@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
@@ -54,9 +55,11 @@ public class PlayerHelper
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
-                        type == Temperature.Types.BODY ? value : getTemperature(player, Temperature.Types.BODY),
-                        type == Temperature.Types.BASE ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD));
+                        type == Temperature.Types.CORE ? value : getTemperature(player, Temperature.Types.CORE),
+                        type == Temperature.Types.BASE  ? value : getTemperature(player, Temperature.Types.BASE),
+                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD),
+                        type == Temperature.Types.HOTTEST ? value : getTemperature(player, Temperature.Types.HOTTEST),
+                        type == Temperature.Types.COLDEST ? value : getTemperature(player, Temperature.Types.COLDEST));
             }
             capability.set(type, value.get());
         });
@@ -75,9 +78,11 @@ public class PlayerHelper
             if (sync && !player.level.isClientSide)
             {
                 updateTemperature(player,
-                        type == Temperature.Types.BODY  ? value : getTemperature(player, Temperature.Types.BODY),
+                        type == Temperature.Types.CORE ? value : getTemperature(player, Temperature.Types.CORE),
                         type == Temperature.Types.BASE  ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD));
+                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD),
+                        type == Temperature.Types.HOTTEST ? value : getTemperature(player, Temperature.Types.HOTTEST),
+                        type == Temperature.Types.COLDEST ? value : getTemperature(player, Temperature.Types.COLDEST));
             }
         });
     }
@@ -125,7 +130,7 @@ public class PlayerHelper
                 }
 
                 if (!player.level.isClientSide)
-                    updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.WORLD), cap.getModifiers(Temperature.Types.RATE));
+                    updateModifiers(player, cap);
             });
         }
     }
@@ -161,7 +166,7 @@ public class PlayerHelper
             });
 
             if (!player.level.isClientSide)
-                updateModifiers(player, cap.getModifiers(Temperature.Types.BODY), cap.getModifiers(Temperature.Types.BASE), cap.getModifiers(Temperature.Types.WORLD), cap.getModifiers(Temperature.Types.RATE));
+                updateModifiers(player, cap);
         });
     }
 
@@ -225,10 +230,12 @@ public class PlayerHelper
     {
         switch (type)
         {
-            case BODY :     return "body_temp_modifiers";
-            case WORLD:     return "world_temp_modifiers";
-            case BASE :     return "base_temp_modifiers";
-            case RATE :     return "rate_temp_modifiers";
+            case CORE :      return "coreTempModifiers";
+            case WORLD :     return "worldTempModifiers";
+            case BASE :      return "baseTempModifiers";
+            case RATE :      return "rateTempModifiers";
+            case HOTTEST:    return "hottestTempModifiers";
+            case COLDEST:    return "coldestTempModifiers";
             default : throw new IllegalArgumentException("PlayerTempHandler.getModifierTag() received illegal Type argument");
         }
     }
@@ -243,10 +250,12 @@ public class PlayerHelper
     {
         switch (type)
         {
-            case BODY :      return "body_temperature";
-            case WORLD:      return "world_temperature";
-            case BASE :      return "base_temperature";
-            case TOTAL: return "composite_temperature";
+            case CORE :      return "coreTemperature";
+            case WORLD :     return "worldTemperature";
+            case BASE :      return "baseTemperature";
+            case BODY :      return "bodyTemperature";
+            case HOTTEST:    return "hottestTemperature";
+            case COLDEST:    return "coldestTemperature";
             default : throw new IllegalArgumentException("PlayerTempHandler.getTempTag() received illegal Type argument");
         }
     }
@@ -266,21 +275,36 @@ public class PlayerHelper
         return getItemInHand(player, arm).getItem() == ModItems.HELLSPRING_LAMP;
     }
 
-    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp)
+    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp, Temperature max, Temperature min)
     {
         if (!player.level.isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                    new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), worldTemp.get()));
+                    new PlayerTempSyncMessage(bodyTemp.get(), baseTemp.get(), worldTemp.get(), max.get(), min.get()));
         }
     }
 
-    public static void updateModifiers(Player player, List<TempModifier> body, List<TempModifier> world, List<TempModifier> base, List<TempModifier> rate)
+    public static void updateModifiers(Player player, List<TempModifier> body, List<TempModifier> world, List<TempModifier> base, List<TempModifier> rate, List<TempModifier> hottest, List<TempModifier> coldest)
     {
         if (!player.level.isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                    new PlayerModifiersSyncMessage(body, world, base, rate));
+                    new PlayerModifiersSyncMessage(body, world, base, rate, hottest, coldest));
+        }
+    }
+
+    public static void updateModifiers(Player player, ITemperatureCap cap)
+    {
+        if (!player.level.isClientSide)
+        {
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
+                    new PlayerModifiersSyncMessage(
+                            cap.getModifiers(Temperature.Types.CORE),
+                            cap.getModifiers(Temperature.Types.WORLD),
+                            cap.getModifiers(Temperature.Types.BASE),
+                            cap.getModifiers(Temperature.Types.RATE),
+                            cap.getModifiers(Temperature.Types.HOTTEST),
+                            cap.getModifiers(Temperature.Types.COLDEST)));
         }
     }
 }

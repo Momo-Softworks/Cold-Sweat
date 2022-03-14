@@ -23,7 +23,7 @@ public class PlayerEatFood
             {
                 if (list.get(0).equals(event.getItem().getItem().getRegistryName().toString()))
                 {
-                    PlayerHelper.addModifier(player, new FoodTempModifier(((Number) list.get(1)).doubleValue()).expires(1), Temperature.Types.BODY, true);
+                    PlayerHelper.addModifier(player, new FoodTempModifier(((Number) list.get(1)).doubleValue()).expires(1), Temperature.Types.CORE, true);
                     break;
                 }
             }

@@ -46,7 +46,7 @@ public class FilledWaterskinItem extends Item
                     itemstack.getOrCreateTag().putDouble("temperature", itemTemp + Math.min(-itemTemp, temp));
                 }
 
-                PlayerHelper.addModifier((Player) entity, new WaterskinTempModifier(temp).expires(1), Temperature.Types.BODY, true);
+                PlayerHelper.addModifier((Player) entity, new WaterskinTempModifier(temp).expires(1), Temperature.Types.CORE, true);
             }
         }
     }
@@ -57,7 +57,7 @@ public class FilledWaterskinItem extends Item
         InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        PlayerHelper.addModifier(player, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), Temperature.Types.BODY, true);
+        PlayerHelper.addModifier(player, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), Temperature.Types.CORE, true);
 
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 

@@ -22,11 +22,7 @@ public class PlayerTempUpdater
             {
                 event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
-                    PlayerHelper.updateModifiers(event.player,
-                            cap.getModifiers(Temperature.Types.BODY),
-                            cap.getModifiers(Temperature.Types.BASE),
-                            cap.getModifiers(Temperature.Types.WORLD),
-                            cap.getModifiers(Temperature.Types.RATE));
+                    PlayerHelper.updateModifiers(event.player, cap);
                 });
             }
 

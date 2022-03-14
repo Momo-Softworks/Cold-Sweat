@@ -16,14 +16,19 @@ public class PlayerTempSyncMessage
     public double body;
     public double base;
     public double world;
+    public double max;
+    public double min;
 
     public PlayerTempSyncMessage() {
     }
 
-    public PlayerTempSyncMessage(double body, double base, double world){
+    public PlayerTempSyncMessage(double body, double base, double world, double max, double min)
+    {
         this.body = body;
         this.base = base;
         this.world = world;
+        this.max = max;
+        this.min = min;
     }
 
     public static void encode(PlayerTempSyncMessage message, FriendlyByteBuf buffer)
@@ -31,23 +36,25 @@ public class PlayerTempSyncMessage
         buffer.writeDouble(message.body);
         buffer.writeDouble(message.base);
         buffer.writeDouble(message.world);
+        buffer.writeDouble(message.max);
+        buffer.writeDouble(message.min);
     }
 
     public static PlayerTempSyncMessage decode(FriendlyByteBuf buffer)
     {
-        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
 
     public static void handle(PlayerTempSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
 
-        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.world)));
+        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.world, message.max, message.min)));
 
         context.setPacketHandled(true);
     }
 
-    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double world)
+    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double world, double max, double min)
     {
         return new DistExecutor.SafeRunnable()
         {
@@ -60,10 +67,11 @@ public class PlayerTempSyncMessage
                 {
                     player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.set(Temperature.Types.BODY, body);
+                        cap.set(Temperature.Types.CORE, body);
                         cap.set(Temperature.Types.BASE, base);
-                        cap.set(Temperature.Types.TOTAL, body + base);
                         cap.set(Temperature.Types.WORLD, world);
+                        cap.set(Temperature.Types.HOTTEST, max);
+                        cap.set(Temperature.Types.COLDEST, min);
                     });
                 }
             }

@@ -1,7 +1,9 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
 import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
@@ -35,12 +37,15 @@ public class WorldTempGaugeDisplay
         (CSMath.isBetween(player.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
         player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showWorldTemp))
         {
-            // Variables
             int scaleX = event.getWindow().getGuiScaledWidth();
             int scaleY = event.getWindow().getGuiScaledHeight();
-            double min = ConfigCache.getInstance().minTemp;
-            double max = ConfigCache.getInstance().maxTemp;
-            double mid = (min + max) / 2;
+
+            ITemperatureCap tempCap = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
+            //System.out.println(tempCap.get(Temperature.Types.HOTTEST));
+            double min = ConfigCache.getInstance().minTemp + tempCap.get(Temperature.Types.COLDEST);
+            double max = ConfigCache.getInstance().maxTemp + tempCap.get(Temperature.Types.HOTTEST);
+            double mid = (ConfigCache.getInstance().minTemp + ConfigCache.getInstance().maxTemp) / 2;
+
             boolean bobbing = CCS.iconBobbing();
 
             // Get player world temperature
