@@ -19,6 +19,7 @@
   "item.minecraft.potion.effect.ice_resistance": "Potion of Ice Resistance",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Lingering Potion of Ice Resistance",
   "item.minecraft.splash_potion.effect.ice_resistance": "Splash Potion of Ice Resistance",
+  "item.minecraft.tipped_arrow.effect.ice_resistance": "Tipped Arrow of Ice Resistance",
 
   "container.cold_sweat.boiler":        "Boiler",
   "container.cold_sweat.icebox":        "Icebox",
