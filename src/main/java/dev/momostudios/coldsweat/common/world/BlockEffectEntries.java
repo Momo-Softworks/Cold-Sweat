@@ -17,9 +17,12 @@ public class BlockEffectEntries
         return master;
     }
 
+    /**
+     * Do not edit this list directly. Use the add and remove methods instead.
+     */
     public List<BlockEffect> getList()
     {
-        return new ArrayList<>(entries);
+        return entries;
     }
 
     public void add(BlockEffect blockEffect)
