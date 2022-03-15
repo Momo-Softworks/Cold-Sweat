@@ -115,7 +115,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
                 }
             }
 
-            if (state.getValue(IceboxBlock.FROSTED) && level.getGameTime() % 3 == 0 && Math.random() < 0.5)
+            if (state.getValue(IceboxBlock.FROSTED) && iceboxTE.ticksExisted % 3 == 0 && Math.random() < 0.5)
             {
                 double d0 = pos.getX() + 0.5;
                 double d1 = pos.getY();
