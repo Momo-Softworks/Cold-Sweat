@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.temperature.modifier;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -7,10 +8,15 @@ import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BiomeTempModifier extends TempModifier
 {
@@ -21,16 +27,17 @@ public class BiomeTempModifier extends TempModifier
     @Override
     public double getResult(Temperature temp, Player player)
     {
-        // get obfuscated name for getHeightAdjustedTemperature method in Biome class
         Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
         getTemperature.setAccessible(true);
+
+        BiomeManager biomeManager = player.level.getBiomeManager();
 
         try
         {
             double worldTemp = 0;
             for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
-                Biome biome = player.level.getBiome(blockPos);
+                Biome biome = biomeManager.getNoiseBiomeAtPosition(blockPos);
                 worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().location());
 
                 // Should temperature be overridden by config
@@ -56,36 +63,42 @@ public class BiomeTempModifier extends TempModifier
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
     {
         double offset = 0;
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("biome_offsets"))
+        for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("biome_offsets"))
         {
-            if (new ResourceLocation(value.get(0)).equals(biomeID))
-                offset += Double.parseDouble(value.get(1));
+            if (value.get(0).equals(biomeID.toString()))
+            {
+                offset += ((Number) value.get(1)).doubleValue();
+                break;
+            }
         }
 
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets"))
+        for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets"))
         {
-            if (new ResourceLocation(value.get(0)).equals(dimensionID))
-                offset += Double.parseDouble(value.get(1));
+            if (value.get(0).equals(dimensionID.toString()))
+            {
+                offset += ((Number) value.get(1)).doubleValue();
+                break;
+            }
         }
         return offset;
     }
 
     protected TempOverride biomeOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures"))
+        for (List<?> value : ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures"))
         {
-            if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return new TempOverride(true, Double.parseDouble(value.get(1)));
+            if (value.get(0).equals(biomeID.toString()))
+                return new TempOverride(true, ((Number) value.get(1)).doubleValue());
         }
         return new TempOverride(false, 0.0d);
     }
 
     protected TempOverride dimensionOverride(ResourceLocation biomeID)
     {
-        for (List<String> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_temperatures"))
+        for (List<?> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_temperatures"))
         {
-            if (new ResourceLocation(value.get(0)).equals(biomeID))
-                return new TempOverride(true, Double.parseDouble(value.get(1)));
+            if (value.get(0).equals(biomeID.toString()))
+                return new TempOverride(true, ((Number) value.get(1)).doubleValue());
         }
         return new TempOverride(false, 0.0d);
     }
