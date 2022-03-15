@@ -10,7 +10,8 @@
   ],
   "mixins": [
     "MixinLevel",
-    "MixinMinecart"
+    "MixinMinecart",
+    "MixinSoulfire"
   ],
   "injectors": {
     "defaultRequire": 1
