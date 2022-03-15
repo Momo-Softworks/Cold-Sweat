@@ -15,7 +15,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,9 +93,8 @@ public class WorldHelper
         return true;
     }
 
-    public static boolean canSpreadThrough(Level world, @Nonnull SpreadPath path, @Nonnull Direction toDir, @Nullable Direction fromDir)
+    public static boolean canSpreadThrough(Level world, @Nonnull BlockPos pos, @Nonnull Direction toDir)
     {
-        BlockPos pos = path.getPos();
         LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk != null)
         {
@@ -108,6 +106,14 @@ public class WorldHelper
             return !isFullSide(state, toDir, pos.relative(toDir), world) && !state.isFaceSturdy(world, pos, toDir.getOpposite());
         }
         return false;
+    }
+
+    public static boolean canSpreadThrough(Level level, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    {
+        if (state.isAir())
+            return true;
+
+        return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
     }
 
     public static double distance(Vec3i pos1, Vec3i pos2)
@@ -186,5 +192,13 @@ public class WorldHelper
             }
             catch (Exception e1) {}
         }
+    }
+
+    public static BlockState getBlockState(LevelChunk chunk, BlockPos blockpos)
+    {
+        int x = blockpos.getX();
+        int y = blockpos.getY();
+        int z = blockpos.getZ();
+        return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
     }
 }
