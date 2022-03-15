@@ -7,7 +7,6 @@ import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import dev.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
@@ -100,7 +99,7 @@ public class InitTempModifiers
                                 {
                                     for (String id : blockIDs)
                                     {
-                                        if (block.getBlock().getRegistryName().equals(new ResourceLocation(id)))
+                                        if (block.getBlock().getRegistryName().toString().equals(id))
                                             return true;
                                     }
                                     return false;
