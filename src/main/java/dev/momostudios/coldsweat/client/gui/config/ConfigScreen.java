@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
@@ -25,13 +26,13 @@ public class ConfigScreen
     public static final int OPTION_SIZE = 25;
     public static final int BOTTOM_BUTTON_WIDTH = 150;
 
-    public static Minecraft mc = Minecraft.getInstance();
+    public static Minecraft MC = Minecraft.getInstance();
 
     public static DecimalFormat twoPlaces = new DecimalFormat("#.##");
 
-    public static boolean isMouseDown = false;
-    public static int mouseX = 0;
-    public static int mouseY = 0;
+    public static boolean IS_MOUSE_DOWN = false;
+    public static int MOUSE_X = 0;
+    public static int MOUSE_Y = 0;
 
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = 1;
@@ -53,7 +54,7 @@ public class ConfigScreen
         {
             if (Minecraft.getInstance().player.getPermissionLevel() >= 2)
             {
-                if (!mc.isLocalServer())
+                if (!MC.isLocalServer())
                 {
                     ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configCache));
                 }
@@ -74,14 +75,14 @@ public class ConfigScreen
     public static void onClicked(ScreenEvent.MouseClickedEvent event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
-            isMouseDown = true;
+            IS_MOUSE_DOWN = true;
     }
 
     @SubscribeEvent
     public static void onReleased(ScreenEvent.MouseReleasedEvent event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
-            isMouseDown = false;
+            IS_MOUSE_DOWN = false;
     }
 
     public static String difficultyName(int difficulty)

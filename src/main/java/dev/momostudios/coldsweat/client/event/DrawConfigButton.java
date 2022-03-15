@@ -22,19 +22,23 @@ public class DrawConfigButton
     {
         if (event.getScreen() instanceof OptionsScreen && ColdSweatConfig.getInstance().isButtonShowing())
         {
-            event.addListener(
+            event.addListener
+            (
                 new ImageButton(event.getScreen().width / 2 - 183, event.getScreen().height / 6 + 120 - 10, 24, 24, 0, 40, 24,
                 new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"),
                 button ->
                 {
-                    if (!Minecraft.getInstance().isLocalServer() && Minecraft.getInstance().player != null)
+                    if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().player != null)
+                    {
                         ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(false));
+                    }
                     else
                     {
                         Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen,
                                 new ConfigCache(ColdSweatConfig.getInstance())));
                     }
-                }));
+                })
+            );
         }
     }
 }

@@ -93,8 +93,8 @@ public class ConfigPageDifficulty extends Screen
         drawGradientRect(ms, 0, middleX + 168 + extra, middleY - 28, middleX + 169 + extra, middleY + 97, borderColor, borderColor2); // right border
 
         // Set the mouse's position for ConfigScreen (used for click events)
-        ConfigScreen.mouseX = mouseX;
-        ConfigScreen.mouseY = mouseY;
+        ConfigScreen.MOUSE_X = mouseX;
+        ConfigScreen.MOUSE_Y = mouseY;
 
         // Draw Title
         drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
@@ -204,7 +204,7 @@ public class ConfigPageDifficulty extends Screen
             configCache.fireRes = false;
             configCache.iceRes = false;
         }
-        ConfigScreen.mc.setScreen(parentScreen);
+        ConfigScreen.MC.setScreen(parentScreen);
         ConfigScreen.saveConfig(configCache);
     }
 
@@ -217,9 +217,9 @@ public class ConfigPageDifficulty extends Screen
     @Override
     public void tick()
     {
-        double x = ConfigScreen.mouseX;
-        double y = ConfigScreen.mouseY;
-        if (ConfigScreen.isMouseDown && isMouseOverSlider(x, y))
+        double x = ConfigScreen.MOUSE_X;
+        double y = ConfigScreen.MOUSE_Y;
+        if (ConfigScreen.IS_MOUSE_DOWN && isMouseOverSlider(x, y))
         {
             int newDifficulty = 0;
             if (x < this.width / 2.0 - 76 + (19))
@@ -241,7 +241,7 @@ public class ConfigPageDifficulty extends Screen
 
             if (newDifficulty != configCache.difficulty)
             {
-                ConfigScreen.mc.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
+                ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
             }
             configCache.difficulty = newDifficulty;
         }

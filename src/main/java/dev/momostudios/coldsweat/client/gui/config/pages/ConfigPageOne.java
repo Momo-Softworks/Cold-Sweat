@@ -7,8 +7,10 @@ import dev.momostudios.coldsweat.common.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -37,6 +39,10 @@ public class ConfigPageOne extends ConfigPageBase
     public ConfigPageOne(Screen parentScreen, ConfigCache configCache)
     {
         super(parentScreen, configCache);
+        if (parentScreen == null)
+        {
+            parentScreen = Minecraft.getInstance().screen;
+        }
         this.parentScreen = parentScreen;
         this.configCache = configCache;
         ON = new TranslatableComponent("options.on").getString();
@@ -131,14 +137,14 @@ public class ConfigPageOne extends ConfigPageBase
                 button -> this.toggleDamageScaling(), configCache);
         damageScalingButton.setWidth(Math.max(152, font.width(damageScalingButton.getMessage().getString()) + 4));
 
-        this.addWidget(celsiusButton);
+        this.addRenderableWidget(celsiusButton);
 
-        this.addWidget(difficultyButton);
+        this.addRenderableWidget(difficultyButton);
 
-        this.addWidget(iceResButton);
-        this.addWidget(fireResButton);
-        this.addWidget(showWorldTempButton);
-        this.addWidget(damageScalingButton);
+        this.addRenderableWidget(iceResButton);
+        this.addRenderableWidget(fireResButton);
+        this.addRenderableWidget(showWorldTempButton);
+        this.addRenderableWidget(damageScalingButton);
 
         if (mc.player != null && mc.player.getPermissionLevel() < 2)
         {

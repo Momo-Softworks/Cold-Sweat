@@ -138,25 +138,25 @@ public class ConfigPageTwo extends ConfigPageBase
         iconBobbingButton.setWidth(Math.max(152, font.width(iconBobbingButton.getMessage().getString()) + 4));
 
 
-        this.addWidget(upSteveButton);
-        this.addWidget(downSteveButton);
-        this.addWidget(leftSteveButton);
-        this.addWidget(rightSteveButton);
-        this.addWidget(resetSteveButton);
+        this.addRenderableWidget(upSteveButton);
+        this.addRenderableWidget(downSteveButton);
+        this.addRenderableWidget(leftSteveButton);
+        this.addRenderableWidget(rightSteveButton);
+        this.addRenderableWidget(resetSteveButton);
 
-        this.addWidget(upTempReadoutButton);
-        this.addWidget(downTempReadoutButton);
-        this.addWidget(leftTempReadoutButton);
-        this.addWidget(rightTempReadoutButton);
-        this.addWidget(resetTempReadoutButton);
+        this.addRenderableWidget(upTempReadoutButton);
+        this.addRenderableWidget(downTempReadoutButton);
+        this.addRenderableWidget(leftTempReadoutButton);
+        this.addRenderableWidget(rightTempReadoutButton);
+        this.addRenderableWidget(resetTempReadoutButton);
 
-        this.addWidget(iconBobbingButton);
-        this.addWidget(customHotbarButton);
-        this.addWidget(gracePeriodButton);
+        this.addRenderableWidget(iconBobbingButton);
+        this.addRenderableWidget(customHotbarButton);
+        this.addRenderableWidget(gracePeriodButton);
 
         if (mc.player == null || mc.player.getPermissionLevel() >= 2)
         {
-            this.addWidget(gracePeriodLengthInput);
+            this.addRenderableWidget(gracePeriodLengthInput);
         } else
         {
             gracePeriodButton.active = false;

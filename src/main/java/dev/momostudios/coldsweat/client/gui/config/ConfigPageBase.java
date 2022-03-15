@@ -72,12 +72,13 @@ public abstract class ConfigPageBase extends Screen
                 : // right
                         this.font.width(component.getString()) < 98 ? this.width / 2 + 151 :
                         this.width / 2 + 151 + (this.font.width(component.getString()) - 94);
+        this.addRenderableWidget(textBox);
     }
 
     @Override
     protected void init()
     {
-        this.addWidget(new Button(
+        this.addRenderableWidget(new Button(
             this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
             this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
             BOTTOM_BUTTON_WIDTH, 20,
@@ -90,13 +91,13 @@ public abstract class ConfigPageBase extends Screen
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
                 mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configCache)));
         if (this.index() < ConfigScreen.LAST_PAGE)
-            this.addWidget(nextNavButton);
+            this.addRenderableWidget(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20,
             new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
                 mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configCache)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
-            this.addWidget(prevNavButton);
+            this.addRenderableWidget(prevNavButton);
     }
 
     @Override
@@ -124,15 +125,9 @@ public abstract class ConfigPageBase extends Screen
             this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
-        // Render buttons & other widgets
-        for (GuiEventListener listener : this.children())
-        {
-            if (listener instanceof Widget widget)
-                widget.render(matrixStack, mouseX, mouseY, partialTicks);
-        }
+        // Render labels for text boxes
         for (ConfigScreenElement inputBox : this.inputBoxes)
         {
-            inputBox.textBox.render(matrixStack, mouseX, mouseY, partialTicks);
             drawString(matrixStack, this.font, inputBox.label.getString(), inputBox.side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51,
                     inputBox.textBox.y + 6, inputBox.requireOP ? mc.player == null ? 16777215 : mc.player.getPermissionLevel() > 2 ? 16777215 : 8421504 : 16777215);
         }
