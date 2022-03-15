@@ -51,9 +51,9 @@ public class AddTempModifiers
                 }
             }
 
-            // Water / Rain
             if (player.tickCount % 5 == 0)
             {
+                // Water / Rain
                 if (player.isInWaterRainOrBubble())
                 {
                     PlayerHelper.addModifier(player, new WaterTempModifier(0.01), Temperature.Types.WORLD, false);
@@ -63,16 +63,6 @@ public class AddTempModifiers
                     PlayerHelper.removeModifiers(player, Temperature.Types.WORLD, 999, modifier ->
                             modifier instanceof WaterTempModifier && (double) modifier.getArgument("strength") <= 0);
                 }
-            }
-
-            // Nether Lamp
-            if (player.getPersistentData().getInt("soulLampTimeout") <= 0 && PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD))
-            {
-                PlayerHelper.removeModifiers(player, Temperature.Types.WORLD, 1, modifier -> modifier instanceof HellLampTempModifier);
-            }
-            else
-            {
-                player.getPersistentData().putInt("soulLampTimeout", player.getPersistentData().getInt("soulLampTimeout") - 1);
             }
         }
     }
@@ -84,8 +74,8 @@ public class AddTempModifiers
         {
             if (player.isSleeping())
             {
-                dev.momostudios.coldsweat.common.temperature.Temperature temp = PlayerHelper.getTemperature(player, Temperature.Types.CORE);
-                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.common.temperature.Temperature(temp.get() / 4), Temperature.Types.CORE);
+                Temperature temp = PlayerHelper.getTemperature(player, Temperature.Types.CORE);
+                PlayerHelper.setTemperature(player, new Temperature(temp.get() / 4), Temperature.Types.CORE);
             }
         });
     }
