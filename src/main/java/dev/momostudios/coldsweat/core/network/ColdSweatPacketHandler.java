@@ -13,6 +13,8 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ColdSweatPacketHandler
 {
@@ -65,33 +67,39 @@ public class ColdSweatPacketHandler
         return config;
     }
 
-    public static CompoundTag writeListOfLists(List<? extends List<String>> list)
+    public static CompoundTag writeListOfLists(List<? extends List<?>> list)
     {
         CompoundTag tag = new CompoundTag();
         for (int i = 0; i < list.size(); i++)
         {
-            List<String> sublist = list.get(i);
+            List<?> sublist = list.get(i);
             ListTag subtag = new ListTag();
-            for (int j = 0; j < sublist.size(); j++)
+            for (Object o : sublist)
             {
-                subtag.add(StringTag.valueOf(sublist.get(j)));
+                subtag.add(StringTag.valueOf(o.toString()));
             }
             tag.put("" + i, subtag);
         }
         return tag;
     }
 
-    public static List<? extends List<String>> readListOfLists(CompoundTag tag)
+    public static List<List<Object>> readListOfLists(CompoundTag tag)
     {
-        List<List<String>> list = new ArrayList<>();
+        List<List<Object>> list = new ArrayList<>();
         for (int i = 0; i < tag.size(); i++)
         {
             ListTag subtag = tag.getList("" + i, 8);
-            List<String> sublist = new ArrayList<>();
-            for (int j = 0; j < subtag.size(); j++)
+            List<Object> sublist = IntStream.range(0, subtag.size()).mapToObj(j -> subtag.getString(j).transform(string ->
             {
-                sublist.add(subtag.getString(j));
-            }
+                try
+                {
+                    return Double.parseDouble(string);
+                }
+                catch (Exception e)
+                {
+                    return string;
+                }
+            })).collect(Collectors.toList());
             list.add(sublist);
         }
         return list;

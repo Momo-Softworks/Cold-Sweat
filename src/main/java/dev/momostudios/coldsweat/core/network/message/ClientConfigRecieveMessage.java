@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 public class ClientConfigRecieveMessage
@@ -50,29 +50,24 @@ public class ClientConfigRecieveMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (message.onJoin)
+            if (context.getDirection().getReceptionSide().isClient())
             {
-                ConfigCache.setInstance(message.configCache);
-            }
-            else
-            {
-                try
+                if (message.onJoin)
                 {
-                    Method displayScreen;
-
+                    ConfigCache.setInstance(message.configCache);
+                }
+                else
+                {
                     try
                     {
-                        displayScreen = ObfuscationReflectionHelper.findMethod(Minecraft.class, "displayGuiScreen", Class.forName("net.minecraft.client.gui.screen.Screen"));
-                    } catch (ObfuscationReflectionHelper.UnableToFindMethodException e)
-                    {
-                        displayScreen = ObfuscationReflectionHelper.findMethod(Minecraft.class, "func_147108_a", Class.forName("net.minecraft.client.gui.screen.Screen"));
+                        LocalPlayer localPlayer = Minecraft.getInstance().player;
+                        if (localPlayer != null)
+                        {
+                            Constructor configScreen = Class.forName("dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne").getConstructor(Class.forName("net.minecraft.client.gui.screens.Screen"), ConfigCache.class);
+                            Minecraft.getInstance().setScreen((Screen) configScreen.newInstance(Minecraft.getInstance().screen, message.configCache));
+                        }
                     }
-                    Constructor constructor = ObfuscationReflectionHelper.findConstructor(Class.forName("dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne"),
-                            Class.forName("net.minecraft.client.gui.screen.Screen"), ConfigCache.class);
-                    displayScreen.invoke(Minecraft.getInstance(), constructor.newInstance(Minecraft.getInstance().screen, message.configCache));
-                } catch (Exception e)
-                {
-                    e.printStackTrace();
+                    catch (Exception e) {}
                 }
             }
         });
