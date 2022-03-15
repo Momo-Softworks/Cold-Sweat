@@ -10,6 +10,11 @@ import net.minecraft.world.level.material.FluidState;
 
 public class LavaBlockEffect extends BlockEffect
 {
+    public LavaBlockEffect()
+    {
+        super(Blocks.LAVA);
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
@@ -20,12 +25,6 @@ public class LavaBlockEffect extends BlockEffect
             return CSMath.blend(temp, 0, distance, 0.5, 7);
         }
         return 0;
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.LAVA;
     }
 
     @Override

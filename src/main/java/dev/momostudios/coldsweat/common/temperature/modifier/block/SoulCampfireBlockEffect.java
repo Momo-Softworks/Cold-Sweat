@@ -12,28 +12,19 @@ import net.minecraft.world.phys.AABB;
 
 public class SoulCampfireBlockEffect extends BlockEffect
 {
+    public SoulCampfireBlockEffect()
+    {
+        super(Blocks.SOUL_CAMPFIRE);
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
         if (this.hasBlock(state) && state.getValue(CampfireBlock.LIT))
         {
-            AABB bb = new AABB(pos.getX() - 0.2, pos.getY(), pos.getZ() - 0.2, pos.getX() + 1.2, pos.getY() + 1.2, pos.getZ() + 1.2);
-            player.level.getEntitiesOfClass(LivingEntity.class, bb).forEach(entity ->
-            {
-                entity.clearFire();
-                if (!entity.getPersistentData().getBoolean("isInSoulFire"))
-                    entity.getPersistentData().putBoolean("isInSoulFire", true);
-            });
-
             return CSMath.blend(-0.2, 0, distance, 0.5, 7);
         }
         return 0;
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.SOUL_CAMPFIRE;
     }
 
     @Override

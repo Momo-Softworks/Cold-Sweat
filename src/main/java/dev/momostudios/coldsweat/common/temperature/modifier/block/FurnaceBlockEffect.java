@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FurnaceBlockEffect extends BlockEffect

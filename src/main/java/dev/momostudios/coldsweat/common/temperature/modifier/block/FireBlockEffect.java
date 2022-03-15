@@ -9,6 +9,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class FireBlockEffect extends BlockEffect
 {
+    public FireBlockEffect()
+    {
+        super(Blocks.FIRE);
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
@@ -17,12 +22,6 @@ public class FireBlockEffect extends BlockEffect
             return CSMath.blend(0.2, 0, distance, 0.5, 7);
         }
         return 0;
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.FIRE;
     }
 
     @Override

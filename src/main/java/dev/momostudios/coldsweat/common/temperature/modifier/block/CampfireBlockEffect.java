@@ -10,6 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CampfireBlockEffect extends BlockEffect
 {
+    public CampfireBlockEffect()
+    {
+        super(Blocks.CAMPFIRE);
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
@@ -18,12 +23,6 @@ public class CampfireBlockEffect extends BlockEffect
             return CSMath.blend(0.27, 0, distance, 0.5, 7);
         }
         return 0;
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.CAMPFIRE;
     }
 
     @Override

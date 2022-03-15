@@ -9,17 +9,15 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 
 public class MagmaBlockEffect extends BlockEffect
 {
+    public MagmaBlockEffect()
+    {
+        super(Blocks.MAGMA_BLOCK);
+    }
 
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
         return CSMath.blend(0.2, 0, distance, 0.5, 3);
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.MAGMA_BLOCK;
     }
 
     @Override

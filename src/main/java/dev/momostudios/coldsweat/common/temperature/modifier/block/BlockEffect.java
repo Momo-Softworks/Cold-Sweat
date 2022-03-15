@@ -2,10 +2,16 @@ package dev.momostudios.coldsweat.common.temperature.modifier.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BlockEffect
 {
+    List<Block> validBlocks = new ArrayList<>();
+
     /**
      * @param state is the {@link BlockState} of the block
      * @param pos is the position of the block
@@ -15,7 +21,15 @@ public abstract class BlockEffect
      */
     public abstract double getTemperature(Player player, BlockState state, BlockPos pos, double distance);
 
-    public abstract boolean hasBlock(BlockState block);
+    public BlockEffect(Block... blocks)
+    {
+        validBlocks.addAll(List.of(blocks));
+    }
+
+    public boolean hasBlock(BlockState block)
+    {
+        return validBlocks.contains(block.getBlock());
+    }
 
     /**
      * The maximum temperature this block can emit, no matter how many there are near the player <br>

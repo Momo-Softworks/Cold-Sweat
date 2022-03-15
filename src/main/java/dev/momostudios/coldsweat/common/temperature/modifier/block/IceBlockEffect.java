@@ -9,6 +9,11 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 
 public class IceBlockEffect extends BlockEffect
 {
+    public IceBlockEffect()
+    {
+        super(Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
@@ -21,14 +26,6 @@ public class IceBlockEffect extends BlockEffect
             return -CSMath.blend(temp, 0, distance, 0.5, 1.5);
         }
         return 0;
-    }
-
-    @Override
-    public boolean hasBlock(BlockState block)
-    {
-        return block.getBlock() == Blocks.ICE ||
-               block.getBlock() == Blocks.PACKED_ICE ||
-               block.getBlock() == Blocks.BLUE_ICE;
     }
 
     @Override
