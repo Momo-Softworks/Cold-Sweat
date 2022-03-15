@@ -43,6 +43,7 @@ import dev.momostudios.coldsweat.common.block.HearthBlock;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -198,7 +199,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                             {
                                 if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
                                         && !WorldHelper.canSeeSky(level, testpos.getPos())
-                                        && WorldHelper.canSpreadThrough(level, spreadPath, direction, spreadPath.origin))
+                                        && WorldHelper.canSpreadThrough(level, entry.getKey(), direction))
                                 {
                                     newPaths.put(testpos.getPos(), testpos);
                                 }
@@ -471,6 +472,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();
 
+    @Nonnull
     @Override
     public ConcurrentHashMap<BlockPos, SpreadPath> getPathMap()
     {
@@ -490,13 +492,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     @Override
-    public void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map) {
-        map.forEach((pos, path) -> {
-            if (!paths.containsKey(pos))
-            {
-                paths.put(pos, path);
-            }
-        });
+    public void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map)
+    {
+        paths.putAll(map);
     }
 
     @Override

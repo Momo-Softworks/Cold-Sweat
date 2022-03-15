@@ -8,16 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface ISpreadingArea
 {
-    ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();
-
     @Nonnull
     ConcurrentHashMap<BlockPos, SpreadPath> getPathMap();
 
     void setPathMap(ConcurrentHashMap<BlockPos, SpreadPath> map);
 
-    default void addPath(SpreadPath pos) {
-        paths.put(pos.getPos(), pos);
-    }
+    void addPath(SpreadPath pos);
 
     void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map);
 
