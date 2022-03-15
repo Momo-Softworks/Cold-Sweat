@@ -16,7 +16,7 @@ public class ConfigCache
     public int gracePeriodLength;
     public boolean gracePeriodEnabled;
 
-    public Map<String, List<? extends List<String>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
+    public Map<String, List<? extends List<Object>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
     public ItemSettingsConfig itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
     private static ConfigCache INSTANCE = new ConfigCache();

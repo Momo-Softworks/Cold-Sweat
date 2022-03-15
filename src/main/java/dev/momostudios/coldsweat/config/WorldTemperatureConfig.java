@@ -66,32 +66,24 @@ public class WorldTemperatureConfig
 
                     Arrays.asList("minecraft:plains", 0.3),
 
-                    Arrays.asList("minecraft:bamboo_jungle", 0.2),
-                    Arrays.asList("minecraft:bamboo_jungle_hills", 0.2),
-                    Arrays.asList("minecraft:jungle", 0.2),
-                    Arrays.asList("minecraft:jungle_hills", 0.2),
-                    Arrays.asList("minecraft:jungle_edge", 0.2),
-                    Arrays.asList("minecraft:modified_jungle", 0.2),
-                    Arrays.asList("minecraft:modified_jungle_edge", 0.2),
+                    Arrays.asList("minecraft:bamboo_jungle", 0.5),
+                    Arrays.asList("minecraft:jungle", 0.5),
+                    Arrays.asList("minecraft:sparse_jungle", 0.3),
 
                     Arrays.asList("minecraft:desert", -0.2),
-                    Arrays.asList("minecraft:desert_hills", -0.2),
-                    Arrays.asList("minecraft:desert_lakes", -0.3),
 
                     Arrays.asList("minecraft:giant_spruce_taiga", 0.2),
                     Arrays.asList("minecraft:giant_spruce_taiga_hills", 0.2),
 
                     Arrays.asList("minecraft:savanna", 0.2),
                     Arrays.asList("minecraft:savanna_plateau", 0.2),
-                    Arrays.asList("minecraft:shattered_savanna_plateau", 0.2),
+                    Arrays.asList("minecraft:windswept_savanna", 0.2),
 
                     Arrays.asList("minecraft:taiga", 0.2),
-                    Arrays.asList("minecraft:taiga_hills", 0.2),
-                    Arrays.asList("minecraft:taiga_mountains", 0.2),
+                    Arrays.asList("minecraft:old_growth_pine_taiga", 0.2),
+                    Arrays.asList("minecraft:old_growth_spruce_taiga", 0.2),
                     Arrays.asList("minecraft:snowy_taiga", 0.2),
-                    Arrays.asList("minecraft:snowy_taiga_hills", 0.2),
-                    Arrays.asList("minecraft:snowy_taiga_mountains", 0.2),
-                    Arrays.asList("minecraft:snowy_mountains", 0.2)
+                    Arrays.asList("minecraft:snowy_slopes", 0.2)
             ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
@@ -127,47 +119,47 @@ public class WorldTemperatureConfig
     /*
      * Non-private values for use elsewhere
      */
-    public List<? extends List<String>> biomeOffsets()
+    public List<? extends List<Object>> biomeOffsets()
     {
-        List<List<String>> list = new ArrayList<>();
+        List<List<Object>> list = new ArrayList<>();
         for (List<?> entry : biomeOffsets.get())
         {
-            list.add(Arrays.asList((String) entry.get(0), entry.get(1).toString()));
+            list.add(Arrays.asList(entry.get(0), entry.get(1)));
         }
         return list;
     }
-    public List<? extends List<String>> biomeTemperatures()
+    public List<? extends List<Object>> biomeTemperatures()
     {
-        List<List<String>> list = new ArrayList<>();
+        List<List<Object>> list = new ArrayList<>();
         for (List<?> entry : biomeTemperatures.get())
         {
-            list.add(Arrays.asList((String) entry.get(0), entry.get(1).toString()));
+            list.add(List.of(entry.get(0), entry.get(1)));
         }
         return list;
     }
 
-    public List<? extends List<String>> dimensionOffsets()
+    public List<? extends List<Object>> dimensionOffsets()
     {
-        List<List<String>> list = new ArrayList<>();
+        List<List<Object>> list = new ArrayList<>();
         for (List<?> entry : dimensionOffsets.get())
         {
-            list.add(Arrays.asList((String) entry.get(0), entry.get(1).toString()));
+            list.add(Arrays.asList(entry.get(0), entry.get(1)));
         }
         return list;
     }
-    public List<? extends List<String>> dimensionTemperatures()
+    public List<? extends List<Object>> dimensionTemperatures()
     {
-        List<List<String>> list = new ArrayList<>();
+        List<List<Object>> list = new ArrayList<>();
         for (List<?> entry : dimensionTemperatures.get())
         {
-            list.add(Arrays.asList((String) entry.get(0), entry.get(1).toString()));
+            list.add(Arrays.asList(entry.get(0), entry.get(1)));
         }
         return list;
     }
 
-    public Map<String, List<? extends List<String>>> getConfigMap()
+    public Map<String, List<? extends List<Object>>> getConfigMap()
     {
-        Map<String, List<? extends List<String>>> map = new HashMap<>();
+        Map<String, List<? extends List<Object>>> map = new HashMap<>();
         map.put("biome_temperatures", biomeTemperatures());
         map.put("biome_offsets", biomeOffsets());
         map.put("dimension_temperatures", dimensionTemperatures());
