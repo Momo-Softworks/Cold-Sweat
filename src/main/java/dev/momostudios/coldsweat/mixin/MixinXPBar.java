@@ -33,6 +33,7 @@ public class MixinXPBar
         Font fontRenderer = gui.getFont();
         if (RearrangeHotbar.customHotbar)
         {
+            /*
             xPos += 10;
 
             if (mc.player != null)
@@ -84,6 +85,33 @@ public class MixinXPBar
                     fontRenderer.draw(matrixStack, s, (float) i1, (float) j1, 8453920);
                     mc.getProfiler().pop();
                 }
+            }*/
+            mc.getProfiler().push("expBar");
+            RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+            int i = mc.player.totalExperience;
+            if (i > 0) {
+                int j = 182;
+                int k = (int)(mc.player.experienceProgress * 183.0F);
+                int l = this.screenHeight - 32 + 3;
+                gui.blit(matrixStack, xPos, l, 0, 64, 182, 5);
+                if (k > 0) {
+                    gui.blit(matrixStack, xPos, l, 0, 69, k, 5);
+                }
+            }
+
+            mc.getProfiler().pop();
+            if (mc.player.experienceLevel > 0)
+            {
+                mc.getProfiler().push("expLevel");
+                String s = "" + mc.player.experienceLevel;
+                int i1 = (this.screenWidth - fontRenderer.width(s)) / 2;
+                int j1 = this.screenHeight - 31;
+                fontRenderer.draw(matrixStack, s, (float)(i1 + 1), (float)j1, 0);
+                fontRenderer.draw(matrixStack, s, (float)(i1 - 1), (float)j1, 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)(j1 + 1), 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)(j1 - 1), 0);
+                fontRenderer.draw(matrixStack, s, (float)i1, (float)j1, 8453920);
+                mc.getProfiler().pop();
             }
         }
         else
@@ -102,7 +130,8 @@ public class MixinXPBar
             }
 
             mc.getProfiler().pop();
-            if (mc.player.experienceLevel > 0) {
+            if (mc.player.experienceLevel > 0)
+            {
                 mc.getProfiler().push("expLevel");
                 String s = "" + mc.player.experienceLevel;
                 int i1 = (this.screenWidth - fontRenderer.width(s)) / 2;

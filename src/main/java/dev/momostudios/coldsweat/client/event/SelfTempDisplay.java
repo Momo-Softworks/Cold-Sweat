@@ -86,7 +86,7 @@ public class SelfTempDisplay
 
             // Render Icon
             RenderSystem.setShaderTexture(0, icon);
-            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 51 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 53 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
 
 
             // Render Readout
@@ -96,24 +96,24 @@ public class SelfTempDisplay
             PoseStack matrixStack = event.getMatrixStack();
 
             String s = "" + (int) Math.ceil(Math.min(Math.abs(temp), 100));
-            float i1 = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempGaugeX();
-            float j1 = scaledHeight - 31f - 8f + CCS.tempGaugeY();
+            float x = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempGaugeX();
+            float y = scaledHeight - 31f - 10f + CCS.tempGaugeY();
             if (!CSMath.isBetween(temp, -100, 100))
             {
-                fontRenderer.draw(matrixStack, s, i1 + 2f, j1, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1 - 2f, j1, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1, j1 + 2f, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1, j1 - 2f, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1 + 1f, j1 + 1f, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1 + 1f, j1 - 1f, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1 - 1f, j1 - 1f, colorBG2);
-                fontRenderer.draw(matrixStack, s, i1 - 1f, j1 + 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x + 2f, y, colorBG2);
+                fontRenderer.draw(matrixStack, s, x - 2f, y, colorBG2);
+                fontRenderer.draw(matrixStack, s, x, y + 2f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x, y - 2f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x + 1f, y + 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x + 1f, y - 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x - 1f, y - 1f, colorBG2);
+                fontRenderer.draw(matrixStack, s, x - 1f, y + 1f, colorBG2);
             }
-            fontRenderer.draw(matrixStack, s, i1 + 1, j1, colorBG);
-            fontRenderer.draw(matrixStack, s, i1 - 1, j1, colorBG);
-            fontRenderer.draw(matrixStack, s, i1, j1 + 1, colorBG);
-            fontRenderer.draw(matrixStack, s, i1, j1 - 1, colorBG);
-            fontRenderer.draw(matrixStack, s, i1, j1, color);
+            fontRenderer.draw(matrixStack, s, x + 1, y, colorBG);
+            fontRenderer.draw(matrixStack, s, x - 1, y, colorBG);
+            fontRenderer.draw(matrixStack, s, x, y + 1, colorBG);
+            fontRenderer.draw(matrixStack, s, x, y - 1, colorBG);
+            fontRenderer.draw(matrixStack, s, x, y, color);
         }
     }
 
