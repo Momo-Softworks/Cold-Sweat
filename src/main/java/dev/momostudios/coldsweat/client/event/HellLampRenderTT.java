@@ -49,13 +49,13 @@ public class HellLampRenderTT
 
                         RenderSystem.enableBlend();
                         RenderSystem.defaultBlendFunc();
-                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
+                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/hellspring_lamp_fuel_empty.png"));
                         GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 0, 30, 8, 30, 8);
                         RenderSystem.setShaderColor(1f, 1f, 1f, 0.15f + (float) ((Math.sin(time / 5f) + 1f) / 2f) * 0.4f);
-                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_ghost.png"));
+                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/hellspring_lamp_fuel_ghost.png"));
                         GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 0, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 8);
                         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
-                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
+                        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/hellspring_lamp_fuel.png"));
                         GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 0, (int) (fuel / 2.1333f), 8, 30, 8);
 
                     }
@@ -73,9 +73,9 @@ public class HellLampRenderTT
             float fuel = stack.getOrCreateTag().getFloat("fuel");
             PoseStack ps = event.getPoseStack();
 
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel_empty.png"));
+            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/hellspring_lamp_fuel_empty.png"));
             GuiComponent.blit(ps, event.getX(), event.getY(), 0, 0, 0, 30, 8, 30, 8);
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/soulfire_lamp_fuel.png"));
+            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/hellspring_lamp_fuel.png"));
             GuiComponent.blit(ps, event.getX(), event.getY(), 0, 0, 8, (int) (fuel / 2.1333f), 8, 30, 8);
         }
     }

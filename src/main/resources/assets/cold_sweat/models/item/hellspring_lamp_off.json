@@ -7,6 +7,6 @@
 		"3": "cold_sweat:items/hellspring_lamp/hellspring_lamp_top_1",
 		"4": "cold_sweat:items/hellspring_lamp/hellspring_lamp_bottom_0",
 		"5": "cold_sweat:items/hellspring_lamp/hellspring_lamp_bottom_1",
-		"particle": "cold_sweat:items/soulfire_lamp/hellspring_lamp_glow"
+		"particle": "cold_sweat:items/hellspring_lamp/hellspring_lamp_glow"
 	}
 }
