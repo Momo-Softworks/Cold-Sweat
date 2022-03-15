@@ -52,15 +52,6 @@ public class PlayerHelper
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
-            if (sync && !player.level.isClientSide)
-            {
-                updateTemperature(player,
-                        type == Temperature.Types.CORE ? value : getTemperature(player, Temperature.Types.CORE),
-                        type == Temperature.Types.BASE  ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD),
-                        type == Temperature.Types.HOTTEST ? value : getTemperature(player, Temperature.Types.HOTTEST),
-                        type == Temperature.Types.COLDEST ? value : getTemperature(player, Temperature.Types.COLDEST));
-            }
             capability.set(type, value.get());
         });
     }
@@ -75,15 +66,6 @@ public class PlayerHelper
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get() + capability.get(type));
-            if (sync && !player.level.isClientSide)
-            {
-                updateTemperature(player,
-                        type == Temperature.Types.CORE ? value : getTemperature(player, Temperature.Types.CORE),
-                        type == Temperature.Types.BASE  ? value : getTemperature(player, Temperature.Types.BASE),
-                        type == Temperature.Types.WORLD ? value : getTemperature(player, Temperature.Types.WORLD),
-                        type == Temperature.Types.HOTTEST ? value : getTemperature(player, Temperature.Types.HOTTEST),
-                        type == Temperature.Types.COLDEST ? value : getTemperature(player, Temperature.Types.COLDEST));
-            }
         });
     }
 
