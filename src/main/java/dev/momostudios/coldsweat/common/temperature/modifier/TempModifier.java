@@ -118,11 +118,19 @@ public abstract class TempModifier
         TempModifierEvent.Tick.Pre pre = new TempModifierEvent.Tick.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
-        if (pre.isCanceled()) return pre.getTemperature().get();
+        if (pre.isCanceled()) return temp.get();
 
-        double value = (player.tickCount % tickRate == 0 || isUnset) ? getResult(pre.getTemperature(), player) : storedValue;
-        storedValue = value;
-        isUnset = false;
+        double value;
+        if (player.tickCount % tickRate == 0 || isUnset)
+        {
+            value = getResult(pre.getTemperature(), player);
+            storedValue = value;
+            isUnset = false;
+        }
+        else
+        {
+            value = storedValue;
+        }
 
         TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
         MinecraftForge.EVENT_BUS.post(post);
@@ -144,7 +152,7 @@ public abstract class TempModifier
     {
         return expireTicks;
     }
-    public int ticksExisted()
+    public int getTicksExisted()
     {
         return ticksExisted;
     }
@@ -166,8 +174,13 @@ public abstract class TempModifier
      */
     public TempModifier tickRate(int ticks)
     {
-        tickRate = ticks;
+        tickRate = Math.max(1, ticks);
         return this;
+    }
+
+    public int getTickRate()
+    {
+        return tickRate;
     }
 
     /**

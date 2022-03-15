@@ -116,8 +116,11 @@ public class NBTHelper
             modifierTag.putInt("expireTicks", modifier.getExpireTime());
 
         // Read the modifier's ticks left
-        if (modifier.ticksExisted() > 0)
-            modifierTag.putInt("ticksLeft", modifier.ticksExisted());
+        if (modifier.getTicksExisted() > 0)
+            modifierTag.putInt("ticksLeft", modifier.getTicksExisted());
+
+        if (modifier.getTickRate() > 1)
+            modifierTag.putInt("tickRate", modifier.getTickRate());
 
         return modifierTag;
     }
@@ -143,6 +146,9 @@ public class NBTHelper
         // Set the modifier's ticks left
         if (modifierTag.contains("ticksLeft"))
             newModifier.setTicksExisted(modifierTag.getInt("ticksLeft"));
+
+        if (modifierTag.contains("tickRate"))
+            newModifier.tickRate(modifierTag.getInt("tickRate"));
 
         return newModifier;
     }

@@ -209,8 +209,8 @@ public class PlayerTempCapability implements ITemperatureCap
         {
             if (modifier.getExpireTime() != -1)
             {
-                modifier.setTicksExisted(modifier.ticksExisted() + 1);
-                return modifier.ticksExisted() >= modifier.getExpireTime();
+                modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+                return modifier.getTicksExisted() >= modifier.getExpireTime();
             }
             return false;
         });
