@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import net.minecraftforge.network.NetworkEvent;
 

@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.temperature.Temperature;
-import dev.momostudios.coldsweat.common.temperature.modifier.*;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import dev.momostudios.coldsweat.util.registries.ModEffects;

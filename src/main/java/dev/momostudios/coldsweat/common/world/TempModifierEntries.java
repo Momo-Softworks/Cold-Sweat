@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.world;
 
-import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
-import dev.momostudios.coldsweat.common.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -50,7 +50,7 @@ public class TempCommand extends BaseCommand
             if (players.contains(source.getPlayerOrException()))
             {
                 //Set the sender's body temperature
-                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.common.temperature.Temperature(amount), Temperature.Types.CORE);
+                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
 
                 //Print success message to all players
                 for (Player player : source.getPlayerOrException().level.players())
@@ -71,7 +71,7 @@ public class TempCommand extends BaseCommand
             else
             {
                 //Set the target player's temperature
-                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.common.temperature.Temperature(amount), Temperature.Types.CORE);
+                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
 
                 //Print success message to all players
                 for (Player player : source.getPlayerOrException().level.players())
@@ -90,7 +90,7 @@ public class TempCommand extends BaseCommand
             int playerCount = 0;
             for (ServerPlayer player : players)
             {
-                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.common.temperature.Temperature(amount), Temperature.Types.CORE);
+                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
                 playerCount++;
             }
 

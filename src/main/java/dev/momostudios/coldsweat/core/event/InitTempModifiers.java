@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.temperature.modifier.*;
-import dev.momostudios.coldsweat.common.temperature.modifier.block.*;
+import dev.momostudios.coldsweat.api.temperature.modifier.*;
+import dev.momostudios.coldsweat.api.temperature.modifier.block.*;
 import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
-import dev.momostudios.coldsweat.core.event.csevents.TempModifierEvent;
+import dev.momostudios.coldsweat.api.event.TempModifierEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -136,8 +136,8 @@ public class InitTempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierEvent.Init.Modifier event)
     {
-        String sereneseasons = "dev.momostudios.coldsweat.common.temperature.modifier.compat.SereneSeasonsTempModifier";
-        String betterweather = "dev.momostudios.coldsweat.common.temperature.modifier.compat.BetterWeatherTempModifier";
+        String sereneseasons = "dev.momostudios.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier";
+        String betterweather = "dev.momostudios.coldsweat.api.temperature.modifier.compat.BetterWeatherTempModifier";
 
         try
         {

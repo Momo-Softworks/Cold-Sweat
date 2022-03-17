@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.minecraft.nbt.*;
-import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 
 public class NBTHelper
 {

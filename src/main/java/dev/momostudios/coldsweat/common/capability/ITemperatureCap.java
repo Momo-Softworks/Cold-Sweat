@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.capability;
 
-import dev.momostudios.coldsweat.common.temperature.Temperature;
-import dev.momostudios.coldsweat.common.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
