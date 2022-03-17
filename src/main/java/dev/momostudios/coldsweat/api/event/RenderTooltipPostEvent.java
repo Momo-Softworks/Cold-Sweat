@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.client.event.csevents;
+package dev.momostudios.coldsweat.api.event;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;

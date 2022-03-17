@@ -6,7 +6,7 @@ import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.api.temperature.modifier.block.BlockEffect;
+import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.player.Player;

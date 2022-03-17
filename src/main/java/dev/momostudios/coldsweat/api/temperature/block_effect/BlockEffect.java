@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.api.temperature.modifier.block;
+package dev.momostudios.coldsweat.api.temperature.block_effect;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

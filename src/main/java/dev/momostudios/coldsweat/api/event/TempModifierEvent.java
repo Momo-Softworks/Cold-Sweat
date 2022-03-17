@@ -8,7 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.block.BlockEffect;
+import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 
 import java.util.function.Predicate;
 
@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 public class TempModifierEvent extends Event
 {
     /**
-     * Fired when a {@link TempModifier} is about to be added. <br>
+     * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
      * {@link #maxCount} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #player} is the player the TempModifier is being applied to. <br>
@@ -69,7 +69,7 @@ public class TempModifierEvent extends Event
 
 
     /**
-     * Fired when a {@link TempModifier} is about to be removed. <br>
+     * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
      * <br>
      * {@link #player} is the player the TempModifier is being removed from. <br>
      * {@link #type} is the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#BODY}. <br>
@@ -124,7 +124,7 @@ public class TempModifierEvent extends Event
          * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
          * <br>
          * This event is {@link Cancelable}. <br>
-         * Cancelling this event results in the Temperature passing through without calling {@code calculate()}. <br>
+         * Cancelling this event results in {@code getValue()} not being called (the Temperature stays unchanged). <br>
          */
         @Cancelable
         public static class Pre extends Tick
@@ -149,13 +149,13 @@ public class TempModifierEvent extends Event
         }
 
         /**
-         * Fired after the {@code getValue()} method is run, but before the value is returned <br>
+         * Fired by {@code calculate()} after the {@code getResult()} method is run, but before the value is returned <br>
          * <br>
          * {@link #player} is the player the TempModifier is attached to. <br>
          * {@link #modifier} is the TempModifier running the method. <br>
          * {@link #temperature} is the Temperature after the {@code getValue())} method has been called. <br>
          * <br>
-         * This event is not {@link Cancelable}. <br>
+         * This event is NOT {@link Cancelable}. <br>
          */
         public static class Post extends Tick
         {
@@ -183,10 +183,10 @@ public class TempModifierEvent extends Event
     /**
      * Fired when the {@link TempModifier} or {@link BlockEffect} registry is being built. <br>
      * The event is fired during {@link net.minecraftforge.event.world.WorldEvent.Load}. <br>
+     * Do not hook into this event directly; use its sub-events instead. <br>
      * <br>
-     * {@link Modifier} refers to registries being added to {@link TempModifierEntries}. <br>
-     * {@link Block} refers to registries being added to {@link BlockEffectEntries}. <br>
      * Use {@code getPool().flush()} if calling manually to prevent duplicates. <br>
+     * (You probably shouldn't ever do that anyway) <br>
      * <br>
      * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * <br>
@@ -194,6 +194,9 @@ public class TempModifierEvent extends Event
      */
     public static class Init extends TempModifierEvent
     {
+        /**
+         * Fired when the {@link TempModifier} registry is being built ({@link TempModifierEntries}). <br>
+         */
         public static class Modifier extends Init
         {
             /**
@@ -213,6 +216,9 @@ public class TempModifierEvent extends Event
             }
         }
 
+        /**
+         * Fired when the {@link BlockEffect} registry is being built ({@link BlockEffectEntries}). <br>
+         */
         public static class Block extends Init
         {
             /**

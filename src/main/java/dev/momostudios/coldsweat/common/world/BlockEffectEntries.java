@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.world;
 
-import dev.momostudios.coldsweat.api.temperature.modifier.block.BlockEffect;
+import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;

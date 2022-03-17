@@ -1,17 +1,17 @@
-package dev.momostudios.coldsweat.api.temperature.modifier.block;
+package dev.momostudios.coldsweat.api.temperature.block_effect;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.core.BlockPos;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.momostudios.coldsweat.util.math.CSMath;
 
-public class SoulFireBlockEffect extends BlockEffect
+public class FireBlockEffect extends BlockEffect
 {
-    public SoulFireBlockEffect()
+    public FireBlockEffect()
     {
-        super(Blocks.SOUL_FIRE);
+        super(Blocks.FIRE);
     }
 
     @Override
@@ -19,18 +19,18 @@ public class SoulFireBlockEffect extends BlockEffect
     {
         if (hasBlock(state))
         {
-            return CSMath.blend(-0.2, 0, distance, 0.5, 7);
+            return CSMath.blend(0.2, 0, distance, 0.5, 7);
         }
         return 0;
     }
 
     @Override
-    public double minEffect() {
-        return CSMath.convertUnits(-32, Temperature.Units.F, Temperature.Units.MC, false);
+    public double maxEffect() {
+        return CSMath.convertUnits(32, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
-    public double minTemperature() {
+    public double maxTemperature() {
         return CSMath.convertUnits(400, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

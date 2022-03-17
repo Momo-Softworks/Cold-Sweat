@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
-import dev.momostudios.coldsweat.api.temperature.modifier.block.*;
+import dev.momostudios.coldsweat.api.temperature.block_effect.*;
 import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
 import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import dev.momostudios.coldsweat.api.event.TempModifierEvent;

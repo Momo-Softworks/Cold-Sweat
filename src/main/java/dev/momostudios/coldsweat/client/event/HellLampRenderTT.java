@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.momostudios.coldsweat.client.event.csevents.RenderTooltipPostEvent;
+import dev.momostudios.coldsweat.api.event.RenderTooltipPostEvent;
 import dev.momostudios.coldsweat.util.config.ConfigEntry;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.gui.GuiComponent;
