@@ -92,7 +92,9 @@ public class ConfigPageTwo extends ConfigPageBase
         gracePeriodButton.setWidth(Math.max(152, font.width(gracePeriodButton.getMessage().getString()) + 4));
 
         // Grace Period Length
-        this.gracePeriodLengthInput = new EditBox(font, this.width / 2 - 86, this.height / 4 + 20, 51, 22, new TextComponent(""));
+        int GPoffset = font.width(new TranslatableComponent("cold_sweat.config.grace_period_length.name").getString()) > 84 ?
+                       font.width(new TranslatableComponent("cold_sweat.config.grace_period_length.name").getString()) - 84 : 0;
+        this.gracePeriodLengthInput = new EditBox(font, this.width / 2 - 86 + GPoffset, this.height / 4 + 20, 51, 22, new TextComponent(""));
         this.gracePeriodLengthInput.setValue(configCache.gracePeriodLength + "");
 
         // Direction Buttons: Steve Head
