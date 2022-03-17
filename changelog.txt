@@ -403,6 +403,33 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
+2.1.9-b04
+- Lag from various sources has been significantly reduced (up to 75% overall decrease in lag per player in the world)
+- Changed how Cold Sweat rearranges the hotbar to make it more compatible with mods that also change the hotbar
+- Updated Hearth and empty Waterskin item textures to be more distinctive
+- Increased the effective range of the Hellspring Lamp by 1.5 blocks (hopefully it's easier to share now!)
+
+Fixes:
+- Fixed the config menu not opening for some players in multiplayer
+- Fixed some text boxes in the config menu not being able to be edited
+- Fixed "Arrow of Ice Resistance" not having a translation key
+- Fixed biomes that don't exist anymore appearing in world-temperatures.toml
+- Fixed potential bug that could cause problems with multiple Hearths in the world
+- Fixed buggy behavior when walking through soul fire
+- Fixed references to "soulfire_lamp" in some files/filenames
+- Fixed some TempModifiers triggering every tick when they shouldn't on the clientside
+- Fixed TempModifiers ticking on the clientside when the game is paused
+
+Technical Changes:
+- All Temperature-related classes have been moved to a new "api" package (including TempModifiers, BlockEffects, etc.)
+- Custom events have been moved to the "api" package as well
+- Two new Temperature types have been added:
+    - HOTTEST: Controls the maximum bearable temperature for the entity
+    - COLDEST: Controls the minimum bearable temperature for the entity
+    - These are an offset applied to their respective values in the config
+    - Can be affected by TempModifiers, manipulated using PlayerHelper, etc.
+- BlockEffects can now define which blocks they are attached to in the class's constructor instead of using hasBlock()
+    - Please use this when possible, as it is dramatically faster
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
