@@ -173,7 +173,10 @@ public class PlayerTempCapability implements ITemperatureCap
         }
 
         // Sets the player's body temperature to BASE + CORE
-        set(Temperature.Types.CORE, CSMath.clamp(bodyTemp.get(), -150.0 + baseTemp.get(), 150.0 + baseTemp.get()));
+        if (!CSMath.isBetween(coreTemp.get(), -150, 150))
+        {
+            set(Temperature.Types.CORE, CSMath.clamp(coreTemp.get(), -150d, 150d));
+        }
 
         //Deal damage to the player if temperature is critical
         boolean hasFireResistance = player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes;
