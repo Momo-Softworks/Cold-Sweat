@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.event.RenderTooltipPostEvent;
+import dev.momostudios.coldsweat.api.event.client.RenderTooltipPostEvent;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
