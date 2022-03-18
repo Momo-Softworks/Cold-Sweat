@@ -21,6 +21,7 @@ public class MixinSoulfire
     {
         if (state.getBlock() instanceof SoulFireBlock)
         {
+            entity.setIsInPowderSnow(true);
             entity.clearFire();
             ci.cancel();
         }
