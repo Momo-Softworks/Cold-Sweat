@@ -242,21 +242,6 @@ public class TempHelper
         }
     }
 
-    public static ItemStack getItemInHand(LivingEntity player, HumanoidArm hand)
-    {
-        return player.getItemInHand(hand == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
-    }
-
-    public static HumanoidArm getArmFromHand(InteractionHand hand, Player player)
-    {
-        return hand == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HumanoidArm.RIGHT ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
-    }
-
-    public static boolean holdingLamp(LivingEntity player, HumanoidArm arm)
-    {
-        return getItemInHand(player, arm).getItem() == ModItems.HELLSPRING_LAMP;
-    }
-
     public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp, Temperature max, Temperature min)
     {
         if (!player.level.isClientSide)

@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -39,7 +39,7 @@ public class MixinHumanoidModel
     @Inject(method = "poseRightArm", at = @At("TAIL"), remap = ColdSweat.remapMixins)
     private void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
-        boolean holdingLamp = TempHelper.holdingLamp(entity, HumanoidArm.RIGHT);
+        boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.RIGHT);
         float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("rightArmRot"));
         float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
         float rightArmRot = armRot + rotOffset;
@@ -69,7 +69,7 @@ public class MixinHumanoidModel
     @Inject(method = "poseLeftArm", at = @At("TAIL"), remap = ColdSweat.remapMixins)
     private void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
-        boolean holdingLamp = TempHelper.holdingLamp(entity, HumanoidArm.LEFT);
+        boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.LEFT);
         float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("leftArmRot"));
         float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
         float leftArmRot = armRot + rotOffset;
