@@ -32,7 +32,6 @@ public class Temperature
         this(0);
     }
 
-
     /**
     * Sets the actual value of the temperature
     */

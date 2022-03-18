@@ -16,7 +16,7 @@ public class MountTempModifier extends TempModifier
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
-        return temp.multiply(1.0D - getArgument("strength", Double.class));
+        return temp.multiply(1.0D - this.<Double>getArgument("strength"));
     }
 
     public String getID()

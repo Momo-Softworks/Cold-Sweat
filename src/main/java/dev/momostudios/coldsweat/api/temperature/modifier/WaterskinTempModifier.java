@@ -18,7 +18,7 @@ public class WaterskinTempModifier extends TempModifier
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
-        return temp.add(getArgument("temperature", double.class));
+        return temp.add(this.<Double>getArgument("temperature"));
     }
 
     public String getID()

@@ -5,18 +5,20 @@ import net.minecraft.world.entity.player.Player;
 
 public class InsulationTempModifier extends TempModifier
 {
-    public InsulationTempModifier() {
+    public InsulationTempModifier()
+    {
         addArgument("warmth", 0);
     }
 
-    public InsulationTempModifier(int amount) {
+    public InsulationTempModifier(int amount)
+    {
         addArgument("warmth", amount);
     }
 
     @Override
     public Temperature getResult(Temperature temp, Player player)
-    {   
-        return temp.divide(Math.max(1d, this.getArgument("warmth", int.class) / 10d));
+    {
+        return temp.divide(Math.max(1d, this.<Integer>getArgument("warmth") / 10d));
     }
 
     public String getID()

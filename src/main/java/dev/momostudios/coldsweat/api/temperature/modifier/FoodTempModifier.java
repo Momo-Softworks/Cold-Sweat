@@ -18,7 +18,7 @@ public class FoodTempModifier extends TempModifier
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
-        return temp.add(getArgument("effect", Double.class));
+        return temp.add(this.<Double>getArgument("effect"));
     }
 
     @Override

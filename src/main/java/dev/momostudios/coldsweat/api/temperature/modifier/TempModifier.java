@@ -1,7 +1,8 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
 import dev.momostudios.coldsweat.core.event.InitTempModifiers;
-import dev.momostudios.coldsweat.api.event.TempModifierEvent;
+import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * It is up to you to apply and remove these modifiers manually.<br>
  * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.<br>
  *<br>
- * TempModifiers must be REGISTERED using {@link TempModifierEvent.Init}<br>
+ * TempModifiers must be REGISTERED using {@link TempModifierRegisterEvent}<br>
  * (see {@link InitTempModifiers} for an example)<br>
  */
 public abstract class TempModifier
@@ -48,29 +49,9 @@ public abstract class TempModifier
      * @param name The name of the argument
      * @return A generic object with the value of the requested argument.
      */
-    public Object getArgument(String name)
+    public <T> T getArgument(String name)
     {
-        return args.get(name);
-    }
-
-    /**
-     *
-     * @param name The name of the argument
-     * @param clazz The class of the argument
-     * @return The value of the requested argument for this TempModifier instance, cast to the specified class.
-     */
-    public <T> T getArgument(String name, Class<T> clazz)
-    {
-        try
-        {
-            return clazz.cast(args.get(name));
-        }
-        catch (Exception e)
-        {
-            throw new IllegalArgumentException(
-                    "Argument type mismatch trying to get argument \"" + name + "\" of " + this.getID() +
-                    " (expected " + clazz.getName() + " but got " + args.get(name).getClass().getName() + ")");
-        }
+        return (T) args.get(name);
     }
 
     /**
@@ -78,11 +59,11 @@ public abstract class TempModifier
      * @param name The name of the argument
      * @param arg The new value of the argument
      */
-    public <T> void setArgument(String name, T arg)
+    public void setArgument(String name, Object arg)
     {
         try
         {
-            args.put(name, args.get(name).getClass().cast(arg));
+            args.put(name, arg);
         }
         catch (Exception e)
         {

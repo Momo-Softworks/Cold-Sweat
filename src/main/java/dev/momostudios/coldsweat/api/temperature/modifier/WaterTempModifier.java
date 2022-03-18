@@ -26,7 +26,7 @@ public class WaterTempModifier extends TempModifier
 
         try
         {
-            double strength = getArgument("strength", Double.class);
+            double strength = this.<Double>getArgument("strength");
             double returnRate = Math.min(-0.0003, -0.0003 - (temp.get() / 800));
             double addAmount = player.isInWaterOrBubble() ? 0.01 : player.level.isRainingAt(player.blockPosition()) ? 0.005 : returnRate;
 
@@ -43,7 +43,7 @@ public class WaterTempModifier extends TempModifier
                 }
             }
 
-            return temp.add(-getArgument("strength", Double.class));
+            return temp.add(-this.<Double>getArgument("strength"));
         }
         // Remove the modifier if an exception is thrown
         catch (Exception e)

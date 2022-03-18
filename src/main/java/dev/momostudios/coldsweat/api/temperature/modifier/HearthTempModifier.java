@@ -30,7 +30,7 @@ public class HearthTempModifier extends TempModifier
         double mid = (min + max) / 2;
         double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
 
-        int insulationStrength = (int) this.getArgument("strength");
+        int insulationStrength = this.<Integer>getArgument("strength");
         return new Temperature(CSMath.blend(temp.get(), CSMath.weightedAverage(temp.get(), mid, 1 - hearthStrength, 1.0), insulationStrength, 0, 10));
     }
 
