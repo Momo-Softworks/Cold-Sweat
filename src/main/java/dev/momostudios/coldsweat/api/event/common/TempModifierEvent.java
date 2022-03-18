@@ -1,14 +1,11 @@
-package dev.momostudios.coldsweat.api.event;
+package dev.momostudios.coldsweat.api.event.common;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
-import dev.momostudios.coldsweat.common.world.TempModifierEntries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 
 import java.util.function.Predicate;
 
@@ -110,6 +107,7 @@ public class TempModifierEvent extends Event
         }
     }
 
+
     /**
      * Fired when a TempModifier runs the {@code calculate()} method. <br>
      * {@code Pre} and {@code Post} are fired on the {@link MinecraftForge#EVENT_BUS} before/after the calculation respectively. <br>
@@ -131,9 +129,9 @@ public class TempModifierEvent extends Event
         {
             public final Player player;
             private TempModifier modifier;
-            private dev.momostudios.coldsweat.api.temperature.Temperature temperature;
+            private Temperature temperature;
 
-            public Pre(TempModifier modifier, Player player, dev.momostudios.coldsweat.api.temperature.Temperature temperature)
+            public Pre(TempModifier modifier, Player player, Temperature temperature)
             {
                 this.player = player;
                 this.modifier = modifier;
@@ -143,7 +141,7 @@ public class TempModifierEvent extends Event
             public TempModifier getModifier() {
                 return modifier;
             }
-            public dev.momostudios.coldsweat.api.temperature.Temperature getTemperature() {
+            public Temperature getTemperature() {
                 return temperature;
             }
         }
@@ -161,9 +159,9 @@ public class TempModifierEvent extends Event
         {
             public final Player player;
             private TempModifier modifier;
-            private dev.momostudios.coldsweat.api.temperature.Temperature temperature;
+            private Temperature temperature;
 
-            public Post(TempModifier modifier, Player player, dev.momostudios.coldsweat.api.temperature.Temperature temperature)
+            public Post(TempModifier modifier, Player player, Temperature temperature)
             {
                 this.player = player;
                 this.modifier = modifier;
@@ -173,68 +171,8 @@ public class TempModifierEvent extends Event
             public TempModifier getModifier() {
                 return modifier;
             }
-            public dev.momostudios.coldsweat.api.temperature.Temperature getTemperature() {
+            public Temperature getTemperature() {
                 return temperature;
-            }
-        }
-    }
-
-
-    /**
-     * Fired when the {@link TempModifier} or {@link BlockEffect} registry is being built. <br>
-     * The event is fired during {@link net.minecraftforge.event.world.WorldEvent.Load}. <br>
-     * Do not hook into this event directly; use its sub-events instead. <br>
-     * <br>
-     * Use {@code getPool().flush()} if calling manually to prevent duplicates. <br>
-     * (You probably shouldn't ever do that anyway) <br>
-     * <br>
-     * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
-     * <br>
-     * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
-     */
-    public static class Init extends TempModifierEvent
-    {
-        /**
-         * Fired when the {@link TempModifier} registry is being built ({@link TempModifierEntries}). <br>
-         */
-        public static class Modifier extends Init
-        {
-            /**
-             * @return the map of registered {@link TempModifier}s.
-             */
-            public final TempModifierEntries getPool() {
-                return TempModifierEntries.getEntries();
-            }
-
-            /**
-             * Adds a new {@link TempModifier} to the registry.
-             * @param modifier the {@link TempModifier} to add.
-             */
-            public void addModifier(TempModifier modifier)
-            {
-                this.getPool().add(modifier);
-            }
-        }
-
-        /**
-         * Fired when the {@link BlockEffect} registry is being built ({@link BlockEffectEntries}). <br>
-         */
-        public static class Block extends Init
-        {
-            /**
-             * @return the map of registered {@link BlockEffect}s.
-             */
-            public final BlockEffectEntries getPool() {
-                return BlockEffectEntries.getEntries();
-            }
-
-            /**
-             * Adds a new {@link BlockEffect} to the registry.
-             * @param blockEffect The BlockEffect to add.
-             */
-            public void addBlockEffect(BlockEffect blockEffect)
-            {
-                this.getPool().add(blockEffect);
             }
         }
     }
