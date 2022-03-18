@@ -441,6 +441,7 @@ Fixes:
 - Fixed a bug that prevented body temperature from working properly
 - Fixed Soulfire not cooling down the surrounding area
 - Fixed the item name hotbar overlay interfering with other UI elements
+- Fixed some elements in the config menu not moving to accommodate longer strings of text
 
 Technical Changes:
 - Renamed PlayerHelper to TempHelper

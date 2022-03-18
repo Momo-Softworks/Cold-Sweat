@@ -17,7 +17,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'net.momostudios'
-version = '2.1.9-b04'
+version = '2.1.9-b05'
 
 java {
     archivesBaseName = 'ColdSweat'
