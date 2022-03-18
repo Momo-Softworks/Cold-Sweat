@@ -22,6 +22,7 @@ public class FurnaceBlockEffect extends BlockEffect
     @Override
     public boolean hasBlock(BlockState block)
     {
+        super.hasBlock(block);
         return block.getBlock() instanceof AbstractFurnaceBlock;
     }
 

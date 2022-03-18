@@ -31,6 +31,6 @@ public class SoulFireBlockEffect extends BlockEffect
 
     @Override
     public double minTemperature() {
-        return CSMath.convertUnits(400, Temperature.Units.F, Temperature.Units.MC, true);
+        return CSMath.convertUnits(-400, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }
