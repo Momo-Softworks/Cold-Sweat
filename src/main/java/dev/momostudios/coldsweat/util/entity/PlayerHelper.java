@@ -5,9 +5,9 @@ import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.common.world.TempModifierEntries;
+import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
-import dev.momostudios.coldsweat.api.event.TempModifierEvent;
+import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
@@ -89,7 +89,7 @@ public class PlayerHelper
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 AtomicInteger duplicateCount = new AtomicInteger(0);
-                if (TempModifierEntries.getEntries().getMap().containsKey(event.getModifier().getID()))
+                if (TempModifierRegistry.getRegister().getEntries().containsKey(event.getModifier().getID()))
                 {
                     CSMath.breakableForEach(cap.getModifiers(event.type), (mod, looper) ->
                     {
