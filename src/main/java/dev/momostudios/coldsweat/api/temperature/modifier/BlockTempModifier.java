@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
-import dev.momostudios.coldsweat.common.world.BlockEffectEntries;
+import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
@@ -68,7 +68,7 @@ public class BlockTempModifier extends TempModifier
                         BlockEffect be;
                         if (!MAPPED_BLOCKS.keySet().contains(state.getBlock()))
                         {
-                            be = BlockEffectEntries.getEntries().getEntryFor(state);
+                            be = BlockEffectRegistry.getRegister().getEntryFor(state);
                             MAPPED_BLOCKS.put(state.getBlock(), be);
                         }
                         else

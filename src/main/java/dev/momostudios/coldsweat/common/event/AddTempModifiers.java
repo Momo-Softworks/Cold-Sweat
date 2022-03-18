@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.event;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
-import dev.momostudios.coldsweat.common.world.TempModifierEntries;
+import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,7 +34,7 @@ public class AddTempModifiers
                 PlayerHelper.addModifier(player, new DepthTempModifier().tickRate(5), Temperature.Types.WORLD, false);
                 PlayerHelper.addModifier(player, new BlockTempModifier().tickRate(5), Temperature.Types.WORLD, false);
                 if (ModList.get().isLoaded("sereneseasons"))
-                    PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
+                    PlayerHelper.addModifier(player, TempModifierRegistry.getRegister().getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
                 /*
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);

@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.util.entity;
 
-import dev.momostudios.coldsweat.common.world.TempModifierEntries;
+import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 
@@ -128,7 +128,7 @@ public class NBTHelper
     public static TempModifier TagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        TempModifier newModifier = TempModifierEntries.getEntries().getEntryFor(modifierTag.getString("id"));
+        TempModifier newModifier = TempModifierRegistry.getRegister().getEntryFor(modifierTag.getString("id"));
 
         modifierTag.getAllKeys().forEach(key ->
         {
