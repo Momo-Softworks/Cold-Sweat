@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,7 +23,7 @@ public class PlayerEatFood
             {
                 if (list.get(0).equals(event.getItem().getItem().getRegistryName().toString()))
                 {
-                    PlayerHelper.addModifier(player, new FoodTempModifier(((Number) list.get(1)).doubleValue()).expires(1), Temperature.Types.CORE, true);
+                    TempHelper.addModifier(player, new FoodTempModifier(((Number) list.get(1)).doubleValue()).expires(1), Temperature.Types.CORE, true);
                     break;
                 }
             }

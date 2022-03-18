@@ -30,7 +30,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class PlayerHelper
+public class TempHelper
 {
     /**
      * Returns the player's temperature of the specified type.

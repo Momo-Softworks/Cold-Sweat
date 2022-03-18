@@ -6,7 +6,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HandleHellLampAnim
@@ -20,7 +20,7 @@ public class HandleHellLampAnim
 
             float rightArmRot = player.getPersistentData().getFloat("rightArmRot");
 
-            if (PlayerHelper.holdingLamp(player, HumanoidArm.RIGHT))
+            if (TempHelper.holdingLamp(player, HumanoidArm.RIGHT))
             {
                 if (rightArmRot < 70)
                     player.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 2);
@@ -33,7 +33,7 @@ public class HandleHellLampAnim
 
             float leftArmRot = player.getPersistentData().getFloat("leftArmRot");
 
-            if (PlayerHelper.holdingLamp(player, HumanoidArm.LEFT))
+            if (TempHelper.holdingLamp(player, HumanoidArm.LEFT))
             {
                 if (leftArmRot < 70)
                     player.getPersistentData().putFloat("leftArmRot", leftArmRot + (71 - leftArmRot) / 2);

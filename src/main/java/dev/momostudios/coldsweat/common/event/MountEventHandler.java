@@ -10,7 +10,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.api.temperature.modifier.MountTempModifier;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class MountEventHandler
             {
                 if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == BlockInit.MINECART_INSULATION.get())
                 {
-                    PlayerHelper.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Types.RATE, false);
+                    TempHelper.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Types.RATE, false);
                 }
                 else
                 {
@@ -37,7 +37,7 @@ public class MountEventHandler
                         {
                             Number number = (Number) entity.get(1);
                             double value = number.doubleValue();
-                            PlayerHelper.addModifier(player, new MountTempModifier(value).expires(1), Temperature.Types.RATE, false);
+                            TempHelper.addModifier(player, new MountTempModifier(value).expires(1), Temperature.Types.RATE, false);
                             break;
                         }
                     }

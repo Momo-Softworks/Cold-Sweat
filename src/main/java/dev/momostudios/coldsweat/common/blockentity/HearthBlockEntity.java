@@ -8,7 +8,7 @@ import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
@@ -223,7 +223,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     {
                         // Get the player's temperature
                         double temp = player.hasEffect(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
-                                PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
+                                TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
                         if ((temp < config.minTemp && this.getHotFuel() > 0))
                         {

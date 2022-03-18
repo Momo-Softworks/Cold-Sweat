@@ -5,7 +5,7 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigEntry;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -143,7 +143,7 @@ public class AddLeatherModifiers
 
                 if (leatherMultiplier > 0)
                 {
-                    PlayerHelper.addModifier(player, new InsulationTempModifier(leatherMultiplier).expires(10), Temperature.Types.RATE, false);
+                    TempHelper.addModifier(player, new InsulationTempModifier(leatherMultiplier).expires(10), Temperature.Types.RATE, false);
                 }
             }
         }

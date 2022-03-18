@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.capability;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.nbt.CompoundTag;
@@ -164,7 +164,7 @@ public class PlayerTempCapability implements ITemperatureCap
 
         if (bodyTemp.get() != get(Temperature.Types.BODY) || player.tickCount % 3 == 0)
         {
-            PlayerHelper.updateTemperature(player,
+            TempHelper.updateTemperature(player,
                     new Temperature(get(Temperature.Types.CORE)),
                     new Temperature(get(Temperature.Types.BASE)),
                     new Temperature(get(Temperature.Types.WORLD)),
@@ -244,10 +244,10 @@ public class PlayerTempCapability implements ITemperatureCap
         CompoundTag nbt = new CompoundTag();
 
         // Save the player's temperature data
-        nbt.putDouble(PlayerHelper.getTempTag(Temperature.Types.CORE), get(Temperature.Types.CORE));
-        nbt.putDouble(PlayerHelper.getTempTag(Temperature.Types.BASE), get(Temperature.Types.BASE));
-        nbt.putDouble(PlayerHelper.getTempTag(Temperature.Types.HOTTEST), get(Temperature.Types.HOTTEST));
-        nbt.putDouble(PlayerHelper.getTempTag(Temperature.Types.COLDEST), get(Temperature.Types.COLDEST));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.CORE), get(Temperature.Types.CORE));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.BASE), get(Temperature.Types.BASE));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.HOTTEST), get(Temperature.Types.HOTTEST));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.COLDEST), get(Temperature.Types.COLDEST));
 
         // Save the player's modifiers
         Temperature.Types[] validTypes = {Temperature.Types.CORE, Temperature.Types.BASE, Temperature.Types.RATE, Temperature.Types.HOTTEST, Temperature.Types.COLDEST};
@@ -260,7 +260,7 @@ public class PlayerTempCapability implements ITemperatureCap
             }
 
             // Write the list of modifiers to the player's persistent data
-            nbt.put(PlayerHelper.getModifierTag(type), modifiers);
+            nbt.put(TempHelper.getModifierTag(type), modifiers);
         }
         return nbt;
     }
@@ -268,15 +268,15 @@ public class PlayerTempCapability implements ITemperatureCap
     @Override
     public void deserializeNBT(CompoundTag nbt)
     {
-        set(Temperature.Types.CORE, nbt.getDouble(PlayerHelper.getTempTag(Temperature.Types.CORE)));
-        set(Temperature.Types.BASE, nbt.getDouble(PlayerHelper.getTempTag(Temperature.Types.BASE)));
+        set(Temperature.Types.CORE, nbt.getDouble(TempHelper.getTempTag(Temperature.Types.CORE)));
+        set(Temperature.Types.BASE, nbt.getDouble(TempHelper.getTempTag(Temperature.Types.BASE)));
 
         // Load the player's modifiers
         Temperature.Types[] validTypes = {Temperature.Types.CORE, Temperature.Types.BASE, Temperature.Types.RATE};
         for (Temperature.Types type : validTypes)
         {
             // Get the list of modifiers from the player's persistent data
-            ListTag modifiers = nbt.getList(PlayerHelper.getModifierTag(type), 10);
+            ListTag modifiers = nbt.getList(TempHelper.getModifierTag(type), 10);
 
             // For each modifier in the list
             modifiers.forEach(modifier ->

@@ -7,7 +7,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID)
 public class PlayerTempUpdater
@@ -25,7 +25,7 @@ public class PlayerTempUpdater
                 {
                     event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        PlayerHelper.updateModifiers(event.player, cap);
+                        TempHelper.updateModifiers(event.player, cap);
                     });
                 }
 

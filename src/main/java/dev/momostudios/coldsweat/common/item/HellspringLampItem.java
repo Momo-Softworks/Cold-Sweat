@@ -16,7 +16,7 @@ import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraftforge.network.PacketDistributor;
 
 public class HellspringLampItem extends Item
@@ -33,8 +33,8 @@ public class HellspringLampItem extends Item
         {
             Player player = (Player) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = PlayerHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD) ?
-                    player.getPersistentData().getDouble("preLampTemp") : PlayerHelper.getTemperature(player, Temperature.Types.WORLD).get();
+            double temp = TempHelper.hasModifier(player, HellLampTempModifier.class, Temperature.Types.WORLD) ?
+                    player.getPersistentData().getDouble("preLampTemp") : TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
             boolean validDimension = false;
             for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
@@ -58,7 +58,7 @@ public class HellspringLampItem extends Item
                     AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
                     worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
                     {
-                        PlayerHelper.addModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.WORLD, false);
+                        TempHelper.addModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.WORLD, false);
                     });
                 }
             }

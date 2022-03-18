@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -50,7 +50,7 @@ public class TempCommand extends BaseCommand
             if (players.contains(source.getPlayerOrException()))
             {
                 //Set the sender's body temperature
-                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
+                TempHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
 
                 //Print success message to all players
                 for (Player player : source.getPlayerOrException().level.players())
@@ -64,14 +64,14 @@ public class TempCommand extends BaseCommand
                     player.sendMessage(new TextComponent(
                     "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
                     message.getString()  +
-                    " \u00a7f" + PlayerHelper.getTemperature(source.getPlayerOrException(), Temperature.Types.CORE).get() + "\u00a7r"),
+                    " \u00a7f" + TempHelper.getTemperature(source.getPlayerOrException(), Temperature.Types.CORE).get() + "\u00a7r"),
                     source.getPlayerOrException().getUUID());
                 }
             }
             else
             {
                 //Set the target player's temperature
-                PlayerHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
+                TempHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
 
                 //Print success message to all players
                 for (Player player : source.getPlayerOrException().level.players())
@@ -80,7 +80,7 @@ public class TempCommand extends BaseCommand
                     player.sendMessage(new TextComponent(
                     "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
                     new TranslatableComponent("commands.cold_sweat.temperature.set.other.result", players.iterator().next().getScoreboardName()).getString()  +
-                    " \u00a7f" + PlayerHelper.getTemperature(players.iterator().next(), Temperature.Types.CORE).get() + "\u00a7r"),
+                    " \u00a7f" + TempHelper.getTemperature(players.iterator().next(), Temperature.Types.CORE).get() + "\u00a7r"),
                     source.getPlayerOrException().getUUID());
                 }
             }
@@ -90,7 +90,7 @@ public class TempCommand extends BaseCommand
             int playerCount = 0;
             for (ServerPlayer player : players)
             {
-                PlayerHelper.setTemperature(player, new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
+                TempHelper.setTemperature(player, new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
                 playerCount++;
             }
 
@@ -115,7 +115,7 @@ public class TempCommand extends BaseCommand
             source.getPlayerOrException().sendMessage(new TextComponent(
             "\u00a77" +
             new TranslatableComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
-            " \u00a7f" + (int) PlayerHelper.getTemperature(player, Temperature.Types.BODY).get() + "\u00a7r"),
+            " \u00a7f" + (int) TempHelper.getTemperature(player, Temperature.Types.BODY).get() + "\u00a7r"),
             source.getPlayerOrException().getUUID());
         }
         return Command.SINGLE_SUCCESS;
