@@ -35,9 +35,9 @@ public class WorldTemperatureConfig
 
         BUILDER.push("DimensionTemperatureOffset");
         dimensionOffsets = BUILDER
-            .defineList("Dimension Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:the_nether", 1.0),
-                    Arrays.asList("minecraft:the_end", -0.1)
+            .defineList("Dimension Temperature Offsets", List.of(
+                    List.of("minecraft:the_nether", 1.0),
+                    List.of("minecraft:the_end", -0.1)
             ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
@@ -61,29 +61,29 @@ public class WorldTemperatureConfig
 
         BUILDER.push("BiomeTemperatureOffsets");
         biomeOffsets = BUILDER
-            .defineList("Biome Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:soul_sand_valley", -0.5),
+            .defineList("Biome Temperature Offsets", List.of(
+                    List.of("minecraft:soul_sand_valley", -0.5),
 
-                    Arrays.asList("minecraft:plains", 0.3),
+                    List.of("minecraft:plains", 0.3),
 
-                    Arrays.asList("minecraft:bamboo_jungle", 0.5),
-                    Arrays.asList("minecraft:jungle", 0.5),
-                    Arrays.asList("minecraft:sparse_jungle", 0.3),
+                    List.of("minecraft:bamboo_jungle", 0.5),
+                    List.of("minecraft:jungle", 0.5),
+                    List.of("minecraft:sparse_jungle", 0.3),
 
-                    Arrays.asList("minecraft:desert", -0.2),
+                    List.of("minecraft:desert", -0.2),
 
-                    Arrays.asList("minecraft:giant_spruce_taiga", 0.2),
-                    Arrays.asList("minecraft:giant_spruce_taiga_hills", 0.2),
+                    List.of("minecraft:giant_spruce_taiga", 0.2),
+                    List.of("minecraft:giant_spruce_taiga_hills", 0.2),
 
-                    Arrays.asList("minecraft:savanna", 0.2),
-                    Arrays.asList("minecraft:savanna_plateau", 0.2),
-                    Arrays.asList("minecraft:windswept_savanna", 0.2),
+                    List.of("minecraft:savanna", 0.0),
+                    List.of("minecraft:savanna_plateau", 0.0),
+                    List.of("minecraft:windswept_savanna", 0.0),
 
-                    Arrays.asList("minecraft:taiga", 0.2),
-                    Arrays.asList("minecraft:old_growth_pine_taiga", 0.2),
-                    Arrays.asList("minecraft:old_growth_spruce_taiga", 0.2),
-                    Arrays.asList("minecraft:snowy_taiga", 0.2),
-                    Arrays.asList("minecraft:snowy_slopes", 0.2)
+                    List.of("minecraft:taiga", 0.2),
+                    List.of("minecraft:old_growth_pine_taiga", 0.2),
+                    List.of("minecraft:old_growth_spruce_taiga", 0.2),
+                    List.of("minecraft:snowy_taiga", 0.2),
+                    List.of("minecraft:snowy_slopes", 0.2)
             ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
