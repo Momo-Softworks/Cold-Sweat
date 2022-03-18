@@ -431,5 +431,29 @@ Technical Changes:
 - BlockEffects can now define which blocks they are attached to in the class's constructor instead of using hasBlock()
     - Please use this when possible, as it is dramatically faster
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.9-b05
+- The body temperature indicator now smoothly blends between stages (because it looks cool)
+- Soul fire now gives you the powder snow freezing effect when you stand in it, making it deadly again
+
+Fixes:
+- Fixed a bug that prevented body temperature from working properly
+- Fixed Soulfire not cooling down the surrounding area
+- Fixed the item name hotbar overlay interfering with other UI elements
+
+Technical Changes:
+- Renamed PlayerHelper to TempHelper
+      - All non-temperature-related methods have been moved from TempHelper to a new PlayerHelper class
+- Events and methods for registering TempModifiers and BlockEffects have been moved/renamed to make it more intuitive
+- TempModifier arguments can now be cast in a cleaner way with type arguments
+      - ex: this.<Double>getArgument("my_argument") casts the returned argument to a double (CANNOT cast to primitives)
+      - Because of this, the old getArgument(String id, Class clazz) method has been removed
+      - This should also clear up a lot of issues with using primitives vs. classes (i.e. int vs. Integer)
+- When registering TempModifiers/BlockEffects, the event is automatically wrapped in a try/catch block that alerts the user that registration has failed
+
+
+
+
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
