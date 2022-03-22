@@ -1,6 +1,8 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.core.init.BlockInit;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraftforge.event.TickEvent;
@@ -9,7 +11,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.api.temperature.modifier.MountTempModifier;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class MountEventHandler
             Player player = event.player;
             if (player.getVehicle() != null)
             {
-                if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == BlockInit.MINECART_INSULATION.get())
+                if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
                 {
                     TempHelper.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Types.RATE, false);
                 }

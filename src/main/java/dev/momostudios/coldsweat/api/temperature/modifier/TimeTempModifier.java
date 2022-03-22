@@ -1,14 +1,19 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.util.LegacyMappings;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraftforge.common.BiomeDictionary;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 public class TimeTempModifier extends TempModifier
 {
@@ -17,23 +22,42 @@ public class TimeTempModifier extends TempModifier
     {
         if (!player.level.dimensionType().hasFixedTime())
         {
-            float timeTemp = 0;
-            Level world = player.level;
-            for (BlockPos iterator : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
+            try
             {
-                ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, world.getBiome(iterator).getRegistryName());
-                if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
-                    BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+                float timeTemp = 0;
+                Level world = player.level;
+                for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
                 {
-                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
-                }
-                else
-                {
-                    timeTemp += (Math.sin(world.getDayTime() / 3819.7186342) / 4d) - 0.125;
-                }
-            }
+                    BiomeManager biomeManager = player.level.getBiomeManager();
+                    Biome biome;
 
-            return temp.add(timeTemp / 200);
+                    // For 1.18.1
+                    if (FMLLoader.versionInfo().mcVersion().equals("1.18.1"))
+                    {
+                        biome = (Biome) LegacyMappings.getBiomeOld.invoke(biomeManager, blockPos);
+                    }
+                    // For 1.18.2
+                    else
+                    {
+                        biome = biomeManager.getBiome(blockPos).value();
+                    }
+
+                    ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
+
+                    if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
+                            BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+                    {
+                        timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
+                    }
+                    else
+                    {
+                        timeTemp += (Math.sin(world.getDayTime() / 3819.7186342) / 4d) - 0.125;
+                    }
+                }
+
+                return temp.add(timeTemp / 200);
+            }
+            catch (Exception e) { return temp; }
         }
         else return temp;
     }

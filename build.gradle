@@ -28,7 +28,7 @@ compileJava {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.18.1'
+    mappings channel: 'official', version: '1.18.2'
     runs {
         client {
             workingDirectory project.file('run')
@@ -84,7 +84,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.88'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.0.19'
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3599022")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3644347")

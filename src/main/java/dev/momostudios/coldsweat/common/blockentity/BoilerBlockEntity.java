@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -41,7 +41,7 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
-        super(BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get(), pos, state);
+        super(ModBlockEntities.get("boiler"), pos, state);
     }
 
     @Override

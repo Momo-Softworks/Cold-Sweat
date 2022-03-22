@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -67,16 +67,16 @@ public class BoilerBlock extends Block implements EntityBlock
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public BoilerBlock()
+    public BoilerBlock(Block.Properties properties)
     {
-        super(getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LIT, false));
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == BlockEntityInit.BOILER_TILE_ENTITY_TYPE.get() ? BoilerBlockEntity::tick : null;
+        return type == ModBlockEntities.get("boiler") ? BoilerBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

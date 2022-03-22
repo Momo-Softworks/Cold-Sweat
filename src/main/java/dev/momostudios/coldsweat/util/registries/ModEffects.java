@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffect;
 
 public class ModEffects
 {
-    public static MobEffect INSULATION = EffectInit.INSULATED_EFFECT_REGISTRY.get();
-    public static MobEffect ICE_RESISTANCE = EffectInit.ICE_RESISTANCE_EFFECT_REGISTRY.get();
-    public static MobEffect GRACE = EffectInit.GRACE_EFFECT_REGISTRY.get();
+    public static MobEffect INSULATION = EffectInit.INSULATED.get();
+    public static MobEffect ICE_RESISTANCE = EffectInit.ICE_RESISTANCE.get();
+    public static MobEffect GRACE = EffectInit.GRACE.get();
 }

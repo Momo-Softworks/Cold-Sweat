@@ -4,8 +4,8 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -23,7 +23,7 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemProperties.register(ModItems.HELLSPRING_LAMP, new ResourceLocation(ColdSweat.MOD_ID, "hellspring_state"), (stack, level, entity, id) ->
+            ItemProperties.register(ItemInit.HELLSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "hellspring_state"), (stack, level, entity, id) ->
             {
                 if (stack.getOrCreateTag().getBoolean("isOn"))
                 {
@@ -33,7 +33,7 @@ public class RegisterItemOverrides
                 return 0;
             });
 
-            ItemProperties.register(ModItems.THERMOMETER, new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, entity, id) ->
+            ItemProperties.register(ItemInit.THERMOMETER.get(), new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, entity, id) ->
             {
                 LocalPlayer player = Minecraft.getInstance().player;
                 if (player != null)

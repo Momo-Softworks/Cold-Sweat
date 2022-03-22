@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -104,7 +104,7 @@ public class SewingContainer extends AbstractContainerMenu
 
     public SewingContainer(final int windowId, final Inventory playerInv)
     {
-        super(ContainerInit.SEWING_CONTAINER_TYPE.get(), windowId);
+        super(MenuInit.SEWING_CONTAINER_TYPE.get(), windowId);
         this.pos = playerInv.player.blockPosition();
         this.playerInventory = playerInv;
         sewingInventory = new SewingInventory(this);

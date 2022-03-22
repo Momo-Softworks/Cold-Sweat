@@ -42,9 +42,9 @@ public class SewingTableBlock extends Block implements MenuProvider
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public SewingTableBlock(Properties properties)
+    public SewingTableBlock(Block.Properties properties)
     {
-        super(SewingTableBlock.getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState());
     }
 

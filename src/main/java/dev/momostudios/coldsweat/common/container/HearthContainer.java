@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
@@ -19,7 +19,7 @@ public class HearthContainer extends AbstractContainerMenu
     public final HearthBlockEntity te;
     public HearthContainer(final int windowId, final Inventory playerInv, final HearthBlockEntity te)
     {
-        super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
+        super(MenuInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Tile Entity

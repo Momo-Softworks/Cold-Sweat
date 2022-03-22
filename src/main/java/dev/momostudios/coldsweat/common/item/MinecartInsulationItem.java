@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.sounds.SoundEvents;
@@ -44,7 +43,7 @@ public class MinecartInsulationItem extends Item
                 }
                 player.swing(InteractionHand.MAIN_HAND, true);
                 level.playSound(null, minecart.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));
-                minecart.setDisplayBlockState(BlockInit.MINECART_INSULATION.get().defaultBlockState());
+                minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
                 minecart.setDisplayOffset(5);
                 return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
             }

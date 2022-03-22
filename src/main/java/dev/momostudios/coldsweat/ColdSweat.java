@@ -1,20 +1,25 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,11 +37,12 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
-        bus.addListener(this::onCapInit);
+        bus.addListener(this::registerCaps);
+
         BlockInit.BLOCKS.register(bus);
-        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
-        ContainerInit.CONTAINER_TYPES.register(bus);
         ItemInit.ITEMS.register(bus);
+        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
+        MenuInit.MENU_TYPES.register(bus);
         EffectInit.EFFECTS.register(bus);
         ParticleTypesInit.PARTICLES.register(bus);
         PotionInit.POTIONS.register(bus);
@@ -50,29 +56,26 @@ public class ColdSweat
         EntitySettingsConfig.setup();
     }
 
-    // Register Commands
     @SubscribeEvent
-    public void onCommandRegister(final RegisterCommandsEvent event)
+    public void registerCommands(final RegisterCommandsEvent event)
     {
         CommandInit.registerCommands(event);
     }
 
-    // Register Packet
     @SubscribeEvent
     public void commonSetup(final FMLCommonSetupEvent event)
     {
         ColdSweatPacketHandler.init();
     }
 
-    // Fix Hearth transparency
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH.get(), RenderType.cutoutMipped());
+        ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
     }
 
     @SubscribeEvent
-    public void onCapInit(RegisterCapabilitiesEvent event)
+    public void registerCaps(RegisterCapabilitiesEvent event)
     {
         event.register(ITemperatureCap.class);
     }

@@ -2,10 +2,11 @@ package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,7 +46,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class HearthBlock extends Block implements EntityBlock
+public class HearthBottomBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty WATER = IntegerProperty.create("water", 0, 2);
@@ -70,9 +71,9 @@ public class HearthBlock extends Block implements EntityBlock
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1);
     }
 
-    public HearthBlock()
+    public HearthBottomBlock(Block.Properties properties)
     {
-        super(HearthBlock.getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
         runCalculation(Shapes.or(
             Block.box(3, 0, 3.5, 13, 18, 12.5), // Shell
@@ -116,7 +117,7 @@ public class HearthBlock extends Block implements EntityBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
-        return type == BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get() ? HearthBlockEntity::tickSelf : null;
+        return type == ModBlockEntities.get("hearth") ? HearthBlockEntity::tickSelf : null;
     }
 
     @Nullable
@@ -176,7 +177,7 @@ public class HearthBlock extends Block implements EntityBlock
     {
         if (level.getBlockState(pos.above()).isAir())
         {
-            level.setBlock(pos.above(), BlockInit.HEARTH_TOP.get().defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+            level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
         }
     }
 
@@ -184,7 +185,7 @@ public class HearthBlock extends Block implements EntityBlock
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        if (level.getBlockState(pos.above()).getBlock() != BlockInit.HEARTH_TOP.get())
+        if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP)
         {
             this.destroy(level, pos, state);
         }
@@ -206,7 +207,7 @@ public class HearthBlock extends Block implements EntityBlock
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.above()).getBlock() == BlockInit.HEARTH_TOP.get())
+            if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP)
             {
                 level.destroyBlock(pos.above(), false);
             }

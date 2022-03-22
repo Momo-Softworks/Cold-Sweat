@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +18,8 @@ import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 {
@@ -25,7 +28,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("block." + ColdSweat.MOD_ID + ".hearth"));
+        super(screenContainer, inv, new TranslatableComponent("block." + ColdSweat.MOD_ID + ".hearth_bottom"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
@@ -76,7 +79,9 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
         blit(poseStack, leftPos + 82, topPos + 68, isHoveringButton(mouseX, mouseY) ? 12 : 0, isRadiusShowing() ? 0 : 12, 12, 12, 24, 24);
 
         if (isHoveringButton(mouseX, mouseY))
-            font.draw(poseStack, "Show Particles", leftPos + 97, topPos + 71, 5592405);
+        {
+            this.renderComponentTooltip(poseStack, List.of(new TextComponent("Show Particles")), mouseX, mouseY);
+        }
     }
 
     boolean isHoveringButton(double mouseX, double mouseY)

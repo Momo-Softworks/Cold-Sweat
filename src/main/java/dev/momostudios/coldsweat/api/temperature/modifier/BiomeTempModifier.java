@@ -1,6 +1,9 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.util.LegacyMappings;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
@@ -8,6 +11,7 @@ import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
@@ -15,10 +19,6 @@ import java.util.List;
 
 public class BiomeTempModifier extends TempModifier
 {
-    public BiomeTempModifier()
-    {
-    }
-
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
@@ -32,7 +32,19 @@ public class BiomeTempModifier extends TempModifier
             double worldTemp = 0;
             for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
-                Biome biome = biomeManager.getNoiseBiomeAtPosition(blockPos);
+                Biome biome;
+
+                // For 1.18.1
+                if (FMLLoader.versionInfo().mcVersion().equals("1.18.1"))
+                {
+                    biome = (Biome) LegacyMappings.getBiomeOld.invoke(biomeManager, blockPos);
+                }
+                // For 1.18.2
+                else
+                {
+                    biome = biomeManager.getBiome(blockPos).value();
+                }
+
                 worldTemp += (float) getTemperature.invoke(biome, blockPos) + getTemperatureOffset(biome.getRegistryName(), player.level.dimension().location());
 
                 // Should temperature be overridden by config

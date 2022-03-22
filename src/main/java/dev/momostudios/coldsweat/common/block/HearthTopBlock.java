@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.core.init.ItemInit;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -24,7 +25,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 
 import java.util.*;
 
@@ -46,9 +46,9 @@ public class HearthTopBlock extends Block
                 .dynamicShape();
     }
 
-    public HearthTopBlock()
+    public HearthTopBlock(Block.Properties properties)
     {
-        super(HearthTopBlock.getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
         runCalculation(Shapes.or(
             Block.box(3, -16, 3.5, 13, 2, 12.5), // Shell
@@ -86,9 +86,9 @@ public class HearthTopBlock extends Block
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBlock hearthBlock)
+        if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
         {
-            hearthBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
+            hearthBottomBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
         }
         return InteractionResult.SUCCESS;
     }
@@ -98,7 +98,7 @@ public class HearthTopBlock extends Block
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        if (level.getBlockState(pos.below()).getBlock() != BlockInit.HEARTH.get())
+        if (level.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM)
         {
             this.destroy(level, pos, state);
         }
@@ -110,7 +110,7 @@ public class HearthTopBlock extends Block
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.below()).getBlock() == BlockInit.HEARTH.get())
+            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
             {
                 level.destroyBlock(pos.below(), false);
             }

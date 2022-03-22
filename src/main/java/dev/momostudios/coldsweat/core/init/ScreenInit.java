@@ -11,15 +11,15 @@ import dev.momostudios.coldsweat.client.gui.HearthScreen;
 import dev.momostudios.coldsweat.client.gui.IceboxScreen;
 import dev.momostudios.coldsweat.client.gui.SewingScreen;
 
-@Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class ContainerFactoryInit
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public class ScreenInit
 {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event)
     {
-        MenuScreens.register(ContainerInit.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
-        MenuScreens.register(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
-        MenuScreens.register(ContainerInit.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
-        MenuScreens.register(ContainerInit.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
+        MenuScreens.register(MenuInit.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
+        MenuScreens.register(MenuInit.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
+        MenuScreens.register(MenuInit.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
+        MenuScreens.register(MenuInit.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
     }
 }

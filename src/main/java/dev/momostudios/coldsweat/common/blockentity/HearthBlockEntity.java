@@ -3,12 +3,12 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
@@ -39,7 +39,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
-import dev.momostudios.coldsweat.common.block.HearthBlock;
+import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
@@ -60,7 +60,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
-        super(BlockEntityInit.HEARTH_TILE_ENTITY_TYPE.get(), pos, state);
+        super(ModBlockEntities.get("hearth"), pos, state);
     }
 
     @Override
@@ -287,7 +287,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
 
         // Update BlockState
-        if (this.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == BlockInit.HEARTH.get())
+        if (this.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == ModBlocks.HEARTH_BOTTOM)
         {
             this.updateFuelState();
         }
@@ -434,8 +434,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
         int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
 
-        BlockState desiredState = state.setValue(HearthBlock.WATER, waterLevel).setValue(HearthBlock.LAVA, lavaLevel);
-        if (state.getValue(HearthBlock.WATER) != waterLevel || state.getValue(HearthBlock.LAVA) != lavaLevel)
+        BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
+        if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
         {
             level.setBlock(pos, desiredState, 3);
         }

@@ -29,9 +29,9 @@ public class MinecartInsulationBlock extends Block
         return ModItems.MINECART_INSULATION;
     }
 
-    public MinecartInsulationBlock(Properties properties)
+    public MinecartInsulationBlock(Block.Properties properties)
     {
-        super(MinecartInsulationBlock.getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState());
     }
 

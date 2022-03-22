@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
-import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,7 +21,7 @@ public class IceboxContainer extends AbstractContainerMenu
 
     public IceboxContainer(final int windowId, final Inventory playerInv, final IceboxBlockEntity te)
     {
-        super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
+        super(MenuInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Fuel slot

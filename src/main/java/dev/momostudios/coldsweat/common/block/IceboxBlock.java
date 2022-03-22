@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,16 +55,16 @@ public class IceboxBlock extends Block implements EntityBlock
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public IceboxBlock()
+    public IceboxBlock(Block.Properties properties)
     {
-        super(IceboxBlock.getProperties());
+        super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get() ? IceboxBlockEntity::tick : null;
+        return type == ModBlockEntities.get("icebox") ? IceboxBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

@@ -24,7 +24,7 @@ public class FilledWaterskinItem extends Item
 {
     public FilledWaterskinItem()
     {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN_REGISTRY.get()));
+        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
     }
 
     @Override

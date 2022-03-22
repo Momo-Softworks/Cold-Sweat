@@ -454,7 +454,7 @@ Technical Changes:
 - When registering TempModifiers/BlockEffects, the event is automatically wrapped in a try/catch block that alerts the user that registration has failed
 
 
-
+------------------------------------------------------------------------------------------------------------------------
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

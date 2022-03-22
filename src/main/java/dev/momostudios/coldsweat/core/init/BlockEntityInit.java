@@ -1,6 +1,10 @@
 package dev.momostudios.coldsweat.core.init;
 
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
@@ -9,14 +13,15 @@ import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
 import net.minecraftforge.registries.RegistryObject;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BlockEntityInit
 {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, ColdSweat.MOD_ID);
 
-    public static final RegistryObject<BlockEntityType<BoilerBlockEntity>> BOILER_TILE_ENTITY_TYPE =
+    public static final RegistryObject<BlockEntityType<BoilerBlockEntity>> BOILER_BLOCK_ENTITY_TYPE =
             BLOCK_ENTITY_TYPES.register("boiler", () -> BlockEntityType.Builder.of(BoilerBlockEntity::new, BlockInit.BOILER.get()).build(null));
-    public static final RegistryObject<BlockEntityType<IceboxBlockEntity>> ICEBOX_TILE_ENTITY_TYPE =
-        BLOCK_ENTITY_TYPES.register("icebox", () -> BlockEntityType.Builder.of(IceboxBlockEntity::new, BlockInit.ICEBOX.get()).build(null));
-    public static final RegistryObject<BlockEntityType<HearthBlockEntity>> HEARTH_TILE_ENTITY_TYPE =
-        BLOCK_ENTITY_TYPES.register("hearth", () -> BlockEntityType.Builder.of(HearthBlockEntity::new, BlockInit.HEARTH.get()).build(null));
+    public static final RegistryObject<BlockEntityType<IceboxBlockEntity>> ICEBOX_BLOCK_ENTITY_TYPE =
+            BLOCK_ENTITY_TYPES.register("icebox", () -> BlockEntityType.Builder.of(IceboxBlockEntity::new, BlockInit.ICEBOX.get()).build(null));
+    public static final RegistryObject<BlockEntityType<HearthBlockEntity>> HEARTH_BLOCK_ENTITY_TYPE =
+            BLOCK_ENTITY_TYPES.register("hearth", () -> BlockEntityType.Builder.of(HearthBlockEntity::new, BlockInit.HEARTH_BOTTOM.get()).build(null));
 }

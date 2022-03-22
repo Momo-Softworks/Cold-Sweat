@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
-import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -44,7 +44,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {
-        super(BlockEntityInit.ICEBOX_TILE_ENTITY_TYPE.get(), pos, state);
+        super(ModBlockEntities.get("icebox"), pos, state);
     }
 
     @Override
