@@ -14,6 +14,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Gui.class, priority = 900)
 public class MixinXPBar
@@ -29,45 +33,37 @@ public class MixinXPBar
      * @author iMikul
      * @reason Move XP bar elements to make room for body temperature readout
      */
-    @Overwrite(remap = ColdSweat.remapMixins)
-    public void renderExperienceBar(PoseStack poseStack, int xPos)
+    @Inject(method = "renderExperienceBar(Lcom/mojang/blaze3d/vertex/PoseStack;I)V",
+            at = @At
+            (
+                value = "INVOKE",
+                target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", shift = At.Shift.AFTER
+            ),
+            slice = @Slice
+            (
+                from = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V"),
+                to   = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I")
+            ),
+            cancellable = true,
+            remap = ColdSweat.remapMixins)
+    public void renderExperienceBar(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         Minecraft mc = Minecraft.getInstance();
-        Font fontRenderer = gui.getFont();
+        Font font = gui.getFont();
 
         // Render XP bar
-        mc.getProfiler().push("expBar");
-        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
-        int i = mc.player.totalExperience;
-        if (i > 0)
+        if (RearrangeHotbar.customHotbar)
         {
-            int k = (int)(mc.player.experienceProgress * 183.0F);
-            int l = this.screenHeight - 32 + 3;
-            gui.blit(poseStack, xPos, l, 0, 64, 182, 5);
-            if (k > 0)
-            {
-                gui.blit(poseStack, xPos, l, 0, 69, k, 5);
-            }
-        }
-
-        // Render XP level
-        mc.getProfiler().pop();
-        if (mc.player.experienceLevel > 0)
-        {
-            mc.getProfiler().push("expLevel");
             String s = "" + mc.player.experienceLevel;
-            int i1 = (this.screenWidth - fontRenderer.width(s)) / 2;
-            int j1 = this.screenHeight - 31 - (RearrangeHotbar.customHotbar ? 0 : 4);
-
-            // Render XP level background
-            GuiComponent.fill(poseStack, i1, j1, i1 + fontRenderer.width(s), j1 + 8, 0);
-
-            fontRenderer.draw(poseStack, s, (float)(i1 + 1), (float)j1, 0);
-            fontRenderer.draw(poseStack, s, (float)(i1 - 1), (float)j1, 0);
-            fontRenderer.draw(poseStack, s, (float)i1, (float)(j1 + 1), 0);
-            fontRenderer.draw(poseStack, s, (float)i1, (float)(j1 - 1), 0);
-            fontRenderer.draw(poseStack, s, (float)i1, (float)j1, 8453920);
+            int i1 = (this.screenWidth - font.width(s)) / 2;
+            int j1 = this.screenHeight - 31;
+            font.draw(poseStack, s, (float)(i1 + 1), (float)j1, 0);
+            font.draw(poseStack, s, (float)(i1 - 1), (float)j1, 0);
+            font.draw(poseStack, s, (float)i1, (float)(j1 + 1), 0);
+            font.draw(poseStack, s, (float)i1, (float)(j1 - 1), 0);
+            font.draw(poseStack, s, (float)i1, (float)j1, 8453920);
             mc.getProfiler().pop();
+            ci.cancel();
         }
     }
 }
