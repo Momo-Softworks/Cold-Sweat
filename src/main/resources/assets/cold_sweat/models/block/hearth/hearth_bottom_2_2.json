@@ -4,6 +4,8 @@
 	"textures": {
 		"hearth_body": "cold_sweat:blocks/hearth_body",
 		"hearth_piping": "cold_sweat:blocks/hearth_extras",
+		"water": "cold_sweat:blocks/colored_water",
+		"lava": "minecraft:block/lava_still",
 		"particle": "cold_sweat:blocks/hearth_body"
 	},
 	"elements": [
@@ -113,7 +115,7 @@
 				"east": {"uv": [0, 0, 2, 0], "texture": "#missing"},
 				"south": {"uv": [0, 0, 2, 0], "texture": "#missing"},
 				"west": {"uv": [0, 0, 2, 0], "texture": "#missing"},
-				"up": {"uv": [4, 3, 6, 5], "texture": "#hearth_piping"},
+				"up": {"uv": [3.5, 8, 7.5, 12], "texture": "#lava"},
 				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
 			}
 		},
@@ -196,7 +198,7 @@
 				"east": {"uv": [0, 0, 2, 0], "texture": "#missing"},
 				"south": {"uv": [0, 0, 2, 0], "texture": "#missing"},
 				"west": {"uv": [0, 0, 2, 0], "texture": "#missing"},
-				"up": {"uv": [4, 5, 6, 7], "texture": "#hearth_piping"},
+				"up": {"uv": [4, 6, 8, 10], "texture": "#water"},
 				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
 			}
 		}
