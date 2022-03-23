@@ -61,9 +61,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 .sound(SoundType.STONE)
                 .destroyTime(2.0F)
                 .explosionResistance(10.0F)
+                .requiresCorrectToolForDrops()
                 .noOcclusion()
-                .lightLevel(state -> state.getValue(LAVA) * 3)
-                .dynamicShape();
+                .dynamicShape()
+                .lightLevel(state -> state.getValue(LAVA) * 3);
     }
 
     public static Item.Properties getItemProperties()
@@ -105,6 +106,12 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos)
     {
         return reader.getBlockState(pos).isAir() && reader.getBlockState(pos.above()).isAir();
+    }
+
+    @Override
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
+    {
+        return true;
     }
 
     @Override
