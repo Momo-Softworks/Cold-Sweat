@@ -28,7 +28,7 @@ public class MountEventHandler
             {
                 if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
                 {
-                    TempHelper.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Types.RATE, false);
+                    TempHelper.addModifier(player, new MountTempModifier(0.75).expires(1), Temperature.Types.RATE, false);
                 }
                 else
                 {
