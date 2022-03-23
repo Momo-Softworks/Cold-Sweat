@@ -3,11 +3,11 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
-import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
@@ -60,7 +60,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
-        super(ModBlockEntities.get("hearth"), pos, state);
+        super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
     }
 
     @Override
