@@ -152,8 +152,8 @@ public class ColdSweatConfig
         setMaxHabitable(cache.maxTemp);
         setMinHabitable(cache.minTemp);
         setRateMultiplier(cache.rate);
-        setFireResistanceEffect(cache.fireRes);
-        setIceResistanceEffect(cache.iceRes);
+        setFireResistanceEnabled(cache.fireRes);
+        setIceResistanceEnabled(cache.iceRes);
         setDamageScaling(cache.damageScaling);
         setShowWorldTemp(cache.showWorldTemp);
         setGracePeriodLength(cache.gracePeriodLength);
@@ -181,7 +181,7 @@ public class ColdSweatConfig
         return iceResistanceEffect.get();
     }
 
-    public boolean showWorldTempGauge() {
+    public boolean isWorldTempShowing() {
         return showWorldTemp.get();
     }
 
@@ -240,11 +240,11 @@ public class ColdSweatConfig
         rateMultiplier.set(rate);
     }
 
-    public void setFireResistanceEffect(boolean isEffective) {
+    public void setFireResistanceEnabled(boolean isEffective) {
         fireResistanceEffect.set(isEffective);
     }
 
-    public void setIceResistanceEffect(boolean isEffective) {
+    public void setIceResistanceEnabled(boolean isEffective) {
         iceResistanceEffect.set(isEffective);
     }
 

@@ -28,7 +28,7 @@ public class ConfigScreen
 
     public static Minecraft MC = Minecraft.getInstance();
 
-    public static DecimalFormat twoPlaces = new DecimalFormat("#.##");
+    public static DecimalFormat TWO_PLACES = new DecimalFormat("#.##");
 
     public static boolean IS_MOUSE_DOWN = false;
     public static int MOUSE_X = 0;

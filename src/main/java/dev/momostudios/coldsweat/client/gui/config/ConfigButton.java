@@ -12,7 +12,7 @@ public class ConfigButton extends Button
 {
     ConfigCache configCache = ConfigCache.getInstance();
 
-    public ConfigButton(int x, int y, int width, int height, BaseComponent title, Button.OnPress pressedAction, ConfigCache cache)
+    public ConfigButton(int x, int y, int width, int height, BaseComponent title, Button.OnPress pressedAction)
     {
         super(x, y, width, height, title, pressedAction);
     }
@@ -25,13 +25,15 @@ public class ConfigButton extends Button
     public void onPress()
     {
         if (setsCustomDifficulty())
+        {
             configCache.difficulty = 4;
 
-        if (Minecraft.getInstance().screen instanceof ConfigPageOne)
-        {
-            ((ConfigPageOne) Minecraft.getInstance().screen).difficultyButton.setMessage(
-                    new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
-                    " (" + ConfigScreen.difficultyName(configCache.difficulty) + ")..."));
+            if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
+            {
+                ((Button) page.getElementBatch("difficulty").get(0)).setMessage(
+                        new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
+                                " (" + ConfigScreen.difficultyName(configCache.difficulty) + ")..."));
+            }
         }
 
         super.onPress();

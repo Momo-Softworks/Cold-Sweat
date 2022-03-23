@@ -2,13 +2,13 @@ package dev.momostudios.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.momostudios.coldsweat.util.config.ConfigScreenElement;
+import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
@@ -19,15 +19,22 @@ import dev.momostudios.coldsweat.config.ConfigCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class ConfigPageBase extends Screen
 {
     private final Screen parentScreen;
     private final ConfigCache configCache;
 
-    public List<ConfigScreenElement> inputBoxes = new ArrayList<>();
+    public Map<String, List<Widget>> elementBatches = new HashMap<>();
+    public Map<Pair<String, Boolean>, Pair<Integer, Integer>> labels = new HashMap<>();
+
+    protected int rightSideLength = 0;
+    protected int leftSideLength = 0;
 
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
@@ -39,16 +46,10 @@ public abstract class ConfigPageBase extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
-    public BaseComponent sectionOneTitle()
-    {
-        return new TranslatableComponent("cold_sweat.config.section.temperature_details");
-    }
+    public abstract BaseComponent sectionOneTitle();
 
     @Nullable
-    public BaseComponent sectionTwoTitle()
-    {
-        return new TranslatableComponent("cold_sweat.config.section.other");
-    }
+    public abstract BaseComponent sectionTwoTitle();
 
     public ConfigPageBase(Screen parentScreen, ConfigCache configCache)
     {
@@ -62,22 +63,183 @@ public abstract class ConfigPageBase extends Screen
         return 0;
     }
 
-    public void addInput(EditBox textBox, Component component, Side side, boolean requireOP)
+    protected void addEmptySpace(Side side, double units)
     {
-        this.inputBoxes.add(new ConfigScreenElement(textBox, component, side, requireOP));
-        textBox.x =
-                side == Side.LEFT ?
-                        this.font.width(component.getString()) < 98 ? this.width / 2 - (35 + textBox.getWidth()) :
-                        this.width / 2 - (35 + textBox.getWidth()) + (this.font.width(component.getString()) - 94)
-                : // right
-                        this.font.width(component.getString()) < 98 ? this.width / 2 + 151 :
-                        this.width / 2 + 151 + (this.font.width(component.getString()) - 94);
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * units;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * units;
+    }
+
+    protected void addLabel(String id, Side side, String text)
+    {
+        this.addLabel(id, side, text, 16777215);
+    }
+
+    protected void addLabel(String id, Side side, String text, int color)
+    {
+        int labelX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
+        int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        ConfigLabel label = new ConfigLabel(text, labelX, labelY, color);
+
+        this.addRenderableWidget(label);
+
+        this.addElementBatch(id, List.of(label));
+
+        if (side == Side.LEFT)
+            this.leftSideLength += font.lineHeight + 4;
+        else
+            this.rightSideLength += font.lineHeight + 4;
+    }
+
+    protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick, boolean requireOP, boolean setsCustomDifficulty)
+    {
+        String label = dynamicLabel.get();
+
+        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        int buttonX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
+        int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
+
+        if (buttonWidth > 152)
+        {
+            buttonX -= (buttonWidth - 152) / 2;
+        }
+        Button button = new ConfigButton(buttonX, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
+        {
+            onClick.accept(button1);
+            button1.setMessage(new TextComponent(dynamicLabel.get()));
+        })
+        {
+            @Override
+            public boolean setsCustomDifficulty()
+            {
+                return setsCustomDifficulty;
+            }
+        };
+        button.active = shouldBeActive;
+        elementBatches.put(id, List.of(button));
+        this.addRenderableWidget(button);
+
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE;
+    }
+
+    protected void addInput(String id, Side side, Component label, Consumer<Double> writeValue, Consumer<EditBox> readValue, boolean requireOP)
+    {
+        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        int inputX = side == Side.LEFT ? -86 : 147;
+        int inputY = (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
+        int labelOffset = font.width(label.getString()) > 90 ?
+                          font.width(label.getString()) - 84 : 0;
+
+        EditBox textBox = new EditBox(this.font, this.width / 2 + inputX + labelOffset, this.height / 4 - 6 + inputY, 51, 22, new TextComponent(""))
+        {
+            @Override
+            public void insertText(String text)
+            {
+                super.insertText(text);
+                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+            }
+            @Override
+            public void deleteWords(int i)
+            {
+                super.deleteWords(i);
+                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+            }
+            @Override
+            public void deleteChars(int i)
+            {
+                super.deleteChars(i);
+                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+            }
+        };
+        textBox.setEditable(shouldBeActive);
+        readValue.accept(textBox);
+        textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
+
         this.addRenderableWidget(textBox);
+
+        this.labels.put(Pair.of(label.getString(), textBox.active), Pair.of(this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY));
+        this.addElementBatch(id, List.of(textBox));
+
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+    }
+
+    protected void addDirectionPanel(String id, Side side, TranslatableComponent label, Consumer<Integer> addX, Consumer<Integer> addY, Runnable reset, boolean requireOP)
+    {
+        int xOffset = side == Side.LEFT ? -96 : 140;
+        int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
+
+        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+
+        ResourceLocation texture = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png");
+
+        int labelOffset = font.width(label.getString()) > 84 ?
+                font.width(label.getString()) - 84 : 0;
+
+
+        // Left button
+        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, texture, button ->
+        {
+            addX.accept(-1);
+        });
+        leftButton.active = shouldBeActive;
+        this.addRenderableWidget(leftButton);
+
+        // Up button
+        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, texture, button ->
+        {
+            addY.accept(-1);
+        });
+        upButton.active = shouldBeActive;
+        this.addRenderableWidget(upButton);
+
+        // Down button
+        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, texture, button ->
+        {
+            addY.accept(1);
+        });
+        downButton.active = shouldBeActive;
+        this.addRenderableWidget(downButton);
+
+        // Right button
+        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, texture, button ->
+        {
+            addX.accept(1);
+        });
+        rightButton.active = shouldBeActive;
+        this.addRenderableWidget(rightButton);
+
+        // Reset button
+        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 0, 128, 20, texture, button ->
+        {
+            reset.run();
+        });
+        resetButton.active = shouldBeActive;
+        this.addRenderableWidget(resetButton);
+
+        this.labels.put(Pair.of(label.getString(), shouldBeActive), Pair.of(this.width / 2 + (side == Side.LEFT ? -140 : 52), this.height / 4 - 1 + yOffset));
+        this.addElementBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton));
+
+        // Move down
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.5;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.5;
     }
 
     @Override
     protected void init()
     {
+        this.leftSideLength = 0;
+        this.rightSideLength = 0;
+
         this.addRenderableWidget(new Button(
             this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
             this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
@@ -125,11 +287,10 @@ public abstract class ConfigPageBase extends Screen
             this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
-        // Render labels for text boxes
-        for (ConfigScreenElement inputBox : this.inputBoxes)
+        // Render labels for everything else
+        for (Map.Entry<Pair<String, Boolean>, Pair<Integer, Integer>> entry : this.labels.entrySet())
         {
-            drawString(matrixStack, this.font, inputBox.label.getString(), inputBox.side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51,
-                    inputBox.textBox.y + 6, inputBox.requireOP ? mc.player == null ? 16777215 : mc.player.getPermissionLevel() > 2 ? 16777215 : 8421504 : 16777215);
+            drawString(matrixStack, this.font, entry.getKey().getFirst(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getKey().getSecond() ? 16777215 : 8421504);
         }
 
         super.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -139,10 +300,6 @@ public abstract class ConfigPageBase extends Screen
     public void tick()
     {
         super.tick();
-        for (ConfigScreenElement inputBox : this.inputBoxes)
-        {
-            inputBox.textBox.tick();
-        }
     }
 
     @Override
@@ -161,5 +318,15 @@ public abstract class ConfigPageBase extends Screen
     {
         LEFT,
         RIGHT
+    }
+
+    protected void addElementBatch(String id, List<Widget> elements)
+    {
+        this.elementBatches.put(id, elements);
+    }
+
+    public List<Widget> getElementBatch(String id)
+    {
+        return this.elementBatches.get(id);
     }
 }

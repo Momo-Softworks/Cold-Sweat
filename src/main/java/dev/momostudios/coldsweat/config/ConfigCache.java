@@ -47,7 +47,7 @@ public class ConfigCache
         fireRes = config.isFireResistanceEnabled();
         iceRes = config.isIceResistanceEnabled();
         damageScaling = config.doDamageScaling();
-        showWorldTemp = config.showWorldTempGauge();
+        showWorldTemp = config.isWorldTempShowing();
         gracePeriodLength = config.getGracePeriodLength();
         gracePeriodEnabled = config.isGracePeriodEnabled();
     }
