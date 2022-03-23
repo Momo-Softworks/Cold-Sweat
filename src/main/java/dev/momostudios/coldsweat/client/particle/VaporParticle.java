@@ -31,7 +31,7 @@ public class VaporParticle extends TextureSheetParticle
         this.maxAlpha = (float) (Math.random() / 3 + 0.2f);
         this.scale(3f + (float) (Math.random() / 2.5f));
         this.setSize(quadSize / 10f, quadSize / 10f);
-        this.lifetime = 40;
+        this.lifetime = 40 + (int) (Math.random() * 20 - 10);
         this.hasPhysics = true;
         this.setParticleSpeed(vx, vy, vz);
         this.setSpriteFromAge(spriteSet);
