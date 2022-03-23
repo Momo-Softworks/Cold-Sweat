@@ -1,10 +1,7 @@
 package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -41,7 +38,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -162,13 +158,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
                         }
                     }
                     te.addFuel(itemFuel);
-                    te.updateFuelState();
+
 
                     worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
-
-                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                            new HearthFuelSyncMessage(te.getBlockPos(), te.getHotFuel(), te.getColdFuel()));
                 }
                 else
                 {

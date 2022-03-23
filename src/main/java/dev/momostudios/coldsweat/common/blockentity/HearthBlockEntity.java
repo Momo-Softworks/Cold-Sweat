@@ -6,9 +6,9 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.HearthFuelSyncMessage;
+import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
-import dev.momostudios.coldsweat.util.registries.ModBlocks;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
@@ -20,6 +20,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -53,6 +54,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public static int slots = 1;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     BlockPos pos = this.getBlockPos();
+
+    boolean shouldUseHotFuel = false;
+    boolean shouldUseColdFuel = false;
 
     public int ticksExisted;
 
@@ -110,8 +114,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public void tick()
     {
         // Set to 'true' if a player in the area needs insulation
-        boolean shouldUseHotFuel = false;
-        boolean shouldUseColdFuel = false;
 
         this.ticksExisted = (this.ticksExisted + 1) % 1000;
 
@@ -249,6 +251,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     }
                 }
             }
+
+            // Drain fuel
+            if (!level.isClientSide && this.ticksExisted % 80 == 0)
+            {
+                if (shouldUseColdFuel)
+                {
+                    this.setColdFuel(this.getColdFuel() - 1);
+                }
+                if (shouldUseHotFuel)
+                {
+                    this.setHotFuel(this.getHotFuel() - 1);
+                }
+
+                shouldUseColdFuel = false;
+                shouldUseHotFuel = false;
+            }
         }
 
         // Input fuel types
@@ -258,38 +276,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             int amount = getItemFuel(this.getItemInSlot(0));
             if ((amount > 0 ? this.getHotFuel() : this.getColdFuel()) <= MAX_FUEL - Math.abs(amount) * 0.75)
             {
-                if (fuel.hasContainerItem() && fuel.getCount() == 1)
+                if (fuel.hasContainerItem())
                 {
-                    this.setItemInSlot(0, fuel.getContainerItem());
+                    if (fuel.getCount() == 1)
+                    {
+                        this.setItemInSlot(0, fuel.getContainerItem());
+                    }
                 }
                 else this.getItemInSlot(0).shrink(1);
                 this.addFuel(amount);
             }
-        }
-
-        // Drain fuel
-        if (!level.isClientSide && this.ticksExisted % 80 == 0)
-        {
-            if (this.getColdFuel() > 0 && shouldUseColdFuel)
-            {
-                this.setColdFuel(this.getColdFuel() - 1);
-            }
-            if (this.getHotFuel() > 0 && shouldUseHotFuel)
-            {
-                this.setHotFuel(this.getHotFuel() - 1);
-            }
-        }
-
-        // Update fuel for clients
-        if (!level.isClientSide && this.ticksExisted % 40 == 0)
-        {
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HearthFuelSyncMessage(pos, this.getHotFuel(), this.getColdFuel()));
-        }
-
-        // Update BlockState
-        if (this.ticksExisted % 5 == 0 && level.getBlockState(pos).getBlock() == ModBlocks.HEARTH_BOTTOM)
-        {
-            this.updateFuelState();
         }
 
         // Particles
@@ -400,17 +396,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         int prevFuel = getHotFuel();
 
-        this.getTileData().putInt("hotFuel", Math.min(amount, MAX_FUEL));
+        this.getTileData().putInt("hotFuel", CSMath.clamp(amount, 0, MAX_FUEL));
+        this.updateFuelState();
 
         if (amount == 0 && prevFuel > 0)
             level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+
     }
 
     public void setColdFuel(int amount)
     {
         int prevFuel = getColdFuel();
 
-        this.getTileData().putInt("coldFuel", Math.min(amount, MAX_FUEL));
+        this.getTileData().putInt("coldFuel", CSMath.clamp(amount, 0, MAX_FUEL));
+        this.updateFuelState();
 
         if (amount == 0 && prevFuel > 0)
             level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
@@ -430,14 +429,21 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void updateFuelState()
     {
-        BlockState state = level.getBlockState(pos);
-        int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
-        int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
-
-        BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
-        if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
+        if (level != null && !level.isClientSide)
         {
-            level.setBlock(pos, desiredState, 3);
+            BlockState state = level.getBlockState(pos);
+            int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
+            int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
+
+            BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
+            if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
+            {
+                level.setBlock(pos, desiredState, 3);
+            }
+            this.setChanged();
+
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
+                    new BlockDataUpdateMessage(pos, List.of("hotFuel", "coldFuel"), List.of(IntTag.valueOf(getHotFuel()), IntTag.valueOf(getColdFuel()))));
         }
     }
 
