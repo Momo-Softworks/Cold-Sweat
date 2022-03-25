@@ -192,4 +192,10 @@ public class CSMath
         }
         catch (Throwable throwable) {}
     }
+
+    public static int normalize(Number value)
+    {
+        if (value.intValue() == 0) return 0;
+        return value.intValue() / Math.abs(value.intValue());
+    }
 }
