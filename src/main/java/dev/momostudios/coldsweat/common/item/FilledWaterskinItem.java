@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,19 +35,19 @@ public class FilledWaterskinItem extends Item
         if (entity instanceof Player)
         {
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
-            if (itemTemp != 0 && slot <= 8)
+            if (CSMath.isBetween(itemTemp, -1, 1))
             {
-                double temp = 0.03 * ConfigCache.getInstance().rate * (itemTemp / Math.abs(itemTemp));
-                if (itemTemp > 0)
-                {
-                    itemstack.getOrCreateTag().putDouble("temperature", itemTemp - Math.min(itemTemp, temp));
-                }
-                else if (itemTemp < 0)
-                {
-                    itemstack.getOrCreateTag().putDouble("temperature", itemTemp + Math.min(-itemTemp, temp));
-                }
+                if (itemTemp != 0)
+                    itemstack.getOrCreateTag().putDouble("temperature", 0);
+            }
+            else if (slot <= 8)
+            {
+                double temp = 0.03 * ConfigCache.getInstance().rate * CSMath.normalize(itemTemp);
+                double newTemp = itemTemp - temp;
 
-                TempHelper.addModifier((Player) entity, new WaterskinTempModifier(temp).expires(1), Temperature.Types.CORE, true);
+                itemstack.getOrCreateTag().putDouble("temperature", newTemp);
+
+                TempHelper.addModifier((Player) entity, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Types.CORE, true);
             }
         }
     }
