@@ -38,7 +38,7 @@ public class WorldTemperatureConfig
             .defineList("Dimension Temperature Offsets", List.of(
                     List.of("minecraft:the_nether", 1.0),
                     List.of("minecraft:the_end", -0.1)
-            ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         BUILDER.push("DimensionTemperatures");
@@ -47,7 +47,7 @@ public class WorldTemperatureConfig
                 "Also override ALL biome temperatures")
             .defineList("Dimension Temperatures", Arrays.asList(
                     // No default values
-            ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         BUILDER.pop();
@@ -84,7 +84,7 @@ public class WorldTemperatureConfig
                     List.of("minecraft:old_growth_spruce_taiga", 0.2),
                     List.of("minecraft:snowy_taiga", 0.2),
                     List.of("minecraft:snowy_slopes", 0.2)
-            ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         BUILDER.push("BiomeTemperatures");
@@ -92,7 +92,7 @@ public class WorldTemperatureConfig
             .comment("Temperatures for individual biomes")
             .defineList("Biome Temperatures", Arrays.asList(
                     // No default values
-            ), it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

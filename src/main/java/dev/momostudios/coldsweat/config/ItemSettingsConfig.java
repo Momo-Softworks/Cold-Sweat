@@ -43,7 +43,7 @@ public final class ItemSettingsConfig
                         Arrays.asList("minecraft:magma_block", 333),
                         Arrays.asList("minecraft:lava_bucket", 1000)
                     ),
-                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
+                    it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -62,7 +62,7 @@ public final class ItemSettingsConfig
                         Arrays.asList("minecraft:ice", 333),
                         Arrays.asList("minecraft:packed_ice", 1000)
                     ),
-                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
+                    it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -90,7 +90,7 @@ public final class ItemSettingsConfig
                         Arrays.asList("minecraft:ice", -333),
                         Arrays.asList("minecraft:packed_ice", -1000)
                     ),
-                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
+                    it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -145,7 +145,7 @@ public final class ItemSettingsConfig
                             Arrays.asList("minecraft:leather_leggings", 5),
                             Arrays.asList("minecraft:leather_boots", 4)
                     ),
-                    it -> ((List) it).get(0) instanceof String && ((List) it).get(1) instanceof Number);
+                    it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
@@ -160,7 +160,7 @@ public final class ItemSettingsConfig
                     (
                             // nothing here
                     ),
-                    it -> ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                    it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
 
         /*
