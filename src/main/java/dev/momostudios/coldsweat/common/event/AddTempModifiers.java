@@ -4,11 +4,16 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
+import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -78,5 +83,29 @@ public class AddTempModifiers
                 TempHelper.setTemperature(player, new Temperature(temp.get() / 4), Temperature.Types.CORE);
             }
         });
+    }
+
+    @SubscribeEvent
+    public static void onTrySleep(PlayerInteractEvent.RightClickBlock event)
+    {
+        Player player = event.getPlayer();
+        if (player.level.getBlockState(event.getPos()).getBlock() instanceof BedBlock)
+        {
+            double bodyTemp = TempHelper.getTemperature(player, Temperature.Types.BODY).get();
+            double worldTemp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+            double minTemp = ConfigCache.getInstance().minTemp;
+            double maxTemp = ConfigCache.getInstance().maxTemp;
+
+            if (!CSMath.isBetween((int) bodyTemp, -99, 99))
+            {
+                player.displayClientMessage(new TextComponent("You are too " + (bodyTemp > 100 ? "hot" : "cold") + " to sleep now."), true);
+                event.setCanceled(true);
+            }
+            else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
+            {
+                player.displayClientMessage(new TextComponent("It is too " + (worldTemp > maxTemp ? "hot" : "cold") + " outside to sleep now."), true);
+                event.setCanceled(true);
+            }
+        }
     }
 }
