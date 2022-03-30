@@ -37,7 +37,7 @@ public class MixinHumanoidModel
      * @reason Adds functions for the Soulfire Lamp
      */
     @Inject(method = "poseRightArm", at = @At("TAIL"), remap = ColdSweat.remapMixins)
-    private void poseRightArm(LivingEntity entity, CallbackInfo ci)
+    public void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.RIGHT);
         float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("rightArmRot"));
@@ -67,7 +67,7 @@ public class MixinHumanoidModel
      * @reason Adds functions for the Soulfire Lamp
      */
     @Inject(method = "poseLeftArm", at = @At("TAIL"), remap = ColdSweat.remapMixins)
-    private void poseLeftArm(LivingEntity entity, CallbackInfo ci)
+    public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.LEFT);
         float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("leftArmRot"));
