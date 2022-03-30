@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = Gui.class, priority = 900)
+@Mixin(value = Gui.class)
 public class MixinXPBar
 {
     Gui gui = (Gui) (Object) this;

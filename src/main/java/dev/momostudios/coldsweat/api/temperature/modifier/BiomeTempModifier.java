@@ -1,9 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.LegacyMappings;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
@@ -62,9 +60,10 @@ public class BiomeTempModifier extends TempModifier
             }
             return temp.add(worldTemp / 200);
         }
-        catch (Exception e) {}
-
-        return temp;
+        catch (Exception e)
+        {
+            return temp;
+        }
     }
 
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)

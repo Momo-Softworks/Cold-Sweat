@@ -144,4 +144,10 @@ public class Temperature
         C,
         MC
     }
+
+    @Override
+    public String toString()
+    {
+        return temp + "";
+    }
 }
