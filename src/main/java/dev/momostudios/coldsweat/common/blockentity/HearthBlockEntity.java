@@ -1,8 +1,10 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -36,29 +38,38 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
-import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
-import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class HearthBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider, ISpreadingArea
+public class HearthBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider
 {
-    public static int slots = 1;
-    protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
+    ConfigCache config = ConfigCache.getInstance();
+
+    LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
+    HashMap<Pair<Integer, Integer>, LevelChunk> loadedChunks = new HashMap<>();
+    public static final int MAX_PATHS = 6000;
+    public static int MAX_DISTANCE = 20;
+
+    static int INSULATION_TIME = 2400;
+
+    public static int SLOT_COUNT = 1;
+    protected NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     BlockPos pos = this.getBlockPos();
 
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
+    boolean hasFuelItem = false;
 
     public int ticksExisted;
+
+    private LevelChunk workingChunk = null;
+    private Pair<Integer, Integer> workingCoords = new Pair<>(pos.getX() >> 4, pos.getZ() >> 4);
 
     public static final int MAX_FUEL = 1000;
 
@@ -110,158 +121,185 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             hearth.tick();
         }
     }
-    
+
     public void tick()
     {
-        // Set to 'true' if a player in the area needs insulation
+        this.ticksExisted++;
 
-        this.ticksExisted = (this.ticksExisted + 1) % 1000;
+        int coldFuel = this.getColdFuel();
+        int hotFuel = this.getHotFuel();
 
         // Gradually increases insulation amount
         int insulationLevel = this.getTileData().getInt("insulationLevel");
         if (insulationLevel < 2400)
             this.getTileData().putInt("insulationLevel", insulationLevel + 1);
 
-        if (level != null && (this.getHotFuel() > 0 || this.getColdFuel() > 0))
+        if (level != null && level.players().stream().anyMatch(player -> player.distanceToSqr(this.pos.getX(), this.pos.getY(), this.pos.getZ()) < 400)
+        && (hotFuel > 0 || coldFuel > 0))
         {
-            List<Player> affectedPlayers = new ArrayList<>();
-
             // Represents the NBT list
-            ConcurrentHashMap<BlockPos, SpreadPath> pathList = this.getPathMap();
 
-            if (pathList.isEmpty())
+            if (paths.isEmpty())
             {
-                this.addPath(new SpreadPath(this.getBlockPos(), Direction.UP));
+                this.addPath(new SpreadPath(this.getBlockPos()));
             }
 
-            if (pathList.size() > 0)
-            {
                 // Create temporary list to add back to the NBT
-                ConcurrentHashMap<BlockPos, SpreadPath> newPaths = new ConcurrentHashMap<>();
+                HashMap<BlockPos, SpreadPath> newPaths = new HashMap<>();
 
                 /*
                  Partition all points into multiple lists (max of 19)
                 */
                 int index = 0;
                 // Size of each partition
-                int partSize = 350;
+                int partSize = 400;
                 // Number of partitions
-                int partitionCount = (int) Math.ceil(pathList.size() / (double) partSize);
+                int partitionCount = (int) Math.ceil(paths.size() / (double) partSize);
                 // Index of the last point being worked on this tick
-                int lastIndex = Math.min(pathList.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
+                int lastIndex = Math.min(paths.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
                 // Index of the first point being worked on this tick
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Iterates over the specified partition of the list of BlockPos
-                for (Map.Entry<BlockPos, SpreadPath> entry : pathList.entrySet())
+                for (Map.Entry<BlockPos, SpreadPath> entry : paths.entrySet())
                 {
-                    // Stop after we reach the maximum number of iterations for this partition
-                    if (index < firstIndex || index - firstIndex >= partSize)
-                    {
-                        index++;
-                        continue;
-                    }
 
-                    // Reset every 4 seconds
-                    if (this.ticksExisted % 80 == 0)
-                    {
-                        this.resetPaths();
-                        break;
-                    }
-
-                    SpreadPath spreadPath = entry.getValue();
-
-                    // Create detection box for PlayerEntities
-                    int x = spreadPath.getX();
-                    int y = spreadPath.getY();
-                    int z = spreadPath.getZ();
-                    AABB aabb = new AABB(x, y, z, x + 1, y + 1, z + 1);
-
-                    // Add players to affectedPlayers
-                    for(Player player : level.players())
-                    {
-                        if (aabb.intersects(player.getBoundingBox()))
-                        {
-                            affectedPlayers.add(player);
-                        }
-                    }
-
-                    index++;
-                    if (spreadPath.isFrozen) continue;
-
-                    // Check in all 6 directions
-                    for (Direction direction : Direction.values())
-                    {
-                        if (pathList.size() < 6000)
-                        {
-                            // Create new BlockPos with an offset of [direction] from [blockPos]
-                            SpreadPath testpos = spreadPath.offset(direction);
-
-                            if (testpos.withinDistance(pos, 20))
-                            {
-                                if (!newPaths.containsKey(testpos.getPos()) && !pathList.containsKey(testpos.getPos())
-                                        && !WorldHelper.canSeeSky(level, testpos.getPos())
-                                        && WorldHelper.canSpreadThrough(level, entry.getKey(), direction))
-                                {
-                                    newPaths.put(testpos.getPos(), testpos);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            this.resetPaths();
-                        }
-                    }
-                    spreadPath.isFrozen = true;
+                // Stop after we reach the maximum number of iterations for this partition
+                if (index - firstIndex > partSize)
+                {
+                    break;
                 }
-                // Add new positions
-                this.addPaths(newPaths);
-
-                if (!level.isClientSide && !affectedPlayers.isEmpty())
+                if (index < firstIndex)
                 {
-                    ConfigCache config = ConfigCache.getInstance();
+                    index++;
+                    continue;
+                }
 
-                    for (Player player : affectedPlayers)
+                index++;
+
+                BlockPos blockPos = entry.getKey();
+
+                int x = blockPos.getX();
+                int y = blockPos.getY();
+                int z = blockPos.getZ();
+
+                // Air Particles
+                if (level.isClientSide && this.getTileData().getBoolean("showRadius"))
+                {
+                    // Spawn particles if enabled
+                    if (Minecraft.getInstance().options.renderDebug)
                     {
-                        // Get the player's temperature
-                        double temp = player.hasEffect(ModEffects.INSULATION) ? player.getPersistentData().getDouble("preHearthTemp") :
-                                TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+                        level.addParticle(ParticleTypes.FLAME, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0);
+                    }
+                    else if (Math.random() < 0.016)
+                    {
+                        double xr = Math.random();
+                        double yr = Math.random();
+                        double zr = Math.random();
+                        double xm = Math.random() / 20 - 0.025;
+                        double zm = Math.random() / 20 - 0.025;
 
-                        if ((temp < config.minTemp && this.getHotFuel() > 0))
+                        level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), x + xr, y + yr, z + zr, xm, 0, zm);
+                    }
+                }
+
+                // Reset every 20 seconds
+                if (this.ticksExisted % 400 == 0)
+                {
+                    this.resetPaths();
+                    break;
+                }
+
+                // Add players to affectedPlayers
+                for (Player player : level.players())
+                {
+                    if (player.distanceToSqr(x, y, z) < 1)
+                    {
+                        MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
+                        boolean hasEffect = effect != null;
+
+                        if (!hasEffect || effect.getDuration() < 60)
                         {
+                            // Get the player's temperature
+                            double temp = hasEffect ? player.getPersistentData().getDouble("preHearthTemp") :
+                                    TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+
                             // Tell the hearth to use hot fuel
-                            shouldUseHotFuel = true;
-                        }
-                        if (temp > config.maxTemp && this.getColdFuel() > 0)
-                        {
+                            shouldUseHotFuel = shouldUseHotFuel || (temp < config.minTemp);
+
                             // Tell the hearth to use cold fuel
-                            shouldUseColdFuel = true;
-                        }
+                            shouldUseColdFuel = shouldUseColdFuel || (temp > config.maxTemp);
 
-                        if (shouldUseHotFuel || shouldUseColdFuel)
-                        {
-                            int effectLevel = Math.max(0, insulationLevel / 240 - 1);
-                            MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
-
-                            if (effect == null || effect.getDuration() < 90 || effect.getAmplifier() != effectLevel)
+                            if (shouldUseHotFuel || shouldUseColdFuel)
                             {
+                                int effectLevel = Math.max(0, insulationLevel / (INSULATION_TIME / 10) - 1);
                                 player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false));
                             }
                         }
                     }
                 }
+
+                SpreadPath spreadPath = entry.getValue();
+
+
+                if (spreadPath.isFrozen)
+                {
+                    continue;
+                }
+
+                // Get the chunk at this position
+                Pair<Integer, Integer> chunkPos = Pair.of(x >> 4, z >> 4);
+
+                LevelChunk chunk;
+
+                if (chunkPos.getFirst().equals(workingCoords.getFirst())
+                && chunkPos.getSecond().equals(workingCoords.getSecond()))
+                {
+                    chunk = workingChunk;
+                }
+                else
+                {
+                    workingChunk = chunk = loadedChunks.get(chunkPos);
+                    workingCoords = chunkPos;
+                }
+
+                if (chunk == null)
+                {
+                    loadedChunks.put(chunkPos, chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4));
+                    workingChunk = chunk;
+                }
+                if (chunk == null) continue;
+
+                // Try to spread to new blocks
+                if (paths.size() < MAX_PATHS && spreadPath.withinDistance(pos, MAX_DISTANCE)
+                && !WorldHelper.canSeeSky(level, spreadPath.getPos()))
+                {
+                    for (Direction direction : Direction.values())
+                    {
+                        SpreadPath tryPath = spreadPath.offset(direction);
+                        BlockPos tryPos = tryPath.getPos();
+
+                        if (!paths.containsKey(tryPos) && WorldHelper.canSpreadThrough(chunk, level, spreadPath.getPos(), tryPath.origin))
+                        {
+                            newPaths.put(tryPos, tryPath);
+                        }
+                    }
+                }
+                spreadPath.isFrozen = true;
             }
+            // Add new positions
+            paths.putAll(newPaths);
 
             // Drain fuel
             if (!level.isClientSide && this.ticksExisted % 80 == 0)
             {
                 if (shouldUseColdFuel)
                 {
-                    this.setColdFuel(this.getColdFuel() - 1);
+                    this.setColdFuel(coldFuel - 1);
                 }
                 if (shouldUseHotFuel)
                 {
-                    this.setHotFuel(this.getHotFuel() - 1);
+                    this.setHotFuel(hotFuel - 1);
                 }
 
                 shouldUseColdFuel = false;
@@ -270,28 +308,32 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
 
         // Input fuel types
-        if (getItemFuel(this.getItemInSlot(0)) != 0)
+        if (this.ticksExisted % 20 == 0)
         {
-            ItemStack fuel = this.getItemInSlot(0);
-            int amount = getItemFuel(this.getItemInSlot(0));
-            if ((amount > 0 ? this.getHotFuel() : this.getColdFuel()) <= MAX_FUEL - Math.abs(amount) * 0.75)
+            this.hasFuelItem = !getItem(0).isEmpty();
+        }
+        if (this.hasFuelItem)
+        {
+            ItemStack fuelItem = this.getItem(0);
+            int fuel = getItemFuel(fuelItem);
+            if (fuel != 0)
             {
-                if (fuel.hasContainerItem())
+                if ((fuel > 0 ? hotFuel : coldFuel) <= MAX_FUEL - Math.abs(fuel) * 0.75)
                 {
-                    if (fuel.getCount() == 1)
+                    if (fuelItem.hasContainerItem())
                     {
-                        this.setItemInSlot(0, fuel.getContainerItem());
+                        if (fuelItem.getCount() == 1)
+                        {
+                            this.setItem(0, fuelItem.getContainerItem());
+                        }
                     }
+                    else fuelItem.shrink(1);
+                    this.addFuel(fuel);
                 }
-                else this.getItemInSlot(0).shrink(1);
-                this.addFuel(amount);
             }
         }
 
         // Particles
-        int coldFuel = this.getColdFuel();
-        int hotFuel = this.getHotFuel();
-
         if (Math.random() < coldFuel / 3000d)
         {
             double d0 = pos.getX() + 0.5d;
@@ -313,37 +355,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             SimpleParticleType particle = Math.random() < 0.5 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE;
             level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
         }
-
-        // Air Particles
-        if (level.isClientSide && this.getTileData().getBoolean("showRadius"))
-        {
-            // Spawn particles if enabled
-            for (BlockPos blockPos : this.getPathMap().keySet())
-            {
-                if (Minecraft.getInstance().options.renderDebug)
-                {
-                    if (this.ticksExisted % 5 == 0)
-                        level.addParticle(ParticleTypes.FLAME, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0, 0);
-                }
-                else if (Math.random() < 0.016)
-                {
-                    double xr = Math.random();
-                    double yr = Math.random();
-                    double zr = Math.random();
-                    double xm = Math.random() / 20 - 0.025;
-                    double zm = Math.random() / 20 - 0.025;
-
-                    level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), blockPos.getX() + xr, blockPos.getY() + yr, blockPos.getZ() + zr, xm, 0, zm);
-                }
-            }
-        }
     }
 
     public void resetPaths()
     {
-        ConcurrentHashMap<BlockPos, SpreadPath> map = new ConcurrentHashMap<>();
-        map.put(pos, new SpreadPath(pos));
-        this.setPathMap(map);
+        Map<BlockPos, SpreadPath> newlist = new HashMap<>();
+        newlist.put(pos, new SpreadPath(pos));
+        this.replacePaths(newlist);
     }
 
     public static int getItemFuel(ItemStack item)
@@ -358,28 +376,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             }
         }
         return 0;
-    }
-
-    public ItemStack getItemInSlot(int index)
-    {
-        AtomicReference<ItemStack> stack = new AtomicReference<>(ItemStack.EMPTY);
-        this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability ->
-        {
-            stack.set(capability.getStackInSlot(index));
-        });
-        return stack.get();
-    }
-
-    public void setItemInSlot(int index, ItemStack stack)
-    {
-        this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability ->
-        {
-            if (stack != null && stack != capability.getStackInSlot(index))
-            {
-                capability.extractItem(index, capability.getStackInSlot(index).getCount(), false);
-            }
-            capability.insertItem(index, stack, false);
-        });
     }
 
     public int getHotFuel()
@@ -450,7 +446,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     @Override
     public int getContainerSize()
     {
-        return slots;
+        return SLOT_COUNT;
     }
 
     @Override
@@ -476,40 +472,25 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         tag.putInt("hotFuel", this.getHotFuel());
     }
 
-    ConcurrentHashMap<BlockPos, SpreadPath> paths = new ConcurrentHashMap<>();
-
-    @Nonnull
-    @Override
-    public ConcurrentHashMap<BlockPos, SpreadPath> getPathMap()
-    {
-        return paths;
-    }
-
-    @Override
-    public void setPathMap(ConcurrentHashMap<BlockPos, SpreadPath> map)
+    public void replacePaths(Map<BlockPos, SpreadPath> newPaths)
     {
         this.paths.clear();
-        this.paths.putAll(map);
+        this.addPaths(newPaths);
     }
 
-    @Override
-    public void addPath(SpreadPath pos) {
-        paths.put(pos.getPos(), pos);
+    public void addPath(SpreadPath path) {
+        paths.putIfAbsent(path.getPos(), path);
     }
 
-    @Override
-    public void addPaths(ConcurrentHashMap<BlockPos, SpreadPath> map)
+    public void addPath(BlockPos pos, SpreadPath path) {
+        paths.putIfAbsent(pos, path);
+    }
+
+    public void addPaths(Map<BlockPos, SpreadPath> newPaths)
     {
-        paths.putAll(map);
-    }
-
-    @Override
-    public void remove(SpreadPath pos) {
-        paths.remove(pos.getPos());
-    }
-
-    @Override
-    public void clear() {
-        paths.clear();
+        for (Map.Entry<BlockPos, SpreadPath> entry : newPaths.entrySet())
+        {
+            this.addPath(entry.getKey(), entry.getValue());
+        }
     }
 }
