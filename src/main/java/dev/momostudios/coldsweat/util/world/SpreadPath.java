@@ -69,6 +69,11 @@ public class SpreadPath
         return new SpreadPath(this.x + dir.getStepX(), this.y + dir.getStepY(), this.z + dir.getStepZ(), dir, this.step + 1);
     }
 
+    public SpreadPath offset(Direction dir, int steps)
+    {
+        return new SpreadPath(this.x + dir.getStepX() * steps, this.y + dir.getStepY() * steps, this.z + dir.getStepZ() * steps, dir, this.step + steps);
+    }
+
     public SpreadPath offset(int x, int y, int z)
     {
         return new SpreadPath(this.x + x, this.y + y, this.z + z, this.origin, this.step + 1);
@@ -89,5 +94,18 @@ public class SpreadPath
         double d2 = (double)this.getY() + d0 - y;
         double d3 = (double)this.getZ() + d0 - z;
         return d1 * d1 + d2 * d2 + d3 * d3;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SpreadPath that = (SpreadPath) o;
+
+        if (x != that.x) return false;
+        if (y != that.y) return false;
+        return z == that.z;
     }
 }
