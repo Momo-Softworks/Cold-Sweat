@@ -11,7 +11,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.PalettedContainer;
@@ -21,8 +20,6 @@ import java.util.*;
 
 public class BlockTempModifier extends TempModifier
 {
-    private static final Map<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
-
     public BlockTempModifier() {}
 
     @Override
@@ -30,7 +27,6 @@ public class BlockTempModifier extends TempModifier
     {
         double totalTemp = 0;
         Map<Pair<Integer, Integer>, LevelChunk> chunkMap = new HashMap<>();
-        ArrayDeque<Pair<Integer, Integer>> chunkPositions = new ArrayDeque<>(30);
         Level level = player.level;
 
         for (int x1 = -7; x1 < 14; x1++)
@@ -39,7 +35,7 @@ public class BlockTempModifier extends TempModifier
             {
                 Pair<Integer, Integer> chunkPos = Pair.of((player.blockPosition().getX() + x1) >> 4, (player.blockPosition().getZ() + z1) >> 4);
                 LevelChunk chunk;
-                if (chunkPositions.contains(chunkPos))
+                if (chunkMap.containsKey(chunkPos))
                 {
                     chunk = chunkMap.get(chunkPos);
                 }
@@ -49,7 +45,6 @@ public class BlockTempModifier extends TempModifier
                     if (chunk == null) continue;
 
                     chunkMap.put(chunkPos, chunk);
-                    chunkPositions.add(chunkPos);
                 }
 
                 for (int y1 = -7; y1 < 14; y1++)
@@ -65,16 +60,7 @@ public class BlockTempModifier extends TempModifier
 
                         if (state.isAir()) continue;
 
-                        BlockEffect be;
-                        if (!MAPPED_BLOCKS.keySet().contains(state.getBlock()))
-                        {
-                            be = BlockEffectRegistry.getRegister().getEntryFor(state);
-                            MAPPED_BLOCKS.put(state.getBlock(), be);
-                        }
-                        else
-                        {
-                            be = MAPPED_BLOCKS.get(state.getBlock());
-                        }
+                        BlockEffect be = BlockEffectRegistry.getRegister().getEntryFor(state);
 
                         if (be == null) continue;
 
