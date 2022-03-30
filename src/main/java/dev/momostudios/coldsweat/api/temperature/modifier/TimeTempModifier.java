@@ -15,8 +15,13 @@ import net.minecraftforge.common.BiomeDictionary;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraftforge.fml.loading.FMLLoader;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TimeTempModifier extends TempModifier
 {
+    Map<Biome, ResourceKey<Biome>> biomeKeys = new HashMap<>();
+
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
@@ -42,10 +47,13 @@ public class TimeTempModifier extends TempModifier
                         biome = biomeManager.getBiome(blockPos).value();
                     }
 
-                    ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
+                    ResourceKey<Biome> key = biomeKeys.get(biome);
+
+                    if (key == null)
+                        key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
 
                     if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
-                            BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
+                        BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                     {
                         timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
                     }
@@ -57,7 +65,10 @@ public class TimeTempModifier extends TempModifier
 
                 return temp.add(timeTemp / 200);
             }
-            catch (Exception e) { return temp; }
+            catch (Exception e)
+            {
+                return temp;
+            }
         }
         else return temp;
     }
