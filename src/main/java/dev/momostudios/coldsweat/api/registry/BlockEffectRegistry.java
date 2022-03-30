@@ -1,44 +1,46 @@
 package dev.momostudios.coldsweat.api.registry;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BlockEffectRegistry
 {
-    static BlockEffectRegistry register = new BlockEffectRegistry();
-    static ArrayDeque<BlockEffect> entries = new ArrayDeque<>(64);
+    private static final Map<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
+
+    static BlockEffectRegistry REGISTER = new BlockEffectRegistry();
 
     public static BlockEffectRegistry getRegister()
     {
-        return register;
-    }
-
-    public ArrayDeque<BlockEffect> getEntries()
-    {
-        return entries;
+        return REGISTER;
     }
 
     public void register(BlockEffect blockEffect)
     {
-        entries.add(blockEffect);
+        blockEffect.validBlocks.forEach(block ->
+        {
+            if (MAPPED_BLOCKS.containsKey(block))
+            {
+                ColdSweat.LOGGER.error("Block {} already has a registered BlockEffect ({})! Skipping BlockEffect {}...",
+                                        block.getName().getString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockEffect.getClass().getSimpleName());
+            }
+            MAPPED_BLOCKS.putIfAbsent(block, blockEffect);
+        });
     }
 
     public static void flush()
     {
-        entries.clear();
+        MAPPED_BLOCKS.clear();
     }
 
     @Nullable
     public BlockEffect getEntryFor(BlockState block)
     {
-        for (BlockEffect blockEffect : getEntries())
-        {
-            if (blockEffect.hasBlock(block))
-                return blockEffect;
-        }
-        return null;
+        return MAPPED_BLOCKS.get(block.getBlock());
     }
 }

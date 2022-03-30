@@ -7,33 +7,25 @@ import java.util.Map;
 
 public class TempModifierRegistry
 {
-    static TempModifierRegistry register = new TempModifierRegistry();
-    static Map<String, TempModifier> entries = new HashMap<>();
+    static TempModifierRegistry REGISTRY = new TempModifierRegistry();
+    static Map<String, TempModifier> TEMP_MODIFIERS = new HashMap<>();
 
     public static TempModifierRegistry getRegister() {
-        return register;
+        return REGISTRY;
     }
 
     public final Map<String, TempModifier> getEntries() {
-        return entries;
+        return TEMP_MODIFIERS;
     }
 
     public void register(TempModifier modifier)
     {
-        entries.put(modifier.getID(), modifier);
-    }
-
-    /**
-     * This should rarely be used, as some mods might rely on TempModifiers being registered.
-     */
-    public void unregister(String id)
-    {
-        entries.remove(id);
+        TEMP_MODIFIERS.put(modifier.getID(), modifier);
     }
 
     public static void flush()
     {
-        entries.clear();
+        TEMP_MODIFIERS.clear();
     }
 
     public TempModifier getEntryFor(String id) {
