@@ -19,6 +19,7 @@
   "item.minecraft.potion.effect.ice_resistance": "냉기 저항의 물약",
   "item.minecraft.lingering_potion.effect.ice_resistance": "잔류형 냉기 저항의 물약",
   "item.minecraft.splash_potion.effect.ice_resistance": "투척용 냉기 저항의 물약",
+  "item.minecraft.tipped_arrow.effect.ice_resistance": "냉기 저항의 화살",		
 
   "container.cold_sweat.boiler":        "보일러",
   "container.cold_sweat.icebox":        "아이스박스",
