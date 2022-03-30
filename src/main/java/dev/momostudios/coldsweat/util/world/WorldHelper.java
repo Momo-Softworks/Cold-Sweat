@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -70,14 +71,18 @@ public class WorldHelper
 
     public static boolean canSeeSky(Level world, BlockPos pos)
     {
-        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        return canSeeSky(world.getChunk(pos.getX() >> 4, pos.getZ() >> 4), world, pos);
+    }
+
+    public static boolean canSeeSky(LevelChunk chunk, Level world, BlockPos pos)
+    {
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
 
         if (chunk != null)
         {
-            for (int i = 1; i < 255 - y; i++)
+            for (int i = 1; i < 319 - y; i++)
             {
                 BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
 
@@ -114,6 +119,24 @@ public class WorldHelper
             return true;
 
         return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
+    }
+
+    public static boolean canSpreadThrough(LevelChunk chunk, Level level, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    {
+        if (chunk != null)
+        {
+            PalettedContainer<BlockState> palette = chunk.getSection((pos.getY() >> 4) - chunk.getMinSection()).getStates();
+            BlockState state = palette.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+
+            if (state.isAir() || state.getCollisionShape(level, pos).isEmpty())
+                return true;
+
+            if (state.isFaceSturdy(level, pos, toDir))
+                return false;
+
+            return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
+        }
+        return false;
     }
 
     public static double distance(Vec3i pos1, Vec3i pos2)
@@ -200,5 +223,10 @@ public class WorldHelper
         int y = blockpos.getY();
         int z = blockpos.getZ();
         return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
+    }
+
+    public static boolean isEvenPosition(BlockPos pos)
+    {
+        return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
     }
 }
