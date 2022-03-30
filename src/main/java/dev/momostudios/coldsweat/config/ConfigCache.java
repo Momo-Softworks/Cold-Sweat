@@ -13,8 +13,8 @@ public class ConfigCache
     public boolean iceRes;
     public boolean damageScaling;
     public boolean showWorldTemp;
-    public int gracePeriodLength;
-    public boolean gracePeriodEnabled;
+    public int graceLength;
+    public boolean graceEnabled;
 
     public Map<String, List<? extends List<Object>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
     public ItemSettingsConfig itemSettingsReference = ItemSettingsConfig.INSTANCE;
@@ -48,7 +48,7 @@ public class ConfigCache
         iceRes = config.isIceResistanceEnabled();
         damageScaling = config.doDamageScaling();
         showWorldTemp = config.isWorldTempShowing();
-        gracePeriodLength = config.getGracePeriodLength();
-        gracePeriodEnabled = config.isGracePeriodEnabled();
+        graceLength = config.getGracePeriodLength();
+        graceEnabled = config.isGracePeriodEnabled();
     }
 }

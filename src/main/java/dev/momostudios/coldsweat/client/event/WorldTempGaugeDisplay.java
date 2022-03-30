@@ -41,7 +41,7 @@ public class WorldTempGaugeDisplay
             int scaleY = event.getWindow().getGuiScaledHeight();
 
             ITemperatureCap tempCap = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
-            //System.out.println(tempCap.get(Temperature.Types.HOTTEST));
+
             double min = ConfigCache.getInstance().minTemp + tempCap.get(Temperature.Types.COLDEST);
             double max = ConfigCache.getInstance().maxTemp + tempCap.get(Temperature.Types.HOTTEST);
             double mid = (ConfigCache.getInstance().minTemp + ConfigCache.getInstance().maxTemp) / 2;
@@ -84,7 +84,7 @@ public class WorldTempGaugeDisplay
 
             RenderSystem.setShaderTexture(0, gaugeTexture);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94, scaleY - 19, 0, 0, 25, 16, 25, 16);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94 + CCS.tempGaugeX(), scaleY - 19 + CCS.tempGaugeY(), 0, 0, 25, 16, 25, 16);
 
             RenderSystem.disableBlend();
 
@@ -104,7 +104,7 @@ public class WorldTempGaugeDisplay
             // Render text
             int blendedTemp = (int) CSMath.blend(prevClientTemp, clientTemp, Minecraft.getInstance().getFrameTime(), 0, 1);
             Minecraft.getInstance().font.draw(event.getMatrixStack(), "" + (blendedTemp + CCS.tempOffset()) + "",
-                    (scaleX / 2f) + 107 + (Integer.toString(blendedTemp + CCS.tempOffset()).length() * -3), scaleY - bob, color);
+                    (scaleX / 2f) + 107 + (Integer.toString(blendedTemp + CCS.tempOffset()).length() * -3) + CCS.tempGaugeX(), scaleY - bob + CCS.tempGaugeY(), color);
         }
     }
 

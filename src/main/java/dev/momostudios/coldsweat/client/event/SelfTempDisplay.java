@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
@@ -14,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -143,12 +141,12 @@ public class SelfTempDisplay
             if (transitionProgress < blendTime)
             {
                 RenderSystem.setShaderTexture(0, lastIcon);
-                GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 53 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+                GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.tempIconX(), scaleY - 53 - threatOffset + CCS.tempIconY(), 0, 0, 10, 10, 10, 10);
                 RenderSystem.enableBlend();
                 RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + transitionProgress) / blendTime);
             }
             RenderSystem.setShaderTexture(0, icon);
-            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.steveHeadX(), scaleY - 53 - threatOffset + CCS.steveHeadY(), 0, 0, 10, 10, 10, 10);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.tempIconX(), scaleY - 53 - threatOffset + CCS.tempIconY(), 0, 0, 10, 10, 10, 10);
             RenderSystem.setShaderColor(1, 1, 1, 1);
 
 
@@ -159,8 +157,8 @@ public class SelfTempDisplay
             PoseStack matrixStack = event.getMatrixStack();
 
             String s = "" + (int) Math.ceil(Math.min(Math.abs(playerTemp), 100));
-            float x = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempGaugeX();
-            float y = scaledHeight - 31f - 10f + CCS.tempGaugeY();
+            float x = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempReadoutX();
+            float y = scaledHeight - 31f - 10f + CCS.tempReadoutY();
             if (!CSMath.isBetween(playerTemp, -100, 100))
             {
                 fontRenderer.draw(matrixStack, s, x + 2f, y, colorBG2);
