@@ -47,8 +47,8 @@ public class ColdSweatPacketHandler
         buffer.writeBoolean(config.iceRes);
         buffer.writeBoolean(config.damageScaling);
         buffer.writeBoolean(config.showWorldTemp);
-        buffer.writeInt(config.gracePeriodLength);
-        buffer.writeBoolean(config.gracePeriodEnabled);
+        buffer.writeInt(config.graceLength);
+        buffer.writeBoolean(config.graceEnabled);
     }
 
     public static ConfigCache readConfigCacheFromBuffer(FriendlyByteBuf buffer)
@@ -62,8 +62,8 @@ public class ColdSweatPacketHandler
         config.iceRes = buffer.readBoolean();
         config.damageScaling = buffer.readBoolean();
         config.showWorldTemp = buffer.readBoolean();
-        config.gracePeriodLength = buffer.readInt();
-        config.gracePeriodEnabled = buffer.readBoolean();
+        config.graceLength = buffer.readInt();
+        config.graceEnabled = buffer.readBoolean();
         return config;
     }
 

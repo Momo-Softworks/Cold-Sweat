@@ -14,12 +14,12 @@ public class GracePeriod
     @SubscribeEvent
     public static void onSpawn(EntityJoinWorldEvent event)
     {
-        if (event.getEntity() instanceof Player && ConfigCache.getInstance().gracePeriodEnabled)
+        if (event.getEntity() instanceof Player && ConfigCache.getInstance().graceEnabled)
         {
             if (!event.getWorld().isClientSide && !event.getEntity().getPersistentData().getBoolean("givenGracePeriod"))
             {
                 event.getEntity().getPersistentData().putBoolean("givenGracePeriod", true);
-                ((Player) event.getEntity()).addEffect(new MobEffectInstance(ModEffects.GRACE, ConfigCache.getInstance().gracePeriodLength, 0, false, false));
+                ((Player) event.getEntity()).addEffect(new MobEffectInstance(ModEffects.GRACE, ConfigCache.getInstance().graceLength, 0, false, false));
             }
         }
     }
