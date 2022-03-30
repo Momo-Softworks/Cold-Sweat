@@ -52,35 +52,41 @@ public class ConfigPageTwo extends ConfigPageBase
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
         // Enable Grace Period
-        this.addButton("grace_toggle", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": " + (configCache.gracePeriodEnabled ? ON : OFF),
+        this.addButton("grace_toggle", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": " + (configCache.graceEnabled ? ON : OFF),
                 button ->
                 {
-                    configCache.gracePeriodEnabled = !configCache.gracePeriodEnabled;
+                    configCache.graceEnabled = !configCache.graceEnabled;
 
                     button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": "
-                            + (configCache.gracePeriodEnabled ? ON : OFF)));
+                            + (configCache.graceEnabled ? ON : OFF)));
                 },
-                true, true);
+                true, true, "Gives the player a brief time of immunity to temperature when spawning in the world.");
 
         // Grace Period Length
-        this.addInput("grace_length", Side.LEFT, new TranslatableComponent("cold_sweat.config.grace_period_length.name"),
-                value -> configCache.gracePeriodLength = value.intValue(),
-                input -> input.setValue(configCache.gracePeriodLength + ""),
-                true);
+        this.addDecimalInput("grace_length", Side.LEFT, new TranslatableComponent("cold_sweat.config.grace_period_length.name"),
+                value -> configCache.graceLength = value.intValue(),
+                input -> input.setValue(configCache.graceLength + ""),
+                true, true, "The duration of the Grace Period, in ticks.", "§71 tick = 1/20th of a second§r");
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temperature_icon.name"),
-                amount -> clientConfig.setSteveHeadX(clientConfig.steveHeadX() + amount),
-                amount -> clientConfig.setSteveHeadY(clientConfig.steveHeadY() + amount),
-                () -> { clientConfig.setSteveHeadX(0); clientConfig.setSteveHeadY(0); },
-                false);
+                amount -> clientConfig.setTempIconX(clientConfig.tempIconX() + amount),
+                amount -> clientConfig.setTempIconY(clientConfig.tempIconY() + amount),
+                () -> { clientConfig.setTempIconX(0); clientConfig.setTempIconY(0); },
+                false, false, "The position of the body temperature icon on the screen.");
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temperature_readout.name"),
+                amount -> clientConfig.setTempReadoutX(clientConfig.tempReadoutX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                amount -> clientConfig.setTempReadoutY(clientConfig.tempReadoutY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                () -> { clientConfig.setTempReadoutX(0); clientConfig.setTempReadoutY(0); },
+                false, false, "The position of the body temperature readout (number) on the screen.");
+
+        this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temperature_gauge.name"),
                 amount -> clientConfig.setTempGaugeX(clientConfig.tempGaugeX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 amount -> clientConfig.setTempGaugeY(clientConfig.tempGaugeY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 () -> { clientConfig.setTempGaugeX(0); clientConfig.setTempGaugeY(0); },
-                false);
+                false, false, "The position of the world temperature gauge on the screen.");
 
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.custom_hotbar.name").getString() + ": " + (clientConfig.customHotbar() ? ON : OFF),
@@ -90,7 +96,7 @@ public class ConfigPageTwo extends ConfigPageBase
 
                     button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.custom_hotbar.name").getString() + ": " + (clientConfig.customHotbar() ? ON : OFF)));
                 },
-                false, false);
+                false, false, "Whether or not to use Cold Sweat's custom hotbar layout (disable this if it is clashing with other mods).");
 
         // Icon Bobbing
         this.addButton("icon_bobbing", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " + (clientConfig.iconBobbing() ? ON : OFF),
@@ -100,7 +106,7 @@ public class ConfigPageTwo extends ConfigPageBase
 
                     button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " + (clientConfig.iconBobbing() ? ON : OFF)));
                 },
-                false, false);
+                false, false, "Whether or not elements of Cold Sweat's UI should \"jiggle\" in extreme temperatures.");
 
         this.addLabel("shift_label", Side.RIGHT, new TranslatableComponent("cold_sweat.config.offset_shift.name").getString(), 11908533);
     }

@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -10,20 +9,17 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import net.minecraft.util.FormattedCharSequence;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class ConfigPageBase extends Screen
 {
@@ -31,7 +27,8 @@ public abstract class ConfigPageBase extends Screen
     private final ConfigCache configCache;
 
     public Map<String, List<Widget>> elementBatches = new HashMap<>();
-    public Map<Pair<String, Boolean>, Pair<Integer, Integer>> labels = new HashMap<>();
+    public List<ConfigLabel> labels = new ArrayList<>();
+    public Map<String, List<FormattedText>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
     protected int leftSideLength = 0;
@@ -80,7 +77,7 @@ public abstract class ConfigPageBase extends Screen
     {
         int labelX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
         int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
-        ConfigLabel label = new ConfigLabel(text, labelX, labelY, color);
+        ConfigLabel label = new ConfigLabel(id, text, labelX, labelY, color);
 
         this.addRenderableWidget(label);
 
@@ -92,7 +89,8 @@ public abstract class ConfigPageBase extends Screen
             this.rightSideLength += font.lineHeight + 4;
     }
 
-    protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick, boolean requireOP, boolean setsCustomDifficulty)
+    protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick,
+                             boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
     {
         String label = dynamicLabel.get();
 
@@ -125,9 +123,12 @@ public abstract class ConfigPageBase extends Screen
             this.leftSideLength += ConfigScreen.OPTION_SIZE;
         else
             this.rightSideLength += ConfigScreen.OPTION_SIZE;
+
+        this.setTooltip(id, tooltip);
     }
 
-    protected void addInput(String id, Side side, Component label, Consumer<Double> writeValue, Consumer<EditBox> readValue, boolean requireOP)
+    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> writeValue, Consumer<EditBox> readValue,
+                                   boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
         int inputX = side == Side.LEFT ? -86 : 147;
@@ -141,19 +142,34 @@ public abstract class ConfigPageBase extends Screen
             public void insertText(String text)
             {
                 super.insertText(text);
-                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+                CSMath.tryCatch(() ->
+                {
+                    if (setsCustomDifficulty)
+                        configCache.difficulty = 4;
+                    writeValue.accept(Double.parseDouble(this.getValue()));
+                });
             }
             @Override
             public void deleteWords(int i)
             {
                 super.deleteWords(i);
-                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+                CSMath.tryCatch(() ->
+                {
+                    if (setsCustomDifficulty)
+                        configCache.difficulty = 4;
+                    writeValue.accept(Double.parseDouble(this.getValue()));
+                });
             }
             @Override
             public void deleteChars(int i)
             {
                 super.deleteChars(i);
-                CSMath.tryCatch(() -> writeValue.accept(Double.parseDouble(this.getValue())));
+                CSMath.tryCatch(() ->
+                {
+                    if (setsCustomDifficulty)
+                        configCache.difficulty = 4;
+                    writeValue.accept(Double.parseDouble(this.getValue()));
+                });
             }
         };
         textBox.setEditable(shouldBeActive);
@@ -162,7 +178,8 @@ public abstract class ConfigPageBase extends Screen
 
         this.addRenderableWidget(textBox);
 
-        this.labels.put(Pair.of(label.getString(), textBox.active), Pair.of(this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY));
+        this.labels.add(new ConfigLabel(id, label.getString(), this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY, shouldBeActive ? 16777215 : 8421504));
+        this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(textBox));
 
         if (side == Side.LEFT)
@@ -171,7 +188,8 @@ public abstract class ConfigPageBase extends Screen
             this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
     }
 
-    protected void addDirectionPanel(String id, Side side, TranslatableComponent label, Consumer<Integer> addX, Consumer<Integer> addY, Runnable reset, boolean requireOP)
+    protected void addDirectionPanel(String id, Side side, TranslatableComponent label, Consumer<Integer> addX, Consumer<Integer> addY, Runnable reset,
+                                     boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
     {
         int xOffset = side == Side.LEFT ? -96 : 140;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
@@ -224,7 +242,8 @@ public abstract class ConfigPageBase extends Screen
         resetButton.active = shouldBeActive;
         this.addRenderableWidget(resetButton);
 
-        this.labels.put(Pair.of(label.getString(), shouldBeActive), Pair.of(this.width / 2 + (side == Side.LEFT ? -140 : 52), this.height / 4 - 1 + yOffset));
+        this.labels.add(new ConfigLabel(id, label.getString(), this.width / 2 + 52, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton));
 
         // Move down
@@ -263,37 +282,98 @@ public abstract class ConfigPageBase extends Screen
     }
 
     @Override
-    public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
+        this.renderBackground(poseStack);
 
-        drawCenteredString(matrixStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
+        drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        drawString(matrixStack, this.font, new TextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
+        drawString(poseStack, this.font, new TextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
 
         // Section 1 Title
-        drawString(matrixStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
+        drawString(poseStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
 
+        // Section 1 Divider
         RenderSystem.setShaderTexture(0, divider);
-        this.blit(matrixStack, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 155);
+        this.blit(poseStack, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 155);
 
         if (this.sectionTwoTitle() != null)
         {
             // Section 2 Title
-            drawString(matrixStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
+            drawString(poseStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
 
+            // Section 2 Divider
             RenderSystem.setShaderTexture(0, divider);
-            this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
+            this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
-        // Render labels for everything else
-        for (Map.Entry<Pair<String, Boolean>, Pair<Integer, Integer>> entry : this.labels.entrySet())
+        // Render labels for everything
+        for (ConfigLabel label : this.labels)
         {
-            drawString(matrixStack, this.font, entry.getKey().getFirst(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getKey().getSecond() ? 16777215 : 8421504);
+            drawString(poseStack, this.font, label.text, label.x, label.y, label.color);
         }
 
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
+
+        // Render tooltip
+        for (Map.Entry<String, List<Widget>> widget : this.elementBatches.entrySet())
+        {
+            int x;
+            int y;
+            int maxX;
+            int maxY;
+            ConfigLabel label = null;
+            if (widget.getValue().size() == 1 && widget.getValue().get(0) instanceof Button button)
+            {
+                x = button.x;
+                y = button.y;
+                maxX = x + button.getWidth();
+                maxY = y + button.getHeight();
+                String id = widget.getKey();
+
+                if (mouseX >= x && mouseX <= maxX - 1
+                &&  mouseY >= y && mouseY <= maxY - 1)
+                {
+                    List<FormattedText> tooltipList = this.tooltips.get(id);
+                    if (tooltipList != null && !tooltipList.isEmpty())
+                    {
+                        List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                        this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (ConfigLabel label1 : this.labels)
+                {
+                    if (label1.id.equals(widget.getKey()))
+                    {
+                        label = label1;
+                        break;
+                    }
+                }
+                if (label == null) continue;
+
+                x = label.x;
+                y = label.y;
+                maxX = label.x + font.width(label.text);
+                maxY = label.y + font.lineHeight;
+
+                if (mouseX >= x - 2 && mouseX <= maxX + 2
+                &&  mouseY >= y - 5 && mouseY <= maxY + 5)
+                {
+                    List<FormattedText> tooltipList = this.tooltips.get(label.id);
+                    if (tooltipList != null && !tooltipList.isEmpty())
+                    {
+                        List<Component> tooltip = this.tooltips.get(label.id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                        this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -328,5 +408,15 @@ public abstract class ConfigPageBase extends Screen
     public List<Widget> getElementBatch(String id)
     {
         return this.elementBatches.get(id);
+    }
+
+    protected void setTooltip(String id, String[] tooltip)
+    {
+        List<FormattedText> tooltipList = new ArrayList<>();
+        for (String string : tooltip)
+        {
+            tooltipList.addAll(font.getSplitter().splitLines(string, 300, Style.EMPTY));
+        }
+        this.tooltips.put(id, tooltipList);
     }
 }

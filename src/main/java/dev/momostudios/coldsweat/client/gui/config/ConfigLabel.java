@@ -10,21 +10,21 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 
 public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
 {
-    private String text;
-    private int color;
+    public final String id;
+
+    public String text;
+    public int color;
     public int x;
     public int y;
 
-    public ConfigLabel(String text, int x, int y)
+    public ConfigLabel(String id, String text, int x, int y)
     {
-        this.text = text;
-        this.x = x;
-        this.y = y;
-        this.color = 16777215;
+        this(id, text, x, y, 16777215);
     }
 
-    public ConfigLabel(String text, int x, int y, int color)
+    public ConfigLabel(String id, String text, int x, int y, int color)
     {
+        this.id = id;
         this.text = text;
         this.x = x;
         this.y = y;
