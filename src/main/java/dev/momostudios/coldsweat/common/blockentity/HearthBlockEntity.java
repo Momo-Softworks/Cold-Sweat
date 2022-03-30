@@ -137,38 +137,38 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (level != null && level.players().stream().anyMatch(player -> player.distanceToSqr(this.pos.getX(), this.pos.getY(), this.pos.getZ()) < 400)
         && (hotFuel > 0 || coldFuel > 0))
         {
-            // Represents the NBT list
+            boolean showParticles = level.isClientSide && this.getTileData().getBoolean("showRadius");
 
             if (paths.isEmpty())
             {
                 this.addPath(new SpreadPath(this.getBlockPos()));
             }
 
-                // Create temporary list to add back to the NBT
-                HashMap<BlockPos, SpreadPath> newPaths = new HashMap<>();
+            // Create temporary list to add back to the NBT
+            HashMap<BlockPos, SpreadPath> newPaths = new HashMap<>();
 
-                /*
-                 Partition all points into multiple lists (max of 19)
-                */
-                int index = 0;
-                // Size of each partition
-                int partSize = 400;
-                // Number of partitions
-                int partitionCount = (int) Math.ceil(paths.size() / (double) partSize);
-                // Index of the last point being worked on this tick
-                int lastIndex = Math.min(paths.size(), partSize * (this.ticksExisted % partitionCount + 1) + 1);
-                // Index of the first point being worked on this tick
-                int firstIndex = Math.max(0, lastIndex - partSize);
+            /*
+             Partition all points into multiple lists (max of 19)
+            */
+            int index = 0;
+            // Size of each partition
+            int partSize = 400;
+            // Number of partitions
+            int partCount = (int) Math.ceil(paths.size() / (double) partSize);
+            // Index of the last point being worked on this tick
+            int lastIndex = Math.min(paths.size(), partSize * (this.ticksExisted % partCount + 1) + 1);
+            // Index of the first point being worked on this tick
+            int firstIndex = Math.max(0, lastIndex - partSize);
 
-                // Iterates over the specified partition of the list of BlockPos
-                for (Map.Entry<BlockPos, SpreadPath> entry : paths.entrySet())
-                {
-
+            // Iterate over the specified partition of paths
+            for (Map.Entry<BlockPos, SpreadPath> entry : paths.entrySet())
+            {
                 // Stop after we reach the maximum number of iterations for this partition
                 if (index - firstIndex > partSize)
                 {
                     break;
                 }
+                // Skip until we reach the first index of this partition
                 if (index < firstIndex)
                 {
                     index++;
@@ -177,6 +177,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 index++;
 
+                // Reset every 20 seconds
+                if (this.ticksExisted % 400 == 0)
+                {
+                    this.resetPaths();
+                    break;
+                }
+
                 BlockPos blockPos = entry.getKey();
 
                 int x = blockPos.getX();
@@ -184,7 +191,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 int z = blockPos.getZ();
 
                 // Air Particles
-                if (level.isClientSide && this.getTileData().getBoolean("showRadius"))
+                if (showParticles)
                 {
                     // Spawn particles if enabled
                     if (Minecraft.getInstance().options.renderDebug)
@@ -203,14 +210,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     }
                 }
 
-                // Reset every 20 seconds
-                if (this.ticksExisted % 400 == 0)
-                {
-                    this.resetPaths();
-                    break;
-                }
-
-                // Add players to affectedPlayers
+                // Give insulation to players
                 for (Player player : level.players())
                 {
                     if (player.distanceToSqr(x, y, z) < 1)
@@ -240,7 +240,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 }
 
                 SpreadPath spreadPath = entry.getValue();
-
 
                 if (spreadPath.isFrozen)
                 {
@@ -272,7 +271,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 // Try to spread to new blocks
                 if (paths.size() < MAX_PATHS && spreadPath.withinDistance(pos, MAX_DISTANCE)
-                && !WorldHelper.canSeeSky(level, spreadPath.getPos()))
+                && !WorldHelper.canSeeSky(chunk, level, spreadPath.getPos()))
                 {
                     for (Direction direction : Direction.values())
                     {
