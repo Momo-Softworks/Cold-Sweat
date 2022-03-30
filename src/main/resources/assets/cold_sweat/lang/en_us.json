@@ -77,8 +77,9 @@
   "cold_sweat.config.rate_multiplier.name":         "Rate Modifier",
   "cold_sweat.config.require_thermometer.name":     "Require Thermometer",
   "cold_sweat.config.temp_offset.name":             "Temp. Offset",
-  "cold_sweat.config.temperature_icon.name":        "Icon Offset*",
-  "cold_sweat.config.temperature_readout.name":     "Readout Offset*",
+  "cold_sweat.config.temperature_icon.name":        "*Temp. Icon Offset",
+  "cold_sweat.config.temperature_readout.name":     "*Temp. Number Offset",
+  "cold_sweat.config.temperature_gauge.name":       "*World Temp. Offset",
   "cold_sweat.config.units.name":                   "Units",
 
   "commands.cold_sweat.temperature.set.self.result":  "Set your own temperature to",
