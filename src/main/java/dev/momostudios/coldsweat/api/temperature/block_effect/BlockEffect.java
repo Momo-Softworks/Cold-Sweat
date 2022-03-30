@@ -5,12 +5,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public abstract class BlockEffect
 {
-    List<Block> validBlocks = new ArrayList<>();
+    public HashSet<Block> validBlocks = new HashSet<>();
 
     /**
      * @param state is the {@link BlockState} of the block
