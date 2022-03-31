@@ -128,7 +128,7 @@ public class NBTHelper
     public static TempModifier TagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        TempModifier newModifier = TempModifierRegistry.getRegister().getEntryFor(modifierTag.getString("id"));
+        TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
 
         modifierTag.getAllKeys().forEach(key ->
         {

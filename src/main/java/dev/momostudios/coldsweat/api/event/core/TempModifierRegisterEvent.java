@@ -20,20 +20,12 @@ import net.minecraftforge.eventbus.api.Event;
 public class TempModifierRegisterEvent extends Event
 {
     /**
-     * @return the map of registered {@link TempModifier}s.
-     */
-    public final TempModifierRegistry getPool()
-    {
-        return TempModifierRegistry.getRegister();
-    }
-
-    /**
      * Adds a new {@link TempModifier} to the registry.
      *
      * @param modifier the {@link TempModifier} to add.
      */
     public void register(TempModifier modifier)
     {
-        this.getPool().register(modifier);
+        TempModifierRegistry.register(modifier);
     }
 }

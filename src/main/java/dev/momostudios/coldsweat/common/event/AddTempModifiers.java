@@ -39,7 +39,7 @@ public class AddTempModifiers
                 TempHelper.addModifier(player, new DepthTempModifier().tickRate(5), Temperature.Types.WORLD, false);
                 TempHelper.addModifier(player, new BlockTempModifier().tickRate(5), Temperature.Types.WORLD, false);
                 if (ModList.get().isLoaded("sereneseasons"))
-                    TempHelper.addModifier(player, TempModifierRegistry.getRegister().getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
+                    TempHelper.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
                 /*
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);

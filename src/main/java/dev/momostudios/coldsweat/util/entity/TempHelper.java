@@ -89,7 +89,7 @@ public class TempHelper
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 AtomicInteger duplicateCount = new AtomicInteger(0);
-                if (TempModifierRegistry.getRegister().getEntries().containsKey(event.getModifier().getID()))
+                if (TempModifierRegistry.getEntries().containsKey(event.getModifier().getID()))
                 {
                     CSMath.breakableForEach(cap.getModifiers(event.type), (mod, looper) ->
                     {

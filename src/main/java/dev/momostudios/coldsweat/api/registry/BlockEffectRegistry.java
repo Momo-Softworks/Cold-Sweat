@@ -11,25 +11,26 @@ import java.util.Map;
 
 public class BlockEffectRegistry
 {
-    private static final Map<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
+    public static final Map<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
 
-    static BlockEffectRegistry REGISTER = new BlockEffectRegistry();
-
-    public static BlockEffectRegistry getRegister()
+    public final Map<Block, BlockEffect> getEntries()
     {
-        return REGISTER;
+        return MAPPED_BLOCKS;
     }
 
-    public void register(BlockEffect blockEffect)
+    public static void register(BlockEffect blockEffect)
     {
         blockEffect.validBlocks.forEach(block ->
         {
             if (MAPPED_BLOCKS.containsKey(block))
             {
-                ColdSweat.LOGGER.error("Block {} already has a registered BlockEffect ({})! Skipping BlockEffect {}...",
+                ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockEffect ({})! Skipping BlockEffect {}...",
                                         block.getName().getString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockEffect.getClass().getSimpleName());
             }
-            MAPPED_BLOCKS.putIfAbsent(block, blockEffect);
+            else
+            {
+                MAPPED_BLOCKS.put(block, blockEffect);
+            }
         });
     }
 
@@ -39,7 +40,7 @@ public class BlockEffectRegistry
     }
 
     @Nullable
-    public BlockEffect getEntryFor(BlockState block)
+    public static BlockEffect getEntryFor(BlockState block)
     {
         return MAPPED_BLOCKS.get(block.getBlock());
     }

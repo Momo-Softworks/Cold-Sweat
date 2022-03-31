@@ -60,7 +60,7 @@ public class BlockTempModifier extends TempModifier
 
                         if (state.isAir()) continue;
 
-                        BlockEffect be = BlockEffectRegistry.getRegister().getEntryFor(state);
+                        BlockEffect be = BlockEffectRegistry.getEntryFor(state);
 
                         if (be == null) continue;
 

@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.api.event.core;
 
 import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
-import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -20,20 +19,12 @@ import net.minecraftforge.eventbus.api.Event;
 public class BlockEffectRegisterEvent extends Event
 {
     /**
-     * @return the map of registered {@link BlockEffect}s.
-     */
-    public final BlockEffectRegistry getPool()
-    {
-        return BlockEffectRegistry.getRegister();
-    }
-
-    /**
      * Adds a new {@link BlockEffect} to the registry.
      *
      * @param blockEffect The BlockEffect to add.
      */
     public void register(BlockEffect blockEffect)
     {
-        this.getPool().register(blockEffect);
+        BlockEffectRegistry.register(blockEffect);
     }
 }
