@@ -8,7 +8,9 @@ import dev.momostudios.coldsweat.api.temperature.block_effect.*;
 import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
@@ -17,7 +19,9 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -52,83 +56,54 @@ public class InitTempModifiers
         event.register(new LavaBlockEffect());
         event.register(new FurnaceBlockEffect());
         event.register(new CampfireBlockEffect());
-        event.register(new FireBlockEffect());
-        event.register(new IceBlockEffect());
         event.register(new IceboxBlockEffect());
         event.register(new BoilerBlockEffect());
-        event.register(new SoulFireBlockEffect());
         event.register(new SoulCampfireBlockEffect());
         event.register(new NetherPortalBlockEffect());
-        event.register(new MagmaBlockEffect());
 
         // Auto-generate BlockEffects from config
-        for (List<Object> effectBuilder : ColdSweatConfig.getInstance().getBlockEffects())
+        for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockEffects())
         {
             try
             {
                 // Check if required fields are present
                 if (!(effectBuilder.get(0) instanceof String)
-                ||  !(effectBuilder.get(1) instanceof Number)
-                ||  !(effectBuilder.get(2) instanceof Number))
+                ||  !(effectBuilder.get(1) instanceof Number configTemp)
+                ||  !(effectBuilder.get(2) instanceof Number configRange))
                 {
                     throw new Exception("Invalid BlockEffect format");
                 }
 
                 String[] blockIDs = ((String) effectBuilder.get(0)).split(",");
+                Block[] affectedBlocks = Arrays.stream(blockIDs).map(id -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id))).toArray(Block[]::new);
 
-                double temp;
-                try { temp = (double) effectBuilder.get(1); } catch (Exception e) { temp = (int) effectBuilder.get(1); }
-
-                double range;
-                try { range = (double) effectBuilder.get(2); } catch (Exception e) { range = (int) effectBuilder.get(2); }
-
-                boolean weaken;
-                try { weaken = (boolean) effectBuilder.get(3); } catch (Exception e) { weaken = true; }
-
-                double maxTemp;
-                try { maxTemp = (double) effectBuilder.get(4); } catch (Exception e) { maxTemp = Double.MAX_VALUE; }
-
-                double minTemp;
-                try { minTemp = (double) effectBuilder.get(5); } catch (Exception e) { minTemp = -Double.MAX_VALUE; }
-
-                final double finalTemp = temp;
-                final double finalRange = range;
-                final boolean finalWeaken = weaken;
-                final double finalMaxTemp = maxTemp;
-                final double finalMinTemp = minTemp;
+                final boolean weaken = !(effectBuilder.get(3) instanceof Boolean) || (boolean) effectBuilder.get(3);
+                final double maxTemp = effectBuilder.get(4) instanceof Number ? ((Number) effectBuilder.get(4)).doubleValue() : Double.MAX_VALUE;
+                final double minTemp = effectBuilder.get(5) instanceof Number ? ((Number) effectBuilder.get(5)).doubleValue() : -Double.MAX_VALUE;
+                final double temp = configTemp.doubleValue();
+                final double range = configRange.doubleValue();
 
                 event.register(
-                        new BlockEffect()
-                        {
-                            @Override
-                            public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
-                            {
-                                return finalWeaken ? CSMath.blend(finalTemp, 0, distance, 0.5, finalRange) : finalTemp;
-                            }
+                new BlockEffect(affectedBlocks)
+                {
+                    @Override
+                    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+                    {
+                        return weaken ? CSMath.blend(temp, 0, distance, 0.5, range) : temp;
+                    }
 
-                            @Override
-                            public boolean hasBlock(BlockState block)
-                            {
-                                for (String id : blockIDs)
-                                {
-                                    if (block.getBlock().getRegistryName().toString().equals(id))
-                                        return true;
-                                }
-                                return false;
-                            }
+                    @Override
+                    public double maxEffect()
+                    {
+                        return maxTemp;
+                    }
 
-                            @Override
-                            public double maxEffect()
-                            {
-                                return finalMaxTemp;
-                            }
-
-                            @Override
-                            public double minEffect()
-                            {
-                                return finalMinTemp;
-                            }
-                        });
+                    @Override
+                    public double minEffect()
+                    {
+                        return minTemp;
+                    }
+                });
             }
             catch (Exception e)
             {

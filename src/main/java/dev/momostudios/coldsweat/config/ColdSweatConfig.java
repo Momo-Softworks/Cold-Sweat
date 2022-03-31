@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -105,11 +106,15 @@ public class ColdSweatConfig
                 .comment("Allows for adding simple BlockEffects without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
                          "[\"block ids (separated by \",\")\", <temperature>, <range (max 7)>, <*true/false: weaken over distance>, <*max effect (temperature)>, <*min effect (temperature)>]",
-                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
-                         "(the effect of the example below (torch) is so low that it does barely anything. It's purely for demonstration)")
+                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)")
                 .defineList("BlockEffects", Arrays.asList
                         (
-                            Arrays.asList("minecraft:torch,minecraft:wall_torch", 0.01, 4, true, 0.02)
+                                List.of(Blocks.SOUL_FIRE.getRegistryName().toString(),  -0.2,   7, true, 999, -0.6),
+                                List.of(Blocks.FIRE.getRegistryName().toString(),        0.2,   7, true, 0.6, -999),
+                                List.of(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.2,   3, true, 0.6, -999),
+                                List.of(Blocks.ICE.getRegistryName().toString(),        -0.2, 1.5, true, 999, -0.6),
+                                List.of(Blocks.PACKED_ICE.getRegistryName().toString(), -0.3, 1.5, true, 999, -0.6),
+                                List.of(Blocks.BLUE_ICE.getRegistryName().toString(),   -0.4, 1.5, true, 999, -0.6)
                         ),
                 it -> it instanceof List);
         BUILDER.pop();
