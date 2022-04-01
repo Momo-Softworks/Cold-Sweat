@@ -9,6 +9,7 @@ import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
@@ -16,6 +17,8 @@ import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -27,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -65,6 +69,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
     boolean hasFuelItem = false;
+
+    boolean isPlayerNearby = false;
 
     public int ticksExisted;
 
@@ -130,14 +136,23 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         int hotFuel = this.getHotFuel();
 
         // Gradually increases insulation amount
-        int insulationLevel = this.getTileData().getInt("insulationLevel");
-        if (insulationLevel < 2400)
-            this.getTileData().putInt("insulationLevel", insulationLevel + 1);
+        int insulationLevel = NBTHelper.incrementTag(this, "insulationLevel", 1, (nbt) -> nbt < 2400);
 
-        if (level != null && level.players().stream().anyMatch(player -> player.distanceToSqr(this.pos.getX(), this.pos.getY(), this.pos.getZ()) < 400)
-        && (hotFuel > 0 || coldFuel > 0))
+        if (this.ticksExisted % 20 == 0)
+        {
+            this.isPlayerNearby = level.players().stream().anyMatch(player -> player.distanceToSqr(this.pos.getX(), this.pos.getY(), this.pos.getZ()) < 400);
+        }
+
+        if (level != null && (hotFuel > 0 || coldFuel > 0) && this.isPlayerNearby)
         {
             boolean showParticles = level.isClientSide && this.getTileData().getBoolean("showRadius");
+
+            // Reset every 1 minute
+            if (this.ticksExisted % 1200 == 0 || this.shouldRebuild())
+            {
+                this.setShouldRebuild(false);
+                this.resetPaths();
+            }
 
             if (paths.isEmpty())
             {
@@ -177,13 +192,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 index++;
 
-                // Reset every 20 seconds
-                if (this.ticksExisted % 400 == 0)
-                {
-                    this.resetPaths();
-                    break;
-                }
-
                 BlockPos blockPos = entry.getKey();
 
                 int x = blockPos.getX();
@@ -191,12 +199,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 int z = blockPos.getZ();
 
                 // Air Particles
-                if (showParticles)
+                if (showParticles && level instanceof ClientLevel clientLevel)
                 {
                     // Spawn particles if enabled
                     if (Minecraft.getInstance().options.renderDebug)
                     {
-                        level.addParticle(ParticleTypes.FLAME, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0);
+                        clientLevel.addAlwaysVisibleParticle(ParticleTypes.FLAME, false, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0);
                     }
                     else if (Math.random() < 0.016)
                     {
@@ -206,7 +214,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         double xm = Math.random() / 20 - 0.025;
                         double zm = Math.random() / 20 - 0.025;
 
-                        level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), x + xr, y + yr, z + zr, xm, 0, zm);
+                        clientLevel.addAlwaysVisibleParticle(ParticleTypesInit.HEARTH_AIR.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
                     }
                 }
 
@@ -246,41 +254,43 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     continue;
                 }
 
-                // Get the chunk at this position
-                Pair<Integer, Integer> chunkPos = Pair.of(x >> 4, z >> 4);
-
-                LevelChunk chunk;
-
-                if (chunkPos.getFirst().equals(workingCoords.getFirst())
-                && chunkPos.getSecond().equals(workingCoords.getSecond()))
-                {
-                    chunk = workingChunk;
-                }
-                else
-                {
-                    workingChunk = chunk = loadedChunks.get(chunkPos);
-                    workingCoords = chunkPos;
-                }
-
-                if (chunk == null)
-                {
-                    loadedChunks.put(chunkPos, chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4));
-                    workingChunk = chunk;
-                }
-                if (chunk == null) continue;
-
                 // Try to spread to new blocks
-                if (paths.size() < MAX_PATHS && spreadPath.withinDistance(pos, MAX_DISTANCE)
-                && !WorldHelper.canSeeSky(chunk, level, spreadPath.getPos()))
+                if (paths.size() < MAX_PATHS && spreadPath.withinDistance(pos, MAX_DISTANCE))
                 {
-                    for (Direction direction : Direction.values())
-                    {
-                        SpreadPath tryPath = spreadPath.offset(direction);
-                        BlockPos tryPos = tryPath.getPos();
+                    // Get the chunk at this position
+                    Pair<Integer, Integer> chunkPos = Pair.of(x >> 4, z >> 4);
 
-                        if (!paths.containsKey(tryPos) && WorldHelper.canSpreadThrough(chunk, level, spreadPath.getPos(), tryPath.origin))
+                    LevelChunk chunk;
+
+                    if (chunkPos.getFirst().equals(workingCoords.getFirst())
+                            && chunkPos.getSecond().equals(workingCoords.getSecond()))
+                    {
+                        chunk = workingChunk;
+                    }
+                    else
+                    {
+                        workingChunk = chunk = loadedChunks.get(chunkPos);
+                        workingCoords = chunkPos;
+                    }
+
+                    if (chunk == null)
+                    {
+                        loadedChunks.put(chunkPos, chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4));
+                        workingChunk = chunk;
+                    }
+                    if (chunk == null) continue;
+
+                    if (!WorldHelper.canSeeSky(chunk, level, spreadPath.getPos()))
+                    {
+                        for (Direction direction : Direction.values())
                         {
-                            newPaths.put(tryPos, tryPath);
+                            SpreadPath tryPath = spreadPath.offset(direction);
+                            BlockPos tryPos = tryPath.getPos();
+
+                            if (!paths.containsKey(tryPos) && WorldHelper.canSpreadThrough(chunk, level, spreadPath.getPos(), tryPath.origin))
+                            {
+                                newPaths.put(tryPos, tryPath);
+                            }
                         }
                     }
                 }
@@ -491,5 +501,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {
             this.addPath(entry.getKey(), entry.getValue());
         }
+    }
+
+    public boolean shouldRebuild()
+    {
+        return this.getTileData().getBoolean("shouldRebuild");
+    }
+
+    public void setShouldRebuild(boolean shouldRebuild)
+    {
+        this.getTileData().putBoolean("shouldRebuild", shouldRebuild);
     }
 }

@@ -3,6 +3,11 @@ package dev.momostudios.coldsweat.util.entity;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.function.Predicate;
 
 public class NBTHelper
 {
@@ -151,5 +156,35 @@ public class NBTHelper
             newModifier.tickRate(modifierTag.getInt("tickRate"));
 
         return newModifier;
+    }
+
+    public static void incrementTag(Object owner, String key, int amount)
+    {
+        incrementTag(owner, key, amount, (nbt) -> true);
+    }
+
+    public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
+    {
+        CompoundTag tag;
+        if (owner instanceof LivingEntity entity)
+        {
+            tag = entity.getPersistentData();
+        }
+        else if (owner instanceof ItemStack stack)
+        {
+            tag = stack.getOrCreateTag();
+        }
+        else if (owner instanceof BlockEntity blockEntity)
+        {
+            tag = blockEntity.getTileData();
+        }
+        else return 0;
+
+        int value = tag.getInt(key);
+        if (predicate.test(value))
+        {
+            tag.putInt(key, value + amount);
+        }
+        return value + amount;
     }
 }
