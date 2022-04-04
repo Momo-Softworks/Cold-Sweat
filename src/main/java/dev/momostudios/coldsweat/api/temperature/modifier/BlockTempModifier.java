@@ -93,7 +93,7 @@ public class BlockTempModifier extends TempModifier
                                 Direction dir1 = CSMath.getDirectionFromVector(facing1.x, facing1.y, facing1.z);
 
                                 if (!bpos1.equals(new BlockPos(prevPos1)) && !bpos1.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(level, palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15), bpos1, dir1))
+                                && !WorldHelper.canSpreadThrough(chunk, palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15), bpos1, dir1))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
@@ -105,7 +105,7 @@ public class BlockTempModifier extends TempModifier
                                 Direction dir2 = CSMath.getDirectionFromVector(facing2.x, facing2.y, facing2.z);
 
                                 if (!bpos2.equals(new BlockPos(prevPos2)) && !bpos2.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(level, palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15), bpos2, dir2))
+                                && !WorldHelper.canSpreadThrough(chunk, palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15), bpos2, dir2))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
