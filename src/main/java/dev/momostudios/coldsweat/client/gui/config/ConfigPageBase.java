@@ -13,6 +13,10 @@ import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,8 +25,24 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Mod.EventBusSubscriber
 public abstract class ConfigPageBase extends Screen
 {
+    // Count how many ticks the mouse has been still for
+    static int MOUSE_STILL_TIMER = 0;
+    static int TOOLTIP_DELAY = 20;
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event)
+    {
+        MOUSE_STILL_TIMER++;
+    }
+    @Override
+    public void afterMouseMove()
+    {
+        MOUSE_STILL_TIMER = 0;
+        super.afterMouseMove();
+    }
+
     private final Screen parentScreen;
     private final ConfigCache configCache;
 
@@ -317,6 +337,7 @@ public abstract class ConfigPageBase extends Screen
         super.render(poseStack, mouseX, mouseY, partialTicks);
 
         // Render tooltip
+        if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
         for (Map.Entry<String, List<Widget>> widget : this.elementBatches.entrySet())
         {
             int x;

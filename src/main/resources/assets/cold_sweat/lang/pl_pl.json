@@ -74,7 +74,7 @@
   "cold_sweat.config.require_thermometer.name":     "Wymaga termometru",
   "cold_sweat.config.temp_offset.name":             "Przesunięcie temp.",
   "cold_sweat.config.temperature_icon.name":        "Przesunięcie ikon*",
-  "cold_sweat.config.temperature_readout.name":     "Przesunięcie odczytu*",
+  "cold_sweat.config.temp_readout_location.name":     "Przesunięcie odczytu*",
 
 
   "commands.cold_sweat.temperature.rate.result":      "Ustaw prędkość zmiany temperatury dla wszystkich graczy na",

@@ -80,7 +80,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 
         if (isHoveringButton(mouseX, mouseY))
         {
-            this.renderComponentTooltip(poseStack, List.of(new TextComponent("Show Particles")), mouseX, mouseY);
+            this.renderComponentTooltip(poseStack, List.of(new TranslatableComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY);
         }
     }
 

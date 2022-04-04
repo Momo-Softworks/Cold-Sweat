@@ -76,7 +76,7 @@
   "cold_sweat.config.require_thermometer.name":     "Richiede Un Termometro",
   "cold_sweat.config.temp_offset.name":             "Compesazione Temperatura",
   "cold_sweat.config.temperature_icon.name":        "Spostamento Icona*",
-  "cold_sweat.config.temperature_readout.name":     "Compesazione Lettura*",
+  "cold_sweat.config.temp_readout_location.name":     "Compesazione Lettura*",
 
 
   "commands.cold_sweat.temperature.rate.result":      "Imposta il tasso di temperatura per tutti i giocatori a",

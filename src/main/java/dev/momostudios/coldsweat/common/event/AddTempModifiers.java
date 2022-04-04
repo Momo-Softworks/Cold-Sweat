@@ -8,7 +8,7 @@ import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.BedBlock;
@@ -98,12 +98,14 @@ public class AddTempModifiers
 
             if (!CSMath.isBetween((int) bodyTemp, -99, 99))
             {
-                player.displayClientMessage(new TextComponent("You are too " + (bodyTemp > 100 ? "hot" : "cold") + " to sleep now."), true);
+                player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.body",
+                                            new TranslatableComponent(bodyTemp > 100 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
                 event.setCanceled(true);
             }
             else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
             {
-                player.displayClientMessage(new TextComponent("It is too " + (worldTemp > maxTemp ? "hot" : "cold") + " outside to sleep now."), true);
+                player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.world",
+                                            new TranslatableComponent(bodyTemp > 100 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
                 event.setCanceled(true);
             }
         }

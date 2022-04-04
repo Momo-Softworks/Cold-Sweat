@@ -77,7 +77,7 @@
   "cold_sweat.config.grace_period_length.name":     "Срок Благословения",
   "cold_sweat.config.icon_bobbing.name":            "Тряска иконки",
   "cold_sweat.config.temperature_icon.name":        "Смещение иконки*",
-  "cold_sweat.config.temperature_readout.name":     "Сдвиг температуры*",
+  "cold_sweat.config.temp_readout_location.name":     "Сдвиг температуры*",
   "cold_sweat.config.offset_shift.name":            "*Удерживайте SHIFT чтобы двигать на 10 пикселей",
 
   "commands.cold_sweat.temperature.set.self.result":  "Установлена ваша температура тела: ",

@@ -78,7 +78,7 @@
   "cold_sweat.config.grace_period_length.name":     "자연의 은총 길이",
   "cold_sweat.config.icon_bobbing.name":            "아이콘 흔들림",
   "cold_sweat.config.temperature_icon.name":        "아이콘 오프셋*",
-  "cold_sweat.config.temperature_readout.name":     "판독치 오프셋*",
+  "cold_sweat.config.temp_readout_location.name":     "판독치 오프셋*",
   "cold_sweat.config.offset_shift.name":            "* 'SHIFT'를 눌러 10픽셀 단위로 이동합니다",
 
   "commands.cold_sweat.temperature.set.self.result":  "Set your own temperature to",
