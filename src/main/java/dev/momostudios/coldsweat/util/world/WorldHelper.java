@@ -98,45 +98,33 @@ public class WorldHelper
         return true;
     }
 
-    public static boolean canSpreadThrough(Level world, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean canSpreadThrough(Level level, BlockPos pos, Direction toDir)
     {
-        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk != null)
-        {
-            BlockState state = chunk.getBlockState(pos);
+        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null) return false;
 
-            if (state.isFaceSturdy(world, pos, toDir))
-                return false;
-
-            return !isFullSide(state, toDir, pos.relative(toDir), world) && !state.isFaceSturdy(world, pos, toDir.getOpposite());
-        }
-        return false;
+        return canSpreadThrough(chunk, chunk.getBlockState(pos), pos, toDir);
     }
 
-    public static boolean canSpreadThrough(Level level, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean canSpreadThrough(LevelChunk chunk, @Nonnull BlockPos pos, @Nonnull Direction toDir)
     {
-        if (state.isAir())
+        PalettedContainer<BlockState> palette = chunk.getSection((pos.getY() >> 4) - chunk.getMinSection()).getStates();
+        BlockState state = palette.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+
+        return canSpreadThrough(chunk, state, pos, toDir);
+    }
+
+    public static boolean canSpreadThrough(@Nonnull LevelChunk chunk, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    {
+        Level level = chunk.getLevel();
+
+        if (state.isAir() || state.getCollisionShape(level, pos.relative(toDir)).isEmpty())
             return true;
 
+        if (state.isFaceSturdy(level, pos, toDir))
+            return false;
+
         return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
-    }
-
-    public static boolean canSpreadThrough(LevelChunk chunk, Level level, @Nonnull BlockPos pos, @Nonnull Direction toDir)
-    {
-        if (chunk != null)
-        {
-            PalettedContainer<BlockState> palette = chunk.getSection((pos.getY() >> 4) - chunk.getMinSection()).getStates();
-            BlockState state = palette.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
-
-            if (state.isAir() || state.getCollisionShape(level, pos).isEmpty())
-                return true;
-
-            if (state.isFaceSturdy(level, pos, toDir))
-                return false;
-
-            return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
-        }
-        return false;
     }
 
     public static double distance(Vec3i pos1, Vec3i pos2)
@@ -144,14 +132,14 @@ public class WorldHelper
         return Math.sqrt(pos1.distSqr(pos2));
     }
 
-    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level world)
+    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level level)
     {
-        if (state.isFaceSturdy(world, pos, dir))
+        if (state.isFaceSturdy(level, pos, dir))
             return true;
         if (state.isAir())
             return false;
 
-        VoxelShape shape = state.getShape(world, pos);
+        VoxelShape shape = state.getShape(level, pos);
         final double[] area = {0};
         if (!shape.isEmpty())
         {
