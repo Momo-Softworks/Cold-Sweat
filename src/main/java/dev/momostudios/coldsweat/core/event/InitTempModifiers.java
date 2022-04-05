@@ -79,12 +79,13 @@ public class InitTempModifiers
 
                 final double temp    = configTemp.doubleValue();
                 final double range   = configRange.doubleValue();
-                final boolean weaken = effectBuilder.size() < 3 || !(effectBuilder.get(3) instanceof Boolean) || (boolean) effectBuilder.get(3);
+                final boolean weaken = effectBuilder.size() < 4 || !(effectBuilder.get(2) instanceof Boolean) || (boolean) effectBuilder.get(3);
 
-                final double maxTemp = effectBuilder.size() >= 4 && effectBuilder.get(4) instanceof Number
+                final double maxTemp = effectBuilder.size() >= 5 && effectBuilder.get(3) instanceof Number
                         ? ((Number) effectBuilder.get(4)).doubleValue()
                         : Double.MAX_VALUE;
-                final double minTemp = effectBuilder.size() >= 5 && effectBuilder.get(5) instanceof Number
+
+                final double minTemp = effectBuilder.size() >= 6 && effectBuilder.get(4) instanceof Number
                         ? ((Number) effectBuilder.get(5)).doubleValue()
                         : -Double.MAX_VALUE;
 
