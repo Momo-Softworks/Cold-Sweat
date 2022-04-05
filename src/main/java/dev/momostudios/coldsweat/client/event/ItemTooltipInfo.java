@@ -29,7 +29,7 @@ public class ItemTooltipInfo
             String tempUnits = celsius ? "C" : "F";
             temp = temp / 2 + 95;
             if (celsius) temp = CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
-            temp += ClientSettingsConfig.getInstance().tempOffset() / 2;
+            temp += ClientSettingsConfig.getInstance().tempOffset() / 2.0;
 
             event.getToolTip().add(1, new TextComponent("\u00a77" + new TranslatableComponent(
                 "item.cold_sweat.waterskin.filled").getString() + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)\u00a7r"));

@@ -1,9 +1,10 @@
 {
   "block.cold_sweat.boiler":            "보일러",
-  "block.cold_sweat.hearth_bottom":            "난로",
-  "block.cold_sweat.hearth_top":         "난로",
+  "block.cold_sweat.hearth_bottom":     "난로",
+  "block.cold_sweat.hearth_top":        "난로",
   "block.cold_sweat.icebox":            "아이스박스",
   "block.cold_sweat.sewing_table":      "봉제 테이블",
+
 
   "item.cold_sweat.minecart_insulation": "광산 수레 단열재",
   "item.cold_sweat.hellspring_lamp":       "영혼불 전등",
@@ -11,7 +12,9 @@
   "item.cold_sweat.waterskin":           "가죽 부대 물통",
   "item.cold_sweat.waterskin.filled":    "채워짐",
 
+
   "modifier.cold_sweat.insulated":      "단열됨",
+
 
   "effect.cold_sweat.insulated":       "단열됨",
   "effect.cold_sweat.ice_resistance":  "냉기 저항",
@@ -19,30 +22,36 @@
   "item.minecraft.potion.effect.ice_resistance": "냉기 저항의 물약",
   "item.minecraft.lingering_potion.effect.ice_resistance": "잔류형 냉기 저항의 물약",
   "item.minecraft.splash_potion.effect.ice_resistance": "투척용 냉기 저항의 물약",
-  "item.minecraft.tipped_arrow.effect.ice_resistance": "냉기 저항의 화살",		
+  "item.minecraft.tipped_arrow.effect.ice_resistance": "냉기 저항의 화살",
+
 
   "container.cold_sweat.boiler":        "보일러",
   "container.cold_sweat.icebox":        "아이스박스",
-  "container.cold_sweat.sewing_table": "봉제 테이블",
+  "container.cold_sweat.sewing_table":  "봉제 테이블",
+  "container.cold_sweat.hearth":        "난로",
+
 
   "itemGroup.cold_sweat": "차가운 땀",
+
 
   "death.attack.cold":          "%1$s이(가) 얼어죽었습니다",
   "death.attack.cold.player":   "%1$s이(가) %2$s와(과) 싸우다 얼어죽었습니다",
   "death.attack.hot":           "%1$s이(가) 열사병으로 죽었습니다",
   "death.attack.hot.player":    "%1$s이(가) %2$s와(과) 싸우다 열사병으로 죽었습니다",
 
+
   "entity.player.damage.freeze": "플레이어가 얼어붙음",
   "item.hellspring_lamp.on":       "영혼불 전등 점화됨",
   "item.hellspring_lamp.off":      "영혼불 전등 소화됨",
 
-  "cold_sweat.config.title":                        "차가운 땀 설정",
-  "cold_sweat.config.section.temperature_details":  "온도 관리",
-  "cold_sweat.config.section.other":                "기타 온도 설정",
-  "cold_sweat.config.section.hud_settings":         "HUD 설정",
-  "cold_sweat.config.section.difficulty.name":      "난이도 설정",
+  "cold_sweat.screen.hearth.show_particles": "입자 보이기",
 
-  "cold_sweat.config.difficulty.name":              "난이도",
+  "cold_sweat.config.title":                        "차가운 땀 설정",
+  "cold_sweat.config.section.difficulty.name":      "난이도 설정",
+  "cold_sweat.config.section.hud_settings":         "HUD 설정",
+  "cold_sweat.config.section.other":                "기타 온도 설정",
+  "cold_sweat.config.section.temperature_details":  "온도 관리",
+
   "cold_sweat.config.difficulty.super_easy.name":   "매우 쉬움",
   "cold_sweat.config.difficulty.easy.name":         "쉬움",
   "cold_sweat.config.difficulty.normal.name":       "보통",
@@ -51,38 +60,67 @@
   "cold_sweat.config.difficulty.description.custom":          "사용자 지정 설정 사용",
   "cold_sweat.config.difficulty.description.min_temp":        "거주 가능한 최저 온도 : %d",
   "cold_sweat.config.difficulty.description.max_temp":        "거주 가능한 최고 온도 : %d",
+  "cold_sweat.config.difficulty.description.potions_on":      "화염과 냉기 저항의 물약이 %d활성화됩니다%d",
+  "cold_sweat.config.difficulty.description.potions_off":     "화염과 냉기 저항의 물약이 %d비활성화됩니다%d",
   "cold_sweat.config.difficulty.description.rate.decrease":   "체온 변화율이 %d 감소",
   "cold_sweat.config.difficulty.description.rate.increase":   "체온 변화율이 %d 증가",
   "cold_sweat.config.difficulty.description.rate.normal":     "표준 체온 변화율",
-  "cold_sweat.config.difficulty.description.world_temp_on":   "온도가 온도계를 가지고 %d있지 않아도%d 보입니다",
-  "cold_sweat.config.difficulty.description.world_temp_off":  "온도가 온도계를 가지고 %d있어야%d 보입니다",
   "cold_sweat.config.difficulty.description.scaling_on":      "게임 난이도에 따른 피해량 증가가 %d적용됩니다%d",
   "cold_sweat.config.difficulty.description.scaling_off":     "게임 난이도에 따른 피해량 증가가 %d적용되지 않습니다%d",
-  "cold_sweat.config.difficulty.description.potions_on":      "화염과 냉기 저항의 물약이 %d활성화됩니다%d",
-  "cold_sweat.config.difficulty.description.potions_off":     "화염과 냉기 저항의 물약이 %d비활성화됩니다%d",
+  "cold_sweat.config.difficulty.description.world_temp_on":   "온도가 온도계를 가지고 %d있지 않아도%d 보입니다",
+  "cold_sweat.config.difficulty.description.world_temp_off":  "온도가 온도계를 가지고 %d있어야%d 보입니다",
 
   "cold_sweat.config.animal_temperature.name":      "동물 온도",
-  "cold_sweat.config.units.name":                   "단위",
   "cold_sweat.config.celsius.name":                 "섭씨",
-  "cold_sweat.config.fahrenheit.name":              "화씨",
-  "cold_sweat.config.temp_offset.name":             "온도 오프셋",
-  "cold_sweat.config.min_temperature.name":         "최저 온도",
-  "cold_sweat.config.max_temperature.name":         "최고 온도",
-  "cold_sweat.config.rate_multiplier.name":         "배율 보정",
   "cold_sweat.config.custom_hotbar.name":           "사용자 지정 핫바",
   "cold_sweat.config.damage_scaling.name":          "게임 난이도에 따른 피해량 증가",
-  "cold_sweat.config.require_thermometer.name":     "온도계 요구",
+  "cold_sweat.config.difficulty.name":              "난이도",
+  "cold_sweat.config.fahrenheit.name":              "화씨",
   "cold_sweat.config.fire_resistance.name":         "화염 저항",
-  "cold_sweat.config.ice_resistance.name":          "냉기 저항",
   "cold_sweat.config.grace_period.name":            "자연의 은총 주기",
   "cold_sweat.config.grace_period_length.name":     "자연의 은총 길이",
+  "cold_sweat.config.ice_resistance.name":          "냉기 저항",
   "cold_sweat.config.icon_bobbing.name":            "아이콘 흔들림",
-  "cold_sweat.config.temperature_icon.name":        "아이콘 오프셋*",
-  "cold_sweat.config.temp_readout_location.name":     "판독치 오프셋*",
+  "cold_sweat.config.max_temperature.name":         "최고 온도",
+  "cold_sweat.config.min_temperature.name":         "최저 온도",
   "cold_sweat.config.offset_shift.name":            "* 'SHIFT'를 눌러 10픽셀 단위로 이동합니다",
+  "cold_sweat.config.require_thermometer.name":     "온도계 요구",
+  "cold_sweat.config.temp_offset.name":             "온도 오프셋",
+  "cold_sweat.config.temp_icon_location.name":      "아이콘 오프셋*",
+  "cold_sweat.config.temp_readout_location.name":   "판독치 오프셋*",
+  "cold_sweat.config.temperature_rate.name":        "배율 계수",
+  "cold_sweat.config.units.name":                   "단위",
+  "cold_sweat.config.world_temp_location.name":     "*세계 온도 오프셋",
 
-  "commands.cold_sweat.temperature.set.self.result":  "Set your own temperature to",
-  "commands.cold_sweat.temperature.set.other.result": "Set the temperature of %d to",
-  "commands.cold_sweat.temperature.set.all.result":   "Set the temperature of %d players to",
-  "commands.cold_sweat.temperature.get.result":       "%d's body temperature is"
+  "cold_sweat.config.custom_hotbar.desc":           "차가운 땀의 커스텀 핫바 양식을 사용할 지 결정합니다(만약 다른 모드와 충돌한다면 비활성화하세요).",
+  "cold_sweat.config.damage_scaling.desc":          "마인크래프트의 난이도가 온도 관련 피해에 영향을 줄 지 결정합니다.",
+  "cold_sweat.config.difficulty.desc":              "차가운 땀의 난이도를 변경합니다.",
+  "cold_sweat.config.fire_resistance.desc":         "화염 저항의 물약이 고온 피해를 막아줄 지 결정합니다.",
+  "cold_sweat.config.grace_period.desc":            "플레이어가 처음 생성되었을 때 약간의 온도 면역을 부여할 지 결정합니다.",
+  "cold_sweat.config.grace_period_length.desc_1":   "자연의 은총의 지속시간을 결정합니다(틱 단위).",
+  "cold_sweat.config.grace_period_length.desc_2":   "%d20틱 = 1초%d",
+  "cold_sweat.config.ice_resistance.desc":          "냉기 저항의 물약이 저온 피해를 막아줄 지 결정합니다.",
+  "cold_sweat.config.icon_bobbing.desc":            "차가운 땀의 UI가 극단적인 온도 상태에 있을 경우 \"떨릴\"지를 결정합니다.",
+  "cold_sweat.config.max_temperature.desc":         "견딜 수 있는 최고 온도입니다. 이 지점을 넘을 경우, 체온이 증가하기 시작합니다.",
+  "cold_sweat.config.min_temperature.desc":         "견딜 수 있는 최저 온도입니다. 이 지점을 넘을 경우, 체온이 하락하기 시작합니다.",
+  "cold_sweat.config.require_thermometer.desc":     "온도계가 있어야 세계 온도를 볼 수 있는 지 결정합니다.",
+  "cold_sweat.config.temp_icon_location.desc":      "체온 아이콘의 위치를 결정합니다",
+  "cold_sweat.config.temp_offset.desc_1":            "지정된 양만큼 세계 온도 기준을 결정합니다.",
+  "cold_sweat.config.temp_offset.desc_2":            "%d클라이언트 단에서만 동작합니다. 게임플레이에 영향을 주지 않습니다.%d",
+  "cold_sweat.config.temp_readout_location.desc":   "체온 숫자의 위치를 결정합니다.",
+  "cold_sweat.config.temperature_rate.desc":        "체온이 오르고 내리는 비율을 결정합니다.",
+  "cold_sweat.config.units.desc":                   "온도를 섭씨 혹은 화씨로 보여줄 지 결정합니다.",
+  "cold_sweat.config.world_temp_location.desc":     "세계 온도 측정기의 위치를 결정합니다.",
+
+
+  "cold_sweat.message.sleep.hot":           "높",
+  "cold_sweat.message.sleep.cold":          "낮",
+  "cold_sweat.message.sleep.body":          "잠을 자기에는 체온이 너무 %d습니다.",
+  "cold_sweat.message.sleep.world":         "바깥 온도가 너무 %d아 잠을 잘 수 없습니다.",
+
+
+  "commands.cold_sweat.temperature.set.self.result":  "체온을 다음으로 설정했습니다: ",
+  "commands.cold_sweat.temperature.set.other.result": "%d의 체온을 다음으로 설정했습니다: ",
+  "commands.cold_sweat.temperature.set.all.result":   "%d 플레이어의 체온을 다음으로 설정했습니다: ",
+  "commands.cold_sweat.temperature.get.result":       "%d의 체온은 다음과 같습니다: "
 }

@@ -28,7 +28,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("block." + ColdSweat.MOD_ID + ".hearth_bottom"));
+        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth_bottom"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
