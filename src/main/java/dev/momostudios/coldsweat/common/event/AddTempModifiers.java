@@ -99,13 +99,13 @@ public class AddTempModifiers
             if (!CSMath.isBetween((int) bodyTemp, -99, 99))
             {
                 player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.body",
-                                            new TranslatableComponent(bodyTemp > 100 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
+                                            new TranslatableComponent(bodyTemp > 99 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
                 event.setCanceled(true);
             }
             else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
             {
                 player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.world",
-                                            new TranslatableComponent(bodyTemp > 100 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
+                                            new TranslatableComponent(worldTemp > maxTemp ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
                 event.setCanceled(true);
             }
         }
