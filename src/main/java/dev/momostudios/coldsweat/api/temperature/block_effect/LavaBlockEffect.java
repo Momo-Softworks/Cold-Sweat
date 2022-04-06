@@ -18,7 +18,7 @@ public class LavaBlockEffect extends BlockEffect
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
-        if (hasBlock(state))
+        if (hasBlock(state.getBlock()))
         {
             FluidState fluidState = state.getFluidState();
             double temp = 0.05 + (fluidState.getOwnHeight()) / 8d;

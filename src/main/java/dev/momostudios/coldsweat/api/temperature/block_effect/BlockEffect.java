@@ -26,9 +26,9 @@ public abstract class BlockEffect
         validBlocks.addAll(List.of(blocks));
     }
 
-    public boolean hasBlock(BlockState block)
+    public boolean hasBlock(Block block)
     {
-        return validBlocks.contains(block.getBlock());
+        return validBlocks.contains(block);
     }
 
     /**
