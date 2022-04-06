@@ -162,7 +162,7 @@ public class PlayerTempCapability implements ITemperatureCap
         // Calculate body/base temperatures with modifiers
         Temperature bodyTemp = baseTemp.add(coreTemp);
 
-        if (bodyTemp.get() != get(Temperature.Types.BODY) || player.tickCount % 3 == 0)
+        if ((int) bodyTemp.get() != (int) get(Temperature.Types.BODY) || player.tickCount % 3 == 0)
         {
             TempHelper.updateTemperature(player,
                     new Temperature(get(Temperature.Types.CORE)),

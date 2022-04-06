@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
@@ -113,7 +114,7 @@ public class WorldTemperatureConfig
             // Do nothing
         }
 
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/world_temperatures.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/world_temperatures.toml");
     }
 
     /*
