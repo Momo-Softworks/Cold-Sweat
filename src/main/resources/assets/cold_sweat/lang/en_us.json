@@ -115,8 +115,8 @@
 
   "cold_sweat.message.sleep.hot":           "hot",
   "cold_sweat.message.sleep.cold":          "cold",
-  "cold_sweat.message.sleep.body":          "You are too %d to sleep now.",
-  "cold_sweat.message.sleep.world":         "It is too %d outside to sleep now.",
+  "cold_sweat.message.sleep.body":          "You may not rest now; You are too %d to sleep.",
+  "cold_sweat.message.sleep.world":         "You may not rest now; The air is too %d.",
 
 
   "commands.cold_sweat.temperature.set.self.result":  "Set your own temperature to",
