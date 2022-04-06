@@ -68,7 +68,6 @@ public class ConfigScreen
         {
             ColdSweatConfig.getInstance().writeValues(configCache);
         }
-        ConfigCache.setInstance(configCache);
     }
 
     @SubscribeEvent
