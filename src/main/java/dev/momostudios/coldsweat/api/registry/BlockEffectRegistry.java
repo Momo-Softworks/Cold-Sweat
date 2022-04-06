@@ -2,16 +2,26 @@ package dev.momostudios.coldsweat.api.registry;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 
 public class BlockEffectRegistry
 {
-    public static final Map<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
+    public static final HashSet<BlockEffect> BLOCK_EFFECTS = new HashSet<>();
+    public static final HashMap<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
+    public static final BlockEffect DEFAULT_BLOCK_EFFECT = new BlockEffect() {
+        @Override
+        public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+        {
+            return 0;
+        }
+    };
 
     public static void register(BlockEffect blockEffect)
     {
@@ -20,13 +30,14 @@ public class BlockEffectRegistry
             if (MAPPED_BLOCKS.containsKey(block))
             {
                 ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockEffect ({})! Skipping BlockEffect {}...",
-                        block.getName().getString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockEffect.getClass().getSimpleName());
+                        block.getRegistryName().toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockEffect.getClass().getSimpleName());
             }
             else
             {
                 MAPPED_BLOCKS.put(block, blockEffect);
             }
         });
+        BLOCK_EFFECTS.add(blockEffect);
     }
 
     public static void flush()
@@ -35,8 +46,26 @@ public class BlockEffectRegistry
     }
 
     @Nullable
-    public static BlockEffect getEntryFor(BlockState block)
+    public static BlockEffect getEntryFor(BlockState blockstate)
     {
-        return MAPPED_BLOCKS.get(block.getBlock());
+        Block block = blockstate.getBlock();
+        if (MAPPED_BLOCKS.containsKey(block))
+        {
+            return MAPPED_BLOCKS.get(block);
+        }
+        else
+        {
+            for (BlockEffect blockEffect : BlockEffectRegistry.BLOCK_EFFECTS)
+            {
+                if (blockEffect.hasBlock(block))
+                {
+                    BlockEffectRegistry.MAPPED_BLOCKS.put(block, blockEffect);
+                    return blockEffect;
+                }
+            }
+
+            BlockEffectRegistry.MAPPED_BLOCKS.put(block, BlockEffectRegistry.DEFAULT_BLOCK_EFFECT);
+            return BlockEffectRegistry.DEFAULT_BLOCK_EFFECT;
+        }
     }
 }
