@@ -48,10 +48,6 @@ public class AttachCapabilities
             return LazyOptional.empty();
         }
 
-        void invalidate() {
-            this.capOptional.invalidate();
-        }
-
         @Override
         public CompoundTag serializeNBT() {
             return this.playerTempCap.serializeNBT();

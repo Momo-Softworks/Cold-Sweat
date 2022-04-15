@@ -10,6 +10,7 @@ import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -26,26 +27,15 @@ public class BlockTempModifier extends TempModifier
     public Temperature getResult(Temperature temp, Player player)
     {
         double totalTemp = 0;
-        Map<Pair<Integer, Integer>, LevelChunk> chunkMap = new HashMap<>();
+        Map<ChunkPos, LevelChunk> chunkMap = new HashMap<>();
         Level level = player.level;
 
         for (int x1 = -7; x1 < 14; x1++)
         {
             for (int z1 = -7; z1 < 14; z1++)
             {
-                Pair<Integer, Integer> chunkPos = Pair.of((player.blockPosition().getX() + x1) >> 4, (player.blockPosition().getZ() + z1) >> 4);
-                LevelChunk chunk;
-                if (chunkMap.containsKey(chunkPos))
-                {
-                    chunk = chunkMap.get(chunkPos);
-                }
-                else
-                {
-                    chunk = level.getChunkSource().getChunkNow(chunkPos.getFirst(), chunkPos.getSecond());
-                    if (chunk == null) continue;
-
-                    chunkMap.put(chunkPos, chunk);
-                }
+                ChunkPos chunkPos = new ChunkPos((player.blockPosition().getX() + x1) >> 4, (player.blockPosition().getZ() + z1) >> 4);
+                LevelChunk chunk = getChunk(level, chunkPos, chunkMap);
 
                 for (int y1 = -7; y1 < 14; y1++)
                 {
@@ -92,8 +82,10 @@ public class BlockTempModifier extends TempModifier
                                 Vec3 facing1 = newPos1.subtract(prevPos1);
                                 Direction dir1 = CSMath.getDirectionFromVector(facing1.x, facing1.y, facing1.z);
 
+                                LevelChunk newChunk = getChunk(level, new ChunkPos(bpos1), chunkMap);
+
                                 if (!bpos1.equals(new BlockPos(prevPos1)) && !bpos1.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(chunk, palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15), bpos1, dir1))
+                                && !WorldHelper.canSpreadThrough(newChunk, palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15), bpos1, dir1))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
@@ -105,7 +97,7 @@ public class BlockTempModifier extends TempModifier
                                 Direction dir2 = CSMath.getDirectionFromVector(facing2.x, facing2.y, facing2.z);
 
                                 if (!bpos2.equals(new BlockPos(prevPos2)) && !bpos2.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(chunk, palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15), bpos2, dir2))
+                                && !WorldHelper.canSpreadThrough(newChunk, palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15), bpos2, dir2))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
@@ -130,5 +122,21 @@ public class BlockTempModifier extends TempModifier
     public String getID()
     {
         return "cold_sweat:nearby_blocks";
+    }
+
+    LevelChunk getChunk(Level world, ChunkPos pos, Map<ChunkPos, LevelChunk> chunks)
+    {
+        ChunkPos chunkPos = new ChunkPos(pos.x, pos.z);
+        LevelChunk chunk;
+        if (chunks.containsKey(chunkPos))
+        {
+            chunk = chunks.get(chunkPos);
+        }
+        else
+        {
+            chunk = world.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
+            chunks.put(chunkPos, chunk);
+        }
+        return chunk;
     }
 }
