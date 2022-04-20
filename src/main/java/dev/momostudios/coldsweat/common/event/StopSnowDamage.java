@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
+import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -12,7 +13,7 @@ public class StopSnowDamage
     @SubscribeEvent
     public static void onSnowDamage(LivingAttackEvent event)
     {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE))
+        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigCache.getInstance().iceRes)
         {
             event.setCanceled(true);
         }
