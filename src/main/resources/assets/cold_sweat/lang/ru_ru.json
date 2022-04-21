@@ -43,7 +43,9 @@
   "item.hellspring_lamp.on":       "Адский светоч зажжён",
   "item.hellspring_lamp.off":      "Адский светоч потушен",
 
+
   "cold_sweat.screen.hearth.show_particles": "Показывать все частицы",
+
 
   "cold_sweat.config.title":                        "Настройки Cold Sweat",
   "cold_sweat.config.section.difficulty.name":      "Настройки сложности",
@@ -56,6 +58,7 @@
   "cold_sweat.config.difficulty.normal.name":       "Нормально",
   "cold_sweat.config.difficulty.hard.name":         "Сложно",
   "cold_sweat.config.difficulty.custom.name":       "Пользовательская",
+
   "cold_sweat.config.difficulty.description.custom":           "Использование пользовательских настроек",
   "cold_sweat.config.difficulty.description.min_temp":         "Минимальная пригодная температура %d",
   "cold_sweat.config.difficulty.description.max_temp":         "Максимальная пригодная температура %d",
