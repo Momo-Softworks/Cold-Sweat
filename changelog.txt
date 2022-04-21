@@ -455,6 +455,30 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
+2.1.10
+- Backported as much content as possible from 1.18.x to 1.16.5
+- Players can no longer sleep when their body temperature or the world's temperature is deadly
+- Added hover tooltips for options in the configuration menu
+- More extreme Hearth optimizations (it's about 10x faster than before, and over 1000x faster than CS 2.0)
+- Added config option to move the world temperature UI element
+- Ice Resistance now prevents damage from powder snow
+
+Translation:
+- Updated Korean translation (thanks to PixelVoxel)
+- Updated Russian translation (thanks to Xemay)
+- The new config tooltips have new corresponding translation keys
+- Messages that show when the player is prevented from sleeping have their own translation keys
+
+Fixes:
+- Fixed biome temperature not working properly in some cases (1.18.1)
+- Fixed custom particles rendering incorrectly (1.18.x)
+- Fixed issue that caused players' world temperatures to be "linked" in multiplayer
+
+Technical Changes:
+- Backend parity between versions (especially for API-related things)
+- Moved some BlockEffects to the config (ice, fire, magma blocks, and some others)
+- Renamed HOTTEST and COLDEST temperature types to simply "MAX" and "MIN"
+- Moved MixinWorld (1.16.5)/MixinLevel (1.18.x) to Forge event system (might help with problems importing Cold Sweat into a workspace)
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
