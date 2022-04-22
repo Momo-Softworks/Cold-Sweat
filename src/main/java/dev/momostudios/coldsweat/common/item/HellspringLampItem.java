@@ -57,7 +57,7 @@ public class HellspringLampItem extends Item
                     AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
                     worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
                     {
-                        TempHelper.addModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.MAX, false);
+                        TempHelper.addOrReplaceModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
                     });
                 }
             }

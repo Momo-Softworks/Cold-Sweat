@@ -72,10 +72,15 @@ public class TempHelper
      */
     public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, boolean duplicates)
     {
-        addModifier(player, modifier, type, duplicates ? Integer.MAX_VALUE : 1);
+        addModifier(player, modifier, type, duplicates ? Integer.MAX_VALUE : 1, false);
     }
 
-    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, int maxCount)
+    public static void addOrReplaceModifier(Player player, TempModifier modifier, Temperature.Types type)
+    {
+        addModifier(player, modifier, type, 1, true);
+    }
+
+    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, int maxCount, boolean replace)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, maxCount);
         MinecraftForge.EVENT_BUS.post(event);
@@ -86,28 +91,45 @@ public class TempHelper
                 AtomicInteger duplicateCount = new AtomicInteger(0);
                 if (TempModifierRegistry.getEntries().containsKey(event.getModifier().getID()))
                 {
-                    CSMath.breakableForEach(cap.getModifiers(event.type), (mod, looper) ->
+                    // If we're replacing, remove the old one and add the new one
+                    if (replace)
                     {
-                        if (mod.getID().equals(event.getModifier().getID()))
+                        cap.getModifiers(event.type).removeIf(mod -> mod.getID().equals(event.getModifier().getID()));
+                        cap.getModifiers(event.type).add(event.getModifier());
+                    }
+                    else
+                    {
+                        for (TempModifier mod : cap.getModifiers(event.type))
                         {
-                            if (duplicateCount.getAndIncrement() > event.maxCount)
+                            if (mod.getID().equals(event.getModifier().getID()))
                             {
-                                looper.stop();
+                                if (duplicateCount.getAndIncrement() > event.maxCount)
+                                {
+                                    break;
+                                }
                             }
                         }
-                    });
-                    if (duplicateCount.get() < event.maxCount)
-                    {
-                        cap.getModifiers(event.type).add(event.getModifier());
+                        if (duplicateCount.get() < event.maxCount)
+                        {
+                            cap.getModifiers(event.type).add(event.getModifier());
+                        }
                     }
                 }
                 else
                 {
-                    ColdSweat.LOGGER.error("No TempModifier with ID " + modifier.getID() + " found! Is it not registered?");
+                    ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found! Is it not registered?");
                 }
 
                 if (!player.level.isClientSide)
-                    updateModifiers(player, cap);
+                {
+                    updateModifiers(player,
+                                    cap.getModifiers(Temperature.Types.CORE),
+                                    cap.getModifiers(Temperature.Types.BASE),
+                                    cap.getModifiers(Temperature.Types.WORLD),
+                                    cap.getModifiers(Temperature.Types.RATE),
+                                    cap.getModifiers(Temperature.Types.MAX),
+                                    cap.getModifiers(Temperature.Types.MIN));
+                }
             });
         }
     }
