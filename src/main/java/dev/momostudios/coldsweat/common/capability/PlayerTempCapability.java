@@ -38,57 +38,57 @@ public class PlayerTempCapability implements ITemperatureCap
 
     public double get(Temperature.Types type)
     {
-        switch (type)
+        return switch (type)
         {
-            case WORLD:    return worldTemp;
-            case CORE:     return coreTemp;
-            case BASE:     return baseTemp;
-            case BODY:     return baseTemp + coreTemp;
-            case HOTTEST:  return maxWorldTemp;
-            case COLDEST:  return minWorldTemp;
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getValue(): " + type);
-        }
+            case WORLD -> worldTemp;
+            case CORE  -> coreTemp;
+            case BASE  -> baseTemp;
+            case BODY  -> baseTemp + coreTemp;
+            case MAX   -> maxWorldTemp;
+            case MIN   -> minWorldTemp;
+            default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getValue(): " + type);
+        };
     }
 
     public void set(Temperature.Types type, double value)
     {
         switch (type)
         {
-            case WORLD   -> this.worldTemp = value;
-            case CORE    -> this.coreTemp  = value;
-            case BASE    -> this.baseTemp  = value;
-            case HOTTEST -> this.maxWorldTemp = value;
-            case COLDEST -> this.minWorldTemp = value;
+            case WORLD -> this.worldTemp = value;
+            case CORE  -> this.coreTemp  = value;
+            case BASE  -> this.baseTemp  = value;
+            case MAX   -> this.maxWorldTemp = value;
+            case MIN   -> this.minWorldTemp = value;
             default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.setValue(): " + type);
         }
     }
 
     public List<TempModifier> getModifiers(Temperature.Types type)
     {
-        switch (type)
+        return switch (type)
         {
-            case WORLD:    { return worldModifiers; }
-            case CORE:     { return bodyModifiers; }
-            case BASE:     { return baseModifiers; }
-            case RATE:     { return rateModifiers; }
-            case HOTTEST:  { return maxWorldModifiers; }
-            case COLDEST:  { return minWorldModifiers; }
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getModifiers(): " + type);
-        }
+            case WORLD -> worldModifiers;
+            case CORE  -> bodyModifiers;
+            case BASE  -> baseModifiers;
+            case RATE  -> rateModifiers;
+            case MAX   -> maxWorldModifiers;
+            case MIN   -> minWorldModifiers;
+            default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getModifiers(): " + type);
+        };
     }
 
     public boolean hasModifier(Temperature.Types type, Class<? extends TempModifier> mod)
     {
-        switch (type)
+        return switch (type)
         {
-            case WORLD:    { return this.worldModifiers.stream().anyMatch(mod::isInstance); }
-            case CORE:     { return this.bodyModifiers.stream().anyMatch(mod::isInstance); }
-            case BASE:     { return this.baseModifiers.stream().anyMatch(mod::isInstance); }
-            case RATE:     { return this.rateModifiers.stream().anyMatch(mod::isInstance); }
-            case HOTTEST:  { return this.maxWorldModifiers.stream().anyMatch(mod::isInstance); }
-            case COLDEST:  { return this.minWorldModifiers.stream().anyMatch(mod::isInstance); }
-            default: throw new IllegalArgumentException("Illegal type for PlayerTempCapability.hasModifier(): " + type);
-        }
+            case WORLD -> this.worldModifiers.stream().anyMatch(mod::isInstance);
+            case CORE  -> this.bodyModifiers.stream().anyMatch(mod::isInstance);
+            case BASE  -> this.baseModifiers.stream().anyMatch(mod::isInstance);
+            case RATE  -> this.rateModifiers.stream().anyMatch(mod::isInstance);
+            case MAX   -> this.maxWorldModifiers.stream().anyMatch(mod::isInstance);
+            case MIN   -> this.minWorldModifiers.stream().anyMatch(mod::isInstance);
+            default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.hasModifier(): " + type);
+        };
     }
 
 
@@ -96,12 +96,12 @@ public class PlayerTempCapability implements ITemperatureCap
     {
         switch (type)
         {
-            case WORLD ->   this.worldModifiers.clear();
-            case CORE ->    this.bodyModifiers.clear();
-            case BASE ->    this.baseModifiers.clear();
-            case RATE ->    this.rateModifiers.clear();
-            case HOTTEST -> this.maxWorldModifiers.clear();
-            case COLDEST -> this.minWorldModifiers.clear();
+            case WORLD -> this.worldModifiers.clear();
+            case CORE  -> this.bodyModifiers.clear();
+            case BASE  -> this.baseModifiers.clear();
+            case RATE  -> this.rateModifiers.clear();
+            case MAX   -> this.maxWorldModifiers.clear();
+            case MIN   -> this.minWorldModifiers.clear();
             default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.clearModifiers(): " + type);
         }
     }
@@ -112,8 +112,8 @@ public class PlayerTempCapability implements ITemperatureCap
         tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.CORE));
         tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.BASE));
         tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.RATE));
-        tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.HOTTEST));
-        tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.COLDEST));
+        tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MAX));
+        tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MIN));
     }
 
     public void tickUpdate(Player player)
@@ -131,10 +131,10 @@ public class PlayerTempCapability implements ITemperatureCap
 
         Temperature baseTemp = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.BASE));
 
-        double maxOffset = tickModifiers(new Temperature(maxWorldTemp), player, getModifiers(Temperature.Types.HOTTEST)).get();
-        double minOffset = tickModifiers(new Temperature(minWorldTemp), player, getModifiers(Temperature.Types.COLDEST)).get();
-        set(Temperature.Types.HOTTEST, maxOffset);
-        set(Temperature.Types.COLDEST, minOffset);
+        double maxOffset = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MAX)).get();
+        double minOffset = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MIN)).get();
+        set(Temperature.Types.MAX, maxOffset);
+        set(Temperature.Types.MIN, minOffset);
 
         double maxTemp = config.maxTemp + maxOffset;
         double minTemp = config.minTemp + minOffset;
@@ -168,8 +168,8 @@ public class PlayerTempCapability implements ITemperatureCap
                     new Temperature(get(Temperature.Types.CORE)),
                     new Temperature(get(Temperature.Types.BASE)),
                     new Temperature(get(Temperature.Types.WORLD)),
-                    new Temperature(get(Temperature.Types.HOTTEST)),
-                    new Temperature(get(Temperature.Types.COLDEST)));
+                    new Temperature(get(Temperature.Types.MAX)),
+                    new Temperature(get(Temperature.Types.MIN)));
         }
 
         // Sets the player's body temperature to BASE + CORE
@@ -246,11 +246,11 @@ public class PlayerTempCapability implements ITemperatureCap
         // Save the player's temperature data
         nbt.putDouble(TempHelper.getTempTag(Temperature.Types.CORE), get(Temperature.Types.CORE));
         nbt.putDouble(TempHelper.getTempTag(Temperature.Types.BASE), get(Temperature.Types.BASE));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.HOTTEST), get(Temperature.Types.HOTTEST));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.COLDEST), get(Temperature.Types.COLDEST));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.MAX), get(Temperature.Types.MAX));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.MIN), get(Temperature.Types.MIN));
 
         // Save the player's modifiers
-        Temperature.Types[] validTypes = {Temperature.Types.CORE, Temperature.Types.BASE, Temperature.Types.RATE, Temperature.Types.HOTTEST, Temperature.Types.COLDEST};
+        Temperature.Types[] validTypes = {Temperature.Types.CORE, Temperature.Types.BASE, Temperature.Types.RATE, Temperature.Types.MAX, Temperature.Types.MIN};
         for (Temperature.Types type : validTypes)
         {
             ListTag modifiers = new ListTag();
