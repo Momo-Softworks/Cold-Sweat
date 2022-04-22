@@ -470,9 +470,10 @@ Translation:
 - Messages that show when the player is prevented from sleeping have their own translation keys
 
 Fixes:
-- Fixed biome temperature not working properly in some cases (1.18.1)
 - Fixed custom particles rendering incorrectly (1.18.x)
 - Fixed issue that caused players' world temperatures to be "linked" in multiplayer
+- Fixed crash that would occur when loading/unloading chunks (1.16.5)
+- Fixed special minecarts duplicating their contents (i.e. hopper minecarts duplicating hoppers)
 
 Technical Changes:
 - Backend parity between versions (especially for API-related things)

@@ -52,7 +52,7 @@ public class AddTempModifiers
                     int potionLevel = effect.getAmplifier() + 1;
 
                     TempHelper.removeModifiers(player, Temperature.Types.CORE, 1, (modifier) -> modifier instanceof HearthTempModifier);
-                    TempHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(20), Temperature.Types.WORLD, 1);
+                    TempHelper.addModifier(player, new HearthTempModifier(potionLevel).expires(20), Temperature.Types.WORLD, 1, false);
                 }
             }
 
