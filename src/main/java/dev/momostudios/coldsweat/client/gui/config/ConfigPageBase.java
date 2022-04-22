@@ -8,12 +8,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.config.ConfigCache;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public abstract class ConfigPageBase extends Screen
 {
     // Count how many ticks the mouse has been still for
@@ -47,7 +47,6 @@ public abstract class ConfigPageBase extends Screen
     private final ConfigCache configCache;
 
     public Map<String, List<Widget>> elementBatches = new HashMap<>();
-    public List<ConfigLabel> labels = new ArrayList<>();
     public Map<String, List<FormattedText>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
@@ -197,8 +196,8 @@ public abstract class ConfigPageBase extends Screen
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
         this.addRenderableWidget(textBox);
+        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY, shouldBeActive ? 16777215 : 8421504));
 
-        this.labels.add(new ConfigLabel(id, label.getString(), this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY, shouldBeActive ? 16777215 : 8421504));
         this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(textBox));
 
@@ -260,9 +259,10 @@ public abstract class ConfigPageBase extends Screen
             reset.run();
         });
         resetButton.active = shouldBeActive;
-        this.addRenderableWidget(resetButton);
 
-        this.labels.add(new ConfigLabel(id, label.getString(), this.width / 2 + 52, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        this.addRenderableWidget(resetButton);
+        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + 52, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+
         this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton));
 
@@ -306,6 +306,7 @@ public abstract class ConfigPageBase extends Screen
     {
         this.renderBackground(poseStack);
 
+        // Page Title
         drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
@@ -328,69 +329,65 @@ public abstract class ConfigPageBase extends Screen
             this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
         }
 
-        // Render labels for everything
-        for (ConfigLabel label : this.labels)
-        {
-            drawString(poseStack, this.font, label.text, label.x, label.y, label.color);
-        }
-
         super.render(poseStack, mouseX, mouseY, partialTicks);
 
         // Render tooltip
         if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
-        for (Map.Entry<String, List<Widget>> widget : this.elementBatches.entrySet())
         {
-            int x;
-            int y;
-            int maxX;
-            int maxY;
-            ConfigLabel label = null;
-            if (widget.getValue().size() == 1 && widget.getValue().get(0) instanceof Button button)
+            for (Map.Entry<String, List<Widget>> widget : this.elementBatches.entrySet())
             {
-                x = button.x;
-                y = button.y;
-                maxX = x + button.getWidth();
-                maxY = y + button.getHeight();
-                String id = widget.getKey();
-
-                if (mouseX >= x && mouseX <= maxX - 1
-                &&  mouseY >= y && mouseY <= maxY - 1)
+                int x;
+                int y;
+                int maxX;
+                int maxY;
+                ConfigLabel label = null;
+                if (widget.getValue().size() == 1 && widget.getValue().get(0) instanceof Button button)
                 {
-                    List<FormattedText> tooltipList = this.tooltips.get(id);
-                    if (tooltipList != null && !tooltipList.isEmpty())
+                    x = button.x;
+                    y = button.y;
+                    maxX = x + button.getWidth();
+                    maxY = y + button.getHeight();
+                    String id = widget.getKey();
+
+                    if (mouseX >= x && mouseX <= maxX - 1
+                            && mouseY >= y && mouseY <= maxY - 1)
                     {
-                        List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
-                        this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
-                        break;
+                        List<FormattedText> tooltipList = this.tooltips.get(id);
+                        if (tooltipList != null && !tooltipList.isEmpty())
+                        {
+                            List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                            this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+                            break;
+                        }
                     }
                 }
-            }
-            else
-            {
-                for (ConfigLabel label1 : this.labels)
+                else
                 {
-                    if (label1.id.equals(widget.getKey()))
+                    for (GuiEventListener eventListener : this.children())
                     {
-                        label = label1;
-                        break;
+                        if (eventListener instanceof ConfigLabel label1 && label1.id.equals(widget.getKey()))
+                        {
+                            label = label1;
+                            break;
+                        }
                     }
-                }
-                if (label == null) continue;
+                    if (label == null) continue;
 
-                x = label.x;
-                y = label.y;
-                maxX = label.x + font.width(label.text);
-                maxY = label.y + font.lineHeight;
+                    x = label.x;
+                    y = label.y;
+                    maxX = label.x + font.width(label.text);
+                    maxY = label.y + font.lineHeight;
 
-                if (mouseX >= x - 2 && mouseX <= maxX + 2
-                &&  mouseY >= y - 5 && mouseY <= maxY + 5)
-                {
-                    List<FormattedText> tooltipList = this.tooltips.get(label.id);
-                    if (tooltipList != null && !tooltipList.isEmpty())
+                    if (mouseX >= x - 2 && mouseX <= maxX + 2
+                            && mouseY >= y - 5 && mouseY <= maxY + 5)
                     {
-                        List<Component> tooltip = this.tooltips.get(label.id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
-                        this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
-                        break;
+                        List<FormattedText> tooltipList = this.tooltips.get(label.id);
+                        if (tooltipList != null && !tooltipList.isEmpty())
+                        {
+                            List<Component> tooltip = this.tooltips.get(label.id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                            this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+                            break;
+                        }
                     }
                 }
             }
