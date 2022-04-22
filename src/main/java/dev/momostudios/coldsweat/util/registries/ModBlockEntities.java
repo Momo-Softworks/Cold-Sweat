@@ -18,6 +18,6 @@ public class ModBlockEntities
 
     public static BlockEntityType<?> get(String id)
     {
-        return RegistryObject.of(new ResourceLocation(ColdSweat.MOD_ID, id), ForgeRegistries.BLOCK_ENTITIES).get();
+        return RegistryObject.create(new ResourceLocation(ColdSweat.MOD_ID, id), ForgeRegistries.BLOCK_ENTITIES).get();
     }
 }

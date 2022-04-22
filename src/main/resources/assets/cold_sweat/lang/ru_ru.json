@@ -114,7 +114,6 @@
   "cold_sweat.config.units.desc":                   "Показывает температуру в градусах цельсия или фаренгейта.",
   "cold_sweat.config.world_temp_location.desc":     "Позиция показателя внешней температуры",
 
-
   "cold_sweat.message.sleep.hot":           "жарко",
   "cold_sweat.message.sleep.cold":          "холодно",
   "cold_sweat.message.sleep.body":          "Вам слишком %d чтобы спать сейчас",
