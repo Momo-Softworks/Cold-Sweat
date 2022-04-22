@@ -119,8 +119,8 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #HOTTEST}: The hottest temperature the player can withstand before affecting body temperature. <br>
-     * {@link #COLDEST}: The coldest temperature the player can withstand before affecting body temperature. <br>
+     * {@link #MAX}: The hottest temperature the player can withstand before affecting body temperature. <br>
+     * {@link #MIN}: The coldest temperature the player can withstand before affecting body temperature. <br>
      * <br>
      * {@link #CORE}: The core temperature of the player. <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
@@ -130,8 +130,8 @@ public class Temperature
     public enum Types
     {
         WORLD,
-        HOTTEST,
-        COLDEST,
+        MAX,
+        MIN,
         CORE,
         BASE,
         BODY,

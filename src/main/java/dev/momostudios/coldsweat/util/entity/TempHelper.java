@@ -13,13 +13,8 @@ import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
-import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -216,8 +211,8 @@ public class TempHelper
             case WORLD :     return "worldTempModifiers";
             case BASE :      return "baseTempModifiers";
             case RATE :      return "rateTempModifiers";
-            case HOTTEST:    return "hottestTempModifiers";
-            case COLDEST:    return "coldestTempModifiers";
+            case MAX:        return "hottestTempModifiers";
+            case MIN:        return "coldestTempModifiers";
             default : throw new IllegalArgumentException("PlayerTempHandler.getModifierTag() received illegal Type argument");
         }
     }
@@ -236,8 +231,8 @@ public class TempHelper
             case WORLD :     return "worldTemperature";
             case BASE :      return "baseTemperature";
             case BODY :      return "bodyTemperature";
-            case HOTTEST:    return "hottestTemperature";
-            case COLDEST:    return "coldestTemperature";
+            case MAX:        return "hottestTemperature";
+            case MIN:        return "coldestTemperature";
             default : throw new IllegalArgumentException("PlayerTempHandler.getTempTag() received illegal Type argument");
         }
     }
@@ -270,8 +265,8 @@ public class TempHelper
                             cap.getModifiers(Temperature.Types.WORLD),
                             cap.getModifiers(Temperature.Types.BASE),
                             cap.getModifiers(Temperature.Types.RATE),
-                            cap.getModifiers(Temperature.Types.HOTTEST),
-                            cap.getModifiers(Temperature.Types.COLDEST)));
+                            cap.getModifiers(Temperature.Types.MAX),
+                            cap.getModifiers(Temperature.Types.MIN)));
         }
     }
 }

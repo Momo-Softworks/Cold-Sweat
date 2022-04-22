@@ -67,11 +67,11 @@ public class PlayerTempSyncMessage
                 {
                     player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.set(Temperature.Types.CORE, body);
-                        cap.set(Temperature.Types.BASE, base);
+                        cap.set(Temperature.Types.CORE,  body);
+                        cap.set(Temperature.Types.BASE,  base);
                         cap.set(Temperature.Types.WORLD, world);
-                        cap.set(Temperature.Types.HOTTEST, max);
-                        cap.set(Temperature.Types.COLDEST, min);
+                        cap.set(Temperature.Types.MAX,   max);
+                        cap.set(Temperature.Types.MIN,   min);
                     });
                 }
             }

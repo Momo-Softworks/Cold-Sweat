@@ -42,8 +42,8 @@ public class WorldTempGaugeDisplay
 
             ITemperatureCap tempCap = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
 
-            double min = ConfigCache.getInstance().minTemp + tempCap.get(Temperature.Types.COLDEST);
-            double max = ConfigCache.getInstance().maxTemp + tempCap.get(Temperature.Types.HOTTEST);
+            double min = ConfigCache.getInstance().minTemp + tempCap.get(Temperature.Types.MIN);
+            double max = ConfigCache.getInstance().maxTemp + tempCap.get(Temperature.Types.MAX);
             double mid = (ConfigCache.getInstance().minTemp + ConfigCache.getInstance().maxTemp) / 2;
 
             boolean bobbing = CCS.iconBobbing();
