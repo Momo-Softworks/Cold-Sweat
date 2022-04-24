@@ -29,6 +29,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
@@ -486,6 +487,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.setColdFuel(tag.getInt("coldFuel"));
         this.setHotFuel(tag.getInt("hotFuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag, this.items);
     }
 
     @Override
@@ -494,6 +496,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         super.saveAdditional(tag);
         tag.putInt("coldFuel", this.getColdFuel());
         tag.putInt("hotFuel", this.getHotFuel());
+        ContainerHelper.saveAllItems(tag, this.items);
     }
 
     public void replacePaths(Map<BlockPos, SpreadPath> newPaths)

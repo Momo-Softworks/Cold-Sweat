@@ -1,8 +1,11 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -11,26 +14,27 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.BoilerBlock;
 import dev.momostudios.coldsweat.common.container.BoilerContainer;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class BoilerBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider
+public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer, StackedContentsCompatible
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -72,7 +76,6 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
         if (te instanceof BoilerBlockEntity boilerTE)
         {
             boilerTE.ticksExisted++;
-            boilerTE.ticksExisted %= 1000;
 
             if (boilerTE.getFuel() > 0)
             {
@@ -81,16 +84,17 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 if (boilerTE.ticksExisted % 20 == 0)
                 {
-                    boolean hasItemStacks = false;
+                    boolean warmingItems = false;
                     for (int i = 0; i < 10; i++)
                     {
-                        if (boilerTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") < 50)
+                        ItemStack slotStack = boilerTE.getItemInSlot(i);
+                        if (slotStack.getItem() == ModItems.FILLED_WATERSKIN && slotStack.getOrCreateTag().getInt("temperature") < 50)
                         {
-                            hasItemStacks = true;
-                            boilerTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", boilerTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") + 1);
+                            warmingItems = true;
+                            NBTHelper.incrementTag(slotStack, "temperature", 1);
                         }
                     }
-                    if (hasItemStacks) boilerTE.setFuel(boilerTE.getFuel() - 1);
+                    if (warmingItems) boilerTE.setFuel(boilerTE.getFuel() - 1);
                 }
             }
             else if (state.getValue(BoilerBlock.LIT))
@@ -137,16 +141,12 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public ItemStack getItemInSlot(int index)
     {
-        return getCap().map(c -> c.getStackInSlot(index)).orElse(ItemStack.EMPTY);
+        return this.items.get(index);
     }
 
     public void setItemInSlot(int index, ItemStack stack)
     {
-        getCap().ifPresent(capability ->
-        {
-            capability.getStackInSlot(index).shrink(capability.getStackInSlot(index).getCount());
-            capability.insertItem(index, stack, false);
-        });
+        this.items.set(index, stack);
     }
 
     public int getFuel()
@@ -159,11 +159,6 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
         this.getTileData().putInt("fuel", Math.min(amount, MAX_FUEL));
     }
 
-    public LazyOptional<IItemHandler> getCap()
-    {
-        return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-    }
-
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
@@ -174,14 +169,16 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
     public void load(CompoundTag tag)
     {
         super.load(tag);
-        this.setFuel(tag.getInt("fuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag, this.items);
+        this.setFuel(tag.getInt("fuel"));
     }
 
     @Override
     public void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
+        ContainerHelper.saveAllItems(tag, this.items);
         tag.putInt("fuel", this.getFuel());
     }
 
@@ -240,14 +237,31 @@ public class BoilerBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     @Override
-    protected NonNullList<ItemStack> getItems()
+    public int[] getSlotsForFace(Direction direction)
     {
-        return this.items;
+        if (direction == Direction.UP || direction == Direction.DOWN) return WATERSKIN_SLOTS;
+        return FUEL_SLOT;
     }
 
     @Override
-    protected void setItems(NonNullList<ItemStack> items)
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction)
     {
-        this.items = items;
+        return (stack.getItem() == ModItems.FILLED_WATERSKIN && CSMath.isBetween(slot, 1, 9) && direction == Direction.UP)
+            || (getItemFuel(stack) > 0 && slot == 0 && direction != Direction.UP && direction != Direction.DOWN);
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
+    {
+        return stack.getItem() == ModItems.FILLED_WATERSKIN && CSMath.isBetween(slot, 1, 9) && direction == Direction.DOWN;
+    }
+
+    @Override
+    public void fillStackedContents(StackedContents contents)
+    {
+        for (ItemStack stack : items)
+        {
+            contents.accountStack(stack);
+        }
     }
 }

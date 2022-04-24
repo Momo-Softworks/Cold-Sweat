@@ -181,18 +181,20 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
-    public void load(CompoundTag nbt)
+    public void load(CompoundTag tag)
     {
-        super.load(nbt);
-        this.setFuel(nbt.getInt("fuel"));
+        super.load(tag);
+        this.setFuel(tag.getInt("fuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag, this.items);
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound)
+    public void saveAdditional(CompoundTag tag)
     {
-        super.saveAdditional(compound);
-        compound.putInt("fuel", this.getFuel());
+        super.saveAdditional(tag);
+        tag.putInt("fuel", this.getFuel());
+        ContainerHelper.saveAllItems(tag, this.items);
     }
 
     @Override
