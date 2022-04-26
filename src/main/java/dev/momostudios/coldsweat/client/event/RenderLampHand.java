@@ -26,6 +26,15 @@ import java.lang.reflect.Method;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
+    static Method renderItem = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "renderArmWithItem",
+                                                               AbstractClientPlayer.class, float.class, float.class,
+                                                               InteractionHand.class, float.class, ItemStack.class,
+                                                               float.class, PoseStack.class, MultiBufferSource.class, int.class);
+    static
+    {
+        renderItem.setAccessible(true);
+    }
+
     @SubscribeEvent
     public static void onHandRender(RenderHandEvent event)
     {
@@ -34,32 +43,34 @@ public class RenderLampHand
         {
             LocalPlayer player = Minecraft.getInstance().player;
             PoseStack ms = event.getPoseStack();
-            VertexConsumer playerSkin = event.getMultiBufferSource().getBuffer(RenderType.entityCutout(player.getSkinTextureLocation()));
             boolean isRightHand = PlayerHelper.getArmFromHand(event.getHand(), player) == HumanoidArm.RIGHT;
 
             event.setCanceled(true);
-
 
             ms.pushPose();
             ms.mulPose(Vector3f.YP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 5 - 5)));
             ms.mulPose(Vector3f.ZP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 10 - 10)));
 
-            ms.translate(0.0d,
-                         event.getEquipProgress() == 0 ? Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2 - Math.PI * 0.5) * 0.1 : 0,
-                         Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 0 - 0);
+            ms.translate
+            (
+                0.0d,
+                Math.cos(Math.min(event.getSwingProgress() * 1.1, 1) * Math.PI * 2 - Math.PI * 0.5) * 0.1
+                    + (event.getEquipProgress() == 0 ? (Math.cos(event.getSwingProgress() * Math.PI * 2) - 1) * 0.2 : 0),
+                Math.cos(Math.min(event.getSwingProgress() * 1.1, 1) * Math.PI * 2) * -0.0 - 0
+            );
 
             ms.pushPose();
 
             if (isRightHand)
             {
-                ms.translate(0.71, -0.2, -0.42);
+                ms.translate(0.75, -0.3, -0.36);
             }
             else
             {
-                ms.translate(-0.71, -0.2, -0.42);
+                ms.translate(-0.75, -0.3, -0.36);
             }
 
-            ms.scale(0.55f, 0.6f, 0.52f);
+            ms.scale(0.75f, 0.8f, 0.72f);
 
             PlayerRenderer handRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().<AbstractClientPlayer>getRenderer(player);
             if (isRightHand)
@@ -75,17 +86,13 @@ public class RenderLampHand
                 ms.mulPose(Vector3f.ZP.rotationDegrees(-98));
                 ms.mulPose(Vector3f.YP.rotationDegrees(190.0F));
                 ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                ms.translate(-event.getEquipProgress() * 1.5, -event.getEquipProgress() * 0.5, -event.getEquipProgress() * 0.2);
+                ms.translate(-event.getEquipProgress() * 1, -event.getEquipProgress() * 0.2, -event.getEquipProgress() * 0.2);
                 handRenderer.renderLeftHand(ms, event.getMultiBufferSource(), event.getPackedLight(), player);
             }
             ms.popPose();
 
             ms.pushPose();
-            Method renderItem = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "renderArmWithItem",
-                                                                       AbstractClientPlayer.class, float.class, float.class,
-                                                                       InteractionHand.class, float.class, ItemStack.class,
-                                                                       float.class, PoseStack.class, MultiBufferSource.class, int.class);
-            renderItem.setAccessible(true);
+            ms.translate(-event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.15, -0.05);
             try
             {
                 renderItem.invoke(Minecraft.getInstance().getItemInHandRenderer(),
