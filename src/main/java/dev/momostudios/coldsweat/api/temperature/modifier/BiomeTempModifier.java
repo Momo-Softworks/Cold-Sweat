@@ -9,26 +9,39 @@ import dev.momostudios.coldsweat.config.ConfigCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@Mod.EventBusSubscriber
 public class BiomeTempModifier extends TempModifier
 {
+    static Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
+    static
+    {
+        getTemperature.setAccessible(true);
+    }
+
+    static Map<ResourceLocation, Double> biomeOverrides = new HashMap<>();
+    static Map<ResourceLocation, Double> biomeOffsets = new HashMap<>();
+    static Map<ResourceLocation, Double> dimensionOverrides = new HashMap<>();
+    static Map<ResourceLocation, Double> dimensionOffsets = new HashMap<>();
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
-        Method getTemperature = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
-        getTemperature.setAccessible(true);
-
         BiomeManager biomeManager = player.level.getBiomeManager();
 
         try
         {
             double worldTemp = 0;
-            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 100, 10))
             {
                 Biome biome;
 
@@ -58,7 +71,7 @@ public class BiomeTempModifier extends TempModifier
                     return new Temperature(biomeOverride.value);
                 }
             }
-            return temp.add(worldTemp / 200);
+            return temp.add(worldTemp / 100);
         }
         catch (Exception e)
         {
@@ -69,21 +82,42 @@ public class BiomeTempModifier extends TempModifier
     protected double getTemperatureOffset(ResourceLocation biomeID, ResourceLocation dimensionID)
     {
         double offset = 0;
-        for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("biome_offsets"))
+        if (biomeOffsets.containsKey(biomeID))
         {
-            if (value.get(0).equals(biomeID.toString()))
+            offset += biomeOffsets.get(biomeID);
+        }
+        else
+        {
+            double foundValue;
+            for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("biome_offsets"))
             {
-                offset += ((Number) value.get(1)).doubleValue();
-                break;
+                if (value.get(0).equals(biomeID.toString()))
+                {
+                    foundValue = ((Number) value.get(1)).doubleValue();
+                    offset += foundValue;
+                    biomeOffsets.put(biomeID, foundValue);
+                    break;
+                }
             }
+            biomeOffsets.put(biomeID, offset);
         }
 
-        for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets"))
+        if (dimensionOffsets.containsKey(biomeID))
         {
-            if (value.get(0).equals(dimensionID.toString()))
+            offset += dimensionOffsets.get(biomeID);
+        }
+        else
+        {
+            double foundValue;
+            for (List<Object> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_offsets"))
             {
-                offset += ((Number) value.get(1)).doubleValue();
-                break;
+                if (value.get(0).equals(dimensionID.toString()))
+                {
+                    foundValue = ((Number) value.get(1)).doubleValue();
+                    offset += foundValue;
+                    dimensionOffsets.put(biomeID, foundValue);
+                    break;
+                }
             }
         }
         return offset;
@@ -91,20 +125,38 @@ public class BiomeTempModifier extends TempModifier
 
     protected TempOverride biomeOverride(ResourceLocation biomeID)
     {
+        if (biomeOverrides.containsKey(biomeID))
+        {
+            return new TempOverride(true, biomeOverrides.get(biomeID));
+        }
+
         for (List<?> value : ConfigCache.getInstance().worldOptionsReference.get("biome_temperatures"))
         {
             if (value.get(0).equals(biomeID.toString()))
-                return new TempOverride(true, ((Number) value.get(1)).doubleValue());
+            {
+                double temp = ((Number) value.get(1)).doubleValue();
+                biomeOverrides.put(biomeID, temp);
+                return new TempOverride(true, temp);
+            }
         }
         return new TempOverride(false, 0.0d);
     }
 
-    protected TempOverride dimensionOverride(ResourceLocation biomeID)
+    protected TempOverride dimensionOverride(ResourceLocation dimensionID)
     {
+        if (dimensionOverrides.containsKey(dimensionID))
+        {
+            return new TempOverride(true, dimensionOverrides.get(dimensionID));
+        }
+
         for (List<?> value : ConfigCache.getInstance().worldOptionsReference.get("dimension_temperatures"))
         {
-            if (value.get(0).equals(biomeID.toString()))
-                return new TempOverride(true, ((Number) value.get(1)).doubleValue());
+            if (value.get(0).equals(dimensionID.toString()))
+            {
+                double temp = ((Number) value.get(1)).doubleValue();
+                dimensionOverrides.put(dimensionID, temp);
+                return new TempOverride(true, temp);
+            }
         }
         return new TempOverride(false, 0.0d);
     }
@@ -119,6 +171,15 @@ public class BiomeTempModifier extends TempModifier
             this.override = override;
             this.value = value;
         }
+    }
+
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event)
+    {
+        biomeOffsets.clear();
+        biomeOverrides.clear();
+        dimensionOffsets.clear();
+        dimensionOverrides.clear();
     }
 
     public String getID()
