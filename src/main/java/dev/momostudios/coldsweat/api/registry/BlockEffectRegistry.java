@@ -49,10 +49,9 @@ public class BlockEffectRegistry
     public static BlockEffect getEntryFor(BlockState blockstate)
     {
         Block block = blockstate.getBlock();
-        if (MAPPED_BLOCKS.containsKey(block))
-        {
-            return MAPPED_BLOCKS.get(block);
-        }
+        BlockEffect mappedEffect = MAPPED_BLOCKS.get(block);
+
+        if (mappedEffect != null) return mappedEffect;
         else
         {
             for (BlockEffect blockEffect : BlockEffectRegistry.BLOCK_EFFECTS)

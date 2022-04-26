@@ -52,7 +52,7 @@ public class BlockTempModifier extends TempModifier
 
                         BlockEffect be = BlockEffectRegistry.getEntryFor(state);
 
-                        if (be == null) continue;
+                        if (be == null || be.equals(BlockEffectRegistry.DEFAULT_BLOCK_EFFECT)) continue;
 
                         // Is totalTemp within the bounds of the BlockEffect's min/max allowed temps?
                         if (CSMath.isBetween(totalTemp, be.minEffect(), be.maxEffect())
@@ -81,11 +81,12 @@ public class BlockTempModifier extends TempModifier
                                 BlockPos bpos1 = new BlockPos(newPos1);
                                 Vec3 facing1 = newPos1.subtract(prevPos1);
                                 Direction dir1 = CSMath.getDirectionFromVector(facing1.x, facing1.y, facing1.z);
+                                BlockState state1 = palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15);
 
                                 LevelChunk newChunk = getChunk(level, new ChunkPos(bpos1), chunkMap);
 
                                 if (!bpos1.equals(new BlockPos(prevPos1)) && !bpos1.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(newChunk, palette.get(bpos1.getX() & 15, bpos1.getY() & 15, bpos1.getZ() & 15), bpos1, dir1))
+                                && !WorldHelper.canSpreadThrough(newChunk, state1, bpos1, dir1))
                                 {
                                     // Divide the added temperature by 2 for each block between the player and the block
                                     blocksBetween++;
@@ -93,14 +94,18 @@ public class BlockTempModifier extends TempModifier
 
                                 // Check if the newPos2 is not a duplicate BlockPos or solid block
                                 BlockPos bpos2 = new BlockPos(newPos2);
-                                Vec3 facing2 = newPos2.subtract(prevPos2);
-                                Direction dir2 = CSMath.getDirectionFromVector(facing2.x, facing2.y, facing2.z);
-
-                                if (!bpos2.equals(new BlockPos(prevPos2)) && !bpos2.equals(blockpos)
-                                && !WorldHelper.canSpreadThrough(newChunk, palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15), bpos2, dir2))
+                                if (bpos2 != bpos1)
                                 {
-                                    // Divide the added temperature by 2 for each block between the player and the block
-                                    blocksBetween++;
+                                    Vec3 facing2 = newPos2.subtract(prevPos2);
+                                    Direction dir2 = CSMath.getDirectionFromVector(facing2.x, facing2.y, facing2.z);
+                                    BlockState state2 = palette.get(bpos2.getX() & 15, bpos2.getY() & 15, bpos2.getZ() & 15);
+
+                                    if (!bpos2.equals(new BlockPos(prevPos2)) && !bpos2.equals(blockpos)
+                                            && !WorldHelper.canSpreadThrough(newChunk, state2, bpos2, dir2))
+                                    {
+                                        // Divide the added temperature by 2 for each block between the player and the block
+                                        blocksBetween++;
+                                    }
                                 }
 
                                 prevPos1 = newPos1;
