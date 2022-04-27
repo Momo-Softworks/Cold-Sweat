@@ -6,5 +6,5 @@ This project is completely open for reference and reproduction as per our GNU GP
 
 ## Documentation
 Documentation for 3rd-party integration with Cold Sweat can be found here (WIP):  
-https://momo-studios.gitbook.io/cold-sweat/  
+https://mikul.gitbook.io/cold-sweat/
 The current documentation is only designed for 1.18.1, but it should be useable for 1.16.5 after the release of 2.1.9.  
