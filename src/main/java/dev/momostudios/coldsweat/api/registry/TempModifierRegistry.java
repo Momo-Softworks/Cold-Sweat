@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.api.registry;
 
 import com.google.common.collect.ImmutableMap;
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 
 import java.util.HashMap;
@@ -17,6 +18,15 @@ public class TempModifierRegistry
 
     public static void register(TempModifier modifier)
     {
+        if (TEMP_MODIFIERS.containsKey(modifier.getID()))
+        {
+            ColdSweat.LOGGER.error("""
+                                   Found duplicate TempModifier entries:
+                                   {} ({})
+                                   {} ({})""", modifier.getClass().getName(), modifier.getID(),
+                                          TEMP_MODIFIERS.get(modifier.getID()).getClass().getName(), modifier.getID());
+            throw new RuntimeException("A TempModifier with the ID \"" + modifier.getID() + "\" already exists!");
+        }
         TEMP_MODIFIERS.put(modifier.getID(), modifier);
     }
 
