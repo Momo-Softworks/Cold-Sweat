@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
-    static Method renderItem = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "renderArmWithItem",
+    static Method renderItem = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "m_109371_",
                                                                AbstractClientPlayer.class, float.class, float.class,
                                                                InteractionHand.class, float.class, ItemStack.class,
                                                                float.class, PoseStack.class, MultiBufferSource.class, int.class);
