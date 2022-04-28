@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.event;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -15,16 +16,16 @@ public class HearthPathManagement
     @SubscribeEvent
     public static void onBlockUpdated(BlockEvent.NeighborNotifyEvent event)
     {
-        int chunkX = (event.getPos().getX() >> 4) - 1;
-        int chunkZ = (event.getPos().getZ() >> 4) - 1;
+        int chunkX = (event.getPos().getX() >> 4);
+        int chunkZ = (event.getPos().getZ() >> 4);
 
-        for (int x = 0; x < 3; x++)
+        for (int x = -1; x < 1; x++)
         {
-            for (int z = 0; z < 3; z++)
+            for (int z = -1; z < 1; z++)
             {
                 LevelChunk chunk = event.getWorld().getChunkSource().getChunkNow(chunkX + x, chunkZ + z);
 
-                if (chunk != null)
+                if (chunk != null && event.getWorld().getChunkSource() instanceof ServerChunkCache)
                 chunk.getBlockEntities().forEach((pos, block) ->
                 {
                     if (block instanceof HearthBlockEntity hearth && !hearth.shouldRebuild())
