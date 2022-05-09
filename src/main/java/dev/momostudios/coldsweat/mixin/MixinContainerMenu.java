@@ -21,7 +21,8 @@ public class MixinContainerMenu
 {
     AbstractContainerMenu menu = (AbstractContainerMenu) (Object) this;
 
-    @Inject(method = "clicked(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), remap = ColdSweat.remapMixins, cancellable = true)
+    @Inject(method = "clicked(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"),
+    remap = ColdSweat.remapMixins, cancellable = true)
     public void slotClicked(int slotId, int mouseButton, ClickType clickType, Player player, CallbackInfo ci)
     {
         try

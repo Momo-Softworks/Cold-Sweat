@@ -37,7 +37,8 @@ public class MixinXPBar
             at = @At
             (
                 value = "INVOKE",
-                target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", shift = At.Shift.AFTER
+                target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
+                shift = At.Shift.AFTER
             ),
             slice = @Slice
             (
