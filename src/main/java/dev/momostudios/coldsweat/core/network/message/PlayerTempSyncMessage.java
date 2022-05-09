@@ -19,9 +19,6 @@ public class PlayerTempSyncMessage
     public double max;
     public double min;
 
-    public PlayerTempSyncMessage() {
-    }
-
     public PlayerTempSyncMessage(double body, double base, double world, double max, double min)
     {
         this.body = body;
@@ -49,32 +46,24 @@ public class PlayerTempSyncMessage
     {
         NetworkEvent.Context context = contextSupplier.get();
 
-        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message.body, message.base, message.world, message.max, message.min)));
+        if (context.getDirection().getReceptionSide().isClient())
+        context.enqueueWork(() ->
+        {
+            LocalPlayer player = Minecraft.getInstance().player;
+
+            if (player != null && !player.isSpectator())
+            {
+                player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                {
+                    cap.set(Temperature.Types.CORE,  message.body);
+                    cap.set(Temperature.Types.BASE,  message.base);
+                    cap.set(Temperature.Types.WORLD, message.world);
+                    cap.set(Temperature.Types.MAX,   message.max);
+                    cap.set(Temperature.Types.MIN,   message.min);
+                });
+            }
+        });
 
         context.setPacketHandled(true);
-    }
-
-    public static DistExecutor.SafeRunnable syncTemperature(double body, double base, double world, double max, double min)
-    {
-        return new DistExecutor.SafeRunnable()
-        {
-            @Override
-            public void run()
-            {
-                LocalPlayer player = Minecraft.getInstance().player;
-
-                if (player != null && !player.isSpectator())
-                {
-                    player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-                    {
-                        cap.set(Temperature.Types.CORE,  body);
-                        cap.set(Temperature.Types.BASE,  base);
-                        cap.set(Temperature.Types.WORLD, world);
-                        cap.set(Temperature.Types.MAX,   max);
-                        cap.set(Temperature.Types.MIN,   min);
-                    });
-                }
-            }
-        };
     }
 }
