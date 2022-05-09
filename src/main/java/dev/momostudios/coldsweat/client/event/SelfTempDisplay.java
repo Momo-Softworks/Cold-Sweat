@@ -22,50 +22,47 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SelfTempDisplay
 {
-    public static ITemperatureCap playerCap = null;
-    static int playerTemp = 0;
-    static int iconBob = 0;
-    static int bobTimer = 0;
+    public static ITemperatureCap PLAYER_CAP = null;
+    static int PLAYER_TEMP = 0;
+    static int ICON_BOB = 0;
+    static int ICON_BOB_TIMER = 0;
 
-    static int currentIcon = 0;
-    static int prevIcon = 0;
-    static int transitionProgress = 0;
+    static int CURRENT_ICON = 0;
+    static int PREV_ICON = 0;
+    static int TRANSITION_PROGRESS = 0;
+    static int BLEND_TIME = 10;
 
-    static int blendTime = 5;
+    static int TEMP_SEVERITY = 0;
 
     @SubscribeEvent
     public static void handleTransition(TickEvent.ClientTickEvent event)
     {
-        blendTime = 10;
-        if (Minecraft.getInstance().cameraEntity instanceof Player entity)
+        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().cameraEntity instanceof Player entity)
         {
-            if (playerCap == null || entity.tickCount % 40 == 0)
-                playerCap = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
+            if (PLAYER_CAP == null || entity.tickCount % 40 == 0)
+                PLAYER_CAP = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
 
-            playerTemp = (int) playerCap.get(Temperature.Types.BODY);
+            TEMP_SEVERITY = getTempSeverity(PLAYER_TEMP);
 
-            int neededIcon = CSMath.isBetween(playerTemp, 33, 65)   ?  1 :
-                             CSMath.isBetween(playerTemp, 66, 99)   ?  2 :
-                             playerTemp >= 100                      ?  3 :
-                             CSMath.isBetween(playerTemp, -65, -33) ? -1 :
-                             CSMath.isBetween(playerTemp, -99, -66) ? -2 :
-                             playerTemp <= -100                     ? -3 : 0;
+            PLAYER_TEMP = (int) PLAYER_CAP.get(Temperature.Types.BODY);
+
+            int neededIcon = (int) CSMath.clamp(TEMP_SEVERITY, -3, 3);
 
             // Hot Temperatures
-            if (currentIcon != neededIcon)
+            if (CURRENT_ICON != neededIcon)
             {
-                currentIcon = neededIcon;
-                transitionProgress = 0;
+                CURRENT_ICON = neededIcon;
+                TRANSITION_PROGRESS = 0;
             }
 
             // Tick the transition progress
-            if (prevIcon != currentIcon)
+            if (PREV_ICON != CURRENT_ICON)
             {
-                transitionProgress++;
+                TRANSITION_PROGRESS++;
 
-                if (transitionProgress >= blendTime)
+                if (TRANSITION_PROGRESS >= BLEND_TIME)
                 {
-                    prevIcon = currentIcon;
+                    PREV_ICON = CURRENT_ICON;
                 }
             }
         }
@@ -77,73 +74,81 @@ public class SelfTempDisplay
         ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
-        if (mc.cameraEntity instanceof Player entity && !entity.isCreative() && !entity.isSpectator() && playerCap != null)
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && mc.cameraEntity instanceof Player player && !player.isCreative() && !player.isSpectator() && PLAYER_CAP != null)
         {
             int scaleX = event.getWindow().getGuiScaledWidth();
             int scaleY = event.getWindow().getGuiScaledHeight();
 
-            int threatLevel = 0;
+            int threatLevel = switch (CURRENT_ICON)
+            {
+                case  2,-2 -> 1;
+                case  3,-3 -> 2;
+                default -> 0;
+            };
 
-            ResourceLocation icon;
-            ResourceLocation lastIcon;
+            ResourceLocation icon = switch (CURRENT_ICON)
+            {
+                case  1 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png");
+                case  2 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");
+                case  3 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");
+                case -1 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png");
+                case -2 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");
+                case -3 ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");
+                default ->   new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");
+            };
+            ResourceLocation lastIcon = switch (PREV_ICON)
+            {
+                case 1  ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png");
+                case 2  ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");
+                case 3  ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");
+                case -1 ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png");
+                case -2 ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");
+                case -3 ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");
+                default ->  new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");
+            };
+
+            // Get text color
             int color =
-                    playerTemp > 0 ? 16744509 :
-                    playerTemp < 0 ? 4233468 :
+                    PLAYER_TEMP > 0 ? 16744509 :
+                    PLAYER_TEMP < 0 ? 4233468 :
                     11513775;
+            // Get outline color
             int colorBG =
-                    playerTemp < 0 ? 1122643 :
-                    playerTemp > 0 ? 5376516 :
+                    PLAYER_TEMP < 0 ? 1122643 :
+                    PLAYER_TEMP > 0 ? 5376516 :
                     0;
-            int colorBG2 =
-                    CSMath.isBetween(playerTemp, -110, -100) ? 6866175 :
-                    CSMath.isBetween(playerTemp, -120, -110) ? 7390719 :
-                    CSMath.isBetween(playerTemp, -130, -120) ? 9824511 :
-                    CSMath.isBetween(playerTemp, -140, -130) ? 12779519 :
-                    playerTemp < - 140 ?                16777215 :
-                    CSMath.isBetween(playerTemp, 100, 110) ? 16744509 :
-                    CSMath.isBetween(playerTemp, 110, 120) ? 16755544 :
-                    CSMath.isBetween(playerTemp, 120, 130) ? 16766325 :
-                    CSMath.isBetween(playerTemp, 130, 140) ? 16771509 :
-                    playerTemp > 140 ? 16777215 : 0;
-
-            switch (currentIcon)
+            // Get the outer border color when readout is > 100
+            int colorBG2 = switch (TEMP_SEVERITY)
             {
-                case  1 ->   icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png");
-                case  2 -> { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");  threatLevel = 1; }
-                case  3 -> { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");  threatLevel = 2; }
-                case -1 ->   icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png");
-                case -2 -> { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png"); threatLevel = 1; }
-                case -3 -> { icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png"); threatLevel = 2; }
-                default ->  icon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");
-            }
-
-            switch (prevIcon)
-            {
-                case 1  ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_0.png");
-                case 2  ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_1.png");
-                case 3  ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_hot_2.png");
-                case -1 ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_0.png");
-                case -2 ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_1.png");
-                case -3 ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_cold_2.png");
-                default ->  lastIcon = new ResourceLocation("cold_sweat:textures/gui/overlay/temp_gauge_default.png");
-            }
+                case  7, -7 -> 16777215;
+                case  6 -> 16771509;
+                case  5 -> 16766325;
+                case  4 -> 16755544;
+                case  3 -> 16744509;
+                case -3 -> 6866175;
+                case -4 -> 7390719;
+                case -5 -> 9824511;
+                case -6 -> 12779519;
+                default -> 0;
+            };
 
             RenderSystem.defaultBlendFunc();
 
             int threatOffset = 0;
             if (CCS.iconBobbing())
             {
-                if (threatLevel == 1) threatOffset = iconBob;
-                if (threatLevel == 2) threatOffset = entity.tickCount % 2 == 0 ? 1 : 0;
+                if (threatLevel == 1) threatOffset = ICON_BOB;
+                else if (threatLevel == 2) threatOffset = player.tickCount % 2 == 0 ? 1 : 0;
             }
 
+            event.getMatrixStack().pushPose();
             // Render Icon
-            if (transitionProgress < blendTime)
+            if (TRANSITION_PROGRESS < BLEND_TIME)
             {
                 RenderSystem.setShaderTexture(0, lastIcon);
                 GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.tempIconX(), scaleY - 53 - threatOffset + CCS.tempIconY(), 0, 0, 10, 10, 10, 10);
                 RenderSystem.enableBlend();
-                RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + transitionProgress) / blendTime);
+                RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + TRANSITION_PROGRESS) / BLEND_TIME);
             }
             RenderSystem.setShaderTexture(0, icon);
             GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) - 5 + CCS.tempIconX(), scaleY - 53 - threatOffset + CCS.tempIconY(), 0, 0, 10, 10, 10, 10);
@@ -156,10 +161,11 @@ public class SelfTempDisplay
             int scaledHeight = mc.getWindow().getGuiScaledHeight();
             PoseStack matrixStack = event.getMatrixStack();
 
-            String s = "" + (int) Math.ceil(Math.min(Math.abs(playerTemp), 100));
+            String s = "" + (int) Math.ceil(Math.min(Math.abs(PLAYER_TEMP), 100));
             float x = (scaledWidth - fontRenderer.width(s)) / 2f + CCS.tempReadoutX();
             float y = scaledHeight - 31f - 10f + CCS.tempReadoutY();
-            if (!CSMath.isBetween(playerTemp, -100, 100))
+
+            if (!CSMath.isBetween(PLAYER_TEMP, -99, 99))
             {
                 fontRenderer.draw(matrixStack, s, x + 2f, y, colorBG2);
                 fontRenderer.draw(matrixStack, s, x - 2f, y, colorBG2);
@@ -175,15 +181,36 @@ public class SelfTempDisplay
             fontRenderer.draw(matrixStack, s, x, y + 1, colorBG);
             fontRenderer.draw(matrixStack, s, x, y - 1, colorBG);
             fontRenderer.draw(matrixStack, s, x, y, color);
+            event.getMatrixStack().popPose();
         }
     }
 
     @SubscribeEvent
     public static void setRandomIconOffset(TickEvent.ClientTickEvent event)
     {
-        bobTimer++;
-        iconBob = Math.random() < 0.3 && bobTimer >= 3 ? 1 : 0;
-        if (bobTimer >= 3) bobTimer = 0;
+        ICON_BOB_TIMER++;
+        ICON_BOB = Math.random() < 0.3 && ICON_BOB_TIMER >= 3 ? 1 : 0;
+        if (ICON_BOB_TIMER >= 3) ICON_BOB_TIMER = 0;
+    }
+
+    static int getTempSeverity(int temp)
+    {
+        return temp >= 140  ?  7
+             : temp >= 130  ?  6
+             : temp >= 120  ?  5
+             : temp >= 110  ?  4
+             : temp >= 100  ?  3
+             : temp >= 66   ?  2
+             : temp >= 33   ?  1
+             : temp >= 0    ?  0
+             : temp >= -32  ?  0
+             : temp >= -65  ? -1
+             : temp >= -99  ? -2
+             : temp >= -109 ? -3
+             : temp >= -119 ? -4
+             : temp >= -129 ? -5
+             : temp >= -139 ? -6
+             : -7;
     }
 }
 
