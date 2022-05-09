@@ -32,7 +32,7 @@ public class FilledWaterskinItem extends Item
     public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected)
     {
         super.inventoryTick(itemstack, world, entity, slot, selected);
-        if (entity instanceof Player)
+        if (entity instanceof Player player)
         {
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (CSMath.isBetween(itemTemp, -1, 1))
@@ -47,7 +47,7 @@ public class FilledWaterskinItem extends Item
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                TempHelper.addModifier((Player) entity, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Types.CORE, true);
+                TempHelper.addModifier(player, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Types.CORE, true);
             }
         }
     }
@@ -63,8 +63,15 @@ public class FilledWaterskinItem extends Item
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
         ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
-        emptyWaterskin.setTag(itemstack.getTag());
-        player.setItemInHand(hand, emptyWaterskin);
+        emptyWaterskin.setHoverName(itemstack.getHoverName());
+        if (player.getInventory().contains(emptyWaterskin))
+        {
+            player.addItem(emptyWaterskin);
+        }
+        else
+        {
+            player.setItemInHand(hand, emptyWaterskin);
+        }
 
         player.swing(hand);
 
