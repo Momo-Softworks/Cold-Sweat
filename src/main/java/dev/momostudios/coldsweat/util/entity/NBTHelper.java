@@ -120,25 +120,26 @@ public class NBTHelper
         if (modifier.getExpireTime() != -1)
             modifierTag.putInt("expireTicks", modifier.getExpireTime());
 
-        // Read the modifier's ticks left
-        if (modifier.getTicksExisted() > 0)
-            modifierTag.putInt("ticksLeft", modifier.getTicksExisted());
-
+        // Read the modifier's tick rate
         if (modifier.getTickRate() > 1)
             modifierTag.putInt("tickRate", modifier.getTickRate());
+
+        // Read the modifier's ticks existed
+        modifierTag.putInt("ticksExisted", modifier.getTicksExisted());
 
         return modifierTag;
     }
 
-    public static TempModifier TagToModifier(CompoundTag modifierTag)
+    public static TempModifier tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
         TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
 
+        if (newModifier == null) return null;
         modifierTag.getAllKeys().forEach(key ->
         {
             // Add the modifier's arguments
-            if (newModifier != null && key != null)
+            if (key != null && modifierTag.get(key).getAsString().equals(modifierTag.getString("id")))
             {
                 newModifier.addArgument(key, getObjectFromTag(modifierTag.get(key)));
             }
@@ -148,19 +149,19 @@ public class NBTHelper
         if (modifierTag.contains("expireTicks"))
             newModifier.expires(modifierTag.getInt("expireTicks"));
 
-        // Set the modifier's ticks left
-        if (modifierTag.contains("ticksLeft"))
-            newModifier.setTicksExisted(modifierTag.getInt("ticksLeft"));
-
+        // Set the modifier's tick rate
         if (modifierTag.contains("tickRate"))
             newModifier.tickRate(modifierTag.getInt("tickRate"));
+
+        // Set the modifier's ticks existed
+        newModifier.setTicksExisted(modifierTag.getInt("ticksExisted"));
 
         return newModifier;
     }
 
     public static void incrementTag(Object owner, String key, int amount)
     {
-        incrementTag(owner, key, amount, (nbt) -> true);
+        incrementTag(owner, key, amount, (tag) -> true);
     }
 
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
