@@ -455,7 +455,7 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.1.10
+2.1.10-b01
 - Backported as much content as possible from 1.18.x to 1.16.5
 - Players can no longer sleep when their body temperature or the world's temperature is deadly
 - Added hover tooltips for options in the configuration menu
@@ -480,6 +480,47 @@ Technical Changes:
 - Moved some BlockEffects to the config (ice, fire, magma blocks, and some others)
 - Renamed HOTTEST and COLDEST temperature types to simply "MAX" and "MIN"
 - Moved MixinWorld (1.16.5)/MixinLevel (1.18.x) to Forge event system (might help with problems importing Cold Sweat into a workspace)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b02
+- The player's hand is now rendered in 1st person when holding the Hellspring Lamp
+- The Hellspring Lamp now works a bit differently:
+      - Instead of decreasing the world's temperature, it now increases the maximum habitable temperature to  ~135 by default
+      - No longer consumes more fuel in hotter areas
+
+Fixes:
+- Fixed crash when launching server
+- Fixed abnormal lag caused by temperature-emitting blocks
+- Fixed some items in the config menu smearing when changing window size
+- Fixed Hellspring Lamp increasing world temperature
+- Fixed Hearth/Boiler/Icebox not saving items when being unloaded or when the world is closed
+- Fixed potential lag caused by block updates
+- Fixed Hearth not recalculating radius when blocks are changed nearby (1.16.5)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b03
+- The Hearth/Boiler/Icebox now take all available fuel at once instead of one item per tick
+      - This should decrease packet congestion, increase performance, and reduce client-server desyncs
+- Optimized how UI elements are rendered to reduce lag
+
+Fixes:
+- Fixed Hearth GUI having broken name (1.18.x)
+- Fixed players not being able to return from the End
+- Fixed Cold Sweat messing with UI elements from other mods
+- Fixed TempModifiers sometimes being stored in NBT incorrectly
+- Fixed used Waterskins not stacking correctly
+- Fixed beds not exploding when used in the Nether
+
+Technical Changes:
+- Inserting fuel into the Hellspring Lamp is now handled by mixins to prevent client having power over the server (1.16.5)
+    - The client was possibly able to spawn in a fake fuel item, then insert it into the lamp and the server would accept it
+- Improved client-server temperature syncing
+      - Temperature is now only synced when there is an update, instead of every other tick
+      - Player body temperature is now synced less often, and it is smoothed out on the clientside to account for this
+      - Temperature can no longer be manually synced using setTemperature() or addTemperature() because of this system
+
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

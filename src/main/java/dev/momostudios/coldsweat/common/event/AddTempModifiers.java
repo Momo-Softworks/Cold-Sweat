@@ -41,6 +41,7 @@ public class AddTempModifiers
                 if (ModList.get().isLoaded("sereneseasons"))
                     TempHelper.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season"), Temperature.Types.WORLD, false);
                 /*
+                Better Weather isn't in 1.18
                 if (ModList.get().isLoaded("betterweather"))
                     PlayerHelper.addModifier(player, TempModifierEntries.getEntries().getEntryFor("betterweather:season"), PlayerHelper.Types.AMBIENT, false);
                 */
@@ -83,31 +84,5 @@ public class AddTempModifiers
                 TempHelper.setTemperature(player, new Temperature(temp.get() / 4), Temperature.Types.CORE);
             }
         });
-    }
-
-    @SubscribeEvent
-    public static void onTrySleep(PlayerInteractEvent.RightClickBlock event)
-    {
-        Player player = event.getPlayer();
-        if (player.level.getBlockState(event.getPos()).getBlock() instanceof BedBlock)
-        {
-            double bodyTemp = TempHelper.getTemperature(player, Temperature.Types.BODY).get();
-            double worldTemp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
-            double minTemp = ConfigCache.getInstance().minTemp;
-            double maxTemp = ConfigCache.getInstance().maxTemp;
-
-            if (!CSMath.isBetween((int) bodyTemp, -99, 99))
-            {
-                player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.body",
-                                            new TranslatableComponent(bodyTemp > 99 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
-                event.setCanceled(true);
-            }
-            else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
-            {
-                player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.world",
-                                            new TranslatableComponent(worldTemp > maxTemp ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
-                event.setCanceled(true);
-            }
-        }
     }
 }
