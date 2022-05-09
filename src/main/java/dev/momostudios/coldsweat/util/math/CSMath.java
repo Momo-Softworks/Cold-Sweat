@@ -6,11 +6,12 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -62,12 +63,12 @@ public class CSMath
         return input * (float) (180 / Math.PI);
     }
 
-    public static <T extends Number> T clamp(T value, T min, T max) {
-        return value.doubleValue() < min.doubleValue() ? min : value.doubleValue() > max.doubleValue() ? max : value;
+    public static double clamp(double value, double min, double max) {
+        return value < min ? min : value > max ? max : value;
     }
 
-    public static boolean isBetween(Number value, Number min, Number max) {
-        return value.doubleValue() >= min.doubleValue() && value.doubleValue() <= max.doubleValue();
+    public static boolean isBetween(double value, double min, double max) {
+        return value >= min && value <= max;
     }
 
     /**
@@ -143,24 +144,23 @@ public class CSMath
         return new Vec3(vec.x, vec.y, vec.z);
     }
 
-    public static Direction getDirectionFromVector(double x, double y, double z) {
+    public static Direction getDirectionFromVector(double x, double y, double z)
+    {
         Direction direction = Direction.NORTH;
         double f = Float.MIN_VALUE;
 
-        for(Direction direction1 : Direction.values()) {
-            double f1 = x * (float)direction1.getStepX() + y * (float)direction1.getStepY() + z * (float)direction1.getStepZ();
-            if (f1 > f) {
+        for(Direction direction1 : Direction.values())
+        {
+            double f1 = x * direction1.getStepX() + y * direction1.getStepY() + z * direction1.getStepZ();
+
+            if (f1 > f)
+            {
                 f = f1;
                 direction = direction1;
             }
         }
 
         return direction;
-    }
-
-    public static BlockPos offsetDirection(BlockPos pos, Direction direction)
-    {
-        return pos.offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
     }
 
     public static <T> void breakableForEach(Collection<T> collection, BiConsumer<T, InterruptableStreamer<T>> consumer)
@@ -197,6 +197,12 @@ public class CSMath
     {
         if (value.intValue() == 0) return 0;
         return value.intValue() / Math.abs(value.intValue());
+    }
+
+    public static double crop(double value, int sigFigs)
+    {
+        DecimalFormat df = new DecimalFormat("#." + StringUtils.repeat("0", sigFigs));
+        return Double.parseDouble(df.format(value));
     }
 
     public static int blendColors(int color1, int color2, float ratio)
