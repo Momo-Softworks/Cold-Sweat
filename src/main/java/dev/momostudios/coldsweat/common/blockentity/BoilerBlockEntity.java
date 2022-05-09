@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
-import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -42,6 +41,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public static int MAX_FUEL = 1000;
     protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
     public int ticksExisted;
+    int fuel;
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
@@ -73,51 +73,68 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
     {
-        if (te instanceof BoilerBlockEntity boilerTE)
+        if (te instanceof BoilerBlockEntity iceboxTE)
         {
-            boilerTE.ticksExisted++;
+            iceboxTE.tick(level, state, pos);
+        }
+    }
 
-            if (boilerTE.getFuel() > 0)
+    public void tick(Level level, BlockState state, BlockPos pos)
+    {
+        ticksExisted++;
+        ticksExisted %= 1000;
+
+        if (getFuel() > 0)
+        {
+            // Set state to lit
+            if (!state.getValue(BoilerBlock.LIT))
+                level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+
+            // Warm up waterskins
+            if (ticksExisted % 20 == 0)
             {
-                if (!state.getValue(BoilerBlock.LIT))
-                    level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
-
-                if (boilerTE.ticksExisted % 20 == 0)
+                boolean hasItemStacks = false;
+                for (int i = 0; i < 10; i++)
                 {
-                    boolean warmingItems = false;
-                    for (int i = 0; i < 10; i++)
+                    ItemStack stack = getItem(i);
+                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+
+                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
                     {
-                        ItemStack slotStack = boilerTE.getItemInSlot(i);
-                        if (slotStack.getItem() == ModItems.FILLED_WATERSKIN && slotStack.getOrCreateTag().getInt("temperature") < 50)
-                        {
-                            warmingItems = true;
-                            NBTHelper.incrementTag(slotStack, "temperature", 1);
-                        }
+                        hasItemStacks = true;
+                        stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
                     }
-                    if (warmingItems) boilerTE.setFuel(boilerTE.getFuel() - 1);
                 }
+                if (hasItemStacks) setFuel(getFuel() - 1);
             }
-            else if (state.getValue(BoilerBlock.LIT))
-            {
+        }
+        // if no fuel, set state to unlit
+        else
+        {
+            if (state.getValue(BoilerBlock.LIT))
                 level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
-            }
+        }
 
-            int itemFuel = boilerTE.getItemFuel(boilerTE.getItemInSlot(0));
-            if (itemFuel > 0)
+        // Input fuel
+        if (this.ticksExisted % 10 == 0)
+        {
+            ItemStack fuelStack = getItem(0);
+            int itemFuel = getItemFuel(fuelStack);
+            if (itemFuel != 0)
             {
-                ItemStack item = boilerTE.getItemInSlot(0);
-                if (boilerTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
+                if (fuelStack.hasContainerItem())
                 {
-                    if (item.hasContainerItem())
+                    if (fuelStack.getCount() == 1)
                     {
-                        boilerTE.setItemInSlot(0, item.getContainerItem());
+                        this.setItem(0, fuelStack.getContainerItem());
+                        setFuel(fuel + itemFuel);
                     }
-                    else
-                    {
-                        boilerTE.getItemInSlot(0).shrink(1);
-                    }
-
-                    boilerTE.setFuel(boilerTE.getFuel() + itemFuel);
+                }
+                else
+                {
+                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - fuel) / itemFuel);
+                    fuelStack.shrink(consumeCount);
+                    setFuel(fuel + itemFuel * consumeCount);
                 }
             }
         }
@@ -139,24 +156,14 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
         return fuel;
     }
 
-    public ItemStack getItemInSlot(int index)
-    {
-        return this.items.get(index);
-    }
-
-    public void setItemInSlot(int index, ItemStack stack)
-    {
-        this.items.set(index, stack);
-    }
-
     public int getFuel()
     {
-        return this.getTileData().getInt("fuel");
+        return fuel;
     }
 
     public void setFuel(int amount)
     {
-        this.getTileData().putInt("fuel", Math.min(amount, MAX_FUEL));
+        fuel = Math.min(amount, MAX_FUEL);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
@@ -9,7 +10,6 @@ import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
-import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
@@ -23,14 +23,13 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -48,7 +47,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
 import java.util.*;
 
-public class HearthBlockEntity extends RandomizableContainerBlockEntity implements MenuProvider
+public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     ConfigCache config = ConfigCache.getInstance();
 
@@ -57,7 +56,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     HashMap<Pair<Integer, Integer>, LevelChunk> loadedChunks = new HashMap<>();
 
     public static final int MAX_PATHS = 6000;
-    public static int MAX_DISTANCE = 20;
+    public static int MAX_DISTANCE = 32;
 
     static int INSULATION_TIME = 1200;
 
@@ -67,12 +66,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     int hotFuel = 0;
     int coldFuel = 0;
+    int insulationLevel = 0;
 
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
     boolean hasHotFuel = false;
     boolean hasColdFuel = false;
-    boolean hasFuelItem = false;
 
     boolean isPlayerNearby = false;
     boolean shouldRebuild = false;
@@ -108,11 +107,28 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         CompoundTag tag = super.getUpdateTag();
         tag.putInt("hotFuel",  this.getHotFuel());
         tag.putInt("coldFuel", this.getColdFuel());
+        tag.putInt("insulationLevel", insulationLevel);
         return tag;
     }
 
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+    public void handleUpdateTag(CompoundTag tag)
+    {
+        super.handleUpdateTag(tag);
+        this.setHotFuel(tag.getInt("hotFuel"));
+        this.setColdFuel(tag.getInt("coldFuel"));
+        insulationLevel = tag.getInt("insulationLevel");
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
+    {
+        handleUpdateTag(pkt.getTag());
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
+    {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
@@ -142,7 +158,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (rebuildCooldown > 0) rebuildCooldown--;
 
         // Gradually increases insulation amount
-        int insulationLevel = NBTHelper.incrementTag(this, "insulationLevel", 1, (nbt) -> nbt < INSULATION_TIME);
+        if (insulationLevel < INSULATION_TIME)
+            insulationLevel++;
 
         if (this.ticksExisted % 20 == 0)
         {
@@ -222,7 +239,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 {
                     for (Player player : level.players())
                     {
-                        if (player.distanceToSqr(x, y, z) < 1.2)
+                        if (CSMath.getDistance(player, new Vector3d(x, y, z)) < 0.6)
                         {
                             MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
                             boolean hasEffect = effect != null;
@@ -255,10 +272,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     continue;
                 }
 
-                // Try to spread to new blocks
+                /*
+                 Try to spread to new blocks
+                 */
                 if (pathCount < MAX_PATHS && spreadPath.withinDistance(pos, MAX_DISTANCE))
                 {
-                    // Get the chunk at this position
+                    /*
+                     Get the chunk at this position
+                     */
                     Pair<Integer, Integer> chunkPos = Pair.of(x >> 4, z >> 4);
 
                     LevelChunk chunk;
@@ -280,6 +301,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     }
                     if (chunk == null) continue;
 
+                    /*
+                     Spreading algorithm
+                     */
                     if (!WorldHelper.canSeeSky(chunk, level, spreadPath.pos))
                     {
                         for (Direction direction : Direction.values())
@@ -320,28 +344,27 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             }
         }
 
-        // Input fuel types
-        if (this.ticksExisted % 20 == 0)
+        // Input fuel
+        if (this.ticksExisted % 10 == 0)
         {
-            this.hasFuelItem = !getItem(0).isEmpty();
-        }
-        if (this.hasFuelItem)
-        {
-            ItemStack fuelItem = this.getItem(0);
-            int fuel = getItemFuel(fuelItem);
+            ItemStack fuelStack = this.getItem(0);
+            int fuel = getItemFuel(fuelStack);
             if (fuel != 0)
             {
-                if ((fuel > 0 ? hotFuel : coldFuel) <= MAX_FUEL - Math.abs(fuel) * 0.75)
+                int storedFuel = fuel > 0 ? hotFuel : coldFuel;
+                if (fuelStack.hasContainerItem())
                 {
-                    if (fuelItem.hasContainerItem())
+                    if (fuelStack.getCount() == 1)
                     {
-                        if (fuelItem.getCount() == 1)
-                        {
-                            this.setItem(0, fuelItem.getContainerItem());
-                        }
+                        this.setItem(0, fuelStack.getContainerItem());
+                        addFuel(fuel, hotFuel, coldFuel);
                     }
-                    else fuelItem.shrink(1);
-                    this.addFuel(fuel, hotFuel, coldFuel);
+                }
+                else
+                {
+                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - storedFuel) / fuel);
+                    fuelStack.shrink(consumeCount);
+                    addFuel(fuel * consumeCount, hotFuel, coldFuel);
                 }
             }
         }
@@ -404,7 +427,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void setHotFuel(int amount)
     {
-        this.hotFuel = CSMath.clamp(amount, 0, MAX_FUEL);
+        this.hotFuel = (int) CSMath.clamp(amount, 0, MAX_FUEL);
         this.updateFuelState();
 
         if (amount == 0 && hasHotFuel)
@@ -417,7 +440,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void setColdFuel(int amount)
     {
-        this.coldFuel = CSMath.clamp(amount, 0, MAX_FUEL);
+        this.coldFuel = (int) CSMath.clamp(amount, 0, MAX_FUEL);
         this.updateFuelState();
 
         if (amount == 0 && hasColdFuel)
@@ -464,7 +487,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             this.setChanged();
 
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
-                    new BlockDataUpdateMessage(pos, List.of("hotFuel", "coldFuel"), List.of(IntTag.valueOf(hotFuel), IntTag.valueOf(coldFuel))));
+                    new BlockDataUpdateMessage(pos, this.getTileData()));
         }
     }
 
@@ -484,9 +507,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public void load(CompoundTag tag)
     {
         super.load(tag);
+        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         this.setColdFuel(tag.getInt("coldFuel"));
         this.setHotFuel(tag.getInt("hotFuel"));
-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        insulationLevel = tag.getInt("insulationLevel");
         ContainerHelper.loadAllItems(tag, this.items);
     }
 
@@ -496,6 +520,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         super.saveAdditional(tag);
         tag.putInt("coldFuel", this.getColdFuel());
         tag.putInt("hotFuel", this.getHotFuel());
+        tag.putInt("insulationLevel", insulationLevel);
         ContainerHelper.saveAllItems(tag, this.items);
     }
 

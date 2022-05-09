@@ -69,39 +69,36 @@ public class IceboxBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide)
+        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity)
         {
-            if (worldIn.getBlockEntity(pos) instanceof IceboxBlockEntity)
+            IceboxBlockEntity te = (IceboxBlockEntity) level.getBlockEntity(pos);
+            ItemStack stack = player.getItemInHand(hand);
+            int itemFuel = te.getItemFuel(stack);
+
+            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
             {
-                IceboxBlockEntity te = (IceboxBlockEntity) worldIn.getBlockEntity(pos);
-                ItemStack stack = player.getItemInHand(hand);
-                int itemFuel = te.getItemFuel(stack);
-
-                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
+                if (!player.isCreative())
                 {
-                    if (!player.isCreative())
+                    if (stack.hasContainerItem())
                     {
-                        if (stack.hasContainerItem())
-                        {
-                            ItemStack container = stack.getContainerItem();
-                            stack.shrink(1);
-                            player.getInventory().add(container);
-                        }
-                        else
-                        {
-                            stack.shrink(1);
-                        }
+                        ItemStack container = stack.getContainerItem();
+                        stack.shrink(1);
+                        player.getInventory().add(container);
                     }
-                    te.setFuel(te.getFuel() + itemFuel);
+                    else
+                    {
+                        stack.shrink(1);
+                    }
+                }
+                te.setFuel(te.getFuel() + itemFuel);
 
-                    worldIn.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
-                }
-                else
-                {
-                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
-                }
+                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+            }
+            else if (!level.isClientSide)
+            {
+                NetworkHooks.openGui((ServerPlayer) player, te, pos);
             }
         }
         return InteractionResult.SUCCESS;

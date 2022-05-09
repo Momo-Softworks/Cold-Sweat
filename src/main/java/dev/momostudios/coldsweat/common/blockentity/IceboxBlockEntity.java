@@ -7,6 +7,7 @@ import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -56,7 +57,21 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+    public void handleUpdateTag(CompoundTag tag)
+    {
+        super.handleUpdateTag(tag);
+        this.setFuel(tag.getInt("fuel"));
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
+    {
+        handleUpdateTag(pkt.getTag());
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
+    {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
@@ -69,63 +84,80 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     {
         if (te instanceof IceboxBlockEntity iceboxTE)
         {
-            iceboxTE.ticksExisted++;
-            iceboxTE.ticksExisted %= 1000;
+            iceboxTE.tick(level, state, pos);
+        }
+    }
 
-            if (iceboxTE.getFuel() > 0)
+    public void tick(Level level, BlockState state, BlockPos pos)
+    {
+        ticksExisted++;
+        ticksExisted %= 1000;
+
+        if (getFuel() > 0)
+        {
+            // Set state to frosted
+            if (!state.getValue(IceboxBlock.FROSTED))
+                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
+
+            // Cool down waterskins
+            if (ticksExisted % 20 == 0)
             {
-                if (!state.getValue(IceboxBlock.FROSTED))
-                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
-
-                if (iceboxTE.ticksExisted % 20 == 0)
+                boolean hasItemStacks = false;
+                for (int i = 0; i < 10; i++)
                 {
-                    boolean hasItemStacks = false;
-                    for (int i = 0; i < 10; i++)
+                    ItemStack stack = getItem(i);
+                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+
+                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
                     {
-                        if (iceboxTE.getItemInSlot(i).getItem() == ModItems.FILLED_WATERSKIN && iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") > -50)
-                        {
-                            hasItemStacks = true;
-                            iceboxTE.getItemInSlot(i).getOrCreateTag().putInt("temperature", iceboxTE.getItemInSlot(i).getOrCreateTag().getInt("temperature") - 1);
-                        }
+                        hasItemStacks = true;
+                        stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
                     }
-                    if (hasItemStacks) iceboxTE.setFuel(iceboxTE.getFuel() - 1);
+                }
+                if (hasItemStacks) setFuel(getFuel() - 1);
+            }
+        }
+        // if no fuel, set state to unfrosted
+        else
+        {
+            if (state.getValue(IceboxBlock.FROSTED))
+                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+        }
+
+        // Input fuel
+        if (this.ticksExisted % 10 == 0)
+        {
+            ItemStack fuelStack = this.getItem(0);
+            int itemFuel = getItemFuel(fuelStack);
+            if (itemFuel != 0)
+            {
+                if (fuelStack.hasContainerItem())
+                {
+                    if (fuelStack.getCount() == 1)
+                    {
+                        this.setItem(0, fuelStack.getContainerItem());
+                        setFuel(fuel + itemFuel);
+                    }
+                }
+                else
+                {
+                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - fuel) / itemFuel);
+                    fuelStack.shrink(consumeCount);
+                    setFuel(fuel + itemFuel * consumeCount);
                 }
             }
-            else
-            {
-                if (state.getValue(IceboxBlock.FROSTED))
-                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
-            }
+        }
 
-            int itemFuel = iceboxTE.getItemFuel(iceboxTE.getItemInSlot(0));
-            if (itemFuel > 0)
-            {
-                ItemStack item = iceboxTE.getItemInSlot(0);
-                if (iceboxTE.getFuel() <= MAX_FUEL - itemFuel * 0.75)
-                {
-                    if (item.hasContainerItem())
-                    {
-                        iceboxTE.setItemInSlot(0, item.getContainerItem());
-                    } else
-                    {
-                        iceboxTE.getItemInSlot(0).shrink(1);
-                    }
-
-                    iceboxTE.setFuel(iceboxTE.getFuel() + itemFuel);
-                }
-            }
-
-            if (state.getValue(IceboxBlock.FROSTED) && iceboxTE.ticksExisted % 3 == 0 && Math.random() < 0.5)
-            {
-                double d0 = pos.getX() + 0.5;
-                double d1 = pos.getY();
-                double d2 = pos.getZ() + 0.5;
-                boolean side = new Random().nextBoolean();
-                double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
-                double d6 = Math.random() * 0.3;
-                double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
-                level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
-            }
+        if (state.getValue(IceboxBlock.FROSTED) && ticksExisted % 3 == 0 && Math.random() < 0.5)
+        {
+            double d0 = pos.getX() + 0.5;
+            double d1 = pos.getY();
+            double d2 = pos.getZ() + 0.5;
+            boolean side = new Random().nextBoolean();
+            double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            double d6 = Math.random() * 0.3;
+            double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
         }
     }
 
