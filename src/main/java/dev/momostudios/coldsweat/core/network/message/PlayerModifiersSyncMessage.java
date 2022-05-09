@@ -87,7 +87,7 @@ public class PlayerModifiersSyncMessage
         List<TempModifier> modifiers = new ArrayList<>();
         for (String key : nbt.getAllKeys())
         {
-            TempModifier modifier = NBTHelper.TagToModifier(nbt.getCompound(key));
+            TempModifier modifier = NBTHelper.tagToModifier(nbt.getCompound(key));
 
             if (modifier != null)
                 modifiers.add(modifier);
