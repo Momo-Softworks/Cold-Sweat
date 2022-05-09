@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,15 +22,16 @@ public class PlayerTempUpdater
         {
             if (!event.player.level.isClientSide)
             {
-                if (event.player.tickCount % 20 == 0)
+                Player player = event.player;
+                player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
-                    event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-                    {
-                        TempHelper.updateModifiers(event.player, cap);
-                    });
-                }
+                    cap.tickUpdate(player);
 
-                event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap -> cap.tickUpdate(event.player));
+                    if (player.tickCount % 20 == 0)
+                    {
+                        TempHelper.updateModifiers(player, cap);
+                    }
+                });
             }
             else
             {
@@ -43,9 +45,7 @@ public class PlayerTempUpdater
     {
         // Syncs the server's config files to the cache
         if (!event.world.isClientSide && WORLD_TIME % 200 == 0)
-        {
             ConfigCache.getInstance().writeValues(ColdSweatConfig.getInstance());
-        }
 
         WORLD_TIME++;
     }
