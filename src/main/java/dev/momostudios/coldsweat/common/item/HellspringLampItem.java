@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -45,32 +46,20 @@ public class HellspringLampItem extends Item
                 }
             }
 
-            if ((isSelected || player.getOffhandItem() == stack) && validDimension && temp > max)
+            if ((isSelected || player.getOffhandItem() == stack) && validDimension && temp > max && getFuel(stack) > 0)
             {
-                if (getFuel(stack) > 0)
+                // Drain fuel
+                if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
+                    addFuel(stack, -0.02d * CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1d, 3d));
+
+                // Give effect to nearby players
+                AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
+                worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
                 {
-                    // Drain fuel
-                    if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.02d * CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1d, 3d));
+                    TempHelper.addOrReplaceModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
+                });
 
-                    // Give effect to nearby players
-                    AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
-                    worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
-                    {
-                        TempHelper.addOrReplaceModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
-                    });
-                }
-            }
-
-            // Handle state changes & sounds
-            if (stack.getOrCreateTag().getInt("stateChangeTimer") > 0)
-            {
-                stack.getOrCreateTag().putInt("stateChangeTimer", stack.getOrCreateTag().getInt("stateChangeTimer") - 1);
-            }
-
-            if (stack.getOrCreateTag().getInt("fuel") > 0 && validDimension && temp > max &&
-            (isSelected || player.getOffhandItem() == stack))
-            {
+                // If the conditions are met, turn on the lamp
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
@@ -79,6 +68,7 @@ public class HellspringLampItem extends Item
                     ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(1, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUUID()));
                 }
             }
+            // If the conditions are not met, turn off the lamp
             else
             {
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && stack.getOrCreateTag().getBoolean("isOn"))
@@ -92,6 +82,9 @@ public class HellspringLampItem extends Item
                     ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PlaySoundMessage(2, 1.5f, (float) Math.random() / 5f + 0.9f, player.getUUID()));
                 }
             }
+
+            // Decrement the state change timer
+            NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
         }
     }
 
