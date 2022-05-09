@@ -27,7 +27,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth_bottom"));
+        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
@@ -67,8 +67,8 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
         int y = (this.height - this.getYSize()) / 2;
         this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
-        int hotFuel =  (int) (this.menu.te.getHotFuel()  / 27.7);
-        int coldFuel = (int) (this.menu.te.getColdFuel() / 27.7);
+        int hotFuel =  (int) (this.menu.getHotFuel()  / 27.7);
+        int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
 
         // Render hot/cold fuel gauges
         blit(poseStack, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, 36, 256, 256);
