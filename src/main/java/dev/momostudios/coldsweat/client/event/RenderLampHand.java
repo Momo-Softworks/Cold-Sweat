@@ -72,7 +72,7 @@ public class RenderLampHand
 
             ms.scale(0.75f, 0.8f, 0.72f);
 
-            PlayerRenderer handRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().<AbstractClientPlayer>getRenderer(player);
+            PlayerRenderer handRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             if (isRightHand)
             {
                 ms.mulPose(Vector3f.ZP.rotationDegrees(98));

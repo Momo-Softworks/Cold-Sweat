@@ -1,18 +1,12 @@
 package dev.momostudios.coldsweat.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
 import dev.momostudios.coldsweat.client.event.RearrangeHotbar;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,7 +47,7 @@ public class MixinXPBar
         Font font = gui.getFont();
 
         // Render XP bar
-        if (RearrangeHotbar.customHotbar)
+        if (RearrangeHotbar.CUSTOM_HOTBAR)
         {
             String s = "" + mc.player.experienceLevel;
             int i1 = (this.screenWidth - font.width(s)) / 2;

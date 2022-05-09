@@ -13,12 +13,13 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RearrangeHotbar
 {
-    public static boolean customHotbar = ClientSettingsConfig.getInstance().customHotbar();
+    public static boolean CUSTOM_HOTBAR = ClientSettingsConfig.getInstance().customHotbar();
 
     @SubscribeEvent
     public static void onRenderHotbar(RenderGameOverlayEvent.PreLayer event)
     {
-        if (event.getOverlay() == ForgeIngameGui.ITEM_NAME_ELEMENT && Minecraft.getInstance().gui instanceof ForgeIngameGui gui && customHotbar)
+        if (event.getOverlay() == ForgeIngameGui.ITEM_NAME_ELEMENT
+        && Minecraft.getInstance().gui instanceof ForgeIngameGui gui && CUSTOM_HOTBAR)
         {
             event.setCanceled(true);
             PoseStack ps = event.getMatrixStack();
@@ -34,7 +35,7 @@ public class RearrangeHotbar
     {
         if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.tickCount % 20 == 0)
         {
-            customHotbar = ClientSettingsConfig.getInstance().customHotbar();
+            CUSTOM_HOTBAR = ClientSettingsConfig.getInstance().customHotbar();
         }
     }
 }

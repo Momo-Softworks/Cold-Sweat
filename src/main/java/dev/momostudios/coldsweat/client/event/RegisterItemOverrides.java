@@ -42,7 +42,7 @@ public class RegisterItemOverrides
                     double minTemp = config.minTemp;
                     double maxTemp = config.maxTemp;
 
-                    double worldTemp = (float) CSMath.convertUnits(WorldTempGaugeDisplay.clientTemp, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                    double worldTemp = (float) CSMath.convertUnits(WorldTempGaugeDisplay.BLENDED_TEMP, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                     double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
                     return (float) worldTempAdjusted;

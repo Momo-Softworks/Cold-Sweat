@@ -68,8 +68,8 @@ public abstract class TempModifier
         catch (Exception e)
         {
             throw new IllegalArgumentException(
-                    "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg +
-                    " (expected " + args.get(name).getClass().getName() + ")");
+                    "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg
+                    + " (expected " + args.get(name).getClass().getName() + ")");
         }
     }
 
@@ -113,8 +113,7 @@ public abstract class TempModifier
         double value;
         if (player.tickCount % tickRate == 0 || isUnset)
         {
-            value = getResult(pre.getTemperature(), player).get();
-            storedValue = value;
+            storedValue = value = getResult(pre.getTemperature(), player).get();
             isUnset = false;
         }
         else

@@ -40,11 +40,6 @@ public class TempHelper
      */
     public static void setTemperature(Player player, Temperature value, Temperature.Types type)
     {
-        setTemperature(player, value, type, true);
-    }
-
-    public static void setTemperature(Player player, Temperature value, Temperature.Types type, boolean sync)
-    {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
             capability.set(type, value.get());
@@ -52,11 +47,6 @@ public class TempHelper
     }
 
     public static void addTemperature(Player player, Temperature value, Temperature.Types type)
-    {
-        addTemperature(player, value, type, true);
-    }
-
-    public static void addTemperature(Player player, Temperature value, Temperature.Types type, boolean sync)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(capability ->
         {
@@ -122,13 +112,7 @@ public class TempHelper
 
                 if (!player.level.isClientSide)
                 {
-                    updateModifiers(player,
-                                    cap.getModifiers(Temperature.Types.CORE),
-                                    cap.getModifiers(Temperature.Types.BASE),
-                                    cap.getModifiers(Temperature.Types.WORLD),
-                                    cap.getModifiers(Temperature.Types.RATE),
-                                    cap.getModifiers(Temperature.Types.MAX),
-                                    cap.getModifiers(Temperature.Types.MIN));
+                    updateModifiers(player, cap);
                 }
             });
         }
