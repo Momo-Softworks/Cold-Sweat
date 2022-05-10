@@ -26,7 +26,10 @@ public class WorldTempGaugeDisplay
     private static double PREV_BLENDED_TEMP = 0;
     public static double BLENDED_TEMP = 0;
 
-    static ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
+    public static double MAX_OFFSET = 0;
+    public static double MIN_OFFSET = 0;
+
+    static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
     @SubscribeEvent
     public static void renderWorldTemperature(RenderGameOverlayEvent.Post event)
@@ -40,15 +43,13 @@ public class WorldTempGaugeDisplay
             int scaleX = event.getWindow().getGuiScaledWidth();
             int scaleY = event.getWindow().getGuiScaledHeight();
 
-            ITemperatureCap tempCap = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
+            double min = ConfigCache.getInstance().minTemp + MIN_OFFSET;
+            double max = ConfigCache.getInstance().maxTemp + MAX_OFFSET;
 
-            double min = ConfigCache.getInstance().minTemp + tempCap.get(Temperature.Types.MIN);
-            double max = ConfigCache.getInstance().maxTemp + tempCap.get(Temperature.Types.MAX);
-
-            boolean bobbing = CCS.iconBobbing();
+            boolean bobbing = CLIENT_CONFIG.iconBobbing();
 
             // Get player world temperature
-            double temp = CSMath.convertUnits(BLENDED_TEMP, CCS.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            double temp = CSMath.convertUnits(BLENDED_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Get the temperature severity
             int severity = getSeverity(temp, min, max);
@@ -88,7 +89,7 @@ public class WorldTempGaugeDisplay
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
             // Render frame
-            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94 + CCS.tempGaugeX(), scaleY - 19 + CCS.tempGaugeY(), 0, 0, 25, 16, 25, 16);
+            GuiComponent.blit(event.getMatrixStack(), (scaleX / 2) + 94 + CLIENT_CONFIG.tempGaugeX(), scaleY - 19 + CLIENT_CONFIG.tempGaugeY(), 0, 0, 25, 16, 25, 16);
 
             RenderSystem.disableBlend();
 
@@ -96,10 +97,11 @@ public class WorldTempGaugeDisplay
             int bob = temp > max || temp < min ? (player.tickCount % 2 == 0 && bobbing ? 16 : 15) : 15;
 
             // Render text
-            int blendedTemp = (int) CSMath.blend(PREV_BLENDED_TEMP,
-                                                 BLENDED_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
-            Minecraft.getInstance().font.draw(event.getMatrixStack(), "" + (blendedTemp + CCS.tempOffset()) + "",
-                    (scaleX / 2f) + 107 + (Integer.toString(blendedTemp + CCS.tempOffset()).length() * -3) + CCS.tempGaugeX(), scaleY - bob + CCS.tempGaugeY(), color);
+            int blendedTemp = (int) CSMath.blend(PREV_BLENDED_TEMP, BLENDED_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+
+            Minecraft.getInstance().font.draw(event.getMatrixStack(), "" + (blendedTemp + CLIENT_CONFIG.tempOffset()) + "",
+            /* X */ scaleX / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.tempGaugeX(),
+            /* Y */ scaleY - bob + CLIENT_CONFIG.tempGaugeY(), color);
             event.getMatrixStack().popPose();
         }
     }
@@ -109,14 +111,17 @@ public class WorldTempGaugeDisplay
     {
         if (Minecraft.getInstance().player != null)
         {
-            Minecraft.getInstance().player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(temp ->
+            Minecraft.getInstance().player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
-                boolean celsius = CCS.celsius();
+                boolean celsius = CLIENT_CONFIG.celsius();
 
-                double realTemp = CSMath.convertUnits(temp.get(Temperature.Types.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                double realTemp = CSMath.convertUnits(cap.get(Temperature.Types.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                 PREV_BLENDED_TEMP = BLENDED_TEMP;
 
                 BLENDED_TEMP = BLENDED_TEMP + (realTemp - BLENDED_TEMP) / 10.0;
+
+                MAX_OFFSET = cap.get(Temperature.Types.MAX);
+                MIN_OFFSET = cap.get(Temperature.Types.MIN);
             });
         }
     }
@@ -126,7 +131,7 @@ public class WorldTempGaugeDisplay
         double mid = (min + max) / 2;
 
         return
-          (temp > max)
+        (temp > max)
             ? 4
         : (temp > mid + ((max - mid) * 0.75))
             ? 3

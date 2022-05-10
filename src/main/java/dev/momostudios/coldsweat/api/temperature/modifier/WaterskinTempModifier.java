@@ -7,7 +7,7 @@ public class WaterskinTempModifier extends TempModifier
 {
     public WaterskinTempModifier()
     {
-        addArgument("temperature", 0.0d);
+        this(0.0);
     }
 
     public WaterskinTempModifier(double temp)

@@ -348,25 +348,25 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (this.ticksExisted % 10 == 0)
         {
             ItemStack fuelStack = this.getItem(0);
-            int fuel = getItemFuel(fuelStack);
-            if (fuel != 0)
+            int itemFuel = getItemFuel(fuelStack);
+            if (itemFuel != 0)
             {
-                int storedFuel = fuel > 0 ? hotFuel : coldFuel;
-                if (storedFuel < MAX_FUEL - fuel)
+                int fuel = itemFuel > 0 ? hotFuel : coldFuel;
+                if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
                 {
                     if (fuelStack.hasContainerItem())
                     {
                         if (fuelStack.getCount() == 1)
                         {
                             this.setItem(0, fuelStack.getContainerItem());
-                            addFuel(fuel, hotFuel, coldFuel);
+                            addFuel(itemFuel, hotFuel, coldFuel);
                         }
                     }
                     else
                     {
-                        int consumeCount = (int) Math.floor((MAX_FUEL - storedFuel) / (double) Math.abs(fuel));
+                        int consumeCount = (int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel));
                         fuelStack.shrink(consumeCount);
-                        addFuel(fuel * consumeCount, hotFuel, coldFuel);
+                        addFuel(itemFuel * consumeCount, hotFuel, coldFuel);
                     }
                 }
             }
