@@ -22,17 +22,16 @@ public class PlaceCaveAir
 
         if (state.getMaterial() == Material.AIR)
         {
-            ChunkPos chunkPos = new ChunkPos(event.getPos());
-            LevelChunk chunk = event.getWorld().getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
-
-            if (event.getWorld() instanceof Level level && !WorldHelper.canSeeSky(chunk, level, event.getPos()))
+            WorldHelper.schedule(() ->
             {
-                WorldHelper.schedule(() ->
+                try
                 {
-                    if (chunk != null)
-                    {
+                    ChunkPos chunkPos = new ChunkPos(event.getPos());
+                    LevelChunk chunk = event.getWorld().getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
 
-                        if (state.getMaterial() == Material.AIR && state.getBlock() != Blocks.CAVE_AIR)
+                    if (chunk != null && event.getWorld() instanceof Level level && !WorldHelper.canSeeSky(chunk, level, event.getPos())
+                    && state.getMaterial() == Material.AIR && state.getBlock() != Blocks.CAVE_AIR)
+                    {
                         for (Direction direction : event.getNotifiedSides())
                         {
                             if (event.getWorld().getBlockState(event.getPos().relative(direction)).getBlock() == Blocks.CAVE_AIR)
@@ -42,8 +41,9 @@ public class PlaceCaveAir
                             }
                         }
                     }
-                }, 1);
-            }
+                }
+                catch (Exception e) {}
+            }, 1);
         }
     }
 }
