@@ -35,6 +35,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -53,7 +54,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
 
     LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
-    HashMap<Pair<Integer, Integer>, LevelChunk> loadedChunks = new HashMap<>();
+    HashMap<ChunkPos, LevelChunk> loadedChunks = new HashMap<>();
 
     public static final int MAX_PATHS = 6000;
     public static int MAX_DISTANCE = 32;
@@ -80,7 +81,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public int ticksExisted;
 
     private LevelChunk workingChunk = null;
-    private Pair<Integer, Integer> workingCoords = new Pair<>(pos.getX() >> 4, pos.getZ() >> 4);
+    private ChunkPos workingCoords = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
 
     public static final int MAX_FUEL = 1000;
 
@@ -280,11 +281,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     /*
                      Get the chunk at this position
                      */
-                    Pair<Integer, Integer> chunkPos = Pair.of(x >> 4, z >> 4);
+                    ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
 
                     LevelChunk chunk;
 
-                    if (chunkPos.equals(workingCoords))
+                    if (chunkPos == workingCoords)
                     {
                         chunk = workingChunk;
                     }
@@ -296,8 +297,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                     if (chunk == null)
                     {
-                        loadedChunks.put(chunkPos, chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4));
-                        workingChunk = chunk;
+                        loadedChunks.put(chunkPos, workingChunk = chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4));
                     }
                     if (chunk == null) continue;
 
@@ -364,7 +364,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     }
                     else
                     {
-                        int consumeCount = (int) Math.floor((MAX_FUEL - storedFuel) / Math.abs(fuel));
+                        int consumeCount = (int) Math.floor((MAX_FUEL - storedFuel) / (double) Math.abs(fuel));
                         fuelStack.shrink(consumeCount);
                         addFuel(fuel * consumeCount, hotFuel, coldFuel);
                     }

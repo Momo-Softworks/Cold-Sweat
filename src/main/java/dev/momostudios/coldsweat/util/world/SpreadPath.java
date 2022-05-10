@@ -70,14 +70,13 @@ public class SpreadPath
     }
 
     public boolean withinDistance(Vec3i vector, double distance) {
-        return distanceSq(vector.getX(), vector.getY(), vector.getZ(), false) < distance * distance;
+        return distanceSq(vector.getX(), vector.getY(), vector.getZ()) < distance * distance;
     }
 
-    public double distanceSq(double x, double y, double z, boolean useCenter) {
-        double d0 = useCenter ? 0.5D : 0.0D;
-        double d1 = (double)this.getX() + d0 - x;
-        double d2 = (double)this.getY() + d0 - y;
-        double d3 = (double)this.getZ() + d0 - z;
+    public double distanceSq(double x, double y, double z) {
+        double d1 = this.getX() - x;
+        double d2 = this.getY() - y;
+        double d3 = this.getZ() - z;
         return d1 * d1 + d2 * d2 + d3 * d3;
     }
 

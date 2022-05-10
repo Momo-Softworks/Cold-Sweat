@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -37,12 +38,14 @@ public class BlockDataUpdateMessage
         {
             context.enqueueWork(() ->
             {
-                Minecraft minecraft = Minecraft.getInstance();
-                BlockPos pos = message.blockPos;
-                BlockEntity blockEntity = minecraft.level.getBlockEntity(pos);
-                if (blockEntity != null)
+                ClientLevel level = Minecraft.getInstance().level;
+                if (level != null)
                 {
-                    blockEntity.getTileData().merge(message.tag);
+                    BlockEntity be = level.getBlockEntity(message.blockPos);
+                    if (be != null)
+                    {
+                        be.getTileData().merge(message.tag);
+                    }
                 }
             });
         }
