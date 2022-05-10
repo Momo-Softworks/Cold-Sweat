@@ -22,17 +22,17 @@ public class HearthContainer extends AbstractContainerMenu
         super(MenuInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
-        // Tile Entity
+        // Block entity slots
         this.addSlot(new Slot(te, 0, 80, 48)
         {
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                return te.getItemFuel(stack) != 0;
+                return HearthBlockEntity.getItemFuel(stack) != 0;
             }
         });
 
-        // Main player inventory
+        // Main player inventory slots
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
@@ -41,7 +41,7 @@ public class HearthContainer extends AbstractContainerMenu
             }
         }
 
-        // Player Hotbar
+        // Player hotbar
         for (int col = 0; col < 9; col++)
         {
             this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
@@ -101,7 +101,7 @@ public class HearthContainer extends AbstractContainerMenu
             }
             else
             {
-                if (this.te.getItemFuel(itemstack)!= 0)
+                if (HearthBlockEntity.getItemFuel(itemstack) != 0)
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {

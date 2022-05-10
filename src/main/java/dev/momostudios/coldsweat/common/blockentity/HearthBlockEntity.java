@@ -147,11 +147,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         if (te instanceof HearthBlockEntity hearth)
         {
-            hearth.tick();
+            hearth.tick(level, pos);
         }
     }
 
-    public void tick()
+    public void tick(Level level, BlockPos pos)
     {
         this.ticksExisted++;
 
@@ -352,19 +352,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             if (fuel != 0)
             {
                 int storedFuel = fuel > 0 ? hotFuel : coldFuel;
-                if (fuelStack.hasContainerItem())
+                if (storedFuel < MAX_FUEL - fuel)
                 {
-                    if (fuelStack.getCount() == 1)
+                    if (fuelStack.hasContainerItem())
                     {
-                        this.setItem(0, fuelStack.getContainerItem());
-                        addFuel(fuel, hotFuel, coldFuel);
+                        if (fuelStack.getCount() == 1)
+                        {
+                            this.setItem(0, fuelStack.getContainerItem());
+                            addFuel(fuel, hotFuel, coldFuel);
+                        }
                     }
-                }
-                else
-                {
-                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - storedFuel) / fuel);
-                    fuelStack.shrink(consumeCount);
-                    addFuel(fuel * consumeCount, hotFuel, coldFuel);
+                    else
+                    {
+                        int consumeCount = (int) Math.floor((MAX_FUEL - storedFuel) / Math.abs(fuel));
+                        fuelStack.shrink(consumeCount);
+                        addFuel(fuel * consumeCount, hotFuel, coldFuel);
+                    }
                 }
             }
         }
@@ -403,13 +406,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public static int getItemFuel(ItemStack item)
     {
-        for (List<?> iterator : new ItemSettingsConfig().hearthItems())
+        for (List<?> entry : new ItemSettingsConfig().hearthItems())
         {
-            String testItem = (String) iterator.get(0);
+            String itemID = (String) entry.get(0);
 
-            if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
+            if (new ResourceLocation(itemID).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                return ((Number) iterator.get(1)).intValue();
+                return ((Number) entry.get(1)).intValue();
             }
         }
         return 0;
@@ -506,12 +509,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     @Override
     public void load(CompoundTag tag)
     {
+        ContainerHelper.loadAllItems(tag, this.items);
         super.load(tag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         this.setColdFuel(tag.getInt("coldFuel"));
         this.setHotFuel(tag.getInt("hotFuel"));
-        insulationLevel = tag.getInt("insulationLevel");
-        ContainerHelper.loadAllItems(tag, this.items);
+        this.insulationLevel = tag.getInt("insulationLevel");
     }
 
     @Override

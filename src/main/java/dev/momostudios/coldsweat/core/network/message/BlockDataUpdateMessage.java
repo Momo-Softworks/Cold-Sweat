@@ -42,7 +42,7 @@ public class BlockDataUpdateMessage
                 BlockEntity blockEntity = minecraft.level.getBlockEntity(pos);
                 if (blockEntity != null)
                 {
-                    blockEntity.load(message.tag);
+                    blockEntity.getTileData().merge(message.tag);
                 }
             });
         }
