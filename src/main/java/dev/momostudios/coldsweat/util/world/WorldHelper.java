@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.util.world;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -197,11 +198,8 @@ public class WorldHelper
         }
         catch (Exception e)
         {
-            try
-            {
-                runnable.run();
-            }
-            catch (Exception e1) {}
+            ColdSweat.LOGGER.error("Error scheduling task", e);
+            e.printStackTrace();
         }
     }
 
