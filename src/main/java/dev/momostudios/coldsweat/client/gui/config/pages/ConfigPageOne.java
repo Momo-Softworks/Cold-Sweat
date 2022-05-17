@@ -131,10 +131,10 @@ public class ConfigPageOne extends ConfigPageBase
                 true, true, new TranslatableComponent("cold_sweat.config.fire_resistance.desc").getString());
 
         this.addButton("show_ambient", Side.RIGHT,
-                () -> new TranslatableComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (configCache.showWorldTemp ? ON : OFF),
+                () -> new TranslatableComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (configCache.requireThermometer ? ON : OFF),
                 button ->
                 {
-                    configCache.showWorldTemp = !configCache.showWorldTemp;
+                    configCache.requireThermometer = !configCache.requireThermometer;
                 },
                 true, true, new TranslatableComponent("cold_sweat.config.require_thermometer.desc").getString());
 

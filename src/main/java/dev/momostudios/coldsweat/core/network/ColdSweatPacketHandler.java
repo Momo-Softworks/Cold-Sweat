@@ -47,7 +47,7 @@ public class ColdSweatPacketHandler
         buffer.writeBoolean(config.fireRes);
         buffer.writeBoolean(config.iceRes);
         buffer.writeBoolean(config.damageScaling);
-        buffer.writeBoolean(config.showWorldTemp);
+        buffer.writeBoolean(config.requireThermometer);
         buffer.writeInt(config.graceLength);
         buffer.writeBoolean(config.graceEnabled);
     }
@@ -62,7 +62,7 @@ public class ColdSweatPacketHandler
         config.fireRes = buffer.readBoolean();
         config.iceRes = buffer.readBoolean();
         config.damageScaling = buffer.readBoolean();
-        config.showWorldTemp = buffer.readBoolean();
+        config.requireThermometer = buffer.readBoolean();
         config.graceLength = buffer.readInt();
         config.graceEnabled = buffer.readBoolean();
         return config;

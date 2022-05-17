@@ -12,7 +12,7 @@ public class ConfigCache
     public boolean fireRes;
     public boolean iceRes;
     public boolean damageScaling;
-    public boolean showWorldTemp;
+    public boolean requireThermometer;
     public int graceLength;
     public boolean graceEnabled;
 
@@ -47,7 +47,7 @@ public class ConfigCache
         fireRes = config.isFireResistanceEnabled();
         iceRes = config.isIceResistanceEnabled();
         damageScaling = config.doDamageScaling();
-        showWorldTemp = config.isWorldTempShowing();
+        requireThermometer = config.thermometerRequired();
         graceLength = config.getGracePeriodLength();
         graceEnabled = config.isGracePeriodEnabled();
     }

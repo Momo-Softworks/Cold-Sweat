@@ -1,9 +1,7 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
@@ -38,7 +36,7 @@ public class WorldTempGaugeDisplay
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL &&
         (CSMath.isBetween(player.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8) ||
-        player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().showWorldTemp))
+        player.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().requireThermometer))
         {
             int scaleX = event.getWindow().getGuiScaledWidth();
             int scaleY = event.getWindow().getGuiScaledHeight();

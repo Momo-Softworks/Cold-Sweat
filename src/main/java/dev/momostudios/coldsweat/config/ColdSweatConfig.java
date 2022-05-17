@@ -30,7 +30,7 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue iceResistanceEffect;
 
     private static final ForgeConfigSpec.BooleanValue damageScaling;
-    private static final ForgeConfigSpec.BooleanValue showWorldTemp;
+    private static final ForgeConfigSpec.BooleanValue requireThermometer;
 
     private static final ForgeConfigSpec.IntValue gracePeriodLength;
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
@@ -63,7 +63,7 @@ public class ColdSweatConfig
         iceResistanceEffect = BUILDER
                 .comment("Ice Resistance blocks all cold temperatures")
                 .define("Ice Resistance Immunity", true);
-        showWorldTemp = BUILDER
+        requireThermometer = BUILDER
             .comment("Thermometer item is required to see world temperature")
             .define("Require Thermometer", true);
         BUILDER.pop();
@@ -160,7 +160,7 @@ public class ColdSweatConfig
         setFireResistanceEnabled(cache.fireRes);
         setIceResistanceEnabled(cache.iceRes);
         setDamageScaling(cache.damageScaling);
-        setShowWorldTemp(cache.showWorldTemp);
+        setRequireThermometer(cache.requireThermometer);
         setGracePeriodLength(cache.graceLength);
         setGracePeriodEnabled(cache.graceEnabled);
         save();
@@ -186,8 +186,8 @@ public class ColdSweatConfig
         return iceResistanceEffect.get();
     }
 
-    public boolean isWorldTempShowing() {
-        return showWorldTemp.get();
+    public boolean thermometerRequired() {
+        return requireThermometer.get();
     }
 
     public boolean doDamageScaling() {
@@ -253,8 +253,8 @@ public class ColdSweatConfig
         iceResistanceEffect.set(isEffective);
     }
 
-    public void setShowWorldTemp(boolean required) {
-        showWorldTemp.set(required);
+    public void setRequireThermometer(boolean required) {
+        requireThermometer.set(required);
     }
 
     public void setDamageScaling(boolean enabled) {
