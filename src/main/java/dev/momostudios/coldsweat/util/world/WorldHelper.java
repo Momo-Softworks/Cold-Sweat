@@ -8,9 +8,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -25,25 +25,45 @@ public class WorldHelper
     /**
      * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
      * Ignores minecraft:cave_air<br>
-     * This is different from {@code world.getHeight()} because it attempts to ignore floating blocks
+     * This is different from {@code level.getHeight()} because it attempts to ignore floating blocks
      */
-    public static int getGroundLevel(BlockPos pos, Level world)
+    public static int getGroundLevel(BlockPos pos, Level level)
     {
         // If Minecraft's height calculation is correct, use that
-        int mcHeight = world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+        int mcHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
         if (pos.getY() >= mcHeight)
             return mcHeight;
 
-        for (int c = 0; c < 255; c++)
+        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null) return mcHeight;
+
+        for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
         {
-            BlockPos pos2 = new BlockPos(pos.getX(), c, pos.getZ());
-            BlockState state = world.getBlockState(pos2);
-            if (state.getMaterial() == Material.AIR && state.getBlock() != Blocks.CAVE_AIR)
+            BlockPos pos2 = new BlockPos(pos.getX(), y, pos.getZ());
+
+            int chunkY = chunk.getSectionIndex(pos2.getY());
+            if (chunkY >= 0 && chunkY < chunk.getSections().length)
             {
-                return c;
+                // Get the subchunk
+                LevelChunkSection levelchunksection = chunk.getSections()[chunkY];
+
+                // If this subchunk is only air, skip it
+                if (levelchunksection.hasOnlyAir())
+                {
+                    y += 16 - (y % 16);
+                    continue;
+                }
+
+                // Get the block state from this subchunk
+                BlockState state = levelchunksection.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
+                // If this block is a surface block, return the Y
+                if (state.isAir() && state.getBlock() != Blocks.CAVE_AIR)
+                {
+                    return y;
+                }
             }
         }
-        return 0;
+        return mcHeight;
     }
 
     /**
