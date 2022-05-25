@@ -16,6 +16,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Handles code related to fueling the Hellspring Lamp
+ */
 @Mixin(AbstractContainerMenu.class)
 public class MixinContainerMenu
 {
@@ -29,11 +32,11 @@ public class MixinContainerMenu
         {
             Slot slot = menu.getSlot(slotId);
             ItemStack stack = slot.getItem();
-            if (stack.getItem() == ModItems.HELLSPRING_LAMP && Minecraft.getInstance().player != null)
+            if (stack.getItem() == ModItems.HELLSPRING_LAMP)
             {
                 double fuel = stack.getOrCreateTag().getDouble("fuel");
                 ItemStack holdingStack = menu.getCarried();
-                if (fuel <= 63 && clickType == ClickType.PICKUP && getItemEntry(holdingStack).value > 0)
+                if (fuel < 64 && clickType == ClickType.PICKUP && getItemEntry(holdingStack).value > 0)
                 {
                     stack.getOrCreateTag().putDouble("fuel", Math.min(64, fuel + (mouseButton == 1 ? 1 : holdingStack.getCount())));
                     holdingStack.shrink(mouseButton == 1 ? 1 : 64 - (int) fuel);
