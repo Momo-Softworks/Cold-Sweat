@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinSoulfire
 {
     @Inject(method = "entityInside(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V",
-    at = @At("HEAD"), cancellable = true, remap = ColdSweat.remapMixins)
+    at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, CallbackInfo ci)
     {
         if (state.getBlock() instanceof SoulFireBlock)

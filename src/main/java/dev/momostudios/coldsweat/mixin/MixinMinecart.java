@@ -2,10 +2,8 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -19,7 +17,7 @@ public class MixinMinecart
 {
     AbstractMinecart minecart = (AbstractMinecart) (Object) this;
 
-    @Inject(method = "destroy(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At("HEAD"), remap = ColdSweat.remapMixins)
+    @Inject(method = "destroy(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
     public void destroy(DamageSource source, CallbackInfo ci)
     {
         Block block = minecart.getDisplayBlockState().getBlock();

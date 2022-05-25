@@ -40,7 +40,7 @@ public class MixinXPBar
                 to   = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I")
             ),
             cancellable = true,
-            remap = ColdSweat.remapMixins)
+            remap = ColdSweat.REMAP_MIXINS)
     public void renderExperienceBar(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         Minecraft mc = Minecraft.getInstance();
