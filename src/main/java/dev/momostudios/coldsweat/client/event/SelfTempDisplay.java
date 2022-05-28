@@ -132,7 +132,6 @@ public class SelfTempDisplay
                 default -> 0;
             };
 
-            RenderSystem.defaultBlendFunc();
 
             int threatOffset = 0;
             if (CCS.iconBobbing())
@@ -142,6 +141,8 @@ public class SelfTempDisplay
             }
 
             event.getMatrixStack().pushPose();
+            RenderSystem.defaultBlendFunc();
+
             // Render Icon
             if (TRANSITION_PROGRESS < BLEND_TIME)
             {
