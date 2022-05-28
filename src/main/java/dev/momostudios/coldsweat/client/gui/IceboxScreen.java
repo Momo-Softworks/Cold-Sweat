@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Inventory;
 public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
-    int fuelLevel;
 
     public IceboxScreen(IceboxContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -22,7 +21,6 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
         this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 201;
-        this.fuelLevel = screenContainer.te.getFuel();
         this.inventoryLabelY = this.imageHeight - 122;
         this.titleLabelX = leftPos + this.imageWidth / 2 - Minecraft.getInstance().font.width(this.getTitle()) / 2;
     }
@@ -46,6 +44,6 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
         this.blit(matrixStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw fuel gauge
-        blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (this.menu.getFuel() / 31.25), 16, 256, 256);
+        blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (menu.te.getFuel() / 31.25), 16, 256, 256);
     }
 }

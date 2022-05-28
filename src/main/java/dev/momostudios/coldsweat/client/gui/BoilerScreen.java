@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Inventory;
 public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
-    int fuelLevel;
 
     public BoilerScreen(BoilerContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -22,7 +21,6 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
         this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 201;
-        this.fuelLevel = screenContainer.te.getFuel();
         this.inventoryLabelY = this.imageHeight - 122;
         this.titleLabelX = leftPos + this.imageWidth / 2 - Minecraft.getInstance().font.width(this.getTitle()) / 2;
     }

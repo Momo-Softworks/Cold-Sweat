@@ -2,6 +2,8 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -22,14 +24,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.IceboxContainer;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Random;
 
@@ -37,17 +38,18 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
-    public static int slots = 10;
+    public static int SLOTS = 10;
     public static int MAX_FUEL = 1000;
-    protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
     public int ticksExisted;
     private int fuel;
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {
-        super(ModBlockEntities.get("icebox"), pos, state);
+        super(ModBlockEntities.ICEBOX, pos, state);
     }
 
+    @Nonnull
     @Override
     public CompoundTag getUpdateTag()
     {
@@ -59,7 +61,6 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     public void handleUpdateTag(CompoundTag tag)
     {
-        super.handleUpdateTag(tag);
         this.setFuel(tag.getInt("fuel"));
     }
 
@@ -73,6 +74,12 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public ClientboundBlockEntityDataPacket getUpdatePacket()
     {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private void sendUpdatePacket()
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(worldPosition)),
+                                             new BlockDataUpdateMessage(this.worldPosition, getUpdateTag()));
     }
 
     @Override
@@ -93,57 +100,58 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
         ticksExisted++;
         ticksExisted %= 1000;
 
-        if (getFuel() > 0)
+        if (!level.isClientSide)
         {
-            // Set state to frosted
-            if (!state.getValue(IceboxBlock.FROSTED))
-                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
-
-            // Cool down waterskins
-            if (ticksExisted % 20 == 0)
+            if (getFuel() > 0)
             {
-                boolean hasItemStacks = false;
-                for (int i = 0; i < 10; i++)
-                {
-                    ItemStack stack = getItem(i);
-                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+                // Set state to frosted
+                if (!state.getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
+                // Cool down waterskins
+                if (ticksExisted % 20 == 0)
+                {
+                    boolean hasItemStacks = false;
+                    for (int i = 0; i < 10; i++)
                     {
-                        hasItemStacks = true;
-                        stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
-                    }
-                }
-                if (hasItemStacks) setFuel(getFuel() - 1);
-            }
-        }
-        // if no fuel, set state to unfrosted
-        else
-        {
-            if (state.getValue(IceboxBlock.FROSTED))
-                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
-        }
+                        ItemStack stack = getItem(i);
+                        int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
-        // Input fuel
-        if (this.ticksExisted % 10 == 0)
-        {
-            ItemStack fuelStack = this.getItem(0);
-            int itemFuel = getItemFuel(fuelStack);
-            if (itemFuel != 0)
+                        if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
+                        {
+                            hasItemStacks = true;
+                            stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
+                        }
+                    }
+                    if (hasItemStacks) setFuel(getFuel() - 1);
+                }
+            }
+            // if no fuel, set state to unfrosted
+            else
             {
-                if (fuelStack.hasContainerItem())
+                if (state.getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+            }
+
+            // Input fuel
+            if (this.ticksExisted % 10 == 0)
+            {
+                ItemStack fuelStack = this.getItem(0);
+                int itemFuel = getItemFuel(fuelStack);
+
+                if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
                 {
-                    if (fuelStack.getCount() == 1)
+                    if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
                     {
                         this.setItem(0, fuelStack.getContainerItem());
-                        setFuel(fuel + itemFuel);
+                        setFuel(this.getFuel() + itemFuel);
                     }
-                }
-                else
-                {
-                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - fuel) / itemFuel);
-                    fuelStack.shrink(consumeCount);
-                    setFuel(fuel + itemFuel * consumeCount);
+                    else
+                    {
+                        int consumeCount = (int) Math.floor((double) (MAX_FUEL - this.getFuel()) / itemFuel);
+                        fuelStack.shrink(consumeCount);
+                        setFuel(this.getFuel() + itemFuel * consumeCount);
+                    }
                 }
             }
         }
@@ -163,32 +171,18 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public int getItemFuel(ItemStack item)
     {
-        int fuel = 0;
+        int itemFeul = 0;
         for (List<?> testIndex : new ItemSettingsConfig().iceboxItems())
         {
             String testItem = (String) testIndex.get(0);
 
             if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
             {
-                fuel = ((Number) testIndex.get(1)).intValue();
+                itemFeul = ((Number) testIndex.get(1)).intValue();
                 break;
             }
         }
-        return fuel;
-    }
-
-    public ItemStack getItemInSlot(int index)
-    {
-        return getCap().map(c -> c.getStackInSlot(index)).orElse(ItemStack.EMPTY);
-    }
-
-    public void setItemInSlot(int index, ItemStack stack)
-    {
-        getCap().ifPresent(capability ->
-        {
-            capability.getStackInSlot(index).shrink(capability.getStackInSlot(index).getCount());
-            capability.insertItem(index, stack, false);
-        });
+        return itemFeul;
     }
 
     public int getFuel()
@@ -199,11 +193,10 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public void setFuel(int amount)
     {
         fuel = Math.min(amount, MAX_FUEL);
-    }
-
-    public LazyOptional<IItemHandler> getCap()
-    {
-        return this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+        if (this.level != null && !this.level.isClientSide)
+        {
+            this.sendUpdatePacket();
+        }
     }
 
     @Override
@@ -232,7 +225,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     public int getContainerSize()
     {
-        return slots;
+        return SLOTS;
     }
 
     @Override
@@ -245,6 +238,12 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public ItemStack getItem(int slot)
     {
         return items.get(slot);
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack itemstack)
+    {
+        items.set(slot, itemstack);
     }
 
     @Override
@@ -263,12 +262,6 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public ItemStack removeItemNoUpdate(int slot)
     {
         return ContainerHelper.removeItem(items, slot, items.get(slot).getCount());
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack itemstack)
-    {
-        items.set(slot, itemstack);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -7,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.BoilerBlock;
@@ -31,6 +35,7 @@ import dev.momostudios.coldsweat.common.container.BoilerContainer;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer, StackedContentsCompatible
@@ -45,9 +50,10 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
-        super(ModBlockEntities.get("boiler"), pos, state);
+        super(ModBlockEntities.BOILER, pos, state);
     }
 
+    @Nonnull
     @Override
     public CompoundTag getUpdateTag()
     {
@@ -57,8 +63,27 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+    public void handleUpdateTag(CompoundTag tag)
+    {
+        this.setFuel(tag.getInt("fuel"));
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
+    {
+        handleUpdateTag(pkt.getTag());
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
+    {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private void sendUpdatePacket()
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(worldPosition)),
+                                             new BlockDataUpdateMessage(this.worldPosition, getUpdateTag()));
     }
 
     @Override
@@ -116,7 +141,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
         }
 
         // Input fuel
-        if (this.ticksExisted % 10 == 0)
+        if (!level.isClientSide && this.ticksExisted % 10 == 0)
         {
             ItemStack fuelStack = getItem(0);
             int itemFuel = getItemFuel(fuelStack);
@@ -164,6 +189,10 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public void setFuel(int amount)
     {
         fuel = Math.min(amount, MAX_FUEL);
+        if (this.level != null && !this.level.isClientSide)
+        {
+            this.sendUpdatePacket();
+        }
     }
 
     @Override
