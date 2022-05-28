@@ -1,14 +1,12 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.api.temperature.modifier.MountTempModifier;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
@@ -34,7 +32,7 @@ public class MountEventHandler
                 {
                     for (List<Object> entity : EntitySettingsConfig.INSTANCE.insulatedEntities())
                     {
-                        if (ForgeRegistries.ENTITIES.getKey(player.getVehicle().getType()).toString().equals(entity.get(0)))
+                        if (player.getVehicle().getType().getRegistryName().toString().equals(entity.get(0)))
                         {
                             Number number = (Number) entity.get(1);
                             double value = number.doubleValue();
