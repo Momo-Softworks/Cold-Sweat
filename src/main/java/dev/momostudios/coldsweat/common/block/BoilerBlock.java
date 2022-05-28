@@ -76,7 +76,7 @@ public class BoilerBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == ModBlockEntities.get("boiler") ? BoilerBlockEntity::tick : null;
+        return type == ModBlockEntities.BOILER ? BoilerBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

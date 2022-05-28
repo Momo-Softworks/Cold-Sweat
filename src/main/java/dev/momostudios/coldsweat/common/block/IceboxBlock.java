@@ -64,7 +64,7 @@ public class IceboxBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == ModBlockEntities.get("icebox") ? IceboxBlockEntity::tick : null;
+        return type == ModBlockEntities.ICEBOX ? IceboxBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

@@ -120,7 +120,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
-        return type == ModBlockEntities.get("hearth") ? HearthBlockEntity::tickSelf : null;
+        return type == ModBlockEntities.HEARTH ? HearthBlockEntity::tickSelf : null;
     }
 
     @Nullable
