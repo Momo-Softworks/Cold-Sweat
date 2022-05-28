@@ -37,6 +37,8 @@ public class ColdSweatConfig
 
     private static final ForgeConfigSpec.DoubleValue hearthEffect;
 
+    private static final ForgeConfigSpec.BooleanValue coldSoulFire;
+
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockEffects;
@@ -123,6 +125,13 @@ public class ColdSweatConfig
         hearthEffect = BUILDER
                 .comment("How strong the hearth is (default: 0.5)")
                 .defineInRange("Hearth Strength", 0.5, 0, 1.0);
+        BUILDER.pop();
+
+        BUILDER.push("Cold Soul Fire");
+        coldSoulFire = BUILDER
+                .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
+                         "Does not affect the block's temperature")
+                .define("Cold Soul Fire", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -214,6 +223,11 @@ public class ColdSweatConfig
     public boolean isGracePeriodEnabled()
     {
         return gracePeriodEnabled.get();
+    }
+
+    public boolean isSoulFireCold()
+    {
+        return coldSoulFire.get();
     }
 
     public List<? extends List<Object>> getBlockEffects()

@@ -11,7 +11,7 @@
   "mixins": [
     "MixinLevel",
     "MixinMinecart",
-    "MixinSoulfire"
+    "MixinSoulFire"
   ],
   "injectors": {
     "defaultRequire": 1
