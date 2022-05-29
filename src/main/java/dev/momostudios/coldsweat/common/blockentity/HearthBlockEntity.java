@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
@@ -311,11 +310,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                             SpreadPath tryPath = spreadPath.offset(direction);
                             BlockPos tryPos = tryPath.pos;
 
-                            SpreadPath existingPath = paths.get(tryPos);
-
-                            if (existingPath == null)
+                            if (paths.get(tryPos) == null)
                             {
-                                if (WorldHelper.canSpreadThrough(chunk, spreadPath.pos, tryPath.direction))
+                                if (!WorldHelper.isSpreadBlocked(chunk, spreadPath.pos, direction))
                                     newPaths.put(tryPos, tryPath);
                             }
                         }

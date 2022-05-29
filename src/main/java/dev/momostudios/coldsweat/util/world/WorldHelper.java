@@ -119,33 +119,33 @@ public class WorldHelper
         return true;
     }
 
-    public static boolean canSpreadThrough(Level level, BlockPos pos, Direction toDir)
+    public static boolean isSpreadBlocked(Level level, BlockPos pos, Direction toDir)
     {
         LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null) return false;
+        if (chunk == null) return true;
 
-        return canSpreadThrough(chunk, chunk.getBlockState(pos), pos, toDir);
+        return isSpreadBlocked(chunk, chunk.getBlockState(pos), pos, toDir);
     }
 
-    public static boolean canSpreadThrough(LevelChunk chunk, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean isSpreadBlocked(LevelChunk chunk, @Nonnull BlockPos pos, @Nonnull Direction toDir)
     {
         PalettedContainer<BlockState> palette = chunk.getSection((pos.getY() >> 4) - chunk.getMinSection()).getStates();
         BlockState state = palette.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
 
-        return canSpreadThrough(chunk, state, pos, toDir);
+        return isSpreadBlocked(chunk, state, pos, toDir);
     }
 
-    public static boolean canSpreadThrough(@Nonnull LevelChunk chunk, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean isSpreadBlocked(@Nonnull LevelChunk chunk, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
     {
         Level level = chunk.getLevel();
 
         if (state.isAir() || state.getCollisionShape(level, pos.relative(toDir)).isEmpty())
-            return true;
-
-        if (state.isFaceSturdy(level, pos, toDir))
             return false;
 
-        return !isFullSide(state, toDir, pos.relative(toDir), level) && !state.isFaceSturdy(level, pos, toDir.getOpposite());
+        if (state.isFaceSturdy(level, pos, toDir))
+            return true;
+
+        return isFullSide(state, toDir, pos.relative(toDir), level) || state.isFaceSturdy(level, pos, toDir.getOpposite());
     }
 
     public static double distance(Vec3i pos1, Vec3i pos2)
@@ -169,15 +169,9 @@ public class WorldHelper
                 if (area[0] < 1)
                     switch (dir.getAxis())
                     {
-                        case X:
-                            area[0] += (maxY - minY) * (maxZ - minZ);
-                            break;
-                        case Y:
-                            area[0] += (maxX - minX) * (maxZ - minZ);
-                            break;
-                        case Z:
-                            area[0] += (maxX - minX) * (maxY - minY);
-                            break;
+                        case X -> area[0] += (maxY - minY) * (maxZ - minZ);
+                        case Y -> area[0] += (maxX - minX) * (maxZ - minZ);
+                        case Z -> area[0] += (maxX - minX) * (maxY - minY);
                     }
             });
             return area[0] >= 1;
