@@ -27,7 +27,7 @@ public class PlayerTempUpdater
                 {
                     cap.tickUpdate(player);
 
-                    if (player.tickCount % 20 == 0)
+                    if (player.tickCount % 60 == 0)
                     {
                         TempHelper.updateModifiers(player, cap);
                     }
