@@ -1,9 +1,13 @@
 package dev.momostudios.coldsweat.util.world;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,6 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -225,8 +230,17 @@ public class WorldHelper
         return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
     }
 
-    public static boolean isEvenPosition(BlockPos pos)
+    /**
+     * Plays a sound for all tracking clients that follows the source entity around.<br>
+     * Why this isn't in Vanilla Minecraft is beyond me
+     * @param sound The SoundEvent to play
+     * @param entity The entity to attach the sound to (all tracking entities will hear the sound)
+     * @param volume The volume of the sound
+     * @param pitch The pitch of the sound
+     */
+    public static void playEntitySound(SoundEvent sound, Entity entity, float volume, float pitch)
     {
-        return pos.getX() % 2 == 0 && pos.getY() % 2 == 0 && pos.getZ() % 2 == 0;
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
+                new PlaySoundMessage(sound.getRegistryName().toString(), volume, pitch, entity.getId()));
     }
 }
