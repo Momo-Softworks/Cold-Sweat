@@ -141,25 +141,23 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
         }
 
         // Input fuel
-        if (!level.isClientSide && this.ticksExisted % 10 == 0)
+        if (this.ticksExisted % 10 == 0)
         {
-            ItemStack fuelStack = getItem(0);
+            ItemStack fuelStack = this.getItem(0);
             int itemFuel = getItemFuel(fuelStack);
-            if (itemFuel != 0)
+
+            if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
             {
-                if (fuelStack.hasContainerItem())
+                if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
                 {
-                    if (fuelStack.getCount() == 1)
-                    {
-                        this.setItem(0, fuelStack.getContainerItem());
-                        setFuel(fuel + itemFuel);
-                    }
+                    this.setItem(0, fuelStack.getContainerItem());
+                    setFuel(this.getFuel() + itemFuel);
                 }
                 else
                 {
-                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - fuel) / itemFuel);
+                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - this.getFuel()) / itemFuel);
                     fuelStack.shrink(consumeCount);
-                    setFuel(fuel + itemFuel * consumeCount);
+                    setFuel(this.getFuel() + itemFuel * consumeCount);
                 }
             }
         }
