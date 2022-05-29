@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -238,9 +239,9 @@ public class WorldHelper
      * @param volume The volume of the sound
      * @param pitch The pitch of the sound
      */
-    public static void playEntitySound(SoundEvent sound, Entity entity, float volume, float pitch)
+    public static void playEntitySound(SoundEvent sound, SoundSource source, Entity entity, float volume, float pitch)
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                new PlaySoundMessage(sound.getRegistryName().toString(), volume, pitch, entity.getId()));
+                new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
     }
 }
