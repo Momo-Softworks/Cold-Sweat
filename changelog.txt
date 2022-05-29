@@ -522,5 +522,29 @@ Technical Changes:
       - Temperature can no longer be manually synced using setTemperature() or addTemperature() because of this system
 
 
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b04
+- Added config option to revert Soul Fire back to dealing burning damage
+- Notable backend optimizations by not sending as many packets around. This should help servers a lot!
+
+Fixes:
+- Fixed the Hearth/Boiler/Icebox causing items to disappear clientside (1.18.x)
+- Fixed the Icebox taking too much fuel (1.18.x)
+- Fixed the Hearth duplicating fuel items (1.18.x)
+- Fixed the Hellspring Lamp not accepting fuel on servers
+- Fixed entity mount insulation config not working properly
+- Fixed custom sounds sometimes playing out-of-sync
+- Fixed crash when languages that use "," instead of "." as decimal places were active in-game
+- Fixed crash related to block updates in partially-loaded chunks
+- Fixed crash when Waterskins were placed in the hotbar
+- Fixed rare crash when a block was destroyed underground (1.18.x)
+- Fixed rare crash due to improper registration when blocks from CS are placed (1.18.x)
+
+Technical Changes:
+- Optimized how TempModifiers are applied/removed
+- Optimized how blocks emit temperature
+- Optimized how the Icebox/Boiler consume fuel
+
+
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
