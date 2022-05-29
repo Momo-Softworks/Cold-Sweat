@@ -7,7 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -45,9 +44,10 @@ public class BlockEffectRegistry
         MAPPED_BLOCKS.clear();
     }
 
-    @Nullable
     public static BlockEffect getEntryFor(BlockState blockstate)
     {
+        if (blockstate.isAir()) return BlockEffectRegistry.DEFAULT_BLOCK_EFFECT;
+
         Block block = blockstate.getBlock();
         BlockEffect mappedEffect = MAPPED_BLOCKS.get(block);
 
