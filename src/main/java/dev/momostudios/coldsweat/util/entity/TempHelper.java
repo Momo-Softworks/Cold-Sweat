@@ -1,13 +1,13 @@
 package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
+import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
+import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
-import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
@@ -55,8 +55,8 @@ public class TempHelper
     }
 
     /**
-     * Applies the given modifier to the player.<br>
-     *
+     * Adds the given modifier to the player.<br>
+     * If duplicates are disabled and the modifier already exists, this action will fail.
      * @param duplicates allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
@@ -65,7 +65,14 @@ public class TempHelper
         addModifier(player, modifier, type, duplicates ? Integer.MAX_VALUE : 1, false);
     }
 
-    public static void addOrReplaceModifier(Player player, TempModifier modifier, Temperature.Types type)
+    /**
+     * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
+     * Otherwise, it will add the modifier.<br>
+     * @param player The player to apply the modifier to
+     * @param modifier The modifier to apply
+     * @param type The type of temperature to apply the modifier to
+     */
+    public static void insertModifier(Player player, TempModifier modifier, Temperature.Types type)
     {
         addModifier(player, modifier, type, 1, true);
     }
@@ -78,41 +85,58 @@ public class TempHelper
         {
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
-                AtomicInteger duplicateCount = new AtomicInteger(0);
-                if (TempModifierRegistry.getEntries().containsKey(event.getModifier().getID()))
+                TempModifier newModifier = event.getModifier();
+                if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
                 {
-                    // If we're replacing, remove the old one and add the new one
+                    List<TempModifier> modifiers = cap.getModifiers(type);
+                    AtomicInteger duplicateCount = new AtomicInteger();
+
+                    // If we're replacing, remove the old one first
                     if (replace)
                     {
-                        cap.getModifiers(event.type).removeIf(mod -> mod.getID().equals(event.getModifier().getID()));
-                        cap.getModifiers(event.type).add(event.getModifier());
+                        // Test if there are more modifiers than maxCount allows
+                        long modCount = modifiers.stream().filter(mod -> mod.getID().equals(newModifier.getID())).count();
+                        int iterations = (int) modCount - maxCount;
+
+                        // If there are more modifiers than maxCount allows, remove the excess
+                        if (iterations >= 1)
+                        {
+                            cap.getModifiers(event.type).removeIf(mod ->
+                            {
+                                if (mod.getID().equals(newModifier.getID()))
+                                {
+                                    return duplicateCount.getAndIncrement() < iterations;
+                                }
+                                return false;
+                            });
+                        }
                     }
+                    // If we're not replacing, test if there is room (# of modifiers of this type < maxCount)
                     else
                     {
                         for (TempModifier mod : cap.getModifiers(event.type))
                         {
                             if (mod.getID().equals(event.getModifier().getID()))
                             {
-                                if (duplicateCount.getAndIncrement() > event.maxCount)
+                                if (duplicateCount.getAndIncrement() >= event.maxCount)
                                 {
+                                    // Fail to add the modifier if there are already too many
                                     break;
                                 }
                             }
                         }
-                        if (duplicateCount.get() < event.maxCount)
-                        {
-                            cap.getModifiers(event.type).add(event.getModifier());
-                        }
+                    }
+
+                    // Add the modifier and update
+                    if (duplicateCount.get() < event.maxCount)
+                    {
+                        cap.getModifiers(event.type).add(event.getModifier());
+                        updateModifiers(player, cap);
                     }
                 }
                 else
                 {
-                    ColdSweat.LOGGER.error("TempModifierEvent.Add: No TempModifier with ID " + modifier.getID() + " found! Is it not registered?");
-                }
-
-                if (!player.level.isClientSide)
-                {
-                    updateModifiers(player, cap);
+                    ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
                 }
             });
         }
@@ -148,7 +172,8 @@ public class TempHelper
                 return false;
             });
 
-            if (!player.level.isClientSide)
+            // Update modifiers if anything actually changed
+            if (removed.get() > 0)
                 updateModifiers(player, cap);
         });
     }
@@ -243,7 +268,8 @@ public class TempHelper
         }
     }
 
-    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp, Temperature max, Temperature min)
+    public static void updateTemperature(Player player, Temperature bodyTemp, Temperature baseTemp, Temperature worldTemp, Temperature max, Temperature
+        min)
     {
         if (!player.level.isClientSide)
         {
