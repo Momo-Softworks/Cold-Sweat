@@ -1,8 +1,5 @@
 package dev.momostudios.coldsweat.config;
 
-import java.util.List;
-import java.util.Map;
-
 public class ConfigCache
 {
     public int difficulty;
@@ -15,9 +12,6 @@ public class ConfigCache
     public boolean requireThermometer;
     public int graceLength;
     public boolean graceEnabled;
-
-    public Map<String, List<? extends List<Object>>> worldOptionsReference = WorldTemperatureConfig.INSTANCE.getConfigMap();
-    public ItemSettingsConfig itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
     private static ConfigCache INSTANCE = new ConfigCache();
 

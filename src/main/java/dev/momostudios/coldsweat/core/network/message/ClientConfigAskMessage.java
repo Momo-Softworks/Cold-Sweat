@@ -1,11 +1,9 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.config.WorldTemperatureConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -13,14 +11,14 @@ import java.util.function.Supplier;
 
 public class ClientConfigAskMessage
 {
-    boolean onJoin;
+    boolean openMenu;
 
-    public ClientConfigAskMessage(boolean onJoin) {
-        this.onJoin = onJoin;
+    public ClientConfigAskMessage(boolean openMenu) {
+        this.openMenu = openMenu;
     }
 
     public static void encode(ClientConfigAskMessage message, FriendlyByteBuf buffer) {
-        buffer.writeBoolean(message.onJoin);
+        buffer.writeBoolean(message.openMenu);
     }
 
     public static ClientConfigAskMessage decode(FriendlyByteBuf buffer)
@@ -35,10 +33,8 @@ public class ClientConfigAskMessage
         {
             ConfigCache cache = new ConfigCache();
             cache.writeValues(ColdSweatConfig.getInstance());
-            cache.worldOptionsReference.putAll(WorldTemperatureConfig.INSTANCE.getConfigMap());
-            cache.itemSettingsReference = ItemSettingsConfig.INSTANCE;
 
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.onJoin));
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.openMenu));
         });
         context.setPacketHandled(true);
     }

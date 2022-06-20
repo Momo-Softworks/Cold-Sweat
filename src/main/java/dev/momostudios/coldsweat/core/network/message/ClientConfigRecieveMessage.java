@@ -14,33 +14,24 @@ import java.util.function.Supplier;
 public class ClientConfigRecieveMessage
 {
     ConfigCache configCache;
-    boolean onJoin;
+    boolean openMenu;
 
-    public ClientConfigRecieveMessage(ConfigCache configCache, boolean onJoin)
+    public ClientConfigRecieveMessage(ConfigCache configCache, boolean openMenu)
     {
         this.configCache = configCache;
-        this.onJoin = onJoin;
+        this.openMenu = openMenu;
     }
 
     public static void encode(ClientConfigRecieveMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeBoolean(message.onJoin);
+        buffer.writeBoolean(message.openMenu);
         ColdSweatPacketHandler.writeConfigCacheToBuffer(message.configCache, buffer);
-        // WorldTempConfig
-        buffer.writeNbt(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("biome_offsets")));
-        buffer.writeNbt(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("dimension_offsets")));
-        buffer.writeNbt(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("biome_temperatures")));
-        buffer.writeNbt(ColdSweatPacketHandler.writeListOfLists(message.configCache.worldOptionsReference.get("dimension_temperatures")));
     }
 
     public static ClientConfigRecieveMessage decode(FriendlyByteBuf buffer)
     {
         boolean onJoin = buffer.readBoolean();
         ConfigCache configCache = ColdSweatPacketHandler.readConfigCacheFromBuffer(buffer);
-        configCache.worldOptionsReference.put("biome_offsets", ColdSweatPacketHandler.readListOfLists(buffer.readNbt()));
-        configCache.worldOptionsReference.put("dimension_offsets", ColdSweatPacketHandler.readListOfLists(buffer.readNbt()));
-        configCache.worldOptionsReference.put("biome_temperatures", ColdSweatPacketHandler.readListOfLists(buffer.readNbt()));
-        configCache.worldOptionsReference.put("dimension_temperatures", ColdSweatPacketHandler.readListOfLists(buffer.readNbt()));
 
         return new ClientConfigRecieveMessage(configCache, onJoin);
     }
@@ -52,11 +43,8 @@ public class ClientConfigRecieveMessage
         {
             if (context.getDirection().getReceptionSide().isClient())
             {
-                if (message.onJoin)
-                {
-                    ConfigCache.setInstance(message.configCache);
-                }
-                else
+                ConfigCache.setInstance(message.configCache);
+                if (message.openMenu)
                 {
                     try
                     {

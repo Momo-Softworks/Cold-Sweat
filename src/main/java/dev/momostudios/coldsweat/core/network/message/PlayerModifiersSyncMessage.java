@@ -1,15 +1,13 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
@@ -98,17 +96,9 @@ public class PlayerModifiersSyncMessage
     public static void handle(PlayerModifiersSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> syncTemperature(message)));
-
-        context.setPacketHandled(true);
-    }
-
-    public static DistExecutor.SafeRunnable syncTemperature(PlayerModifiersSyncMessage message)
-    {
-        return new DistExecutor.SafeRunnable()
+        if (context.getDirection().getReceptionSide().isClient())
         {
-            @Override
-            public void run()
+            context.enqueueWork(() ->
             {
                 LocalPlayer player = Minecraft.getInstance().player;
 
@@ -135,7 +125,9 @@ public class PlayerModifiersSyncMessage
                         cap.getModifiers(Temperature.Types.MIN).addAll(message.coldest);
                     });
                 }
-            }
-        };
+            });
+        }
+
+        context.setPacketHandled(true);
     }
 }
