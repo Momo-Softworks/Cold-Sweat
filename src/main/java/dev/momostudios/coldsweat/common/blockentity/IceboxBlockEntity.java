@@ -1,9 +1,13 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
+import dev.momostudios.coldsweat.common.container.IceboxContainer;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -13,25 +17,24 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
-import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.container.IceboxContainer;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuProvider
@@ -41,8 +44,12 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public static int SLOTS = 10;
     public static int MAX_FUEL = 1000;
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+
+    List<ServerPlayer> usingPlayers = new ArrayList<>();
     public int ticksExisted;
-    private int fuel;
+    int fuel;
+
+    public static Map<Item, Number> VALID_FUEL = ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems());
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {
@@ -78,7 +85,11 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     private void sendUpdatePacket()
     {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(worldPosition)),
+        // Remove the players that aren't interacting with this block anymore
+        usingPlayers.removeIf(player -> !(player.containerMenu instanceof IceboxContainer iceboxContainer && iceboxContainer.te == this));
+
+        // Send data to all players with this block's menu open
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).toList()),
                                              new BlockDataUpdateMessage(this.worldPosition, getUpdateTag()));
     }
 
@@ -112,7 +123,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
                 if (ticksExisted % 20 == 0)
                 {
                     boolean hasItemStacks = false;
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 1; i < 10; i++)
                     {
                         ItemStack stack = getItem(i);
                         int itemTemp = stack.getOrCreateTag().getInt("temperature");
@@ -127,10 +138,9 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
                 }
             }
             // if no fuel, set state to unfrosted
-            else
+            else if (state.getValue(IceboxBlock.FROSTED))
             {
-                if (state.getValue(IceboxBlock.FROSTED))
-                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
             }
 
             // Input fuel
@@ -171,18 +181,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public int getItemFuel(ItemStack item)
     {
-        int itemFeul = 0;
-        for (List<?> testIndex : new ItemSettingsConfig().iceboxItems())
-        {
-            String testItem = (String) testIndex.get(0);
-
-            if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
-            {
-                itemFeul = ((Number) testIndex.get(1)).intValue();
-                break;
-            }
-        }
-        return itemFeul;
+        return VALID_FUEL.getOrDefault(item.getItem(), 0).intValue();
     }
 
     public int getFuel()
@@ -202,6 +201,11 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
+        // Track the players using this block
+        if (playerInv.player instanceof ServerPlayer serverPlayer)
+        {
+            usingPlayers.add(serverPlayer);
+        }
         return new IceboxContainer(id, playerInv, this);
     }
 
