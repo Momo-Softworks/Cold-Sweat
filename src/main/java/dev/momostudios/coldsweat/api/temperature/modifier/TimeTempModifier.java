@@ -1,9 +1,8 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import dev.momostudios.coldsweat.util.LegacyMappings;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.util.LegacyMethodHelper;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -12,15 +11,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraftforge.common.BiomeDictionary;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
-import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class TimeTempModifier extends TempModifier
 {
-    Map<Biome, ResourceKey<Biome>> biomeKeys = new HashMap<>();
+    static Map<Biome, ResourceKey<Biome>> BIOME_KEYS = new HashMap<>();
 
     @Override
     public Temperature getResult(Temperature temp, Player player)
@@ -34,20 +31,9 @@ public class TimeTempModifier extends TempModifier
                 for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
                 {
                     BiomeManager biomeManager = player.level.getBiomeManager();
-                    Biome biome;
+                    Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
 
-                    // For 1.18.1
-                    if (FMLLoader.versionInfo().mcVersion().equals("1.18.1"))
-                    {
-                        biome = (Biome) LegacyMappings.getBiomeOld.invoke(biomeManager, blockPos);
-                    }
-                    // For 1.18.2
-                    else
-                    {
-                        biome = biomeManager.getBiome(blockPos).value();
-                    }
-
-                    ResourceKey<Biome> key = biomeKeys.get(biome);
+                    ResourceKey<Biome> key = BIOME_KEYS.get(biome);
 
                     if (key == null)
                         key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
