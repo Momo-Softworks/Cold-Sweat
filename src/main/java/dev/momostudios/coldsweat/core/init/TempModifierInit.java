@@ -1,14 +1,16 @@
-package dev.momostudios.coldsweat.core.event;
+package dev.momostudios.coldsweat.core.init;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.core.BlockEffectRegisterEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
-import dev.momostudios.coldsweat.api.temperature.modifier.*;
-import dev.momostudios.coldsweat.api.temperature.block_effect.*;
 import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
+import dev.momostudios.coldsweat.api.temperature.block_effect.*;
+import dev.momostudios.coldsweat.api.temperature.modifier.*;
+import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,15 +19,12 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber
-public class InitTempModifiers
+public class TempModifierInit
 {
     // Trigger TempModifierEvent.Init
     @SubscribeEvent
@@ -68,52 +67,57 @@ public class InitTempModifiers
             {
                 // Check if required fields are present
                 if (!(effectBuilder.get(0) instanceof String)
-                ||  !(effectBuilder.get(1) instanceof Number configTemp)
-                ||  !(effectBuilder.get(2) instanceof Number configRange))
+                || !(effectBuilder.get(1) instanceof Number configTemp)
+                || !(effectBuilder.get(2) instanceof Number configRange))
                 {
                     throw new Exception("Invalid BlockEffect format");
                 }
 
                 String[] blockIDs = ((String) effectBuilder.get(0)).split(",");
-                Block[] affectedBlocks = Arrays.stream(blockIDs).map(id -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id))).toArray(Block[]::new);
 
                 final double temp    = configTemp.doubleValue();
                 final double range   = configRange.doubleValue();
                 final boolean weaken = effectBuilder.size() < 4 || !(effectBuilder.get(2) instanceof Boolean) || (boolean) effectBuilder.get(3);
 
-                final double maxTemp = effectBuilder.size() >= 5 && effectBuilder.get(3) instanceof Number
+                final double maxChange = effectBuilder.size() == 5 && effectBuilder.get(4) instanceof Number
                         ? ((Number) effectBuilder.get(4)).doubleValue()
                         : Double.MAX_VALUE;
 
-                final double minTemp = effectBuilder.size() >= 6 && effectBuilder.get(4) instanceof Number
-                        ? ((Number) effectBuilder.get(5)).doubleValue()
-                        : -Double.MAX_VALUE;
+                final double maxEffect = temp > 0 ?  maxChange :  Double.MAX_VALUE;
+                final double minEffect = temp < 0 ? -maxChange : -Double.MAX_VALUE;
+
+                List<Block> effectBlocks = new ArrayList<>();
+
+                for (String id : blockIDs)
+                {
+                    effectBlocks.addAll(ConfigHelper.getBlocks(id));
+                }
 
                 event.register(
-                new BlockEffect(affectedBlocks)
-                {
-                    @Override
-                    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
-                    {
-                        return weaken ? CSMath.blend(temp, 0, distance, 0.5, range) : temp;
-                    }
+                        new BlockEffect(effectBlocks.toArray(new Block[0]))
+                        {
+                            @Override
+                            public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+                            {
+                                return weaken ? CSMath.blend(temp, 0, distance, 0.5, range) : temp;
+                            }
 
-                    @Override
-                    public double maxEffect()
-                    {
-                        return maxTemp;
-                    }
+                            @Override
+                            public double maxEffect()
+                            {
+                                return maxEffect;
+                            }
 
-                    @Override
-                    public double minEffect()
-                    {
-                        return minTemp;
-                    }
-                });
+                            @Override
+                            public double minEffect()
+                            {
+                                return minEffect;
+                            }
+                        });
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.warn("Invalid configuration for BlockEffects in config file \"main.toml\"");
+                ColdSweat.LOGGER.error("Invalid configuration for BlockEffects in config file \"main.toml\"");
                 e.printStackTrace();
                 break;
             }
@@ -125,7 +129,6 @@ public class InitTempModifiers
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
         String sereneseasons = "dev.momostudios.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier";
-        String betterweather = "dev.momostudios.coldsweat.api.temperature.modifier.compat.BetterWeatherTempModifier";
 
         event.register(new BlockTempModifier());
         event.register(new BiomeTempModifier());
@@ -138,13 +141,13 @@ public class InitTempModifiers
         event.register(new WaterTempModifier());
         event.register(new HearthTempModifier());
         event.register(new FoodTempModifier());
+        event.register(new FreezingTempModifier());
 
         if (ModList.get().isLoaded("sereneseasons"))
         {
             try { event.register((TempModifier) Class.forName(sereneseasons).getConstructor().newInstance()); }
-            catch (Exception e) {}
+            catch (Exception ignored) {}
         }
-        //if (ModList.get().isLoaded("betterweather")) event.addModifier((TempModifier) Class.forName(betterweather).newInstance());
 
         if (ModList.get().isLoaded("sereneseasons") && ModList.get().isLoaded("betterweather"))
         {
