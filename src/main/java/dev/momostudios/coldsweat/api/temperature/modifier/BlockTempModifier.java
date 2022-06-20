@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.PalettedContainer;
@@ -28,12 +29,13 @@ public class BlockTempModifier extends TempModifier
     @Override
     public Temperature getResult(Temperature temp, Player player)
     {
-        if (player.tickCount % 20 == 0)
+        Map<Block, Double> effectAmounts = new HashMap<>();
+
+        if (player.tickCount % 60 == 0)
         {
             chunkMap.clear();
         }
 
-        double totalTemp = 0;
         Level level = player.level;
 
         for (int x = -7; x < 14; x++)
@@ -59,9 +61,12 @@ public class BlockTempModifier extends TempModifier
 
                         if (be == null || be.equals(BlockEffectRegistry.DEFAULT_BLOCK_EFFECT)) continue;
 
+                        // Get the amount that this block has affected the player so far
+                        double effectAmount = effectAmounts.getOrDefault(state.getBlock(), 0.0);
+
                         // Is totalTemp within the bounds of the BlockEffect's min/max allowed temps?
-                        if (CSMath.isBetween(totalTemp, be.minEffect(), be.maxEffect())
-                        && CSMath.isBetween(temp.get() + totalTemp, be.minTemperature(), be.maxTemperature()))
+                        if (CSMath.isBetween(effectAmount, be.minEffect(), be.maxEffect())
+                        && CSMath.isInRange(temp.get(), be.minTemperature(), be.maxTemperature()))
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vec3 pos = new Vec3(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5);
@@ -146,16 +151,28 @@ public class BlockTempModifier extends TempModifier
                                 prevPos1 = newPos1;
                                 prevPos2 = newPos2;
                             }
+
+                            // Calculate the decrease in effectiveness due to blocks in the way
                             double blockDampening = Math.pow(1.5, blocksBetween);
 
-                            totalTemp += tempToAdd / blockDampening;
+                            // Store this block type's total effect on the player
+                            double blockEffectTotal = effectAmount + tempToAdd / blockDampening;
+                            effectAmounts.put(state.getBlock(), CSMath.clamp(blockEffectTotal, be.minEffect(), be.maxEffect()));
+
                         }
                     }
-                    catch (Exception e) {}
+                    catch (Exception ignored) {}
                 }
             }
         }
-        
+
+        // Add the effects of all the blocks together and return the result
+        double totalTemp = 0;
+        for (Map.Entry<Block, Double> effect : effectAmounts.entrySet())
+        {
+            totalTemp += effect.getValue();
+        }
+
         return temp.add(totalTemp);
     }
 
