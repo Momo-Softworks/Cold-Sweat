@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -29,25 +30,29 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean selected)
+    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean isSelected)
     {
-        super.inventoryTick(itemstack, world, entity, slot, selected);
+        super.inventoryTick(itemstack, world, entity, slot, isSelected);
         if (entity instanceof Player player)
         {
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
-            if (CSMath.isBetween(itemTemp, -1, 1))
+            if (itemTemp != 0)
             {
-                if (itemTemp != 0)
+                if (CSMath.isInRange(itemTemp, -1, 1))
+                {
                     itemstack.getOrCreateTag().putDouble("temperature", 0);
-            }
-            else if (slot <= 8)
-            {
-                double temp = 0.03 * ConfigCache.getInstance().rate * CSMath.normalize(itemTemp);
-                double newTemp = itemTemp - temp;
+                    return;
+                }
 
-                itemstack.getOrCreateTag().putDouble("temperature", newTemp);
+                if (slot <= 8 || player.getOffhandItem().equals(itemstack))
+                {
+                    double temp = 0.03 * ConfigCache.getInstance().rate * CSMath.getSign(itemTemp);
+                    double newTemp = itemTemp - temp;
 
-                TempHelper.addModifier(player, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Types.CORE, true);
+                    itemstack.getOrCreateTag().putDouble("temperature", newTemp);
+
+                    TempHelper.addModifier(player, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Types.CORE, true);
+                }
             }
         }
     }
@@ -58,15 +63,25 @@ public class FilledWaterskinItem extends Item
         InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        TempHelper.addModifier(player, new WaterskinTempModifier(itemstack.getOrCreateTag().getDouble("temperature")).expires(1), Temperature.Types.CORE, true);
+        double amount = itemstack.getOrCreateTag().getDouble("temperature") * (ItemSettingsConfig.getInstance().waterskinStrength() / 50d);
+        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(1), Temperature.Types.CORE, true);
 
-        level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+        // Play empty sound
+        level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
+                SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
+        // Create empty waterskin item
         ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
-        emptyWaterskin.setHoverName(itemstack.getHoverName());
+
+        // Preserve NBT (except temperature)
+        emptyWaterskin.setTag(itemstack.getTag());
+        emptyWaterskin.removeTagKey("temperature");
+
+        // Add the item to the player's inventory
         if (player.getInventory().contains(emptyWaterskin))
         {
             player.addItem(emptyWaterskin);
+            player.setItemInHand(hand, ItemStack.EMPTY);
         }
         else
         {
