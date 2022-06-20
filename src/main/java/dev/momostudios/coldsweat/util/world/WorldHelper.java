@@ -51,17 +51,18 @@ public class WorldHelper
             if (chunkY >= 0 && chunkY < chunk.getSections().length)
             {
                 // Get the subchunk
-                LevelChunkSection levelchunksection = chunk.getSections()[chunkY];
+                LevelChunkSection subchunk = chunk.getSections()[chunkY];
+                if (subchunk == null) return mcHeight;
 
                 // If this subchunk is only air, skip it
-                if (levelchunksection.hasOnlyAir())
+                if (subchunk.hasOnlyAir())
                 {
                     y += 16 - (y % 16);
                     continue;
                 }
 
                 // Get the block state from this subchunk
-                BlockState state = levelchunksection.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
+                BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
                 // If this block is a surface block, return the Y
                 if (state.isAir() && state.getBlock() != Blocks.CAVE_AIR)
                 {

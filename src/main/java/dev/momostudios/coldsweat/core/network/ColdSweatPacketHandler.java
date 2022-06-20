@@ -105,4 +105,24 @@ public class ColdSweatPacketHandler
         }
         return list;
     }
+
+    public static CompoundTag writeListOfStrings(List<? extends String> list)
+    {
+        CompoundTag tag = new CompoundTag();
+        for (int i = 0; i < list.size(); i++)
+        {
+            tag.put("" + i, StringTag.valueOf(list.get(i)));
+        }
+        return tag;
+    }
+
+    public static List<? extends String> readListOfStrings(CompoundTag tag)
+    {
+        List<String> list = new ArrayList<>();
+        for (String key : tag.getAllKeys())
+        {
+            list.add(tag.getString(key));
+        }
+        return list;
+    }
 }

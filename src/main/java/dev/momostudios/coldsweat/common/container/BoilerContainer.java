@@ -100,7 +100,7 @@ public class BoilerContainer extends AbstractContainerMenu
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (CSMath.isBetween(index, 0, 9))
+            if (CSMath.isInRange(index, 0, 9))
             {
                 if (!this.moveItemStackTo(itemstack1, 10, 46, true))
                 {
@@ -127,7 +127,7 @@ public class BoilerContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, slots.size() - 9, slots.size()))
+                else if (CSMath.isInRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 10, 36, false))
                     {
@@ -135,7 +135,7 @@ public class BoilerContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, 10, slots.size() - 9))
+                else if (CSMath.isInRange(index, 10, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {

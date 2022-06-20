@@ -1,16 +1,13 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.util.config.ConfigEntry;
+import dev.momostudios.coldsweat.client.event.HellLampRenderTT;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,25 +33,13 @@ public class MixinContainerMenu
             {
                 double fuel = stack.getOrCreateTag().getDouble("fuel");
                 ItemStack holdingStack = menu.getCarried();
-                if (fuel < 64 && clickType == ClickType.PICKUP && getItemEntry(holdingStack).value > 0)
+                if (fuel < 64 && clickType == ClickType.PICKUP && HellLampRenderTT.VALID_FUEL.contains(holdingStack.getItem()))
                 {
                     stack.getOrCreateTag().putDouble("fuel", Math.min(64, fuel + (mouseButton == 1 ? 1 : holdingStack.getCount())));
                     holdingStack.shrink(mouseButton == 1 ? 1 : 64 - (int) fuel);
                     ci.cancel();
                 }
             }
-        } catch (Exception e) {}
-    }
-
-    private static ConfigEntry getItemEntry(ItemStack stack)
-    {
-        for (String entry : ItemSettingsConfig.getInstance().soulLampItems())
-        {
-            if (entry.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString()))
-            {
-                return new ConfigEntry(entry, 1);
-            }
-        }
-        return new ConfigEntry("minecraft:air", 0);
+        } catch (Exception ignored) {}
     }
 }

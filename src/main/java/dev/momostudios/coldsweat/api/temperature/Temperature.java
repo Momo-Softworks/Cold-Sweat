@@ -50,11 +50,12 @@ public class Temperature
     */
     public Temperature add(double amount)
     {
-        return new Temperature(temp + amount);
+        temp += amount;
+        return this;
     }
     public Temperature add(Temperature amount)
     {
-        return new Temperature(temp + amount.temp);
+        return add(amount.temp);
     }
 
     /**

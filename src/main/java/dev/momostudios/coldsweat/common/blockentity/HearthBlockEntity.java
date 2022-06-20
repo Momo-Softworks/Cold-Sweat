@@ -2,13 +2,16 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
+import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
@@ -26,13 +29,13 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -41,11 +44,10 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
-import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
@@ -83,6 +85,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     private ChunkPos workingCoords = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
 
     public static final int MAX_FUEL = 1000;
+    public static Map<Item, Number> VALID_FUEL = ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems());
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
@@ -403,16 +406,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public static int getItemFuel(ItemStack item)
     {
-        for (List<?> entry : new ItemSettingsConfig().hearthItems())
-        {
-            String itemID = (String) entry.get(0);
-
-            if (new ResourceLocation(itemID).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
-            {
-                return ((Number) entry.get(1)).intValue();
-            }
-        }
-        return 0;
+        return VALID_FUEL.getOrDefault(item.getItem(), 0).intValue();
     }
 
     public int getHotFuel()

@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
-import dev.momostudios.coldsweat.core.event.InitTempModifiers;
+import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.<br>
  *<br>
  * TempModifiers must be REGISTERED using {@link TempModifierRegisterEvent}<br>
- * (see {@link InitTempModifiers} for an example)<br>
+ * (see {@link TempModifierInit} for an example)<br>
  */
 public abstract class TempModifier
 {
@@ -31,7 +31,6 @@ public abstract class TempModifier
 
     /**
      * Default constructor.<br>
-     * REQUIRED
      */
     public TempModifier() {}
 

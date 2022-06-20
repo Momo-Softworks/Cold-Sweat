@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.config.*;
-import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -44,7 +44,7 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
 
         // Setup configs
-        WorldTemperatureConfig.setup();
+        WorldSettingsConfig.setup();
         ItemSettingsConfig.setup();
         ColdSweatConfig.setup();
         ClientSettingsConfig.setup();
@@ -66,6 +66,7 @@ public class ColdSweat
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event)
     {
+        // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
     }
 

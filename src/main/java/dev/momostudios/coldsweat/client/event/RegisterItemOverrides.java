@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.client.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigCache;
 import dev.momostudios.coldsweat.core.init.ItemInit;
@@ -42,7 +43,7 @@ public class RegisterItemOverrides
                     double minTemp = config.minTemp;
                     double maxTemp = config.maxTemp;
 
-                    double worldTemp = (float) CSMath.convertUnits(WorldTempGaugeDisplay.BLENDED_TEMP, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                    double worldTemp = (float) CSMath.convertUnits(Overlays.WORLD_TEMP, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                     double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
                     return (float) worldTempAdjusted;

@@ -22,14 +22,14 @@ public class PreventPlayerSleep
         double minTemp = ConfigCache.getInstance().minTemp + TempHelper.getTemperature(player, Temperature.Types.MIN).get();
         double maxTemp = ConfigCache.getInstance().maxTemp + TempHelper.getTemperature(player, Temperature.Types.MAX).get();
 
-        if (!CSMath.isBetween((int) bodyTemp, -99, 99))
+        if (!CSMath.isInRange((int) bodyTemp, -99, 99))
         {
             player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.body",
             new TranslatableComponent(bodyTemp > 99 ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);
             event.getPlayer().swing(event.getPlayer().swingingArm);
             event.setCanceled(true);
         }
-        else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
+        else if (!CSMath.isInRange(worldTemp, minTemp, maxTemp))
         {
             player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.world",
             new TranslatableComponent(worldTemp > maxTemp ? "cold_sweat.message.sleep.hot" : "cold_sweat.message.sleep.cold").getString()), true);

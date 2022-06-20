@@ -9,9 +9,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.StringUtils;
 
-import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -28,31 +26,28 @@ public class CSMath
      */
     public static double convertUnits(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
     {
-        switch (from)
+        return switch (from)
         {
-            case C:
-                return switch (to)
-                {
-                    case C -> value;
-                    case F -> value * 1.8 + 32d;
-                    case MC -> value / 23.333333333d;
-                };
-            case F:
-                return switch (to)
-                {
-                    case C -> (value - 32) / 1.8;
-                    case F -> value;
-                    case MC -> (value - (absolute ? 32d : 0d)) / 42d;
-                };
-            case MC:
-                return switch (to)
-                {
-                    case C -> value * 23.333333333d;
-                    case F -> value * 42d + (absolute ? 32d : 0d);
-                    case MC -> value;
-                };
-            default: return value;
-        }
+            case C -> switch (to)
+            {
+                case C -> value;
+                case F -> value * 1.8 + 32d;
+                case MC -> value / 23.333333333d;
+            };
+            case F -> switch (to)
+            {
+                case C -> (value - 32) / 1.8;
+                case F -> value;
+                case MC -> (value - (absolute ? 32d : 0d)) / 42d;
+            };
+            case MC -> switch (to)
+            {
+                case C -> value * 23.333333333d;
+                case F -> value * 42d + (absolute ? 32d : 0d);
+                case MC -> value;
+            };
+            default -> value;
+        };
     }
 
     public static float toRadians(float input) {
@@ -67,8 +62,18 @@ public class CSMath
         return value < min ? min : value > max ? max : value;
     }
 
-    public static boolean isBetween(double value, double min, double max) {
+    /**
+     * Calculates if the given value is between two values (inclusive)
+     */
+    public static boolean isInRange(double value, double min, double max) {
         return value >= min && value <= max;
+    }
+
+    /**
+     * Calculates if the given value is between two values (exclusive)
+     */
+    public static boolean isBetween(double value, double min, double max) {
+        return value > min && value < max;
     }
 
     /**
@@ -171,15 +176,15 @@ public class CSMath
     /**
      * A deobfuscated version of GuiComponent's innerBlit function.
      */
-    public static void blit(Matrix4f matrix, int leftX, int rightX, int bottomY, int topY, int level, float leftU, float rightU, float bottomV, float topV)
+    public static void blit(Matrix4f matrix, int leftX, int rightX, int bottomY, int topY, int level, float leftU, float rightU, float topV, float bottomV)
     {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix, (float) leftX,  (float) topY,    (float) level).uv(leftU,  topV).endVertex();
-        bufferbuilder.vertex(matrix, (float) rightX, (float) topY,    (float) level).uv(rightU, topV).endVertex();
-        bufferbuilder.vertex(matrix, (float) rightX, (float) bottomY, (float) level).uv(rightU, bottomV).endVertex();
-        bufferbuilder.vertex(matrix, (float) leftX,  (float) bottomY, (float) level).uv(leftU,  bottomV).endVertex();
+        bufferbuilder.vertex(matrix, (float) leftX,  (float) topY,    (float) level).uv(leftU,  bottomV).endVertex();
+        bufferbuilder.vertex(matrix, (float) rightX, (float) topY,    (float) level).uv(rightU, bottomV).endVertex();
+        bufferbuilder.vertex(matrix, (float) rightX, (float) bottomY, (float) level).uv(rightU, topV).endVertex();
+        bufferbuilder.vertex(matrix, (float) leftX,  (float) bottomY, (float) level).uv(leftU,  topV).endVertex();
         bufferbuilder.end();
         BufferUploader.end(bufferbuilder);
     }
@@ -193,10 +198,10 @@ public class CSMath
         catch (Throwable throwable) {}
     }
 
-    public static int normalize(Number value)
+    public static int getSign(Number value)
     {
-        if (value.intValue() == 0) return 0;
-        return value.intValue() / Math.abs(value.intValue());
+        if (value.doubleValue() == 0) return 0;
+        return (int) (value.doubleValue() / Math.abs(value.doubleValue()));
     }
 
     public static double crop(double value, int sigFigs)
@@ -216,5 +221,21 @@ public class CSMath
         int g = (int) (g1 + (g2 - g1) * ratio);
         int b = (int) (b1 + (b2 - b1) * ratio);
         return r << 16 | g << 8 | b;
+    }
+
+    /**
+     * @return The value that is farther from 0.
+     */
+    public static double getMostExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) > Math.abs(value2) ? value1 : value2;
+    }
+
+    /**
+     * @return The value that is closer to 0.
+     */
+    public static double getLeastExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) < Math.abs(value2) ? value1 : value2;
     }
 }
