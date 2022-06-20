@@ -107,18 +107,24 @@ public class ColdSweatConfig
         blockEffects = BUILDER
                 .comment("Allows for adding simple BlockEffects without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[\"block ids (separated by \",\")\", <temperature>, <range (max 7)>, <*true/false: weaken over distance>, <*max effect (temperature)>, <*min effect (temperature)>]",
-                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)")
+                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: weaken over distance>, <*max effect>], [etc...], [etc...]]",
+                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
+                         "",
+                         "Arguments:",
+                         "block-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
+                         "temperature: the temperature of the block, in Minecraft units",
+                         "weaken over distance: the block is less effective as distance increases",
+                         "max effect: the max temperature change this block can cause to a player (even with multiple blocks)")
                 .defineList("BlockEffects", Arrays.asList
-                        (
-                                List.of(Blocks.SOUL_FIRE.getRegistryName().toString(),  -0.2,   7, true, 999, -0.6),
-                                List.of(Blocks.FIRE.getRegistryName().toString(),        0.2,   7, true, 0.6, -999),
-                                List.of(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.2,   3, true, 0.6, -999),
-                                List.of(Blocks.ICE.getRegistryName().toString(),        -0.2, 1.5, true, 999, -0.6),
-                                List.of(Blocks.PACKED_ICE.getRegistryName().toString(), -0.3, 1.5, true, 999, -0.6),
-                                List.of(Blocks.BLUE_ICE.getRegistryName().toString(),   -0.4, 1.5, true, 999, -0.6)
-                        ),
-                it -> it instanceof List);
+                                (
+                                        Arrays.asList(Blocks.SOUL_FIRE.getRegistryName().toString(),   -0.2,   7, true, 0.8),
+                                        Arrays.asList(Blocks.FIRE.getRegistryName().toString(),         0.2,   7, true, 0.8),
+                                        Arrays.asList(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.15,   3, true, 0.6),
+                                        Arrays.asList(Blocks.ICE.getRegistryName().toString(),         -0.2, 1.5, true, 0.8),
+                                        Arrays.asList(Blocks.PACKED_ICE.getRegistryName().toString(),  -0.3, 1.5, true, 1.2),
+                                        Arrays.asList(Blocks.BLUE_ICE.getRegistryName().toString(),    -0.4, 1.5, true, 1.6)
+                                ),
+                        it -> true);
         BUILDER.pop();
 
         BUILDER.push("Hearth Strength");

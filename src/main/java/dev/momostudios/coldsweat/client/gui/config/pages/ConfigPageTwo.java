@@ -71,8 +71,8 @@ public class ConfigPageTwo extends ConfigPageBase
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),
-                amount -> clientConfig.setTempIconX(clientConfig.tempIconX() + amount),
-                amount -> clientConfig.setTempIconY(clientConfig.tempIconY() + amount),
+                amount -> clientConfig.setTempIconX(clientConfig.tempIconX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                amount -> clientConfig.setTempIconY(clientConfig.tempIconY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 () -> { clientConfig.setTempIconX(0); clientConfig.setTempIconY(0); },
                 false, false, new TranslatableComponent("cold_sweat.config.temp_icon_location.desc").getString());
 

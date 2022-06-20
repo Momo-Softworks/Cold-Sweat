@@ -30,7 +30,7 @@ public class DrawConfigButton
                 {
                     if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().player != null)
                     {
-                        ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(false));
+                        ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(true));
                     }
                     else
                     {

@@ -10,17 +10,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class WorldTemperatureConfig
+public class WorldSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemperatures;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemperatures;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
 
-    public static final WorldTemperatureConfig INSTANCE = new WorldTemperatureConfig();
+    static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
     static
     {
@@ -43,7 +43,7 @@ public class WorldTemperatureConfig
         BUILDER.pop();
 
         BUILDER.push("DimensionTemperatures");
-        dimensionTemperatures = BUILDER
+        dimensionTemps = BUILDER
             .comment("Override their respective offset values",
                 "Also override ALL biome temperatures")
             .defineList("Dimension Temperatures", Arrays.asList(
@@ -89,7 +89,7 @@ public class WorldTemperatureConfig
         BUILDER.pop();
 
         BUILDER.push("BiomeTemperatures");
-        biomeTemperatures = BUILDER
+        biomeTemps = BUILDER
             .comment("Temperatures for individual biomes")
             .defineList("Biome Temperatures", Arrays.asList(
                     // No default values
@@ -117,67 +117,50 @@ public class WorldTemperatureConfig
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/world_temperatures.toml");
     }
 
+    public static WorldSettingsConfig getInstance()
+    {
+        return INSTANCE;
+    }
+
     /*
      * Non-private values for use elsewhere
      */
-    public List<? extends List<Object>> biomeOffsets()
+    public List<? extends List<?>> biomeOffsets()
     {
-        List<List<Object>> list = new ArrayList<>();
-        for (List<?> entry : biomeOffsets.get())
-        {
-            list.add(Arrays.asList(entry.get(0), entry.get(1)));
-        }
-        return list;
+        return biomeOffsets.get();
     }
-    public List<? extends List<Object>> biomeTemperatures()
+    public List<? extends List<?>> biomeTemperatures()
     {
-        List<List<Object>> list = new ArrayList<>();
-        for (List<?> entry : biomeTemperatures.get())
-        {
-            list.add(List.of(entry.get(0), entry.get(1)));
-        }
-        return list;
+        return biomeTemps.get();
     }
 
-    public List<? extends List<Object>> dimensionOffsets()
+    public List<? extends List<?>> dimensionOffsets()
     {
-        List<List<Object>> list = new ArrayList<>();
-        for (List<?> entry : dimensionOffsets.get())
-        {
-            list.add(Arrays.asList(entry.get(0), entry.get(1)));
-        }
-        return list;
+        return dimensionOffsets.get();
     }
-    public List<? extends List<Object>> dimensionTemperatures()
+    public List<? extends List<?>> dimensionTemperatures()
     {
-        List<List<Object>> list = new ArrayList<>();
-        for (List<?> entry : dimensionTemperatures.get())
-        {
-            list.add(Arrays.asList(entry.get(0), entry.get(1)));
-        }
-        return list;
+        return dimensionTemps.get();
     }
 
-    public Map<String, List<? extends List<Object>>> getConfigMap()
+    public void copyValues(WorldSettingsConfig config)
     {
-        Map<String, List<? extends List<Object>>> map = new HashMap<>();
-        map.put("biome_temperatures", biomeTemperatures());
-        map.put("biome_offsets", biomeOffsets());
-        map.put("dimension_temperatures", dimensionTemperatures());
-        map.put("dimension_offsets", dimensionOffsets());
-        return map;
+        setBiomeOffsets(config.biomeOffsets());
+        setBiomeTemperatures(config.biomeTemperatures());
+        setDimensionOffsets(config.dimensionOffsets());
+        setDimensionTemperatures(config.dimensionOffsets());
     }
 
-    public void setBiomeOffsets(List<? extends List<String>> list) {
+    public void setBiomeOffsets(List<? extends List<?>> list) {
         biomeOffsets.set(list);
     }
-    public void setDimensionOffsets(List<? extends List<String>> list) {
+    public void setDimensionOffsets(List<? extends List<?>> list) {
         dimensionOffsets.set(list);
     }
-    public void setBiomeTemperatures(List<? extends List<String>> list) {
-        biomeTemperatures.set(list);
+    public void setBiomeTemperatures(List<? extends List<?>> list) {
+        biomeTemps.set(list);
     }
-    public void setDimensionTemperatures(List<? extends List<String>> list) {
-        dimensionTemperatures.set(list);
+    public void setDimensionTemperatures(List<? extends List<?>> list) {
+        dimensionTemps.set(list);
     }
 }
