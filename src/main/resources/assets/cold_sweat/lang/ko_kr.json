@@ -19,6 +19,8 @@
   "effect.cold_sweat.insulated":       "단열됨",
   "effect.cold_sweat.ice_resistance":  "냉기 저항",
   "effect.cold_sweat.grace":           "자연의 은총",
+
+
   "item.minecraft.potion.effect.ice_resistance": "냉기 저항의 물약",
   "item.minecraft.lingering_potion.effect.ice_resistance": "잔류형 냉기 저항의 물약",
   "item.minecraft.splash_potion.effect.ice_resistance": "투척용 냉기 저항의 물약",
@@ -122,8 +124,7 @@
   "cold_sweat.message.sleep.world":         "바깥 온도가 너무 %d아 잠을 잘 수 없습니다.",
 
 
-  "commands.cold_sweat.temperature.set.self.result":  "체온을 다음으로 설정했습니다: ",
-  "commands.cold_sweat.temperature.set.other.result": "%d의 체온을 다음으로 설정했습니다: ",
-  "commands.cold_sweat.temperature.set.all.result":   "%d 플레이어의 체온을 다음으로 설정했습니다: ",
-  "commands.cold_sweat.temperature.get.result":       "%d의 체온은 다음과 같습니다: "
+  "commands.cold_sweat.temperature.set.single.result": "%d의 체온을 다음으로 설정했습니다: %d",
+  "commands.cold_sweat.temperature.set.many.result":   "%d 플레이어의 체온을 다음으로 설정했습니다: %d",
+  "commands.cold_sweat.temperature.get.result":        "%d의 체온은 다음과 같습니다: %d"
 }

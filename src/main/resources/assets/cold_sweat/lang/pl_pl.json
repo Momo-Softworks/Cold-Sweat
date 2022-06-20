@@ -13,9 +13,9 @@
 
   "modifier.cold_sweat.insulated":      "Ocieplony",
 
-  "effect.insulated":       "Ocieplony",
-  "effect.ice_resistance":  "Odporność na mróz",
-  "effect.grace":           "Grace",
+  "effect.cold_sweat.insulated":       "Ocieplony",
+  "effect.cold_sweat.ice_resistance":  "Odporność na mróz",
+  "effect.cold_sweat.grace":           "Grace",
   "item.minecraft.potion.effect.ice_resistance": "Mikstura odporności na mróz",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Trwała mikstura odporności na mróz",
   "item.minecraft.splash_potion.effect.ice_resistance": "Miotana mikstura odporności na mróz",
@@ -77,9 +77,7 @@
   "cold_sweat.config.temp_readout_location.name":     "Przesunięcie odczytu*",
 
 
-  "commands.cold_sweat.temperature.rate.result":      "Ustaw prędkość zmiany temperatury dla wszystkich graczy na",
-  "commands.cold_sweat.temperature.set.self.result":  "Ustaw temperaturę własną na",
-  "commands.cold_sweat.temperature.set.other.result": "Ustaw temperaturę %d na",
-  "commands.cold_sweat.temperature.set.all.result":   "Ustaw temperaturę %d graczy na",
-  "commands.cold_sweat.temperature.get.result":       "Temperatura ciała %d wynosi"
+  "commands.cold_sweat.temperature.set.single.result": "Ustaw temperaturę %d na %d",
+  "commands.cold_sweat.temperature.set.many.result":   "Ustaw temperaturę %d graczy na %d",
+  "commands.cold_sweat.temperature.get.result":        "Temperatura ciała %d wynosi %d"
 }

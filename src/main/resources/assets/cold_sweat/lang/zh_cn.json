@@ -13,9 +13,9 @@
   
     "modifier.cold_sweat.insulated":      "隔热的",
   
-    "effect.insulated":       "隔温",
-    "effect.ice_resistance":  "寒冷保护",
-    "effect.grace":           "恩典",
+    "effect.cold_sweat.insulated":       "隔温",
+    "effect.cold_sweat.ice_resistance":  "寒冷保护",
+    "effect.cold_sweat.grace":           "恩典",
     "item.minecraft.potion.effect.ice_resistance": "寒冷保护药水",
     "item.minecraft.lingering_potion.effect.ice_resistance": "滞留型寒冷保护药水",
     "item.minecraft.splash_potion.effect.ice_resistance": "喷溅型寒冷保护药水",
@@ -80,10 +80,9 @@
     "cold_sweat.config.require_thermometer.name":     "需要温度计",
     "cold_sweat.config.temp_offset.name":             "体温调整",
     "cold_sweat.config.temperature_icon.name":        "移动图标位置*",
-    "cold_sweat.config.temp_readout_location.name":     "移动读数位置*",
-  
-    "commands.cold_sweat.temperature.set.self.result":  "将自身体温调整到",
-    "commands.cold_sweat.temperature.set.other.result": "调整%d体温到",
-    "commands.cold_sweat.temperature.set.all.result":   "调整%d位玩家的体温到",
-    "commands.cold_sweat.temperature.get.result":       "%d的体温是"
+    "cold_sweat.config.temp_readout_location.name":   "移动读数位置*",
+
+    "commands.cold_sweat.temperature.set.single.result": "调整%d体温到 %d",
+    "commands.cold_sweat.temperature.set.many.result":   "调整%d位玩家的体温到 %d",
+    "commands.cold_sweat.temperature.get.result":        "%d的体温是 %d"
   }

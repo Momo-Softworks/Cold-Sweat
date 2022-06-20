@@ -120,8 +120,7 @@
   "cold_sweat.message.sleep.world":         "Рядом слишком %d чтобы спать сейчас",
 
 
-  "commands.cold_sweat.temperature.set.self.result":  "Установлена ваша температура тела:",
-  "commands.cold_sweat.temperature.set.other.result": "Установлена температура тела %d:",
-  "commands.cold_sweat.temperature.set.all.result":   "Установлена температура тела %d игроков:",
-  "commands.cold_sweat.temperature.get.result":       "Температура тела %d: "
+  "commands.cold_sweat.temperature.set.single.result": "Установлена температура тела %d: %d",
+  "commands.cold_sweat.temperature.set.many.result":   "Установлена температура тела %d игроков: %d",
+  "commands.cold_sweat.temperature.get.result":        "Температура тела %d: %d"
 }
