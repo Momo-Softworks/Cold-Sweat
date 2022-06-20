@@ -3,14 +3,12 @@ package dev.momostudios.coldsweat.common.command.impl;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -43,80 +41,35 @@ public class TempCommand extends BaseCommand
                 );
     }
 
-    private int executeSetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players, int amount) throws CommandSyntaxException
+    private int executeSetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players, int amount)
     {
+        // Set the temperature for all affected targets
+        for (ServerPlayer player : players)
+        {
+            TempHelper.setTemperature(player, new Temperature(amount), Temperature.Types.CORE);
+        }
+
+        //Compose & send message
         if (players.size() == 1)
         {
-            if (players.contains(source.getPlayerOrException()))
-            {
-                //Set the sender's body temperature
-                TempHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
+            Player target = players.iterator().next();
 
-                //Print success message to all players
-                for (Player player : source.getPlayerOrException().level.players())
-                {
-                    //Determine if the message is being sent to the sender or another player
-                    TranslatableComponent message = player == source.getPlayerOrException() ?
-                    new TranslatableComponent("commands.cold_sweat.temperature.set.self.result") :
-                    new TranslatableComponent("commands.cold_sweat.temperature.set.other.result", source.getPlayerOrException().getName().getString());
-
-                    //Compose the message
-                    player.sendMessage(new TextComponent(
-                    "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
-                    message.getString()  +
-                    " \u00a7f" + TempHelper.getTemperature(source.getPlayerOrException(), Temperature.Types.CORE).get() + "\u00a7r"),
-                    source.getPlayerOrException().getUUID());
-                }
-            }
-            else
-            {
-                //Set the target player's temperature
-                TempHelper.setTemperature(players.iterator().next(), new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
-
-                //Print success message to all players
-                for (Player player : source.getPlayerOrException().level.players())
-                {
-                    //Compose the message
-                    player.sendMessage(new TextComponent(
-                    "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
-                    new TranslatableComponent("commands.cold_sweat.temperature.set.other.result", players.iterator().next().getScoreboardName()).getString()  +
-                    " \u00a7f" + TempHelper.getTemperature(players.iterator().next(), Temperature.Types.CORE).get() + "\u00a7r"),
-                    source.getPlayerOrException().getUUID());
-                }
-            }
+            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), amount), true);
         }
         else
         {
-            int playerCount = 0;
-            for (ServerPlayer player : players)
-            {
-                TempHelper.setTemperature(player, new dev.momostudios.coldsweat.api.temperature.Temperature(amount), Temperature.Types.CORE);
-                playerCount++;
-            }
-
-            //Print success message to all players
-            for (Player player : source.getPlayerOrException().level.players())
-            {
-                //Compose the message
-                player.sendMessage(new TextComponent(
-                "\u00a77\u00a7o[" + source.getPlayerOrException().getScoreboardName() + "]: " +
-                new TranslatableComponent("commands.cold_sweat.temperature.set.all.result", playerCount).getString()  +
-                " \u00a7f" + amount + "\u00a7r"), player.getUUID());
-            }
+            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.many.result", players.size(), amount), true);
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeGetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players) throws CommandSyntaxException
+    private int executeGetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players)
     {
-        for (ServerPlayer player : players)
+        for (ServerPlayer target : players)
         {
-            //Compose the message
-            source.getPlayerOrException().sendMessage(new TextComponent(
-            "\u00a77" +
-            new TranslatableComponent("commands.cold_sweat.temperature.get.result", player.getScoreboardName()).getString()  +
-            " \u00a7f" + (int) TempHelper.getTemperature(player, Temperature.Types.BODY).get() + "\u00a7r"),
-            source.getPlayerOrException().getUUID());
+            //Compose & send message
+            int bodyTemp = (int) TempHelper.getTemperature(target, Temperature.Types.BODY).get();
+            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;
     }
