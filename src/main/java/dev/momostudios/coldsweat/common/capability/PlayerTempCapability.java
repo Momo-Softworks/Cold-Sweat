@@ -23,13 +23,8 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class PlayerTempCapability implements ITemperatureCap
 {
-    boolean pendingUpdate = false;
+    double[] syncedValues = new double[5];
     int updateCooldown = 0;
-    double syncedWorldTemp = 0;
-    double syncedCoreTemp = 0;
-    double syncedBaseTemp = 0;
-    double syncedMaxTemp = 0;
-    double syncedMinTemp = 0;
 
     double worldTemp;
     double coreTemp;
@@ -117,11 +112,11 @@ public class PlayerTempCapability implements ITemperatureCap
     public void tickClient(Player player)
     {
         if (player.level.isClientSide)
-            for (Temperature.Types type : Temperature.Types.values())
-            {
-                if (type == Temperature.Types.BODY) continue;
-                tickModifiers(new Temperature(), player, getModifiers(type));
-            }
+        for (Temperature.Types type : Temperature.Types.values())
+        {
+            if (type == Temperature.Types.BODY) continue;
+            tickModifiers(new Temperature(), player, getModifiers(type));
+        }
     }
 
     public void tickUpdate(Player player)
@@ -129,13 +124,9 @@ public class PlayerTempCapability implements ITemperatureCap
         ConfigCache config = ConfigCache.getInstance();
 
         // Tick expiration time for world modifiers
-        Temperature world = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.WORLD));
-        double worldTemp = world.get();
-
+        double worldTemp = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.WORLD)).get();
         Temperature coreTemp = tickModifiers(new Temperature(get(Temperature.Types.CORE)), player, getModifiers(Temperature.Types.CORE));
-
         Temperature baseTemp = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.BASE));
-
         double maxOffset = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MAX)).get();
         double minOffset = tickModifiers(new Temperature(), player, getModifiers(Temperature.Types.MIN)).get();
 
@@ -151,25 +142,20 @@ public class PlayerTempCapability implements ITemperatureCap
             boolean isOver = worldTemp > maxTemp;
             double difference = Math.abs(worldTemp - (isOver ? maxTemp : minTemp));
             Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * (isOver ? 1 : -1));
-            coreTemp = coreTemp.add(tickModifiers(changeBy, player, getModifiers(Temperature.Types.RATE)));
+            coreTemp.add(tickModifiers(changeBy, player, getModifiers(Temperature.Types.RATE)));
         }
         else
         {
             // Return the player's body temperature to 0
-            Temperature returnRate = new Temperature(getBodyReturnRate(worldTemp, coreTemp.get() > 0 ? maxTemp : minTemp, config.rate, coreTemp.get()));
-            coreTemp = coreTemp.add(returnRate);
+            coreTemp.add(getBodyReturnRate(worldTemp, coreTemp.get() > 0 ? maxTemp : minTemp, config.rate, coreTemp.get()));
         }
 
-        if ((int) syncedCoreTemp != (int) coreTemp.get()
-        ||  (int) syncedBaseTemp != (int) baseTemp.get()
-        || CSMath.crop(syncedWorldTemp, 2) != CSMath.crop(worldTemp, 2)
-        || CSMath.crop(syncedMaxTemp,   2) != CSMath.crop(maxOffset, 2)
-        || CSMath.crop(syncedMinTemp,   2) != CSMath.crop(minOffset, 2))
-        {
-            pendingUpdate = true;
-        }
-
-        if (updateCooldown-- <= 0 && pendingUpdate)
+        if (updateCooldown-- <= 0
+        && (int) syncedValues[0] != (int) coreTemp.get()
+        || (int) syncedValues[1] != (int) baseTemp.get()
+        || CSMath.crop(syncedValues[2], 2) != CSMath.crop(worldTemp, 2)
+        || CSMath.crop(syncedValues[3], 2) != CSMath.crop(maxOffset, 2)
+        || CSMath.crop(syncedValues[4], 2) != CSMath.crop(minOffset, 2))
         {
             TempHelper.updateTemperature(player,
                                          new Temperature(get(Temperature.Types.CORE)),
@@ -177,14 +163,9 @@ public class PlayerTempCapability implements ITemperatureCap
                                          new Temperature(get(Temperature.Types.WORLD)),
                                          new Temperature(get(Temperature.Types.MAX)),
                                          new Temperature(get(Temperature.Types.MIN)));
-            pendingUpdate = false;
             updateCooldown = 5;
 
-            syncedBaseTemp = baseTemp.get();
-            syncedCoreTemp = coreTemp.get();
-            syncedWorldTemp = worldTemp;
-            syncedMaxTemp = maxOffset;
-            syncedMinTemp = minOffset;
+            syncedValues = new double[] { coreTemp.get(), baseTemp.get(), worldTemp, maxOffset, minOffset };
         }
 
         // Sets the player's body temperature to BASE + CORE
@@ -197,10 +178,10 @@ public class PlayerTempCapability implements ITemperatureCap
         // Calculate body/base temperatures with modifiers
         Temperature bodyTemp = baseTemp.add(coreTemp);
 
-        //Deal damage to the player if temperature is critical
         boolean hasFireResistance = player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes;
-        boolean hasIceResistance = player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes;
+        boolean hasIceResistance = player.hasEffect(ModEffects.ICE_RESISTANCE)   && config.iceRes;
 
+        //Deal damage to the player if temperature is critical
         if (player.tickCount % 40 == 0)
         {
             boolean damageScaling = config.damageScaling;
@@ -217,11 +198,16 @@ public class PlayerTempCapability implements ITemperatureCap
     }
 
     // Used for returning the player's temperature back to 0
-    private static double getBodyReturnRate(double world, double cap, double rate, double bodyTemp)
+    private static double getBodyReturnRate(double worldTemp, double tempLimit, double tempRate, double bodyTemp)
     {
-        double tempRate = 7.0d;
-        double changeBy = Math.max((Math.abs(world - cap) / tempRate) * rate, Math.abs(rate / 30));
-        return Math.min(Math.abs(bodyTemp), changeBy) * (bodyTemp > 0 ? -1 : 1);
+        double staticRate = 7.0d;
+        // Get the difference between the world temp and the threshold to determine the speed of return (closer to the threshold = slower)
+        // Divide it by the staticRate (7) because it feels nice
+        // Multiply it by the configured tempRate Rate Modifier
+        // If it's too slow, default to tempRate / 30 instead
+        // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
+        double changeBy = Math.max((Math.abs(worldTemp - tempLimit) / staticRate) * tempRate, tempRate / 30) * -CSMath.getSign(bodyTemp);
+        return CSMath.getLeastExtreme(changeBy, -bodyTemp);
     }
 
     private static Temperature tickModifiers(Temperature temp, Player player, List<TempModifier> modifiers)
