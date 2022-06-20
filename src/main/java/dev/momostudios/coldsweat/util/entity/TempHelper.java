@@ -18,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -88,49 +87,24 @@ public class TempHelper
                 TempModifier newModifier = event.getModifier();
                 if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
                 {
-                    List<TempModifier> modifiers = cap.getModifiers(type);
-                    AtomicInteger duplicateCount = new AtomicInteger();
+                    List<TempModifier> modifiers = cap.getModifiers(event.type);
 
-                    // If we're replacing, remove the old one first
+                    // Find all the modifiers of this type
+                    List<TempModifier> matchingMods = modifiers.stream().filter(mod -> mod.getID().equals(newModifier.getID())).toList();
+
+                    // If we're replacing, remove the old one if needed
                     if (replace)
                     {
-                        // Test if there are more modifiers than maxCount allows
-                        long modCount = modifiers.stream().filter(mod -> mod.getID().equals(newModifier.getID())).count();
-                        int iterations = (int) modCount - maxCount;
-
-                        // If there are more modifiers than maxCount allows, remove the excess
-                        if (iterations >= 1)
+                        if (matchingMods.size() >= event.maxCount)
                         {
-                            cap.getModifiers(event.type).removeIf(mod ->
-                            {
-                                if (mod.getID().equals(newModifier.getID()))
-                                {
-                                    return duplicateCount.getAndIncrement() < iterations;
-                                }
-                                return false;
-                            });
-                        }
-                    }
-                    // If we're not replacing, test if there is room (# of modifiers of this type < maxCount)
-                    else
-                    {
-                        for (TempModifier mod : cap.getModifiers(event.type))
-                        {
-                            if (mod.getID().equals(event.getModifier().getID()))
-                            {
-                                if (duplicateCount.getAndIncrement() >= event.maxCount)
-                                {
-                                    // Fail to add the modifier if there are already too many
-                                    break;
-                                }
-                            }
+                            modifiers.removeAll(matchingMods);
                         }
                     }
 
                     // Add the modifier and update
-                    if (duplicateCount.get() < event.maxCount)
+                    if (replace || matchingMods.size() < event.maxCount)
                     {
-                        cap.getModifiers(event.type).add(event.getModifier());
+                        modifiers.add(event.getModifier());
                         updateModifiers(player, cap);
                     }
                 }
@@ -168,6 +142,7 @@ public class TempHelper
                             return true;
                         }
                     }
+                    return false;
                 }
                 return false;
             });
@@ -178,6 +153,11 @@ public class TempHelper
         });
     }
 
+    public static void removeModifiers(Player player, Temperature.Types type, Predicate<TempModifier> condition)
+    {
+        removeModifiers(player, type, Integer.MAX_VALUE, condition);
+    }
+
     /**
      * Gets all TempModifiers of the specified type on the player
      * @param player is the player being sampled
@@ -186,9 +166,7 @@ public class TempHelper
      */
     public static List<TempModifier> getModifiers(Player player, Temperature.Types type)
     {
-        List<TempModifier> mods =  player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
-        mods.removeIf(mod -> mod == null || mod.getID() == null ||mod.getID().isEmpty());
-        return new ArrayList<>(mods);
+        return player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability()).getModifiers(type);
     }
 
     /**
