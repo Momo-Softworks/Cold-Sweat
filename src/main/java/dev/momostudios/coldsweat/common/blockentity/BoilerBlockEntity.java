@@ -1,52 +1,53 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.block.BoilerBlock;
+import dev.momostudios.coldsweat.common.container.BoilerContainer;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
-import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
-import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.block.BoilerBlock;
-import dev.momostudios.coldsweat.common.container.BoilerContainer;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer, StackedContentsCompatible
+public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuProvider
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
-    public static int slots = 10;
+    public static int SLOTS = 10;
     public static int MAX_FUEL = 1000;
-    protected NonNullList<ItemStack> items = NonNullList.withSize(slots, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+
+    List<ServerPlayer> usingPlayers = new ArrayList<>();
     public int ticksExisted;
     int fuel;
+
+    public static Map<Item, Number> VALID_FUEL = ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems());
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
@@ -82,7 +83,11 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     private void sendUpdatePacket()
     {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(worldPosition)),
+        // Remove the players that aren't interacting with this block anymore
+        usingPlayers.removeIf(player -> !(player.containerMenu instanceof BoilerContainer boilerContainer && boilerContainer.te == this));
+
+        // Send data to all players with this block's menu open
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).toList()),
                                              new BlockDataUpdateMessage(this.worldPosition, getUpdateTag()));
     }
 
@@ -119,7 +124,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
             if (ticksExisted % 20 == 0)
             {
                 boolean hasItemStacks = false;
-                for (int i = 0; i < 10; i++)
+                for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
@@ -165,18 +170,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public int getItemFuel(ItemStack item)
     {
-        int fuel = 0;
-        for (List<?> testIndex : new ItemSettingsConfig().boilerItems())
-        {
-            String testItem = (String) testIndex.get(0);
-
-            if (new ResourceLocation(testItem).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
-            {
-                fuel = ((Number) testIndex.get(1)).intValue();
-                break;
-            }
-        }
-        return fuel;
+        return VALID_FUEL.getOrDefault(item.getItem(), 0).intValue();
     }
 
     public int getFuel()
@@ -196,6 +190,11 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {
+        // Track the players using this block
+        if (playerInv.player instanceof ServerPlayer serverPlayer)
+        {
+            usingPlayers.add(serverPlayer);
+        }
         return new BoilerContainer(id, playerInv, this);
     }
 
@@ -219,7 +218,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     public int getContainerSize()
     {
-        return slots;
+        return SLOTS;
     }
 
     @Override
@@ -268,34 +267,5 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public void clearContent()
     {
         items.clear();
-    }
-
-    @Override
-    public int[] getSlotsForFace(Direction direction)
-    {
-        if (direction == Direction.UP || direction == Direction.DOWN) return WATERSKIN_SLOTS;
-        return FUEL_SLOT;
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction)
-    {
-        return (stack.getItem() == ModItems.FILLED_WATERSKIN && CSMath.isBetween(slot, 1, 9) && direction == Direction.UP)
-            || (getItemFuel(stack) > 0 && slot == 0 && direction != Direction.UP && direction != Direction.DOWN);
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
-    {
-        return stack.getItem() == ModItems.FILLED_WATERSKIN && CSMath.isBetween(slot, 1, 9) && direction == Direction.DOWN;
-    }
-
-    @Override
-    public void fillStackedContents(StackedContents contents)
-    {
-        for (ItemStack stack : items)
-        {
-            contents.accountStack(stack);
-        }
     }
 }
