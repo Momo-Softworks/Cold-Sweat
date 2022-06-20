@@ -1,11 +1,13 @@
 package dev.momostudios.coldsweat.common.container;
 
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -17,18 +19,27 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SewingContainer extends AbstractContainerMenu
 {
     BlockPos pos;
     Inventory playerInventory;
     SewingInventory sewingInventory;
+    public static List<Item> VALID_INSULATORS = new ArrayList<>();
+    static
+    {
+        for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
+        {
+            VALID_INSULATORS.addAll(ConfigHelper.getItems(itemID));
+        }
+    }
 
     public static class SewingInventory implements Container
     {
@@ -206,7 +217,11 @@ public class SewingContainer extends AbstractContainerMenu
         this.setRemoteSlot(1, this.sewingInventory.getItem(1));
 
         Player player = this.playerInventory.player;
-        player.level.playSound(null, player.blockPosition(), this.getCarried().getItem().getEquipSound(), SoundSource.BLOCKS, 1f, 1f);
+        SoundEvent equipSound = this.getCarried().getItem().getEquipSound();
+        if (equipSound != null)
+        {
+            player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+        }
         player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
     }
     private ItemStack testForRecipe()
@@ -236,14 +251,7 @@ public class SewingContainer extends AbstractContainerMenu
 
     public boolean isInsulatingItem(ItemStack item)
     {
-        for (String iterator : new ItemSettingsConfig().insulatingItems())
-        {
-            if (new ResourceLocation(iterator).equals(ForgeRegistries.ITEMS.getKey(item.getItem())))
-            {
-                return true;
-            }
-        }
-        return false;
+        return VALID_INSULATORS.contains(item.getItem());
     }
 
     @Override
@@ -287,7 +295,7 @@ public class SewingContainer extends AbstractContainerMenu
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (CSMath.isBetween(index, 0, 2))
+            if (CSMath.isInRange(index, 0, 2))
             {
                 if (!this.moveItemStackTo(itemstack1, 3, 39, true))
                 {
@@ -322,7 +330,7 @@ public class SewingContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, slots.size() - 9, slots.size()))
+                else if (CSMath.isInRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 3, 29, false))
                     {
@@ -330,7 +338,7 @@ public class SewingContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isBetween(index, 3, slots.size() - 9))
+                else if (CSMath.isInRange(index, 3, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {
