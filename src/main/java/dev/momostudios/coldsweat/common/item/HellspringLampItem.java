@@ -20,44 +20,41 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HellspringLampItem extends Item
 {
+    static List<String> VALID_DIMENSIONS = new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions());
+
     public HellspringLampItem()
     {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1));
+        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant());
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof Player && !worldIn.isClientSide)
+        if (entityIn instanceof Player player && !worldIn.isClientSide)
         {
-            Player player = (Player) entityIn;
             double max = ConfigCache.getInstance().maxTemp;
             double temp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
-            boolean validDimension = false;
-            for (String id : ItemSettingsConfig.getInstance().hellLampDimensions())
-            {
-                if (worldIn.dimension().location().toString().equals(id))
-                {
-                    validDimension = true;
-                    break;
-                }
-            }
-
-            if ((isSelected || player.getOffhandItem() == stack) && validDimension && temp > max && getFuel(stack) > 0)
+            if ((isSelected || player.getOffhandItem() == stack) && temp > max && getFuel(stack) > 0
+            && VALID_DIMENSIONS.contains(worldIn.dimension().location().toString()))
             {
                 // Drain fuel
                 if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
+                {
                     addFuel(stack, -0.02d * CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1d, 3d));
+                }
 
                 // Give effect to nearby players
                 AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
-                worldIn.getEntitiesOfClass(Player.class, bb).forEach(e ->
+                for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
                 {
-                    TempHelper.insertModifier(e, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
-                });
+                    TempHelper.insertModifier(entity, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
+                }
 
                 // If the conditions are met, turn on the lamp
                 if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
