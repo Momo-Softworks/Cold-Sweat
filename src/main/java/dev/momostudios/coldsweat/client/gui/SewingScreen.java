@@ -49,17 +49,15 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
         RenderSystem.setShaderTexture(0, SEWING_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
-        this.blit(poseStack, x ,y, 0, 0, this.getXSize(), this.getYSize());
+        this.blit(poseStack, x, y, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
         {
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 0, 0, 16, 16);
+            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
         }
         if (!menu.getSlot(1).hasItem())
         {
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/screen/sewing_elements.png"));
-            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 16, 0, 16, 16);
+            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
         }
     }
 }
