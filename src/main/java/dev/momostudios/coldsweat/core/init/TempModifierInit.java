@@ -128,7 +128,7 @@ public class TempModifierInit
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
-        String sereneseasons = "dev.momostudios.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier";
+        String sereneSeasons = "dev.momostudios.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier";
 
         event.register(new BlockTempModifier());
         event.register(new BiomeTempModifier());
@@ -145,13 +145,8 @@ public class TempModifierInit
 
         if (ModList.get().isLoaded("sereneseasons"))
         {
-            try { event.register((TempModifier) Class.forName(sereneseasons).getConstructor().newInstance()); }
+            try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
             catch (Exception ignored) {}
-        }
-
-        if (ModList.get().isLoaded("sereneseasons") && ModList.get().isLoaded("betterweather"))
-        {
-            ColdSweat.LOGGER.warn("Multiple seasons mods are present! This may cause issues!");
         }
     }
 }
