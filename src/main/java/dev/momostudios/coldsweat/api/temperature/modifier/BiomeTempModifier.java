@@ -4,21 +4,21 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.LegacyMethodHelper;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-@Mod.EventBusSubscriber
 public class BiomeTempModifier extends TempModifier
 {
     static Method GET_TEMPERATURE = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
@@ -27,36 +27,50 @@ public class BiomeTempModifier extends TempModifier
         GET_TEMPERATURE.setAccessible(true);
     }
 
-    static Map<Biome, Number> BIOME_TEMPS = ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures());
-    static Map<Biome, Number> BIOME_OFFSETS = ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets());
-    static Map<ResourceLocation, Number> DIMENSION_TEMPS = new HashMap<>();
-    static Map<ResourceLocation, Number> DIMENSION_OFFSETS = new HashMap<>();
-    static
+    static LoadedValue<Map<ResourceLocation, Number>> BIOME_TEMPS       = LoadedValue.of(() ->
+            ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures()));
+
+    static LoadedValue<Map<ResourceLocation, Number>> BIOME_OFFSETS     = LoadedValue.of(() ->
+            ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets()));
+
+    static LoadedValue<Map<ResourceLocation, Number>> DIMENSION_TEMPS   = LoadedValue.of(() ->
     {
-        for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())
-        {
-            DIMENSION_OFFSETS.put(new ResourceLocation((String) entry.get(0)), (Number) entry.get(1));
-        }
+        Map<ResourceLocation, Number> map = new HashMap<>();
         for (List<?> entry : WorldSettingsConfig.getInstance().dimensionTemperatures())
         {
-            DIMENSION_TEMPS.put(new ResourceLocation((String) entry.get(0)), (Number) entry.get(1));
+            map.put(new ResourceLocation((String) entry.get(0)), (Number) entry.get(1));
         }
-    }
+        return map;
+    });
+
+    static LoadedValue<Map<ResourceLocation, Number>> DIMENSION_OFFSETS = LoadedValue.of(() ->
+    {
+        Map<ResourceLocation, Number> map = new HashMap<>();
+        for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())
+        {
+            map.put(new ResourceLocation((String) entry.get(0)), (Number) entry.get(1));
+        }
+        return map;
+    });
+
     @Override
-    public Temperature getResult(Temperature temp, Player player)
+    public Function<Temperature, Temperature> calculate(Player player)
     {
         BiomeManager biomeManager = player.level.getBiomeManager();
 
         try
         {
             double worldTemp = 0;
-            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 100, 10))
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 50, 10))
             {
                 Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
+                if (biome == null) continue;
+                ResourceLocation biomeID = biome.getRegistryName();
+                ResourceLocation dimensionID = player.level.dimension().location();
 
                 // Should temperature be overridden by config
-                Number biomeOverride = BIOME_TEMPS.get(biome);
-                Number dimensionOverride = DIMENSION_TEMPS.get(player.level.dimension().location());
+                Number biomeOverride = BIOME_TEMPS.get().get(biomeID);
+                Number dimensionOverride = DIMENSION_TEMPS.get().get(dimensionID);
 
                 if (dimensionOverride != null)
                 {
@@ -69,8 +83,8 @@ public class BiomeTempModifier extends TempModifier
                     continue;
                 }
 
-                Number biomeOffset = BIOME_OFFSETS.get(biome);
-                Number dimensionOffset = DIMENSION_OFFSETS.get(player.level.dimension().location());
+                Number biomeOffset = BIOME_OFFSETS.get().get(biomeID);
+                Number dimensionOffset = DIMENSION_OFFSETS.get().get(dimensionID);
 
                 // If temperature is not overridden, apply the offsets
                 worldTemp += (float) GET_TEMPERATURE.invoke(biome, blockPos);
@@ -78,12 +92,12 @@ public class BiomeTempModifier extends TempModifier
                 if (dimensionOffset != null) worldTemp += dimensionOffset.doubleValue();
 
             }
-            return temp.add(worldTemp / 100);
+            double finalWorldTemp = worldTemp;
+            return (temp) -> temp.add(finalWorldTemp / 50);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            return temp;
+            return (temp) -> temp;
         }
     }
 

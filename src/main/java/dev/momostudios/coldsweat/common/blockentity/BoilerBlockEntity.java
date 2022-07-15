@@ -7,6 +7,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -47,7 +48,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public int ticksExisted;
     int fuel;
 
-    public static Map<Item, Number> VALID_FUEL = ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems());
+    public static LoadedValue<Map<Item, Number>> VALID_FUEL = LoadedValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {
@@ -88,7 +89,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
         // Send data to all players with this block's menu open
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).toList()),
-                                             new BlockDataUpdateMessage(this.worldPosition, getUpdateTag()));
+                                             new BlockDataUpdateMessage(this));
     }
 
     @Override
@@ -112,7 +113,6 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public void tick(Level level, BlockState state, BlockPos pos)
     {
         ticksExisted++;
-        ticksExisted %= 1000;
 
         if (getFuel() > 0)
         {
@@ -139,10 +139,9 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
             }
         }
         // if no fuel, set state to unlit
-        else
+        else if (state.getValue(BoilerBlock.LIT))
         {
-            if (state.getValue(BoilerBlock.LIT))
-                level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+            level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
         }
 
         // Input fuel
@@ -160,7 +159,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
                 }
                 else
                 {
-                    int consumeCount = (int) Math.floor((double) (MAX_FUEL - this.getFuel()) / itemFuel);
+                    int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
                     fuelStack.shrink(consumeCount);
                     setFuel(this.getFuel() + itemFuel * consumeCount);
                 }
@@ -170,7 +169,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public int getItemFuel(ItemStack item)
     {
-        return VALID_FUEL.getOrDefault(item.getItem(), 0).intValue();
+        return VALID_FUEL.get().getOrDefault(item.getItem(), 0).intValue();
     }
 
     public int getFuel()

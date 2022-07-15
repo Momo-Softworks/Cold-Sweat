@@ -7,26 +7,25 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ConfigHelper
 {
-    public static List<Block> getBlocks(String id)
+    public static List<Block> getBlocks(String... ids)
     {
-        if (id.startsWith("#"))
+        List<Block> blocks = new ArrayList<>();
+        for (String id : ids)
         {
-            final String tagID = id.replace("#", "");
-            Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
-                                                tag.getKey().location().toString().equals(tagID)).findFirst();
-            if (optionalTag.isPresent())
+            if (id.startsWith("#"))
             {
-                return optionalTag.get().stream().toList();
+                final String tagID = id.replace("#", "");
+                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
+                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
             }
+            blocks.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)));
         }
-        return List.of(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)));
+        return blocks;
     }
 
     public static Map<Block, Number> getBlocksWithValues(List<? extends List<?>> source)
@@ -36,25 +35,46 @@ public class ConfigHelper
         {
             String blockID = (String) entry.get(0);
 
-            map.put(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID)), (Number) entry.get(1));
+            if (blockID.startsWith("#"))
+            {
+                final String tagID = blockID.replace("#", "");
+                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
+                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(blockITag ->
+                {
+                    for (Block block : optionalTag.get().stream().toList())
+                    {
+                        map.put(block, (Number) entry.get(1));
+                    }
+                });
+            }
+            else
+            {
+                Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID));
+
+                if (newBlock != null) map.put(newBlock, (Number) entry.get(1));
+            }
         }
         return map;
     }
 
-    public static List<Item> getItems(String id)
+    public static List<Item> getItems(String... ids)
     {
-        if (id.startsWith("#"))
+        List<Item> items = new ArrayList<>();
+        for (String id : ids)
         {
-            final String tagID = id.replace("#", "");
-            Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
-                                               tag.getKey().location().toString().equals(tagID)).findFirst();
-            if (optionalTag.isPresent())
+            if (id.startsWith("#"))
             {
-                return optionalTag.get().stream().toList();
+                final String tagID = id.replace("#", "");
+                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
+                        tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
             }
+            items.add(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
         }
-        return List.of(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
+        return items;
     }
+
 
     public static Map<Item, Number> getItemsWithValues(List<? extends List<?>> source)
     {
@@ -63,34 +83,70 @@ public class ConfigHelper
         {
             String itemID = (String) entry.get(0);
 
-            map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)), (Number) entry.get(1));
+            if (itemID.startsWith("#"))
+            {
+                final String tagID = itemID.replace("#", "");
+                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
+                                                   tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(itemITag ->
+                {
+                    for (Item item : optionalTag.get().stream().toList())
+                    {
+                        map.put(item, (Number) entry.get(1));
+                    }
+                });
+            }
+            else
+            {
+                Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
+
+                if (newItem != null) map.put(newItem, (Number) entry.get(1));
+            }
         }
         return map;
     }
 
-    public static List<Biome> getBiomes(String id)
+    public static List<Biome> getBiomes(String... ids)
     {
-        if (id.startsWith("#"))
+        List<Biome> blocks = new ArrayList<>();
+        for (String id : ids)
         {
-            final String tagID = id.replace("#", "");
-            Optional<ITag<Biome>> optionalTag = ForgeRegistries.BIOMES.tags().stream().filter(tag ->
-                                                tag.getKey().location().toString().equals(tagID)).findFirst();
-            if (optionalTag.isPresent())
+            if (id.startsWith("#"))
             {
-                return optionalTag.get().stream().toList();
+                final String tagID = id.replace("#", "");
+                Optional<ITag<Biome>> optionalTag = ForgeRegistries.BIOMES.tags().stream().filter(tag ->
+                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
             }
+            blocks.add(ForgeRegistries.BIOMES.getValue(new ResourceLocation(id)));
         }
-        return List.of(ForgeRegistries.BIOMES.getValue(new ResourceLocation(id)));
+        return blocks;
     }
 
-    public static Map<Biome, Number> getBiomesWithValues(List<? extends List<?>> source)
+    public static Map<ResourceLocation, Number> getBiomesWithValues(List<? extends List<?>> source)
     {
-        Map<Biome, Number> map = new HashMap<>();
+        Map<ResourceLocation, Number> map = new HashMap<>();
         for (List<?> entry : source)
         {
             String biomeID = (String) entry.get(0);
 
-            map.put(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)), (Number) entry.get(1));
+            if (biomeID.startsWith("#"))
+            {
+                final String tagID = biomeID.replace("#", "");
+                Optional<ITag<Biome>> optionalTag = ForgeRegistries.BIOMES.tags().stream().filter(tag -> tag.getKey().location().toString().equals(tagID)).findFirst();
+
+                if (optionalTag.isPresent())
+                {
+                    for (Biome biome : optionalTag.get().stream().toList())
+                    {
+                        map.put(biome.getRegistryName(), (Number) entry.get(1));
+                    }
+                }
+            }
+            else if (ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)) != null)
+            {
+                map.put(new ResourceLocation(biomeID), (Number) entry.get(1));
+            }
         }
         return map;
     }

@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.container;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -32,14 +33,15 @@ public class SewingContainer extends AbstractContainerMenu
     BlockPos pos;
     Inventory playerInventory;
     SewingInventory sewingInventory;
-    public static List<Item> VALID_INSULATORS = new ArrayList<>();
-    static
-    {
-        for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
-        {
-            VALID_INSULATORS.addAll(ConfigHelper.getItems(itemID));
-        }
-    }
+    public static LoadedValue<List<Item>> VALID_INSULATORS = LoadedValue.of(() ->
+                                                              {
+                                                                  List<Item> list = new ArrayList<>();
+                                                                  for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
+                                                                  {
+                                                                      list.addAll(ConfigHelper.getItems(itemID));
+                                                                  }
+                                                                  return list;
+                                                              });
 
     public static class SewingInventory implements Container
     {
@@ -201,7 +203,7 @@ public class SewingContainer extends AbstractContainerMenu
         this(i, inventory);
         try {
             this.pos = BlockPos.of(friendlyByteBuf.readLong());
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
 
     private void takeInput()
@@ -224,6 +226,7 @@ public class SewingContainer extends AbstractContainerMenu
         }
         player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
     }
+
     private ItemStack testForRecipe()
     {
         ItemStack slot0Item = this.sewingInventory.getItem(0);
@@ -251,7 +254,7 @@ public class SewingContainer extends AbstractContainerMenu
 
     public boolean isInsulatingItem(ItemStack item)
     {
-        return VALID_INSULATORS.contains(item.getItem());
+        return VALID_INSULATORS.get().contains(item.getItem());
     }
 
     @Override

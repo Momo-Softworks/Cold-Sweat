@@ -2,9 +2,12 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.HellLampTempModifier;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.client.gui.tooltip.HellspringTooltip;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -13,19 +16,35 @@ import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@Mod.EventBusSubscriber
 public class HellspringLampItem extends Item
 {
-    static List<String> VALID_DIMENSIONS = new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions());
+    public static LoadedValue<List<Item>> VALID_FUEL = LoadedValue.of(() ->
+    {
+        List<Item> list = new ArrayList<>();
+        for (String itemID : ItemSettingsConfig.getInstance().soulLampItems())
+        {
+            list.addAll(ConfigHelper.getItems(itemID));
+        }
+        return list;
+    });
+    static LoadedValue<List<String>> VALID_DIMENSIONS = LoadedValue.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
 
     public HellspringLampItem()
     {
@@ -41,7 +60,7 @@ public class HellspringLampItem extends Item
             double temp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
 
             if ((isSelected || player.getOffhandItem() == stack) && temp > max && getFuel(stack) > 0
-            && VALID_DIMENSIONS.contains(worldIn.dimension().location().toString()))
+            && VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString()))
             {
                 // Drain fuel
                 if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
@@ -97,7 +116,7 @@ public class HellspringLampItem extends Item
     }
     private void addFuel(ItemStack stack, double fuel)
     {
-        setFuel(stack, getFuel(stack) + fuel);
+        setFuel(stack, Math.min(64, getFuel(stack) + fuel));
     }
     private double getFuel(ItemStack stack)
     {
@@ -105,7 +124,8 @@ public class HellspringLampItem extends Item
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList) {
+    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
+    {
         if (this.allowdedIn(tab))
         {
             ItemStack stack = new ItemStack(this);
@@ -113,6 +133,24 @@ public class HellspringLampItem extends Item
             stack.getOrCreateTag().putDouble("fuel", 64);
             itemList.add(stack);
         }
+    }
 
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack newStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
+    {
+        if (VALID_FUEL.get().contains(newStack.getItem()) && getFuel(thisStack) < 64)
+        {
+            int stackCount = newStack.getCount();
+            newStack.shrink(64 - (int) getFuel(thisStack));
+            addFuel(thisStack, stackCount);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack)
+    {
+        return Optional.of(new HellspringTooltip(getFuel(stack)));
     }
 }

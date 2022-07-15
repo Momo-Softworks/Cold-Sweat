@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -19,11 +20,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 
 public class FilledWaterskinItem extends Item
 {
+    static LoadedValue<Integer> WATERSKIN_STRENGTH = LoadedValue.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
+
     public FilledWaterskinItem()
     {
         super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
@@ -63,8 +66,9 @@ public class FilledWaterskinItem extends Item
         InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        double amount = itemstack.getOrCreateTag().getDouble("temperature") * (ItemSettingsConfig.getInstance().waterskinStrength() / 50d);
-        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(1), Temperature.Types.CORE, true);
+        double amount = itemstack.getOrCreateTag().getDouble("temperature") * (WATERSKIN_STRENGTH.get() / 50d);
+        if (player.tickCount % 5 == 0)
+        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(5), Temperature.Types.CORE, true);
 
         // Play empty sound
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,

@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +21,8 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ArmorInsulation
 {
-    public static Map<Item, Number> INSULATING_ARMORS = ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().insulatingArmor());
+    public static LoadedValue<Map<Item, Number>> INSULATING_ARMORS = LoadedValue.of(() ->
+            ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().insulatingArmor()));
 
     @SubscribeEvent
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
@@ -30,10 +32,12 @@ public class ArmorInsulation
             Player player = event.player;
             if (player.tickCount % 10 == 0)
             {
-                ItemStack headItem     = player.getItemBySlot(EquipmentSlot.HEAD);
+                Map<Item, Number> insulatingArmors = INSULATING_ARMORS.get();
+
+                ItemStack headItem = player.getItemBySlot(EquipmentSlot.HEAD);
                 ItemStack bodyItem = player.getItemBySlot(EquipmentSlot.CHEST);
-                ItemStack legsItem   = player.getItemBySlot(EquipmentSlot.LEGS);
-                ItemStack feetItem      = player.getItemBySlot(EquipmentSlot.FEET);
+                ItemStack legsItem = player.getItemBySlot(EquipmentSlot.LEGS);
+                ItemStack feetItem = player.getItemBySlot(EquipmentSlot.FEET);
 
                 int leatherMultiplier = 0;
                 // The defense of armor pieces adds to the insulation
@@ -43,7 +47,7 @@ public class ArmorInsulation
                 if (feetItem.getItem() instanceof ArmorItem boots)      leatherMultiplier += boots.getDefense();
 
                 /* Helmet */
-                int headInsulation = INSULATING_ARMORS.getOrDefault(headItem.getItem(), 0).intValue();
+                int headInsulation = insulatingArmors.getOrDefault(headItem.getItem(), 0).intValue();
 
                 if (headInsulation > 0) leatherMultiplier += headInsulation;
                 else if (headItem.getOrCreateTag().getBoolean("insulated"))
@@ -52,7 +56,7 @@ public class ArmorInsulation
                 }
 
                 /* Chestplate */
-                int chestInsulation = INSULATING_ARMORS.getOrDefault(bodyItem.getItem(), 0).intValue();
+                int chestInsulation = insulatingArmors.getOrDefault(bodyItem.getItem(), 0).intValue();
 
                 if (chestInsulation > 0) leatherMultiplier += chestInsulation;
                 else if (bodyItem.getOrCreateTag().getBoolean("insulated"))
@@ -61,7 +65,7 @@ public class ArmorInsulation
                 }
 
                 /* Leggings */
-                int legsInsulation = INSULATING_ARMORS.getOrDefault(legsItem.getItem(), 0).intValue();
+                int legsInsulation = insulatingArmors.getOrDefault(legsItem.getItem(), 0).intValue();
 
                 if (legsInsulation > 0) leatherMultiplier += legsInsulation;
                 else if (legsItem.getOrCreateTag().getBoolean("insulated"))
@@ -69,8 +73,8 @@ public class ArmorInsulation
                     leatherMultiplier += 5;
                 }
 
-                /* Leggings */
-                int feetInsulation = INSULATING_ARMORS.getOrDefault(feetItem.getItem(), 0).intValue();
+                /* Boots */
+                int feetInsulation = insulatingArmors.getOrDefault(feetItem.getItem(), 0).intValue();
 
                 if (feetInsulation > 0) leatherMultiplier += feetInsulation;
                 else if (feetItem.getOrCreateTag().getBoolean("insulated"))
