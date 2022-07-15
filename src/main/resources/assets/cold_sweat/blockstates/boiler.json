@@ -3,41 +3,41 @@
   {
     "facing=north,lit=false":
     {
-      "model": "cold_sweat:block/boiler_off"
+      "model": "cold_sweat:block/boiler"
     },
     "facing=east,lit=false":
     {
-      "model": "cold_sweat:block/boiler_off",
+      "model": "cold_sweat:block/boiler",
       "y": 90
     },
     "facing=south,lit=false":
     {
-      "model": "cold_sweat:block/boiler_off",
+      "model": "cold_sweat:block/boiler",
       "y": 180
     },
     "facing=west,lit=false":
     {
-      "model": "cold_sweat:block/boiler_off",
+      "model": "cold_sweat:block/boiler",
       "y": 270
     },
 
     "facing=north,lit=true":
     {
-      "model": "cold_sweat:block/boiler_on"
+      "model": "cold_sweat:block/boiler_lit"
     },
     "facing=east,lit=true":
     {
-      "model": "cold_sweat:block/boiler_on",
+      "model": "cold_sweat:block/boiler_lit",
       "y": 90
     },
     "facing=south,lit=true":
     {
-      "model": "cold_sweat:block/boiler_on",
+      "model": "cold_sweat:block/boiler_lit",
       "y": 180
     },
     "facing=west,lit=true":
     {
-      "model": "cold_sweat:block/boiler_on",
+      "model": "cold_sweat:block/boiler_lit",
       "y": 270
     }
   }

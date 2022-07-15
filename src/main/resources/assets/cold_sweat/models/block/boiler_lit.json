@@ -1,9 +1,11 @@
 {
   "parent": "block/cube",
-  "textures": {
+
+  "textures":
+  {
     "down": "cold_sweat:blocks/boiler_bottom",
     "up": "cold_sweat:blocks/boiler_top",
-    "north": "cold_sweat:blocks/boiler_front_off",
+    "north": "cold_sweat:blocks/boiler_front_lit",
     "east": "cold_sweat:blocks/boiler_side",
     "south": "cold_sweat:blocks/boiler_side",
     "west": "cold_sweat:blocks/boiler_side",
