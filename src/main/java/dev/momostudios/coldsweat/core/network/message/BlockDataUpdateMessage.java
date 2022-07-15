@@ -13,9 +13,17 @@ import java.util.function.Supplier;
 public class BlockDataUpdateMessage
 {
     BlockPos blockPos;
+    BlockEntity blockEntity;
     CompoundTag tag;
 
-    public BlockDataUpdateMessage(BlockPos blockPos, CompoundTag tag) {
+    public BlockDataUpdateMessage(BlockEntity blockEntity)
+    {
+        this.blockPos = blockEntity.getBlockPos();
+        this.blockEntity = blockEntity;
+    }
+
+    public BlockDataUpdateMessage(BlockPos blockPos, CompoundTag tag)
+    {
         this.blockPos = blockPos;
         this.tag = tag;
     }
@@ -23,7 +31,7 @@ public class BlockDataUpdateMessage
     public static void encode(BlockDataUpdateMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBlockPos(message.blockPos);
-        buffer.writeNbt(message.tag);
+        buffer.writeNbt(message.blockEntity.saveWithoutMetadata());
     }
 
     public static BlockDataUpdateMessage decode(FriendlyByteBuf buffer)
@@ -44,7 +52,7 @@ public class BlockDataUpdateMessage
                     BlockEntity be = level.getBlockEntity(message.blockPos);
                     if (be != null)
                     {
-                        be.getTileData().merge(message.tag);
+                        be.load(message.tag);
                     }
                 }
             });
