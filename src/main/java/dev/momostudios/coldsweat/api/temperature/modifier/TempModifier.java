@@ -1,14 +1,15 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
-import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
+import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * TempModifiers are applied to entities to dynamically change their temperature.<br>
@@ -26,8 +27,8 @@ public abstract class TempModifier
     int expireTicks = -1;
     int ticksExisted = 0;
     int tickRate = 1;
-    double storedValue = 0;
-    boolean isUnset = true;
+    Function<Temperature, Temperature> function = temp -> temp;
+
 
     /**
      * Default constructor.<br>
@@ -85,45 +86,41 @@ public abstract class TempModifier
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
      * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.<br>
      * <br>
-     * Do not call this method directly unless you intentionally do not wish to post to the event bus.<br>
-     * Instead, use {@link #calculate(Temperature, Player)}.<br>
-     * <br>
-     * @param temp should usually represent the player's body temperature or world temperature.<br>
      * @param player the player that is being affected by the modifier.<br>
      * @return the new {@link Temperature}.<br>
      */
-    public abstract Temperature getResult(Temperature temp, Player player);
+    protected abstract Function<Temperature, Temperature> calculate(Player player);
 
     /**
-     * Posts this TempModifier's {@link #getResult(Temperature, Player)} to the Forge event bus.<br>
+     * Posts this TempModifier's {@link #calculate(Player)} to the Forge event bus.<br>
      * Returns the stored value if this TempModifier has a tickRate set, and it is not the right tick.<br>
      * <br>
-     * @param temp the Temperature being fed into the {@link #getResult(Temperature, Player)} method.
+     * @param temp the Temperature being fed into the {@link #calculate(Player)} method.
      * @param player the player that is being affected by the modifier.
-     * @return the new {@link Temperature}.
      */
-    public Temperature calculate(Temperature temp, Player player)
+    public Temperature getValue(Temperature temp, Player player)
     {
-        TempModifierEvent.Tick.Pre pre = new TempModifierEvent.Tick.Pre(this, player, temp);
+        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
         if (pre.isCanceled()) return temp;
 
-        double value;
-        if (player.tickCount % tickRate == 0 || isUnset)
-        {
-            storedValue = value = getResult(pre.getTemperature(), player).get();
-            isUnset = false;
-        }
-        else
-        {
-            value = storedValue;
-        }
+        this.function = this.calculate(player);
 
-        TempModifierEvent.Tick.Post post = new TempModifierEvent.Tick.Post(this, player, new Temperature(value));
+        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, player, this.function.apply(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
 
         return post.getTemperature();
+    }
+
+    /**
+     * Returns a function that changes a given Temperature in some way.<br>
+     * This function is stored and called upon between "ticks" if the TempModifier has a set tickRate
+     * @return A function with a Temperature input and a Temperature output
+     */
+    public Function<Temperature, Temperature> getFunction()
+    {
+        return this.function;
     }
 
     /**
@@ -150,7 +147,7 @@ public abstract class TempModifier
     }
 
     /**
-     * TempModifiers can be configured to run {@link TempModifier#getResult(Temperature, Player)} at a specified interval.<br>
+     * TempModifiers can be configured to run {@link TempModifier#calculate(Player)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
      * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>

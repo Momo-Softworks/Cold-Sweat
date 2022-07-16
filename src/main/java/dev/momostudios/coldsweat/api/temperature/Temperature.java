@@ -50,8 +50,7 @@ public class Temperature
     */
     public Temperature add(double amount)
     {
-        temp += amount;
-        return this;
+        return new Temperature(this.temp + amount);
     }
     public Temperature add(Temperature amount)
     {
@@ -67,7 +66,7 @@ public class Temperature
     }
     public Temperature multiply(Temperature amount)
     {
-        return new Temperature(temp * amount.temp);
+        return multiply(amount.temp);
     }
 
     /**
@@ -79,7 +78,7 @@ public class Temperature
     }
     public Temperature divide(Temperature amount)
     {
-        return new Temperature(temp / amount.temp);
+        return divide(amount.temp);
     }
 
     /**
@@ -97,7 +96,7 @@ public class Temperature
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull Player player)
     {
-        return modifier.calculate(new Temperature(temp), player);
+        return modifier.getValue(new Temperature(temp), player);
     }
 
     /**
@@ -110,7 +109,7 @@ public class Temperature
         Temperature temp2 = new Temperature(this.temp);
         for (TempModifier modifier : modifiers)
         {
-            temp2.set(modifier.calculate(temp2, player));
+            temp2.set(modifier.getValue(temp2, player));
         }
         return temp2;
     }

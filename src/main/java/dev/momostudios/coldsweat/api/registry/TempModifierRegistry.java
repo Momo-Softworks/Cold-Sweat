@@ -30,12 +30,28 @@ public class TempModifierRegistry
         TEMP_MODIFIERS.put(modifier.getID(), modifier);
     }
 
+    /**
+     * Clears the registry of all items. This effectively "un-registers" all TempModifiers.
+     */
     public static void flush()
     {
         TEMP_MODIFIERS.clear();
     }
 
-    public static TempModifier getEntryFor(String id) {
-        return TEMP_MODIFIERS.get(id);
+    /**
+     * Returns a new instance of the TempModifier with the given ID.<br>
+     * If the TempModifier class does not have a default constructor (which should never happen), a generic one is given.
+     */
+    public static TempModifier getEntryFor(String id)
+    {
+        try
+        {
+            return TEMP_MODIFIERS.get(id).getClass().getConstructor().newInstance();
+        }
+        catch (Exception e)
+        {
+            ColdSweat.LOGGER.error("TempModifier \"" + id + "\" does not have a default constructor. This will cause issues!");
+            return TEMP_MODIFIERS.get(id);
+        }
     }
 }

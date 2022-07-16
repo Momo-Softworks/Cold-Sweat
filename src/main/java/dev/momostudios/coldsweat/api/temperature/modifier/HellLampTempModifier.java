@@ -3,12 +3,14 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.function.Function;
+
 public class HellLampTempModifier extends TempModifier
 {
     @Override
-    public Temperature getResult(Temperature temp, Player player)
+    public Function<Temperature, Temperature> calculate(Player player)
     {
-        return temp.add(0.8);
+        return temp -> temp.add(0.8);
     }
 
     @Override
