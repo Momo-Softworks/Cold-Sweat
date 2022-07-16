@@ -1,5 +1,9 @@
 package dev.momostudios.coldsweat.common.item;
 
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TimeTempModifier;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.sounds.SoundEvents;
@@ -16,8 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
+
+import java.util.List;
 
 public class WaterskinItem extends Item
 {
@@ -27,12 +31,12 @@ public class WaterskinItem extends Item
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player entity, InteractionHand hand)
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
     {
-        InteractionResultHolder<ItemStack> ar = super.use(level, entity, hand);
+        InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, entity, ClipContext.Fluid.SOURCE_ONLY);
+        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
 
         if (blockhitresult.getType() != HitResult.Type.BLOCK)
@@ -45,28 +49,33 @@ public class WaterskinItem extends Item
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());
-                filledWaterskin.getOrCreateTag().putDouble("temperature", (new BiomeTempModifier().calculate(new Temperature(), entity).get() - 1) * 25);
+                filledWaterskin.getOrCreateTag().putDouble("temperature", new Temperature().with(List.of(
+                        new BiomeTempModifier(),
+                        new BlockTempModifier(),
+                        new TimeTempModifier()
+                ), player).get() * 15);
+
                 //Replace 1 of the stack with a FilledWaterskinItem
                 if (itemstack.getCount() > 1)
                 {
-                    if (!entity.addItem(filledWaterskin))
+                    if (!player.addItem(filledWaterskin))
                     {
-                        ItemEntity itementity = entity.drop(filledWaterskin, false);
+                        ItemEntity itementity = player.drop(filledWaterskin, false);
                         if (itementity != null)
                         {
                             itementity.setNoPickUpDelay();
-                            itementity.setOwner(entity.getUUID());
+                            itementity.setOwner(player.getUUID());
                         }
                     }
                     itemstack.shrink(1);
                 }
                 else
                 {
-                    entity.setItemInHand(hand, filledWaterskin);
+                    player.setItemInHand(hand, filledWaterskin);
                 }
                 //Play filling sound
-                level.playSound(null, entity, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
-                entity.swing(hand);
+                level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
+                player.swing(hand);
             }
             return ar;
         }
