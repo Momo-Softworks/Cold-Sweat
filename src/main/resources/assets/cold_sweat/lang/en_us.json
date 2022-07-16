@@ -114,10 +114,10 @@
   "cold_sweat.config.world_temp_location.desc":     "The position of the world temperature gauge on the screen.",
 
 
-  "cold_sweat.message.sleep.hot":           "hot",
-  "cold_sweat.message.sleep.cold":          "cold",
-  "cold_sweat.message.sleep.body":          "You may not rest now; You are too %d to sleep.",
-  "cold_sweat.message.sleep.world":         "You may not rest now; The air is too %d.",
+  "cold_sweat.message.sleep.body.hot":     "You may not rest now; You are overheating.",
+  "cold_sweat.message.sleep.body.cold":    "You may not rest now; You are freezing.",
+  "cold_sweat.message.sleep.world.hot":    "You may not rest now; It is sweltering outside.",
+  "cold_sweat.message.sleep.world.cold":   "You may not rest now; It is freezing outside.",
 
 
   "commands.cold_sweat.temperature.set.single.result": "Set the temperature of %d to %d",

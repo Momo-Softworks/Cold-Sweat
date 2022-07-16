@@ -114,10 +114,11 @@
   "cold_sweat.config.units.desc":                   "Показывает температуру в градусах цельсия или фаренгейта.",
   "cold_sweat.config.world_temp_location.desc":     "Позиция показателя внешней температуры",
 
-  "cold_sweat.message.sleep.hot":           "жарко",
-  "cold_sweat.message.sleep.cold":          "холодно",
-  "cold_sweat.message.sleep.body":          "Вам слишком %d чтобы спать сейчас",
-  "cold_sweat.message.sleep.world":         "Рядом слишком %d чтобы спать сейчас",
+
+  "cold_sweat.message.sleep.body.hot":     "Вам слишком жарко чтобы спать сейчас",
+  "cold_sweat.message.sleep.body.cold":    "Вам слишком холодно чтобы спать сейчас",
+  "cold_sweat.message.sleep.world.hot":    "Рядом слишком жарко чтобы спать сейчас",
+  "cold_sweat.message.sleep.world.cold":   "Рядом слишком холодно чтобы спать сейчас",
 
 
   "commands.cold_sweat.temperature.set.single.result": "Установлена температура тела %d: %d",

@@ -118,10 +118,10 @@
   "cold_sweat.config.world_temp_location.desc":     "세계 온도 측정기의 위치를 결정합니다.",
 
 
-  "cold_sweat.message.sleep.hot":           "높",
-  "cold_sweat.message.sleep.cold":          "낮",
-  "cold_sweat.message.sleep.body":          "잠을 자기에는 체온이 너무 %d습니다.",
-  "cold_sweat.message.sleep.world":         "바깥 온도가 너무 %d아 잠을 잘 수 없습니다.",
+  "cold_sweat.message.sleep.body.hot":     "잠을 자기에는 체온이 너무 높습니다.",
+  "cold_sweat.message.sleep.body.cold":    "잠을 자기에는 체온이 너무 낮습니다.",
+  "cold_sweat.message.sleep.world.hot":    "바깥 온도가 너무 높아 잠을 잘 수 없습니다.",
+  "cold_sweat.message.sleep.world.cold":   "바깥 온도가 너무 낮아 잠을 잘 수 없습니다.",
 
 
   "commands.cold_sweat.temperature.set.single.result": "%d의 체온을 다음으로 설정했습니다: %d",

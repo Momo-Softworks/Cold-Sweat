@@ -109,10 +109,10 @@
   "cold_sweat.config.world_temp_location.desc":     "La posición del indicador de temperatura mundial en la pantalla.",
 
 
-  "cold_sweat.message.sleep.hot":           "caliente",
-  "cold_sweat.message.sleep.cold":          "frío",
-  "cold_sweat.message.sleep.body":          "No puedes descansar ahora; eres demasiado %d para dormir.",
-  "cold_sweat.message.sleep.world":         "No puedes descansar ahora; el aire es demasiado %d.",
+  "cold_sweat.message.sleep.body.hot":     "No puedes descansar ahora; eres demasiado caliente para dormir.",
+  "cold_sweat.message.sleep.body.cold":    "No puedes descansar ahora; eres demasiado frío para dormir.",
+  "cold_sweat.message.sleep.world.hot":    "No puedes descansar ahora; el aire es demasiado caliente.",
+  "cold_sweat.message.sleep.world.cold":   "No puedes descansar ahora; el aire es demasiado frío.",
 
   "commands.cold_sweat.temperature.set.single.result": "Fije la temperatura de %d a %d",
   "commands.cold_sweat.temperature.set.many.result":   "Fije la temperatura del jugador %d a %d",
