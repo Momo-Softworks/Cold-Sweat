@@ -7,6 +7,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class NBTHelper
@@ -139,7 +141,8 @@ public class NBTHelper
         modifierTag.getAllKeys().forEach(key ->
         {
             // Add the modifier's arguments
-            if (key != null && modifierTag.get(key).getAsString().equals(modifierTag.getString("id")))
+            List<String> invalidArgs = Arrays.asList("id", "expireTicks", "tickRate", "ticksExisted");
+            if (key != null && !invalidArgs.contains(modifierTag.get(key).getAsString()))
             {
                 newModifier.addArgument(key, getObjectFromTag(modifierTag.get(key)));
             }
