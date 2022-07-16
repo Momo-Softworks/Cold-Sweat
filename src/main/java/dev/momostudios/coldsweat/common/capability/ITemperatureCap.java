@@ -15,8 +15,8 @@ public interface ITemperatureCap
     boolean hasModifier(Temperature.Types type, Class<? extends TempModifier> mod);
     void clearModifiers(Temperature.Types type);
     void copy(ITemperatureCap cap);
-    void tickUpdate(Player player);
-    void tickClient(Player player);
+    void tick(Player player);
+    void tickDummy(Player player);
 
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag tag);

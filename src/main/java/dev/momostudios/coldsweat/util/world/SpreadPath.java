@@ -8,8 +8,7 @@ public class SpreadPath
 {
     public Direction direction;
     public BlockPos pos;
-    public int freezes = 0;
-    public boolean removable = false;
+    public boolean frozen = false;
 
     public SpreadPath(BlockPos pos)
     {

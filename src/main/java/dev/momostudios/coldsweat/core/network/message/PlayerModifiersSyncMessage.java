@@ -20,27 +20,28 @@ public class PlayerModifiersSyncMessage
     public List<TempModifier> core;
     public List<TempModifier> base;
     public List<TempModifier> rate;
-    public List<TempModifier> hottest;
-    public List<TempModifier> coldest;
+    public List<TempModifier> max;
+    public List<TempModifier> min;
 
-    public PlayerModifiersSyncMessage(List<TempModifier> world, List<TempModifier> core, List<TempModifier> base, List<TempModifier> rate, List<TempModifier> hottest, List<TempModifier> coldest)
+    public PlayerModifiersSyncMessage(List<TempModifier> world, List<TempModifier> core, List<TempModifier> base, List<TempModifier> rate,
+                                      List<TempModifier> max, List<TempModifier> min)
     {
         this.world = world;
         this.core = core;
         this.base = base;
         this.rate = rate;
-        this.hottest = hottest;
-        this.coldest = coldest;
+        this.max = max;
+        this.min = min;
     }
 
     public static void encode(PlayerModifiersSyncMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.WORLD));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.CORE));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.BASE));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.RATE));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.MAX));
-        buffer.writeNbt(writeToNBT(message, Temperature.Types.MIN));
+        buffer.writeNbt(writeToNBT(message.world));
+        buffer.writeNbt(writeToNBT(message.core));
+        buffer.writeNbt(writeToNBT(message.base));
+        buffer.writeNbt(writeToNBT(message.rate));
+        buffer.writeNbt(writeToNBT(message.max));
+        buffer.writeNbt(writeToNBT(message.min));
     }
 
     public static PlayerModifiersSyncMessage decode(FriendlyByteBuf buffer)
@@ -54,17 +55,9 @@ public class PlayerModifiersSyncMessage
                 readFromNBT(buffer.readNbt()));
     }
 
-    private static CompoundTag writeToNBT(PlayerModifiersSyncMessage message, Temperature.Types type)
+    private static CompoundTag writeToNBT(List<TempModifier> referenceList)
     {
         CompoundTag nbt = new CompoundTag();
-        List<TempModifier> referenceList =
-                type == Temperature.Types.WORLD ? message.world :
-                type == Temperature.Types.CORE  ? message.core :
-                type == Temperature.Types.BASE  ? message.base :
-                type == Temperature.Types.RATE  ? message.rate :
-                type == Temperature.Types.MAX   ? message.hottest :
-                type == Temperature.Types.MIN   ? message.coldest :
-                new ArrayList<>(0);
 
         // Iterate modifiers and write to NBT
         for (int i = 0; i < referenceList.size(); i++)
@@ -119,10 +112,10 @@ public class PlayerModifiersSyncMessage
                         cap.getModifiers(Temperature.Types.RATE).addAll(message.rate);
 
                         cap.clearModifiers(Temperature.Types.MAX);
-                        cap.getModifiers(Temperature.Types.MAX).addAll(message.hottest);
+                        cap.getModifiers(Temperature.Types.MAX).addAll(message.max);
 
                         cap.clearModifiers(Temperature.Types.MIN);
-                        cap.getModifiers(Temperature.Types.MIN).addAll(message.coldest);
+                        cap.getModifiers(Temperature.Types.MIN).addAll(message.min);
                     });
                 }
             });

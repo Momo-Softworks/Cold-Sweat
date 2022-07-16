@@ -2,11 +2,11 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.vehicle.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,19 +17,26 @@ public class MixinMinecart
 {
     AbstractMinecart minecart = (AbstractMinecart) (Object) this;
 
-    @Inject(method = "destroy(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
-    public void destroy(DamageSource source, CallbackInfo ci)
+    @Inject(method = "destroy(Lnet/minecraft/world/damagesource/DamageSource;)V",
+            at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS, cancellable = true)
+    public void destroy(DamageSource p_38115_, CallbackInfo ci)
     {
-        Block block = minecart.getDisplayBlockState().getBlock();
-
-        if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)
-        && block != Blocks.HOPPER
-        && block != Blocks.CHEST
-        && block != Blocks.TNT
-        && block != Blocks.FURNACE)
+        ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
+        if (!carryStack.isEmpty())
         {
-            ItemStack itemStack = new ItemStack(block.asItem());
-            minecart.spawnAtLocation(itemStack);
+            minecart.remove(Entity.RemovalReason.KILLED);
+            if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
+            {
+                ItemStack itemstack = new ItemStack(Items.MINECART);
+                if (minecart.hasCustomName())
+                {
+                    itemstack.setHoverName(minecart.getCustomName());
+                }
+
+                minecart.spawnAtLocation(itemstack);
+                minecart.spawnAtLocation(carryStack);
+            }
+            ci.cancel();
         }
     }
 }

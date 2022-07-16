@@ -14,49 +14,44 @@ import net.minecraftforge.common.BiomeDictionary;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class TimeTempModifier extends TempModifier
 {
     static Map<Biome, ResourceKey<Biome>> BIOME_KEYS = new HashMap<>();
 
     @Override
-    public Temperature getResult(Temperature temp, Player player)
+    public Function<Temperature, Temperature> calculate(Player player)
     {
         if (!player.level.dimensionType().hasFixedTime())
         {
-            try
+            float timeTemp = 0;
+            Level world = player.level;
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
-                float timeTemp = 0;
-                Level world = player.level;
-                for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
+                BiomeManager biomeManager = player.level.getBiomeManager();
+                Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
+
+                ResourceKey<Biome> key = BIOME_KEYS.get(biome);
+
+                if (key == null)
+                    key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
+
+                if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT)
+                && BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                 {
-                    BiomeManager biomeManager = player.level.getBiomeManager();
-                    Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
-
-                    ResourceKey<Biome> key = BIOME_KEYS.get(biome);
-
-                    if (key == null)
-                        key = ResourceKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
-
-                    if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT) &&
-                        BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
-                    {
-                        timeTemp += Math.sin(world.getDayTime() / 3819.7186342) - 0.5;
-                    }
-                    else
-                    {
-                        timeTemp += (Math.sin(world.getDayTime() / 3819.7186342) / 4d) - 0.125;
-                    }
+                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) / 1.5 - 0.7;
                 }
+                else
+                {
+                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) / 4d - 0.125;
+                }
+            }
 
-                return temp.add(timeTemp / 200);
-            }
-            catch (Exception e)
-            {
-                return temp;
-            }
+            float finalTimeTemp = timeTemp;
+            return temp -> temp.add(finalTimeTemp / 200);
         }
-        else return temp;
+        else return temp -> temp;
     }
 
     public String getID()

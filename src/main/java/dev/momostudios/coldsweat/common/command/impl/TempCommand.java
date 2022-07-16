@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 public class TempCommand extends BaseCommand
 {
@@ -46,14 +48,17 @@ public class TempCommand extends BaseCommand
         // Set the temperature for all affected targets
         for (ServerPlayer player : players)
         {
-            TempHelper.setTemperature(player, new Temperature(amount), Temperature.Types.CORE);
+            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            {
+                cap.set(Temperature.Types.CORE, amount);
+                TempHelper.updateTemperature(player, cap, true);
+            });
         }
 
         //Compose & send message
         if (players.size() == 1)
         {
             Player target = players.iterator().next();
-
             source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), amount), true);
         }
         else
@@ -65,7 +70,7 @@ public class TempCommand extends BaseCommand
 
     private int executeGetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players)
     {
-        for (ServerPlayer target : players)
+        for (ServerPlayer target : players.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {
             //Compose & send message
             int bodyTemp = (int) TempHelper.getTemperature(target, Temperature.Types.BODY).get();

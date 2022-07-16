@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;

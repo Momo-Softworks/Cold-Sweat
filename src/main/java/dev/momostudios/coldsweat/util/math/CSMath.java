@@ -1,12 +1,10 @@
 package dev.momostudios.coldsweat.util.math;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
@@ -46,7 +44,6 @@ public class CSMath
                 case F -> value * 42d + (absolute ? 32d : 0d);
                 case MC -> value;
             };
-            default -> value;
         };
     }
 
@@ -95,18 +92,23 @@ public class CSMath
 
     public static double getDistance(Entity entity, Vector3d pos)
     {
-        double xDistance = Math.max(0, Math.abs(entity.getX() - pos.x) - entity.getBbWidth() / 2);
-        double yDistance = Math.max(0, Math.abs((entity.getY() + entity.getBbHeight() / 2) - pos.y) - entity.getBbHeight() / 2);
-        double zDistance = Math.max(0, Math.abs(entity.getZ() - pos.z) - entity.getBbWidth() / 2);
+        return getDistance(entity, pos.x, pos.y, pos.z);
+    }
+
+    public static double getDistance(Entity entity, double x, double y, double z)
+    {
+        double xDistance = Math.abs(entity.getX() - x);
+        double yDistance = Math.abs(entity.getY() + entity.getBbHeight() / 2 - y);
+        double zDistance = Math.abs(entity.getZ() - z);
         return Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
     }
 
-    public static double average(double... values)
+    public static double average(Number... values)
     {
         double sum = 0;
-        for (double value : values)
+        for (Number value : values)
         {
-            sum += value;
+            sum += value.doubleValue();
         }
         return sum / values.length;
     }
@@ -168,25 +170,14 @@ public class CSMath
         return direction;
     }
 
+    public static Direction getDirectionFromVector(Vec3 vec3)
+    {
+        return getDirectionFromVector(vec3.x, vec3.y, vec3.z);
+    }
+
     public static <T> void breakableForEach(Collection<T> collection, BiConsumer<T, InterruptableStreamer<T>> consumer)
     {
         new InterruptableStreamer<T>(collection).run(consumer);
-    }
-
-    /**
-     * A deobfuscated version of GuiComponent's innerBlit function.
-     */
-    public static void blit(Matrix4f matrix, int leftX, int rightX, int bottomY, int topY, int level, float leftU, float rightU, float topV, float bottomV)
-    {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix, (float) leftX,  (float) topY,    (float) level).uv(leftU,  bottomV).endVertex();
-        bufferbuilder.vertex(matrix, (float) rightX, (float) topY,    (float) level).uv(rightU, bottomV).endVertex();
-        bufferbuilder.vertex(matrix, (float) rightX, (float) bottomY, (float) level).uv(rightU, topV).endVertex();
-        bufferbuilder.vertex(matrix, (float) leftX,  (float) bottomY, (float) level).uv(leftU,  topV).endVertex();
-        bufferbuilder.end();
-        BufferUploader.end(bufferbuilder);
     }
 
     public static void tryCatch(Runnable runnable)
@@ -195,7 +186,7 @@ public class CSMath
         {
             runnable.run();
         }
-        catch (Throwable throwable) {}
+        catch (Throwable ignored) {}
     }
 
     public static int getSign(Number value)
@@ -237,5 +228,15 @@ public class CSMath
     public static double getLeastExtreme(double value1, double value2)
     {
         return Math.abs(value1) < Math.abs(value2) ? value1 : value2;
+    }
+
+    public static double distance(Vec3i pos1, Vec3i pos2)
+    {
+        return Math.sqrt(pos1.distSqr(pos2));
+    }
+
+    public static Vec3 getMiddle(BlockPos pos)
+    {
+        return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 }

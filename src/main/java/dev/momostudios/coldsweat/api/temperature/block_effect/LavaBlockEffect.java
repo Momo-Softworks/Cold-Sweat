@@ -21,7 +21,7 @@ public class LavaBlockEffect extends BlockEffect
         if (hasBlock(state.getBlock()))
         {
             FluidState fluidState = state.getFluidState();
-            double temp = 0.05 + (fluidState.getOwnHeight()) / 8d;
+            double temp = 0.2 + (fluidState.getOwnHeight()) / 8d;
             return CSMath.blend(temp, 0, distance, 0.5, 7);
         }
         return 0;
@@ -29,7 +29,7 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxEffect() {
-        return CSMath.convertUnits(1000, Temperature.Units.F, Temperature.Units.MC, false);
+        return CSMath.convertUnits(400, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override

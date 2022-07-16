@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 
 public class ConfigButton extends Button
 {

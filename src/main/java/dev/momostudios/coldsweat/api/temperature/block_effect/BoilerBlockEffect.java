@@ -1,11 +1,10 @@
 package dev.momostudios.coldsweat.api.temperature.block_effect;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.util.registries.ModBlocks;
-import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.common.block.BoilerBlock;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 

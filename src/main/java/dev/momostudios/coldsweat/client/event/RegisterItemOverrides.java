@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -29,7 +29,7 @@ public class RegisterItemOverrides
                 if (stack.getOrCreateTag().getBoolean("isOn"))
                 {
                     return stack.getOrCreateTag().getInt("fuel") > 43 ? 3 :
-                            stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
+                           stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
                 }
                 return 0;
             });
@@ -43,7 +43,8 @@ public class RegisterItemOverrides
                     double minTemp = config.minTemp;
                     double maxTemp = config.maxTemp;
 
-                    double worldTemp = (float) CSMath.convertUnits(Overlays.WORLD_TEMP, ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                    double worldTemp = (float) CSMath.convertUnits(Overlays.WORLD_TEMP,
+                            ClientSettingsConfig.getInstance().celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                     double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
                     return (float) worldTempAdjusted;

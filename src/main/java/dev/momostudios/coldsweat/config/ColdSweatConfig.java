@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -46,13 +47,16 @@ public class ColdSweatConfig
 
     static 
     {
-        showConfigButton = BUILDER.comment("Show the config menu button in the Options menu").define("ShowConfigButton", true);
+        showConfigButton = BUILDER
+                .comment("Show the config menu button in the Options menu")
+                .define("Enable In-Game Config", true);
 
         /*
          Difficulty
          */
         difficulty = BUILDER
-                .comment("Overrides all other config options for easy difficulty management")
+                .comment("Overrides all other config options for easy difficulty management",
+                        "This value is changed by the in-game config. It does nothing otherwise.")
                 .defineInRange("Difficulty", 3, 1, 5);
 
         /*

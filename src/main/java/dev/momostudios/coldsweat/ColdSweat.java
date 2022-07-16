@@ -1,11 +1,14 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.client.gui.tooltip.ClientHellspringTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.HellspringTooltip;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -68,6 +71,7 @@ public class ColdSweat
     {
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
+        MinecraftForgeClient.registerTooltipComponentFactory(HellspringTooltip.class, tooltip -> new ClientHellspringTooltip(tooltip.getFuel()));
     }
 
     @SubscribeEvent

@@ -5,9 +5,8 @@ import dev.momostudios.coldsweat.api.temperature.Temperature.Types;
 import dev.momostudios.coldsweat.api.temperature.Temperature.Units;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.capability.PlayerTempCapability;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -33,10 +32,10 @@ public class Overlays
 
     // Stuff for world temperature
     static boolean SHOW_WORLD_TEMP = false;
-    private static double PREV_WORLD_TEMP = 0;
+    static double PREV_WORLD_TEMP = 0;
     public static double WORLD_TEMP = 0;
-    public static double MAX_OFFSET = 0;
-    public static double MIN_OFFSET = 0;
+    static double MAX_OFFSET = 0;
+    static double MIN_OFFSET = 0;
 
     // Stuff for body temperature
     static boolean SHOW_BODY_TEMP = false;
@@ -62,8 +61,6 @@ public class Overlays
         {
             double min = ConfigCache.getInstance().minTemp + MIN_OFFSET;
             double max = ConfigCache.getInstance().maxTemp + MAX_OFFSET;
-
-            boolean bobbing = CLIENT_CONFIG.iconBobbing();
 
             // Get player world temperature
             double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Units.C : Units.F, Units.MC, true);
@@ -99,7 +96,7 @@ public class Overlays
             RenderSystem.disableBlend();
 
             // Sets the text bobbing offset (or none if disabled)
-            int bob = bobbing && !CSMath.isInRange(temp, min, max) && player.tickCount % 2 == 0 ? 1 : 0;
+            int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min, max) && player.tickCount % 2 == 0 ? 1 : 0;
 
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -114,7 +111,6 @@ public class Overlays
     public static final IIngameOverlay BODY_TEMP_ELEMENT = OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "Body Temp", (gui, poseStack, partialTick, width, height) ->
     {
         gui.setupOverlayRenderState(true, false);
-        ClientSettingsConfig CCS = ClientSettingsConfig.getInstance();
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.cameraEntity instanceof Player player && SHOW_BODY_TEMP)
@@ -148,7 +144,7 @@ public class Overlays
 
             int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
             int threatOffset =
-                    !CCS.iconBobbing() ? 0
+                    !CLIENT_CONFIG.iconBobbing() ? 0
                     : bobLevel == 2 ? ICON_BOB
                     : bobLevel == 3 ? player.tickCount % 2
                     : 0;
@@ -159,13 +155,13 @@ public class Overlays
             RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
             if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
             {
-                GuiComponent.blit(poseStack, (width / 2) - 5 + CCS.tempIconX(), height - 53 - threatOffset + CCS.tempIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.tempIconX(), height - 53 - threatOffset + CLIENT_CONFIG.tempIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
                 RenderSystem.enableBlend();
                 RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
             }
             // Render new icon on top of old icon (if blending)
             // Otherwise this is just the regular icon
-            GuiComponent.blit(poseStack, (width / 2) - 5 + CCS.tempIconX(), height - 53 - threatOffset + CCS.tempIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+            GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.tempIconX(), height - 53 - threatOffset + CLIENT_CONFIG.tempIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
             RenderSystem.setShaderColor(1, 1, 1, 1);
 
             // Render Readout
@@ -174,8 +170,8 @@ public class Overlays
             int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
             String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-            float x = (scaledWidth - font.width(s)) / 2f + CCS.tempReadoutX();
-            float y = scaledHeight - 31f - 10f + CCS.tempReadoutY();
+            float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.tempReadoutX();
+            float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.tempReadoutY();
 
             // Draw the outline
             font.draw(poseStack, s, x + 1, y, colorBG);
@@ -197,14 +193,15 @@ public class Overlays
             // Ensure player temp capability is stored
             if (PLAYER_CAP == null || entity.tickCount % 40 == 0)
             {
-                PLAYER_CAP = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCapability());
+                PLAYER_CAP = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(null);
             }
 
 
             /* World Temp */
 
-            SHOW_WORLD_TEMP = CSMath.isInRange(entity.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8)
-                           || entity.getOffhandItem().getItem()  == ModItems.THERMOMETER || !ConfigCache.getInstance().requireThermometer;
+            SHOW_WORLD_TEMP = !ConfigCache.getInstance().requireThermometer
+                           || CSMath.isInRange(entity.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8)
+                           || entity.getOffhandItem().getItem()  == ModItems.THERMOMETER;
 
             if (SHOW_WORLD_TEMP)
             {
@@ -215,7 +212,7 @@ public class Overlays
 
                 // Calculate the blended world temp for this tick
                 PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += (realTemp - WORLD_TEMP) / 10.0;
+                WORLD_TEMP += (realTemp - WORLD_TEMP) / 6.0;
 
                 // Update max/min offset
                 MAX_OFFSET = PLAYER_CAP.get(Types.MAX);
@@ -274,5 +271,12 @@ public class Overlays
         return
           absTemp < 100 ? (int) Math.floor(CSMath.blend(0, 3, absTemp, 0, 100)) * sign
         : (int) CSMath.blend(3, 7, absTemp, 100, 150) * sign;
+    }
+
+    public static void setBodyTemp(double temp)
+    {
+        BODY_TEMP = temp;
+        PREV_BODY_TEMP = temp;
+        BLEND_BODY_TEMP = (int) temp;
     }
 }
