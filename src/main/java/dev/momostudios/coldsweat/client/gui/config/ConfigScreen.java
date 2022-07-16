@@ -9,11 +9,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
 import java.text.DecimalFormat;

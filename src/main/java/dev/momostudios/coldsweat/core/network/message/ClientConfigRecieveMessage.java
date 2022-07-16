@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -55,7 +55,7 @@ public class ClientConfigRecieveMessage
                             Minecraft.getInstance().setScreen((Screen) configScreen.newInstance(Minecraft.getInstance().screen, message.configCache));
                         }
                     }
-                    catch (Exception e) {}
+                    catch (Exception ignored) {}
                 }
             }
         });

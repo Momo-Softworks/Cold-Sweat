@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;

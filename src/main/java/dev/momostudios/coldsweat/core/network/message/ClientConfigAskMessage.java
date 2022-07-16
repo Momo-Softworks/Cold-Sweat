@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -32,7 +32,7 @@ public class ClientConfigAskMessage
         context.enqueueWork(() ->
         {
             ConfigCache cache = new ConfigCache();
-            cache.writeValues(ColdSweatConfig.getInstance());
+            cache.readValues(ColdSweatConfig.getInstance());
 
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new ClientConfigRecieveMessage(cache, message.openMenu));
         });

@@ -1,4 +1,6 @@
-package dev.momostudios.coldsweat.config;
+package dev.momostudios.coldsweat.util.config;
+
+import dev.momostudios.coldsweat.config.ColdSweatConfig;
 
 public class ConfigCache
 {
@@ -29,10 +31,10 @@ public class ConfigCache
 
     public ConfigCache(ColdSweatConfig config)
     {
-        writeValues(config);
+        readValues(config);
     }
 
-    public void writeValues(ColdSweatConfig config)
+    public void readValues(ColdSweatConfig config)
     {
         difficulty = config.getDifficulty();
         maxTemp = config.getMaxTempHabitable();
