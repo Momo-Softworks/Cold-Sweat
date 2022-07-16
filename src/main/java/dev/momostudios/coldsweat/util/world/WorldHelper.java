@@ -5,26 +5,27 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class WorldHelper
 {
@@ -35,7 +36,7 @@ public class WorldHelper
      */
     public static int getGroundLevel(BlockPos pos, Level level)
     {
-        // If Minecraft's height calculation is correct, use that
+        // If Minecraft's height calculation is good enough, use that
         int mcHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
         if (pos.getY() >= mcHeight)
             return mcHeight;
@@ -99,65 +100,43 @@ public class WorldHelper
 
     public static boolean canSeeSky(Level world, BlockPos pos)
     {
-        return canSeeSky(world.getChunk(pos.getX() >> 4, pos.getZ() >> 4), world, pos);
+        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        return chunk == null || canSeeSky(chunk, world, pos);
     }
 
-    public static boolean canSeeSky(LevelChunk chunk, Level world, BlockPos pos)
+    public static boolean canSeeSky(LevelChunk chunk, Level level, BlockPos pos)
     {
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
-
-        if (chunk != null)
+        Vec3 startPos = new Vec3(pos.getX(), pos.getY(), pos.getZ());
+        ClipContext clipContext = new ClipContext(startPos, startPos.add(0, level.getHeight() - startPos.y, 0), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, null);
+        return !gatherRTResults(clipContext, (ctx, bpos) ->
         {
-            for (int i = 1; i < 319 - y; i++)
-            {
-                BlockState state = chunk.getBlockState(new BlockPos(x, y + i, z));
-
-                if (state.isAir())
-                {
-                    continue;
-                }
-
-                if (isFullSide(state, Direction.DOWN, pos.above(i), world) || isFullSide(state, Direction.UP, pos.above(i), world))
-                    return false;
-            }
-        }
-        return true;
+            BlockState rayState = chunk.getBlockState(bpos);
+            return isFullSide(rayState, Direction.DOWN, bpos, level) || isFullSide(rayState, Direction.UP, bpos, level);
+        }).contains(true);
     }
 
     public static boolean isSpreadBlocked(Level level, BlockPos pos, Direction toDir)
     {
         LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null) return true;
-
-        return isSpreadBlocked(chunk, chunk.getBlockState(pos), pos, toDir);
+        return chunk == null || isSpreadBlocked(level, chunk.getBlockState(pos), pos, toDir);
     }
 
-    public static boolean isSpreadBlocked(LevelChunk chunk, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean isSpreadBlocked(LevelChunk chunk, BlockPos pos, Direction toDir)
     {
-        PalettedContainer<BlockState> palette = chunk.getSection((pos.getY() >> 4) - chunk.getMinSection()).getStates();
-        BlockState state = palette.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
-
-        return isSpreadBlocked(chunk, state, pos, toDir);
+        return isSpreadBlocked(chunk.getLevel(), chunk.getBlockState(pos), pos, toDir);
     }
 
-    public static boolean isSpreadBlocked(@Nonnull LevelChunk chunk, BlockState state, @Nonnull BlockPos pos, @Nonnull Direction toDir)
+    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir)
     {
-        Level level = chunk.getLevel();
+        BlockPos offsetPos = pos.relative(toDir);
 
-        if (state.isAir() || state.getCollisionShape(level, pos.relative(toDir)).isEmpty())
+        if (state.isAir() || state.getCollisionShape(level, offsetPos).isEmpty())
             return false;
 
         if (state.isFaceSturdy(level, pos, toDir))
             return true;
 
-        return isFullSide(state, toDir, pos.relative(toDir), level) || state.isFaceSturdy(level, pos, toDir.getOpposite());
-    }
-
-    public static double distance(Vec3i pos1, Vec3i pos2)
-    {
-        return Math.sqrt(pos1.distSqr(pos2));
+        return isFullSide(state, toDir, offsetPos, level) || state.isFaceSturdy(level, pos, toDir.getOpposite());
     }
 
     public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level level)
@@ -229,7 +208,12 @@ public class WorldHelper
         int x = blockpos.getX();
         int y = blockpos.getY();
         int z = blockpos.getZ();
-        return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
+
+        try
+        {
+            return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
+        }
+        catch (Exception e) { return Blocks.AIR.defaultBlockState(); }
     }
 
     /**
@@ -244,5 +228,73 @@ public class WorldHelper
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
                 new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
+    }
+
+    public static <T> List<T> gatherRTResults(ClipContext context, BiFunction<ClipContext, BlockPos, T> rayTracer)
+    {
+        List<T> rayTraces = new ArrayList<>();
+        Vec3 startVec = context.getFrom();
+        Vec3 endVec = context.getTo();
+
+        if (!startVec.equals(endVec))
+        {
+            double d0 = Mth.lerp(-1.0E-7D, endVec.x, startVec.x);
+            double d1 = Mth.lerp(-1.0E-7D, endVec.y, startVec.y);
+            double d2 = Mth.lerp(-1.0E-7D, endVec.z, startVec.z);
+            double d3 = Mth.lerp(-1.0E-7D, startVec.x, endVec.x);
+            double d4 = Mth.lerp(-1.0E-7D, startVec.y, endVec.y);
+            double d5 = Mth.lerp(-1.0E-7D, startVec.z, endVec.z);
+            int i = Mth.floor(d3);
+            int j = Mth.floor(d4);
+            int k = Mth.floor(d5);
+            BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(i, j, k);
+
+            double d6 = d0 - d3;
+            double d7 = d1 - d4;
+            double d8 = d2 - d5;
+            int l = Mth.sign(d6);
+            int i1 = Mth.sign(d7);
+            int j1 = Mth.sign(d8);
+            double d9 = l == 0 ? Double.MAX_VALUE : (double) l / d6;
+            double d10 = i1 == 0 ? Double.MAX_VALUE : (double) i1 / d7;
+            double d11 = j1 == 0 ? Double.MAX_VALUE : (double) j1 / d8;
+            double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
+            double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
+            double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
+
+            while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
+            {
+                if (d12 < d13)
+                {
+                    if (d12 < d14)
+                    {
+                        i += l;
+                        d12 += d9;
+                    }
+                    else
+                    {
+                        k += j1;
+                        d14 += d11;
+                    }
+                }
+                else if (d13 < d14)
+                {
+                    j += i1;
+                    d13 += d10;
+                }
+                else
+                {
+                    k += j1;
+                    d14 += d11;
+                }
+
+                T result1 = rayTracer.apply(context, blockpos$mutable.set(i, j, k));
+                if (result1 != null)
+                {
+                    rayTraces.add(result1);
+                }
+            }
+        }
+        return rayTraces;
     }
 }
