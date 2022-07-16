@@ -2,10 +2,12 @@ package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,6 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -139,30 +143,77 @@ public class HearthBottomBlock extends Block implements EntityBlock
             if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
             {
                 ItemStack stack = player.getItemInHand(hand);
+
+                // If the held item is a bucket, try to extract fluids
+                if (player.getItemInHand(hand).getItem() == Items.BUCKET)
+                {
+                    int lavaFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.LAVA_BUCKET.getDefaultInstance()));
+                    if (te.getHotFuel() >= lavaFuel)
+                    {
+                        Vec3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
+                        Vec3 lavaSidePos = CSMath.getMiddle(pos)
+                                                     .add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
+
+                        if (rayTraceResult.getLocation().distanceTo(lavaSidePos) < 0.4)
+                        {
+                            if (lavaFuel > 0)
+                            {
+                                te.setHotFuel(te.getHotFuel() - lavaFuel);
+                                player.setItemInHand(hand, Items.LAVA_BUCKET.getDefaultInstance());
+                                worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
+                    }
+                    int waterFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.WATER_BUCKET.getDefaultInstance()));
+                    if (te.getColdFuel() >= waterFuel)
+                    {
+                        Vec3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
+                        Vec3 waterSidePos = CSMath.getMiddle(pos)
+                                                 .add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
+
+                        if (rayTraceResult.getLocation().distanceTo(waterSidePos) < 0.4)
+                        {
+                            if (waterFuel > 0)
+                            {
+                                te.setColdFuel(te.getColdFuel() - waterFuel);
+                                player.setItemInHand(hand, Items.WATER_BUCKET.getDefaultInstance());
+                                worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
+                    }
+                }
+
+                // If the held item is fuel, try to insert the fuel
                 int itemFuel = HearthBlockEntity.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
 
                 if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthBlockEntity.MAX_FUEL)
                 {
+                    // Consume the item if not in creative
                     if (!player.isCreative())
                     {
                         if (stack.hasContainerItem())
                         {
                             ItemStack container = stack.getContainerItem();
-                            stack.shrink(1);
-                            player.getInventory().add(container);
+                            player.setItemInHand(hand, container);
                         }
                         else
                         {
                             stack.shrink(1);
                         }
                     }
+                    // Add the fuel
                     te.addFuel(itemFuel);
 
-
+                    // Play the fuel filling sound
                     worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
+                // If the held item is fuel, try to insert the fuel
                 else
                 {
                     NetworkHooks.openGui((ServerPlayer) player, te, pos);
