@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.api.temperature.block_effect;
+package dev.momostudios.coldsweat.api.temperature.block_temp;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -7,9 +7,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public class NetherPortalBlockEffect extends BlockEffect
+public class NetherPortalBlockTemp extends BlockTemp
 {
-    public NetherPortalBlockEffect()
+    public NetherPortalBlockTemp()
     {
         super(Blocks.NETHER_PORTAL);
     }

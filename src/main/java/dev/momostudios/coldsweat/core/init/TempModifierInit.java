@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.init;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.event.core.BlockEffectRegisterEvent;
+import dev.momostudios.coldsweat.api.event.core.BlockTempRegisterEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
-import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
+import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
-import dev.momostudios.coldsweat.api.temperature.block_effect.*;
+import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
@@ -31,7 +31,7 @@ public class TempModifierInit
     public static void registerTempModifiers(WorldEvent.Load event)
     {
         TempModifierRegistry.flush();
-        BlockEffectRegistry.flush();
+        BlockTempRegistry.flush();
 
         try { MinecraftForge.EVENT_BUS.post(new TempModifierRegisterEvent()); }
         catch (Exception e)
@@ -40,28 +40,28 @@ public class TempModifierInit
             e.printStackTrace();
         }
 
-        try { MinecraftForge.EVENT_BUS.post(new BlockEffectRegisterEvent()); }
+        try { MinecraftForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
         catch (Exception e)
         {
-            ColdSweat.LOGGER.error("Registering BlockEffects failed!");
+            ColdSweat.LOGGER.error("Registering BlockTemps failed!");
             e.printStackTrace();
         }
     }
 
-    // Register BlockEffects
+    // Register BlockTemps
     @SubscribeEvent
-    public static void registerBlockEffects(BlockEffectRegisterEvent event)
+    public static void registerBlockTemps(BlockTempRegisterEvent event)
     {
-        event.register(new LavaBlockEffect());
-        event.register(new FurnaceBlockEffect());
-        event.register(new CampfireBlockEffect());
-        event.register(new IceboxBlockEffect());
-        event.register(new BoilerBlockEffect());
-        event.register(new SoulCampfireBlockEffect());
-        event.register(new NetherPortalBlockEffect());
+        event.register(new LavaBlockTemp());
+        event.register(new FurnaceBlockTemp());
+        event.register(new CampfireBlockTemp());
+        event.register(new IceboxBlockTemp());
+        event.register(new BoilerBlockTemp());
+        event.register(new SoulCampfireBlockTemp());
+        event.register(new NetherPortalBlockTemp());
 
-        // Auto-generate BlockEffects from config
-        for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockEffects())
+        // Auto-generate BlockTemps from config
+        for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockTemps())
         {
             try
             {
@@ -70,7 +70,7 @@ public class TempModifierInit
                 || !(effectBuilder.get(1) instanceof Number configTemp)
                 || !(effectBuilder.get(2) instanceof Number configRange))
                 {
-                    throw new Exception("Invalid BlockEffect format");
+                    throw new Exception("Invalid BlockTemp format");
                 }
 
                 String[] blockIDs = ((String) effectBuilder.get(0)).split(",");
@@ -94,7 +94,7 @@ public class TempModifierInit
                 }
 
                 event.register(
-                        new BlockEffect(effectBlocks.toArray(new Block[0]))
+                        new BlockTemp(effectBlocks.toArray(new Block[0]))
                         {
                             @Override
                             public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
@@ -117,7 +117,7 @@ public class TempModifierInit
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Invalid configuration for BlockEffects in config file \"main.toml\"");
+                ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
                 e.printStackTrace();
                 break;
             }

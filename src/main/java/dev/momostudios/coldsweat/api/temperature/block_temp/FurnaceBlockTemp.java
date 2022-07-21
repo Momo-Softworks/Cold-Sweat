@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.api.temperature.block_effect;
+package dev.momostudios.coldsweat.api.temperature.block_temp;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.core.BlockPos;
@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class FurnaceBlockEffect extends BlockEffect
+public class FurnaceBlockTemp extends BlockTemp
 {
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)

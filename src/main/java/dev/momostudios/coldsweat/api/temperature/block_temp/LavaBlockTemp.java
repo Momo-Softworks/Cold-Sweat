@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.api.temperature.block_effect;
+package dev.momostudios.coldsweat.api.temperature.block_temp;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import net.minecraft.core.BlockPos;
@@ -8,9 +8,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.material.FluidState;
 
-public class LavaBlockEffect extends BlockEffect
+public class LavaBlockTemp extends BlockTemp
 {
-    public LavaBlockEffect()
+    public LavaBlockTemp()
     {
         super(Blocks.LAVA);
     }
@@ -29,7 +29,7 @@ public class LavaBlockEffect extends BlockEffect
 
     @Override
     public double maxEffect() {
-        return CSMath.convertUnits(400, Temperature.Units.F, Temperature.Units.MC, false);
+        return CSMath.convertUnits(300, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override

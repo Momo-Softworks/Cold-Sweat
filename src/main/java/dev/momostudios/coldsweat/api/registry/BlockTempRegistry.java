@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.api.registry;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
+import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
@@ -10,11 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class BlockEffectRegistry
+public class BlockTempRegistry
 {
-    public static final HashSet<BlockEffect> BLOCK_EFFECTS = new HashSet<>();
-    public static final HashMap<Block, BlockEffect> MAPPED_BLOCKS = new HashMap<>();
-    public static final BlockEffect DEFAULT_BLOCK_EFFECT = new BlockEffect() {
+    public static final HashSet<BlockTemp> BLOCK_EFFECTS = new HashSet<>();
+    public static final HashMap<Block, BlockTemp> MAPPED_BLOCKS = new HashMap<>();
+    public static final BlockTemp DEFAULT_BLOCK_EFFECT = new BlockTemp() {
         @Override
         public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
         {
@@ -22,21 +22,21 @@ public class BlockEffectRegistry
         }
     };
 
-    public static void register(BlockEffect blockEffect)
+    public static void register(BlockTemp blockTemp)
     {
-        blockEffect.validBlocks.forEach(block ->
+        blockTemp.validBlocks.forEach(block ->
         {
             if (MAPPED_BLOCKS.containsKey(block))
             {
-                ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockEffect ({})! Skipping BlockEffect {}...",
-                        block.getRegistryName().toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockEffect.getClass().getSimpleName());
+                ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockTemp ({})! Skipping BlockTemp {}...",
+                        block.getRegistryName().toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockTemp.getClass().getSimpleName());
             }
             else
             {
-                MAPPED_BLOCKS.put(block, blockEffect);
+                MAPPED_BLOCKS.put(block, blockTemp);
             }
         });
-        BLOCK_EFFECTS.add(blockEffect);
+        BLOCK_EFFECTS.add(blockTemp);
     }
 
     public static void flush()
@@ -44,7 +44,7 @@ public class BlockEffectRegistry
         MAPPED_BLOCKS.clear();
     }
 
-    public static BlockEffect getEntryFor(BlockState blockstate)
+    public static BlockTemp getEntryFor(BlockState blockstate)
     {
         Block block = blockstate.getBlock();
         return MAPPED_BLOCKS.computeIfAbsent(block, (block2) ->
@@ -53,11 +53,11 @@ public class BlockEffectRegistry
             {
                 return DEFAULT_BLOCK_EFFECT;
             }
-            for (BlockEffect blockEffect : BLOCK_EFFECTS)
+            for (BlockTemp blockTemp : BLOCK_EFFECTS)
             {
-                if (blockEffect.hasBlock(block))
+                if (blockTemp.hasBlock(block))
                 {
-                    return blockEffect;
+                    return blockTemp;
                 }
             }
 

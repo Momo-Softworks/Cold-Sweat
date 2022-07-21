@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.api.event.core;
 
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
-import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;

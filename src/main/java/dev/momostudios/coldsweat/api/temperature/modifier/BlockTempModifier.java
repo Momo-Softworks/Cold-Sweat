@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import com.mojang.math.Vector3d;
-import dev.momostudios.coldsweat.api.registry.BlockEffectRegistry;
+import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.api.temperature.block_effect.BlockEffect;
+import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -30,7 +30,7 @@ public class BlockTempModifier extends TempModifier
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
-        Map<BlockEffect, Double> effectAmounts = new HashMap<>();
+        Map<BlockTemp, Double> effectAmounts = new HashMap<>();
         ChunkPos playerChunkPos = new ChunkPos((player.blockPosition().getX()) >> 4, (player.blockPosition().getZ()) >> 4);
 
         if (player.tickCount % 200 == 0)
@@ -58,15 +58,15 @@ public class BlockTempModifier extends TempModifier
 
                         if (state.isAir()) continue;
 
-                        // Get the BlockEffect associated with the block
-                        BlockEffect be = BlockEffectRegistry.getEntryFor(state);
+                        // Get the BlockTemp associated with the block
+                        BlockTemp be = BlockTempRegistry.getEntryFor(state);
 
-                        if (be == null || be.equals(BlockEffectRegistry.DEFAULT_BLOCK_EFFECT)) continue;
+                        if (be == null || be.equals(BlockTempRegistry.DEFAULT_BLOCK_EFFECT)) continue;
 
                         // Get the amount that this block has affected the player so far
                         double effectAmount = effectAmounts.getOrDefault(be, 0.0);
 
-                        // Is totalTemp within the bounds of the BlockEffect's min/max allowed temps?
+                        // Is totalTemp within the bounds of the BlockTemp's min/max allowed temps?
                         if (CSMath.isBetween(effectAmount, be.minEffect(), be.maxEffect()))
                         {
                             // Get Vector positions of the centers of the source block and player
@@ -95,8 +95,8 @@ public class BlockTempModifier extends TempModifier
                             double blockDampening = blocks.get();
 
                             // Store this block type's total effect on the player
-                            double blockEffectTotal = effectAmount + tempToAdd / (blockDampening * 2 + 1);
-                            effectAmounts.put(be, CSMath.clamp(blockEffectTotal, be.minEffect(), be.maxEffect()));
+                            double blockTempTotal = effectAmount + tempToAdd / (blockDampening * 2 + 1);
+                            effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
                         }
                     }
                     catch (Exception ignored) {
@@ -109,9 +109,9 @@ public class BlockTempModifier extends TempModifier
         // Add the effects of all the blocks together and return the result
         return temp ->
         {
-            for (Map.Entry<BlockEffect, Double> effect : effectAmounts.entrySet())
+            for (Map.Entry<BlockTemp, Double> effect : effectAmounts.entrySet())
             {
-                BlockEffect be = effect.getKey();
+                BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
                 if (!CSMath.isInRange(temp.get(), min, max)) continue;
