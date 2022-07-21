@@ -45,7 +45,7 @@
 - Fixed the /temperature command sending an incorrect message when setting another player's temperature
 
 - Technical Changes:
-    - BlockEffects and TempModifiers are now stored in a map instead of a list
+    - BlockTemps and TempModifiers are now stored in a map instead of a list
         - Massive performance uplift
         - Easier to store/lookup elements by their ID/block
     - Updates to TempModifiers
@@ -61,8 +61,8 @@
             - Cancellable
             - Allows for changing the number of modifiers removed
         - TempModifierEvent.Init
-            - Called when the registry of TempModifiers or BlockEffects is being built
-            - Allows for injection of custom TempModifiers and BlockEffects
+            - Called when the registry of TempModifiers or BlockTemps is being built
+            - Allows for injection of custom TempModifiers and BlockTemps
             - If you call this event manually, use getPool().flush() beforehand to prevent duplicate entries (lag)
     - The Hearth now uses the capability system instead of NBT
             - This should increase performance and prevent issues with the NBT data limit on some servers
@@ -210,7 +210,7 @@ Fixes:
 - Fixed temperature configs not working properly on servers
 
 Technical Changes:
-- BlockEffects and TempModifiers are now stored in a map instead of a list
+- BlockTemps and TempModifiers are now stored in a map instead of a list
     - Massive performance uplift
     - Easier to store/lookup elements by their ID/block
 - Updates to TempModifiers
@@ -233,8 +233,8 @@ Technical Changes:
         - Cancellable
         - Allows for changing the number of modifiers removed
     - TempModifierEvent.Init
-        - Called when the registry of TempModifiers or BlockEffects is being built
-        - Allows for injection of custom TempModifiers and BlockEffects
+        - Called when the registry of TempModifiers or BlockTemps is being built
+        - Allows for injection of custom TempModifiers and BlockTemps
         - If you call this event manually, use getPool().flush() beforehand to prevent duplicate entries (lag)
     - TempModifierEvent.Tick
         - Fired when a TempModifier's value is called
@@ -421,14 +421,14 @@ Fixes:
 - Fixed TempModifiers ticking on the clientside when the game is paused
 
 Technical Changes:
-- All Temperature-related classes have been moved to a new "api" package (including TempModifiers, BlockEffects, etc.)
+- All Temperature-related classes have been moved to a new "api" package (including TempModifiers, BlockTemps, etc.)
 - Custom events have been moved to the "api" package as well
 - Two new Temperature types have been added:
     - HOTTEST: Controls the maximum bearable temperature for the entity
     - COLDEST: Controls the minimum bearable temperature for the entity
     - These are an offset applied to their respective values in the config
     - Can be affected by TempModifiers, manipulated using PlayerHelper, etc.
-- BlockEffects can now define which blocks they are attached to in the class's constructor instead of using hasBlock()
+- BlockTemps can now define which blocks they are attached to in the class's constructor instead of using hasBlock()
     - Please use this when possible, as it is dramatically faster
 
 
@@ -446,12 +446,12 @@ Fixes:
 Technical Changes:
 - Renamed PlayerHelper to TempHelper
       - All non-temperature-related methods have been moved from TempHelper to a new PlayerHelper class
-- Events and methods for registering TempModifiers and BlockEffects have been moved/renamed to make it more intuitive
+- Events and methods for registering TempModifiers and BlockTemps have been moved/renamed to make it more intuitive
 - TempModifier arguments can now be cast in a cleaner way with type arguments
       - ex: this.<Double>getArgument("my_argument") casts the returned argument to a double (CANNOT cast to primitives)
       - Because of this, the old getArgument(String id, Class clazz) method has been removed
       - This should also clear up a lot of issues with using primitives vs. classes (i.e. int vs. Integer)
-- When registering TempModifiers/BlockEffects, the event is automatically wrapped in a try/catch block that alerts the user that registration has failed
+- When registering TempModifiers/BlockTemps, the event is automatically wrapped in a try/catch block that alerts the user that registration has failed
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ Fixes:
 
 Technical Changes:
 - Backend parity between versions (especially for API-related things)
-- Moved some BlockEffects to the config (ice, fire, magma blocks, and some others)
+- Moved some BlockTemps to the config (ice, fire, magma blocks, and some others)
 - Renamed HOTTEST and COLDEST temperature types to simply "MAX" and "MIN"
 - Moved MixinWorld (1.16.5)/MixinLevel (1.18.x) to Forge event system (might help with problems importing Cold Sweat into a workspace)
 
@@ -545,6 +545,87 @@ Technical Changes:
 - Optimized how blocks emit temperature
 - Optimized how the Icebox/Boiler consume fuel
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b05a
+- Powder snow now decreases the player's body temperature by up to -20 when inside (1.18)
+- The Hellspring Lamp item is now fire-resistant
+- Improved styling of the readout when body temperature is above 100
+- The Hearth's air particles are now enabled by default
+
+Fixes:
+- Fixed crash that occurred when getting the player's depth
+- Fixed duplication glitch with waterskins
+- Fixed BlockTemps affecting temperature inconsistently in extreme conditions
+- Fixed body/world temperature gauges rendering over chat text
+- Fixed Hellspring Lamp sometimes being twice as effective
+- Fixed fuel items giving a stack's worth of fuel
+- Fixed bug that caused players' world temperatures to be "linked" with each other (again)
+- Fixed TempModifier arguments not being loaded from NBT
+
+Technical Changes:
+- Seasonal temperatures can now be configured in world-settings.toml
+      - Seasons are broken up into 3 "sub-seasons," each with its own temperature
+      - This section of the config will be automatically generated when Serene Seasons is detected
+- Most config options for blocks/items/biomes now accept tags
+      - Marked with a '#' followed by the tag (i.e. #minecraft:logs)
+      - Can be used in place of a block/item/biome ID
+      - All blocks/items/biomes with the tag will be affected by the config option
+- Configuring custom BlockTemps is now more intuitive
+      - Merged minEffect/maxEffect into a single "maxEffect" argument
+- Most configs can now be updated by reloading the world instead of restarting the game
+      - Servers will still have to restart for values to update
+- Improved reliability of the /temperature command
+      - Works properly in command blocks
+      - Works correctly on other players
+      - Sends the correct response message
+      - Many times more efficient
+      - Respects sendCommandFeedback and logAdminCommands gamerules
+- Waterskins now preserve NBT data when used
+- Merged UI elements that had multiple image files into one image file to preserve space & clean up file structure
+      - Affected: Hellspring lamp fuel gauge, World temp. gauge, Body temp. gauge
+- UI elements are now rendered through a more efficient method (1.18)
+- Improved documentation in some config files; especially for BlockTemps
+- Improved the layout of some config files
+      - Config files will be automatically reformatted. Some data may be lost
+- Optimized how the Insulated effect works
+- Optimized how TempModifiers are applied/removed
+- Optimized how blocks affect temperature
+- Optimized how biomes affect temperature
+- Reduced the size of config-related packets, which should help with network congestion on larger servers
+- The algorithm for getting the player's depth no longer relies on cave_air blocks (1.18)
+
+Translation Changes:
+- Added Spanish (España) translation (@Criber_761 on Discord)
+- Fixed some spelling mistakes in Russian (@git-dopi on GitHub)
+- commands.cold_sweat.temperature.set.self.result (removed)
+- commands.cold_sweat.temperature.set.other.result -> commands.cold_sweat.temperature.set.single.result
+- commands.cold_sweat.temperature.set.all.result -> commands.cold_sweat.temperature.set.many.result
+- Command messages are now better suited for languages with different sentence structures
+- Removed unused translation keys in some languages
+- Split sleep prevention messages into 4 separate translation keys (world/body, hot/cold)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b05b
+- Fuel can now be extracted from the Hearth with an empty bucket
+- Gave the Boiler a slight redesign and an animated texture when lit
+- Added ambient sounds to the boiler when lit
+- The temperature of Lava is now capped at 300 degrees for balancing & performance reasons
+
+Fixes:
+- Fixed crash when toggling particles in the Hearth's GUI
+- Fixed crash when a world is loaded without a Cold Sweat-compatible mod that was previously there
+- Fixed the Hearth consuming cold fuel unnecessarily
+- Fixed temperature being slow to react in some cases
+- Fixed body temperature not working properly in some cases
+
+Technical Changes:
+- Removed some unnecessary mixins
+- Reworked TempModifiers to be more consistent and not dependent on other TempModifiers
+      - This is achieved by returning a function (Function<Temperature, Temperature>) instead of a value (Temperature)
+      - Returning a function makes its result independent of any other TempModifier's result
+- Greatly optimized the performance of temperature-affecting blocks
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
