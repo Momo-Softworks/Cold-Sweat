@@ -30,10 +30,10 @@ public class AddTempModifiers
             {
                 TempHelper.addModifier(player, new BiomeTempModifier().tickRate(8),  Temperature.Types.WORLD, false);
                 TempHelper.addModifier(player, new TimeTempModifier().tickRate(20),  Temperature.Types.WORLD, false);
-                TempHelper.addModifier(player, new BlockTempModifier().tickRate(5),  Temperature.Types.WORLD, false);
                 if (ModList.get().isLoaded("sereneseasons"))
                     TempHelper.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(20), Temperature.Types.WORLD, false);
                 TempHelper.addModifier(player, new DepthTempModifier().tickRate(10), Temperature.Types.WORLD, false);
+                TempHelper.addModifier(player, new BlockTempModifier().tickRate(5),  Temperature.Types.WORLD, false);
             }, 10);
         }
     }
