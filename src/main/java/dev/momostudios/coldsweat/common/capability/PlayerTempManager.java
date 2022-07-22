@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.entity.TempHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -76,6 +77,12 @@ public class PlayerTempManager
                 serverPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                 {
                     cap.tick(serverPlayer);
+
+                    for (Temperature.Types type : PlayerTempCap.VALID_MODIFIER_TYPES)
+                    {
+                        cap.getModifiers(type).removeIf(modifier ->
+                                modifier.setTicksExisted(modifier.getTicksExisted() + 1) > modifier.getExpireTime() && modifier.getExpireTime() != -1);
+                    }
 
                     if (serverPlayer.tickCount % 100 == 0)
                     {

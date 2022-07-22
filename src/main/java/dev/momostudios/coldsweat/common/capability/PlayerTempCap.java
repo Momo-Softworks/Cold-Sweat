@@ -19,7 +19,6 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
@@ -233,21 +232,18 @@ public class PlayerTempCap implements ITemperatureCap
     private Temperature tickModifiers(Player player, Temperature temp, Temperature.Types type)
     {
         List<TempModifier> modifiers = getModifiers(type);
-        AtomicReference<Temperature> newTemp = new AtomicReference<>(temp);
+        Temperature newTemp = new Temperature(temp.get());
 
-        modifiers.removeIf(modifier ->
+        for (TempModifier modifier : modifiers)
         {
             // Apply the TempModifier's function to the Temperature
             // If the modifier's tick rate lines up, calculate the new function
             newTemp.set(player.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
-                    ? newTemp.get().with(modifier, player)
-                    : modifier.getFunction().apply(newTemp.get()));
+                    ? newTemp.with(modifier, player)
+                    : modifier.getFunction().apply(newTemp));
+        }
 
-            modifier.setTicksExisted(modifier.getTicksExisted() + 1);
-            return modifier.getTicksExisted() > modifier.getExpireTime() && modifier.getExpireTime() != -1;
-        });
-
-        return newTemp.get();
+        return newTemp;
     }
 
     public void copy(PlayerTempCap cap)

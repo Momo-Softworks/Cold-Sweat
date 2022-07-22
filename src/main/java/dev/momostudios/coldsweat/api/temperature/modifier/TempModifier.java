@@ -141,9 +141,9 @@ public abstract class TempModifier
     {
         return ticksExisted;
     }
-    public void setTicksExisted(int ticks)
+    public int setTicksExisted(int ticks)
     {
-        ticksExisted = ticks;
+        return ticksExisted = ticks;
     }
 
     /**
