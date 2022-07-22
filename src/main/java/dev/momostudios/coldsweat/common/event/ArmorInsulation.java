@@ -27,66 +27,53 @@ public class ArmorInsulation
     @SubscribeEvent
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END)
+        Player player = event.player;
+        if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
         {
-            Player player = event.player;
-            if (player.tickCount % 10 == 0)
+            Map<Item, Number> insulatingArmors = INSULATING_ARMORS.get();
+
+            int insulation = 0;
+            for (EquipmentSlot slot : EquipmentSlot.values())
             {
-                Map<Item, Number> insulatingArmors = INSULATING_ARMORS.get();
+                if (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) continue;
 
-                ItemStack headItem = player.getItemBySlot(EquipmentSlot.HEAD);
-                ItemStack bodyItem = player.getItemBySlot(EquipmentSlot.CHEST);
-                ItemStack legsItem = player.getItemBySlot(EquipmentSlot.LEGS);
-                ItemStack feetItem = player.getItemBySlot(EquipmentSlot.FEET);
-
-                int leatherMultiplier = 0;
-                // The defense of armor pieces adds to the insulation
-                if (headItem.getItem() instanceof ArmorItem helmet)     leatherMultiplier += helmet.getDefense();
-                if (bodyItem.getItem() instanceof ArmorItem chestplate) leatherMultiplier += chestplate.getDefense();
-                if (legsItem.getItem() instanceof ArmorItem leggings)   leatherMultiplier += leggings.getDefense();
-                if (feetItem.getItem() instanceof ArmorItem boots)      leatherMultiplier += boots.getDefense();
-
-                /* Helmet */
-                int headInsulation = insulatingArmors.getOrDefault(headItem.getItem(), 0).intValue();
-
-                if (headInsulation > 0) leatherMultiplier += headInsulation;
-                else if (headItem.getOrCreateTag().getBoolean("insulated"))
+                ItemStack armorStack = player.getItemBySlot(slot);
+                if (armorStack.getItem() instanceof ArmorItem armorItem)
                 {
-                    leatherMultiplier += 3;
-                }
+                    // Add the armor's defense value to the insulation value.
+                    insulation += armorItem.getDefense();
 
-                /* Chestplate */
-                int chestInsulation = insulatingArmors.getOrDefault(bodyItem.getItem(), 0).intValue();
-
-                if (chestInsulation > 0) leatherMultiplier += chestInsulation;
-                else if (bodyItem.getOrCreateTag().getBoolean("insulated"))
-                {
-                    leatherMultiplier += 5;
-                }
-
-                /* Leggings */
-                int legsInsulation = insulatingArmors.getOrDefault(legsItem.getItem(), 0).intValue();
-
-                if (legsInsulation > 0) leatherMultiplier += legsInsulation;
-                else if (legsItem.getOrCreateTag().getBoolean("insulated"))
-                {
-                    leatherMultiplier += 5;
-                }
-
-                /* Boots */
-                int feetInsulation = insulatingArmors.getOrDefault(feetItem.getItem(), 0).intValue();
-
-                if (feetInsulation > 0) leatherMultiplier += feetInsulation;
-                else if (feetItem.getOrCreateTag().getBoolean("insulated"))
-                {
-                    leatherMultiplier += 5;
-                }
-
-                if (leatherMultiplier > 0)
-                {
-                    TempHelper.addModifier(player, new InsulationTempModifier(leatherMultiplier).expires(10), Temperature.Types.RATE, false);
+                    // Add the armor's intrinsic insulation value (defined in configs)
+                    // Mutually exclusive with Sewing Table insulation
+                    Number insulationValue = insulatingArmors.get(armorStack.getItem());
+                    if (insulationValue != null)
+                    {
+                        insulation += insulationValue.intValue();
+                    }
+                    // Add the armor's insulation value from the Sewing Table
+                    else if (armorStack.getOrCreateTag().getBoolean("insulated"))
+                    {
+                        insulation += getSlotWeight(slot);
+                    }
                 }
             }
+
+            if (insulation > 0)
+            {
+                TempHelper.replaceModifier(player, new InsulationTempModifier(insulation).expires(10).tickRate(10), Temperature.Types.RATE);
+            }
         }
+    }
+
+    static int getSlotWeight(EquipmentSlot slot)
+    {
+        return switch (slot)
+        {
+            case HEAD -> 4;
+            case CHEST -> 7;
+            case LEGS -> 6;
+            case FEET -> 3;
+            default -> 0;
+        };
     }
 }
