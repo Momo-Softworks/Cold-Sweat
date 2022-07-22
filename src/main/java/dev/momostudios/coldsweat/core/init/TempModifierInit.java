@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -26,9 +26,9 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class TempModifierInit
 {
-    // Trigger TempModifierEvent.Init
+    // Trigger registry events
     @SubscribeEvent
-    public static void registerTempModifiers(WorldEvent.Load event)
+    public static void registerTempModifiers(ServerStartedEvent event)
     {
         TempModifierRegistry.flush();
         BlockTempRegistry.flush();
