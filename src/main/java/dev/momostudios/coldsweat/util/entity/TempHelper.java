@@ -19,6 +19,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -50,6 +51,19 @@ public class TempHelper
     }
 
     /**
+     * @return The first modifier of the given class that is applied to the player.
+     */
+    public static TempModifier getModifier(Player player, Temperature.Types type, Class<? extends TempModifier> modClass)
+    {
+        AtomicReference<TempModifier> mod = new AtomicReference<>();
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        {
+            mod.set(cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst().orElse(null));
+        });
+        return mod.get();
+    }
+
+    /**
      * Adds the given modifier to the player.<br>
      * If duplicates are disabled and the modifier already exists, this action will fail.
      * @param allowDuplicates allows or disallows duplicate TempModifiers to be applied
@@ -67,7 +81,7 @@ public class TempHelper
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void insertModifier(Player player, TempModifier modifier, Temperature.Types type)
+    public static void replaceModifier(Player player, TempModifier modifier, Temperature.Types type)
     {
         addModifier(player, modifier, type, 1, true);
     }

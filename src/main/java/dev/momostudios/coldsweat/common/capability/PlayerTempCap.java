@@ -156,15 +156,18 @@ public class PlayerTempCap implements ITemperatureCap
 
         double tempRate = 7.0d;
 
-        if (worldTemp > maxTemp || worldTemp < minTemp)
+        int magnitude = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
+        if (magnitude != 0)
         {
-            boolean isOver = worldTemp > maxTemp;
-            double difference = Math.abs(worldTemp - (isOver ? maxTemp : minTemp));
-            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * (isOver ? 1 : -1));
+            double difference = Math.abs(worldTemp - CSMath.clamp(worldTemp, minTemp, maxTemp));
+            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * magnitude);
             coreTemp = coreTemp.add(tickModifiers(player, changeBy, Temperature.Types.RATE));
         }
-        // Return the player's body temperature to 0
-        coreTemp = coreTemp.add(getBodyReturnRate(worldTemp, coreTemp.get() > 0 ? maxTemp : minTemp, config.rate, coreTemp.get()));
+        if (magnitude != CSMath.getSign(coreTemp.get()))
+        {
+            // Return the player's body temperature to 0
+            coreTemp = coreTemp.add(getBodyReturnRate(worldTemp, coreTemp.get() > 0 ? maxTemp : minTemp, config.rate, coreTemp.get()));
+        }
 
         if (ticksSinceSync++ >= 5
         && ((int) syncedValues[0] != (int) coreTemp.get()

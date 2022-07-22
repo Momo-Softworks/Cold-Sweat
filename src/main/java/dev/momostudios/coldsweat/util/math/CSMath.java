@@ -189,10 +189,18 @@ public class CSMath
         catch (Throwable ignored) {}
     }
 
-    public static int getSign(Number value)
+    public static int getSign(double value)
     {
-        if (value.doubleValue() == 0) return 0;
-        return (int) (value.doubleValue() / Math.abs(value.doubleValue()));
+        if (value == 0) return 0;
+        return (int) (value / Math.abs(value));
+    }
+
+    /**
+     * Returns 1 if the given value is above the range, -1 if it is below the range, and 0 if it is within the range.
+     */
+    public static int getSignForRange(double value, double min, double max)
+    {
+        return value > max ? 1 : value < min ? -1 : 0;
     }
 
     public static double crop(double value, int sigFigs)
