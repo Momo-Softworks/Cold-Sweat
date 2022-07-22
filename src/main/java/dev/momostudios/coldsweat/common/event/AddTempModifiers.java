@@ -48,6 +48,12 @@ public class AddTempModifiers
         {
             TempHelper.addModifier(player, new WaterTempModifier(0.01), Temperature.Types.WORLD, false);
         }
+
+        // Powder snow
+        if (!player.level.isClientSide && player.tickCount % 5 == 0 && player.getTicksFrozen() > 0)
+        {
+            TempHelper.replaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Types.BASE);
+        }
     }
 
     @SubscribeEvent
@@ -59,7 +65,7 @@ public class AddTempModifiers
             if (event instanceof PotionEvent.PotionAddedEvent)
             {
                 MobEffectInstance effect = event.getPotionEffect();
-                TempHelper.insertModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Types.WORLD);
+                TempHelper.replaceModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Types.WORLD);
             }
             else if (event instanceof PotionEvent.PotionRemoveEvent || event instanceof PotionEvent.PotionExpiryEvent)
             {
