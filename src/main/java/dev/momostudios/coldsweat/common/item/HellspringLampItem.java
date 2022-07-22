@@ -57,15 +57,19 @@ public class HellspringLampItem extends Item
         if (entityIn instanceof Player player && !worldIn.isClientSide)
         {
             double max = ConfigCache.getInstance().maxTemp;
-            double temp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+            double temp;
 
-            if ((isSelected || player.getOffhandItem() == stack) && temp > max && getFuel(stack) > 0
+            // Is selected
+            if ((isSelected || player.getOffhandItem() == stack)
+            // Is world temp more than max
+            && (temp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get()) > max && getFuel(stack) > 0
+            // Is in valid dimension
             && VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString()))
             {
                 // Drain fuel
                 if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
                 {
-                    addFuel(stack, -0.02d * CSMath.clamp(temp - ConfigCache.getInstance().maxTemp, 1d, 3d));
+                    addFuel(stack, -0.02d * CSMath.clamp(temp - max, 1d, 3d));
                 }
 
                 // Give effect to nearby players
