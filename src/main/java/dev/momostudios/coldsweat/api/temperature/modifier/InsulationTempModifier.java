@@ -20,7 +20,8 @@ public class InsulationTempModifier extends TempModifier
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
-        return temp -> temp.divide(Math.max(1d, this.<Integer>getArgument("warmth") / 10d));
+        double warmth = Math.max(1d, this.<Integer>getArgument("warmth") / 10d);
+        return temp -> temp.divide(warmth);
     }
 
     public String getID()
