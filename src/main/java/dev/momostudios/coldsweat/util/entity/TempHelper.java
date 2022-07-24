@@ -29,12 +29,12 @@ public class TempHelper
     /**
      * Returns the player's temperature of the specified type.
      */
-    public static Temperature getTemperature(Player player, Temperature.Types type)
+    public static Temperature getTemperature(Player player, Temperature.Type type)
     {
         return new Temperature(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.get(type)).orElse(0.0));
     }
 
-    public static void setTemperature(Player player, Temperature value, Temperature.Types type)
+    public static void setTemperature(Player player, Temperature value, Temperature.Type type)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
@@ -42,7 +42,7 @@ public class TempHelper
         });
     }
 
-    public static void addTemperature(Player player, Temperature value, Temperature.Types type)
+    public static void addTemperature(Player player, Temperature value, Temperature.Type type)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
@@ -53,7 +53,7 @@ public class TempHelper
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
-    public static TempModifier getModifier(Player player, Temperature.Types type, Class<? extends TempModifier> modClass)
+    public static TempModifier getModifier(Player player, Temperature.Type type, Class<? extends TempModifier> modClass)
     {
         AtomicReference<TempModifier> mod = new AtomicReference<>();
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
@@ -69,7 +69,7 @@ public class TempHelper
      * @param allowDuplicates allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, boolean allowDuplicates)
+    public static void addModifier(Player player, TempModifier modifier, Temperature.Type type, boolean allowDuplicates)
     {
         addModifier(player, modifier, type, allowDuplicates ? Integer.MAX_VALUE : 1, false);
     }
@@ -81,12 +81,12 @@ public class TempHelper
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void replaceModifier(Player player, TempModifier modifier, Temperature.Types type)
+    public static void replaceModifier(Player player, TempModifier modifier, Temperature.Type type)
     {
         addModifier(player, modifier, type, 1, true);
     }
 
-    public static void addModifier(Player player, TempModifier modifier, Temperature.Types type, int maxCount, boolean replace)
+    public static void addModifier(Player player, TempModifier modifier, Temperature.Type type, int maxCount, boolean replace)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, player, type, maxCount);
         MinecraftForge.EVENT_BUS.post(event);
@@ -130,7 +130,7 @@ public class TempHelper
      * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifiers(Player player, Temperature.Types type, int count, Predicate<TempModifier> condition)
+    public static void removeModifiers(Player player, Temperature.Type type, int count, Predicate<TempModifier> condition)
     {
         AtomicInteger removed = new AtomicInteger(0);
 
@@ -161,7 +161,7 @@ public class TempHelper
         });
     }
 
-    public static void removeModifiers(Player player, Temperature.Types type, Predicate<TempModifier> condition)
+    public static void removeModifiers(Player player, Temperature.Type type, Predicate<TempModifier> condition)
     {
         removeModifiers(player, type, Integer.MAX_VALUE, condition);
     }
@@ -172,7 +172,7 @@ public class TempHelper
      * @param type determines which TempModifier list to pull from
      * @return a NEW list of all TempModifiers of the specified type
      */
-    public static List<TempModifier> getModifiers(Player player, Temperature.Types type)
+    public static List<TempModifier> getModifiers(Player player, Temperature.Type type)
     {
         return player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getModifiers(type)).orElse(null);
     }
@@ -182,7 +182,7 @@ public class TempHelper
      * @param type The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
      */
-    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Temperature.Types type)
+    public static boolean hasModifier(Player player, Class<? extends TempModifier> modClass, Temperature.Type type)
     {
         return player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
@@ -192,7 +192,7 @@ public class TempHelper
      * @param type determines which TempModifier list to pull from
      * @param action the action(s) to perform on each TempModifier
      */
-    public static void forEachModifier(Player player, Temperature.Types type, Consumer<TempModifier> action)
+    public static void forEachModifier(Player player, Temperature.Type type, Consumer<TempModifier> action)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
@@ -203,7 +203,7 @@ public class TempHelper
         });
     }
 
-    public static void forEachModifier(Player player, Temperature.Types type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
+    public static void forEachModifier(Player player, Temperature.Type type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
@@ -220,7 +220,7 @@ public class TempHelper
      * @param type The type of TempModifier to be stored
      * @return The NBT tag name for the given type
      */
-    public static String getModifierTag(Temperature.Types type)
+    public static String getModifierTag(Temperature.Type type)
     {
         return switch (type)
                 {
@@ -237,10 +237,10 @@ public class TempHelper
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
-     * @param type The type of Temperature to be stored. ({@link Temperature.Types#WORLD} should only be stored when needed to prevent lag)
+     * @param type The type of Temperature to be stored. ({@link Temperature.Type#WORLD} should only be stored when needed to prevent lag)
      * @return The NBT tag name for the given type
      */
-    public static String getTempTag(Temperature.Types type)
+    public static String getTempTag(Temperature.Type type)
     {
         return switch (type)
                 {
@@ -258,11 +258,11 @@ public class TempHelper
         if (!player.level.isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-            new PlayerTempSyncMessage(cap.get(Temperature.Types.WORLD),
-                cap.get(Temperature.Types.CORE),
-                cap.get(Temperature.Types.BASE),
-                cap.get(Temperature.Types.MAX),
-                cap.get(Temperature.Types.MIN), instant));
+            new PlayerTempSyncMessage(cap.get(Temperature.Type.WORLD),
+                cap.get(Temperature.Type.CORE),
+                cap.get(Temperature.Type.BASE),
+                cap.get(Temperature.Type.MAX),
+                cap.get(Temperature.Type.MIN), instant));
         }
     }
 
@@ -273,12 +273,12 @@ public class TempHelper
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
             new PlayerModifiersSyncMessage(
-                cap.getModifiers(Temperature.Types.WORLD),
-                cap.getModifiers(Temperature.Types.CORE),
-                cap.getModifiers(Temperature.Types.BASE),
-                cap.getModifiers(Temperature.Types.RATE),
-                cap.getModifiers(Temperature.Types.MAX),
-                cap.getModifiers(Temperature.Types.MIN)));
+                cap.getModifiers(Temperature.Type.WORLD),
+                cap.getModifiers(Temperature.Type.CORE),
+                cap.getModifiers(Temperature.Type.BASE),
+                cap.getModifiers(Temperature.Type.RATE),
+                cap.getModifiers(Temperature.Type.MAX),
+                cap.getModifiers(Temperature.Type.MIN)));
         }
     }
 }

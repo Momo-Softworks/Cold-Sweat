@@ -246,7 +246,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         {
                             // Get the player's temperature
                             double temp = hasEffect ? player.getPersistentData().getDouble("preHearthTemp") :
-                                    TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+                                    TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
 
                             // Tell the hearth to use hot fuel
                             shouldUseHotFuel = shouldUseHotFuel || (temp < config.minTemp);

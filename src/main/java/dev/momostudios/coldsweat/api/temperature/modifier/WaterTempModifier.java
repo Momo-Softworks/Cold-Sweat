@@ -28,7 +28,7 @@ public class WaterTempModifier extends TempModifier
         double minTemp = ConfigCache.getInstance().minTemp;
 
         double strength = this.<Double>getArgument("strength");
-        double worldTemp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+        double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
         double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));
         double addAmount = player.isInWaterOrBubble() ? 0.01 : player.level.isRainingAt(player.blockPosition()) ? 0.005 : returnRate;
 

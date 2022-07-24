@@ -62,7 +62,7 @@ public class HellspringLampItem extends Item
             // Is selected
             if ((isSelected || player.getOffhandItem() == stack)
             // Is world temp more than max
-            && (temp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get()) > max && getFuel(stack) > 0
+            && (temp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0
             // Is in valid dimension
             && VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString()))
             {
@@ -76,7 +76,7 @@ public class HellspringLampItem extends Item
                 AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
                 for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
                 {
-                    TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5), Temperature.Types.MAX);
+                    TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5), Temperature.Type.MAX);
                 }
 
                 // If the conditions are met, turn on the lamp

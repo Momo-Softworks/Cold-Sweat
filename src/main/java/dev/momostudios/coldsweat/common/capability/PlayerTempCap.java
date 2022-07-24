@@ -25,8 +25,8 @@ import java.util.List;
  */
 public class PlayerTempCap implements ITemperatureCap
 {
-    static Temperature.Types[] VALID_MODIFIER_TYPES = {Temperature.Types.CORE, Temperature.Types.BASE, Temperature.Types.RATE,
-                                                       Temperature.Types.MAX,  Temperature.Types.MIN,  Temperature.Types.WORLD};
+    static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE,
+                                                      Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
 
     private double[] syncedValues = new double[5];
     private int ticksSinceSync = 0;
@@ -44,7 +44,7 @@ public class PlayerTempCap implements ITemperatureCap
     List<TempModifier> maxModifiers = new ArrayList<>();
     List<TempModifier> minModifiers = new ArrayList<>();
 
-    public double get(Temperature.Types type)
+    public double get(Temperature.Type type)
     {
         return switch (type)
         {
@@ -58,7 +58,7 @@ public class PlayerTempCap implements ITemperatureCap
         };
     }
 
-    public void set(Temperature.Types type, double value)
+    public void set(Temperature.Type type, double value)
     {
         switch (type)
         {
@@ -71,7 +71,7 @@ public class PlayerTempCap implements ITemperatureCap
         }
     }
 
-    public List<TempModifier> getModifiers(Temperature.Types type)
+    public List<TempModifier> getModifiers(Temperature.Type type)
     {
         return switch (type)
         {
@@ -85,7 +85,7 @@ public class PlayerTempCap implements ITemperatureCap
         };
     }
 
-    public boolean hasModifier(Temperature.Types type, Class<? extends TempModifier> mod)
+    public boolean hasModifier(Temperature.Type type, Class<? extends TempModifier> mod)
     {
         return switch (type)
         {
@@ -100,7 +100,7 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
 
-    public void clearModifiers(Temperature.Types type)
+    public void clearModifiers(Temperature.Type type)
     {
         switch (type)
         {
@@ -117,23 +117,23 @@ public class PlayerTempCap implements ITemperatureCap
     @Override
     public void copy(ITemperatureCap cap)
     {
-        this.worldModifiers = cap.getModifiers(Temperature.Types.WORLD);
-        this.baseModifiers  = cap.getModifiers(Temperature.Types.BASE);
-        this.coreModifiers  = cap.getModifiers(Temperature.Types.CORE);
-        this.rateModifiers  = cap.getModifiers(Temperature.Types.RATE);
-        this.maxModifiers   = cap.getModifiers(Temperature.Types.RATE);
-        this.minModifiers   = cap.getModifiers(Temperature.Types.RATE);
+        this.worldModifiers = cap.getModifiers(Temperature.Type.WORLD);
+        this.baseModifiers  = cap.getModifiers(Temperature.Type.BASE);
+        this.coreModifiers  = cap.getModifiers(Temperature.Type.CORE);
+        this.rateModifiers  = cap.getModifiers(Temperature.Type.RATE);
+        this.maxModifiers   = cap.getModifiers(Temperature.Type.RATE);
+        this.minModifiers   = cap.getModifiers(Temperature.Type.RATE);
 
-        this.worldTemp = cap.get(Temperature.Types.WORLD);
-        this.coreTemp = cap.get(Temperature.Types.CORE);
-        this.baseTemp = cap.get(Temperature.Types.BASE);
-        this.maxTemp = cap.get(Temperature.Types.MAX);
-        this.minTemp = cap.get(Temperature.Types.MIN);
+        this.worldTemp = cap.get(Temperature.Type.WORLD);
+        this.coreTemp = cap.get(Temperature.Type.CORE);
+        this.baseTemp = cap.get(Temperature.Type.BASE);
+        this.maxTemp = cap.get(Temperature.Type.MAX);
+        this.minTemp = cap.get(Temperature.Type.MIN);
     }
 
     public void tickDummy(Player player)
     {
-        for (Temperature.Types type : VALID_MODIFIER_TYPES)
+        for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
             tickModifiers(player, new Temperature(), type);
         }
@@ -144,11 +144,11 @@ public class PlayerTempCap implements ITemperatureCap
         ConfigCache config = ConfigCache.getInstance();
 
         // Tick expiration time for world modifiers
-        double worldTemp = tickModifiers(player, new Temperature(), Temperature.Types.WORLD).get();
-        Temperature coreTemp = tickModifiers(player, new Temperature(this.coreTemp), Temperature.Types.CORE);
-        Temperature baseTemp = tickModifiers(player, new Temperature(), Temperature.Types.BASE);
-        double maxOffset = tickModifiers(player, new Temperature(), Temperature.Types.MAX).get();
-        double minOffset = tickModifiers(player, new Temperature(), Temperature.Types.MIN).get();
+        double worldTemp = tickModifiers(player, new Temperature(), Temperature.Type.WORLD).get();
+        Temperature coreTemp = tickModifiers(player, new Temperature(this.coreTemp), Temperature.Type.CORE);
+        Temperature baseTemp = tickModifiers(player, new Temperature(), Temperature.Type.BASE);
+        double maxOffset = tickModifiers(player, new Temperature(), Temperature.Type.MAX).get();
+        double minOffset = tickModifiers(player, new Temperature(), Temperature.Type.MIN).get();
 
         double maxTemp = config.maxTemp + maxOffset;
         double minTemp = config.minTemp + minOffset;
@@ -160,7 +160,7 @@ public class PlayerTempCap implements ITemperatureCap
         {
             double difference = Math.abs(worldTemp - CSMath.clamp(worldTemp, minTemp, maxTemp));
             Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * magnitude);
-            coreTemp = coreTemp.add(tickModifiers(player, changeBy, Temperature.Types.RATE));
+            coreTemp = coreTemp.add(tickModifiers(player, changeBy, Temperature.Type.RATE));
         }
         if (magnitude != CSMath.getSign(coreTemp.get()))
         {
@@ -188,11 +188,11 @@ public class PlayerTempCap implements ITemperatureCap
         }
 
         // Sets the player's body temperature to BASE + CORE
-        set(Temperature.Types.BASE, baseTemp.get());
-        set(Temperature.Types.CORE, CSMath.clamp(coreTemp.get(), -150d, 150d));
-        set(Temperature.Types.WORLD, worldTemp);
-        set(Temperature.Types.MAX, maxOffset);
-        set(Temperature.Types.MIN, minOffset);
+        set(Temperature.Type.BASE, baseTemp.get());
+        set(Temperature.Type.CORE, CSMath.clamp(coreTemp.get(), -150d, 150d));
+        set(Temperature.Type.WORLD, worldTemp);
+        set(Temperature.Type.MAX, maxOffset);
+        set(Temperature.Type.MIN, minOffset);
 
         // Calculate body/base temperatures with modifiers
         Temperature bodyTemp = baseTemp.add(coreTemp);
@@ -229,7 +229,7 @@ public class PlayerTempCap implements ITemperatureCap
         return CSMath.getLeastExtreme(changeBy, -bodyTemp);
     }
 
-    private Temperature tickModifiers(Player player, Temperature temp, Temperature.Types type)
+    private Temperature tickModifiers(Player player, Temperature temp, Temperature.Type type)
     {
         List<TempModifier> modifiers = getModifiers(type);
         Temperature newTemp = new Temperature(temp.get());
@@ -249,14 +249,14 @@ public class PlayerTempCap implements ITemperatureCap
     public void copy(PlayerTempCap cap)
     {
         // Copy temperature values
-        for (Temperature.Types type : Temperature.Types.values())
+        for (Temperature.Type type : Temperature.Type.values())
         {
-            if (type == Temperature.Types.BODY || type == Temperature.Types.RATE) continue;
+            if (type == Temperature.Type.BODY || type == Temperature.Type.RATE) continue;
             this.set(type, cap.get(type));
         }
 
         // Copy the modifiers
-        for (Temperature.Types type : VALID_MODIFIER_TYPES)
+        for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
             this.getModifiers(type).clear();
             this.getModifiers(type).addAll(cap.getModifiers(type));
@@ -268,13 +268,13 @@ public class PlayerTempCap implements ITemperatureCap
         CompoundTag nbt = new CompoundTag();
 
         // Save the player's temperature data
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.CORE), get(Temperature.Types.CORE));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.BASE), get(Temperature.Types.BASE));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.MAX), get(Temperature.Types.MAX));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Types.MIN), get(Temperature.Types.MIN));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.CORE), get(Temperature.Type.CORE));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.BASE), get(Temperature.Type.BASE));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.MAX), get(Temperature.Type.MAX));
+        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.MIN), get(Temperature.Type.MIN));
 
         // Save the player's modifiers
-        for (Temperature.Types type : VALID_MODIFIER_TYPES)
+        for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
             ListTag modifiers = new ListTag();
             for (TempModifier modifier : getModifiers(type))
@@ -290,11 +290,11 @@ public class PlayerTempCap implements ITemperatureCap
 
     public void deserializeNBT(CompoundTag nbt)
     {
-        set(Temperature.Types.CORE, nbt.getDouble(TempHelper.getTempTag(Temperature.Types.CORE)));
-        set(Temperature.Types.BASE, nbt.getDouble(TempHelper.getTempTag(Temperature.Types.BASE)));
+        set(Temperature.Type.CORE, nbt.getDouble(TempHelper.getTempTag(Temperature.Type.CORE)));
+        set(Temperature.Type.BASE, nbt.getDouble(TempHelper.getTempTag(Temperature.Type.BASE)));
 
         // Load the player's modifiers
-        for (Temperature.Types type : VALID_MODIFIER_TYPES)
+        for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
             // Get the list of modifiers from the player's persistent data
             ListTag modifiers = nbt.getList(TempHelper.getModifierTag(type), 10);

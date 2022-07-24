@@ -58,11 +58,11 @@ public class PlayerTempSyncMessage
                 {
                     player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.set(Temperature.Types.WORLD, message.world);
-                        cap.set(Temperature.Types.CORE, message.core);
-                        cap.set(Temperature.Types.BASE, message.base);
-                        cap.set(Temperature.Types.MAX, message.max);
-                        cap.set(Temperature.Types.MIN, message.min);
+                        cap.set(Temperature.Type.WORLD, message.world);
+                        cap.set(Temperature.Type.CORE, message.core);
+                        cap.set(Temperature.Type.BASE, message.base);
+                        cap.set(Temperature.Type.MAX, message.max);
+                        cap.set(Temperature.Type.MIN, message.min);
                         if (message.instantBody)
                         {
                             Overlays.setBodyTemp(message.base + message.core);

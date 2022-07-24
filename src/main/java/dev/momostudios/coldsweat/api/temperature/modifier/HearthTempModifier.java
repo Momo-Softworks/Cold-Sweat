@@ -24,7 +24,7 @@ public class HearthTempModifier extends TempModifier
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
-        double worldTemp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
+        double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
         player.getPersistentData().putDouble("preHearthTemp", worldTemp);
 
         ConfigCache config = ConfigCache.getInstance();

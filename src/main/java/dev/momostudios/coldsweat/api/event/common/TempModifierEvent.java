@@ -20,7 +20,7 @@ public class TempModifierEvent extends Event
      * <br>
      * {@link #maxCount} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #player} is the player the TempModifier is being applied to. <br>
-     * {@link #type} determines the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#BODY} <br>
+     * {@link #type} determines the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY} <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being added.<br>
@@ -33,13 +33,13 @@ public class TempModifierEvent extends Event
         private Player player;
         private TempModifier modifier;
         public int maxCount;
-        public Temperature.Types type;
+        public Temperature.Type type;
 
         public void setMaxCount(int count) {
             this.maxCount = count;
         }
 
-        public void setModifierType(Temperature.Types newType) {
+        public void setModifierType(Temperature.Type newType) {
             this.type = newType;
         }
 
@@ -55,7 +55,7 @@ public class TempModifierEvent extends Event
             return player;
         }
 
-        public Add(TempModifier modifier, Player player, Temperature.Types type, int duplicates)
+        public Add(TempModifier modifier, Player player, Temperature.Type type, int duplicates)
         {
             maxCount = duplicates;
             this.player = player;
@@ -69,7 +69,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
      * <br>
      * {@link #player} is the player the TempModifier is being removed from. <br>
-     * {@link #type} is the modifier's {@link Temperature.Types}. It will never be {@link Temperature.Types#BODY}. <br>
+     * {@link #type} is the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
      * <br>
@@ -82,11 +82,11 @@ public class TempModifierEvent extends Event
     public static class Remove extends TempModifierEvent
     {
         public final Player player;
-        public final Temperature.Types type;
+        public final Temperature.Type type;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(Player player, Temperature.Types type, int count, Predicate<TempModifier> condition)
+        public Remove(Player player, Temperature.Type type, int count, Predicate<TempModifier> condition)
         {
             this.player = player;
             this.type = type;

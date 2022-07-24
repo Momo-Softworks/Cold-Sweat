@@ -27,7 +27,7 @@ public class PlayerEatFood
             double foodTemp = VALID_FOODS.get().getOrDefault(event.getItem().getItem(), 0).doubleValue();
             if (foodTemp != 0)
             {
-                TempHelper.addModifier(player, new FoodTempModifier(foodTemp).expires(1), Temperature.Types.CORE, true);
+                TempHelper.addModifier(player, new FoodTempModifier(foodTemp).expires(1), Temperature.Type.CORE, true);
             }
         }
     }

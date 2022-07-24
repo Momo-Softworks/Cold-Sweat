@@ -20,10 +20,10 @@ public class PreventPlayerSleep
         if (event.getResultStatus() != null) return;
 
         Player player = event.getPlayer();
-        double bodyTemp = TempHelper.getTemperature(player, Temperature.Types.BODY).get();
-        double worldTemp = TempHelper.getTemperature(player, Temperature.Types.WORLD).get();
-        double minTemp = ConfigCache.getInstance().minTemp + TempHelper.getTemperature(player, Temperature.Types.MIN).get();
-        double maxTemp = ConfigCache.getInstance().maxTemp + TempHelper.getTemperature(player, Temperature.Types.MAX).get();
+        double bodyTemp = TempHelper.getTemperature(player, Temperature.Type.BODY).get();
+        double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
+        double minTemp = ConfigCache.getInstance().minTemp + TempHelper.getTemperature(player, Temperature.Type.MIN).get();
+        double maxTemp = ConfigCache.getInstance().maxTemp + TempHelper.getTemperature(player, Temperature.Type.MAX).get();
 
         // If the player's body temperature is critical
         if (!CSMath.isBetween(bodyTemp, -100, 100))

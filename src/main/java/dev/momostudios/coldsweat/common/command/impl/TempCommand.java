@@ -50,7 +50,7 @@ public class TempCommand extends BaseCommand
         {
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
-                cap.set(Temperature.Types.CORE, amount);
+                cap.set(Temperature.Type.CORE, amount);
                 TempHelper.updateTemperature(player, cap, true);
             });
         }
@@ -73,7 +73,7 @@ public class TempCommand extends BaseCommand
         for (ServerPlayer target : players.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {
             //Compose & send message
-            int bodyTemp = (int) TempHelper.getTemperature(target, Temperature.Types.BODY).get();
+            int bodyTemp = (int) TempHelper.getTemperature(target, Temperature.Type.BODY).get();
             source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;

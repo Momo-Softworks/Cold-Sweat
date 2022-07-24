@@ -60,7 +60,7 @@ public class ArmorInsulation
 
             if (insulation > 0)
             {
-                TempHelper.replaceModifier(player, new InsulationTempModifier(insulation).expires(10).tickRate(10), Temperature.Types.RATE);
+                TempHelper.replaceModifier(player, new InsulationTempModifier(insulation).expires(10).tickRate(10), Temperature.Type.RATE);
             }
         }
     }

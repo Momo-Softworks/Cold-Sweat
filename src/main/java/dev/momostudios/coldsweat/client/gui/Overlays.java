@@ -1,7 +1,8 @@
 package dev.momostudios.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.momostudios.coldsweat.api.temperature.Temperature.Types;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.Temperature.Type;
 import dev.momostudios.coldsweat.api.temperature.Temperature.Units;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
@@ -208,15 +209,15 @@ public class Overlays
                 boolean celsius = CLIENT_CONFIG.celsius();
 
                 // Get temperature in actual degrees
-                double realTemp = CSMath.convertUnits(PLAYER_CAP.get(Types.WORLD), Units.MC, celsius ? Units.C : Units.F, true);
+                double realTemp = CSMath.convertUnits(PLAYER_CAP.get(Type.WORLD), Units.MC, celsius ? Units.C : Units.F, true);
 
                 // Calculate the blended world temp for this tick
                 PREV_WORLD_TEMP = WORLD_TEMP;
                 WORLD_TEMP += (realTemp - WORLD_TEMP) / 6.0;
 
                 // Update max/min offset
-                MAX_OFFSET = PLAYER_CAP.get(Types.MAX);
-                MIN_OFFSET = PLAYER_CAP.get(Types.MIN);
+                MAX_OFFSET = PLAYER_CAP.get(Temperature.Type.MAX);
+                MIN_OFFSET = PLAYER_CAP.get(Type.MIN);
             }
 
 
@@ -233,7 +234,7 @@ public class Overlays
 
                 // Blend body temp (per tick)
                 PREV_BODY_TEMP = BODY_TEMP;
-                BODY_TEMP += (PLAYER_CAP.get(Types.BODY) - BODY_TEMP) / 5;
+                BODY_TEMP += (PLAYER_CAP.get(Type.BODY) - BODY_TEMP) / 5;
 
                 // Get the severity of the player's body temperature
                 BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);

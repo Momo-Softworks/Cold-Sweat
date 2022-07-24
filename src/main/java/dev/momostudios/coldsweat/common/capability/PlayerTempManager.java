@@ -78,7 +78,7 @@ public class PlayerTempManager
                 {
                     cap.tick(serverPlayer);
 
-                    for (Temperature.Types type : PlayerTempCap.VALID_MODIFIER_TYPES)
+                    for (Temperature.Type type : PlayerTempCap.VALID_MODIFIER_TYPES)
                     {
                         cap.getModifiers(type).removeIf(modifier ->
                                 modifier.setTicksExisted(modifier.getTicksExisted() + 1) > modifier.getExpireTime() && modifier.getExpireTime() != -1);

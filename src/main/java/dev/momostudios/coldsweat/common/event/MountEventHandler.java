@@ -26,7 +26,7 @@ public class MountEventHandler
             {
                 if (player.getVehicle() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
                 {
-                    TempHelper.addModifier(player, new MountTempModifier(0.75).expires(1), Temperature.Types.RATE, false);
+                    TempHelper.addModifier(player, new MountTempModifier(0.75).expires(1), Temperature.Type.RATE, false);
                 }
                 else
                 {
@@ -36,7 +36,7 @@ public class MountEventHandler
                         {
                             Number number = (Number) entity.get(1);
                             double value = number.doubleValue();
-                            TempHelper.addModifier(player, new MountTempModifier(value).expires(1), Temperature.Types.RATE, false);
+                            TempHelper.addModifier(player, new MountTempModifier(value).expires(1), Temperature.Type.RATE, false);
                             break;
                         }
                     }

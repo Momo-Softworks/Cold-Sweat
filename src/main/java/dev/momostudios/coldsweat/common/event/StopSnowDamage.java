@@ -35,7 +35,7 @@ public class StopSnowDamage
             int insulation = 0;
             boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigCache.getInstance().iceRes;
             if (hasIcePotion
-            || ((insulation = ((insulationModifier = TempHelper.getModifier(player, Temperature.Types.RATE, InsulationTempModifier.class)) == null ? 0
+            || ((insulation = ((insulationModifier = TempHelper.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class)) == null ? 0
             : insulationModifier.<Integer>getArgument("warmth"))) > 0 && (player.tickCount % Math.max(1, 37 - insulation)) == 0))
             {
                 if (player.getTicksFrozen() < event.player.getTicksRequiredToFreeze() || insulation >= 37 || hasIcePotion)

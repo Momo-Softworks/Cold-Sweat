@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface ITemperatureCap
 {
-    double get(Temperature.Types type);
-    void set(Temperature.Types type, double value);
-    List<TempModifier> getModifiers(Temperature.Types type);
-    boolean hasModifier(Temperature.Types type, Class<? extends TempModifier> mod);
-    void clearModifiers(Temperature.Types type);
+    double get(Temperature.Type type);
+    void set(Temperature.Type type, double value);
+    List<TempModifier> getModifiers(Temperature.Type type);
+    boolean hasModifier(Temperature.Type type, Class<? extends TempModifier> mod);
+    void clearModifiers(Temperature.Type type);
     void copy(ITemperatureCap cap);
     void tick(Player player);
     void tickDummy(Player player);

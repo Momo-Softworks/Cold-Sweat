@@ -99,23 +99,23 @@ public class PlayerModifiersSyncMessage
                 {
                     player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.clearModifiers(Temperature.Types.WORLD);
-                        cap.getModifiers(Temperature.Types.WORLD).addAll(message.world);
+                        cap.clearModifiers(Temperature.Type.WORLD);
+                        cap.getModifiers(Temperature.Type.WORLD).addAll(message.world);
 
-                        cap.clearModifiers(Temperature.Types.CORE);
-                        cap.getModifiers(Temperature.Types.CORE).addAll(message.core);
+                        cap.clearModifiers(Temperature.Type.CORE);
+                        cap.getModifiers(Temperature.Type.CORE).addAll(message.core);
 
-                        cap.clearModifiers(Temperature.Types.BASE);
-                        cap.getModifiers(Temperature.Types.BASE).addAll(message.base);
+                        cap.clearModifiers(Temperature.Type.BASE);
+                        cap.getModifiers(Temperature.Type.BASE).addAll(message.base);
 
-                        cap.clearModifiers(Temperature.Types.RATE);
-                        cap.getModifiers(Temperature.Types.RATE).addAll(message.rate);
+                        cap.clearModifiers(Temperature.Type.RATE);
+                        cap.getModifiers(Temperature.Type.RATE).addAll(message.rate);
 
-                        cap.clearModifiers(Temperature.Types.MAX);
-                        cap.getModifiers(Temperature.Types.MAX).addAll(message.max);
+                        cap.clearModifiers(Temperature.Type.MAX);
+                        cap.getModifiers(Temperature.Type.MAX).addAll(message.max);
 
-                        cap.clearModifiers(Temperature.Types.MIN);
-                        cap.getModifiers(Temperature.Types.MIN).addAll(message.min);
+                        cap.clearModifiers(Temperature.Type.MIN);
+                        cap.getModifiers(Temperature.Type.MIN).addAll(message.min);
                     });
                 }
             });
