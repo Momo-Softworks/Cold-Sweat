@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.event;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.config.LoadedValue;
@@ -60,7 +61,12 @@ public class ArmorInsulation
 
             if (insulation > 0)
             {
-                TempHelper.replaceModifier(player, new InsulationTempModifier(insulation).expires(10).tickRate(10), Temperature.Type.RATE);
+                TempModifier modifier = TempHelper.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
+
+                if (modifier != null)
+                    modifier.setArgument("warmth", insulation);
+                else
+                    TempHelper.replaceModifier(player, new InsulationTempModifier(insulation).expires(10).tickRate(10), Temperature.Type.RATE);
             }
         }
     }
