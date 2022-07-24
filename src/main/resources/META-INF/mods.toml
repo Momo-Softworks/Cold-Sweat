@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[36,)"
-license="All rights reserved"
+license="GNU General Public License v3.1"
 [[mods]]
 modId="cold_sweat"
 version="${file.jarVersion}"
@@ -8,7 +8,8 @@ displayName="Cold Sweat"
 #logoFile="cold_sweat.png"
 authors="iMikul, chubbymomo, skinnymomo"
 description='''
-
+Cold Sweat is a highly-extensible temperature mod for Minecraft. See the documentation here:
+https://mikul.gitbook.io/cold-sweat/
 '''
 [[dependencies.cold_sweat]]
    modId="forge"
