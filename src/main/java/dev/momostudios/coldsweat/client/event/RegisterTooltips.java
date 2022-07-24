@@ -8,11 +8,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class RegisterTooltips
 {
     @SubscribeEvent
-    public static void registerTooltips(FMLClientSetupEvent event)
+    public static void registerTooltips(final FMLClientSetupEvent event)
     {
         MinecraftForgeClient.registerTooltipComponentFactory(HellspringTooltip.class, tooltip -> new ClientHellspringTooltip(tooltip.getFuel()));
     }
