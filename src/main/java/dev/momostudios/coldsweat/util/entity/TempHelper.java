@@ -244,12 +244,11 @@ public class TempHelper
     {
         return switch (type)
                 {
-                    case CORE -> "coreTemperature";
-                    case WORLD -> "worldTemperature";
-                    case BASE -> "baseTemperature";
-                    case BODY -> "bodyTemperature";
-                    case MAX -> "hottestTemperature";
-                    case MIN -> "coldestTemperature";
+                    case CORE -> "coreTemp";
+                    case WORLD -> "worldTemp";
+                    case BASE -> "baseTemp";
+                    case MAX -> "maxTWorldTemp";
+                    case MIN -> "minWorldTemp";
                     default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
                 };
     }
