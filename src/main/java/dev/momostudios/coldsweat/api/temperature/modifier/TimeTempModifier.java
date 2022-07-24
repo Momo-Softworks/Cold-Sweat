@@ -26,7 +26,7 @@ public class TimeTempModifier extends TempModifier
         if (!player.level.dimensionType().hasFixedTime())
         {
             float timeTemp = 0;
-            Level world = player.level;
+            Level level = player.level;
             for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 200, 6))
             {
                 BiomeManager biomeManager = player.level.getBiomeManager();
@@ -40,11 +40,11 @@ public class TimeTempModifier extends TempModifier
                 if (BiomeDictionary.hasType(key, BiomeDictionary.Type.HOT)
                 && BiomeDictionary.hasType(key, BiomeDictionary.Type.SANDY))
                 {
-                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) / 1.5 - 0.7;
+                    timeTemp += Math.sin(level.getDayTime() / 3819.7186342) / 1.5 - 0.7;
                 }
                 else
                 {
-                    timeTemp += Math.sin(world.getDayTime() / 3819.7186342) / 4d - 0.125;
+                    timeTemp += Math.sin(level.getDayTime() / 3819.7186342) / 4d - 0.125;
                 }
             }
 
