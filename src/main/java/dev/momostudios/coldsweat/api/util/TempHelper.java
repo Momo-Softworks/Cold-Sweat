@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.entity;
+package dev.momostudios.coldsweat.api.util;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
