@@ -627,5 +627,19 @@ Technical Changes:
       - Returning a function makes its result independent of any other TempModifier's result
 - Greatly optimized the performance of temperature-affecting blocks
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10-b05c
+- Insulated armor now slows down/stops freezing from powder snow and soul fire
+
+Fixes:
+- Fixed body temperature still not working properly in some cases
+- Fixed issue with tooltips that caused servers to crash on startup
+
+Technical Changes:
+- Fixed TempModifiers not ticking or expiring properly
+- Changed the order in which vanilla TempModifiers are applied to prevent unwanted behavior (like seasons affecting underground players)
+- Renamed all instances of "BlockEffect" to "BlockTemp" for clarity
+
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
