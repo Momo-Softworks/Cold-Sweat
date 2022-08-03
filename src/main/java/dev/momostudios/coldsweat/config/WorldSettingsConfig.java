@@ -131,8 +131,8 @@ public class WorldSettingsConfig
                     .defineList("Spring", Arrays.asList(
                             -0.2, 0, 0.2
                     ), it -> it instanceof List && ((List<?>) it).get(0) instanceof Number
-                            && ((List<?>) it).get(1) instanceof Number
-                            && ((List<?>) it).get(2) instanceof Number);
+                                                && ((List<?>) it).get(1) instanceof Number
+                                                && ((List<?>) it).get(2) instanceof Number);
 
             BUILDER.pop();
         }

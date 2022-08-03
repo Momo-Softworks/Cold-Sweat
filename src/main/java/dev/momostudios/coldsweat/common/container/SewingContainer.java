@@ -34,14 +34,14 @@ public class SewingContainer extends AbstractContainerMenu
     Inventory playerInventory;
     SewingInventory sewingInventory;
     public static LoadedValue<List<Item>> VALID_INSULATORS = LoadedValue.of(() ->
-                                                              {
-                                                                  List<Item> list = new ArrayList<>();
-                                                                  for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
-                                                                  {
-                                                                      list.addAll(ConfigHelper.getItems(itemID));
-                                                                  }
-                                                                  return list;
-                                                              });
+    {
+        List<Item> list = new ArrayList<>();
+        for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
+        {
+            list.addAll(ConfigHelper.getItems(itemID));
+        }
+        return list;
+    });
 
     public static class SewingInventory implements Container
     {
