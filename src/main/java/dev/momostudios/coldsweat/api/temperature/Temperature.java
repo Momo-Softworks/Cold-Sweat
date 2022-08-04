@@ -96,7 +96,7 @@ public class Temperature
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull Player player)
     {
-        return modifier.getValue(new Temperature(temp), player);
+        return modifier.update(new Temperature(temp), player);
     }
 
     /**
@@ -109,7 +109,7 @@ public class Temperature
         Temperature temp2 = new Temperature(this.temp);
         for (TempModifier modifier : modifiers)
         {
-            temp2.set(modifier.getValue(temp2, player));
+            temp2.set(modifier.update(temp2, player));
         }
         return temp2;
     }

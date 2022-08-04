@@ -27,6 +27,8 @@ public abstract class TempModifier
     int expireTicks = -1;
     int ticksExisted = 0;
     int tickRate = 1;
+    Temperature lastInput = new Temperature();
+    Temperature lastOutput = new Temperature();
     Function<Temperature, Temperature> function = temp -> temp;
 
 
@@ -98,7 +100,7 @@ public abstract class TempModifier
      * @param temp the Temperature being fed into the {@link #calculate(Player)} method.
      * @param player the player that is being affected by the modifier.
      */
-    public Temperature getValue(Temperature temp, Player player)
+    public Temperature update(Temperature temp, Player player)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
@@ -114,13 +116,13 @@ public abstract class TempModifier
     }
 
     /**
-     * Returns a function that changes a given Temperature in some way.<br>
-     * This function is stored and called upon between "ticks" if the TempModifier has a set tickRate
-     * @return A function with a Temperature input and a Temperature output
+     * @param temp the Temperature to calculate with
+     * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public Function<Temperature, Temperature> getFunction()
+    public Temperature getResult(Temperature temp)
     {
-        return this.function;
+        lastInput = temp.copy();
+        return lastOutput = function.apply(temp).copy();
     }
 
     /**
@@ -166,6 +168,22 @@ public abstract class TempModifier
     public int getTickRate()
     {
         return tickRate;
+    }
+
+    /**
+     * @return The Temperature this TempModifier was last given
+     */
+    public Temperature getLastInput()
+    {
+        return lastInput;
+    }
+
+    /**
+     * @return The Temperature this TempModifier's function last returned
+     */
+    public Temperature getLastOutput()
+    {
+        return lastOutput;
     }
 
     /**
