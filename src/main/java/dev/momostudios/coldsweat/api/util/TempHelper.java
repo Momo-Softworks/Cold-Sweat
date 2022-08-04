@@ -53,12 +53,39 @@ public class TempHelper
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
-    public static TempModifier getModifier(Player player, Temperature.Type type, Class<? extends TempModifier> modClass)
+    public static <T extends TempModifier> T getModifier(Player player, Temperature.Type type, Class<T> modClass)
+    {
+        AtomicReference<T> mod = new AtomicReference<>();
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        {
+            for (TempModifier modifier : cap.getModifiers(type))
+            {
+                if (modifier.getClass() == modClass)
+                {
+                    mod.set((T) modifier);
+                    break;
+                }
+            }
+        });
+        return mod.get();
+    }
+
+    /**
+     * @return The first modifier applied to the player that fits the predicate.
+     */
+    public static TempModifier getModifier(Player player, Temperature.Type type, Predicate<TempModifier> condition)
     {
         AtomicReference<TempModifier> mod = new AtomicReference<>();
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
-            mod.set(cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst().orElse(null));
+            for (TempModifier modifier : cap.getModifiers(type))
+            {
+                if (condition.test(modifier))
+                {
+                    mod.set(modifier);
+                    break;
+                }
+            }
         });
         return mod.get();
     }
