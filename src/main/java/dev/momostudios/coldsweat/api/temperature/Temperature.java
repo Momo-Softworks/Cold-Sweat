@@ -96,7 +96,7 @@ public class Temperature
      */
     public Temperature with(@Nonnull TempModifier modifier, @Nonnull Player player)
     {
-        return modifier.update(new Temperature(temp), player);
+        return with(List.of(modifier), player);
     }
 
     /**
@@ -109,9 +109,19 @@ public class Temperature
         Temperature temp2 = new Temperature(this.temp);
         for (TempModifier modifier : modifiers)
         {
-            temp2.set(modifier.update(temp2, player));
+            temp2.set(player.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
+                    ? modifier.update(temp2, player)
+                    : modifier.getResult(temp2));
         }
         return temp2;
+    }
+
+    /**
+     * @return a new Temperature instance with the same value as this one
+     */
+    public Temperature copy()
+    {
+        return new Temperature(this.temp);
     }
 
     /**
