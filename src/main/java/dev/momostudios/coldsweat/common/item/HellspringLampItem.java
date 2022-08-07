@@ -2,6 +2,8 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.HellLampTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.client.gui.tooltip.HellspringTooltip;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -9,7 +11,6 @@ import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.config.LoadedValue;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -57,26 +58,31 @@ public class HellspringLampItem extends Item
         if (entityIn instanceof Player player && !worldIn.isClientSide)
         {
             double max = ConfigCache.getInstance().maxTemp;
+            TempModifier lampMod = TempHelper.getModifier(player, Temperature.Type.WORLD, HellLampTempModifier.class);
             double temp;
 
             // Is selected
             if ((isSelected || player.getOffhandItem() == stack)
             // Is world temp more than max
-            && (temp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0
+            && (temp = lampMod != null ? lampMod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0
             // Is in valid dimension
             && VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString()))
             {
                 // Drain fuel
-                if (player.tickCount % 10 == 0 && !(player.isCreative() || player.isSpectator()))
+                if (player.tickCount % 5 == 0 && !(player.isCreative() || player.isSpectator()))
                 {
-                    addFuel(stack, -0.02d * CSMath.clamp(temp - max, 1d, 3d));
-                }
+                    addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
 
-                // Give effect to nearby players
-                AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5, player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
-                for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
-                {
-                    TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5), Temperature.Type.MAX);
+                    AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5,
+                                       player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
+                    for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
+                    {
+                        HellLampTempModifier modifier = TempHelper.getModifier(entity, Temperature.Type.WORLD, HellLampTempModifier.class);
+                        if (modifier != null)
+                            modifier.expires(modifier.getTicksExisted() + 5);
+                        else
+                            TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                    }
                 }
 
                 // If the conditions are met, turn on the lamp
