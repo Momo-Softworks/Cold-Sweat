@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
@@ -9,10 +10,10 @@ import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
+import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
 import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.config.LoadedValue;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
@@ -53,7 +54,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     ConfigCache config = ConfigCache.getInstance();
 
-
     LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
     HashMap<ChunkPos, LevelChunk> loadedChunks = new HashMap<>();
 
@@ -64,7 +64,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public static int SLOT_COUNT = 1;
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    BlockPos pos = this.getBlockPos();
+    BlockPos blockPos = this.getBlockPos();
 
     int hotFuel = 0;
     int coldFuel = 0;
@@ -79,10 +79,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     boolean shouldRebuild = false;
     int rebuildCooldown = 0;
 
-    public int ticksExisted;
+    public int ticksExisted = 0;
+    int pathTicker = 0;
 
     private LevelChunk workingChunk = null;
-    private ChunkPos workingCoords = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
+    private ChunkPos workingCoords = new ChunkPos(this.getBlockPos().getX() >> 4, this.getBlockPos().getZ() >> 4);
 
     public static final int MAX_FUEL = 1000;
     public static LoadedValue<Map<Item, Number>> VALID_FUEL = LoadedValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
@@ -90,7 +91,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
         super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
-        this.addPath(new SpreadPath(this.pos));
+        this.addPath(new SpreadPath(this.getBlockPos()));
     }
 
     @Override
@@ -156,7 +157,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void tick(Level level, BlockPos pos)
     {
+        addPath(pos, new SpreadPath(pos));
+
         this.ticksExisted++;
+        this.pathTicker++;
 
         if (rebuildCooldown > 0) rebuildCooldown--;
 
@@ -166,14 +170,21 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         if (this.ticksExisted % 20 == 0)
         {
-            this.isPlayerNearby = level.players().stream().anyMatch(player -> player.distanceToSqr(this.pos.getX(), this.pos.getY(), this.pos.getZ()) < 400);
+            this.isPlayerNearby = level.players().stream().anyMatch(player -> player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 400);
         }
 
         // Reset if a nearby block has been updated
         if (rebuildCooldown <= 0 && this.shouldRebuild)
         {
             this.shouldRebuild = false;
-            this.resetPaths();
+            this.rebuildCooldown = 100;
+
+            this.replacePaths(Map.of(pos, new SpreadPath(pos)));
+
+            if (!level.isClientSide)
+            {
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4)), new HearthResetMessage(pos));
+            }
         }
 
         if (level != null && (hotFuel > 0 || coldFuel > 0) && this.isPlayerNearby)
@@ -194,9 +205,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             // Number of partitions
             int partCount = (int) Math.ceil(pathCount / (double) partSize);
             // Index of the last point being worked on this tick
-            int lastIndex = Math.min(pathCount, partSize * (this.ticksExisted % partCount + 1) + 1);
+            int lastIndex = Math.min(pathCount, partSize * (this.pathTicker % partCount + 1) + 1);
             // Index of the first point being worked on this tick
             int firstIndex = Math.max(0, lastIndex - partSize);
+
+            if (lastIndex >= pathCount - 1) this.pathTicker = 0;
 
             // Iterate over the specified partition of paths
             for (Map.Entry<BlockPos, SpreadPath> entry : paths.entrySet())
@@ -206,11 +219,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 if (index > lastIndex) break;
                 if (index < firstIndex) continue;
 
-                SpreadPath spreadPath = entry.getValue();
+                BlockPos blockPos = entry.getKey();
 
-                int x = spreadPath.getX();
-                int y = spreadPath.getY();
-                int z = spreadPath.getZ();
+                int x = blockPos.getX();
+                int y = blockPos.getY();
+                int z = blockPos.getZ();
 
                 // Air Particles
                 if (showParticles)
@@ -264,10 +277,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     }
                 }
 
-                if (spreadPath.frozen)
-                {
-                    continue;
-                }
+                SpreadPath spreadPath = entry.getValue();
+
+                // Don't try to spread if the path is frozen
+                if (spreadPath.isFrozen()) continue;
 
                 /*
                  Try to spread to new blocks
@@ -301,26 +314,25 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                      Spreading algorithm
                      */
                     LevelChunk finalChunk = chunk;
-                    BlockPos spreadPos = spreadPath.pos;
-                    if (!WorldHelper.canSeeSky(finalChunk, level, spreadPos))
+                    if (!WorldHelper.canSeeSky(finalChunk, level, blockPos.above()))
                     {
                         for (Direction direction : Direction.values())
                         {
                             SpreadPath tryPath = spreadPath.offset(direction);
-                            newPaths.computeIfAbsent(tryPath.pos, pos2 ->
+                            newPaths.computeIfAbsent(tryPath.getPos(), pos2 ->
                             {
-                                if (!WorldHelper.isSpreadBlocked(finalChunk, spreadPos, direction))
+                                if (!WorldHelper.isSpreadBlocked(finalChunk, blockPos, direction))
                                     return tryPath;
                                 return null;
                             });
                         }
                     }
                 }
-                spreadPath.frozen = true;
+                spreadPath.freeze();
             }
 
             // Add new positions
-            paths.putAll(newPaths);
+            addPaths(newPaths);
 
             // Drain fuel
             if (!level.isClientSide && this.ticksExisted % 80 == 0)
@@ -391,14 +403,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    public void resetPaths()
-    {
-        Map<BlockPos, SpreadPath> newlist = new HashMap<>();
-        SpreadPath path = new SpreadPath(pos);
-        newlist.put(pos, path);
-        this.replacePaths(newlist);
-    }
-
     public static int getItemFuel(ItemStack item)
     {
         return VALID_FUEL.get().getOrDefault(item.getItem(), 0).intValue();
@@ -422,7 +426,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (amount == 0 && hasHotFuel)
         {
             hasHotFuel = false;
-            level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            level.playSound(null, blockPos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
         }
         else hasHotFuel = true;
     }
@@ -435,7 +439,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (amount == 0 && hasColdFuel)
         {
             hasColdFuel = false;
-            level.playSound(null, pos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            level.playSound(null, blockPos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
         }
         else hasColdFuel = true;
     }
@@ -464,20 +468,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             int hotFuel = this.getHotFuel();
             int coldFuel = this.getColdFuel();
 
-            BlockState state = level.getBlockState(pos);
+            BlockState state = level.getBlockState(blockPos);
             int waterLevel = coldFuel == 0 ? 0 : (coldFuel < MAX_FUEL / 2 ? 1 : 2);
             int lavaLevel = hotFuel == 0 ? 0 : (hotFuel < MAX_FUEL / 2 ? 1 : 2);
 
             BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
             if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
             {
-                level.setBlock(pos, desiredState, 3);
+                level.setBlock(blockPos, desiredState, 3);
             }
             this.setChanged();
 
             CompoundTag tag = new CompoundTag();
             this.saveAdditional(tag);
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(blockPos)),
                     new BlockDataUpdateMessage(this));
         }
     }
@@ -531,19 +535,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void addPaths(Map<BlockPos, SpreadPath> newPaths)
     {
-        for (Map.Entry<BlockPos, SpreadPath> entry : newPaths.entrySet())
-        {
-            this.addPath(entry.getKey(), entry.getValue());
-        }
+        paths.putAll(newPaths);
     }
 
-    public boolean shouldRebuild()
+    public void resetPaths()
     {
-        return shouldRebuild;
-    }
-
-    public void setShouldRebuild(boolean shouldRebuild)
-    {
-        this.shouldRebuild = shouldRebuild;
+        this.shouldRebuild = true;
     }
 }
