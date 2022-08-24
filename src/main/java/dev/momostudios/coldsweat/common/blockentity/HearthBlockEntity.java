@@ -54,7 +54,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     ConfigCache config = ConfigCache.getInstance();
 
-    LinkedHashMap<BlockPos, SpreadPath> paths = new LinkedHashMap<>();
+    ArrayList<SpreadPath> paths = new ArrayList<>();
     HashMap<ChunkPos, LevelChunk> loadedChunks = new HashMap<>();
 
     public static final int MAX_PATHS = 6000;
@@ -193,7 +193,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             int pathCount = paths.size();
 
             // Create temporary list to add back to the master path list
-            HashMap<BlockPos, SpreadPath> newPaths = new HashMap<>();
+            ArrayList<SpreadPath> newPaths = new ArrayList<>();
 
             /*
              Partition the points into logical "sub-maps" to be iterated over separately each tick
@@ -212,12 +212,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             if (lastIndex >= pathCount - 1) this.pathTicker = 0;
 
             // Iterate over the specified partition of paths
-            for (Map.Entry<BlockPos, SpreadPath> entry : paths.entrySet())
-            {
-                // Skip until we reach the first index of this partition
-                index++;
-                if (index > lastIndex) break;
-                if (index < firstIndex) continue;
+            for (int i = firstIndex; i < lastIndex; i++)
+            {   SpreadPath spreadPath = paths.get(i);
 
                 BlockPos blockPos = entry.getKey();
 
