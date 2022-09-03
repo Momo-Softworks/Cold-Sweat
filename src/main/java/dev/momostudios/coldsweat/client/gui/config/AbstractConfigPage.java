@@ -26,11 +26,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public abstract class ConfigPageBase extends Screen
+public abstract class AbstractConfigPage extends Screen
 {
     // Count how many ticks the mouse has been still for
     static int MOUSE_STILL_TIMER = 0;
-    static int TOOLTIP_DELAY = 20;
+    static int TOOLTIP_DELAY = 5;
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
@@ -67,7 +67,7 @@ public abstract class ConfigPageBase extends Screen
     @Nullable
     public abstract BaseComponent sectionTwoTitle();
 
-    public ConfigPageBase(Screen parentScreen, ConfigCache configCache)
+    public AbstractConfigPage(Screen parentScreen, ConfigCache configCache)
     {
         super(new TranslatableComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
