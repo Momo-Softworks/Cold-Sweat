@@ -52,14 +52,12 @@ public class BiomeTempModifier extends TempModifier
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
-        BiomeManager biomeManager = player.level.getBiomeManager();
-
         try
         {
             double worldTemp = 0;
             for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), SAMPLES, 16))
             {
-                Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
+                Biome biome = LegacyMethodHelper.getBiome(player.level, blockPos);
                 if (biome == null) continue;
                 ResourceLocation biomeID = biome.getRegistryName();
                 ResourceLocation dimensionID = player.level.dimension().location();
@@ -79,17 +77,14 @@ public class BiomeTempModifier extends TempModifier
                     continue;
                 }
 
-                Number biomeOffset = BIOME_OFFSETS.get().get(biomeID);
-                Number dimensionOffset = DIMENSION_OFFSETS.get().get(dimensionID);
-
-                // If temperature is not overridden, apply the offsets
-                worldTemp += (float) GET_TEMPERATURE.invoke(biome, blockPos);
-                if (biomeOffset != null) worldTemp += biomeOffset.doubleValue();
-                if (dimensionOffset != null) worldTemp += dimensionOffset.doubleValue();
+                // If temperature is not overridden, get biome temp & apply the offsets
+                worldTemp += biome.getBaseTemperature()
+                           + BIOME_OFFSETS.get().getOrDefault(biomeID, 0).doubleValue()
+                           + DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0).doubleValue();
 
             }
-            double finalWorldTemp = worldTemp;
-            return (temp) -> temp.add(finalWorldTemp / 50);
+            double finalWorldTemp = worldTemp / SAMPLES;
+            return temp -> temp.add(finalWorldTemp);
         }
         catch (Exception e)
         {
