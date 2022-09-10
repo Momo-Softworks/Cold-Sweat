@@ -1,14 +1,16 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
+import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,9 +22,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+
+import java.util.Random;
 
 public class FilledWaterskinItem extends Item
 {
@@ -37,26 +38,18 @@ public class FilledWaterskinItem extends Item
     public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean isSelected)
     {
         super.inventoryTick(itemstack, world, entity, slot, isSelected);
-        if (entity instanceof Player player)
+        if (entity.tickCount % 5 == 0 && entity instanceof Player player)
         {
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
-            if (itemTemp != 0)
+            if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                if (CSMath.isInRange(itemTemp, -1, 1))
-                {
-                    itemstack.getOrCreateTag().putDouble("temperature", 0);
-                    return;
-                }
+                double temp = 0.1 * ConfigCache.getInstance().rate * CSMath.getSign(itemTemp);
+                double newTemp = itemTemp - temp;
+                if (CSMath.isInRange(newTemp, -1, 1)) newTemp = 0;
 
-                if (slot <= 8 || player.getOffhandItem().equals(itemstack))
-                {
-                    double temp = 0.03 * ConfigCache.getInstance().rate * CSMath.getSign(itemTemp);
-                    double newTemp = itemTemp - temp;
+                itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                    itemstack.getOrCreateTag().putDouble("temperature", newTemp);
-
-                    TempHelper.addModifier(player, new WaterskinTempModifier(temp * 1.5).expires(1), Temperature.Type.CORE, true);
-                }
+                TempHelper.addModifier(player, new WaterskinTempModifier(temp / 1.5).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -68,8 +61,7 @@ public class FilledWaterskinItem extends Item
         ItemStack itemstack = ar.getObject();
 
         double amount = itemstack.getOrCreateTag().getDouble("temperature") * (WATERSKIN_STRENGTH.get() / 50d);
-        if (player.tickCount % 5 == 0)
-        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(5), Temperature.Type.CORE, true);
+        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Type.CORE, true);
 
         // Play empty sound
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
@@ -95,16 +87,17 @@ public class FilledWaterskinItem extends Item
 
         player.swing(hand);
 
+        Random rand = new Random();
         for (int i = 0; i < 10; i++)
         {
             TaskScheduler.scheduleClient(() ->
             {
-                for (int p = 0; p < 5; p++)
+                for (int p = 0; p < rand.nextInt(3) + 2; p++)
                 {
                     level.addParticle(ParticleTypes.FALLING_WATER,
-                            player.getX() + Math.random() * player.getBbWidth() - (player.getBbWidth() / 2),
-                            player.getY() + player.getBbHeight() + Math.random() * 0.5,
-                            player.getZ() + Math.random() * player.getBbWidth() - (player.getBbWidth() / 2), 0.3, 0.3, 0.3);
+                            player.getX() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2),
+                            player.getY() + player.getBbHeight() + rand.nextFloat() * 0.5,
+                            player.getZ() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2), 0.3, 0.3, 0.3);
                 }
             }, i);
         }
