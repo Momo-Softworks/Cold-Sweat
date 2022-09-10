@@ -7,7 +7,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -48,7 +48,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public int ticksExisted;
     int fuel;
 
-    public static LoadedValue<Map<Item, Number>> VALID_FUEL = LoadedValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
+    public static DynamicValue<Map<Item, Number>> VALID_FUEL = DynamicValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {

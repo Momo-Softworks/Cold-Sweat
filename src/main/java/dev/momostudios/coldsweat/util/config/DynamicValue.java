@@ -10,31 +10,36 @@ import java.util.function.Supplier;
  * Contains a value that updates again once Forge has been fully loaded. Mostly used for static fields.
  * @param <T> The variable type that this object is storing
  */
-public class LoadedValue<T>
+public class DynamicValue<T>
 {
     T value;
     Supplier<T> valueCreator;
 
-    public LoadedValue(Supplier<T> valueCreator)
+    public DynamicValue(Supplier<T> valueCreator)
     {
         this.valueCreator = valueCreator;
         this.value = valueCreator.get();
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    public static <V> LoadedValue<V> of(Supplier<V> valueCreator)
+    public static <V> DynamicValue<V> of(Supplier<V> valueCreator)
     {
-        return new LoadedValue<>(valueCreator);
+        return new DynamicValue<>(valueCreator);
     }
 
     @SubscribeEvent
     public void onLoaded(ServerStartedEvent event)
     {
-        this.value = valueCreator.get();
+        this.load();
     }
 
     public T get()
     {
         return value;
+    }
+
+    public void load()
+    {
+        this.value = valueCreator.get();
     }
 }

@@ -13,7 +13,7 @@ import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
 import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
@@ -86,7 +86,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     private ChunkPos workingCoords = new ChunkPos(this.getBlockPos().getX() >> 4, this.getBlockPos().getZ() >> 4);
 
     public static final int MAX_FUEL = 1000;
-    public static LoadedValue<Map<Item, Number>> VALID_FUEL = LoadedValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
+    public static DynamicValue<Map<Item, Number>> VALID_FUEL = DynamicValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {

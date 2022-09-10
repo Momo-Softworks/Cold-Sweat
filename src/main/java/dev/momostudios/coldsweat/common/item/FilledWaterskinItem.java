@@ -4,7 +4,8 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -25,7 +26,7 @@ import dev.momostudios.coldsweat.api.util.TempHelper;
 
 public class FilledWaterskinItem extends Item
 {
-    static LoadedValue<Integer> WATERSKIN_STRENGTH = LoadedValue.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
+    static DynamicValue<Integer> WATERSKIN_STRENGTH = DynamicValue.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
 
     public FilledWaterskinItem()
     {

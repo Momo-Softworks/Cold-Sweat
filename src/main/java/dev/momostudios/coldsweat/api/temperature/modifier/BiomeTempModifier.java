@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.LegacyMethodHelper;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -21,19 +21,13 @@ import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
 {
-    static Method GET_TEMPERATURE = ObfuscationReflectionHelper.findMethod(Biome.class, "m_47528_", BlockPos.class);
-    static
-    {
-        GET_TEMPERATURE.setAccessible(true);
-    }
-
-    static LoadedValue<Map<ResourceLocation, Number>> BIOME_TEMPS       = LoadedValue.of(() ->
+    static DynamicValue<Map<ResourceLocation, Number>> BIOME_TEMPS = DynamicValue.of(() ->
             ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures()));
 
-    static LoadedValue<Map<ResourceLocation, Number>> BIOME_OFFSETS     = LoadedValue.of(() ->
+    static DynamicValue<Map<ResourceLocation, Number>> BIOME_OFFSETS = DynamicValue.of(() ->
             ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets()));
 
-    static LoadedValue<Map<ResourceLocation, Number>> DIMENSION_TEMPS   = LoadedValue.of(() ->
+    static DynamicValue<Map<ResourceLocation, Number>> DIMENSION_TEMPS = DynamicValue.of(() ->
     {
         Map<ResourceLocation, Number> map = new HashMap<>();
         for (List<?> entry : WorldSettingsConfig.getInstance().dimensionTemperatures())
@@ -43,7 +37,7 @@ public class BiomeTempModifier extends TempModifier
         return map;
     });
 
-    static LoadedValue<Map<ResourceLocation, Number>> DIMENSION_OFFSETS = LoadedValue.of(() ->
+    static DynamicValue<Map<ResourceLocation, Number>> DIMENSION_OFFSETS = DynamicValue.of(() ->
     {
         Map<ResourceLocation, Number> map = new HashMap<>();
         for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())

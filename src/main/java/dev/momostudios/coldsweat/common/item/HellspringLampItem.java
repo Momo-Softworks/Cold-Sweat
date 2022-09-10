@@ -9,7 +9,7 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.config.ConfigCache;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
@@ -36,7 +36,7 @@ import java.util.Optional;
 @Mod.EventBusSubscriber
 public class HellspringLampItem extends Item
 {
-    public static LoadedValue<List<Item>> VALID_FUEL = LoadedValue.of(() ->
+    public static DynamicValue<List<Item>> VALID_FUEL = DynamicValue.of(() ->
     {
         List<Item> list = new ArrayList<>();
         for (String itemID : ItemSettingsConfig.getInstance().soulLampItems())
@@ -45,7 +45,7 @@ public class HellspringLampItem extends Item
         }
         return list;
     });
-    static LoadedValue<List<String>> VALID_DIMENSIONS = LoadedValue.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
+    static DynamicValue<List<String>> VALID_DIMENSIONS = DynamicValue.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
 
     public HellspringLampItem()
     {

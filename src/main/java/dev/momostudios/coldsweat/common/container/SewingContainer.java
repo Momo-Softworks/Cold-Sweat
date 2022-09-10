@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.container;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -33,7 +33,7 @@ public class SewingContainer extends AbstractContainerMenu
     BlockPos pos;
     Inventory playerInventory;
     SewingInventory sewingInventory;
-    public static LoadedValue<List<Item>> VALID_INSULATORS = LoadedValue.of(() ->
+    public static DynamicValue<List<Item>> VALID_INSULATORS = DynamicValue.of(() ->
     {
         List<Item> list = new ArrayList<>();
         for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())

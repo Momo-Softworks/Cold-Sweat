@@ -3,7 +3,8 @@ package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.player.Player;
 import sereneseasons.api.season.SeasonHelper;
 
@@ -11,10 +12,10 @@ import java.util.function.Function;
 
 public class SereneSeasonsTempModifier extends TempModifier
 {
-    static LoadedValue<Double[]> SUMMER_TEMPS = LoadedValue.of(() -> WorldSettingsConfig.getInstance().summerTemps());
-    static LoadedValue<Double[]> AUTUMN_TEMPS = LoadedValue.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
-    static LoadedValue<Double[]> WINTER_TEMPS = LoadedValue.of(() -> WorldSettingsConfig.getInstance().winterTemps());
-    static LoadedValue<Double[]> SPRING_TEMPS = LoadedValue.of(() -> WorldSettingsConfig.getInstance().springTemps());
+    static DynamicValue<Double[]> SUMMER_TEMPS = DynamicValue.of(() -> WorldSettingsConfig.getInstance().summerTemps());
+    static DynamicValue<Double[]> AUTUMN_TEMPS = DynamicValue.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
+    static DynamicValue<Double[]> WINTER_TEMPS = DynamicValue.of(() -> WorldSettingsConfig.getInstance().winterTemps());
+    static DynamicValue<Double[]> SPRING_TEMPS = DynamicValue.of(() -> WorldSettingsConfig.getInstance().springTemps());
 
     @Override
     public Function<Temperature, Temperature> calculate(Player player)

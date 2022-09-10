@@ -6,8 +6,7 @@ import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.LoadedValue;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.util.config.DynamicValue;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -22,7 +21,7 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ArmorInsulation
 {
-    public static LoadedValue<Map<Item, Number>> INSULATING_ARMORS = LoadedValue.of(() ->
+    public static DynamicValue<Map<Item, Number>> INSULATING_ARMORS = DynamicValue.of(() ->
             ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().insulatingArmor()));
 
     @SubscribeEvent
