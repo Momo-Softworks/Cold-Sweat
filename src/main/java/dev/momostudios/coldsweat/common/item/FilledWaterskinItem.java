@@ -101,6 +101,8 @@ public class FilledWaterskinItem extends Item
                 }
             }, i);
         }
+        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
+        player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
 
         return ar;
     }

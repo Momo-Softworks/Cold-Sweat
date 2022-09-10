@@ -5,6 +5,8 @@ import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TimeTempModifier;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -49,11 +51,11 @@ public class WaterskinItem extends Item
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());
-                filledWaterskin.getOrCreateTag().putDouble("temperature", new Temperature().with(List.of(
+                filledWaterskin.getOrCreateTag().putDouble("temperature", (new Temperature().with(player, List.of(
                         new BiomeTempModifier(),
                         new BlockTempModifier(),
                         new TimeTempModifier()
-                ), player).get() * 15);
+                )).get() - (CSMath.average(ConfigCache.getInstance().maxTemp, ConfigCache.getInstance().minTemp))) * 15);
 
                 //Replace 1 of the stack with a FilledWaterskinItem
                 if (itemstack.getCount() > 1)
@@ -76,6 +78,9 @@ public class WaterskinItem extends Item
                 //Play filling sound
                 level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
                 player.swing(hand);
+
+                player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
+                player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
             }
             return ar;
         }
