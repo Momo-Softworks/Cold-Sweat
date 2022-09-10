@@ -81,16 +81,16 @@ public class BoilerBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide)
+        if (!level.isClientSide)
         {
-            if (worldIn.getBlockEntity(pos) instanceof BoilerBlockEntity te)
+            if (level.getBlockEntity(pos) instanceof BoilerBlockEntity blockEntity)
             {
                 ItemStack stack = player.getItemInHand(hand);
-                int itemFuel = te.getItemFuel(stack);
+                int itemFuel = blockEntity.getItemFuel(stack);
 
-                if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < BoilerBlockEntity.MAX_FUEL)
+                if (itemFuel != 0 && blockEntity.getFuel() + itemFuel * 0.75 < BoilerBlockEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {
@@ -105,13 +105,13 @@ public class BoilerBlock extends Block implements EntityBlock
                             stack.shrink(1);
                         }
                     }
-                    te.setFuel(te.getFuel() + itemFuel);
+                    blockEntity.setFuel(blockEntity.getFuel() + itemFuel);
 
-                    worldIn.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else
                 {
-                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
+                    NetworkHooks.openGui((ServerPlayer) player, blockEntity, pos);
                 }
             }
         }
@@ -129,18 +129,18 @@ public class BoilerBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
         if (state.getBlock() != newState.getBlock())
         {
-            BlockEntity tileentity = world.getBlockEntity(pos);
-            if (tileentity instanceof BoilerBlockEntity te)
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof BoilerBlockEntity te)
             {
-                Containers.dropContents(world, pos, te);
-                world.updateNeighborsAt(pos, this);
+                Containers.dropContents(level, pos, te);
+                level.updateNeighborsAt(pos, this);
             }
         }
-        super.onRemove(state, world, pos, newState, isMoving);
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class BoilerBlock extends Block implements EntityBlock
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random rand)
+    public void animateTick(BlockState stateIn, Level level, BlockPos pos, Random rand)
     {
         if (stateIn.getValue(LIT))
         {
@@ -174,8 +174,8 @@ public class BoilerBlock extends Block implements EntityBlock
             double d5 = direction$axis == Direction.Axis.X ? (double)direction.getStepX() * 0.52D : d4;
             double d6 = rand.nextDouble() * 6.0D / 16.0D + 0.2;
             double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getStepZ() * 0.52D : d4;
-            worldIn.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
-            worldIn.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+            level.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+            level.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
         }
     }
 
