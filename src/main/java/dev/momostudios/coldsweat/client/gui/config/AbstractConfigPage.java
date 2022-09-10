@@ -225,6 +225,9 @@ public abstract class AbstractConfigPage extends Screen
         ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, texture, button ->
         {
             addX.accept(-1);
+
+            if (setsCustomDifficulty)
+                configCache.difficulty = 4;
         });
         leftButton.active = shouldBeActive;
         this.addRenderableWidget(leftButton);
@@ -233,6 +236,9 @@ public abstract class AbstractConfigPage extends Screen
         ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, texture, button ->
         {
             addY.accept(-1);
+
+            if (setsCustomDifficulty)
+                configCache.difficulty = 4;
         });
         upButton.active = shouldBeActive;
         this.addRenderableWidget(upButton);
@@ -241,6 +247,9 @@ public abstract class AbstractConfigPage extends Screen
         ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, texture, button ->
         {
             addY.accept(1);
+
+            if (setsCustomDifficulty)
+                configCache.difficulty = 4;
         });
         downButton.active = shouldBeActive;
         this.addRenderableWidget(downButton);
@@ -249,6 +258,9 @@ public abstract class AbstractConfigPage extends Screen
         ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, texture, button ->
         {
             addX.accept(1);
+
+            if (setsCustomDifficulty)
+                configCache.difficulty = 4;
         });
         rightButton.active = shouldBeActive;
         this.addRenderableWidget(rightButton);
@@ -257,6 +269,9 @@ public abstract class AbstractConfigPage extends Screen
         ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 0, 128, 20, texture, button ->
         {
             reset.run();
+
+            if (setsCustomDifficulty)
+                configCache.difficulty = 4;
         });
         resetButton.active = shouldBeActive;
 
