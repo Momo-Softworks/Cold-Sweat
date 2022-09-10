@@ -4,7 +4,8 @@
   "package": "dev.momostudios.coldsweat.mixin",
   "client": [
     "MixinHumanoidModel",
-    "MixinXPBar"
+    "MixinXPBar",
+    "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
     "MixinMinecart",
