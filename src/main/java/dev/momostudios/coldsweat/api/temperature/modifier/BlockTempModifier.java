@@ -44,8 +44,8 @@ public class BlockTempModifier extends TempModifier
         {
             for (int z = -7; z < 7; z++)
             {
-                ChunkPos chunkPos = new ChunkPos((player.blockPosition().getX() + x) >> 4, (player.blockPosition().getZ() + z) >> 4);
-                LevelChunk chunk = getChunk(level, chunkPos, chunkMap);
+                LevelChunk chunk = level.getChunkSource().getChunkNow((player.blockPosition().getX() + x) >> 4, (player.blockPosition().getZ() + z) >> 4);
+                if (chunk == null) continue;
 
                 for (int y = -7; y < 7; y++)
                 {
@@ -53,8 +53,8 @@ public class BlockTempModifier extends TempModifier
                     {
                         BlockPos blockpos = player.blockPosition().offset(x, y, z);
 
-                        PalettedContainer<BlockState> palette = chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates();
-                        BlockState state = palette.get(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
+                        LevelChunkSection subchunk = WorldHelper.getChunkSection(chunk, blockpos.getY());
+                        BlockState state = subchunk.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
 
                         if (state.isAir()) continue;
 
