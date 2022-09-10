@@ -8,12 +8,10 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -23,20 +21,12 @@ import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
 {
-    Map<ChunkPos, LevelChunk> chunkMap = new HashMap<>();
-
     public BlockTempModifier() {}
 
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
-        ChunkPos playerChunkPos = new ChunkPos((player.blockPosition().getX()) >> 4, (player.blockPosition().getZ()) >> 4);
-
-        if (player.tickCount % 200 == 0)
-        {
-            chunkMap.keySet().removeIf(chunkPos -> chunkPos.getChessboardDistance(playerChunkPos) > 1);
-        }
 
         Level level = player.level;
 
@@ -99,8 +89,7 @@ public class BlockTempModifier extends TempModifier
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
                         }
                     }
-                    catch (Exception ignored) {
-                    }
+                    catch (Exception ignored) {}
                 }
             }
         }
@@ -124,17 +113,5 @@ public class BlockTempModifier extends TempModifier
     public String getID()
     {
         return "cold_sweat:nearby_blocks";
-    }
-
-    LevelChunk getChunk(Level world, ChunkPos pos, Map<ChunkPos, LevelChunk> chunks)
-    {
-        ChunkPos chunkPos = new ChunkPos(pos.x, pos.z);
-        LevelChunk chunk = chunks.get(chunkPos);
-        if (chunk == null)
-        {
-            chunk = world.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
-            chunks.put(chunkPos, chunk);
-        }
-        return chunk;
     }
 }
