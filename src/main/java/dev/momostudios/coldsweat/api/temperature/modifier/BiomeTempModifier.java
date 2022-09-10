@@ -47,6 +47,8 @@ public class BiomeTempModifier extends TempModifier
         return map;
     });
 
+    static int SAMPLES = 64;
+
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
@@ -55,7 +57,7 @@ public class BiomeTempModifier extends TempModifier
         try
         {
             double worldTemp = 0;
-            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), 50, 10))
+            for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), SAMPLES, 16))
             {
                 Biome biome = LegacyMethodHelper.getBiome(biomeManager, blockPos);
                 if (biome == null) continue;
