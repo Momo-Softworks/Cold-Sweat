@@ -59,6 +59,20 @@ public class CSMath
         return value < min ? min : value > max ? max : value;
     }
 
+    public static int clamp(int value, int min, int max) {
+        return value < min ? min : value > max ? max : value;
+    }
+
+    public static double ceil(double value)
+    {
+        return value + (1 - (value % 1));
+    }
+
+    public static double floor(double value)
+    {
+        return value - (value % 1);
+    }
+
     /**
      * Calculates if the given value is between two values (inclusive)
      */
