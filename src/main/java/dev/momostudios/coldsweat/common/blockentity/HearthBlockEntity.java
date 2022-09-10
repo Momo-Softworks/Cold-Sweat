@@ -189,11 +189,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         if (level != null && (hotFuel > 0 || coldFuel > 0) && this.isPlayerNearby)
         {
-            boolean showParticles = level.isClientSide && !this.getTileData().getBoolean("hideParticles");
-            int pathCount = paths.size();
-
-            // Create temporary list to add back to the master path list
-            ArrayList<SpreadPath> newPaths = new ArrayList<>();
+            if (this.ticksExisted % 10 == 0)
+            {
+                showParticles = level.isClientSide
+                             && Minecraft.getInstance().options.particles == ParticleStatus.ALL
+                             && !HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
+            }
 
             /*
              Partition the points into logical "sub-maps" to be iterated over separately each tick
