@@ -69,23 +69,20 @@ public class BlockTempModifier extends TempModifier
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
                             AtomicInteger blocks = new AtomicInteger();
-                            WorldHelper.gatherRTResults(new ClipContext(player.position().add(0, player.getBbHeight() / 2, 0), pos,
-                                    ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player),
-                                    (ctx, bpos) ->
-                                    {
-                                        BlockState rayState = level.getChunkSource().getChunkNow(bpos.getX() >> 4, bpos.getZ() >> 4).getBlockState(bpos);
-                                        if (rayState.isCollisionShapeFullBlock(level, bpos))
-                                        {
-                                            blocks.getAndIncrement();
-                                        }
-                                        return rayState;
-                                    });
+                            Vec3 playerPos = player.position().add(0, player.getBbHeight() / 2, 0);
+
+                            WorldHelper.forBlocksInRay(playerPos, pos, level,
+                            (rayState, bpos) ->
+                            {
+                                if (WorldHelper.isSpreadBlocked(level, rayState, bpos, CSMath.getDirectionFromVector(pos.subtract(playerPos))))
+                                    blocks.getAndIncrement();
+                            }, 3);
 
                             // Calculate the decrease in effectiveness due to blocks in the way
                             double blockDampening = blocks.get();
 
                             // Store this block type's total effect on the player
-                            double blockTempTotal = effectAmount + tempToAdd / (blockDampening * 2 + 1);
+                            double blockTempTotal = effectAmount + tempToAdd / (blockDampening + 1);
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
                         }
                     }
