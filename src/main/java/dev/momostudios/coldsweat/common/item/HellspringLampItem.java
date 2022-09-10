@@ -58,40 +58,46 @@ public class HellspringLampItem extends Item
         if (entityIn instanceof Player player && !worldIn.isClientSide)
         {
             double max = ConfigCache.getInstance().maxTemp;
-            TempModifier lampMod = TempHelper.getModifier(player, Temperature.Type.WORLD, HellLampTempModifier.class);
             double temp;
 
             // Is selected
-            if ((isSelected || player.getOffhandItem() == stack)
-            // Is world temp more than max
-            && (temp = lampMod != null ? lampMod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0
-            // Is in valid dimension
-            && VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString()))
+            if ((isSelected || player.getOffhandItem() == stack))
             {
-                // Drain fuel
-                if (player.tickCount % 5 == 0 && !(player.isCreative() || player.isSpectator()))
+                TempModifier lampMod = TempHelper.getModifier(player, Temperature.Type.WORLD, HellLampTempModifier.class);
+                // Is world temp more than max
+                if (VALID_DIMENSIONS.get().contains(worldIn.dimension().location().toString())
+                // Is in valid dimension
+                && (temp = lampMod != null ? lampMod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0)
                 {
-                    addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
-
-                    AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5,
-                                       player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
-                    for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
+                    // Drain fuel
+                    if (player.tickCount % 5 == 0)
                     {
-                        HellLampTempModifier modifier = TempHelper.getModifier(entity, Temperature.Type.WORLD, HellLampTempModifier.class);
-                        if (modifier != null)
-                            modifier.expires(modifier.getTicksExisted() + 5);
-                        else
-                            TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        if (!(player.isCreative() || player.isSpectator()))
+                        {
+                            addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
+                        }
+
+                        AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5,
+                                           player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
+
+                        for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
+                        {
+                            HellLampTempModifier modifier = TempHelper.getModifier(entity, Temperature.Type.WORLD, HellLampTempModifier.class);
+                            if (modifier != null)
+                                modifier.expires(modifier.getTicksExisted() + 5);
+                            else
+                                TempHelper.replaceModifier(entity, new HellLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        }
                     }
-                }
 
-                // If the conditions are met, turn on the lamp
-                if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
-                {
-                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                    stack.getOrCreateTag().putBoolean("isOn", true);
+                    // If the conditions are met, turn on the lamp
+                    if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
+                    {
+                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                        stack.getOrCreateTag().putBoolean("isOn", true);
 
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, SoundSource.PLAYERS, player, 1.5f, (float) Math.random() / 5f + 0.9f);
+                        WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, SoundSource.PLAYERS, player, 1.5f, (float) Math.random() / 5f + 0.9f);
+                    }
                 }
             }
             // If the conditions are not met, turn off the lamp
