@@ -17,14 +17,14 @@ public class ClientSettingsConfig
     private static final ForgeConfigSpec.BooleanValue celsius;
     private static final ForgeConfigSpec.IntValue tempOffset;
 
-    private static final ForgeConfigSpec.IntValue tempIconX;
-    private static final ForgeConfigSpec.IntValue tempIconY;
+    private static final ForgeConfigSpec.IntValue bodyIconX;
+    private static final ForgeConfigSpec.IntValue bodyIconY;
 
-    private static final ForgeConfigSpec.IntValue tempReadoutX;
-    private static final ForgeConfigSpec.IntValue tempReadoutY;
+    private static final ForgeConfigSpec.IntValue bodyReadoutX;
+    private static final ForgeConfigSpec.IntValue bodyReadoutY;
 
-    private static final ForgeConfigSpec.IntValue tempGaugeX;
-    private static final ForgeConfigSpec.IntValue tempGaugeY;
+    private static final ForgeConfigSpec.IntValue worldGaugeX;
+    private static final ForgeConfigSpec.IntValue worldGaugeY;
 
     private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
     private static final ForgeConfigSpec.BooleanValue iconBobbing;
@@ -48,29 +48,29 @@ public class ClientSettingsConfig
          Position of the "Steve Head" temperature icon above the hotbar
          */
         BUILDER.push("Position of the 'Steve Head' temperature gauge above the hotbar");
-        tempIconX = BUILDER
+        bodyIconX = BUILDER
                 .comment("The x position of the gauge relative to its normal position")
                 .defineInRange("Temp. Icon X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        tempIconY = BUILDER
+        bodyIconY = BUILDER
                 .comment("The y position of the gauge relative to its normal position")
                 .defineInRange("Temp. Icon Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
 
         BUILDER.push("Position of the temperature number below the icon");
-        tempReadoutX = BUILDER
+        bodyReadoutX = BUILDER
                 .comment("The x position of the temperature gauge relative to default")
                 .defineInRange("Temp. Readout X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        tempReadoutY = BUILDER
+        bodyReadoutY = BUILDER
                 .comment("The y position of the temperature gauge relative to default")
                 .defineInRange("Temp. Readout Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("Position of the world temperature gauge beside the hotbar");
-        tempGaugeX = BUILDER
+        worldGaugeX = BUILDER
                 .comment("The x position of the temperature gauge relative to default")
                 .defineInRange("Temp. Gauge X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        tempGaugeY = BUILDER
+        worldGaugeY = BUILDER
                 .comment("The y position of the temperature gauge relative to default")
                 .defineInRange("Temp. Gauge Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
@@ -122,24 +122,24 @@ public class ClientSettingsConfig
     }
 
     public int bodyIconX() {
-        return tempIconX.get();
+        return bodyIconX.get();
     }
     public int bodyIconY() {
-        return tempIconY.get();
+        return bodyIconY.get();
     }
 
     public int bodyReadoutX() {
-        return tempReadoutX.get();
+        return bodyReadoutX.get();
     }
     public int bodyReadoutY() {
-        return tempReadoutY.get();
+        return bodyReadoutY.get();
     }
 
     public int worldGaugeX() {
-        return tempGaugeX.get();
+        return worldGaugeX.get();
     }
     public int worldGaugeY() {
-        return tempGaugeY.get();
+        return worldGaugeY.get();
     }
 
     public boolean customHotbar() {
@@ -165,24 +165,24 @@ public class ClientSettingsConfig
     }
 
     public void setBodyIconX(int pos) {
-        tempIconX.set(pos);
+        bodyIconX.set(pos);
     }
     public void setBodyIconY(int pos) {
-        tempIconY.set(pos);
+        bodyIconY.set(pos);
     }
 
     public void setBodyReadoutX(int pos) {
-        tempReadoutX.set(pos);
+        bodyReadoutX.set(pos);
     }
     public void setBodyReadoutY(int pos) {
-        tempReadoutY.set(pos);
+        bodyReadoutY.set(pos);
     }
 
     public void setWorldGaugeX(int pos) {
-        tempGaugeX.set(pos);
+        worldGaugeX.set(pos);
     }
     public void setWorldGaugeY(int pos) {
-        tempGaugeY.set(pos);
+        worldGaugeY.set(pos);
     }
 
     public void setCustomHotbar(boolean enabled) {
