@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.client.gui.config.pages;
 
-import dev.momostudios.coldsweat.client.gui.config.ConfigPageBase;
+import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.client.gui.config.AbstractConfigPage;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
@@ -13,7 +14,9 @@ import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-public class ConfigPageOne extends ConfigPageBase
+import java.util.function.Supplier;
+
+public class ConfigPageOne extends AbstractConfigPage
 {
     Screen parentScreen;
     ConfigCache configCache;
@@ -58,6 +61,8 @@ public class ConfigPageOne extends ConfigPageBase
 
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
+        Supplier<Temperature.Units> properUnits = () -> clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F;
+
         // The options
 
         // Celsius
@@ -66,16 +71,20 @@ public class ConfigPageOne extends ConfigPageBase
                 new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString()), button ->
         {
             clientConfig.setCelsius(!clientConfig.celsius());
+            // Update the world temp. gauge when the button is pressed
+            Overlays.WORLD_TEMP = CSMath.convertUnits(Overlays.PLAYER_CAP.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, properUnits.get(), true);
 
+            // Update the button text to reflect the current setting
             button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.units.name").getString() + ": " +
                     (clientConfig.celsius() ? new TranslatableComponent("cold_sweat.config.celsius.name").getString() :
                             new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString())));
 
+            // Change the max & min temps to reflect the new setting
             ((EditBox) this.elementBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, true))));
+                    CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, properUnits.get(), true))));
 
             ((EditBox) this.elementBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, true))));
+                    CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, properUnits.get(), true))));
         }, false, false, new TranslatableComponent("cold_sweat.config.units.desc").getString());
 
 
@@ -84,18 +93,18 @@ public class ConfigPageOne extends ConfigPageBase
                 value -> clientConfig.setTempOffset(value.intValue()),
                 input -> input.setValue(String.valueOf(clientConfig.tempOffset())),
                 false, false, new TranslatableComponent("cold_sweat.config.temp_offset.desc_1").getString(),
-                              new TranslatableComponent("cold_sweat.config.temp_offset.desc_2", "§7", "§r").getString());
+                              "§7"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.max_temperature.name"),
-                value -> configCache.maxTemp = CSMath.convertUnits(value, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true),
-                input -> input.setValue(String.valueOf(CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, true))),
+                value -> configCache.maxTemp = CSMath.convertUnits(value, properUnits.get(), Temperature.Units.MC, true),
+                input -> input.setValue(String.valueOf(CSMath.convertUnits(configCache.maxTemp, Temperature.Units.MC, properUnits.get(), true))),
                 false, false, new TranslatableComponent("cold_sweat.config.max_temperature.desc").getString());
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.min_temperature.name"),
-                value -> configCache.minTemp = CSMath.convertUnits(value, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true),
-                input -> input.setValue(String.valueOf(CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F, true))),
+                value -> configCache.minTemp = CSMath.convertUnits(value, properUnits.get(), Temperature.Units.MC, true),
+                input -> input.setValue(String.valueOf(CSMath.convertUnits(configCache.minTemp, Temperature.Units.MC, properUnits.get(), true))),
                 false, false, new TranslatableComponent("cold_sweat.config.min_temperature.desc").getString());
 
         // Rate Multiplier
@@ -116,34 +125,22 @@ public class ConfigPageOne extends ConfigPageBase
         // Misc. Temp Effects
         this.addButton("ice_resistance", Side.RIGHT,
                 () -> new TranslatableComponent("cold_sweat.config.ice_resistance.name").getString() + ": " + (configCache.iceRes ? ON : OFF),
-                button ->
-                {
-                    configCache.iceRes = !configCache.iceRes;
-                },
+                button -> configCache.iceRes = !configCache.iceRes,
                 true, true, new TranslatableComponent("cold_sweat.config.ice_resistance.desc").getString());
 
         this.addButton("fire_resistance", Side.RIGHT,
                 () -> new TranslatableComponent("cold_sweat.config.fire_resistance.name").getString() + ": " + (configCache.fireRes ? ON : OFF),
-                button ->
-                {
-                   configCache.fireRes = !configCache.fireRes;
-                },
+                button -> configCache.fireRes = !configCache.fireRes,
                 true, true, new TranslatableComponent("cold_sweat.config.fire_resistance.desc").getString());
 
         this.addButton("show_world_temp", Side.RIGHT,
                 () -> new TranslatableComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (configCache.requireThermometer ? ON : OFF),
-                button ->
-                {
-                    configCache.requireThermometer = !configCache.requireThermometer;
-                },
+                button -> configCache.requireThermometer = !configCache.requireThermometer,
                 true, true, new TranslatableComponent("cold_sweat.config.require_thermometer.desc").getString());
 
         this.addButton("damage_scaling", Side.RIGHT,
                 () -> new TranslatableComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (configCache.damageScaling ? ON : OFF),
-                button ->
-                {
-                    configCache.damageScaling = !configCache.damageScaling;
-                },
+                button -> configCache.damageScaling = !configCache.damageScaling,
                 true, true, new TranslatableComponent("cold_sweat.config.damage_scaling.desc").getString());
     }
 
