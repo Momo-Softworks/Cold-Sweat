@@ -121,24 +121,24 @@ public class ClientSettingsConfig
         return tempOffset.get();
     }
 
-    public int tempIconX() {
+    public int bodyIconX() {
         return tempIconX.get();
     }
-    public int tempIconY() {
+    public int bodyIconY() {
         return tempIconY.get();
     }
 
-    public int tempReadoutX() {
+    public int bodyReadoutX() {
         return tempReadoutX.get();
     }
-    public int tempReadoutY() {
+    public int bodyReadoutY() {
         return tempReadoutY.get();
     }
 
-    public int tempGaugeX() {
+    public int worldGaugeX() {
         return tempGaugeX.get();
     }
-    public int tempGaugeY() {
+    public int worldGaugeY() {
         return tempGaugeY.get();
     }
 
@@ -164,24 +164,24 @@ public class ClientSettingsConfig
         tempOffset.set(offset);
     }
 
-    public void setTempIconX(int pos) {
+    public void setBodyIconX(int pos) {
         tempIconX.set(pos);
     }
-    public void setTempIconY(int pos) {
+    public void setBodyIconY(int pos) {
         tempIconY.set(pos);
     }
 
-    public void setTempReadoutX(int pos) {
+    public void setBodyReadoutX(int pos) {
         tempReadoutX.set(pos);
     }
-    public void setTempReadoutY(int pos) {
+    public void setBodyReadoutY(int pos) {
         tempReadoutY.set(pos);
     }
 
-    public void setTempGaugeX(int pos) {
+    public void setWorldGaugeX(int pos) {
         tempGaugeX.set(pos);
     }
-    public void setTempGaugeY(int pos) {
+    public void setWorldGaugeY(int pos) {
         tempGaugeY.set(pos);
     }
 
