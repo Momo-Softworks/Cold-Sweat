@@ -1,16 +1,23 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HandleHellLampAnim
 {
+    public static Map<LivingEntity, Pair<Float, Float>> RIGHT_ARM_ROTATIONS = new HashMap<>();
+    public static Map<LivingEntity, Pair<Float, Float>> LEFT_ARM_ROTATIONS = new HashMap<>();
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
@@ -18,30 +25,42 @@ public class HandleHellLampAnim
         {
             Player player = event.player;
 
-            float rightArmRot = player.getPersistentData().getFloat("rightArmRot");
+            Pair<Float, Float> rightArmRot = RIGHT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
             if (PlayerHelper.holdingLamp(player, HumanoidArm.RIGHT))
             {
-                if (rightArmRot < 70)
-                    player.getPersistentData().putFloat("rightArmRot", rightArmRot + (71 - rightArmRot) / 2);
+                float post = rightArmRot.getFirst();
+                if (post < 69.99)
+                {
+                    RIGHT_ARM_ROTATIONS.put(player, Pair.of(post + (70 - post) / 3f, post));
+                }
             }
             else
             {
-                if (rightArmRot > 0)
-                    player.getPersistentData().putFloat("rightArmRot", rightArmRot + (0 - rightArmRot) / 2);
+                float post = rightArmRot.getFirst();
+                if (post > 0.01)
+                {
+                    RIGHT_ARM_ROTATIONS.put(player, Pair.of(post + (0 - post) / 3f, post));
+                }
             }
 
-            float leftArmRot = player.getPersistentData().getFloat("leftArmRot");
+            Pair<Float, Float> leftArmRot = LEFT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
             if (PlayerHelper.holdingLamp(player, HumanoidArm.LEFT))
             {
-                if (leftArmRot < 70)
-                    player.getPersistentData().putFloat("leftArmRot", leftArmRot + (71 - leftArmRot) / 2);
+                float post = leftArmRot.getFirst();
+                if (post < 69.99)
+                {
+                    LEFT_ARM_ROTATIONS.put(player, Pair.of(post + (71 - post) / 3f, post));
+                }
             }
             else
             {
-                if (leftArmRot > 0)
-                    player.getPersistentData().putFloat("leftArmRot", leftArmRot + (0 - leftArmRot) / 2);
+                float post = leftArmRot.getFirst();
+                if (post > 0.01)
+                {
+                    LEFT_ARM_ROTATIONS.put(player, Pair.of(post + (0 - post) / 3f, post));
+                }
             }
         }
     }

@@ -1,11 +1,14 @@
 package dev.momostudios.coldsweat.mixin;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.client.event.HandleHellLampAnim;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -28,10 +31,6 @@ public class MixinHumanoidModel
     @Shadow
     public ModelPart leftArm;
 
-    @Final
-    @Shadow
-    public ModelPart head;
-
     /**
      * @author iMikul
      * @reason Adds functions for the Soulfire Lamp
@@ -41,21 +40,23 @@ public class MixinHumanoidModel
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.RIGHT);
-        float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("rightArmRot"));
-        float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 30);
-        float rightArmRot = armRot + rotOffset;
+        Pair<Float, Float> armRot = HandleHellLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
+        float rightArmRot = CSMath.toRadians(Mth.lerp(Minecraft.getInstance().getFrameTime(), armRot.getSecond(), armRot.getFirst()));
 
         switch (model.rightArmPose)
         {
-            case EMPTY -> {
+            case EMPTY ->
+            {
                 this.rightArm.xRot = this.rightArm.xRot - rightArmRot;
                 this.rightArm.yRot = 0.0F;
             }
-            case BLOCK -> {
+            case BLOCK ->
+            {
                 this.rightArm.xRot = this.rightArm.xRot * 0.5F - 0.9424779F - rightArmRot;
                 this.rightArm.yRot = (-(float) Math.PI / 6F);
             }
-            case ITEM -> {
+            case ITEM ->
+            {
                 this.rightArm.xRot = this.rightArm.xRot * (holdingLamp ? 0.15F : 0.5f) - ((float) Math.PI / 10F) - rightArmRot;
                 this.rightArm.zRot = this.rightArm.zRot * (holdingLamp ? 0.15F : 0.5f);
                 this.rightArm.yRot = 0.0F;
@@ -72,21 +73,23 @@ public class MixinHumanoidModel
     public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.LEFT);
-        float armRot = CSMath.toRadians(entity.getPersistentData().getFloat("leftArmRot"));
-        float rotOffset = CSMath.toRadians(Minecraft.getInstance().getFrameTime()) * (float) ((Math.toRadians(holdingLamp ? 70 : 0) - armRot) * 20);
-        float leftArmRot = armRot + rotOffset;
+        Pair<Float, Float> armRot = HandleHellLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
+        float leftArmRot = CSMath.toRadians((float) CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0f, 1f));
 
         switch (model.leftArmPose)
         {
-            case EMPTY -> {
+            case EMPTY ->
+            {
                 this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
                 this.leftArm.yRot = 0.0F;
             }
-            case BLOCK -> {
+            case BLOCK ->
+            {
                 this.leftArm.xRot = this.leftArm.xRot * 0.5f - 0.9424779F - leftArmRot;
                 this.leftArm.yRot = ((float) Math.PI / 6F);
             }
-            case ITEM -> {
+            case ITEM ->
+            {
                 this.leftArm.xRot = this.leftArm.xRot * (holdingLamp ? 0.15F : 0.5f) - ((float) Math.PI / 10F) - leftArmRot;
                 this.leftArm.zRot = this.leftArm.zRot * (holdingLamp ? 0.15F : 0.5f);
                 this.leftArm.yRot = 0.0F;
