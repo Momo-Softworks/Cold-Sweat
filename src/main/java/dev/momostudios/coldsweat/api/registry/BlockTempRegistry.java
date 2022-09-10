@@ -8,11 +8,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 
 public class BlockTempRegistry
 {
-    public static final HashSet<BlockTemp> BLOCK_EFFECTS = new HashSet<>();
+    public static final LinkedList<BlockTemp> BLOCK_EFFECTS = new LinkedList<>();
     public static final HashMap<Block, BlockTemp> MAPPED_BLOCKS = new HashMap<>();
     public static final BlockTemp DEFAULT_BLOCK_EFFECT = new BlockTemp() {
         @Override
@@ -46,13 +46,13 @@ public class BlockTempRegistry
 
     public static BlockTemp getEntryFor(BlockState blockstate)
     {
-        Block block = blockstate.getBlock();
-        return MAPPED_BLOCKS.computeIfAbsent(block, (block2) ->
+        if (blockstate.isAir())
         {
-            if (blockstate.isAir())
-            {
-                return DEFAULT_BLOCK_EFFECT;
-            }
+            return DEFAULT_BLOCK_EFFECT;
+        }
+
+        return MAPPED_BLOCKS.computeIfAbsent(blockstate.getBlock(), (block) ->
+        {
             for (BlockTemp blockTemp : BLOCK_EFFECTS)
             {
                 if (blockTemp.hasBlock(block))
