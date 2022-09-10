@@ -26,7 +26,7 @@ public class AddTempModifiers
     {
         if (event.getEntity() instanceof Player player && !player.level.isClientSide)
         {
-            WorldHelper.schedule(() ->
+            TaskScheduler.scheduleServer(() ->
             {
                 TempHelper.addModifier(player, new BiomeTempModifier().tickRate(8),  Temperature.Type.WORLD, false);
                 TempHelper.addModifier(player, new TimeTempModifier().tickRate(20),  Temperature.Type.WORLD, false);

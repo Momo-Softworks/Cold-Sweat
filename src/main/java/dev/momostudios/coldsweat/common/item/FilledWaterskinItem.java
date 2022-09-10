@@ -96,7 +96,7 @@ public class FilledWaterskinItem extends Item
 
         for (int i = 0; i < 10; i++)
         {
-            WorldHelper.schedule(() ->
+            TaskScheduler.scheduleClient(() ->
             {
                 for (int p = 0; p < 5; p++)
                 {
