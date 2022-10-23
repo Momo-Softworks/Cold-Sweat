@@ -60,63 +60,63 @@ public class HearthDebugRenderer
             // Points to draw lines
             BiConsumer<Vector3f, Float> nw = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> ne = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> sw = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, -1, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, -1, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> se = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 1, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> nu = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, -1, 0, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, -1, 0, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> nd = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> su = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> sd = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 1, 0, 0).endVertex();
             };
             BiConsumer<Vector3f, Float> eu = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
             };
             BiConsumer<Vector3f, Float> ed = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, -1).endVertex();
+                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, -1).endVertex();
             };
             BiConsumer<Vector3f, Float> wu = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
             };
             BiConsumer<Vector3f, Float> wd = (pos, renderAlpha) ->
             {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0f, 0f, 0f).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
             };
 
             for (Map.Entry<BlockPos, Set<BlockPos>> entry : HEARTH_LOCATIONS.entrySet())
