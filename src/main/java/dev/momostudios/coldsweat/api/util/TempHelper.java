@@ -7,6 +7,7 @@ import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlayerModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
@@ -16,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,63 +33,64 @@ public class TempHelper
      */
     public static Temperature getTemperature(Player player, Temperature.Type type)
     {
-        return new Temperature(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.get(type)).orElse(0.0));
+        return new Temperature(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()).getTemp(type));
     }
 
     public static void setTemperature(Player player, Temperature value, Temperature.Type type)
     {
-        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-        {
-            cap.set(type, value.get());
-        });
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()).setTemp(type, value.get());
     }
 
     public static void addTemperature(Player player, Temperature value, Temperature.Type type)
     {
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
-            cap.set(type, value.add(cap.get(type)).get());
+            cap.setTemp(type, value.add(cap.getTemp(type)).get());
         });
+    }
+
+    /**
+     * @param modClass The class of the TempModifier to check for
+     * @param type The type of TempModifier to check for
+     * @return true if the player has a TempModifier that extends the given class
+     */
+    public static boolean hasModifier(Player player, Temperature.Type type, Class<? extends TempModifier> modClass)
+    {
+        return player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
 
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
+    @Nullable
     public static <T extends TempModifier> T getModifier(Player player, Temperature.Type type, Class<T> modClass)
     {
-        AtomicReference<T> mod = new AtomicReference<>();
-        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        AtomicReference<TempModifier> mod = new AtomicReference<>(null);
+        for (TempModifier modifier : player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()).getModifiers(type))
         {
-            for (TempModifier modifier : cap.getModifiers(type))
+            if (modifier.getClass().equals(modClass))
             {
-                if (modifier.getClass() == modClass)
-                {
-                    mod.set((T) modifier);
-                    break;
-                }
+                mod.set(modifier);
+                break;
             }
-        });
-        return mod.get();
+        }
+        return (T) mod.get();
     }
 
     /**
      * @return The first modifier applied to the player that fits the predicate.
      */
+    @Nullable
     public static TempModifier getModifier(Player player, Temperature.Type type, Predicate<TempModifier> condition)
     {
-        AtomicReference<TempModifier> mod = new AtomicReference<>();
-        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        for (TempModifier modifier : player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()).getModifiers(type))
         {
-            for (TempModifier modifier : cap.getModifiers(type))
+            if (condition.test(modifier))
             {
-                if (condition.test(modifier))
-                {
-                    mod.set(modifier);
-                    break;
-                }
+                return modifier;
             }
-        });
-        return mod.get();
+        }
+        return null;
     }
 
     /**
@@ -128,15 +131,23 @@ public class TempHelper
 
                     // Find all the modifiers of this type
                     List<TempModifier> matchingMods = modifiers.stream().filter(mod -> mod.getID().equals(newModifier.getID())).toList();
+                    int matchingCount = matchingMods.size();
 
-                    // If we're replacing, remove the old one if needed
-                    if (replace && matchingMods.size() >= event.maxCount)
+                    // If there are more modifiers than allowed
+                    if (matchingCount >= event.maxCount)
                     {
-                        modifiers.removeAll(matchingMods.stream().limit(matchingMods.size() - event.maxCount).toList());
+                        // If replacing, delete extra modifiers
+                        if (replace)
+                        {
+                            modifiers.removeAll(matchingMods.stream().limit(matchingMods.size() - (event.maxCount - 1)).toList());
+                            matchingCount = 0;
+                        }
+                        // Otherwise the modifier can't be added
+                        else return;
                     }
 
                     // Add the modifier and update
-                    if (replace || matchingMods.size() < event.maxCount)
+                    if (matchingCount < event.maxCount)
                     {
                         modifiers.add(event.getModifier());
                         updateModifiers(player, cap);
@@ -250,15 +261,15 @@ public class TempHelper
     public static String getModifierTag(Temperature.Type type)
     {
         return switch (type)
-                {
-                    case CORE -> "coreTempModifiers";
-                    case WORLD -> "worldTempModifiers";
-                    case BASE -> "baseTempModifiers";
-                    case RATE -> "rateTempModifiers";
-                    case MAX -> "hottestTempModifiers";
-                    case MIN -> "coldestTempModifiers";
-                    default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
-                };
+        {
+            case CORE  -> "coreTempModifiers";
+            case WORLD -> "worldTempModifiers";
+            case BASE  -> "baseTempModifiers";
+            case RATE  -> "rateTempModifiers";
+            case MAX   -> "maxTempModifiers";
+            case MIN   -> "minTempModifiers";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
+        };
     }
 
     /**
@@ -270,42 +281,31 @@ public class TempHelper
     public static String getTempTag(Temperature.Type type)
     {
         return switch (type)
-                {
-                    case CORE -> "coreTemp";
-                    case WORLD -> "worldTemp";
-                    case BASE -> "baseTemp";
-                    case MAX -> "maxTWorldTemp";
-                    case MIN -> "minWorldTemp";
-                    default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
-                };
+        {
+            case CORE  -> "coreTemp";
+            case WORLD -> "worldTemp";
+            case BASE  -> "baseTemp";
+            case MAX   -> "maxWorldTemp";
+            case MIN   -> "minWorldTemp";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
+        };
     }
 
     public static void updateTemperature(Player player, ITemperatureCap cap, boolean instant)
     {
-        if (!player.level.isClientSide)
+        if (!player.level.isClientSide && cap instanceof PlayerTempCap playerCap)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-            new PlayerTempSyncMessage(cap.get(Temperature.Type.WORLD),
-                cap.get(Temperature.Type.CORE),
-                cap.get(Temperature.Type.BASE),
-                cap.get(Temperature.Type.MAX),
-                cap.get(Temperature.Type.MIN), instant));
+            new PlayerTempSyncMessage(playerCap.serializeTemps(), instant));
         }
     }
 
-
     public static void updateModifiers(Player player, ITemperatureCap cap)
     {
-        if (!player.level.isClientSide)
+        if (!player.level.isClientSide && cap instanceof PlayerTempCap playerCap)
         {
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-            new PlayerModifiersSyncMessage(
-                cap.getModifiers(Temperature.Type.WORLD),
-                cap.getModifiers(Temperature.Type.CORE),
-                cap.getModifiers(Temperature.Type.BASE),
-                cap.getModifiers(Temperature.Type.RATE),
-                cap.getModifiers(Temperature.Type.MAX),
-                cap.getModifiers(Temperature.Type.MIN)));
+            new PlayerModifiersSyncMessage(playerCap.serializeModifiers()));
         }
     }
 }

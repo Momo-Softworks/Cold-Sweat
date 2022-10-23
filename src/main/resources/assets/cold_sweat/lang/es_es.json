@@ -6,7 +6,7 @@
   "block.cold_sweat.sewing_table":      "Mesa de costura",
 
   "item.cold_sweat.minecart_insulation": "Aislamiento de vagonetas",
-  "item.cold_sweat.hellspring_lamp":     "Lámpara Infernal",
+  "item.cold_sweat.soulspring_lamp":     "Lámpara Infernal",
   "item.cold_sweat.thermometer":         "Termómetro",
   "item.cold_sweat.waterskin":           "Cantimplora",
   "item.cold_sweat.waterskin.filled":    "Lleno",
@@ -35,8 +35,8 @@
   "death.attack.hot.player":    "%1$s murio de un golpe de calor mientras peleaba %2$s",
 
   "entity.player.damage.freeze":   "El jugador se congela",
-  "item.hellspring_lamp.on":       "Lámpara infernal encedido",
-  "item.hellspring_lamp.off":      "Lámpara infernal apagado",
+  "item.soulspring_lamp.on":       "Lámpara infernal encedido",
+  "item.soulspring_lamp.off":      "Lámpara infernal apagado",
 
   "cold_sweat.screen.hearth.show_particles": "Mostrar partículas de aire",
 

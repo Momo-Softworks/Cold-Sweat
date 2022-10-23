@@ -6,7 +6,7 @@
     "block.cold_sweat.sewing_table":      "缝纫台",
   
     "item.cold_sweat.minecart_insulation": "隔温矿车",
-    "item.cold_sweat.hellspring_lamp":       "魂火灯",
+    "item.cold_sweat.soulspring_lamp":       "魂火灯",
     "item.cold_sweat.thermometer":         "温度计",
     "item.cold_sweat.waterskin":           "水袋",
     "item.cold_sweat.waterskin.filled":    "满的",
@@ -32,8 +32,8 @@
     "death.attack.hot.player":    "%1$s 在与 %2$s 的战斗中中暑而亡",
   
     "entity.player.damage.freeze": "玩家被冻住",
-    "item.hellspring_lamp.on":       "魂火灯已点燃",
-    "item.hellspring_lamp.off":      "魂火灯已熄灭",
+    "item.soulspring_lamp.on":       "魂火灯已点燃",
+    "item.soulspring_lamp.off":      "魂火灯已熄灭",
   
     "cold_sweat.config.title":                        "Cold Sweat配置",
     "cold_sweat.config.section.temperature_details":  "温度配置",

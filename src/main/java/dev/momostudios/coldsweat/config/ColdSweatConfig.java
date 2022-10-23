@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -170,7 +170,7 @@ public class ColdSweatConfig
         return configReference;
     }
 
-    public void writeValues(ConfigCache cache)
+    public void writeValues(ConfigSettings cache)
     {
         setDifficulty(cache.difficulty);
         setMaxHabitable(cache.maxTemp);

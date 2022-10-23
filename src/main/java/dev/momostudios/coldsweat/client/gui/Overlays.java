@@ -6,8 +6,9 @@ import dev.momostudios.coldsweat.api.temperature.Temperature.Type;
 import dev.momostudios.coldsweat.api.temperature.Temperature.Units;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.gui.IIngameOverlay;
@@ -29,7 +29,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
-    public static ITemperatureCap PLAYER_CAP = null;
+    public static ITemperatureCap PLAYER_CAP = new PlayerTempCap();
 
     // Stuff for world temperature
     static boolean SHOW_WORLD_TEMP = false;
@@ -60,8 +60,8 @@ public class Overlays
 
         if (player != null && SHOW_WORLD_TEMP)
         {
-            double min = ConfigCache.getInstance().minTemp + MIN_OFFSET;
-            double max = ConfigCache.getInstance().maxTemp + MAX_OFFSET;
+            double min = ConfigSettings.getInstance().minTemp + MIN_OFFSET;
+            double max = ConfigSettings.getInstance().maxTemp + MAX_OFFSET;
 
             // Get player world temperature
             double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Units.C : Units.F, Units.MC, true);
@@ -92,7 +92,7 @@ public class Overlays
             RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
 
             // Render frame
-            GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.tempGaugeX(), height - 19 + CLIENT_CONFIG.tempGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
+            GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.worldGaugeX(), height - 19 + CLIENT_CONFIG.worldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             RenderSystem.disableBlend();
 
@@ -103,8 +103,8 @@ public class Overlays
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
             Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.tempOffset()) + "",
-            /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.tempGaugeX(),
-            /* Y */ height - 15 - bob + CLIENT_CONFIG.tempGaugeY(), color);
+            /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.worldGaugeX(),
+            /* Y */ height - 15 - bob + CLIENT_CONFIG.worldGaugeY(), color);
             poseStack.popPose();
         }
     });
@@ -156,13 +156,13 @@ public class Overlays
             RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
             if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
             {
-                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.tempIconX(), height - 53 - threatOffset + CLIENT_CONFIG.tempIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
                 RenderSystem.enableBlend();
                 RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
             }
             // Render new icon on top of old icon (if blending)
             // Otherwise this is just the regular icon
-            GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.tempIconX(), height - 53 - threatOffset + CLIENT_CONFIG.tempIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+            GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
             RenderSystem.setShaderColor(1, 1, 1, 1);
 
             // Render Readout
@@ -171,8 +171,8 @@ public class Overlays
             int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
             String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-            float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.tempReadoutX();
-            float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.tempReadoutY();
+            float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.bodyReadoutX();
+            float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.bodyReadoutY();
 
             // Draw the outline
             font.draw(poseStack, s, x + 1, y, colorBG);
@@ -189,58 +189,51 @@ public class Overlays
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().cameraEntity instanceof Player entity)
+        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().cameraEntity instanceof Player player)
         {
             // Ensure player temp capability is stored
-            if (PLAYER_CAP == null || entity.tickCount % 40 == 0)
+            if (PLAYER_CAP == null || player.tickCount % 40 == 0)
             {
-                PLAYER_CAP = entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(null);
+                PLAYER_CAP = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(null);
             }
 
 
             /* World Temp */
-
-            SHOW_WORLD_TEMP = !ConfigCache.getInstance().requireThermometer
-                           || CSMath.isInRange(entity.getInventory().findSlotMatchingItem(new ItemStack(ModItems.THERMOMETER)), 0, 8)
-                           || entity.getOffhandItem().getItem()  == ModItems.THERMOMETER;
 
             if (SHOW_WORLD_TEMP)
             {
                 boolean celsius = CLIENT_CONFIG.celsius();
 
                 // Get temperature in actual degrees
-                double realTemp = CSMath.convertUnits(PLAYER_CAP.get(Type.WORLD), Units.MC, celsius ? Units.C : Units.F, true);
+                double realTemp = CSMath.convertUnits(PLAYER_CAP.getTemp(Type.WORLD), Units.MC, celsius ? Units.C : Units.F, true);
 
                 // Calculate the blended world temp for this tick
                 PREV_WORLD_TEMP = WORLD_TEMP;
                 WORLD_TEMP += (realTemp - WORLD_TEMP) / 6.0;
 
                 // Update max/min offset
-                MAX_OFFSET = PLAYER_CAP.get(Temperature.Type.MAX);
-                MIN_OFFSET = PLAYER_CAP.get(Type.MIN);
+                MAX_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MAX);
+                MIN_OFFSET = PLAYER_CAP.getTemp(Type.MIN);
             }
 
 
             /* Body Temp */
 
-            // Get if the body temp icon should be shown
-            SHOW_BODY_TEMP = !entity.isCreative() && !entity.isSpectator() && PLAYER_CAP != null;
+            // Blend body temp (per tick)
+            PREV_BODY_TEMP = BODY_TEMP;
+            BODY_TEMP += (PLAYER_CAP.getTemp(Type.BODY) - BODY_TEMP) / 5;
 
             // Handle effects for the icon (bobbing, stage, transition)
             if (SHOW_BODY_TEMP)
             {
                 // Get icon bob
-                ICON_BOB = entity.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
-
-                // Blend body temp (per tick)
-                PREV_BODY_TEMP = BODY_TEMP;
-                BODY_TEMP += (PLAYER_CAP.get(Type.BODY) - BODY_TEMP) / 5;
+                ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
 
                 // Get the severity of the player's body temperature
                 BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
 
                 // Get the icon to be displayed
-                int neededIcon = (int) CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
+                int neededIcon = CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
 
                 // Start transition
                 if (BODY_ICON != neededIcon)
@@ -256,6 +249,19 @@ public class Overlays
                     PREV_BODY_ICON = BODY_ICON;
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void updateDisplayCondition(TickEvent.PlayerTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.START)
+        {
+            Player player = event.player;
+            SHOW_WORLD_TEMP = !ConfigSettings.getInstance().requireThermometer
+                            || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
+                            || player.getOffhandItem().getItem() == ModItems.THERMOMETER;
+            SHOW_BODY_TEMP = !player.isCreative() && !player.isSpectator();
         }
     }
 

@@ -29,6 +29,8 @@ public class ClientSettingsConfig
     private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
     private static final ForgeConfigSpec.BooleanValue iconBobbing;
 
+    private static final ForgeConfigSpec.BooleanValue hearthDebug;
+
 
     static 
     {
@@ -82,6 +84,10 @@ public class ClientSettingsConfig
             .comment("Controls whether the temperature icon shakes when in critical condition")
             .define("Icon Bobbing", true);
         BUILDER.pop();
+
+        hearthDebug = BUILDER
+            .comment("Displays areas that the Hearth affecting when the F3 debug menu is open")
+            .define("Hearth Debug", true);
 
         SPEC = BUILDER.build();
     }
@@ -150,7 +156,9 @@ public class ClientSettingsConfig
         return iconBobbing.get();
     }
 
-
+    public boolean hearthDebug() {
+        return hearthDebug.get();
+    }
 
     /*
      * Safe set methods for config values
@@ -191,6 +199,10 @@ public class ClientSettingsConfig
 
     public void setIconBobbing(boolean enabled) {
         iconBobbing.set(enabled);
+    }
+
+    public void setHearthDebug(boolean enabled) {
+        hearthDebug.set(enabled);
     }
 
     public void save() {

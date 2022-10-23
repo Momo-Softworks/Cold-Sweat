@@ -1,21 +1,19 @@
 package dev.momostudios.coldsweat.common.capability;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.PlayerTempSyncMessage;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,26 +23,29 @@ import java.util.List;
  */
 public class PlayerTempCap implements ITemperatureCap
 {
-    static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE,
-                                                      Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
+    static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
+    static Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
 
     private double[] syncedValues = new double[5];
-    private int ticksSinceSync = 0;
+    double ticksSinceSync = 0;
 
-    double worldTemp;
-    double coreTemp;
-    double baseTemp;
-    double maxTemp;
-    double minTemp;
+    double worldTemp = 1;
+    double coreTemp = 0;
+    double baseTemp = 0;
+    double maxOffset = 0;
+    double minOffset = 0;
 
-    List<TempModifier> worldModifiers    = new ArrayList<>();
-    List<TempModifier> coreModifiers     = new ArrayList<>();
-    List<TempModifier> baseModifiers     = new ArrayList<>();
-    List<TempModifier> rateModifiers     = new ArrayList<>();
-    List<TempModifier> maxModifiers = new ArrayList<>();
-    List<TempModifier> minModifiers = new ArrayList<>();
+    public boolean showBodyTemp;
+    public boolean showWorldTemp;
 
-    public double get(Temperature.Type type)
+    List<TempModifier> worldModifiers = new ArrayList<>();
+    List<TempModifier> coreModifiers  = new ArrayList<>();
+    List<TempModifier> baseModifiers  = new ArrayList<>();
+    List<TempModifier> rateModifiers  = new ArrayList<>();
+    List<TempModifier> maxModifiers   = new ArrayList<>();
+    List<TempModifier> minModifiers   = new ArrayList<>();
+
+    public double getTemp(Temperature.Type type)
     {
         return switch (type)
         {
@@ -52,21 +53,21 @@ public class PlayerTempCap implements ITemperatureCap
             case CORE  -> coreTemp;
             case BASE  -> baseTemp;
             case BODY  -> baseTemp + coreTemp;
-            case MAX   -> maxTemp;
-            case MIN   -> minTemp;
+            case MAX   -> maxOffset;
+            case MIN   -> minOffset;
             default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.getValue(): " + type);
         };
     }
 
-    public void set(Temperature.Type type, double value)
+    public void setTemp(Temperature.Type type, double value)
     {
         switch (type)
         {
             case WORLD -> this.worldTemp = value;
             case CORE  -> this.coreTemp  = value;
             case BASE  -> this.baseTemp  = value;
-            case MAX   -> this.maxTemp = value;
-            case MIN   -> this.minTemp = value;
+            case MAX   -> this.maxOffset = value;
+            case MIN   -> this.minOffset = value;
             default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.setValue(): " + type);
         }
     }
@@ -124,92 +125,96 @@ public class PlayerTempCap implements ITemperatureCap
         this.maxModifiers   = cap.getModifiers(Temperature.Type.RATE);
         this.minModifiers   = cap.getModifiers(Temperature.Type.RATE);
 
-        this.worldTemp = cap.get(Temperature.Type.WORLD);
-        this.coreTemp = cap.get(Temperature.Type.CORE);
-        this.baseTemp = cap.get(Temperature.Type.BASE);
-        this.maxTemp = cap.get(Temperature.Type.MAX);
-        this.minTemp = cap.get(Temperature.Type.MIN);
+        this.worldTemp = cap.getTemp(Temperature.Type.WORLD);
+        this.coreTemp  = cap.getTemp(Temperature.Type.CORE);
+        this.baseTemp  = cap.getTemp(Temperature.Type.BASE);
+        this.maxOffset = cap.getTemp(Temperature.Type.MAX);
+        this.minOffset = cap.getTemp(Temperature.Type.MIN);
     }
 
     public void tickDummy(Player player)
     {
         for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
-            tickModifiers(player, new Temperature(), type);
+            new Temperature().with(player, getModifiers(type));
         }
     }
 
     public void tick(Player player)
     {
-        ConfigCache config = ConfigCache.getInstance();
+        ConfigSettings config = ConfigSettings.getInstance();
 
         // Tick expiration time for world modifiers
-        double worldTemp = tickModifiers(player, new Temperature(), Temperature.Type.WORLD).get();
-        Temperature coreTemp = tickModifiers(player, new Temperature(this.coreTemp), Temperature.Type.CORE);
-        Temperature baseTemp = tickModifiers(player, new Temperature(), Temperature.Type.BASE);
-        double maxOffset = tickModifiers(player, new Temperature(), Temperature.Type.MAX).get();
-        double minOffset = tickModifiers(player, new Temperature(), Temperature.Type.MIN).get();
+        double newWorldTemp = new Temperature().with(player, getModifiers(Temperature.Type.WORLD)).get();
+        double newCoreTemp  = new Temperature(this.coreTemp).with(player, getModifiers(Temperature.Type.CORE)).get();
+        double newBaseTemp  = new Temperature().with(player, getModifiers(Temperature.Type.BASE)).get();
+        double newMaxOffset = new Temperature().with(player, getModifiers(Temperature.Type.MAX)).get();
+        double newMinOffset = new Temperature().with(player, getModifiers(Temperature.Type.MIN)).get();
 
-        double maxTemp = config.maxTemp + maxOffset;
-        double minTemp = config.minTemp + minOffset;
+        double maxTemp = config.maxTemp + newMaxOffset;
+        double minTemp = config.minTemp + newMinOffset;
 
         double tempRate = 7.0d;
 
-        int magnitude = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
-        if (magnitude != 0)
+        // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
+        int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
+
+        // Don't make the player's temperature worse if they're in creative/spectator mode
+        if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
         {
-            double difference = Math.abs(worldTemp - CSMath.clamp(worldTemp, minTemp, maxTemp));
-            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * config.rate, Math.abs(config.rate / 50)) * magnitude);
-            coreTemp = coreTemp.add(tickModifiers(player, changeBy, Temperature.Type.RATE));
+            double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
+            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude);
+            newCoreTemp += changeBy.with(player, getModifiers(Temperature.Type.RATE)).get();
         }
-        if (magnitude != CSMath.getSign(coreTemp.get()))
+        // If the player's temperature and world temperature are not both hot or both cold
+        if (magnitude != CSMath.getSign(newCoreTemp))
         {
             // Return the player's body temperature to 0
-            coreTemp = coreTemp.add(getBodyReturnRate(worldTemp, coreTemp.get() > 0 ? maxTemp : minTemp, config.rate, coreTemp.get()));
+            newCoreTemp += getBodyReturnRate(newWorldTemp, newCoreTemp > 0 ? maxTemp : minTemp, config.rate, newCoreTemp);
         }
 
-        if (ticksSinceSync++ >= 5
-        && ((int) syncedValues[0] != (int) coreTemp.get()
-        || (int) syncedValues[1] != (int) baseTemp.get()
-        || CSMath.crop(syncedValues[2], 2) != CSMath.crop(worldTemp, 2)
-        || CSMath.crop(syncedValues[3], 2) != CSMath.crop(maxOffset, 2)
-        || CSMath.crop(syncedValues[4], 2) != CSMath.crop(minOffset, 2)))
+        // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
+        if (player.tickCount % 20 == 0)
         {
-            ticksSinceSync = 0;
-            syncedValues = new double[] { coreTemp.get(), baseTemp.get(), worldTemp, maxOffset, minOffset };
-
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                    new PlayerTempSyncMessage(
-                            worldTemp,
-                            coreTemp.get(),
-                            baseTemp.get(),
-                            maxOffset,
-                            minOffset, false));
+            showWorldTemp = !ConfigSettings.getInstance().requireThermometer
+                         || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
+                         || player.getOffhandItem().getItem() == ModItems.THERMOMETER;
+            showBodyTemp = !player.isCreative() && !player.isSpectator();
         }
 
-        // Sets the player's body temperature to BASE + CORE
-        set(Temperature.Type.BASE, baseTemp.get());
-        set(Temperature.Type.CORE, CSMath.clamp(coreTemp.get(), -150d, 150d));
-        set(Temperature.Type.WORLD, worldTemp);
-        set(Temperature.Type.MAX, maxOffset);
-        set(Temperature.Type.MIN, minOffset);
+        // Write the new temperature values
+        setTemp(Temperature.Type.BASE, newBaseTemp);
+        setTemp(Temperature.Type.CORE, CSMath.clamp(newCoreTemp, -150f, 150f));
+        setTemp(Temperature.Type.WORLD, newWorldTemp);
+        setTemp(Temperature.Type.MAX, newMaxOffset);
+        setTemp(Temperature.Type.MIN, newMinOffset);
+
+        // Sync the temperature values to the client
+        if (ticksSinceSync++ >= 5
+        && (((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
+        ||  ((Math.abs(syncedValues[1] - newBaseTemp) >= 1 && showBodyTemp))
+        ||  ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
+        ||  ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
+        ||  ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
+        {
+            TempHelper.updateTemperature(player, this, false);
+            syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
+            ticksSinceSync = 0;
+        }
 
         // Calculate body/base temperatures with modifiers
-        Temperature bodyTemp = baseTemp.add(coreTemp);
-
-        boolean hasFireResistance = player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes;
-        boolean hasIceResistance = player.hasEffect(ModEffects.ICE_RESISTANCE)   && config.iceRes;
+        double bodyTemp = getTemp(Temperature.Type.BODY);
 
         //Deal damage to the player if temperature is critical
         if (player.tickCount % 40 == 0)
         {
             boolean damageScaling = config.damageScaling;
 
-            if (bodyTemp.get() >= 100 && !hasFireResistance && !player.hasEffect(ModEffects.GRACE))
+            if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes) && !player.hasEffect(ModEffects.GRACE))
             {
                 player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
             }
-            else if (bodyTemp.get() <= -100 && !hasIceResistance && !player.hasEffect(ModEffects.GRACE))
+            else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes) && !player.hasEffect(ModEffects.GRACE))
             {
                 player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
             }
@@ -221,29 +226,12 @@ public class PlayerTempCap implements ITemperatureCap
     {
         double staticRate = 3.0d;
         // Get the difference between the world temp and the threshold to determine the speed of return (closer to the threshold = slower)
-        // Divide it by the staticRate (7) because it feels nice
+        // Divide it by the staticRate (3) because it feels nice
         // Multiply it by the configured tempRate Rate Modifier
         // If it's too slow, default to tempRate / 30 instead
         // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
         double changeBy = Math.max((Math.abs(worldTemp - tempLimit) / staticRate) * tempRate, tempRate / 10) * -CSMath.getSign(bodyTemp);
         return CSMath.getLeastExtreme(changeBy, -bodyTemp);
-    }
-
-    private Temperature tickModifiers(Player player, Temperature temp, Temperature.Type type)
-    {
-        List<TempModifier> modifiers = getModifiers(type);
-        Temperature newTemp = new Temperature(temp.get());
-
-        for (TempModifier modifier : modifiers)
-        {
-            // Apply the TempModifier's function to the Temperature
-            // If the modifier's tick rate lines up, calculate the new function
-            newTemp.set(player.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
-                    ? newTemp.with(modifier, player)
-                    : modifier.getFunction().apply(newTemp));
-        }
-
-        return newTemp;
     }
 
     public void copy(PlayerTempCap cap)
@@ -252,7 +240,7 @@ public class PlayerTempCap implements ITemperatureCap
         for (Temperature.Type type : Temperature.Type.values())
         {
             if (type == Temperature.Type.BODY || type == Temperature.Type.RATE) continue;
-            this.set(type, cap.get(type));
+            this.setTemp(type, cap.getTemp(type));
         }
 
         // Copy the modifiers
@@ -263,21 +251,38 @@ public class PlayerTempCap implements ITemperatureCap
         }
     }
 
+    @Override
     public CompoundTag serializeNBT()
+    {
+        // Save the player's temperatures
+        CompoundTag nbt = this.serializeTemps();
+
+        // Save the player's modifiers
+        nbt.merge(this.serializeModifiers());
+        return nbt;
+    }
+
+    public CompoundTag serializeTemps()
     {
         CompoundTag nbt = new CompoundTag();
 
         // Save the player's temperature data
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.CORE), get(Temperature.Type.CORE));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.BASE), get(Temperature.Type.BASE));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.MAX), get(Temperature.Type.MAX));
-        nbt.putDouble(TempHelper.getTempTag(Temperature.Type.MIN), get(Temperature.Type.MIN));
+        for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
+        {
+            nbt.putDouble(TempHelper.getTempTag(type), this.getTemp(type));
+        }
+        return nbt;
+    }
+
+    public CompoundTag serializeModifiers()
+    {
+        CompoundTag nbt = new CompoundTag();
 
         // Save the player's modifiers
         for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
             ListTag modifiers = new ListTag();
-            for (TempModifier modifier : getModifiers(type))
+            for (TempModifier modifier : this.getModifiers(type))
             {
                 modifiers.add(NBTHelper.modifierToTag(modifier));
             }
@@ -288,24 +293,43 @@ public class PlayerTempCap implements ITemperatureCap
         return nbt;
     }
 
+    @Override
     public void deserializeNBT(CompoundTag nbt)
     {
-        set(Temperature.Type.CORE, nbt.getDouble(TempHelper.getTempTag(Temperature.Type.CORE)));
-        set(Temperature.Type.BASE, nbt.getDouble(TempHelper.getTempTag(Temperature.Type.BASE)));
+        // Load the player's temperatures
+        deserializeTemps(nbt);
 
         // Load the player's modifiers
+        deserializeModifiers(nbt);
+    }
+
+    public void deserializeTemps(CompoundTag nbt)
+    {
+        for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
+        {
+            setTemp(type, nbt.getDouble(TempHelper.getTempTag(type)));
+        }
+    }
+
+    public void deserializeModifiers(CompoundTag nbt)
+    {
         for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
+            getModifiers(type).clear();
+
             // Get the list of modifiers from the player's persistent data
             ListTag modifiers = nbt.getList(TempHelper.getModifierTag(type), 10);
 
             // For each modifier in the list
-            modifiers.forEach(modifier ->
+            modifiers.forEach(modNBT ->
             {
-                CompoundTag modifierNBT = (CompoundTag) modifier;
+                TempModifier modifier = NBTHelper.tagToModifier((CompoundTag) modNBT);
 
                 // Add the modifier to the player's temperature
-                getModifiers(type).add(NBTHelper.tagToModifier(modifierNBT));
+                if (modifier != null)
+                    getModifiers(type).add(modifier);
+                else
+                    ColdSweat.LOGGER.error("Failed to load modifier of type {}", type);
             });
         }
     }

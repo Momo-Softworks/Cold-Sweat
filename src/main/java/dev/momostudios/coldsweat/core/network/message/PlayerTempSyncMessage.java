@@ -3,8 +3,10 @@ package dev.momostudios.coldsweat.core.network.message;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -12,36 +14,24 @@ import java.util.function.Supplier;
 
 public class PlayerTempSyncMessage
 {
-    public double core;
-    public double base;
-    public double world;
-    public double max;
-    public double min;
-    public boolean instantBody;
+    CompoundTag temps;
+    boolean instant;
 
-    public PlayerTempSyncMessage(double world, double core, double base, double max, double min, boolean instantBody)
+    public PlayerTempSyncMessage(CompoundTag temps, boolean instant)
     {
-        this.world = world;
-        this.core = core;
-        this.base = base;
-        this.max = max;
-        this.min = min;
-        this.instantBody = instantBody;
+        this.temps = temps;
+        this.instant = instant;
     }
 
     public static void encode(PlayerTempSyncMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeDouble(message.world);
-        buffer.writeDouble(message.core);
-        buffer.writeDouble(message.base);
-        buffer.writeDouble(message.max);
-        buffer.writeDouble(message.min);
-        buffer.writeBoolean(message.instantBody);
+        buffer.writeNbt(message.temps);
+        buffer.writeBoolean(message.instant);
     }
 
     public static PlayerTempSyncMessage decode(FriendlyByteBuf buffer)
     {
-        return new PlayerTempSyncMessage(buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readBoolean());
+        return new PlayerTempSyncMessage(buffer.readNbt(), buffer.readBoolean());
     }
 
     public static void handle(PlayerTempSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -58,14 +48,14 @@ public class PlayerTempSyncMessage
                 {
                     player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
                     {
-                        cap.set(Temperature.Type.WORLD, message.world);
-                        cap.set(Temperature.Type.CORE, message.core);
-                        cap.set(Temperature.Type.BASE, message.base);
-                        cap.set(Temperature.Type.MAX, message.max);
-                        cap.set(Temperature.Type.MIN, message.min);
-                        if (message.instantBody)
+                        if (cap instanceof PlayerTempCap playerTempCap)
                         {
-                            Overlays.setBodyTemp(message.base + message.core);
+                            playerTempCap.deserializeTemps(message.temps);
+
+                            if (message.instant)
+                            {
+                                Overlays.setBodyTemp(cap.getTemp(Temperature.Type.BODY));
+                            }
                         }
                     });
                 }

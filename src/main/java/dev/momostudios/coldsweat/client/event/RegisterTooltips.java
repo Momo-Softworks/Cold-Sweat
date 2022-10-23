@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.client.event;
 
-import dev.momostudios.coldsweat.client.gui.tooltip.ClientHellspringTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.HellspringTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,6 +14,6 @@ public class RegisterTooltips
     @SubscribeEvent
     public static void registerTooltips(final FMLClientSetupEvent event)
     {
-        MinecraftForgeClient.registerTooltipComponentFactory(HellspringTooltip.class, tooltip -> new ClientHellspringTooltip(tooltip.getFuel()));
+        MinecraftForgeClient.registerTooltipComponentFactory(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
     }
 }

@@ -3,12 +3,10 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
 import dev.momostudios.coldsweat.common.container.IceboxContainer;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
-import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -24,7 +22,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
@@ -35,7 +32,6 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuProvider
@@ -49,8 +45,6 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     List<ServerPlayer> usingPlayers = new ArrayList<>();
     public int ticksExisted;
     int fuel;
-
-    public static DynamicValue<Map<Item, Number>> VALID_FUEL = DynamicValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {
@@ -181,7 +175,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public int getItemFuel(ItemStack item)
     {
-        return VALID_FUEL.get().getOrDefault(item.getItem(), 0).intValue();
+        return ConfigSettings.ICEBOX_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
     }
 
     public int getFuel()

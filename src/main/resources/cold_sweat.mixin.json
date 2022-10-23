@@ -1,13 +1,15 @@
 {
   "required": true,
-  "compatibilityLevel": "JAVA_13",
+  "compatibilityLevel": "JAVA_17",
   "package": "dev.momostudios.coldsweat.mixin",
   "client": [
+    "MixinLevelRender",
     "MixinHumanoidModel",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
+    "MixinBlockUpdate",
     "MixinMinecart",
     "MixinSoulFire"
   ],

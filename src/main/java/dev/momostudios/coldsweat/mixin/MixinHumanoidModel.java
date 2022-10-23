@@ -2,13 +2,12 @@ package dev.momostudios.coldsweat.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.client.event.HandleHellLampAnim;
+import dev.momostudios.coldsweat.client.event.HandleSoulLampAnim;
 import dev.momostudios.coldsweat.util.entity.PlayerHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -40,8 +39,8 @@ public class MixinHumanoidModel
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.RIGHT);
-        Pair<Float, Float> armRot = HandleHellLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float rightArmRot = CSMath.toRadians(Mth.lerp(Minecraft.getInstance().getFrameTime(), armRot.getSecond(), armRot.getFirst()));
+        Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
+        float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
 
         switch (model.rightArmPose)
         {
@@ -73,8 +72,8 @@ public class MixinHumanoidModel
     public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = PlayerHelper.holdingLamp(entity, HumanoidArm.LEFT);
-        Pair<Float, Float> armRot = HandleHellLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float leftArmRot = CSMath.toRadians((float) CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0f, 1f));
+        Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
+        float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
 
         switch (model.leftArmPose)
         {

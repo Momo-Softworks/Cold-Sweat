@@ -11,7 +11,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -25,7 +25,7 @@ public class DrawConfigButton
             event.addListener
             (
                 new ImageButton(event.getScreen().width / 2 - 183, event.getScreen().height / 6 + 120 - 10, 24, 24, 0, 40, 24,
-                new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"),
+                new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                 button ->
                 {
                     if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().player != null)
@@ -35,7 +35,7 @@ public class DrawConfigButton
                     else
                     {
                         Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen,
-                                new ConfigCache(ColdSweatConfig.getInstance())));
+                                new ConfigSettings(ColdSweatConfig.getInstance())));
                     }
                 })
             );

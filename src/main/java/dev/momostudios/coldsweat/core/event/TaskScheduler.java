@@ -5,10 +5,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler
@@ -24,10 +22,8 @@ public class TaskScheduler
             Map<Runnable, Integer> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
             if (schedule.isEmpty()) return;
 
-            // Track tasks that have expired
-            Set<Map.Entry<Runnable, Integer>> toRemove = new HashSet<>();
             // Iterate through all active tasks
-            for (Map.Entry<Runnable, Integer> task : schedule.entrySet())
+            schedule.entrySet().removeIf(task ->
             {
                 if (task.getValue() <= 0)
                 {
@@ -35,7 +31,7 @@ public class TaskScheduler
                     {
                         // Run the task and remove it from the scheduler
                         task.getKey().run();
-                        toRemove.add(task);
+                        return true;
                     }
                     catch (Exception e)
                     {
@@ -48,8 +44,8 @@ public class TaskScheduler
                 {
                     task.setValue(task.getValue() - 1);
                 }
-            }
-            schedule.entrySet().removeAll(toRemove);
+                return false;
+            });
         }
     }
 

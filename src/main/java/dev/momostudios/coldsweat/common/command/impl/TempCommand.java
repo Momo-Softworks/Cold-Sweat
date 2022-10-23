@@ -43,14 +43,14 @@ public class TempCommand extends BaseCommand
                 );
     }
 
-    private int executeSetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players, int amount)
+    private int executeSetPlayerTemp(CommandSourceStack source, Collection<ServerPlayer> players, int temp)
     {
         // Set the temperature for all affected targets
         for (ServerPlayer player : players)
         {
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
-                cap.set(Temperature.Type.CORE, amount);
+                cap.setTemp(Temperature.Type.CORE, temp);
                 TempHelper.updateTemperature(player, cap, true);
             });
         }
@@ -59,11 +59,11 @@ public class TempCommand extends BaseCommand
         if (players.size() == 1)
         {
             Player target = players.iterator().next();
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), amount), true);
+            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
         }
         else
         {
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.many.result", players.size(), amount), true);
+            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.many.result", players.size(), temp), true);
         }
         return Command.SINGLE_SUCCESS;
     }

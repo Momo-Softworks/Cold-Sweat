@@ -54,7 +54,7 @@ public class PlaySoundMessage
 
     public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer) {
         buffer.writeInt(message.soundChars);
-        buffer.writeCharSequence(message.sound.subSequence(0, message.sound.length()), StandardCharsets.UTF_8);
+        buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
         buffer.writeEnum(message.source);
         buffer.writeFloat(message.volume);
         buffer.writeFloat(message.pitch);

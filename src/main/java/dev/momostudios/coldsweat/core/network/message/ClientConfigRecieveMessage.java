@@ -1,11 +1,11 @@
 package dev.momostudios.coldsweat.core.network.message;
 
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
-import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.lang.reflect.Constructor;
@@ -13,27 +13,27 @@ import java.util.function.Supplier;
 
 public class ClientConfigRecieveMessage
 {
-    ConfigCache configCache;
+    ConfigSettings configSettings;
     boolean openMenu;
 
-    public ClientConfigRecieveMessage(ConfigCache configCache, boolean openMenu)
+    public ClientConfigRecieveMessage(ConfigSettings configSettings, boolean openMenu)
     {
-        this.configCache = configCache;
+        this.configSettings = configSettings;
         this.openMenu = openMenu;
     }
 
     public static void encode(ClientConfigRecieveMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBoolean(message.openMenu);
-        ColdSweatPacketHandler.writeConfigCacheToBuffer(message.configCache, buffer);
+        buffer.writeNbt(ConfigHelper.writeConfigSettingsToNBT(message.configSettings));
     }
 
     public static ClientConfigRecieveMessage decode(FriendlyByteBuf buffer)
     {
         boolean onJoin = buffer.readBoolean();
-        ConfigCache configCache = ColdSweatPacketHandler.readConfigCacheFromBuffer(buffer);
+        ConfigSettings configSettings = ConfigHelper.readConfigSettingsFromNBT(buffer.readNbt());
 
-        return new ClientConfigRecieveMessage(configCache, onJoin);
+        return new ClientConfigRecieveMessage(configSettings, onJoin);
     }
 
     public static void handle(ClientConfigRecieveMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -43,7 +43,7 @@ public class ClientConfigRecieveMessage
         {
             if (context.getDirection().getReceptionSide().isClient())
             {
-                ConfigCache.setInstance(message.configCache);
+                ConfigSettings.setInstance(message.configSettings);
                 if (message.openMenu)
                 {
                     try
@@ -51,8 +51,8 @@ public class ClientConfigRecieveMessage
                         LocalPlayer localPlayer = Minecraft.getInstance().player;
                         if (localPlayer != null)
                         {
-                            Constructor configScreen = Class.forName("dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne").getConstructor(Class.forName("net.minecraft.client.gui.screens.Screen"), ConfigCache.class);
-                            Minecraft.getInstance().setScreen((Screen) configScreen.newInstance(Minecraft.getInstance().screen, message.configCache));
+                            Constructor configScreen = Class.forName("dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne").getConstructor(Class.forName("net.minecraft.client.gui.screens.Screen"), ConfigSettings.class);
+                            Minecraft.getInstance().setScreen((Screen) configScreen.newInstance(Minecraft.getInstance().screen, message.configSettings));
                         }
                     }
                     catch (Exception ignored) {}

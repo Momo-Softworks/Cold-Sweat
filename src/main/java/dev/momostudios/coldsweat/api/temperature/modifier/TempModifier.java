@@ -109,7 +109,7 @@ public abstract class TempModifier
 
         this.function = this.calculate(player);
 
-        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, player, this.function.apply(pre.getTemperature()));
+        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, player, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
 
         return post.getTemperature();
@@ -191,4 +191,10 @@ public abstract class TempModifier
      * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate IDs.<br>
      */
     public abstract String getID();
+
+    @Override
+    public String toString()
+    {
+        return this.getID();
+    }
 }

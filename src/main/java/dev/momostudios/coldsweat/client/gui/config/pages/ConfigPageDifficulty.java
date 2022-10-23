@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.client.gui.config.DifficultyDescriptions;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,19 +24,19 @@ import java.util.List;
 public class ConfigPageDifficulty extends Screen
 {
     private final Screen parentScreen;
-    private final ConfigCache configCache;
+    private final ConfigSettings configSettings;
 
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
 
-    ResourceLocation configButtons = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png");
+    ResourceLocation configButtons = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_gui.png");
 
-    public ConfigPageDifficulty(Screen parentScreen, ConfigCache configCache)
+    public ConfigPageDifficulty(Screen parentScreen, ConfigSettings configSettings)
     {
         super(new TranslatableComponent("cold_sweat.config.section.difficulty.name"));
         this.parentScreen = parentScreen;
-        this.configCache = configCache;
+        this.configSettings = configSettings;
     }
 
     public int index()
@@ -73,7 +73,7 @@ public class ConfigPageDifficulty extends Screen
 
         // Get max text length (used to extend the text box if it's too wide)
         int longestLine = 0;
-        for (String text : DifficultyDescriptions.getListFor(configCache.difficulty))
+        for (String text : DifficultyDescriptions.getListFor(configSettings.difficulty))
         {
             String ttLine = "  " + text + "  ";
             // Add the text and a new line to the list
@@ -100,18 +100,18 @@ public class ConfigPageDifficulty extends Screen
 
         RenderSystem.setShaderTexture(0, configButtons);
 
-        // Draw Slider
+        // Draw Slider Bar
         this.blit(poseStack, this.width / 2 - 76, this.height / 2 - 53, 12,
-                isMouseOverSlider(mouseX, mouseY) ? 174 : 168, 152, 6);
+                isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
 
         // Draw Slider Head
-        this.blit(poseStack, this.width / 2 - 78 + (configCache.difficulty * 37), this.height / 2 - 58,
-                isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 168, 6, 16);
+        this.blit(poseStack, this.width / 2 - 78 + (configSettings.difficulty * 37), this.height / 2 - 58,
+                isMouseOverSlider(mouseX, mouseY) ? 6 : 0, 128, 6, 16);
 
         // Draw Difficulty Title
-        String difficultyName = ConfigScreen.difficultyName(configCache.difficulty);
+        String difficultyName = ConfigScreen.difficultyName(configSettings.difficulty);
         this.font.drawShadow(poseStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
-                this.height / 2.0f - 84, ConfigScreen.difficultyColor(configCache.difficulty));
+                this.height / 2.0f - 84, ConfigScreen.difficultyColor(configSettings.difficulty));
 
         // Render Button(s)
         super.render(poseStack, mouseX, mouseY, partialTicks);
@@ -120,50 +120,50 @@ public class ConfigPageDifficulty extends Screen
     private void close()
     {
         // Super Easy
-        if (configCache.difficulty == 0)
+        if (configSettings.difficulty == 0)
         {
-            configCache.minTemp = CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.maxTemp = CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.rate = 0.5;
-            configCache.requireThermometer = false;
-            configCache.damageScaling = false;
-            configCache.fireRes = true;
-            configCache.iceRes = true;
+            configSettings.minTemp = CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.maxTemp = CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.rate = 0.5;
+            configSettings.requireThermometer = false;
+            configSettings.damageScaling = false;
+            configSettings.fireRes = true;
+            configSettings.iceRes = true;
         }
         // Easy
-        else if (configCache.difficulty == 1)
+        else if (configSettings.difficulty == 1)
         {
-            configCache.minTemp = CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.maxTemp = CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.rate = 0.75;
-            configCache.requireThermometer = false;
-            configCache.damageScaling = false;
-            configCache.fireRes = true;
-            configCache.iceRes = true;
+            configSettings.minTemp = CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.maxTemp = CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.rate = 0.75;
+            configSettings.requireThermometer = false;
+            configSettings.damageScaling = false;
+            configSettings.fireRes = true;
+            configSettings.iceRes = true;
         }
         // Normal
-        else if (configCache.difficulty == 2)
+        else if (configSettings.difficulty == 2)
         {
-            configCache.minTemp = CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.maxTemp = CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.rate = 1.0;
-            configCache.requireThermometer = true;
-            configCache.damageScaling = true;
-            configCache.fireRes = false;
-            configCache.iceRes = false;
+            configSettings.minTemp = CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.maxTemp = CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.rate = 1.0;
+            configSettings.requireThermometer = true;
+            configSettings.damageScaling = true;
+            configSettings.fireRes = false;
+            configSettings.iceRes = false;
         }
         // Hard
-        else if (configCache.difficulty == 3)
+        else if (configSettings.difficulty == 3)
         {
-            configCache.minTemp = CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.maxTemp = CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true);
-            configCache.rate = 1.5;
-            configCache.requireThermometer = true;
-            configCache.damageScaling = true;
-            configCache.fireRes = false;
-            configCache.iceRes = false;
+            configSettings.minTemp = CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.maxTemp = CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true);
+            configSettings.rate = 1.5;
+            configSettings.requireThermometer = true;
+            configSettings.damageScaling = true;
+            configSettings.fireRes = false;
+            configSettings.iceRes = false;
         }
-        ConfigScreen.saveConfig(configCache);
+        ConfigScreen.saveConfig(configSettings);
         ConfigScreen.MC.setScreen(parentScreen);
     }
 
@@ -202,11 +202,11 @@ public class ConfigPageDifficulty extends Screen
                 newDifficulty = 4;
             }
 
-            if (newDifficulty != configCache.difficulty)
+            if (newDifficulty != configSettings.difficulty)
             {
                 ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
             }
-            configCache.difficulty = newDifficulty;
+            configSettings.difficulty = newDifficulty;
         }
     }
 }

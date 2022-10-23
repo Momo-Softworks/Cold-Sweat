@@ -1,14 +1,16 @@
 package dev.momostudios.coldsweat.util.world;
 
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
 public class SpreadPath
 {
-    public Direction direction;
-    public BlockPos pos;
-    public boolean frozen = false;
+    Direction direction;
+    BlockPos pos;
+    boolean frozen = false;
+    int step = 0;
 
     public SpreadPath(BlockPos pos)
     {
@@ -20,14 +22,27 @@ public class SpreadPath
     {
         this.direction = direction;
         this.pos = pos;
-
-
     }
 
     public SpreadPath(int x, int y, int z, Direction direction)
     {
         this.direction = direction;
         this.pos = new BlockPos(x, y, z);
+    }
+
+    public BlockPos getPos()
+    {
+        return this.pos;
+    }
+
+    public boolean isFrozen()
+    {
+        return this.frozen;
+    }
+
+    public void freeze()
+    {
+        this.frozen = true;
     }
 
     public int getX()
@@ -43,36 +58,40 @@ public class SpreadPath
         return pos.getZ();
     }
 
-    public BlockPos blockPos()
+    public int getStep()
     {
-        return pos;
-    }
-
-    public SpreadPath offset(Direction dir)
-    {
-        return new SpreadPath(this.getX() + dir.getStepX(), this.getY() + dir.getStepY(), this.getZ() + dir.getStepZ(), dir);
-    }
-
-    public SpreadPath offset(Direction dir, int steps)
-    {
-        return new SpreadPath(this.getX() + dir.getStepX() * steps, this.getY() + dir.getStepY() * steps, this.getZ() + dir.getStepZ() * steps, dir);
+        return this.step;
     }
 
     public SpreadPath offset(int x, int y, int z)
     {
-        return new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
+        SpreadPath path = new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
+        path.step = this.step + (int) CSMath.getDistance(pos, path.pos);
+        return path;
+    }
+
+    public SpreadPath offset(Direction dir)
+    {
+        return offset(dir, 1);
+    }
+
+    public SpreadPath offset(Direction dir, int steps)
+    {
+        return offset(dir.getStepX() * steps, dir.getStepY() * steps, dir.getStepZ() * steps);
     }
 
     public SpreadPath offset(BlockPos pos)
     {
-        return new SpreadPath(this.getX() + pos.getX(), this.getY() + pos.getY(), this.getZ() + pos.getZ(), this.direction);
+        return offset(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public boolean withinDistance(Vec3i vector, double distance) {
+    public boolean withinDistance(Vec3i vector, double distance)
+    {
         return distanceSq(vector.getX(), vector.getY(), vector.getZ()) < distance * distance;
     }
 
-    public double distanceSq(double x, double y, double z) {
+    public double distanceSq(double x, double y, double z)
+    {
         double d1 = this.getX() - x;
         double d2 = this.getY() - y;
         double d3 = this.getZ() - z;
@@ -87,8 +106,6 @@ public class SpreadPath
 
         SpreadPath that = (SpreadPath) o;
 
-        if (getX() != that.getX()) return false;
-        if (getY() != that.getY()) return false;
-        return getZ() == that.getZ();
+        return pos.equals(that.pos);
     }
 }

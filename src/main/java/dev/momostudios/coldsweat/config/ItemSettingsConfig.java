@@ -81,11 +81,11 @@ public final class ItemSettingsConfig
         BUILDER.pop();
 
         /*
-          Hellspring Lamp Items
+          Soulspring Lamp Items
          */
-        BUILDER.push("Hellspring Lamp");
+        BUILDER.push("Soulspring Lamp");
         soulLampItems = BUILDER
-                .comment("Defines the items that the Hellspring Lamp can use as fuel and their values",
+                .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
                         "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
                 .defineList("Fuel Items", Arrays.asList
                                 (
@@ -101,7 +101,7 @@ public final class ItemSettingsConfig
                         it -> it instanceof String);
 
         soulLampDimensions = BUILDER
-                .comment("Defines the dimensions that the Hellspring Lamp can be used in",
+                .comment("Defines the dimensions that the Soulspring Lamp can be used in",
                         "Format: [\"dimension-id-1\", \"dimension-id-2\", ...etc]")
                 .defineList("Valid Dimensions", Arrays.asList
                                 (
