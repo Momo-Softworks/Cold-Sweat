@@ -154,15 +154,15 @@ public class WorldHelper
         VoxelShape areaShape = CSMath.flattenShape(dir.getAxis(), shape);
         // Return true if the 2D x/y area of the shape is >= 1
         double[] area = new double[1];
-        areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+        switch (dir.getAxis())
         {
-            switch (dir.getAxis())
-            {
-                case X -> area[0] += (y2 - y1) * (z2 - z1);
-                case Y -> area[0] += (x2 - x1) * (z2 - z1);
-                case Z -> area[0] += (x2 - x1) * (y2 - y1);
-            }
-        });
+            case X ->
+            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (y2 - y1) * (z2 - z1));
+            case Y ->
+            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (z2 - z1));
+            case Z ->
+            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (y2 - y1));
+        }
         return area[0] >= 1;
     }
 
