@@ -1,5 +1,10 @@
 package dev.momostudios.coldsweat.util.config;
 
+import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -11,6 +16,44 @@ import java.util.*;
 
 public class ConfigHelper
 {
+    public static CompoundTag writeConfigSettingsToNBT(ConfigSettings config)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("difficulty", config.difficulty);
+        tag.putDouble("minTemp", config.minTemp);
+        tag.putDouble("maxTemp", config.maxTemp);
+        tag.putDouble("rate", config.rate);
+        tag.putBoolean("fireResistance", config.fireRes);
+        tag.putBoolean("iceResistance", config.iceRes);
+        tag.putBoolean("damageScaling", config.damageScaling);
+        tag.putBoolean("requireThermometer", config.requireThermometer);
+        tag.putInt("graceLength", config.graceLength);
+        tag.putBoolean("graceEnabled", config.graceEnabled);
+        return tag;
+    }
+
+    public static ConfigSettings readConfigSettingsFromNBT(CompoundTag tag)
+    {
+        ConfigSettings config = new ConfigSettings();
+        if (tag == null)
+        {
+            ColdSweat.LOGGER.error("Failed to read config settings!");
+            return config;
+        }
+
+        config.difficulty = tag.getInt("difficulty");
+        config.minTemp = tag.getDouble("minTemp");
+        config.maxTemp = tag.getDouble("maxTemp");
+        config.rate = tag.getDouble("rate");
+        config.fireRes = tag.getBoolean("fireResistance");
+        config.iceRes = tag.getBoolean("iceResistance");
+        config.damageScaling = tag.getBoolean("damageScaling");
+        config.requireThermometer = tag.getBoolean("requireThermometer");
+        config.graceLength = tag.getInt("graceLength");
+        config.graceEnabled = tag.getBoolean("graceEnabled");
+        return config;
+    }
+
     public static List<Block> getBlocks(String... ids)
     {
         List<Block> blocks = new ArrayList<>();
@@ -23,7 +66,7 @@ public class ConfigHelper
                                                     tag.getKey().location().toString().equals(tagID)).findFirst();
                 optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
             }
-            blocks.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)));
+            else blocks.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)));
         }
         return blocks;
     }
@@ -70,15 +113,15 @@ public class ConfigHelper
                         tag.getKey().location().toString().equals(tagID)).findFirst();
                 optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
             }
-            items.add(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
+            else items.add(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
         }
         return items;
     }
 
 
-    public static Map<Item, Number> getItemsWithValues(List<? extends List<?>> source)
+    public static Map<Item, Double> getItemsWithValues(List<? extends List<?>> source)
     {
-        Map<Item, Number> map = new HashMap<>();
+        Map<Item, Double> map = new HashMap<>();
         for (List<?> entry : source)
         {
             String itemID = (String) entry.get(0);
@@ -92,7 +135,7 @@ public class ConfigHelper
                 {
                     for (Item item : optionalTag.get().stream().toList())
                     {
-                        map.put(item, (Number) entry.get(1));
+                        map.put(item, ((Number) entry.get(1)).doubleValue());
                     }
                 });
             }
@@ -100,53 +143,49 @@ public class ConfigHelper
             {
                 Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
 
-                if (newItem != null) map.put(newItem, (Number) entry.get(1));
+                if (newItem != null) map.put(newItem, ((Number) entry.get(1)).doubleValue());
             }
         }
         return map;
     }
 
-    public static List<Biome> getBiomes(String... ids)
+    public static Map<ResourceLocation, Pair<Double, Double>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
     {
-        List<Biome> blocks = new ArrayList<>();
-        for (String id : ids)
-        {
-            if (id.startsWith("#"))
-            {
-                final String tagID = id.replace("#", "");
-                Optional<ITag<Biome>> optionalTag = ForgeRegistries.BIOMES.tags().stream().filter(tag ->
-                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
-                optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
-            }
-            blocks.add(ForgeRegistries.BIOMES.getValue(new ResourceLocation(id)));
-        }
-        return blocks;
-    }
-
-    public static Map<ResourceLocation, Number> getBiomesWithValues(List<? extends List<?>> source)
-    {
-        Map<ResourceLocation, Number> map = new HashMap<>();
+        Map<ResourceLocation, Pair<Double, Double>> map = new HashMap<>();
         for (List<?> entry : source)
         {
-            String biomeID = (String) entry.get(0);
-
-            if (biomeID.startsWith("#"))
+            try
             {
-                final String tagID = biomeID.replace("#", "");
-                Optional<ITag<Biome>> optionalTag = ForgeRegistries.BIOMES.tags().stream().filter(tag -> tag.getKey().location().toString().equals(tagID)).findFirst();
+                String biomeID = (String) entry.get(0);
 
-                if (optionalTag.isPresent())
+                Collection<Biome> biomes = biomeID.startsWith("#") ?
+                        ForgeRegistries.BIOMES.tags().stream().filter(tag -> tag.getKey().location().toString().equals(biomeID.replace("#", ""))).findFirst().orElseThrow(Exception::new).stream().toList() :
+                        Collections.singletonList(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)));
+
+                // Iterate through all biomes
+                for (Biome biome : biomes)
                 {
-                    for (Biome biome : optionalTag.get().stream().toList())
+                    double min;
+                    double max;
+                    // The config defines a min and max value, with optional unit conversion
+                    if (entry.size() > 2)
                     {
-                        map.put(biome.getRegistryName(), (Number) entry.get(1));
+                        Temperature.Units units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+                        min = CSMath.convertUnits(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
+                        max = CSMath.convertUnits(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
                     }
+                    // The config only defines a mid-temperature
+                    else
+                    {
+                        double mid = ((Number) entry.get(1)).doubleValue();
+                        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                        min = mid - variance;
+                        max = mid + variance;
+                    }
+                    // Maps the biome ID to the temperature (and variance if present)
+                    map.put(biome.getRegistryName(), Pair.of(min, max));
                 }
-            }
-            else if (ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)) != null)
-            {
-                map.put(new ResourceLocation(biomeID), (Number) entry.get(1));
-            }
+            } catch (Exception ignored) {}
         }
         return map;
     }

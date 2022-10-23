@@ -1,9 +1,7 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.MenuInit;
-import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.DynamicValue;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -20,28 +18,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SewingContainer extends AbstractContainerMenu
 {
     BlockPos pos;
     Inventory playerInventory;
     SewingInventory sewingInventory;
-    public static DynamicValue<List<Item>> VALID_INSULATORS = DynamicValue.of(() ->
-    {
-        List<Item> list = new ArrayList<>();
-        for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
-        {
-            list.addAll(ConfigHelper.getItems(itemID));
-        }
-        return list;
-    });
 
     public static class SewingInventory implements Container
     {
@@ -128,9 +114,9 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                return stack.getItem() instanceof ArmorItem &&
-                       !SewingContainer.this.isInsulatingItem(stack) &&
-                       !stack.getOrCreateTag().getBoolean("insulated");
+                return stack.getItem() instanceof ArmorItem
+                    && !SewingContainer.this.isInsulatingItem(stack)
+                    && !stack.getOrCreateTag().getBoolean("insulated");
             }
             @Override
             public void onTake(Player player, ItemStack stack)
@@ -150,12 +136,14 @@ public class SewingContainer extends AbstractContainerMenu
         this.addSlot(new Slot(sewingInventory, 1, 43, 53)
         {
             @Override
-            public boolean mayPlace(ItemStack stack) {
-                return SewingContainer.this.isInsulatingItem(stack);
+            public boolean mayPlace(ItemStack stack)
+            {
+                return isInsulatingItem(stack);
             }
             @Override
             public void onTake(Player player, ItemStack stack)
             {
+                super.onTake(player, stack);
                 SewingContainer.this.takeInput();
             }
             @Override
@@ -170,7 +158,8 @@ public class SewingContainer extends AbstractContainerMenu
         this.addSlot(new Slot(sewingInventory, 2, 121, 39)
         {
             @Override
-            public boolean mayPlace(ItemStack stack) {
+            public boolean mayPlace(ItemStack stack)
+            {
                 return false;
             }
 
@@ -234,7 +223,7 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack result = ItemStack.EMPTY;
 
         // Insulated Armor
-        if (slot0Item.getItem() instanceof ArmorItem && this.isInsulatingItem(slot1Item) &&
+        if (slot0Item.getItem() instanceof ArmorItem && isInsulatingItem(slot1Item) &&
         // Do slot types match OR is insulating item NOT armor
         (!(slot1Item.getItem() instanceof ArmorItem) || LivingEntity.getEquipmentSlotForItem(slot0Item).equals(LivingEntity.getEquipmentSlotForItem(slot1Item))))
         {
@@ -252,9 +241,9 @@ public class SewingContainer extends AbstractContainerMenu
         this.pos = pos;
     }
 
-    public boolean isInsulatingItem(ItemStack item)
+    public static boolean isInsulatingItem(ItemStack item)
     {
-        return VALID_INSULATORS.get().contains(item.getItem());
+        return ConfigSettings.INSULATING_ITEMS.get().contains(item.getItem());
     }
 
     @Override
@@ -265,10 +254,10 @@ public class SewingContainer extends AbstractContainerMenu
         setCarried(ItemStack.EMPTY);
 
         // Drop the contents of the input slots
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < sewingInventory.getContainerSize(); i++)
         {
             ItemStack itemStack = this.getSlot(i).getItem();
-            if (!playerinventory.add(itemStack))
+            if (i != 2 && !playerinventory.add(itemStack))
             {
                 ItemEntity itementity = playerinventory.player.drop(itemStack, false);
                 if (itementity != null)

@@ -6,11 +6,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 
 public class ConfigButton extends Button
 {
-    ConfigCache configCache = ConfigCache.getInstance();
+    ConfigSettings configSettings = ConfigSettings.getInstance();
 
     public ConfigButton(int x, int y, int width, int height, BaseComponent title, Button.OnPress pressedAction)
     {
@@ -26,13 +26,13 @@ public class ConfigButton extends Button
     {
         if (setsCustomDifficulty())
         {
-            configCache.difficulty = 4;
+            configSettings.difficulty = 4;
 
             if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
             {
                 ((Button) page.getElementBatch("difficulty").get(0)).setMessage(
                         new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
-                                " (" + ConfigScreen.difficultyName(configCache.difficulty) + ")..."));
+                                " (" + ConfigScreen.difficultyName(configSettings.difficulty) + ")..."));
             }
         }
 

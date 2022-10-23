@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,7 +44,7 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     private final Screen parentScreen;
-    private final ConfigCache configCache;
+    private final ConfigSettings configSettings;
 
     public Map<String, List<Widget>> elementBatches = new HashMap<>();
     public Map<String, List<FormattedText>> tooltips = new HashMap<>();
@@ -57,7 +57,7 @@ public abstract class AbstractConfigPage extends Screen
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
     public static Minecraft mc = Minecraft.getInstance();
 
-    ResourceLocation divider = new ResourceLocation("cold_sweat:textures/gui/screen/configs/style_divider.png");
+    static ResourceLocation TEXTURE = new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png");
 
     ImageButton nextNavButton;
     ImageButton prevNavButton;
@@ -67,11 +67,11 @@ public abstract class AbstractConfigPage extends Screen
     @Nullable
     public abstract BaseComponent sectionTwoTitle();
 
-    public AbstractConfigPage(Screen parentScreen, ConfigCache configCache)
+    public AbstractConfigPage(Screen parentScreen, ConfigSettings configSettings)
     {
         super(new TranslatableComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
-        this.configCache = configCache;
+        this.configSettings = configSettings;
     }
 
     public int index()
@@ -109,20 +109,17 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick,
-                             boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
+                             boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         String label = dynamicLabel.get();
 
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
-        int buttonX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
+        int buttonX = this.width / 2;
+        int xOffset = side == Side.LEFT ? -179 : 56;
         int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
-        if (buttonWidth > 152)
-        {
-            buttonX -= (buttonWidth - 152) / 2;
-        }
-        Button button = new ConfigButton(buttonX, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
+        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
         {
             onClick.accept(button1);
             button1.setMessage(new TextComponent(dynamicLabel.get()));
@@ -136,7 +133,11 @@ public abstract class AbstractConfigPage extends Screen
         };
         button.active = shouldBeActive;
         elementBatches.put(id, List.of(button));
+
+        // Add button
         this.addRenderableWidget(button);
+        // Add the clientside indicator
+        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
 
         if (side == Side.LEFT)
             this.leftSideLength += ConfigScreen.OPTION_SIZE;
@@ -147,15 +148,15 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> writeValue, Consumer<EditBox> readValue,
-                                   boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
+                                   boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
-        int inputX = side == Side.LEFT ? -86 : 147;
-        int inputY = (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
+        int xOffset = side == Side.LEFT ? -82 : 151;
+        int yOffset = (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
         int labelOffset = font.width(label.getString()) > 90 ?
                           font.width(label.getString()) - 84 : 0;
 
-        EditBox textBox = new EditBox(this.font, this.width / 2 + inputX + labelOffset, this.height / 4 - 6 + inputY, 51, 22, new TextComponent(""))
+        EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, new TextComponent(""))
         {
             @Override
             public void insertText(String text)
@@ -164,7 +165,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configCache.difficulty = 4;
+                        configSettings.difficulty = 4;
                     writeValue.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -175,7 +176,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configCache.difficulty = 4;
+                        configSettings.difficulty = 4;
                     writeValue.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -186,7 +187,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configCache.difficulty = 4;
+                        configSettings.difficulty = 4;
                     writeValue.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -195,8 +196,12 @@ public abstract class AbstractConfigPage extends Screen
         readValue.accept(textBox);
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
+        // Add the text box
         this.addRenderableWidget(textBox);
-        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + (side == Side.LEFT ? -185 : 52), this.height / 4 + inputY, shouldBeActive ? 16777215 : 8421504));
+        // Add the label
+        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        // Add the clientside indicator
+        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
 
         this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(textBox));
@@ -208,75 +213,76 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     protected void addDirectionPanel(String id, Side side, TranslatableComponent label, Consumer<Integer> addX, Consumer<Integer> addY, Runnable reset,
-                                     boolean requireOP, boolean setsCustomDifficulty, String... tooltip)
+                                     boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
-        int xOffset = side == Side.LEFT ? -96 : 140;
+        int xOffset = side == Side.LEFT ? -81 : 152;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
 
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
-
-        ResourceLocation texture = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png");
 
         int labelOffset = font.width(label.getString()) > 84 ?
                 font.width(label.getString()) - 84 : 0;
 
 
         // Left button
-        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, texture, button ->
+        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
         {
             addX.accept(-1);
 
             if (setsCustomDifficulty)
-                configCache.difficulty = 4;
+                configSettings.difficulty = 4;
         });
         leftButton.active = shouldBeActive;
         this.addRenderableWidget(leftButton);
 
         // Up button
-        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, texture, button ->
+        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
         {
             addY.accept(-1);
 
             if (setsCustomDifficulty)
-                configCache.difficulty = 4;
+                configSettings.difficulty = 4;
         });
         upButton.active = shouldBeActive;
         this.addRenderableWidget(upButton);
 
         // Down button
-        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, texture, button ->
+        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
         {
             addY.accept(1);
 
             if (setsCustomDifficulty)
-                configCache.difficulty = 4;
+                configSettings.difficulty = 4;
         });
         downButton.active = shouldBeActive;
         this.addRenderableWidget(downButton);
 
         // Right button
-        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, texture, button ->
+        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
         {
             addX.accept(1);
 
             if (setsCustomDifficulty)
-                configCache.difficulty = 4;
+                configSettings.difficulty = 4;
         });
         rightButton.active = shouldBeActive;
         this.addRenderableWidget(rightButton);
 
         // Reset button
-        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 0, 128, 20, texture, button ->
+        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 48, 0, 20, TEXTURE, button ->
         {
             reset.run();
 
             if (setsCustomDifficulty)
-                configCache.difficulty = 4;
+                configSettings.difficulty = 4;
         });
         resetButton.active = shouldBeActive;
-
         this.addRenderableWidget(resetButton);
-        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + 52, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+
+        // Add the option text
+        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        // Add the clientside indicator
+        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 114, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
 
         this.setTooltip(id, tooltip);
         this.addElementBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton));
@@ -303,15 +309,13 @@ public abstract class AbstractConfigPage extends Screen
         );
 
         // Navigation
-        nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20,
-            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configCache)));
+        nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
+                button -> mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configSettings)));
         if (this.index() < ConfigScreen.LAST_PAGE)
             this.addRenderableWidget(nextNavButton);
 
-        prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20,
-            new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_buttons.png"), button ->
-                mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configCache)));
+        prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
+                button -> mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configSettings)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
             this.addRenderableWidget(prevNavButton);
     }
@@ -331,8 +335,8 @@ public abstract class AbstractConfigPage extends Screen
         drawString(poseStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
 
         // Section 1 Divider
-        RenderSystem.setShaderTexture(0, divider);
-        this.blit(poseStack, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 155);
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        this.blit(poseStack, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
 
         if (this.sectionTwoTitle() != null)
         {
@@ -340,8 +344,8 @@ public abstract class AbstractConfigPage extends Screen
             drawString(poseStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
 
             // Section 2 Divider
-            RenderSystem.setShaderTexture(0, divider);
-            this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 155);
+            RenderSystem.setShaderTexture(0, TEXTURE);
+            this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
         }
 
         super.render(poseStack, mouseX, mouseY, partialTicks);
@@ -365,7 +369,7 @@ public abstract class AbstractConfigPage extends Screen
                     String id = widget.getKey();
 
                     if (mouseX >= x && mouseX <= maxX - 1
-                            && mouseY >= y && mouseY <= maxY - 1)
+                    && mouseY >= y && mouseY <= maxY - 1)
                     {
                         List<FormattedText> tooltipList = this.tooltips.get(id);
                         if (tooltipList != null && !tooltipList.isEmpty())

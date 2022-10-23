@@ -7,6 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Collection;
 import java.util.Map;
@@ -59,6 +61,10 @@ public class CSMath
         return value < min ? min : value > max ? max : value;
     }
 
+    public static float clamp(float value, float min, float max) {
+        return value < min ? min : value > max ? max : value;
+    }
+
     public static int clamp(int value, int min, int max) {
         return value < min ? min : value > max ? max : value;
     }
@@ -88,33 +94,63 @@ public class CSMath
     }
 
     /**
-     * Returns a number between the two given values {@code blendMin} and {@code blendMax}, based on factor.<br>
-     * If {@code factor} = 0, returns {@code blendMin}. If {@code factor} = {@code range}, returns {@code blendMax}.<br>
-     * @param blendMin The minimum value.
-     * @param blendMax The maximum value.
-     * @param factor The "progress" between blendMin and blendMax.
+     * Returns a number between the two given values {@code blendFrom} and {@code blendTo}, based on factor.<br>
+     * If {@code factor} = rangeMin, returns {@code blendFrom}. If {@code factor} = {@code rangeMax}, returns {@code blendTo}.<br>
+     * @param blendFrom The minimum value.
+     * @param blendTo The maximum value.
+     * @param factor The "progress" between blendFrom and blendTo.
      * @param rangeMin The minimum of the range of values over which to interpolate.
      * @param rangeMax The maximum of the range of values over which to interpolate.
      * @return The interpolated value.
      */
-    public static double blend(double blendMin, double blendMax, double factor, double rangeMin, double rangeMax)
+    public static double blend(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
-        if (factor <= rangeMin) return blendMin;
-        if (factor >= rangeMax) return blendMax;
-        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendMax - blendMin) + blendMin;
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendTo - blendFrom) + blendFrom;
     }
 
-    public static double getDistance(Entity entity, Vector3d pos)
+    /**
+     * Floating-point overload for {@link #blend(double, double, double, double, double)}.
+     */
+    public static float blend(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    {
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendTo - blendFrom) + blendFrom;
+    }
+
+    public static double getDistance(Entity entity, Vec3 pos)
     {
         return getDistance(entity, pos.x, pos.y, pos.z);
     }
 
+    public static double getDistanceSqr(double x1, double y1, double z1, double x2, double y2, double z2)
+    {
+        double xDistance = Math.abs(x1 - x2);
+        double yDistance = Math.abs(y1 - y2);
+        double zDistance = Math.abs(z1 - z2);
+        return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
+    }
+
+    public static double getDistance(double x1, double y1, double z1, double x2, double y2, double z2)
+    {
+        return Math.sqrt(getDistanceSqr(x1, y1, z1, x2, y2, z2));
+    }
+
+    public static double getDistance(Vec3 pos1, Vec3 pos2)
+    {
+        return getDistance(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
+    }
+
     public static double getDistance(Entity entity, double x, double y, double z)
     {
-        double xDistance = Math.abs(entity.getX() - x);
-        double yDistance = Math.abs(entity.getY() + entity.getBbHeight() / 2 - y);
-        double zDistance = Math.abs(entity.getZ() - z);
-        return Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
+        return getDistance(entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), x, y, z);
+    }
+
+    public static double getDistance(Vec3i pos1, Vec3i pos2)
+    {
+        return Math.sqrt(pos1.distSqr(pos2));
     }
 
     public static double average(Number... values)
@@ -148,14 +184,15 @@ public class CSMath
      * @param values The map of values to average (value, weight).
      * @return The average of the values in the given array.
      */
-    public static double weightedAverage(Map<Double, Double> values)
+    public static double weightedAverage(Map<? extends Number, ? extends Number> values)
     {
         double sum = 0;
         double weightSum = 0;
-        for (Map.Entry<Double, Double> entry : values.entrySet())
+        for (Map.Entry<? extends Number, ? extends Number> entry : values.entrySet())
         {
-            sum += entry.getKey() * entry.getValue();
-            weightSum += entry.getValue();
+            double weight = entry.getValue().doubleValue();
+            sum += entry.getKey().doubleValue() * weight;
+            weightSum += weight;
         }
         return sum / weightSum;
     }
@@ -170,7 +207,7 @@ public class CSMath
         Direction direction = Direction.NORTH;
         double f = Float.MIN_VALUE;
 
-        for(Direction direction1 : Direction.values())
+        for (Direction direction1 : Direction.values())
         {
             double f1 = x * direction1.getStepX() + y * direction1.getStepY() + z * direction1.getStepZ();
 
@@ -252,13 +289,40 @@ public class CSMath
         return Math.abs(value1) < Math.abs(value2) ? value1 : value2;
     }
 
-    public static double distance(Vec3i pos1, Vec3i pos2)
-    {
-        return Math.sqrt(pos1.distSqr(pos2));
-    }
 
     public static Vec3 getMiddle(BlockPos pos)
     {
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    }
+
+    public static VoxelShape rotateShape(Direction to, VoxelShape shape)
+    {
+        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty() };
+
+        int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
+        for (int i = 0; i < times; i++)
+        {
+            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> shapeHolder[1] = Shapes.or(shapeHolder[1],
+                Shapes.create(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+            shapeHolder[0] = shapeHolder[1];
+            shapeHolder[1] = Shapes.empty();
+        }
+
+        return shapeHolder[0];
+    }
+
+    public static VoxelShape flattenShape(Direction.Axis axis, VoxelShape shape)
+    {
+        // Flatten the shape into a 2D projection
+        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty() };
+        shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            switch (axis)
+            {
+                case X -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(0, minY, minZ, 1, maxY, maxZ));
+                case Y -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, 0, minZ, maxX, 1, maxZ));
+                case Z -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1));
+            }
+        });
+        return shapeHolder[1];
     }
 }

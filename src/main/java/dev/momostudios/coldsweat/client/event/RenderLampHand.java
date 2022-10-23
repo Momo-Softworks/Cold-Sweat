@@ -39,7 +39,7 @@ public class RenderLampHand
     public static void onHandRender(RenderHandEvent event)
     {
 
-        if (event.getItemStack().getItem() == ModItems.HELLSPRING_LAMP)
+        if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP)
         {
             LocalPlayer player = Minecraft.getInstance().player;
             PoseStack ms = event.getPoseStack();

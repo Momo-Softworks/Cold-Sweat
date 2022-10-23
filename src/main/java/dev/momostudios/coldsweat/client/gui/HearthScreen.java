@@ -33,7 +33,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
-        this.imageHeight = 188;
+        this.imageHeight = 166;
     }
 
     Pair<BlockPos, String> levelPos = Pair.of(this.menu.te.getBlockPos(), this.menu.te.getLevel().dimension().location().toString());

@@ -20,8 +20,8 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
-        this.imageHeight = 201;
-        this.inventoryLabelY = this.imageHeight - 122;
+        this.imageHeight = 172;
+        this.inventoryLabelY = this.imageHeight - 94;
         this.titleLabelX = leftPos + this.imageWidth / 2 - Minecraft.getInstance().font.width(this.getTitle()) / 2;
     }
 

@@ -46,22 +46,8 @@ public class BlockTempRegistry
 
     public static BlockTemp getEntryFor(BlockState blockstate)
     {
-        if (blockstate.isAir())
-        {
-            return DEFAULT_BLOCK_EFFECT;
-        }
+        if (blockstate.isAir()) return DEFAULT_BLOCK_EFFECT;
 
-        return MAPPED_BLOCKS.computeIfAbsent(blockstate.getBlock(), (block) ->
-        {
-            for (BlockTemp blockTemp : BLOCK_EFFECTS)
-            {
-                if (blockTemp.hasBlock(block))
-                {
-                    return blockTemp;
-                }
-            }
-
-            return DEFAULT_BLOCK_EFFECT;
-        });
+        return MAPPED_BLOCKS.computeIfAbsent(blockstate.getBlock(), (block) -> DEFAULT_BLOCK_EFFECT);
     }
 }

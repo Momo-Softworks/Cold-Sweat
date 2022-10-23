@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface ITemperatureCap
 {
-    double get(Temperature.Type type);
-    void set(Temperature.Type type, double value);
+    double getTemp(Temperature.Type type);
+    void setTemp(Temperature.Type type, double value);
     List<TempModifier> getModifiers(Temperature.Type type);
     boolean hasModifier(Temperature.Type type, Class<? extends TempModifier> mod);
     void clearModifiers(Temperature.Type type);

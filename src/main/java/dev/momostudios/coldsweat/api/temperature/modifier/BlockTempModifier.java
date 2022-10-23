@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,20 +62,29 @@ public class BlockTempModifier extends TempModifier
                             // Get Vector positions of the centers of the source block and player
                             Vec3 pos = new Vec3(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5);
 
-                            // Get the temperature of the block given the player's distance
-                            double distance = CSMath.getDistance(player, new Vector3d(pos.x, pos.y, pos.z));
-                            double tempToAdd = be.getTemperature(player, state, blockpos, distance);
-
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
                             AtomicInteger blocks = new AtomicInteger();
-                            Vec3 playerPos = player.position().add(0, player.getBbHeight() / 2, 0);
 
-                            WorldHelper.forBlocksInRay(playerPos, pos, level,
+                            // Gets the closest point in the player's BB to the block
+                            double playerRadius = player.getBbWidth() / 2;
+                            Vec3 playerClosest = new Vec3(CSMath.clamp(pos.x, player.getX() - playerRadius, player.getX() + playerRadius),
+                                                          CSMath.clamp(pos.y, player.getY(), player.getY() + player.getBbHeight()),
+                                                          CSMath.clamp(pos.z, player.getZ() - playerRadius, player.getZ() + playerRadius));
+
+                            // Get the temperature of the block given the player's distance
+                            double distance = CSMath.getDistance(playerClosest, pos);
+                            double tempToAdd = be.getTemperature(player, state, blockpos, distance);
+
+                            Vec3 ray = pos.subtract(playerClosest);
+                            Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
+                            WorldHelper.forBlocksInRay(playerClosest, pos, level,
                             (rayState, bpos) ->
                             {
-                                if (WorldHelper.isSpreadBlocked(level, rayState, bpos, CSMath.getDirectionFromVector(pos.subtract(playerPos))))
+                                if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction))
+                                {
                                     blocks.getAndIncrement();
+                                }
                             }, 3);
 
                             // Calculate the decrease in effectiveness due to blocks in the way

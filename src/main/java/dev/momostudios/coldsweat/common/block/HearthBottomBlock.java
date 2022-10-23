@@ -21,7 +21,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -76,36 +75,18 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
-        runCalculation(Shapes.or(
+        calculateFacingShapes(Shapes.or(
             Block.box(3, 0, 3.5, 13, 18, 12.5), // Shell
             Block.box(4, 18, 5, 9, 27, 10), // Exhaust
             Block.box(-1, 3, 6, 17, 11, 10))); // Canisters
     }
 
-    static void calculateShapes(Direction to, VoxelShape shape) {
-        VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
-
-        int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
-        for (int i = 0; i < times; i++) {
-            buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
-                Shapes.create(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
-            buffer[0] = buffer[1];
-            buffer[1] = Shapes.empty();
-        }
-
-        SHAPES.put(to, buffer[0]);
-    }
-
-    static void runCalculation(VoxelShape shape) {
-        for (Direction direction : Direction.values()) {
-            calculateShapes(direction, shape);
-        }
-    }
-
-    @Override
-    public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos)
+    static void calculateFacingShapes(VoxelShape shape)
     {
-        return reader.getBlockState(pos).isAir() && reader.getBlockState(pos.above()).isAir();
+        for (Direction direction : Direction.values())
+        {
+            SHAPES.put(direction, CSMath.rotateShape(direction, shape));
+        }
     }
 
     @Override
@@ -148,18 +129,26 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 if (player.getItemInHand(hand).getItem() == Items.BUCKET)
                 {
                     int lavaFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.LAVA_BUCKET.getDefaultInstance()));
-                    if (te.getHotFuel() >= lavaFuel)
+                    if (te.getHotFuel() >= lavaFuel * 0.99)
                     {
                         Vec3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
-                        Vec3 lavaSidePos = CSMath.getMiddle(pos)
-                                                     .add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
+                        Vec3 lavaSidePos = CSMath.getMiddle(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
 
                         if (rayTraceResult.getLocation().distanceTo(lavaSidePos) < 0.4)
                         {
                             if (lavaFuel > 0)
                             {
+                                // Remove fuel
                                 te.setHotFuel(te.getHotFuel() - lavaFuel);
-                                player.setItemInHand(hand, Items.LAVA_BUCKET.getDefaultInstance());
+                                // Give filled bucket item
+                                if (stack.getCount() == 1)
+                                    player.setItemInHand(hand, Items.LAVA_BUCKET.getDefaultInstance());
+                                else
+                                {
+                                    stack.shrink(1);
+                                    player.addItem(Items.LAVA_BUCKET.getDefaultInstance());
+                                }
+                                // Play bucket sound
                                 worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
 
                                 return InteractionResult.SUCCESS;
@@ -167,18 +156,26 @@ public class HearthBottomBlock extends Block implements EntityBlock
                         }
                     }
                     int waterFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.WATER_BUCKET.getDefaultInstance()));
-                    if (te.getColdFuel() >= waterFuel)
+                    if (te.getColdFuel() >= waterFuel * 0.99)
                     {
                         Vec3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
-                        Vec3 waterSidePos = CSMath.getMiddle(pos)
-                                                 .add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
+                        Vec3 waterSidePos = CSMath.getMiddle(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
 
                         if (rayTraceResult.getLocation().distanceTo(waterSidePos) < 0.4)
                         {
                             if (waterFuel > 0)
                             {
+                                // Remove fuel
                                 te.setColdFuel(te.getColdFuel() - waterFuel);
-                                player.setItemInHand(hand, Items.WATER_BUCKET.getDefaultInstance());
+                                // Give filled bucket item
+                                if (stack.getCount() == 1)
+                                    player.setItemInHand(hand, Items.WATER_BUCKET.getDefaultInstance());
+                                else
+                                {
+                                    stack.shrink(1);
+                                    player.addItem(Items.WATER_BUCKET.getDefaultInstance());
+                                }
+                                // Play bucket sound
                                 worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
 
                                 return InteractionResult.SUCCESS;
@@ -213,7 +210,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
-                // If the held item is fuel, try to insert the fuel
+                // Open the GUI
                 else
                 {
                     NetworkHooks.openGui((ServerPlayer) player, te, pos);
@@ -264,7 +261,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
             }
 
             BlockEntity tileentity = level.getBlockEntity(pos);
-            if (tileentity instanceof HearthBlockEntity) {
+            if (tileentity instanceof HearthBlockEntity)
+            {
                 Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
                 level.updateNeighborsAt(pos, this);
             }
@@ -279,12 +277,18 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
         builder.add(FACING, WATER, LAVA);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0);
+    public BlockState getStateForPlacement(BlockPlaceContext context)
+    {
+        Level level = context.getLevel();
+        BlockPos topPos = context.getClickedPos().above();
+        return level.getBlockState(topPos).canBeReplaced(context) && level.getWorldBorder().isWithinBounds(topPos)
+                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0)
+                : null;
     }
 }

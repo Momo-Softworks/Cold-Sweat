@@ -2,11 +2,9 @@ package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
@@ -72,28 +70,30 @@ public class PlayerTempManager
     {
         if (event.phase == TickEvent.Phase.START)
         {
-            if (event.player instanceof ServerPlayer serverPlayer)
+            Player player = event.player;
+            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
-                serverPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                if (event.side.isServer())
                 {
-                    cap.tick(serverPlayer);
+                    // Tick modifiers serverside
+                    cap.tick(player);
+                }
+                else
+                {
+                    // Tick modifiers clientside
+                    cap.tickDummy(player);
+                }
 
-                    for (Temperature.Type type : PlayerTempCap.VALID_MODIFIER_TYPES)
+                // Remove expired modifiers
+                for (Temperature.Type type : PlayerTempCap.VALID_MODIFIER_TYPES)
+                {
+                    cap.getModifiers(type).removeIf(modifier ->
                     {
-                        cap.getModifiers(type).removeIf(modifier ->
-                                modifier.setTicksExisted(modifier.getTicksExisted() + 1) > modifier.getExpireTime() && modifier.getExpireTime() != -1);
-                    }
-
-                    if (serverPlayer.tickCount % 100 == 0)
-                    {
-                        TempHelper.updateModifiers(serverPlayer, cap);
-                    }
-                });
-            }
-            else
-            {
-                event.player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap -> cap.tickDummy(event.player));
-            }
+                        int expireTime = modifier.getExpireTime();
+                        return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
+                    });
+                }
+            });
         }
     }
 

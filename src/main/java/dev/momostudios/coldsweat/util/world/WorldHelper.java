@@ -1,31 +1,33 @@
 package dev.momostudios.coldsweat.util.world;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 public class WorldHelper
 {
@@ -48,71 +50,87 @@ public class WorldHelper
         {
             BlockPos pos2 = new BlockPos(pos.getX(), y, pos.getZ());
 
-            int chunkY = chunk.getSectionIndex(pos2.getY());
-            if (chunkY >= 0 && chunkY < chunk.getSections().length)
+            // Get the subchunk
+            LevelChunkSection subchunk = getChunkSection(chunk, pos2.getY());
+            if (subchunk == null) return mcHeight;
+
+            // If this subchunk is only air, skip it
+            if (subchunk.hasOnlyAir())
             {
-                // Get the subchunk
-                LevelChunkSection subchunk = chunk.getSections()[chunkY];
-                if (subchunk == null) return mcHeight;
+                y += 16 - (y % 16);
+                continue;
+            }
 
-                // If this subchunk is only air, skip it
-                if (subchunk.hasOnlyAir())
-                {
-                    y += 16 - (y % 16);
-                    continue;
-                }
-
-                // Get the block state from this subchunk
-                BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
-                // If this block is a surface block, return the Y
-                if (state.isAir() && state.getBlock() != Blocks.CAVE_AIR)
-                {
-                    return y;
-                }
+            // Get the block state from this subchunk
+            BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
+            // If this block is a surface block, return the Y
+            if (state.isAir() && state.getBlock() != Blocks.CAVE_AIR)
+            {
+                return y;
             }
         }
         return mcHeight;
     }
 
     /**
-     * Gets the average biome temperature in a grid of BlockPos 3 blocks apart<br>
+     * Returns all block positions in a grid of the specified size<br>
      * Search area scales with the number of samples
-     * @param pos is the center of the search box
-     * @param samples is the number of checks performed. Higher samples = more accurate but more resource-intensive too
-     * @param interval is how far apart each check is. Higher values means less dense and larger search area
+     * @param pos The center of the search area
+     * @param samples The total number of checks performed.
+     * @param interval How far apart each check is. Higher values = less dense and larger search area
      */
     public static List<BlockPos> getNearbyPositions(BlockPos pos, int samples, int interval)
     {
         List<BlockPos> posList = new ArrayList<>();
         int sampleRoot = (int) Math.sqrt(samples);
+        int radius = (sampleRoot * interval) / 2;
 
-        for (int sx = 0; sx < sampleRoot; sx++)
+        for (int x = 0; x < sampleRoot; x++)
         {
-            for (int sz = 0; sz < sampleRoot; sz++)
+            for (int z = 0; z < sampleRoot; z++)
             {
-                int length = interval * sampleRoot;
-                posList.add(pos.offset(sx * interval - (length / 2), 0, sz * interval - (length / 2)));
+                posList.add(pos.offset(x * interval - radius, 0, z * interval - radius));
             }
         }
 
         return posList;
     }
 
-    public static boolean canSeeSky(Level world, BlockPos pos)
+
+    public static boolean canSeeSky(LevelChunk chunk, Level level, BlockPos pos, int maxDistance)
     {
-        LevelChunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        return chunk == null || canSeeSky(chunk, world, pos);
+        for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
+        {
+            BlockPos pos2 = pos.above(i);
+            // Get the subchunk
+            LevelChunkSection subchunk = getChunkSection(chunk, pos2.getY());
+
+            // If this subchunk is only air, skip it
+            if (subchunk.hasOnlyAir())
+            {
+                i += 16 - (i % 16);
+                continue;
+            }
+
+            BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
+            if (isSpreadBlocked(level, state, pos2, Direction.UP))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public static boolean canSeeSky(LevelChunk chunk, Level level, BlockPos pos)
+    public static boolean canSeeSky(Level level, BlockPos pos, int maxDistance)
     {
-        Vec3 startPos = new Vec3(pos.getX(), pos.getY(), pos.getZ());
-        ClipContext clipContext = new ClipContext(startPos, startPos.add(0, level.getHeight() - startPos.y, 0), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, null);
-        return !gatherRTResults(clipContext, (ctx, bpos) ->
-        {
-            BlockState rayState = chunk.getBlockState(bpos);
-            return isFullSide(rayState, Direction.DOWN, bpos, level) || isFullSide(rayState, Direction.UP, bpos, level);
-        }).contains(true);
+        LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+        return chunk == null || canSeeSky(chunk, level, pos, maxDistance);
+    }
+
+    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir)
+    {
+        if (state.isAir()) return false;
+        return isFullSide(state, toDir, pos, level);
     }
 
     public static boolean isSpreadBlocked(Level level, BlockPos pos, Direction toDir)
@@ -123,84 +141,29 @@ public class WorldHelper
 
     public static boolean isSpreadBlocked(LevelChunk chunk, BlockPos pos, Direction toDir)
     {
-        return isSpreadBlocked(chunk.getLevel(), chunk.getBlockState(pos), pos, toDir);
-    }
-
-    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir)
-    {
-        BlockPos offsetPos = pos.relative(toDir);
-
-        if (state.isAir() || state.getCollisionShape(level, offsetPos).isEmpty())
-            return false;
-
-        if (state.isFaceSturdy(level, pos, toDir))
-            return true;
-
-        return isFullSide(state, toDir, offsetPos, level) || state.isFaceSturdy(level, pos, toDir.getOpposite());
+        return isSpreadBlocked(chunk.getLevel(), getChunkSection(chunk, pos.getY()).getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15), pos, toDir);
     }
 
     public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level level)
     {
-        if (state.isFaceSturdy(level, pos, dir))
-            return true;
-        if (state.isAir())
-            return false;
+        VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.empty());
+        if (shape.isEmpty()) return false;
+        if (shape.equals(Shapes.box(0, 0, 0, 1, 1, 1))) return true;
 
-        VoxelShape shape = state.getShape(level, pos);
-        final double[] area = {0};
-        if (!shape.isEmpty())
+        // Flatten the shape into a 2D plane
+        VoxelShape areaShape = CSMath.flattenShape(dir.getAxis(), shape);
+        // Return true if the 2D x/y area of the shape is >= 1
+        double[] area = new double[1];
+        areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) ->
         {
-            shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+            switch (dir.getAxis())
             {
-                if (area[0] < 1)
-                    switch (dir.getAxis())
-                    {
-                        case X -> area[0] += (maxY - minY) * (maxZ - minZ);
-                        case Y -> area[0] += (maxX - minX) * (maxZ - minZ);
-                        case Z -> area[0] += (maxX - minX) * (maxY - minY);
-                    }
-            });
-            return area[0] >= 1;
-        }
-        return false;
-    }
-
-    public static void schedule(Runnable runnable, int delayTicks)
-    {
-        try
-        {
-            new Object()
-            {
-                private int ticks = 0;
-
-                public void start()
-                {
-                    MinecraftForge.EVENT_BUS.register(this);
-                }
-
-                @SubscribeEvent
-                public void tick(TickEvent.ServerTickEvent event)
-                {
-                    if (event.phase == TickEvent.Phase.END)
-                    {
-                        ticks++;
-                        if (ticks >= delayTicks)
-                            run();
-                    }
-                }
-
-                private void run()
-                {
-                    runnable.run();
-                    MinecraftForge.EVENT_BUS.unregister(this);
-                }
-            }.start();
-        }
-        catch (Exception e)
-        {
-            ColdSweat.LOGGER.error("Error scheduling task", e);
-            e.printStackTrace();
-        }
+                case X -> area[0] += (y2 - y1) * (z2 - z1);
+                case Y -> area[0] += (x2 - x1) * (z2 - z1);
+                case Z -> area[0] += (x2 - x1) * (y2 - y1);
+            }
+        });
+        return area[0] >= 1;
     }
 
     public static BlockState getBlockState(LevelChunk chunk, BlockPos blockpos)
@@ -211,9 +174,15 @@ public class WorldHelper
 
         try
         {
-            return chunk.getSection((blockpos.getY() >> 4) - chunk.getMinSection()).getStates().get(x & 15, y & 15, z & 15);
+            return getChunkSection(chunk, y).getStates().get(x & 15, y & 15, z & 15);
         }
         catch (Exception e) { return Blocks.AIR.defaultBlockState(); }
+    }
+
+    public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
+    {
+        LevelChunkSection[] sections = chunk.getSections();
+        return sections[Math.min(sections.length - 1, (y >> 4) - chunk.getMinSection())];
     }
 
     /**
@@ -224,77 +193,83 @@ public class WorldHelper
      * @param volume The volume of the sound
      * @param pitch The pitch of the sound
      */
-    public static void playEntitySound(SoundEvent sound, SoundSource source, Entity entity, float volume, float pitch)
+    public static void playEntitySound(SoundEvent sound, Entity entity, SoundSource source, float volume, float pitch)
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
                 new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
     }
 
-    public static <T> List<T> gatherRTResults(ClipContext context, BiFunction<ClipContext, BlockPos, T> rayTracer)
+    /**
+     * Iterates through every block along the given vector
+     * @param from The starting position
+     * @param to The ending position
+     * @param rayTracer function to run on each found block
+     * @param maxHits the maximum number of blocks to act upon before the ray expires
+     */
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
     {
-        List<T> rayTraces = new ArrayList<>();
-        Vec3 startVec = context.getFrom();
-        Vec3 endVec = context.getTo();
-
-        if (!startVec.equals(endVec))
+        // Don't bother if the ray has no length
+        if (!from.equals(to))
         {
-            double d0 = Mth.lerp(-1.0E-7D, endVec.x, startVec.x);
-            double d1 = Mth.lerp(-1.0E-7D, endVec.y, startVec.y);
-            double d2 = Mth.lerp(-1.0E-7D, endVec.z, startVec.z);
-            double d3 = Mth.lerp(-1.0E-7D, startVec.x, endVec.x);
-            double d4 = Mth.lerp(-1.0E-7D, startVec.y, endVec.y);
-            double d5 = Mth.lerp(-1.0E-7D, startVec.z, endVec.z);
-            int i = Mth.floor(d3);
-            int j = Mth.floor(d4);
-            int k = Mth.floor(d5);
-            BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(i, j, k);
+            Vec3 ray = to.subtract(from);
+            Vec3 normalRay = ray.normalize();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            ChunkAccess workingChunk = level.getChunkSource().getChunk((int) from.x >> 4, (int) from.z >> 4, ChunkStatus.FULL, false);
 
-            double d6 = d0 - d3;
-            double d7 = d1 - d4;
-            double d8 = d2 - d5;
-            int l = Mth.sign(d6);
-            int i1 = Mth.sign(d7);
-            int j1 = Mth.sign(d8);
-            double d9 = l == 0 ? Double.MAX_VALUE : (double) l / d6;
-            double d10 = i1 == 0 ? Double.MAX_VALUE : (double) i1 / d7;
-            double d11 = j1 == 0 ? Double.MAX_VALUE : (double) j1 / d8;
-            double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
-            double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
-            double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
-
-            while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
+            // Iterate over every block-long segment of the ray
+            for (int i = 0; i < ray.length(); i++)
             {
-                if (d12 < d13)
-                {
-                    if (d12 < d14)
-                    {
-                        i += l;
-                        d12 += d9;
-                    }
-                    else
-                    {
-                        k += j1;
-                        d14 += d11;
-                    }
-                }
-                else if (d13 < d14)
-                {
-                    j += i1;
-                    d13 += d10;
-                }
-                else
-                {
-                    k += j1;
-                    d14 += d11;
-                }
+                // Get the position of the current segment
+                Vec3 vec = from.add(normalRay.scale(i));
 
-                T result1 = rayTracer.apply(context, blockpos$mutable.set(i, j, k));
-                if (result1 != null)
+                // Skip if the position is the same as the last one
+                if (new BlockPos(vec).equals(pos)) continue;
+                pos.set(vec.x, vec.y, vec.z);
+
+                // Set new workingChunk if the ray travels outside the current one
+                if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
+                    workingChunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+
+                if (workingChunk == null) continue;
+
+                // Get the blockstate at the current position
+                BlockState state = getChunkSection(workingChunk, pos.getY()).getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+
+                // If the block isn't air, then we hit something
+                if (!state.isAir())
                 {
-                    rayTraces.add(result1);
+                    maxHits--;
+                    if (maxHits <= 0) break;
                 }
+                rayTracer.accept(state, pos);
             }
         }
-        return rayTraces;
+    }
+
+    public static Entity raycastEntity(Vec3 from, Vec3 to, Level level, Predicate<Entity> filter)
+    {
+        // Don't bother if the ray has no length
+        if (!from.equals(to))
+        {
+            Vec3 ray = to.subtract(from);
+            Vec3 normalRay = ray.normalize();
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+            // Iterate over every block-long segment of the ray
+            for (int i = 0; i < ray.length(); i++)
+            {
+                // Get the position of the current segment
+                Vec3 vec = from.add(normalRay.scale(i));
+
+                // Skip if the position is the same as the last one
+                if (new BlockPos(vec).equals(pos)) continue;
+                pos.set(vec.x, vec.y, vec.z);
+
+                // Return the first entity in the current block, or continue if there is none
+                List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AABB(pos), filter);
+                if (!entities.isEmpty()) return entities.get(0);
+            }
+        }
+        return null;
     }
 }

@@ -7,7 +7,7 @@
 
 
   "item.cold_sweat.minecart_insulation": "Утеплённая вагонетка",
-  "item.cold_sweat.hellspring_lamp":     "Адский светоч",
+  "item.cold_sweat.soulspring_lamp":     "Адский светоч",
   "item.cold_sweat.thermometer":         "Термометр",
   "item.cold_sweat.waterskin":           "Мешочек для воды",
   "item.cold_sweat.waterskin.filled":    "Наполнен",
@@ -28,6 +28,7 @@
   "container.cold_sweat.boiler":        "Бойлер",
   "container.cold_sweat.icebox":        "Холодильник",
   "container.cold_sweat.sewing_table":  "Швейный стол",
+  "container.cold_sweat.hearth":        "Очаг",
 
 
   "itemGroup.cold_sweat": "Cold Sweat",
@@ -40,8 +41,8 @@
 
 
   "entity.player.damage.freeze":   "Игрок замерзает",
-  "item.hellspring_lamp.on":       "Адский светоч зажжён",
-  "item.hellspring_lamp.off":      "Адский светоч потушен",
+  "item.soulspring_lamp.on":       "Адский светоч зажжён",
+  "item.soulspring_lamp.off":      "Адский светоч потушен",
 
 
   "cold_sweat.screen.hearth.show_particles": "Показывать все частицы",

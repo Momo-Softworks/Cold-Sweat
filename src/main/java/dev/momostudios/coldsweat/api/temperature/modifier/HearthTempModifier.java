@@ -1,10 +1,10 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
@@ -27,7 +27,7 @@ public class HearthTempModifier extends TempModifier
         double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
         player.getPersistentData().putDouble("preHearthTemp", worldTemp);
 
-        ConfigCache config = ConfigCache.getInstance();
+        ConfigSettings config = ConfigSettings.getInstance();
 
         double min = config.minTemp;
         double max = config.maxTemp;

@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -24,7 +24,7 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemProperties.register(ItemInit.HELLSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "hellspring_state"), (stack, level, entity, id) ->
+            ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
             {
                 if (stack.getOrCreateTag().getBoolean("isOn"))
                 {
@@ -39,7 +39,7 @@ public class RegisterItemOverrides
                 LocalPlayer player = Minecraft.getInstance().player;
                 if (player != null)
                 {
-                    ConfigCache config = ConfigCache.getInstance();
+                    ConfigSettings config = ConfigSettings.getInstance();
                     double minTemp = config.minTemp;
                     double maxTemp = config.maxTemp;
 

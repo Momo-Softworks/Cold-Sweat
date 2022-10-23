@@ -52,14 +52,6 @@ public class TempModifierInit
     @SubscribeEvent
     public static void registerBlockTemps(BlockTempRegisterEvent event)
     {
-        event.register(new LavaBlockTemp());
-        event.register(new FurnaceBlockTemp());
-        event.register(new CampfireBlockTemp());
-        event.register(new IceboxBlockTemp());
-        event.register(new BoilerBlockTemp());
-        event.register(new SoulCampfireBlockTemp());
-        event.register(new NetherPortalBlockTemp());
-
         // Auto-generate BlockTemps from config
         for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockTemps())
         {
@@ -122,6 +114,14 @@ public class TempModifierInit
                 break;
             }
         }
+
+        event.register(new LavaBlockTemp());
+        event.register(new FurnaceBlockTemp());
+        event.register(new CampfireBlockTemp());
+        event.register(new IceboxBlockTemp());
+        event.register(new BoilerBlockTemp());
+        event.register(new SoulCampfireBlockTemp());
+        event.register(new NetherPortalBlockTemp());
     }
 
     // Register TempModifiers
@@ -135,9 +135,8 @@ public class TempModifierInit
         event.register(new DepthTempModifier());
         event.register(new InsulationTempModifier());
         event.register(new MountTempModifier());
-        event.register(new TimeTempModifier());
         event.register(new WaterskinTempModifier());
-        event.register(new HellLampTempModifier());
+        event.register(new SoulLampTempModifier());
         event.register(new WaterTempModifier());
         event.register(new HearthTempModifier());
         event.register(new FoodTempModifier());

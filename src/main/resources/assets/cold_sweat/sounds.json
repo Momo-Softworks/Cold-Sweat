@@ -14,24 +14,24 @@
       }
     ]
   },
-  "item.hellspring_lamp.on":
+  "item.soulspring_lamp.on":
   {
-    "subtitle": "item.hellspring_lamp.on",
+    "subtitle": "item.soulspring_lamp.on",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/hellspring_lamp/hellspring_lamp_on",
+        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_on",
         "stream": true
       }
     ]
   },
-  "item.hellspring_lamp.off":
+  "item.soulspring_lamp.off":
   {
-    "subtitle": "item.hellspring_lamp.off",
+    "subtitle": "item.soulspring_lamp.off",
     "sounds":
     [
       {
-        "name": "cold_sweat:item/hellspring_lamp/hellspring_lamp_off",
+        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_off",
         "stream": true
       }
     ]

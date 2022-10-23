@@ -10,21 +10,25 @@ import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractMinecart.class)
 public class MixinMinecart
 {
     AbstractMinecart minecart = (AbstractMinecart) (Object) this;
 
-    @Inject(method = "destroy(Lnet/minecraft/world/damagesource/DamageSource;)V",
-            at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS, cancellable = true)
-    public void destroy(DamageSource p_38115_, CallbackInfo ci)
+    @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
+            at = @At
+            (
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
+            ),
+            remap = ColdSweat.REMAP_MIXINS)
+    public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
     {
         ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
         if (!carryStack.isEmpty())
         {
-            minecart.remove(Entity.RemovalReason.KILLED);
             if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
             {
                 ItemStack itemstack = new ItemStack(Items.MINECART);
@@ -36,6 +40,7 @@ public class MixinMinecart
                 minecart.spawnAtLocation(itemstack);
                 minecart.spawnAtLocation(carryStack);
             }
+            minecart.remove(Entity.RemovalReason.KILLED);
             ci.cancel();
         }
     }

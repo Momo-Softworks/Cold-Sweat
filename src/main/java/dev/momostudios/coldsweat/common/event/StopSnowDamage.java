@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.event;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,7 +19,7 @@ public class StopSnowDamage
     @SubscribeEvent
     public static void onSnowDamage(LivingAttackEvent event)
     {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigCache.getInstance().iceRes)
+        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.getInstance().iceRes)
         {
             event.setCanceled(true);
         }
@@ -33,7 +33,7 @@ public class StopSnowDamage
         {
             TempModifier insulationModifier;
             int insulation = 0;
-            boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigCache.getInstance().iceRes;
+            boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.getInstance().iceRes;
             if (hasIcePotion
             || ((insulation = ((insulationModifier = TempHelper.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class)) == null ? 0
             : insulationModifier.<Integer>getArgument("warmth"))) > 0 && (player.tickCount % Math.max(1, 37 - insulation)) == 0))

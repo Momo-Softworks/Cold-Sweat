@@ -630,16 +630,125 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.1.10-b05c
-- Insulated armor now slows down/stops freezing from powder snow and soul fire
+- The Hellspring Lamp's functionality has been reverted to the old system
+    - That is, it directly changes the world's temperature instead of raising the maximum habitable temperature
 
 Fixes:
 - Fixed body temperature still not working properly in some cases
-- Fixed issue with tooltips that caused servers to crash on startup
+- Fixed the Hearth not updating when an insulated area is blocked off
+- Fixed the Hearth's Insulation effect occasionally dropping out
+- Fixed potential duplication bug with some fuel items in the Hearth
 
 Technical Changes:
+- In small areas, the Hearth will slow its spreading algorithm down to 1/20th of the normal rate
+      - Improves performance if the Hearth is in an area smaller than 6000 blocks
+- More minor Hearth optimizations
 - Fixed TempModifiers not ticking or expiring properly
 - Changed the order in which vanilla TempModifiers are applied to prevent unwanted behavior (like seasons affecting underground players)
 - Renamed all instances of "BlockEffect" to "BlockTemp" for clarity
+- Renamed & simplified some methods in TempModifier for clarity
+- TempModifiers now store the last value they received and the last value they returned
+      - These can be used to get the temperature of a player before a certain modifier was applied (or after)
+- New method in TempHelper: getModifier()
+      - Returns the first occurrence of a TempModifier with the given class
+      - Overload method uses a predicate instead of a class
+- Fixed potentially erroneous behavior in TempHelper.addModifier() (specifically with the "replace" flag)
+- Reduced the amount of packets being sent for various clientside updates
+- Temperature#with() now takes into account modifier tickRates
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10.1
+
+Fixes:
+- Fixed memory leak when syncing TempModifiers from server to client
+- Fixed Hearth not resetting when a block update happens nearby
+- Fixed Hearth letting the Insulated effect expire before giving it to the player again (1.18.x)
+- Fixed the Hearth giving the Insulated effect despite having the incorrect fuel type
+- Fixed the Hearth not being able to be placed on a replaceable block (snow layer, tall grass, etc.)
+- Fixed the "replace" function of addModifier() not working properly (1.18.x)
+
+Technical Changes:
+- BlockTemps defined in the config now override vanilla BlockTemps
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10.2
+- All biomes from Biomes o' Plenty have been given custom temperatures to work better with Cold Sweat
+      - The world-settings.toml config file will need to be deleted for this change to take effect
+- Temperatures will now blend between sub-seasons in Serene Seasons on a day-by-day basis
+- All Hearths' particle visibility settings are now stored persistently per-player
+    - Might not work on servers for now
+- Biome humidity now plays a role in how the time of day affects temperature
+      - More humid biomes will have less drastic temperature shifts
+- Added a small cooldown for Waterskins to prevent spamming
+
+Fixes:
+- Fixed the Hellspring Lamp not working (1.18.x)
+- Fixed the Hearth not insulating the player from more than 1 block away (1.18.x)
+- Fixed Waterskins not working sometimes
+- Fixed body temperature ticking up/down in erratic patterns
+- Fixed changes in temperature being delayed by ~5 ticks
+- Fixed crash when destroying a minecart carrying a block (1.16.5)
+- Fixed minecarts dropping duplicate items when destroyed
+- Fixed rare crash when rendering UI elements (1.18.x)
+- Fixed the Hearth spreading to un-roofed areas in some cases
+- Fixed armor insulation not being as effective as intended
+- Fixed biome temperature calculations being incorrect
+
+Technical Changes:
+- The Hearth is now up to ~2,000% more computationally efficient than in 2.1.10.1
+    - ~2,000,000% more efficient than in 1.3.5 or 2.0
+    - It now takes 4 ms of compute time per minute vs >40,000 ms in older versions
+- schedule() is now handled by a custom task scheduler instead of Forge's event system
+    - It has also been broken up into client-side and server-side methods
+    - Otherwise, it is functionally the same
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10.3
+- Players' Hearth particle preferences are now saved on servers
+- Refined the temperatures of some biomes (mostly from Biomes o' Plenty)
+
+Fixes:
+- Fixed some crashes related to empty/nonexistent chunks
+- Fixed the Hearth crashing the server in rare cases
+- Fixed the Hearth incorrectly detecting skylight access in some cases
+- Fixed Waterskins reaching too extreme of temperatures when being filled in intense climates
+- Fixed players' Hearth particle settings not working on servers
+
+Technical Changes:
+- The Hearth will now only reset from a block update if the Hearth's radius is occupying that position
+- Refined the algorithm that determines the intensity of time-related temperature changes
+      - A config option has been added to override this in cases where it is inaccurate ("Biome Variance" in world-settings.toml)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.10.4
+- The Grace effect now shows as an icon on the top-right when it is active
+- The Insulated effect is now removed when the player is in an un-roofed area
+- Renamed Hellspring Lamp to Soulspring Lamp (the ID has changed, too, but old worlds will be automatically converted)
+- The Soulspring Lamp now emits light when lit (clientside only)
+      - For weaker systems, a config option has been added to disable this
+- The Hearth now displays 3D boxes around the area it is affecting
+      - This might severely impact performance, so a config option has been added to disable it
+
+Fixes:
+- Fixed crash when starting a server
+- Fixed GUIs not being centered in the screen
+- Fixed error when attempting to join a server due to missing class definition
+- Fixed sub-seasonal temperatures not blending into each other correctly
+- Fixed configs loading multiple times when starting a world
+- Fixed the Hearth spreading through blocks it wasn't supposed to
+
+Technical Changes:
+- Removed TimeTempModifier (merged with BiomeTempModifier)
+- Config settings for biome temperature now specify the midnight and noon temperatures a biome (in other words, the "low" and "high" temperatures)
+      - Old configs will be treated as "legacy", and will still work in some capacity; though it's highly advised to switch to the new system
+      - Removed the "Biome Variance" config option, as it is no longer needed
+- Centralized/streamlined how config settings are internally handled
+- Created custom block update event to more accurately detect block updates
+- Optimized the Hearth's spreading algorithm by reducing extraneous checks & using the new update event
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

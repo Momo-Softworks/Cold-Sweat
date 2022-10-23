@@ -7,7 +7,7 @@
 
 
   "item.cold_sweat.minecart_insulation": "광산 수레 단열재",
-  "item.cold_sweat.hellspring_lamp":       "영혼불 전등",
+  "item.cold_sweat.soulspring_lamp":       "영혼불 전등",
   "item.cold_sweat.thermometer":         "온도계",
   "item.cold_sweat.waterskin":           "가죽 부대 물통",
   "item.cold_sweat.waterskin.filled":    "채워짐",
@@ -43,8 +43,8 @@
 
 
   "entity.player.damage.freeze": "플레이어가 얼어붙음",
-  "item.hellspring_lamp.on":       "영혼불 전등 점화됨",
-  "item.hellspring_lamp.off":      "영혼불 전등 소화됨",
+  "item.soulspring_lamp.on":       "영혼불 전등 점화됨",
+  "item.soulspring_lamp.off":      "영혼불 전등 소화됨",
 
 
   "cold_sweat.screen.hearth.show_particles": "입자 보이기",

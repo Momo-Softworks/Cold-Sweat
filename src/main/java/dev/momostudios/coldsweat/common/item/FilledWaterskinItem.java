@@ -3,12 +3,10 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import dev.momostudios.coldsweat.api.util.TempHelper;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import dev.momostudios.coldsweat.util.config.ConfigCache;
-import dev.momostudios.coldsweat.util.config.DynamicValue;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,8 +25,6 @@ import java.util.Random;
 
 public class FilledWaterskinItem extends Item
 {
-    static DynamicValue<Integer> WATERSKIN_STRENGTH = DynamicValue.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
-
     public FilledWaterskinItem()
     {
         super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
@@ -43,7 +39,7 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = 0.1 * ConfigCache.getInstance().rate * CSMath.getSign(itemTemp);
+                double temp = 0.1 * ConfigSettings.getInstance().rate * CSMath.getSign(itemTemp);
                 double newTemp = itemTemp - temp;
                 if (CSMath.isInRange(newTemp, -1, 1)) newTemp = 0;
 
@@ -60,7 +56,7 @@ public class FilledWaterskinItem extends Item
         InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        double amount = itemstack.getOrCreateTag().getDouble("temperature") * (WATERSKIN_STRENGTH.get() / 50d);
+        double amount = itemstack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Type.CORE, true);
 
         // Play empty sound
@@ -88,11 +84,11 @@ public class FilledWaterskinItem extends Item
         player.swing(hand);
 
         Random rand = new Random();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 6; i++)
         {
             TaskScheduler.scheduleClient(() ->
             {
-                for (int p = 0; p < rand.nextInt(3) + 2; p++)
+                for (int p = 0; p < rand.nextInt(5) + 5; p++)
                 {
                     level.addParticle(ParticleTypes.FALLING_WATER,
                             player.getX() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2),
