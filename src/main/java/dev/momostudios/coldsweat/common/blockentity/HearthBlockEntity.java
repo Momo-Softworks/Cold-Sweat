@@ -9,6 +9,7 @@ import dev.momostudios.coldsweat.client.event.HearthDebugRenderer;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.common.event.HearthPathManagement;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -330,7 +331,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                     SpreadPath tryPath = spreadPath.offset(direction);
 
                                     // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
-                                    if (pathLookup.add(tryPath.getPos()) && !WorldHelper.isSpreadBlocked(chunk, pathPos, direction))
+                                    if (pathLookup.add(tryPath.getPos()) && WorldHelper.isSpreadBlocked(level, WorldHelper.getBlockState(chunk, pathPos), pathPos, direction))
                                     {
                                         // Add the new path to the temporary list and lookup table
                                         paths.add(tryPath);
@@ -352,6 +353,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                             spreadPath.freeze();
                             this.frozenPaths++;
                         }
+                        if (this.frozenPaths >= this.maxPaths())
+                            this.spreading = false;
                     }
 
                     /*
@@ -363,7 +366,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         {
                             // Air Particles
                             Random rand = new Random();
-                            if (!Minecraft.getInstance().options.renderDebug && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
+                            if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().hearthDebug()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
                             {
                                 float xr = rand.nextFloat();
                                 float yr = rand.nextFloat();
@@ -446,7 +449,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
 
         // Particles
-        //long startNanos = System.nanoTime();
         if (level.isClientSide)
         {
             Random rand = new Random();
