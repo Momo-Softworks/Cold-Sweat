@@ -58,4 +58,10 @@ public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
     {
         narration.add(NarratedElementType.HINT, this.text);
     }
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY)
+    {
+        return mouseX >= this.x - 5 && mouseY >= this.y - 5 && mouseX < this.x + Minecraft.getInstance().font.width(this.text) + 5 && mouseY < this.y + Minecraft.getInstance().font.lineHeight + 5;
+    }
 }

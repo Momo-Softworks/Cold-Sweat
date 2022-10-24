@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +47,7 @@ public abstract class AbstractConfigPage extends Screen
     private final Screen parentScreen;
     private final ConfigSettings configSettings;
 
-    public Map<String, List<Widget>> elementBatches = new HashMap<>();
+    public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
     public Map<String, List<FormattedText>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
@@ -98,9 +99,7 @@ public abstract class AbstractConfigPage extends Screen
         int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         ConfigLabel label = new ConfigLabel(id, text, labelX, labelY, color);
 
-        this.addRenderableWidget(label);
-
-        this.addElementBatch(id, List.of(label));
+        this.addWidgetBatch(id, List.of(label));
 
         if (side == Side.LEFT)
             this.leftSideLength += font.lineHeight + 4;
@@ -132,12 +131,11 @@ public abstract class AbstractConfigPage extends Screen
             }
         };
         button.active = shouldBeActive;
-        elementBatches.put(id, List.of(button));
 
-        // Add button
-        this.addRenderableWidget(button);
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+
+        this.addWidgetBatch(id, List.of(button));
 
         if (side == Side.LEFT)
             this.leftSideLength += ConfigScreen.OPTION_SIZE;
@@ -196,15 +194,15 @@ public abstract class AbstractConfigPage extends Screen
         readValue.accept(textBox);
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
-        // Add the text box
-        this.addRenderableWidget(textBox);
         // Add the label
-        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
 
         this.setTooltip(id, tooltip);
-        this.addElementBatch(id, List.of(textBox));
+
+        // Add the widget
+        this.addWidgetBatch(id, List.of(textBox, configLabel));
 
         if (side == Side.LEFT)
             this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
@@ -223,7 +221,6 @@ public abstract class AbstractConfigPage extends Screen
         int labelOffset = font.width(label.getString()) > 84 ?
                 font.width(label.getString()) - 84 : 0;
 
-
         // Left button
         ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
         {
@@ -233,7 +230,6 @@ public abstract class AbstractConfigPage extends Screen
                 configSettings.difficulty = 4;
         });
         leftButton.active = shouldBeActive;
-        this.addRenderableWidget(leftButton);
 
         // Up button
         ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
@@ -244,7 +240,6 @@ public abstract class AbstractConfigPage extends Screen
                 configSettings.difficulty = 4;
         });
         upButton.active = shouldBeActive;
-        this.addRenderableWidget(upButton);
 
         // Down button
         ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
@@ -255,7 +250,6 @@ public abstract class AbstractConfigPage extends Screen
                 configSettings.difficulty = 4;
         });
         downButton.active = shouldBeActive;
-        this.addRenderableWidget(downButton);
 
         // Right button
         ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
@@ -266,7 +260,6 @@ public abstract class AbstractConfigPage extends Screen
                 configSettings.difficulty = 4;
         });
         rightButton.active = shouldBeActive;
-        this.addRenderableWidget(rightButton);
 
         // Reset button
         ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 48, 0, 20, TEXTURE, button ->
@@ -277,15 +270,14 @@ public abstract class AbstractConfigPage extends Screen
                 configSettings.difficulty = 4;
         });
         resetButton.active = shouldBeActive;
-        this.addRenderableWidget(resetButton);
 
         // Add the option text
-        this.addRenderableWidget(new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504));
+        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 114, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
 
         this.setTooltip(id, tooltip);
-        this.addElementBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton));
+        this.addWidgetBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
 
         // Move down
         if (side == Side.LEFT)
@@ -352,63 +344,21 @@ public abstract class AbstractConfigPage extends Screen
 
         // Render tooltip
         if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
+        for (Map.Entry<String, List<GuiEventListener>> entry : widgetBatches.entrySet())
         {
-            for (Map.Entry<String, List<Widget>> widget : this.elementBatches.entrySet())
+            String id = entry.getKey();
+            List<GuiEventListener> widgets = entry.getValue();
+
+            // if the mouse is hovering over any of the widgets in the batch, print hello
+            if (widgets.stream().anyMatch(widget -> widget.isMouseOver(mouseX, mouseY)))
             {
-                int x;
-                int y;
-                int maxX;
-                int maxY;
-                ConfigLabel label = null;
-                if (widget.getValue().size() == 1 && widget.getValue().get(0) instanceof Button button)
+                List<FormattedText> tooltipList = this.tooltips.get(id);
+                if (tooltipList != null && !tooltipList.isEmpty())
                 {
-                    x = button.x;
-                    y = button.y;
-                    maxX = x + button.getWidth();
-                    maxY = y + button.getHeight();
-                    String id = widget.getKey();
-
-                    if (mouseX >= x && mouseX <= maxX - 1
-                    && mouseY >= y && mouseY <= maxY - 1)
-                    {
-                        List<FormattedText> tooltipList = this.tooltips.get(id);
-                        if (tooltipList != null && !tooltipList.isEmpty())
-                        {
-                            List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
-                            this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
-                            break;
-                        }
-                    }
+                    List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                    this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
                 }
-                else
-                {
-                    for (GuiEventListener eventListener : this.children())
-                    {
-                        if (eventListener instanceof ConfigLabel label1 && label1.id.equals(widget.getKey()))
-                        {
-                            label = label1;
-                            break;
-                        }
-                    }
-                    if (label == null) continue;
-
-                    x = label.x;
-                    y = label.y;
-                    maxX = label.x + font.width(label.text);
-                    maxY = label.y + font.lineHeight;
-
-                    if (mouseX >= x - 2 && mouseX <= maxX + 2
-                            && mouseY >= y - 5 && mouseY <= maxY + 5)
-                    {
-                        List<FormattedText> tooltipList = this.tooltips.get(label.id);
-                        if (tooltipList != null && !tooltipList.isEmpty())
-                        {
-                            List<Component> tooltip = this.tooltips.get(label.id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
-                            this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
-                            break;
-                        }
-                    }
-                }
+                break;
             }
         }
     }
@@ -437,14 +387,19 @@ public abstract class AbstractConfigPage extends Screen
         RIGHT
     }
 
-    protected void addElementBatch(String id, List<Widget> elements)
+    protected void addWidgetBatch(String id, List<GuiEventListener> elements)
     {
-        this.elementBatches.put(id, elements);
+        for (GuiEventListener element : elements)
+        {
+            if (element instanceof Widget && element instanceof NarratableEntry widget)
+                this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
+        }
+        this.widgetBatches.put(id, elements);
     }
 
-    public List<Widget> getElementBatch(String id)
+    public List<GuiEventListener> getWidgetBatch(String id)
     {
-        return this.elementBatches.get(id);
+        return this.widgetBatches.get(id);
     }
 
     protected void setTooltip(String id, String[] tooltip)

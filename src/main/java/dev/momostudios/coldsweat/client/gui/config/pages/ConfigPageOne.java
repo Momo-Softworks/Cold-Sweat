@@ -80,10 +80,10 @@ public class ConfigPageOne extends AbstractConfigPage
                             new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString())));
 
             // Change the max & min temps to reflect the new setting
-            ((EditBox) this.elementBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
+            ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
                     CSMath.convertUnits(configSettings.maxTemp, Temperature.Units.MC, properUnits.get(), true))));
 
-            ((EditBox) this.elementBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
+            ((EditBox) this.widgetBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
                     CSMath.convertUnits(configSettings.minTemp, Temperature.Units.MC, properUnits.get(), true))));
         }, false, false, true, new TranslatableComponent("cold_sweat.config.units.desc").getString());
 

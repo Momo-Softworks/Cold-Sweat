@@ -30,7 +30,7 @@ public class ConfigButton extends Button
 
             if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
             {
-                ((Button) page.getElementBatch("difficulty").get(0)).setMessage(
+                ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
                         new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
                                 " (" + ConfigScreen.difficultyName(configSettings.difficulty) + ")..."));
             }
