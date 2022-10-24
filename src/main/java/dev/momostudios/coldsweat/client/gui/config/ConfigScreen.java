@@ -16,6 +16,8 @@ import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.List;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ConfigScreen
@@ -33,17 +35,21 @@ public class ConfigScreen
     public static int MOUSE_X = 0;
     public static int MOUSE_Y = 0;
 
+    static List<Class<? extends AbstractConfigPage>> PAGES = Arrays.asList(ConfigPageOne.class, ConfigPageTwo.class);
     public static int FIRST_PAGE = 0;
-    public static int LAST_PAGE = 1;
+    public static int LAST_PAGE = PAGES.size() - 1;
 
     public static Screen getPage(int index, Screen parentScreen, ConfigSettings configSettings)
     {
         index = Math.max(FIRST_PAGE, Math.min(LAST_PAGE, index));
-        switch (index)
+        try
         {
-            case 0:  return new ConfigPageOne(parentScreen, configSettings);
-            case 1:  return new ConfigPageTwo(parentScreen, configSettings);
-            default: return null;
+            return PAGES.get(index).getConstructor(Screen.class, ConfigSettings.class).newInstance(parentScreen, configSettings);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
         }
     }
 
