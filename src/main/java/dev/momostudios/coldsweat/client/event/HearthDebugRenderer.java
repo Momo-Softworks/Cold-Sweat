@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -121,6 +122,8 @@ public class HearthDebugRenderer
 
             for (Map.Entry<BlockPos, Set<BlockPos>> entry : HEARTH_LOCATIONS.entrySet())
             {
+                if (HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), Minecraft.getInstance().level))) continue;
+
                 Set<BlockPos> points = entry.getValue();
                 for (BlockPos pos : points)
                 {
