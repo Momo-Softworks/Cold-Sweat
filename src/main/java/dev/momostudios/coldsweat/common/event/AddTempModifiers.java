@@ -82,18 +82,6 @@ public class AddTempModifiers
     }
 
     @SubscribeEvent
-    public static void removeInsulation(TickEvent.PlayerTickEvent event)
-    {
-        Player player = event.player;
-        // Removes the Insulated effect if the player has skylight access
-        if (event.phase == TickEvent.Phase.END && !player.level.isClientSide && player.tickCount % 20 == 0
-        && player.hasEffect(ModEffects.INSULATION) && WorldHelper.canSeeSky(player.level, new BlockPos(player.getX(), CSMath.ceil(player.getY()), player.getZ()), 64))
-        {
-            player.removeEffect(ModEffects.INSULATION);
-        }
-    }
-
-    @SubscribeEvent
     public static void onSleep(SleepFinishedTimeEvent event)
     {
         if (!event.getWorld().isClientSide())
