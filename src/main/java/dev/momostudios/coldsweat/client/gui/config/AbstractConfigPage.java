@@ -37,11 +37,12 @@ public abstract class AbstractConfigPage extends Screen
     {
         MOUSE_STILL_TIMER++;
     }
+
     @Override
-    public void afterMouseMove()
+    public void mouseMoved(double mouseX, double mouseY)
     {
         MOUSE_STILL_TIMER = 0;
-        super.afterMouseMove();
+        super.mouseMoved(mouseX, mouseY);
     }
 
     private final Screen parentScreen;
@@ -80,6 +81,9 @@ public abstract class AbstractConfigPage extends Screen
         return 0;
     }
 
+    /**
+     * Adds an empty block to the list on the given side. One unit is the height of a button.
+     */
     protected void addEmptySpace(Side side, double units)
     {
         if (side == Side.LEFT)
@@ -88,11 +92,10 @@ public abstract class AbstractConfigPage extends Screen
             this.rightSideLength += ConfigScreen.OPTION_SIZE * units;
     }
 
-    protected void addLabel(String id, Side side, String text)
-    {
-        this.addLabel(id, side, text, 16777215);
-    }
-
+    /**
+     * Adds a label with plain text to the list on the given side.
+     * @param id The internal id of the label. This widget can be accessed by this id.
+     */
     protected void addLabel(String id, Side side, String text, int color)
     {
         int labelX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
@@ -107,6 +110,21 @@ public abstract class AbstractConfigPage extends Screen
             this.rightSideLength += font.lineHeight + 4;
     }
 
+    protected void addLabel(String id, Side side, String text)
+    {
+        this.addLabel(id, side, text, 16777215);
+    }
+
+    /**
+     * Adds a button to the list on the given side.
+     * @param id The internal id of the button. This widget can be accessed by this id.
+     * @param dynamicLabel A supplier that returns the label of the button. The label is updated when the button is pressed.
+     * @param onClick The action to perform when the button is pressed.
+     * @param requireOP Whether the button should be disabled if the player is not OP.
+     * @param setsCustomDifficulty Sets Cold Sweat's difficulty to custom when pressed, if true.
+     * @param clientside Whether the button is clientside only (renders the clientside icon).
+     * @param tooltip The tooltip of the button when hovered.
+     */
     protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick,
                              boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
@@ -116,8 +134,10 @@ public abstract class AbstractConfigPage extends Screen
         int buttonX = this.width / 2;
         int xOffset = side == Side.LEFT ? -179 : 56;
         int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        // Extend the button if the text is too long
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
+        // Make the button
         Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
         {
             onClick.accept(button1);
@@ -137,6 +157,7 @@ public abstract class AbstractConfigPage extends Screen
 
         this.addWidgetBatch(id, List.of(button));
 
+        // Mark this space as used
         if (side == Side.LEFT)
             this.leftSideLength += ConfigScreen.OPTION_SIZE;
         else
@@ -145,7 +166,18 @@ public abstract class AbstractConfigPage extends Screen
         this.setTooltip(id, tooltip);
     }
 
-    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> writeValue, Consumer<EditBox> readValue,
+    /**
+     * Adds an input that accepts decimal numbers to the list on the given side.
+     * @param id The internal id of the input. This widget can be accessed by this id.
+     * @param label The label text of the input.
+     * @param onValueWrite The action to perform when the input is changed.
+     * @param onInit The action to perform when the input is initialized.
+     * @param requireOP Whether the input should be disabled if the player is not OP.
+     * @param setsCustomDifficulty Sets Cold Sweat's difficulty to custom when edited, if true.
+     * @param clientside Whether the input is clientside only (renders the clientside icon).
+     * @param tooltip The tooltip of the input when hovered.
+     */
+    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> onValueWrite, Consumer<EditBox> onInit,
                                    boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
@@ -154,6 +186,7 @@ public abstract class AbstractConfigPage extends Screen
         int labelOffset = font.width(label.getString()) > 90 ?
                           font.width(label.getString()) - 84 : 0;
 
+        // Make the input
         EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, new TextComponent(""))
         {
             @Override
@@ -164,7 +197,7 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         configSettings.difficulty = 4;
-                    writeValue.accept(Double.parseDouble(this.getValue()));
+                    onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
             @Override
@@ -175,7 +208,7 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         configSettings.difficulty = 4;
-                    writeValue.accept(Double.parseDouble(this.getValue()));
+                    onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
             @Override
@@ -186,15 +219,21 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         configSettings.difficulty = 4;
-                    writeValue.accept(Double.parseDouble(this.getValue()));
+                    onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
         };
+
+        // Disable the input if the player is not OP
         textBox.setEditable(shouldBeActive);
-        readValue.accept(textBox);
+
+        // Set the initial value
+        onInit.accept(textBox);
+
+        // Round the input to 2 decimal places
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
-        // Add the label
+        // Make the label
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
@@ -204,13 +243,26 @@ public abstract class AbstractConfigPage extends Screen
         // Add the widget
         this.addWidgetBatch(id, List.of(textBox, configLabel));
 
+        // Mark this space as used
         if (side == Side.LEFT)
             this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
         else
             this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
     }
 
-    protected void addDirectionPanel(String id, Side side, TranslatableComponent label, Consumer<Integer> addX, Consumer<Integer> addY, Runnable reset,
+    /**
+     * Adds a 4-way direction button panel with a reset button to the list on the given side.
+     * @param id The internal id of the panel. This widget can be accessed by this id.
+     * @param label The label text of the panel.
+     * @param leftRightPressed The action to perform when the left or right button is pressed. 1 for right, -1 for left.
+     * @param upDownPressed The action to perform when the up or down button is pressed. -1 for up, 1 for down.
+     * @param reset The action to perform when the reset button is pressed.
+     * @param requireOP Whether the panel should be disabled if the player is not OP.
+     * @param setsCustomDifficulty Sets Cold Sweat's difficulty to custom when edited, if true.
+     * @param clientside Whether the panel is clientside only (renders the clientside icon).
+     * @param tooltip The tooltip of the panel when hovered.
+     */
+    protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         int xOffset = side == Side.LEFT ? -81 : 152;
@@ -224,7 +276,7 @@ public abstract class AbstractConfigPage extends Screen
         // Left button
         ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
         {
-            addX.accept(-1);
+            leftRightPressed.accept(-1);
 
             if (setsCustomDifficulty)
                 configSettings.difficulty = 4;
@@ -234,7 +286,7 @@ public abstract class AbstractConfigPage extends Screen
         // Up button
         ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
         {
-            addY.accept(-1);
+            upDownPressed.accept(-1);
 
             if (setsCustomDifficulty)
                 configSettings.difficulty = 4;
@@ -244,7 +296,7 @@ public abstract class AbstractConfigPage extends Screen
         // Down button
         ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
         {
-            addY.accept(1);
+            upDownPressed.accept(1);
 
             if (setsCustomDifficulty)
                 configSettings.difficulty = 4;
@@ -254,7 +306,7 @@ public abstract class AbstractConfigPage extends Screen
         // Right button
         ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
         {
-            addX.accept(1);
+            leftRightPressed.accept(1);
 
             if (setsCustomDifficulty)
                 configSettings.difficulty = 4;
