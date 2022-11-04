@@ -135,10 +135,11 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
     {
-        if (attacker instanceof Player && getFuel(stack) < 64 && !(target instanceof Player) && target.getMobType() != MobType.UNDEAD)
+        if (attacker instanceof Player && getFuel(stack) < 64 && !(target instanceof Player)
+        && target.getHealth() >= target.getMaxHealth() && target.getMobType() != MobType.UNDEAD)
         {
             ParticleBatchMessage packet = new ParticleBatchMessage();
-            addFuel(stack, 0.5);
+            addFuel(stack, Math.min(4, target.getMaxHealth()));
             Random rand = new Random();
             for (int i = 0; i < CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50); i++)
             {
