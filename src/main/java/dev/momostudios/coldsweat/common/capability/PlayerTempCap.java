@@ -26,7 +26,7 @@ public class PlayerTempCap implements ITemperatureCap
     static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
     static Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
 
-    private double[] syncedValues = new double[5];
+    private double[] syncedValues = {-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
     double ticksSinceSync = 0;
 
     double worldTemp = 1;
@@ -35,15 +35,15 @@ public class PlayerTempCap implements ITemperatureCap
     double maxOffset = 0;
     double minOffset = 0;
 
-    public boolean showBodyTemp;
-    public boolean showWorldTemp;
-
     List<TempModifier> worldModifiers = new ArrayList<>();
     List<TempModifier> coreModifiers  = new ArrayList<>();
     List<TempModifier> baseModifiers  = new ArrayList<>();
     List<TempModifier> rateModifiers  = new ArrayList<>();
     List<TempModifier> maxModifiers   = new ArrayList<>();
     List<TempModifier> minModifiers   = new ArrayList<>();
+
+    public boolean showBodyTemp;
+    public boolean showWorldTemp;
 
     public double getTemp(Temperature.Type type)
     {
@@ -100,7 +100,6 @@ public class PlayerTempCap implements ITemperatureCap
         };
     }
 
-
     public void clearModifiers(Temperature.Type type)
     {
         switch (type)
@@ -113,23 +112,6 @@ public class PlayerTempCap implements ITemperatureCap
             case MIN   -> this.minModifiers.clear();
             default -> throw new IllegalArgumentException("Illegal type for PlayerTempCapability.clearModifiers(): " + type);
         }
-    }
-
-    @Override
-    public void copy(ITemperatureCap cap)
-    {
-        this.worldModifiers = cap.getModifiers(Temperature.Type.WORLD);
-        this.baseModifiers  = cap.getModifiers(Temperature.Type.BASE);
-        this.coreModifiers  = cap.getModifiers(Temperature.Type.CORE);
-        this.rateModifiers  = cap.getModifiers(Temperature.Type.RATE);
-        this.maxModifiers   = cap.getModifiers(Temperature.Type.RATE);
-        this.minModifiers   = cap.getModifiers(Temperature.Type.RATE);
-
-        this.worldTemp = cap.getTemp(Temperature.Type.WORLD);
-        this.coreTemp  = cap.getTemp(Temperature.Type.CORE);
-        this.baseTemp  = cap.getTemp(Temperature.Type.BASE);
-        this.maxOffset = cap.getTemp(Temperature.Type.MAX);
-        this.minOffset = cap.getTemp(Temperature.Type.MIN);
     }
 
     public void tickDummy(Player player)
@@ -164,7 +146,7 @@ public class PlayerTempCap implements ITemperatureCap
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
             Temperature changeBy = new Temperature(Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude);
-            newCoreTemp += changeBy.with(player, getModifiers(Temperature.Type.RATE)).get();
+            newCoreTemp = changeBy.with(player, getModifiers(Temperature.Type.RATE)).add(newCoreTemp).get();
         }
         // If the player's temperature and world temperature are not both hot or both cold
         if (magnitude != CSMath.getSign(newCoreTemp))
@@ -206,15 +188,15 @@ public class PlayerTempCap implements ITemperatureCap
         double bodyTemp = getTemp(Temperature.Type.BODY);
 
         //Deal damage to the player if temperature is critical
-        if (player.tickCount % 40 == 0)
+        if (player.tickCount % 40 == 0 && !player.hasEffect(ModEffects.GRACE))
         {
             boolean damageScaling = config.damageScaling;
 
-            if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes) && !player.hasEffect(ModEffects.GRACE))
+            if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
             {
                 player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
             }
-            else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes) && !player.hasEffect(ModEffects.GRACE))
+            else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
             {
                 player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
             }
@@ -228,16 +210,17 @@ public class PlayerTempCap implements ITemperatureCap
         // Get the difference between the world temp and the threshold to determine the speed of return (closer to the threshold = slower)
         // Divide it by the staticRate (3) because it feels nice
         // Multiply it by the configured tempRate Rate Modifier
-        // If it's too slow, default to tempRate / 30 instead
+        // If it's too slow, default to tempRate / 10 instead
         // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
         double changeBy = Math.max((Math.abs(worldTemp - tempLimit) / staticRate) * tempRate, tempRate / 10) * -CSMath.getSign(bodyTemp);
         return CSMath.getLeastExtreme(changeBy, -bodyTemp);
     }
 
-    public void copy(PlayerTempCap cap)
+    @Override
+    public void copy(ITemperatureCap cap)
     {
         // Copy temperature values
-        for (Temperature.Type type : Temperature.Type.values())
+        for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
         {
             if (type == Temperature.Type.BODY || type == Temperature.Type.RATE) continue;
             this.setTemp(type, cap.getTemp(type));
