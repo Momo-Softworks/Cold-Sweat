@@ -53,6 +53,10 @@ public class CSMath
         return input * (float) (Math.PI / 180);
     }
 
+    public static float toRadians(double input) {
+        return (float) input * (float) (Math.PI / 180);
+    }
+
     public static float toDegrees(float input) {
         return input * (float) (180 / Math.PI);
     }
@@ -69,14 +73,14 @@ public class CSMath
         return value < min ? min : value > max ? max : value;
     }
 
-    public static double ceil(double value)
+    public static int ceil(double value)
     {
-        return value + (1 - (value % 1));
+        return (int) (value + (1 - (value % 1)));
     }
 
-    public static double floor(double value)
+    public static int floor(double value)
     {
-        return value - (value % 1);
+        return (int) (value - (value % 1));
     }
 
     /**
@@ -194,7 +198,7 @@ public class CSMath
             sum += entry.getKey().doubleValue() * weight;
             weightSum += weight;
         }
-        return sum / weightSum;
+        return sum / Math.max(1, weightSum);
     }
 
     public static Vec3 vectorToVec(Vector3d vec)
@@ -297,6 +301,7 @@ public class CSMath
 
     public static VoxelShape rotateShape(Direction to, VoxelShape shape)
     {
+        // shapeHolder[0] is the old shape, shapeHolder[1] is the new shape
         VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty() };
 
         int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
@@ -314,15 +319,20 @@ public class CSMath
     public static VoxelShape flattenShape(Direction.Axis axis, VoxelShape shape)
     {
         // Flatten the shape into a 2D projection
-        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty() };
-        shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-            switch (axis)
-            {
-                case X -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(0, minY, minZ, 1, maxY, maxZ));
-                case Y -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, 0, minZ, maxX, 1, maxZ));
-                case Z -> shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1));
-            }
-        });
+        // shapeHolder[0] is the old shape, shapeHolder[1] is the new shape
+        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty()};
+        switch (axis)
+        {
+            case X ->
+            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(0, minY, minZ, 1, maxY, maxZ)));
+            case Y ->
+            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, 0, minZ, maxX, 1, maxZ)));
+            case Z ->
+            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1)));
+        }
         return shapeHolder[1];
     }
 }
