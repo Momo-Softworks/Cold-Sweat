@@ -158,9 +158,13 @@ public class ConfigHelper
             {
                 String biomeID = (String) entry.get(0);
 
-                Collection<Biome> biomes = biomeID.startsWith("#") ?
-                        ForgeRegistries.BIOMES.tags().stream().filter(tag -> tag.getKey().location().toString().equals(biomeID.replace("#", ""))).findFirst().orElseThrow(Exception::new).stream().toList() :
-                        Collections.singletonList(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)));
+                Collection<Biome> biomes;
+                if (biomeID.startsWith("#"))
+                {
+                    Optional<ITag<Biome>> tagBiomes = ForgeRegistries.BIOMES.tags().stream().filter(tag -> tag.getKey().location().toString().equals(biomeID.replace("#", ""))).findFirst();
+                    biomes = tagBiomes.map(biomeITag -> biomeITag.stream().toList()).orElse(Collections.emptyList());
+                }
+                else biomes = Collections.singletonList(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)));
 
                 // Iterate through all biomes
                 for (Biome biome : biomes)
@@ -182,6 +186,7 @@ public class ConfigHelper
                         min = mid - variance;
                         max = mid + variance;
                     }
+
                     // Maps the biome ID to the temperature (and variance if present)
                     map.put(biome.getRegistryName(), Pair.of(min, max));
                 }
