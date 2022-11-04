@@ -29,22 +29,22 @@ public class DepthTempModifier extends TempModifier
         double midTemp = (ConfigSettings.getInstance().maxTemp + ConfigSettings.getInstance().minTemp) / 2;
         BlockPos playerPos = player.blockPosition();
 
-        List<Double> lightLevels = new ArrayList<>();
-        List<Double> depthLevels = new ArrayList<>();
+        Map<Integer, Double> lightLevels = new HashMap<>();
+        Map<Double, Double> depthLevels = new HashMap<>();
 
         for (BlockPos pos : WorldHelper.getNearbyPositions(playerPos, SAMPLES, 3))
         {
             ChunkAccess chunk = player.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
             double depth = Math.max(0, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - playerPos.getY());
-            double light = player.level.getBrightness(LightLayer.SKY, pos);
+            int light = player.level.getBrightness(LightLayer.SKY, pos);
 
-            lightLevels.add(light);
-            depthLevels.add(depth);
+            lightLevels.put(light, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos))));
+            depthLevels.put(depth, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos))));
         }
 
-        double light = CSMath.average(lightLevels.toArray(new Double[0]));
-        double depth = CSMath.average(depthLevels.toArray(new Double[0]));
+        double light = CSMath.weightedAverage(lightLevels);
+        double depth = CSMath.weightedAverage(depthLevels);
 
         return temp ->
         {
