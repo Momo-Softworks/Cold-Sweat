@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -12,15 +13,24 @@ import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthPathManagement;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,11 +38,12 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HearthDebugRenderer
 {
-    public static Map<BlockPos, Set<BlockPos>> HEARTH_LOCATIONS = new HashMap<>();
+    public static Map<BlockPos, Set<Pair<BlockPos, ArrayList<Direction>>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
     public static void onLevelRendered(RenderLevelEvent event)
@@ -45,6 +56,7 @@ public class HearthDebugRenderer
             Frustum frustum = event.getFrustum();
             PoseStack ps = event.getPoseStack();
             Vec3 camPos = event.getCamera().getPosition();
+            Level level = event.getLevel();
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.enableBlend();
@@ -120,13 +132,18 @@ public class HearthDebugRenderer
                 vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(1f, 0.7f, 0.6f, renderAlpha).normal(matrix3f, 0, 0, 1).endVertex();
             };
 
-            for (Map.Entry<BlockPos, Set<BlockPos>> entry : HEARTH_LOCATIONS.entrySet())
-            {
-                if (HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), Minecraft.getInstance().level))) continue;
+            LevelChunk workingChunk = (LevelChunk) level.getChunk(new BlockPos(0, 0, 0));
 
-                Set<BlockPos> points = entry.getValue();
-                for (BlockPos pos : points)
+            for (Map.Entry<BlockPos, Set<Pair<BlockPos, ArrayList<Direction>>>> entry : HEARTH_LOCATIONS.entrySet())
+            {
+                if (HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
+
+                Set<Pair<BlockPos, ArrayList<Direction>>> points = entry.getValue();
+                for (Pair<BlockPos, ArrayList<Direction>> pair : points)
                 {
+                    BlockPos pos = pair.getFirst();
+                    ArrayList<Direction> directions = pair.getSecond();
+
                     float x = pos.getX();
                     float y = pos.getY();
                     float z = pos.getZ();
@@ -134,23 +151,33 @@ public class HearthDebugRenderer
 
                     if (renderAlpha > 0.01f && frustum.isVisible(new AABB(pos)))
                     {
-                        Set<BiConsumer<Vector3f, Float>> lines = new HashSet<>(Arrays.asList(nw, ne, sw, se, nu, nd, su, sd, eu, ed, wu, wd));
+                        ChunkPos chunkPos = new ChunkPos(pos);
+                        if (!workingChunk.getPos().equals(chunkPos))
+                            workingChunk = (LevelChunk) level.getChunkSource().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+
+                        if (WorldHelper.getBlockState(workingChunk, pos).getShape(level, pos).equals(Shapes.block()))
+                        {
+                            LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, 1f, 0.7f, 0.6f, renderAlpha);
+                            continue;
+                        }
+
+                        if (directions.size() == 6) continue;
+
+                        Set<BiConsumer<Vector3f, Float>> lines = Sets.newHashSet(nw, ne, sw, se, nu, nd, su, sd, eu, ed, wu, wd);
 
                         // Remove the lines if another point is on the adjacent face
-                        if (points.contains(pos.below()))
+                        if (directions.contains(Direction.DOWN))
                             Arrays.asList(nd, sd, ed, wd).forEach(lines::remove);
-                        if (points.contains(pos.above()))
+                        if (directions.contains(Direction.UP))
                             Arrays.asList(nu, su, eu, wu).forEach(lines::remove);
-                        if (points.contains(pos.north()))
+                        if (directions.contains(Direction.NORTH))
                             Arrays.asList(nw, ne, nu, nd).forEach(lines::remove);
-                        if (points.contains(pos.south()))
+                        if (directions.contains(Direction.SOUTH))
                             Arrays.asList(sw, se, su, sd).forEach(lines::remove);
-                        if (points.contains(pos.west()))
+                        if (directions.contains(Direction.WEST))
                             Arrays.asList(nw, sw, wu, wd).forEach(lines::remove);
-                        if (points.contains(pos.east()))
+                        if (directions.contains(Direction.EAST))
                             Arrays.asList(ne, se, eu, ed).forEach(lines::remove);
-
-                        if (lines.isEmpty()) continue;
 
                         lines.forEach(line -> line.accept(new Vector3f(x, y, z), renderAlpha));
                     }
@@ -165,13 +192,28 @@ public class HearthDebugRenderer
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
         if (event.phase == TickEvent.Phase.END && Minecraft.getInstance().level != null
-        && Minecraft.getInstance().level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug)
+        && Minecraft.getInstance().level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
+        && ClientSettingsConfig.getInstance().hearthDebug())
         {
             HEARTH_LOCATIONS.clear();
             for (Map.Entry<BlockPos, Integer> entry : HearthPathManagement.HEARTH_POSITIONS.entrySet())
             {
                 BlockPos pos = entry.getKey();
-                HEARTH_LOCATIONS.put(pos, new HashSet<>(((HearthBlockEntity) Minecraft.getInstance().level.getBlockEntity(pos)).getPaths()));
+                BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
+                if (blockEntity instanceof HearthBlockEntity hearth)
+                {
+                    Set<BlockPos> paths = hearth.getPaths();
+                    HEARTH_LOCATIONS.put(pos, paths.stream().map(bp ->
+                    {
+                        ArrayList<Direction> dirs = new ArrayList<>();
+                        for (Direction dir : Direction.values())
+                        {
+                            if (paths.contains(bp.relative(dir)))
+                                dirs.add(dir);
+                        }
+                        return Pair.of(bp, dirs);
+                    }).collect(Collectors.toSet()));
+                }
             }
         }
     }
