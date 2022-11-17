@@ -51,15 +51,13 @@ public class AddTempModifiers
         Player player = event.player;
 
         // Water / Rain
-        if (!player.level.isClientSide && player.tickCount % 5 == 0 && player.isInWaterRainOrBubble())
+        if (!player.level.isClientSide && player.tickCount % 5 == 0)
         {
-            TempHelper.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
-        }
+            if (player.isInWaterRainOrBubble())
+                TempHelper.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
 
-        // Powder snow
-        if (!player.level.isClientSide && player.tickCount % 5 == 0 && player.getTicksFrozen() > 0)
-        {
-            TempHelper.replaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
+            if (player.getTicksFrozen() > 0)
+                TempHelper.replaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
         }
     }
 
