@@ -1,27 +1,40 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class SewingContainer extends AbstractContainerMenu
 {
@@ -114,15 +127,15 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
+                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
                 return stack.getItem() instanceof ArmorItem
-                    && !SewingContainer.this.isInsulatingItem(stack)
-                    && !stack.getOrCreateTag().getBoolean("insulated");
+                    && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
             @Override
             public void onTake(Player player, ItemStack stack)
             {
-                if (this.getItem().isEmpty())
-                    SewingContainer.this.takeInput();
+                super.onTake(player, stack);
+                SewingContainer.this.takeInput();
             }
             @Override
             public void setChanged()
@@ -138,7 +151,8 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                return isInsulatingItem(stack);
+                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+                return insulation.getFirst() > 0 || insulation.getSecond() > 0 || stack.getItem() instanceof ShearsItem;
             }
             @Override
             public void onTake(Player player, ItemStack stack)
@@ -167,7 +181,7 @@ public class SewingContainer extends AbstractContainerMenu
             public void onTake(Player player, ItemStack stack)
             {
                 super.onTake(player, stack);
-                SewingContainer.this.takeOutput();
+                SewingContainer.this.takeOutput(stack);
             }
         });
 
@@ -195,41 +209,112 @@ public class SewingContainer extends AbstractContainerMenu
         } catch (Exception ignored) {}
     }
 
+    public void setItem(int index, ItemStack stack)
+    {
+        this.sewingInventory.setItem(index, stack);
+        this.setRemoteSlot(index, stack);
+    }
+
+    public void growItem(int index, int amount)
+    {
+        ItemStack stack = this.sewingInventory.getItem(index);
+        stack.grow(amount);
+        this.sewingInventory.setItem(index, stack);
+        this.setRemoteSlot(index, stack);
+    }
+
+    public ItemStack getItem(int index)
+    {
+        return this.sewingInventory.getItem(index);
+    }
+
     private void takeInput()
     {
         this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
-    private void takeOutput()
+    private void takeOutput(ItemStack stack)
     {
-        this.sewingInventory.getItem(0).shrink(1);
-        this.setRemoteSlot(0, this.sewingInventory.getItem(0));
-
-        this.sewingInventory.getItem(1).shrink(1);
-        this.setRemoteSlot(1, this.sewingInventory.getItem(1));
-
         Player player = this.playerInventory.player;
-        SoundEvent equipSound = this.getCarried().getItem().getEquipSound();
-        if (equipSound != null)
+        ItemStack input1 = this.sewingInventory.getItem(0);
+        ItemStack input2 = this.sewingInventory.getItem(1);
+
+        // If insulation is being removed
+        if (this.getItem(1).getItem() instanceof ShearsItem)
         {
-            player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+            // Damage shears
+            input2.hurt(1, new Random(), null);
+            input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+            {
+                // Put the insulation item that was removed in the first input slot
+                this.setItem(0, cap.getInsulationItems().get(cap.getInsulationItems().size() - 1));
+                // Play shear sound
+                player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+            });
         }
-        player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+        // If insulation is being added
+        else
+        {
+            // Remove input items
+            this.growItem(0, -1);
+            this.growItem(1, -1);
+            player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+        }
+
+        // Get equip sound for the armor item
+        SoundEvent equipSound = stack.getItem().getEquipSound();
+        if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
     }
 
     private ItemStack testForRecipe()
     {
-        ItemStack slot0Item = this.sewingInventory.getItem(0);
-        ItemStack slot1Item = this.sewingInventory.getItem(1);
+        ItemStack armorItem = this.getItem(0);
+        ItemStack insulatorItem = this.getItem(1);
         ItemStack result = ItemStack.EMPTY;
 
-        // Insulated Armor
-        if (slot0Item.getItem() instanceof ArmorItem && isInsulatingItem(slot1Item) &&
-        // Do slot types match OR is insulating item NOT armor
-        (!(slot1Item.getItem() instanceof ArmorItem) || LivingEntity.getEquipmentSlotForItem(slot0Item).equals(LivingEntity.getEquipmentSlotForItem(slot1Item))))
+        // Is the first item armor, and the second item an insulator
+        if (armorItem.getItem() instanceof ArmorItem)
         {
-            ItemStack processed = slot0Item.copy();
-            processed.getOrCreateTag().putBoolean("insulated", true);
-            this.sewingInventory.setItem(2, processed);
+            ItemStack processed = armorItem.copy();
+            IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap());
+            int filledSlots = insulCap.getInsulationItems().size();
+
+            // Shears are used to remove insulation
+            if (insulatorItem.getItem() instanceof ShearsItem && filledSlots > 0)
+            {
+                insulCap.removeInsulationItem(insulCap.getInsulationItems().size() - 1);
+            }
+            // Item is for insulation
+            else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem())
+            && filledSlots < ArmorInsulation.getInsulationSlots(armorItem) && (!(insulatorItem.getItem() instanceof ArmorItem)
+            || LivingEntity.getEquipmentSlotForItem(armorItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
+            {
+                ItemStack insulator = insulatorItem.copy();
+                insulator.setCount(1);
+                insulCap.addInsulationItem(insulator);
+            }
+            else return ItemStack.EMPTY;
+
+            processed.getOrCreateTag().putBoolean("Insulated", true);
+
+            // Set NBT data that will be synced to the client (only used for tooltip)
+            ListTag list = new ListTag();
+            for (Pair<Double, Double> pair : insulCap.getInsulation())
+            {
+                CompoundTag tag = new CompoundTag();
+                tag.putDouble("Cold", pair.getFirst());
+                tag.putDouble("Hot", pair.getSecond());
+                list.add(tag);
+            }
+            processed.getOrCreateTag().put("Insulation", list);
+
+            // Remove "Insulated" tag if armor has no insulation left
+            processed.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+            {
+                if (cap.getInsulationItems().isEmpty())
+                    processed.getOrCreateTag().putBoolean("Insulated", false);
+            });
+
+            this.setItem(2, processed);
             result = processed;
         }
         return result;
@@ -241,29 +326,26 @@ public class SewingContainer extends AbstractContainerMenu
         this.pos = pos;
     }
 
-    public static boolean isInsulatingItem(ItemStack item)
-    {
-        return ConfigSettings.INSULATING_ITEMS.get().contains(item.getItem());
-    }
-
     @Override
-    public void removed(Player playerIn)
+    public void removed(Player player)
     {
-        Inventory playerinventory = playerIn.getInventory();
-        playerIn.drop(getCarried(), false);
-        setCarried(ItemStack.EMPTY);
+        super.removed(player);
 
         // Drop the contents of the input slots
-        for (int i = 0; i < sewingInventory.getContainerSize(); i++)
+        if (player instanceof ServerPlayer)
         {
-            ItemStack itemStack = this.getSlot(i).getItem();
-            if (i != 2 && !playerinventory.add(itemStack))
+            for (int i = 0; i < sewingInventory.getContainerSize(); i++)
             {
-                ItemEntity itementity = playerinventory.player.drop(itemStack, false);
-                if (itementity != null)
+                ItemStack itemStack = this.getSlot(i).getItem();
+                if (!itemStack.isEmpty() && i != 2)
                 {
-                    itementity.setNoPickUpDelay();
-                    itementity.setOwner(playerinventory.player.getUUID());
+                    if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
+                    {
+                        player.getInventory().placeItemBackInInventory(itemStack);
+                    }
+                    else player.drop(itemStack, false, true);
+
+                    setCarried(ItemStack.EMPTY);
                 }
             }
         }
@@ -280,79 +362,74 @@ public class SewingContainer extends AbstractContainerMenu
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
-        ItemStack itemstack = ItemStack.EMPTY;
+        ItemStack newStack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
         if (slot.hasItem())
         {
-            ItemStack itemstack1 = slot.getItem();
-            itemstack = itemstack1.copy();
+            ItemStack slotItem = slot.getItem();
+            newStack = slotItem.copy();
             if (CSMath.isInRange(index, 0, 2))
             {
-                if (!this.moveItemStackTo(itemstack1, 3, 39, true))
+                if (this.moveItemStackTo(slotItem, 3, 39, true))
                 {
-                    return ItemStack.EMPTY;
+                    slot.onTake(player, newStack);
                 }
-
-                slot.onQuickCraft(itemstack1, itemstack);
+                else return ItemStack.EMPTY;
             }
             else
             {
-                if (isInsulatingItem(itemstack1))
+                Pair<Double, Double> itemValue = ArmorInsulation.getItemInsulation(slotItem);
+                if (itemValue.getFirst() > 0 || itemValue.getSecond() > 0 || slotItem.getItem() instanceof ShearsItem)
                 {
-                    if (!this.moveItemStackTo(itemstack1, 1, 2, false))
+                    if (this.moveItemStackTo(slotItem, 1, 2, false))
                     {
-                        slot.onQuickCraft(itemstack1, itemstack);
-                        return ItemStack.EMPTY;
+                        slot.onQuickCraft(slotItem, newStack);
                     }
+                    else return ItemStack.EMPTY;
                 }
-                else if (itemstack1.getItem() instanceof ArmorItem)
+                else if (slotItem.getItem() instanceof ArmorItem)
                 {
-                    if (!this.moveItemStackTo(itemstack1, 0, 1, false))
+                    if (!this.moveItemStackTo(slotItem, 0, 1, false))
                     {
-                        slot.onQuickCraft(itemstack1, itemstack);
-                        return ItemStack.EMPTY;
+                        slot.onQuickCraft(slotItem, newStack);
                     }
+                    else return ItemStack.EMPTY;
                 }
                 else if (index == 2)
                 {
-                    if (!this.moveItemStackTo(itemstack1, 3, 39, false))
+                    if (!this.moveItemStackTo(slotItem, 3, 39, false))
                     {
-                        slot.onQuickCraft(itemstack1, itemstack);
-                        return ItemStack.EMPTY;
+                        slot.onQuickCraft(slotItem, newStack);
                     }
+                    else return ItemStack.EMPTY;
                 }
                 else if (CSMath.isInRange(index, slots.size() - 9, slots.size()))
                 {
-                    if (!this.moveItemStackTo(itemstack1, 3, 29, false))
+                    if (!this.moveItemStackTo(slotItem, 3, 29, false))
                     {
-                        slot.onQuickCraft(itemstack1, itemstack);
-                        return ItemStack.EMPTY;
+                        slot.onQuickCraft(slotItem, newStack);
                     }
+                    else return ItemStack.EMPTY;
                 }
                 else if (CSMath.isInRange(index, 3, slots.size() - 9))
                 {
-                    if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
+                    if (!this.moveItemStackTo(slotItem, slots.size() - 9, slots.size(), false))
                     {
-                        slot.onQuickCraft(itemstack1, itemstack);
-                        return ItemStack.EMPTY;
+                        slot.onQuickCraft(slotItem, newStack);
                     }
+                    else return ItemStack.EMPTY;
                 }
                 return ItemStack.EMPTY;
             }
 
-            if (itemstack1.isEmpty())
+            if (slotItem.isEmpty())
             {
                 slot.set(ItemStack.EMPTY);
             }
-            else
-            {
-                slot.setChanged();
-            }
-
-            slot.onTake(player, itemstack1);
+            else slot.setChanged();
         }
 
-        return itemstack;
+        return newStack;
     }
 }

@@ -23,6 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.PacketDistributor;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class WorldHelper
         if (pos.getY() >= mcHeight)
             return mcHeight;
 
-        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
         if (chunk == null) return mcHeight;
 
         for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
@@ -96,7 +97,6 @@ public class WorldHelper
         return posList;
     }
 
-
     public static boolean canSeeSky(LevelChunk chunk, Level level, BlockPos pos, int maxDistance)
     {
         for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
@@ -113,7 +113,7 @@ public class WorldHelper
             }
 
             BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
-            if (isSpreadBlocked(level, state, pos2, Direction.UP))
+            if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
             {
                 return false;
             }
@@ -127,46 +127,33 @@ public class WorldHelper
         return chunk == null || canSeeSky(chunk, level, pos, maxDistance);
     }
 
-    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir)
+    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         if (state.isAir()) return false;
-        return isFullSide(state, toDir, pos, level);
+        VoxelShape shape = state.getBlock().getShape(state, level, pos, CollisionContext.empty());
+
+        return isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir)
+            || isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir);
     }
 
-    public static boolean isSpreadBlocked(Level level, BlockPos pos, Direction toDir)
+    public static boolean isFullSide(VoxelShape shape, Direction dir)
     {
-        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        return chunk == null || isSpreadBlocked(level, chunk.getBlockState(pos), pos, toDir);
-    }
-
-    public static boolean isSpreadBlocked(LevelChunk chunk, BlockPos pos, Direction toDir)
-    {
-        return isSpreadBlocked(chunk.getLevel(), getChunkSection(chunk, pos.getY()).getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15), pos, toDir);
-    }
-
-    public static boolean isFullSide(BlockState state, Direction dir, BlockPos pos, Level level)
-    {
-        VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.empty());
         if (shape.isEmpty()) return false;
-        if (shape.equals(Shapes.box(0, 0, 0, 1, 1, 1))) return true;
+        if (shape.equals(Shapes.block())) return true;
 
-        // Flatten the shape into a 2D plane
-        VoxelShape areaShape = CSMath.flattenShape(dir.getAxis(), shape);
         // Return true if the 2D x/y area of the shape is >= 1
         double[] area = new double[1];
         switch (dir.getAxis())
         {
-            case X ->
-            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (y2 - y1) * (z2 - z1));
-            case Y ->
-            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (z2 - z1));
-            case Z ->
-            areaShape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (y2 - y1));
+            case X -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (y2 - y1) * (z2 - z1));
+            case Y -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (z2 - z1));
+            case Z -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (y2 - y1));
         }
+
         return area[0] >= 1;
     }
 
-    public static BlockState getBlockState(LevelChunk chunk, BlockPos blockpos)
+    public static BlockState getBlockState(ChunkAccess chunk, BlockPos blockpos)
     {
         int x = blockpos.getX();
         int y = blockpos.getY();
@@ -176,7 +163,10 @@ public class WorldHelper
         {
             return getChunkSection(chunk, y).getStates().get(x & 15, y & 15, z & 15);
         }
-        catch (Exception e) { return Blocks.AIR.defaultBlockState(); }
+        catch (Exception e)
+        {
+            return chunk.getBlockState(blockpos);
+        }
     }
 
     public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
@@ -206,7 +196,7 @@ public class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, LevelChunk chunk, TriConsumer<LevelChunk, BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))
@@ -214,7 +204,7 @@ public class WorldHelper
             Vec3 ray = to.subtract(from);
             Vec3 normalRay = ray.normalize();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            ChunkAccess workingChunk = level.getChunkSource().getChunk((int) from.x >> 4, (int) from.z >> 4, ChunkStatus.FULL, false);
+            ChunkAccess workingChunk = chunk;
 
             // Iterate over every block-long segment of the ray
             for (int i = 0; i < ray.length(); i++)
@@ -241,7 +231,7 @@ public class WorldHelper
                     maxHits--;
                     if (maxHits <= 0) break;
                 }
-                rayTracer.accept(state, pos);
+                rayTracer.accept((LevelChunk) workingChunk, state, pos);
             }
         }
     }

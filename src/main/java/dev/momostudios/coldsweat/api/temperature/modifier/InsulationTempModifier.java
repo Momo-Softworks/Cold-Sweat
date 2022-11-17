@@ -9,19 +9,21 @@ public class InsulationTempModifier extends TempModifier
 {
     public InsulationTempModifier()
     {
-        addArgument("warmth", 0);
+        this(0d, 0d);
     }
 
-    public InsulationTempModifier(int amount)
+    public InsulationTempModifier(double cold, double hot)
     {
-        addArgument("warmth", amount);
+        addArgument("cold", cold);
+        addArgument("hot", hot);
     }
 
     @Override
     public Function<Temperature, Temperature> calculate(Player player)
     {
-        double warmth = Math.max(1d, this.<Integer>getArgument("warmth") / 10d);
-        return temp -> temp.divide(warmth);
+        double cold = Math.max(1d, this.<Double>getArgument("cold") / 8d);
+        double hot = Math.max(1d, this.<Double>getArgument("hot") / 8d);
+        return temp -> temp.divide(temp.get() > 0 ? hot : cold);
     }
 
     public String getID()

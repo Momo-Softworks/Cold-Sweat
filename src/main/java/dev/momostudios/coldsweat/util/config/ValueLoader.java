@@ -10,21 +10,21 @@ import java.util.function.Supplier;
  * Contains a value that updates again once Forge has been fully loaded. Mostly used for static fields.
  * @param <T> The variable type that this object is storing
  */
-public class ConfigValue<T>
+public class ValueLoader<T>
 {
     T value;
     Supplier<T> valueCreator;
 
-    public ConfigValue(Supplier<T> valueCreator)
+    public ValueLoader(Supplier<T> valueCreator)
     {
         this.valueCreator = valueCreator;
         this.value = valueCreator.get();
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    public static <V> ConfigValue<V> of(Supplier<V> valueCreator)
+    public static <V> ValueLoader<V> of(Supplier<V> valueCreator)
     {
-        return new ConfigValue<>(valueCreator);
+        return new ValueLoader<>(valueCreator);
     }
 
     @SubscribeEvent

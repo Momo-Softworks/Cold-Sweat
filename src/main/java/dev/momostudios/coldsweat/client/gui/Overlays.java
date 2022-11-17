@@ -16,6 +16,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -194,7 +195,7 @@ public class Overlays
             // Ensure player temp capability is stored
             if (PLAYER_CAP == null || player.tickCount % 40 == 0)
             {
-                PLAYER_CAP = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(null);
+                PLAYER_CAP = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap());
             }
 
 
@@ -205,14 +206,16 @@ public class Overlays
                 boolean celsius = CLIENT_CONFIG.celsius();
 
                 // Get temperature in actual degrees
-                double realTemp = CSMath.convertUnits(PLAYER_CAP.getTemp(Type.WORLD), Units.MC, celsius ? Units.C : Units.F, true);
+                double worldTemp = PLAYER_CAP.getTemp(Type.WORLD);
+                double realTemp = CSMath.convertUnits(worldTemp, Units.MC, celsius ? Units.C : Units.F, true);
 
                 // Calculate the blended world temp for this tick
+                double diff = realTemp - WORLD_TEMP;
                 PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += (realTemp - WORLD_TEMP) / 6.0;
+                WORLD_TEMP += (int) Math.abs(diff) <= 1 ? diff : diff / 2d;
 
                 // Update max/min offset
-                MAX_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MAX);
+                MAX_OFFSET = PLAYER_CAP.getTemp(Type.MAX);
                 MIN_OFFSET = PLAYER_CAP.getTemp(Type.MIN);
             }
 

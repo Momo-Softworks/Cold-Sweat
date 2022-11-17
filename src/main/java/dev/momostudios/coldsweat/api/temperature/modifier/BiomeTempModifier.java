@@ -48,12 +48,12 @@ public class BiomeTempModifier extends TempModifier
                     // Get the biome's temperature, either overridden by config or calculated
                     // Start with biome override
                     configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
-                            // If no override, check for offset
-                            Pair.of((configTemp = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
-                            // If no offset, do nothing
-                            Pair.of(0d, 0d)))
-                            // Add the biome's base temperature and calculate min/max based on biome's humidity
-                            .getFirst() + biomeTemp - biomeVariance, configTemp.getSecond() + biomeTemp + biomeVariance));
+                                 // If no override, check for offset
+                                 Pair.of((configTemp = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+                                 // If no offset, do nothing
+                                 Pair.of(0d, 0d)))
+                                 // Add the biome's base temperature and calculate min/max based on biome's humidity
+                                 .getFirst() + biomeTemp - biomeVariance, configTemp.getSecond() + biomeTemp + biomeVariance));
 
                     // Biome temp at midnight (bottom of the sine wave)
                     double min = configTemp.getFirst();
@@ -70,7 +70,6 @@ public class BiomeTempModifier extends TempModifier
 
                 worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
             }
-            //if (!player.level.isClientSide) player.displayClientMessage(new TextComponent(worldTemp + ""), true);
             double finalWorldTemp = worldTemp;
             return temp -> temp.add(finalWorldTemp);
         }

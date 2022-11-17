@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.util.config;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import net.minecraft.resources.ResourceLocation;
@@ -16,40 +17,42 @@ import java.util.Map;
 public class ConfigSettings
 {
     // Settings saved during runtime for easy access
-    public static ConfigValue<Map<ResourceLocation, Pair<Double, Double>>> BIOME_TEMPS;
-    public static ConfigValue<Map<ResourceLocation, Pair<Double, Double>>> BIOME_OFFSETS;
-    public static ConfigValue<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
-    public static ConfigValue<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
-    public static ConfigValue<Double[]> SUMMER_TEMPS;
-    public static ConfigValue<Double[]> AUTUMN_TEMPS;
-    public static ConfigValue<Double[]> WINTER_TEMPS;
-    public static ConfigValue<Double[]> SPRING_TEMPS;
+    public static ValueLoader<Map<ResourceLocation, Pair<Double, Double>>> BIOME_TEMPS;
+    public static ValueLoader<Map<ResourceLocation, Pair<Double, Double>>> BIOME_OFFSETS;
+    public static ValueLoader<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
+    public static ValueLoader<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static ValueLoader<Double[]> SUMMER_TEMPS;
+    public static ValueLoader<Double[]> AUTUMN_TEMPS;
+    public static ValueLoader<Double[]> WINTER_TEMPS;
+    public static ValueLoader<Double[]> SPRING_TEMPS;
 
-    public static ConfigValue<List<Item>> INSULATING_ITEMS;
-    public static ConfigValue<Map<Item, Double>> INSULATING_ARMORS;
+    public static ValueLoader<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static ValueLoader<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
 
-    public static ConfigValue<Map<Item, Double>> VALID_FOODS;
+    public static ValueLoader<Map<Item, Double>> VALID_FOODS;
 
-    public static ConfigValue<Integer> WATERSKIN_STRENGTH;
+    public static ValueLoader<Integer> WATERSKIN_STRENGTH;
 
-    public static ConfigValue<List<Item>> LAMP_FUEL_ITEMS;
+    public static ValueLoader<List<Item>> LAMP_FUEL_ITEMS;
 
-    public static ConfigValue<List<String>> LAMP_DIMENSIONS;
+    public static ValueLoader<List<String>> LAMP_DIMENSIONS;
 
-    public static ConfigValue<Map<Item, Double>> BOILER_FUEL;
-    public static ConfigValue<Map<Item, Double>> ICEBOX_FUEL;
-    public static ConfigValue<Map<Item, Double>> HEARTH_FUEL;
+    public static ValueLoader<Map<Item, Double>> BOILER_FUEL;
+    public static ValueLoader<Map<Item, Double>> ICEBOX_FUEL;
+    public static ValueLoader<Map<Item, Double>> HEARTH_FUEL;
+
+    public static ValueLoader<Pair<Integer, Double>> GOAT_FUR_TIMINGS;
 
     // Makes the settings instantiation collapsible & easier to read
     static
     {
-        BIOME_TEMPS = ConfigValue.of(() ->
+        BIOME_TEMPS = ValueLoader.of(() ->
                 ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures(), true));
 
-        BIOME_OFFSETS = ConfigValue.of(() ->
+        BIOME_OFFSETS = ValueLoader.of(() ->
                 ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets(), false));
 
-        DIMENSION_TEMPS = ConfigValue.of(() ->
+        DIMENSION_TEMPS = ValueLoader.of(() ->
         {
             Map<ResourceLocation, Double> map = new HashMap<>();
             for (List<?> entry : WorldSettingsConfig.getInstance().dimensionTemperatures())
@@ -59,7 +62,7 @@ public class ConfigSettings
             return map;
         });
 
-        DIMENSION_OFFSETS = ConfigValue.of(() ->
+        DIMENSION_OFFSETS = ValueLoader.of(() ->
         {
             Map<ResourceLocation, Double> map = new HashMap<>();
             for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())
@@ -69,28 +72,43 @@ public class ConfigSettings
             return map;
         });
 
-        BOILER_FUEL = ConfigValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
-        HEARTH_FUEL = ConfigValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
-        ICEBOX_FUEL = ConfigValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
+        BOILER_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
+        HEARTH_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
+        ICEBOX_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
 
-        INSULATING_ITEMS = ConfigValue.of(() ->
+        INSULATION_ITEMS = ValueLoader.of(() ->
         {
-            List<Item> list = new ArrayList<>();
-            for (String itemID : ItemSettingsConfig.getInstance().insulatingItems())
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (List<?> entry : ItemSettingsConfig.getInstance().insulatingItems())
             {
-                list.addAll(ConfigHelper.getItems(itemID));
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {
+                    map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
+                }
             }
-            return list;
+            return map;
         });
 
-        INSULATING_ARMORS = ConfigValue.of(() ->
-                ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().insulatingArmor()));
+        INSULATING_ARMORS = ValueLoader.of(() ->
+        {
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (List<?> entry : ItemSettingsConfig.getInstance().insulatingArmor())
+            {
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {
+                    map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
+                }
+            }
+            return map;
+        });
 
-        VALID_FOODS = ConfigValue.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
+        VALID_FOODS = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
 
-        WATERSKIN_STRENGTH = ConfigValue.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
+        WATERSKIN_STRENGTH = ValueLoader.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
 
-        LAMP_FUEL_ITEMS = ConfigValue.of(() ->
+        LAMP_FUEL_ITEMS = ValueLoader.of(() ->
         {
             List<Item> list = new ArrayList<>();
             for (String itemID : ItemSettingsConfig.getInstance().soulLampItems())
@@ -100,14 +118,20 @@ public class ConfigSettings
             return list;
         });
 
-        LAMP_DIMENSIONS = ConfigValue.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
+        LAMP_DIMENSIONS = ValueLoader.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
+
+        GOAT_FUR_TIMINGS = ValueLoader.of(() ->
+        {
+            List<?> entry = EntitySettingsConfig.getInstance().goatFurGrowth();
+            return Pair.of(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).doubleValue());
+        });
 
         if (ModList.get().isLoaded("sereneseasons"))
         {
-            SUMMER_TEMPS = ConfigValue.of(() -> WorldSettingsConfig.getInstance().summerTemps());
-            AUTUMN_TEMPS = ConfigValue.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
-            WINTER_TEMPS = ConfigValue.of(() -> WorldSettingsConfig.getInstance().winterTemps());
-            SPRING_TEMPS = ConfigValue.of(() -> WorldSettingsConfig.getInstance().springTemps());
+            SUMMER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().summerTemps());
+            AUTUMN_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
+            WINTER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().winterTemps());
+            SPRING_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().springTemps());
         }
     }
 

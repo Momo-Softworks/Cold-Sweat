@@ -61,8 +61,11 @@ public class WorldSettingsConfig
         /*
          Biomes
          */
-        BUILDER.comment("Format: [[\"biome-1\", value-1], [\"biome-2\", value-2]... etc]",
-                        "Note: all temperatures are in Minecraft units")
+        BUILDER.comment("Format: [[\"biome-1\", temp-low, temp-high, *units], [\"biome-2\", temp-low, temp-high, *units]... etc]",
+                       "temp-low: The temperature of the biome at midnight",
+                       "temp-high: The temperature of the biome at noon",
+                       "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)",
+                       "Note: all temperatures are in Minecraft units")
                .push("Biomes");
 
         /* Vanilla Biomes */

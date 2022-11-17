@@ -1,0 +1,10 @@
+{
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:entities/hoglin"
+    }
+  ],
+  "addition": "cold_sweat:hoglin_hide",
+  "type": "cold_sweat:hide_from_hoglin"
+}

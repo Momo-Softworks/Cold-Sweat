@@ -28,6 +28,10 @@ public class ItemInit
     public static final RegistryObject<Item> THERMOMETER = ITEMS.register("thermometer", () ->
             new Item((new Item.Properties()).tab(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> SOULSPRING_LAMP = ITEMS.register("soulspring_lamp", SoulspringLampItem::new);
+    public static final RegistryObject<Item> GOAT_FUR = ITEMS.register("goat_fur", () ->
+            new Item((new Item.Properties()).tab(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> HOGLIN_HIDE = ITEMS.register("hoglin_hide", () ->
+            new Item((new Item.Properties()).tab(ColdSweatGroup.COLD_SWEAT)));
 
     //BlockItems
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));

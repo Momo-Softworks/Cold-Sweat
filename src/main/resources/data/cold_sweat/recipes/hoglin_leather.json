@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+        "item": "cold_sweat:hoglin_hide"
+        }
+    ],
+  "result":
+  {
+    "item": "minecraft:leather",
+    "count": 2
+  }
+}

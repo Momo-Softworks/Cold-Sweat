@@ -13,6 +13,7 @@ import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthPathManagement;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.world.SpreadPath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -202,7 +203,7 @@ public class HearthDebugRenderer
                 BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
                 if (blockEntity instanceof HearthBlockEntity hearth)
                 {
-                    Set<BlockPos> paths = hearth.getPaths();
+                    ArrayList<BlockPos> paths = hearth.getPaths().stream().map(SpreadPath::getPos).collect(Collectors.toCollection(ArrayList::new));
                     HEARTH_LOCATIONS.put(pos, paths.stream().map(bp ->
                     {
                         ArrayList<Direction> dirs = new ArrayList<>();

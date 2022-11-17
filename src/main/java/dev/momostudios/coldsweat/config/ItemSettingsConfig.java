@@ -20,9 +20,12 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulatingItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
+
     private static final ForgeConfigSpec.IntValue waterskinStrength;
 
     static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
@@ -116,27 +119,40 @@ public final class ItemSettingsConfig
         BUILDER.push("Insulation");
         insulatingItems = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
-                        "Format: [[\"item-id-1\"], [\"item-id-2\"], ...etc]")
+                        "Format: [[\"item-id-1\", cold-1, hot-1], [\"item-id-2\", cold-2, hot-2], ...etc]",
+                        "\"item-id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
+                        "\"cold\": The amount of cold insulation the item provides.",
+                        "\"hot\": The amount of heat insulation the item provides.")
                 .defineList("Insulation Ingredients", Arrays.asList
                                 (
-                                        "minecraft:leather_helmet",
-                                        "minecraft:leather_chestplate",
-                                        "minecraft:leather_leggings",
-                                        "minecraft:leather_boots"
+                                        List.of("minecraft:leather_helmet",     4, 4),
+                                        List.of("minecraft:leather_chestplate", 6, 6),
+                                        List.of("minecraft:leather_leggings",   5, 5),
+                                        List.of("minecraft:leather_boots",      4, 4),
+                                        List.of("minecraft:leather",            1, 1),
+                                        List.of("cold_sweat:hoglin_hide",       0, 2),
+                                        List.of("cold_sweat:goat_fur",          2, 0)
                                 ),
-                        it -> it instanceof String);
+                        it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
         insulatingArmor = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
                 .defineList("Insulated Armor", Arrays.asList
                                 (
-                                        Arrays.asList("minecraft:leather_helmet", 4),
-                                        Arrays.asList("minecraft:leather_chestplate", 7),
-                                        Arrays.asList("minecraft:leather_leggings", 5),
-                                        Arrays.asList("minecraft:leather_boots", 4)
+                                        List.of("minecraft:leather_helmet",     4, 4),
+                                        List.of("minecraft:leather_chestplate", 6, 6),
+                                        List.of("minecraft:leather_leggings",   5, 5),
+                                        List.of("minecraft:leather_boots",      4, 4)
                                 ),
-                        it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                        it -> it instanceof List list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+
+        insulationSlots = BUILDER
+                .comment("Defines how many insulation slots armor pieces have")
+                .defineList("Insulation Slots", Arrays.asList(4, 6, 5, 4),
+                        it -> it instanceof List list && list.get(0) instanceof Number && list.get(1) instanceof Number
+                                                      && list.get(2) instanceof Number && list.get(3) instanceof Number);
+
         BUILDER.pop();
 
         /*
@@ -175,19 +191,6 @@ public final class ItemSettingsConfig
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
     }
 
-    public void copyValues(ItemSettingsConfig config)
-    {
-        setBoilerItems(config.boilerItems());
-        setIceboxItems(config.iceboxItems());
-        setHearthItems(config.hearthItems());
-        setInsulatingItems(config.insulatingItems());
-        setInsulatingArmor(config.insulatingArmor());
-        setSoulLampDimensions(config.soulLampDimensions());
-        setSoulLampItems(config.soulLampItems());
-        setTemperatureFoods(config.temperatureFoods());
-        setWaterskinStrength(config.waterskinStrength());
-    }
-
     public static ItemSettingsConfig getInstance()
     {
         return INSTANCE;
@@ -208,7 +211,7 @@ public final class ItemSettingsConfig
         return hearthItems.get();
     }
 
-    public List<? extends String> insulatingItems()
+    public List<? extends List<?>> insulatingItems()
     {
         return insulatingItems.get();
     }
@@ -216,6 +219,11 @@ public final class ItemSettingsConfig
     public List<? extends List<?>> insulatingArmor()
     {
         return insulatingArmor.get();
+    }
+
+    public List<? extends Number> insulationSlots()
+    {
+        return insulationSlots.get();
     }
 
     public List<? extends String> soulLampItems()
@@ -253,7 +261,7 @@ public final class ItemSettingsConfig
         hearthItems.set(itemMap);
     }
 
-    public void setInsulatingItems(List<? extends String> items)
+    public void setInsulatingItems(List<? extends List<?>> items)
     {
         insulatingItems.set(items);
     }
@@ -261,6 +269,11 @@ public final class ItemSettingsConfig
     public void setInsulatingArmor(List<? extends List<?>> itemMap)
     {
         insulatingArmor.set(itemMap);
+    }
+
+    public void setInsulationSlots(List<? extends Number> slots)
+    {
+        insulationSlots.set(slots);
     }
 
     public void setSoulLampItems(List<? extends String> items)

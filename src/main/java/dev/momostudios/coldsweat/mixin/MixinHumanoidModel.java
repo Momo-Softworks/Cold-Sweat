@@ -52,7 +52,7 @@ public class MixinHumanoidModel
             case BLOCK ->
             {
                 this.rightArm.xRot = this.rightArm.xRot * 0.5F - 0.9424779F - rightArmRot;
-                this.rightArm.yRot = (-(float) Math.PI / 6F);
+                this.rightArm.yRot = -((float) Math.PI / 6F);
             }
             case ITEM ->
             {

@@ -40,7 +40,7 @@ public class AddTempModifiers
                 if (ModList.get().isLoaded("sereneseasons"))
                     TempHelper.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(20), Temperature.Type.WORLD, false);
                 TempHelper.addModifier(player, new DepthTempModifier().tickRate(10), Temperature.Type.WORLD, false);
-                TempHelper.addModifier(player, new BlockTempModifier().tickRate(5),  Temperature.Type.WORLD, false);
+                TempHelper.addModifier(player, new BlockTempModifier().tickRate(4),  Temperature.Type.WORLD, false);
             }, 10);
         }
     }
@@ -114,7 +114,7 @@ public class AddTempModifiers
                 }
                 else
                 {
-                    EntitySettingsConfig.INSTANCE.insulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
+                    EntitySettingsConfig.getInstance().insulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
                     {
                         float insulationAmount = ((Number) entityID.get(1)).floatValue();
                         TempHelper.addModifier(player, new MountTempModifier(insulationAmount).expires(1), Temperature.Type.RATE, false);

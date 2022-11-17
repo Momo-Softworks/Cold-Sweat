@@ -24,13 +24,13 @@ import java.lang.reflect.Method;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
-    static Method renderItem = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "m_109371_",
+    static Method RENDER_ITEM = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "m_109371_",
                                                                AbstractClientPlayer.class, float.class, float.class,
                                                                InteractionHand.class, float.class, ItemStack.class,
                                                                float.class, PoseStack.class, MultiBufferSource.class, int.class);
     static
     {
-        renderItem.setAccessible(true);
+        RENDER_ITEM.setAccessible(true);
     }
 
     @SubscribeEvent
@@ -93,7 +93,7 @@ public class RenderLampHand
             ms.translate(-event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.15, -0.05);
             try
             {
-                renderItem.invoke(Minecraft.getInstance().getItemInHandRenderer(),
+                RENDER_ITEM.invoke(Minecraft.getInstance().getItemInHandRenderer(),
                                   player,
                                   event.getInterpolatedPitch(),
                                   event.getPartialTicks(),
@@ -105,7 +105,7 @@ public class RenderLampHand
                                   event.getMultiBufferSource(),
                                   event.getPackedLight());
             }
-            catch (Exception e) {}
+            catch (Exception ignored) {}
 
             ms.popPose();
             ms.popPose();

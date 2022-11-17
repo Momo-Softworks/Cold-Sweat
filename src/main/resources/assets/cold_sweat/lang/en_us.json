@@ -10,7 +10,12 @@
   "item.cold_sweat.soulspring_lamp":     "Soulspring Lamp",
   "item.cold_sweat.thermometer":         "Thermometer",
   "item.cold_sweat.waterskin":           "Waterskin",
+  "item.cold_sweat.goat_fur":            "Goat Fur",
+  "item.cold_sweat.hoglin_hide":         "Hoglin Hide",
   "item.cold_sweat.waterskin.filled":    "Filled",
+
+
+  "entity.cold_sweat.chameleon": "Chameleon",
 
 
   "modifier.cold_sweat.insulated":      "Insulated",
@@ -19,6 +24,8 @@
   "effect.cold_sweat.insulated":        "Insulated",
   "effect.cold_sweat.ice_resistance":   "Ice Resistance",
   "effect.cold_sweat.grace":            "Grace",
+
+
   "item.minecraft.potion.effect.ice_resistance":             "Potion of Ice Resistance",
   "item.minecraft.lingering_potion.effect.ice_resistance":   "Lingering Potion of Ice Resistance",
   "item.minecraft.splash_potion.effect.ice_resistance":      "Splash Potion of Ice Resistance",
@@ -101,7 +108,7 @@
   "cold_sweat.config.grace_period.desc":            "Gives the player a brief time of immunity to temperature when spawning in the world.",
   "cold_sweat.config.grace_period_length.desc_1":   "The duration of the Grace Period, in ticks.",
   "cold_sweat.config.grace_period_length.desc_2":   "20 ticks = 1 second",
-  "cold_sweat.config.hearth_debug.desc": "Displays areas that the Hearth is affecting when the F3 debug menu is open",
+  "cold_sweat.config.hearth_debug.desc":            "Displays areas that the Hearth is affecting when the F3 debug menu is open.",
   "cold_sweat.config.ice_resistance.desc":          "Whether or not Ice Resistance potions give the player immunity to freezing damage.",
   "cold_sweat.config.icon_bobbing.desc":            "Whether or not elements of Cold Sweat's UI should \"jiggle\" in extreme temperatures.",
   "cold_sweat.config.max_temperature.desc":         "The maximum bearable world temperature. After this point, your core temperature will start increasing.",

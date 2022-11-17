@@ -247,7 +247,7 @@ public class CSMath
     public static int getSign(double value)
     {
         if (value == 0) return 0;
-        return (int) (value / Math.abs(value));
+        return value < 0 ? -1 : 1;
     }
 
     /**

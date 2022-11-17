@@ -7,9 +7,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class FurnaceBlockTemp extends BlockTemp
 {
+    public FurnaceBlockTemp()
+    {
+        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
+    }
+
     @Override
     public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
     {
@@ -23,7 +29,6 @@ public class FurnaceBlockTemp extends BlockTemp
     @Override
     public boolean hasBlock(Block block)
     {
-        super.hasBlock(block);
         return block instanceof AbstractFurnaceBlock;
     }
 

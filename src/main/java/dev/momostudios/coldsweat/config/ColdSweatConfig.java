@@ -18,7 +18,7 @@ import java.util.List;
 public class ColdSweatConfig
 {
     private static final ForgeConfigSpec SPEC;
-    private static final ColdSweatConfig configReference = new ColdSweatConfig();
+    private static final ColdSweatConfig CONFIG_REFERENCE = new ColdSweatConfig();
     public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.IntValue difficulty;
@@ -111,22 +111,22 @@ public class ColdSweatConfig
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: weaken over distance>, <*max effect>], [etc...], [etc...]]",
+                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>], [etc...], [etc...]]",
                          "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
                          "",
                          "Arguments:",
                          "block-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
                          "temperature: the temperature of the block, in Minecraft units",
-                         "weaken over distance: the block is less effective as distance increases",
+                         "falloff: the block is less effective as distance increases",
                          "max effect: the max temperature change this block can cause to a player (even with multiple blocks)")
                 .defineList("BlockTemps", Arrays.asList
                                 (
-                                        Arrays.asList(Blocks.SOUL_FIRE.getRegistryName().toString(),   -0.2,   7, true, 0.8),
-                                        Arrays.asList(Blocks.FIRE.getRegistryName().toString(),         0.2,   7, true, 0.8),
-                                        Arrays.asList(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.15,   3, true, 0.6),
-                                        Arrays.asList(Blocks.ICE.getRegistryName().toString(),         -0.2, 1.5, true, 0.8),
-                                        Arrays.asList(Blocks.PACKED_ICE.getRegistryName().toString(),  -0.3, 1.5, true, 1.2),
-                                        Arrays.asList(Blocks.BLUE_ICE.getRegistryName().toString(),    -0.4, 1.5, true, 1.6)
+                                        Arrays.asList(Blocks.SOUL_FIRE.getRegistryName().toString(),   -0.2, 7, true, 0.8),
+                                        Arrays.asList(Blocks.FIRE.getRegistryName().toString(),         0.2, 7, true, 0.8),
+                                        Arrays.asList(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.15, 3, true, 0.6),
+                                        Arrays.asList(Blocks.ICE.getRegistryName().toString(),         -0.1, 4, true, 0.5),
+                                        Arrays.asList(Blocks.PACKED_ICE.getRegistryName().toString(),  -0.2, 4, true, 1.0),
+                                        Arrays.asList(Blocks.BLUE_ICE.getRegistryName().toString(),    -0.3, 4, true, 1.0)
                                 ),
                         it -> true);
         BUILDER.pop();
@@ -167,7 +167,7 @@ public class ColdSweatConfig
 
     public static ColdSweatConfig getInstance()
     {
-        return configReference;
+        return CONFIG_REFERENCE;
     }
 
     public void writeValues(ConfigSettings cache)

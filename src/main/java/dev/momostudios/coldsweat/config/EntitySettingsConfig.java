@@ -16,8 +16,9 @@ public class EntitySettingsConfig
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> insulatedEntities;
+    public static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
 
-    public static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
+    static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
 
     static
     {
@@ -32,6 +33,13 @@ public class EntitySettingsConfig
                 .defineList("Insulated Entities", Arrays.asList(
                 ), it -> it instanceof List && ((List<?>) it).size() == 2 && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
+
+        goatFurGrowth = BUILDER
+                .comment("Defines how often a goat will try to grow its fur, and the chance of it succeeding",
+                        "Format: [ticks, chance]")
+                .defineList("Goat Fur Growth Timings", List.of(
+                        1200, 0.15
+                ), it -> it instanceof Number);
 
         SPEC = BUILDER.build();
     }
@@ -54,12 +62,21 @@ public class EntitySettingsConfig
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
     }
 
+    public static EntitySettingsConfig getInstance()
+    {
+        return INSTANCE;
+    }
+
     /*
      * Non-private values for use elsewhere
      */
 
     public List<? extends List<Object>> insulatedEntities() {
         return insulatedEntities.get();
+    }
+
+    public List<?> goatFurGrowth() {
+        return goatFurGrowth.get();
     }
 
     public void setInsulatedEntities(List<? extends List<Object>> list) {

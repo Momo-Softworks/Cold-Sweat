@@ -10,4 +10,6 @@ public class ModItems
     public static final Item MINECART_INSULATION = ItemInit.MINECART_INSULATION.get();
     public static final Item SOULSPRING_LAMP = ItemInit.SOULSPRING_LAMP.get();
     public static final Item THERMOMETER = ItemInit.THERMOMETER.get();
+    public static final Item GOAT_FUR = ItemInit.GOAT_FUR.get();
+    public static final Item HOGLIN_HIDE = ItemInit.HOGLIN_HIDE.get();
 }

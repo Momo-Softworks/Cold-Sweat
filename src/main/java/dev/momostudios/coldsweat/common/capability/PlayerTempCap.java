@@ -12,6 +12,7 @@ import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
@@ -26,8 +27,9 @@ public class PlayerTempCap implements ITemperatureCap
     static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
     static Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
 
-    private double[] syncedValues = {-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
+    private double[] syncedValues = new double[5];
     double ticksSinceSync = 0;
+    boolean neverSynced = true;
 
     double worldTemp = 1;
     double coreTemp = 0;
@@ -147,9 +149,11 @@ public class PlayerTempCap implements ITemperatureCap
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
             Temperature changeBy = new Temperature(Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude);
             newCoreTemp = changeBy.with(player, getModifiers(Temperature.Type.RATE)).add(newCoreTemp).get();
+            //player.displayClientMessage(new TextComponent(newCoreTemp - this.coreTemp + " " + newCoreTemp + " " + this.coreTemp), true);
         }
         // If the player's temperature and world temperature are not both hot or both cold
-        if (magnitude != CSMath.getSign(newCoreTemp))
+        int tempSign = CSMath.getSign(newCoreTemp);
+        if (tempSign != 0 && magnitude != tempSign)
         {
             // Return the player's body temperature to 0
             newCoreTemp += getBodyReturnRate(newWorldTemp, newCoreTemp > 0 ? maxTemp : minTemp, config.rate, newCoreTemp);
@@ -172,8 +176,8 @@ public class PlayerTempCap implements ITemperatureCap
         setTemp(Temperature.Type.MIN, newMinOffset);
 
         // Sync the temperature values to the client
-        if (ticksSinceSync++ >= 5
-        && (((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
+        if ((neverSynced
+        ||  ((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
         ||  ((Math.abs(syncedValues[1] - newBaseTemp) >= 1 && showBodyTemp))
         ||  ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
         ||  ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
@@ -181,7 +185,7 @@ public class PlayerTempCap implements ITemperatureCap
         {
             TempHelper.updateTemperature(player, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
-            ticksSinceSync = 0;
+            neverSynced = false;
         }
 
         // Calculate body/base temperatures with modifiers

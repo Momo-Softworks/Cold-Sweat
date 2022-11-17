@@ -724,31 +724,84 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.1.10.4
+2.1.11
 - The Grace effect now shows as an icon on the top-right when it is active
 - The Insulated effect is now removed when the player is in an un-roofed area
 - Renamed Hellspring Lamp to Soulspring Lamp (the ID has changed, too, but old worlds will be automatically converted)
-- The Soulspring Lamp now emits light when lit (clientside only)
-      - For weaker systems, a config option has been added to disable this
-- The Hearth now displays 3D boxes around the area it is affecting
+- The Hearth now displays 3D boxes around the area it is affecting when the F3 debug screen is open
       - This might severely impact performance, so a config option has been added to disable it
+- Client-only config settings are now labeled with an icon in the config menu
 
 Fixes:
 - Fixed crash when starting a server
+- Fixed crash that could occur when a minecart was broken
 - Fixed GUIs not being centered in the screen
 - Fixed error when attempting to join a server due to missing class definition
 - Fixed sub-seasonal temperatures not blending into each other correctly
 - Fixed configs loading multiple times when starting a world
-- Fixed the Hearth spreading through blocks it wasn't supposed to
+- Fixed the Hearth spreading to places it shouldn't (or not spreading to places it should)
+- Fixed tooltips not showing in the config menu when hovering over some widgets
 
 Technical Changes:
 - Removed TimeTempModifier (merged with BiomeTempModifier)
 - Config settings for biome temperature now specify the midnight and noon temperatures a biome (in other words, the "low" and "high" temperatures)
-      - Old configs will be treated as "legacy", and will still work in some capacity; though it's highly advised to switch to the new system
+      - Old configs will be treated as "legacy", and will still work to some extent; though it's highly advised to switch to the new system
       - Removed the "Biome Variance" config option, as it is no longer needed
 - Centralized/streamlined how config settings are internally handled
 - Created custom block update event to more accurately detect block updates
 - Optimized the Hearth's spreading algorithm by reducing extraneous checks & using the new update event
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.1.11.1
+
+- Fixed crash due to client-only class loading on servers
+- Fixed freeze that could occur when a block update happened while the world was loading
+- Fixed the Hearth not detecting players
+- Fixed the Hearth not saving "warm-up" time when the world is closed (1.16.5)
+- Fixed the Insulation effect being removed when the player has skylight access
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b01
+- Revamped the armor insulation system:
+      - Each piece of armor has a number of slots that can be filled with insulation
+      - A graphic of the armor's insulation will display in the item's tooltip
+      - There are now multiple types of insulation items:
+            - Leather: Provides an equal amount of hot and cold insulation
+            - Goat Fur: Provides strong cold insulation
+            - Hoglin Hide: Provides strong hot insulation
+      - Leather armor can still be sewed to armor, filling all of its insulation slots
+      - Insulation items can be combined in different ways for more specific use-cases
+      - Insulation items can be recovered by crafting the armor with shears in the Sewing Table
+      - Because there are now two types of insulation, some configs have been changed to match
+        (not deleting the old ones may cause a crash)
+      - The number of insulation slots in helmets, chestplates, leggings, and boots is now configurable
+- Goats can now be sheared to get Goat Fur
+      - Their fur will grow back after some time (15% chance to grow back every 45 seconds)
+      - Their texture has been tweaked to better incorporate this
+- Hoglins now drop Hoglin Hide when killed, in addition to their other drops
+- The Soulspring Lamp can now be fuelled by attacking an entity at full health with it
+      - This restores up to 4 fuel
+      - Does not work on entities below full health
+- When 'Shift' is held, the Soulspring Lamp's tooltip will now show a graphic of what items it can be fuelled with
+
+Fixes:
+- Fixed the Sewing Table deleting items if the player disconnects without closing the menu
+- Fixed furnaces not affecting temperature
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b02
+- Insulation items can now be removed with Shears in the Sewing Table
+- The world temperature gauge is now much more responsive
+- Updated the Goat texture to look better when sheared
+- Extended the Goat Fur's growth time to 15% chance every 60 seconds (from 45)
+
+Fixes:
+- Fixed player temperature sometimes not changing if it is at 0
+- Fixed crash related to Goats that might occur when joining the world
+
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server

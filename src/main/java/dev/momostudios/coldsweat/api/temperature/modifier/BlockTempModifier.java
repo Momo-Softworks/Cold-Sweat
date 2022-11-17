@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +35,7 @@ public class BlockTempModifier extends TempModifier
         {
             for (int z = -7; z < 7; z++)
             {
-                LevelChunk chunk = level.getChunkSource().getChunkNow((player.blockPosition().getX() + x) >> 4, (player.blockPosition().getZ() + z) >> 4);
+                LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk((player.blockPosition().getX() + x) >> 4, (player.blockPosition().getZ() + z) >> 4, ChunkStatus.FULL, false);
                 if (chunk == null) continue;
 
                 for (int y = -7; y < 7; y++)
@@ -78,13 +79,11 @@ public class BlockTempModifier extends TempModifier
 
                             Vec3 ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
-                            WorldHelper.forBlocksInRay(playerClosest, pos, level,
-                            (rayState, bpos) ->
+                            WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk,
+                            (rayChunk, rayState, bpos) ->
                             {
-                                if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction))
-                                {
+                                if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
                                     blocks.getAndIncrement();
-                                }
                             }, 3);
 
                             // Calculate the decrease in effectiveness due to blocks in the way

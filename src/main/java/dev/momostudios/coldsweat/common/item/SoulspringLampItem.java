@@ -62,19 +62,20 @@ public class SoulspringLampItem extends Item
                 // Is in valid dimension
                 && (temp = lampMod != null ? lampMod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0)
                 {
-                    // Drain fuel
                     if (player.tickCount % 5 == 0)
                     {
+                        // Drain fuel
                         if (!(player.isCreative() || player.isSpectator()))
-                        {
                             addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
-                        }
 
-                        AABB bb = new AABB(player.getX() - 3.5, player.getY() - 3.5, player.getZ() - 3.5,
-                                           player.getX() + 3.5, player.getY() + 3.5, player.getZ() + 3.5);
+                        // Affect nearby players
+                        double rad = 3.5d;
+                        AABB bb = new AABB(player.getX() - rad, player.getY() - rad, player.getZ() - rad,
+                                           player.getX() + rad, player.getY() + rad, player.getZ() + rad);
 
                         for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
                         {
+                            // Extend modifier time if it is present
                             SoulLampTempModifier modifier = TempHelper.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
                             if (modifier != null)
                                 modifier.expires(modifier.getTicksExisted() + 5);
@@ -132,15 +133,21 @@ public class SoulspringLampItem extends Item
         return stack.getOrCreateTag().getDouble("fuel");
     }
 
+    // Restore fuel if player hits an enemy
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
     {
+        // If fuel < 64 and target NOT player
         if (attacker instanceof Player && getFuel(stack) < 64 && !(target instanceof Player)
-        && target.getHealth() >= target.getMaxHealth() && target.getMobType() != MobType.UNDEAD)
+        && target.getHealth() > target.getMaxHealth() - 1 && target.getMobType() != MobType.UNDEAD)
         {
-            ParticleBatchMessage packet = new ParticleBatchMessage();
+            // Add fuel
             addFuel(stack, Math.min(4, target.getMaxHealth()));
+
+            // Spawn particles
+            ParticleBatchMessage packet = new ParticleBatchMessage();
             Random rand = new Random();
+            // Spawn random particles proportionally to the entity's size
             for (int i = 0; i < CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50); i++)
             {
                 packet.addParticle(ParticleTypes.SOUL, new ParticleBatchMessage.ParticlePlacement(
@@ -149,7 +156,9 @@ public class SoulspringLampItem extends Item
                         target.getZ() + target.getBbWidth() * rand.nextFloat(),
                         rand.nextFloat() * 0.2f - 0.1f, rand.nextFloat() * 0.2f - 0.1f, rand.nextFloat() * 0.2f - 0.1f));
             }
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), packet);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), packet);
+            // Play soul stealing sound
+            WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, SoundSource.PLAYERS, 1f, (float) Math.random() / 5f + 1.3f);
             return true;
         }
         return super.hurtEnemy(stack, attacker, target);

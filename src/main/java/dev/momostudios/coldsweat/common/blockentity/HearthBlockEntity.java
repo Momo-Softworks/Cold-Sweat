@@ -30,6 +30,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundSource;
@@ -55,6 +56,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     ConfigSettings config = ConfigSettings.getInstance();
 
     ArrayList<SpreadPath> paths = new ArrayList<>();
+    ArrayList<SpreadPath> totalPaths = new ArrayList<>();
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>();
 
@@ -75,6 +77,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     int insulationLevel = 0;
 
     boolean isPlayerNearby = false;
+    List<Player> players = new ArrayList<>();
     int rebuildCooldown = 0;
     boolean forceRebuild = false;
     LinkedList<BlockPos> notifyQueue = new LinkedList<>();
@@ -176,11 +179,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         if (rebuildCooldown > 0) rebuildCooldown--;
 
-        List<Player> players = new ArrayList<>(level.players());
-
         if (this.level != null && this.ticksExisted % 20 == 0)
         {
             this.isPlayerNearby = false;
+            players.clear();
             for (Player player : this.level.players())
             {
                 if (player.blockPosition().closerThan(pos, this.spreadRange()))
@@ -196,7 +198,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         {
             boolean shouldRebuild = false;
 
-            // If the rebuild is forced, skip the queue and rebuild immediately
+            // If the rebuild is forced, skip checking the queue and rebuild immediately
             if (forceRebuild)
                 shouldRebuild = true;
             else
@@ -255,12 +257,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // Size of each partition (defaults to 1/30th of the total paths)
                 int partSize = CSMath.clamp(pathCount / 30, 10, 200);
                 // Number of partitions
-                int partCount = (int) CSMath.ceil(pathCount / (double) partSize);
+                int partCount = CSMath.ceil(pathCount / (double) partSize);
                 // Index of the last point being worked on this tick
                 int lastIndex = Math.min(pathCount, partSize * ((this.ticksExisted % partCount) + 1));
                 // Index of the first point being worked on this tick
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
+                if (level.getGameTime() % 20 == 0 && spreading)
+                    totalPaths = paths;
                 /*
                  Iterate over the specified partition of paths
                  */
@@ -318,7 +322,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                              Spreading algorithm
                              */
                             BlockPos pathPos = spreadPath.getPos();
-                            BlockState blockState = WorldHelper.getBlockState(chunk, pathPos);
+                            BlockState fromState = WorldHelper.getBlockState(chunk, pathPos);
 
                             if (!WorldHelper.canSeeSky(chunk, level, pathPos.above(), 64))
                             {
@@ -328,7 +332,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                     SpreadPath tryPath = spreadPath.offset(direction);
 
                                     // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
-                                    if (pathLookup.add(tryPath.getPos()) && !WorldHelper.isSpreadBlocked(level, blockState, pathPos, direction, spreadPath.getDirection()))
+                                    if (pathLookup.add(tryPath.getPos())
+                                    && !WorldHelper.isSpreadBlocked(level, fromState, pathPos, direction, spreadPath.getDirection()))
                                     {
                                         // Add the new path to the temporary list and lookup table
                                         paths.add(tryPath);
@@ -344,14 +349,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                 continue;
                             }
                         }
-                        if (!spreadPath.isFrozen())
-                        {
-                            // Track frozen paths to know when the Hearth is done spreading
-                            spreadPath.freeze();
-                            this.frozenPaths++;
-                        }
-                        if (this.frozenPaths >= pathCount)
-                            this.spreading = false;
+                        // Track frozen paths to know when the Hearth is done spreading
+                        spreadPath.freeze();
+                        this.frozenPaths++;
                     }
 
                     /*
@@ -399,6 +399,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         }
                     }
                 }
+                if (this.frozenPaths >= pathLookup.size())
+                    this.spreading = false;
 
                 // Drain fuel
                 if (this.ticksExisted % 80 == 0)
@@ -626,7 +628,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void sendBlockUpdate(BlockPos pos)
     {
-        notifyQueue.add(pos);
+        if (pathLookup.contains(pos))
+            notifyQueue.add(pos);
     }
 
     public void resetPaths()
@@ -641,8 +644,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         HearthPathManagement.HEARTH_POSITIONS.remove(this.blockPos);
     }
 
-    public Set<BlockPos> getPaths()
+    public ArrayList<SpreadPath> getPaths()
     {
-        return pathLookup;
+        return totalPaths;
     }
 }

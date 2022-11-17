@@ -63,6 +63,11 @@ public class SpreadPath
         return this.step;
     }
 
+    public Direction getDirection()
+    {
+        return direction;
+    }
+
     public SpreadPath offset(int x, int y, int z)
     {
         SpreadPath path = new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
