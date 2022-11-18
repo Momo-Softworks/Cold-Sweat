@@ -1,9 +1,7 @@
 package dev.momostudios.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
-import dev.momostudios.coldsweat.api.temperature.Temperature.Type;
-import dev.momostudios.coldsweat.api.temperature.Temperature.Units;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
@@ -16,7 +14,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -65,7 +62,7 @@ public class Overlays
             double max = ConfigSettings.getInstance().maxTemp + MAX_OFFSET;
 
             // Get player world temperature
-            double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Units.C : Units.F, Units.MC, true);
+            double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Get the temperature severity
             int severity = getWorldSeverity(temp, min, max);
@@ -206,8 +203,8 @@ public class Overlays
                 boolean celsius = CLIENT_CONFIG.celsius();
 
                 // Get temperature in actual degrees
-                double worldTemp = PLAYER_CAP.getTemp(Type.WORLD);
-                double realTemp = CSMath.convertUnits(worldTemp, Units.MC, celsius ? Units.C : Units.F, true);
+                double worldTemp = PLAYER_CAP.getTemp(Temperature.Type.WORLD);
+                double realTemp = CSMath.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
 
                 // Calculate the blended world temp for this tick
                 double diff = realTemp - WORLD_TEMP;
@@ -215,8 +212,8 @@ public class Overlays
                 WORLD_TEMP += (int) Math.abs(diff) <= 1 ? diff : diff / 2d;
 
                 // Update max/min offset
-                MAX_OFFSET = PLAYER_CAP.getTemp(Type.MAX);
-                MIN_OFFSET = PLAYER_CAP.getTemp(Type.MIN);
+                MAX_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MAX);
+                MIN_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MIN);
             }
 
 
@@ -224,7 +221,7 @@ public class Overlays
 
             // Blend body temp (per tick)
             PREV_BODY_TEMP = BODY_TEMP;
-            BODY_TEMP += (PLAYER_CAP.getTemp(Type.BODY) - BODY_TEMP) / 5;
+            BODY_TEMP += (PLAYER_CAP.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
 
             // Handle effects for the icon (bobbing, stage, transition)
             if (SHOW_BODY_TEMP)

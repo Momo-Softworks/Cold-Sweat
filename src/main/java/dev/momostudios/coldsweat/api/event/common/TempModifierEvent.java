@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.api.event.common;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
@@ -129,9 +129,9 @@ public class TempModifierEvent extends Event
         {
             public final Player player;
             private final TempModifier modifier;
-            private Temperature temperature;
+            private double temperature;
 
-            public Pre(TempModifier modifier, Player player, Temperature temperature)
+            public Pre(TempModifier modifier, Player player, double temperature)
             {
                 this.player = player;
                 this.modifier = modifier;
@@ -141,7 +141,7 @@ public class TempModifierEvent extends Event
             public TempModifier getModifier() {
                 return modifier;
             }
-            public Temperature getTemperature() {
+            public double getTemperature() {
                 return temperature;
             }
         }
@@ -159,9 +159,9 @@ public class TempModifierEvent extends Event
         {
             public final Player player;
             private final TempModifier modifier;
-            private Temperature temperature;
+            private double temperature;
 
-            public Post(TempModifier modifier, Player player, Temperature temperature)
+            public Post(TempModifier modifier, Player player, double temperature)
             {
                 this.player = player;
                 this.modifier = modifier;
@@ -171,7 +171,7 @@ public class TempModifierEvent extends Event
             public TempModifier getModifier() {
                 return modifier;
             }
-            public Temperature getTemperature() {
+            public double getTemperature() {
                 return temperature;
             }
         }

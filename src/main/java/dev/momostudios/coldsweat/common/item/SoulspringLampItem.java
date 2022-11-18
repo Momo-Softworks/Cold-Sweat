@@ -1,9 +1,8 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -56,11 +55,11 @@ public class SoulspringLampItem extends Item
             // Is selected
             if ((isSelected || player.getOffhandItem() == stack))
             {
-                TempModifier lampMod = TempHelper.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                TempModifier lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class);
                 // Is world temp more than max
                 if (ConfigSettings.LAMP_DIMENSIONS.get().contains(worldIn.dimension().location().toString())
                 // Is in valid dimension
-                && (temp = lampMod != null ? lampMod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get()) > max && getFuel(stack) > 0)
+                && (temp = lampMod != null ? lampMod.getLastInput() : Temperature.get(player, Temperature.Type.WORLD)) > max && getFuel(stack) > 0)
                 {
                     if (player.tickCount % 5 == 0)
                     {
@@ -76,11 +75,11 @@ public class SoulspringLampItem extends Item
                         for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
                         {
                             // Extend modifier time if it is present
-                            SoulLampTempModifier modifier = TempHelper.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                            SoulLampTempModifier modifier = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
                             if (modifier != null)
                                 modifier.expires(modifier.getTicksExisted() + 5);
                             else
-                                TempHelper.replaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                                Temperature.replaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
                         }
                     }
 

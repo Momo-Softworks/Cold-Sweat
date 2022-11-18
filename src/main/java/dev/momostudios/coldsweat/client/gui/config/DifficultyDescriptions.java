@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 import dev.momostudios.coldsweat.util.math.CSMath;

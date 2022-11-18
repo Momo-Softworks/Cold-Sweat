@@ -1,9 +1,8 @@
 package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
@@ -12,7 +11,6 @@ import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
@@ -120,7 +118,7 @@ public class PlayerTempCap implements ITemperatureCap
     {
         for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
-            new Temperature().with(player, getModifiers(type));
+            Temperature.applyModifiers(0, player, getModifiers(type));
         }
     }
 
@@ -129,11 +127,11 @@ public class PlayerTempCap implements ITemperatureCap
         ConfigSettings config = ConfigSettings.getInstance();
 
         // Tick expiration time for world modifiers
-        double newWorldTemp = new Temperature().with(player, getModifiers(Temperature.Type.WORLD)).get();
-        double newCoreTemp  = new Temperature(this.coreTemp).with(player, getModifiers(Temperature.Type.CORE)).get();
-        double newBaseTemp  = new Temperature().with(player, getModifiers(Temperature.Type.BASE)).get();
-        double newMaxOffset = new Temperature().with(player, getModifiers(Temperature.Type.MAX)).get();
-        double newMinOffset = new Temperature().with(player, getModifiers(Temperature.Type.MIN)).get();
+        double newWorldTemp = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.WORLD));
+        double newCoreTemp  = Temperature.applyModifiers(this.coreTemp, player, getModifiers(Temperature.Type.CORE));
+        double newBaseTemp  = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.BASE));
+        double newMaxOffset = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.MAX));
+        double newMinOffset = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.MIN));
 
         double maxTemp = config.maxTemp + newMaxOffset;
         double minTemp = config.minTemp + newMinOffset;
@@ -147,8 +145,8 @@ public class PlayerTempCap implements ITemperatureCap
         if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            Temperature changeBy = new Temperature(Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude);
-            newCoreTemp = changeBy.with(player, getModifiers(Temperature.Type.RATE)).add(newCoreTemp).get();
+            double changeBy = Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude;
+            newCoreTemp += Temperature.applyModifiers(changeBy, player, getModifiers(Temperature.Type.RATE));
             //player.displayClientMessage(new TextComponent(newCoreTemp - this.coreTemp + " " + newCoreTemp + " " + this.coreTemp), true);
         }
         // If the player's temperature and world temperature are not both hot or both cold
@@ -183,7 +181,7 @@ public class PlayerTempCap implements ITemperatureCap
         ||  ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
         ||  ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
         {
-            TempHelper.updateTemperature(player, this, false);
+            Temperature.updateTemperature(player, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
             neverSynced = false;
         }
@@ -256,7 +254,7 @@ public class PlayerTempCap implements ITemperatureCap
         // Save the player's temperature data
         for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
         {
-            nbt.putDouble(TempHelper.getTempTag(type), this.getTemp(type));
+            nbt.putDouble(Temperature.getTempTag(type), this.getTemp(type));
         }
         return nbt;
     }
@@ -275,7 +273,7 @@ public class PlayerTempCap implements ITemperatureCap
             }
 
             // Write the list of modifiers to the player's persistent data
-            nbt.put(TempHelper.getModifierTag(type), modifiers);
+            nbt.put(Temperature.getModifierTag(type), modifiers);
         }
         return nbt;
     }
@@ -294,7 +292,7 @@ public class PlayerTempCap implements ITemperatureCap
     {
         for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
         {
-            setTemp(type, nbt.getDouble(TempHelper.getTempTag(type)));
+            setTemp(type, nbt.getDouble(Temperature.getTempTag(type)));
         }
     }
 
@@ -305,7 +303,7 @@ public class PlayerTempCap implements ITemperatureCap
             getModifiers(type).clear();
 
             // Get the list of modifiers from the player's persistent data
-            ListTag modifiers = nbt.getList(TempHelper.getModifierTag(type), 10);
+            ListTag modifiers = nbt.getList(Temperature.getModifierTag(type), 10);
 
             // For each modifier in the list
             modifiers.forEach(modNBT ->

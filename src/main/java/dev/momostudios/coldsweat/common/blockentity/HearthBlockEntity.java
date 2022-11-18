@@ -2,9 +2,8 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.common.event.HearthPathManagement;
@@ -30,7 +29,6 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundSource;
@@ -480,8 +478,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Get the player's temperature
         if (!(shouldUseHotFuel && shouldUseColdFuel))
         {
-            HearthTempModifier mod = TempHelper.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
-            double temp = (mod != null) ? mod.getLastInput().get() : TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
+            HearthTempModifier mod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
+            double temp = (mod != null) ? mod.getLastInput() : Temperature.get(player, Temperature.Type.WORLD);
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < config.minTemp);

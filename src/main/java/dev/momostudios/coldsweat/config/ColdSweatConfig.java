@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.config;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.block.Blocks;

@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -25,7 +24,7 @@ public class BlockTempModifier extends TempModifier
     public BlockTempModifier() {}
 
     @Override
-    public Function<Temperature, Temperature> calculate(Player player)
+    public Function<Double, Double> calculate(Player player)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
 
@@ -108,8 +107,8 @@ public class BlockTempModifier extends TempModifier
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
-                if (!CSMath.isInRange(temp.get(), min, max)) continue;
-                temp.set(CSMath.clamp(temp.get() + effect.getValue(), min, max));
+                if (!CSMath.isInRange(temp, min, max)) continue;
+                temp = CSMath.clamp(temp + effect.getValue(), min, max);
             }
             return temp;
         };

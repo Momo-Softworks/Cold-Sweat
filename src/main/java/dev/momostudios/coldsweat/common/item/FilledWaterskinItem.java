@@ -1,8 +1,7 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -45,7 +44,7 @@ public class FilledWaterskinItem extends Item
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                TempHelper.addModifier(player, new WaterskinTempModifier(temp / 1.5).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp / 1.5).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -57,7 +56,7 @@ public class FilledWaterskinItem extends Item
         ItemStack itemstack = ar.getObject();
 
         double amount = itemstack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
-        TempHelper.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Type.CORE, true);
+        Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Type.CORE, true);
 
         // Play empty sound
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,

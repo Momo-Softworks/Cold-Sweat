@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -13,7 +12,7 @@ import java.util.function.Function;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public Function<Temperature, Temperature> calculate(Player player)
+    public Function<Double, Double> calculate(Player player)
     {
         if (player.level.dimensionType().natural())
         {
@@ -42,7 +41,7 @@ public class SereneSeasonsTempModifier extends TempModifier
                     return temp -> temp;
                 }
             }
-            return temp -> temp.add((float) CSMath.blend(startValue, endValue, season.getDay() % (season.getSubSeasonDuration() / season.getDayDuration()), 0, 8));
+            return temp -> temp + (float) CSMath.blend(startValue, endValue, season.getDay() % (season.getSubSeasonDuration() / season.getDayDuration()), 0, 8);
         }
 
         return temp -> temp;

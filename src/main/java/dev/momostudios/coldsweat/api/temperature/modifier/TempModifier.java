@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,9 +26,9 @@ public abstract class TempModifier
     int expireTicks = -1;
     int ticksExisted = 0;
     int tickRate = 1;
-    Temperature lastInput = new Temperature();
-    Temperature lastOutput = new Temperature();
-    Function<Temperature, Temperature> function = temp -> temp;
+    double lastInput = 0;
+    double lastOutput = 0;
+    Function<Double, Double> function = temp -> temp;
 
 
     /**
@@ -91,7 +90,7 @@ public abstract class TempModifier
      * @param player the player that is being affected by the modifier.<br>
      * @return the new {@link Temperature}.<br>
      */
-    protected abstract Function<Temperature, Temperature> calculate(Player player);
+    protected abstract Function<Double, Double> calculate(Player player);
 
     /**
      * Posts this TempModifier's {@link #calculate(Player)} to the Forge event bus.<br>
@@ -100,7 +99,7 @@ public abstract class TempModifier
      * @param temp the Temperature being fed into the {@link #calculate(Player)} method.
      * @param player the player that is being affected by the modifier.
      */
-    public Temperature update(Temperature temp, Player player)
+    public double update(double temp, Player player)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, player, temp);
         MinecraftForge.EVENT_BUS.post(pre);
@@ -119,10 +118,10 @@ public abstract class TempModifier
      * @param temp the Temperature to calculate with
      * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public Temperature getResult(Temperature temp)
+    public double getResult(double temp)
     {
-        lastInput = temp.copy();
-        return lastOutput = function.apply(temp).copy();
+        lastInput = temp;
+        return lastOutput = function.apply(temp);
     }
 
     /**
@@ -173,7 +172,7 @@ public abstract class TempModifier
     /**
      * @return The Temperature this TempModifier was last given
      */
-    public Temperature getLastInput()
+    public double getLastInput()
     {
         return lastInput;
     }
@@ -181,7 +180,7 @@ public abstract class TempModifier
     /**
      * @return The Temperature this TempModifier's function last returned
      */
-    public Temperature getLastOutput()
+    public double getLastOutput()
     {
         return lastOutput;
     }

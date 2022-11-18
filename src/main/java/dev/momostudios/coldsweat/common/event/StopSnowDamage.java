@@ -1,10 +1,9 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +34,7 @@ public class StopSnowDamage
             double insulation = 0;
             boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.getInstance().iceRes;
             if (hasIcePotion
-            || ((insulation = ((insulationModifier = TempHelper.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class)) == null ? 0
+            || ((insulation = ((insulationModifier = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class)) == null ? 0
             : insulationModifier.<Double>getArgument("cold"))) > 0 && (player.tickCount % Math.max(1, 37 - insulation)) == 0))
             {
                 if (player.getTicksFrozen() < event.player.getTicksRequiredToFreeze() || insulation >= 37 || hasIcePotion)

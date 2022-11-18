@@ -3,10 +3,9 @@ package dev.momostudios.coldsweat.common.command.impl;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -51,7 +50,7 @@ public class TempCommand extends BaseCommand
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 cap.setTemp(Temperature.Type.CORE, temp);
-                TempHelper.updateTemperature(player, cap, true);
+                Temperature.updateTemperature(player, cap, true);
             });
         }
 
@@ -73,7 +72,7 @@ public class TempCommand extends BaseCommand
         for (ServerPlayer target : players.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {
             //Compose & send message
-            int bodyTemp = (int) TempHelper.getTemperature(target, Temperature.Type.BODY).get();
+            int bodyTemp = (int) Temperature.get(target, Temperature.Type.BODY);
             source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;

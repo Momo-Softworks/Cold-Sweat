@@ -1,8 +1,7 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import dev.momostudios.coldsweat.api.util.TempHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -20,10 +19,10 @@ public class PreventPlayerSleep
         if (event.getResultStatus() != null) return;
 
         Player player = event.getPlayer();
-        double bodyTemp = TempHelper.getTemperature(player, Temperature.Type.BODY).get();
-        double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
-        double minTemp = ConfigSettings.getInstance().minTemp + TempHelper.getTemperature(player, Temperature.Type.MIN).get();
-        double maxTemp = ConfigSettings.getInstance().maxTemp + TempHelper.getTemperature(player, Temperature.Type.MAX).get();
+        double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
+        double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
+        double minTemp = ConfigSettings.getInstance().minTemp + Temperature.get(player, Temperature.Type.MIN);
+        double maxTemp = ConfigSettings.getInstance().maxTemp + Temperature.get(player, Temperature.Type.MAX);
 
         // If the player's body temperature is critical
         if (!CSMath.isBetween(bodyTemp, -100, 100))

@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -48,10 +48,10 @@ public class WaterskinItem extends Item
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());
-                filledWaterskin.getOrCreateTag().putDouble("temperature", CSMath.clamp((new Temperature().with(player,
+                filledWaterskin.getOrCreateTag().putDouble("temperature", CSMath.clamp((Temperature.applyModifiers(0, player,
                         new BiomeTempModifier(),
                         new BlockTempModifier()
-                ).get() - (CSMath.average(ConfigSettings.getInstance().maxTemp, ConfigSettings.getInstance().minTemp))) * 15, -50, 50));
+                ) - (CSMath.average(ConfigSettings.getInstance().maxTemp, ConfigSettings.getInstance().minTemp))) * 15, -50, 50));
 
                 //Replace 1 of the stack with a FilledWaterskinItem
                 if (itemstack.getCount() > 1)

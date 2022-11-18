@@ -1,8 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +21,9 @@ public class WaterTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Temperature, Temperature> calculate(Player player)
+    public Function<Double, Double> calculate(Player player)
     {
-        double worldTemp = TempHelper.getTemperature(player, Temperature.Type.WORLD).get();
+        double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
         double maxTemp = ConfigSettings.getInstance().maxTemp;
         double minTemp = ConfigSettings.getInstance().minTemp;
 
@@ -52,7 +51,7 @@ public class WaterTempModifier extends TempModifier
             }
         }
 
-        return temp -> temp.add(-this.<Double>getArgument("strength"));
+        return temp -> temp - this.<Double>getArgument("strength");
     }
 
     @Override

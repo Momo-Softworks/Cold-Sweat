@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.util.LegacyMethodHelper;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -19,7 +18,7 @@ public class BiomeTempModifier extends TempModifier
     static int SAMPLES = 64;
 
     @Override
-    public Function<Temperature, Temperature> calculate(Player player)
+    public Function<Double, Double> calculate(Player player)
     {
         try
         {
@@ -29,7 +28,7 @@ public class BiomeTempModifier extends TempModifier
 
             if (dimensionOverride != null)
             {
-                return temp -> temp.add(dimensionOverride.doubleValue());
+                return temp -> temp + dimensionOverride.doubleValue();
             }
             else
             {
@@ -71,7 +70,7 @@ public class BiomeTempModifier extends TempModifier
                 worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
             }
             double finalWorldTemp = worldTemp;
-            return temp -> temp.add(finalWorldTemp);
+            return temp -> temp + finalWorldTemp;
         }
         catch (Exception e)
         {

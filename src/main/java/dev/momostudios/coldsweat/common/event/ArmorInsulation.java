@@ -2,10 +2,9 @@ package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import dev.momostudios.coldsweat.api.util.TempHelper;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
@@ -68,13 +67,13 @@ public class ArmorInsulation
                 }
             }
 
-            TempModifier currentMod = TempHelper.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
+            TempModifier currentMod = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
             if (currentMod == null || (double) currentMod.getArgument("cold") != cold || (double) currentMod.getArgument("hot") != hot)
             {
                 if (cold == 0 && hot == 0 && currentMod != null)
-                    TempHelper.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
+                    Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
                 else
-                    TempHelper.replaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(10), Temperature.Type.RATE);
+                    Temperature.replaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(10), Temperature.Type.RATE);
             }
         }
     }

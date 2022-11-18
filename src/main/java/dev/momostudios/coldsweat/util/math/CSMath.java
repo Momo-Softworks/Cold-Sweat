@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.math;
 
 import com.mojang.math.Vector3d;
-import dev.momostudios.coldsweat.api.temperature.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
