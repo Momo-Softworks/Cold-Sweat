@@ -150,8 +150,7 @@ public final class ItemSettingsConfig
         insulationSlots = BUILDER
                 .comment("Defines how many insulation slots armor pieces have")
                 .defineList("Insulation Slots", Arrays.asList(4, 6, 5, 4),
-                        it -> it instanceof List list && list.get(0) instanceof Number && list.get(1) instanceof Number
-                                                      && list.get(2) instanceof Number && list.get(3) instanceof Number);
+                        it -> it instanceof Number);
 
         BUILDER.pop();
 
