@@ -13,11 +13,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,12 +28,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SewingContainer extends AbstractContainerMenu
@@ -285,7 +287,7 @@ public class SewingContainer extends AbstractContainerMenu
             }
             // Item is for insulation
             else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem())
-            && filledSlots < ArmorInsulation.getInsulationSlots(armorItem) && (!(insulatorItem.getItem() instanceof ArmorItem)
+            && (!(insulatorItem.getItem() instanceof ArmorItem)
             || LivingEntity.getEquipmentSlotForItem(armorItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack insulator = insulatorItem.copy();
@@ -323,12 +325,19 @@ public class SewingContainer extends AbstractContainerMenu
             }
             processed.getOrCreateTag().put("Insulation", list);
 
-            // Remove "Insulated" tag if armor has no insulation left
-            processed.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+            LazyOptional<IInsulatableCap> optCap = processed.getCapability(ModCapabilities.ITEM_INSULATION);
+            if (optCap.isPresent())
             {
+                IInsulatableCap cap = optCap.orElse(new ItemInsulationCap());
+
+                // Cancel crafting if the insulation provided by the insulator is too much
+                if (cap.getInsulation().size() > ArmorInsulation.getInsulationSlots(armorItem))
+                    return ItemStack.EMPTY;
+
+                // Remove "Insulated" tag if armor has no insulation left
                 if (cap.getInsulationItems().isEmpty())
                     processed.getOrCreateTag().putBoolean("Insulated", false);
-            });
+            }
 
             this.setItem(2, processed);
             result = processed;
@@ -360,8 +369,6 @@ public class SewingContainer extends AbstractContainerMenu
                         player.getInventory().placeItemBackInInventory(itemStack);
                     }
                     else player.drop(itemStack, false, true);
-
-                    setCarried(ItemStack.EMPTY);
                 }
             }
         }
