@@ -84,7 +84,7 @@ public class SoulspringLampItem extends Item
                     }
 
                     // If the conditions are met, turn on the lamp
-                    if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && !stack.getOrCreateTag().getBoolean("isOn"))
+                    if (!stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
                     {
                         stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                         stack.getOrCreateTag().putBoolean("isOn", true);
@@ -96,7 +96,7 @@ public class SoulspringLampItem extends Item
             // If the conditions are not met, turn off the lamp
             else
             {
-                if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0 && stack.getOrCreateTag().getBoolean("isOn"))
+                if (stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);

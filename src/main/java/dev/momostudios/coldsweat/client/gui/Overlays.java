@@ -209,7 +209,7 @@ public class Overlays
                 // Calculate the blended world temp for this tick
                 double diff = realTemp - WORLD_TEMP;
                 PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += (int) Math.abs(diff) <= 1 ? diff : diff / 2d;
+                WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 2d;
 
                 // Update max/min offset
                 MAX_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MAX);
