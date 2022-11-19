@@ -291,6 +291,22 @@ public class SewingContainer extends AbstractContainerMenu
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);
+
+                // Transfer enchantments
+                Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(processed);
+                insulator.getEnchantmentTags().removeIf(nbt ->
+                {
+                    CompoundTag enchantTag = ((CompoundTag) nbt);
+                    Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
+                    if (ench == null) return false;
+
+                    if (ench.canApplyAtEnchantingTable(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+                    {
+                        processed.enchant(ench, enchantTag.getInt("lvl"));
+                        return true;
+                    }
+                    return false;
+                });
             }
             else return ItemStack.EMPTY;
 
