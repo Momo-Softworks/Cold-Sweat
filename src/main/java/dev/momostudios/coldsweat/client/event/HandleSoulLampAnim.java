@@ -1,21 +1,15 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
-import net.minecraft.core.BlockPos;
+import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.lighting.LayerLightEngine;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +18,9 @@ public class HandleSoulLampAnim
 {
     public static Map<LivingEntity, Pair<Float, Float>> RIGHT_ARM_ROTATIONS = new HashMap<>();
     public static Map<LivingEntity, Pair<Float, Float>> LEFT_ARM_ROTATIONS = new HashMap<>();
+    static boolean LEFT_HANDED = false;
 
-    static Method SET_LIGHT = ObfuscationReflectionHelper.findMethod(LayerLightEngine.class, "m_7351_", long.class, int.class);
+    /*static Method SET_LIGHT = ObfuscationReflectionHelper.findMethod(LayerLightEngine.class, "m_7351_", long.class, int.class);
     static Method GET_LIGHT = ObfuscationReflectionHelper.findMethod(LayerLightEngine.class, "m_6172_", long.class);
     static Field LIGHT_ENGINE = ObfuscationReflectionHelper.findField(LevelLightEngine.class, "f_75802_");
     static
@@ -35,7 +30,7 @@ public class HandleSoulLampAnim
         LIGHT_ENGINE.setAccessible(true);
     }
 
-    static final Map<BlockPos, Integer> OLD_LIGHT = new HashMap<>();
+    static final Map<BlockPos, Integer> OLD_LIGHT = new HashMap<>();*/
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
@@ -43,11 +38,13 @@ public class HandleSoulLampAnim
         if (event.phase == TickEvent.Phase.START)
         {
             Player player = event.player;
+            if (player.tickCount % 20 == 0)
+                LEFT_HANDED = player.getMainArm() == HumanoidArm.LEFT;
             //boolean isOn = false;
 
             Pair<Float, Float> rightArmRot = RIGHT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
-            if (PlayerHelper.holdingLamp(player, HumanoidArm.RIGHT))
+            if (player.getItemInHand(LEFT_HANDED ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND).getItem() == ModItems.SOULSPRING_LAMP)
             {
                 //isOn = PlayerHelper.getItemInHand(player, HumanoidArm.RIGHT).getOrCreateTag().getBoolean("isOn");
                 float post = rightArmRot.getFirst();
@@ -67,7 +64,7 @@ public class HandleSoulLampAnim
 
             Pair<Float, Float> leftArmRot = LEFT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
-            if (PlayerHelper.holdingLamp(player, HumanoidArm.LEFT))
+            if (player.getItemInHand(LEFT_HANDED ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).getItem() == ModItems.SOULSPRING_LAMP)
             {
                 //isOn = isOn || PlayerHelper.getItemInHand(player, HumanoidArm.LEFT).getOrCreateTag().getBoolean("isOn");
                 float post = leftArmRot.getFirst();
