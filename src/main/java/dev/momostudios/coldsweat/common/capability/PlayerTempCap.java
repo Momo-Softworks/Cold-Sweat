@@ -26,7 +26,6 @@ public class PlayerTempCap implements ITemperatureCap
     static Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.MAX, Temperature.Type.MIN, Temperature.Type.WORLD};
 
     private double[] syncedValues = new double[5];
-    double ticksSinceSync = 0;
     boolean neverSynced = true;
 
     double worldTemp = 1;
@@ -118,7 +117,7 @@ public class PlayerTempCap implements ITemperatureCap
     {
         for (Temperature.Type type : VALID_MODIFIER_TYPES)
         {
-            Temperature.applyModifiers(0, player, getModifiers(type));
+            Temperature.apply(0, player, getModifiers(type));
         }
     }
 
@@ -127,34 +126,38 @@ public class PlayerTempCap implements ITemperatureCap
         ConfigSettings config = ConfigSettings.getInstance();
 
         // Tick expiration time for world modifiers
-        double newWorldTemp = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.WORLD));
-        double newCoreTemp  = Temperature.applyModifiers(this.coreTemp, player, getModifiers(Temperature.Type.CORE));
-        double newBaseTemp  = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.BASE));
-        double newMaxOffset = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.MAX));
-        double newMinOffset = Temperature.applyModifiers(0, player, getModifiers(Temperature.Type.MIN));
+        double newWorldTemp = Temperature.apply(0, player, getModifiers(Temperature.Type.WORLD));
+        double newCoreTemp  = Temperature.apply(this.coreTemp, player, getModifiers(Temperature.Type.CORE));
+        double newBaseTemp  = Temperature.apply(0, player, getModifiers(Temperature.Type.BASE));
+        double newMaxOffset = Temperature.apply(0, player, getModifiers(Temperature.Type.MAX));
+        double newMinOffset = Temperature.apply(0, player, getModifiers(Temperature.Type.MIN));
 
         double maxTemp = config.maxTemp + newMaxOffset;
         double minTemp = config.minTemp + newMinOffset;
 
-        double tempRate = 7.0d;
-
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
-        // Don't make the player's temperature worse if they're in creative/spectator mode
+        // Don't change player temperature if they're in creative/spectator mode
         if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = Math.max((difference / tempRate) * (float)config.rate, Math.abs((float)config.rate / 50)) * magnitude;
-            newCoreTemp += Temperature.applyModifiers(changeBy, player, getModifiers(Temperature.Type.RATE));
-            //player.displayClientMessage(new TextComponent(newCoreTemp - this.coreTemp + " " + newCoreTemp + " " + this.coreTemp), true);
+            double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
+            newCoreTemp += Temperature.apply(changeBy, player, getModifiers(Temperature.Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
         int tempSign = CSMath.getSign(newCoreTemp);
         if (tempSign != 0 && magnitude != tempSign)
         {
             // Return the player's body temperature to 0
-            newCoreTemp += getBodyReturnRate(newWorldTemp, newCoreTemp > 0 ? maxTemp : minTemp, config.rate, newCoreTemp);
+            // Get the difference between the world temp and the min/max threshold to get the speed of return (closer to threshold = slower)
+            // Divide it by 3 because it feels nice
+            // Multiply it by the configured Rate Modifier
+            // If it's too slow, default to config.rate / 10 instead
+            // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
+            double tempLimit = newCoreTemp > 0 ? maxTemp : minTemp;
+            double changeBy = Math.max((Math.abs(newWorldTemp - tempLimit) / 3d) * config.rate, config.rate / 10) * -CSMath.getSign(newCoreTemp);
+            CSMath.getLeastExtreme(changeBy, -coreTemp);
         }
 
         // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
@@ -175,11 +178,11 @@ public class PlayerTempCap implements ITemperatureCap
 
         // Sync the temperature values to the client
         if ((neverSynced
-        ||  ((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
-        ||  ((Math.abs(syncedValues[1] - newBaseTemp) >= 1 && showBodyTemp))
-        ||  ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
-        ||  ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
-        ||  ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
+        || ((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
+        || ((Math.abs(syncedValues[1] - newBaseTemp) >= 1 && showBodyTemp))
+        || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
+        || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
+        || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
         {
             Temperature.updateTemperature(player, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
@@ -190,32 +193,23 @@ public class PlayerTempCap implements ITemperatureCap
         double bodyTemp = getTemp(Temperature.Type.BODY);
 
         //Deal damage to the player if temperature is critical
-        if (player.tickCount % 40 == 0 && !player.hasEffect(ModEffects.GRACE))
+        if (!player.isCreative() && !player.isSpectator())
         {
-            boolean damageScaling = config.damageScaling;
+            if (player.tickCount % 40 == 0 && !player.hasEffect(ModEffects.GRACE))
+            {
+                boolean damageScaling = config.damageScaling;
 
-            if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
-            {
-                player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
-            }
-            else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
-            {
-                player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
+                if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
+                {
+                    player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
+                }
+                else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
+                {
+                    player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
+                }
             }
         }
-    }
-
-    // Used for returning the player's temperature back to 0
-    private double getBodyReturnRate(double worldTemp, double tempLimit, double tempRate, double bodyTemp)
-    {
-        double staticRate = 3.0d;
-        // Get the difference between the world temp and the threshold to determine the speed of return (closer to the threshold = slower)
-        // Divide it by the staticRate (3) because it feels nice
-        // Multiply it by the configured tempRate Rate Modifier
-        // If it's too slow, default to tempRate / 10 instead
-        // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
-        double changeBy = Math.max((Math.abs(worldTemp - tempLimit) / staticRate) * tempRate, tempRate / 10) * -CSMath.getSign(bodyTemp);
-        return CSMath.getLeastExtreme(changeBy, -bodyTemp);
+        else setTemp(Temperature.Type.CORE, 0);
     }
 
     @Override
