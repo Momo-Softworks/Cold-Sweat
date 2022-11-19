@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +24,7 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
-        if (event.getObject().getItem() instanceof ArmorItem)
+        if (event.getObject().getItem() instanceof ArmorItem && !ConfigSettings.INSULATION_ITEMS.get().containsKey(event.getObject().getItem()))
         {
             // Make a new capability instance to attach to the item
             IInsulatableCap itemInsulationCap = new ItemInsulationCap();
