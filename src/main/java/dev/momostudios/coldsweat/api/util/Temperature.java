@@ -55,6 +55,35 @@ public class Temperature
     }
 
     /**
+     * @return  a double representing what the Temperature would be after a TempModifier is applied.
+     * @param player the player this modifier should use
+     * @param modifiers the modifier(s) being applied to the {@code Temperature}
+     */
+    public static double apply(double temp, @Nonnull Player player, @Nonnull TempModifier... modifiers)
+    {
+        double temp2 = temp;
+        for (TempModifier modifier : modifiers)
+        {
+            if (modifier == null) continue;
+
+            temp2 = player.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
+                    ? modifier.update(temp2, player)
+                    : modifier.getResult(temp2);
+        }
+        return temp2;
+    }
+
+    /**
+     * @return a double representing what the Temperature would be after a list of TempModifier(s) are applied.
+     * @param player the player this list of modifiers should use
+     * @param modifiers the list of modifiers being applied to the {@code Temperature}
+     */
+    public static double apply(double temp, @Nonnull Player player, @Nonnull Collection<TempModifier> modifiers)
+    {
+        return apply(temp, player, modifiers.toArray(new TempModifier[0]));
+    }
+
+    /**
      * @param modClass The class of the TempModifier to check for
      * @param type The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
@@ -257,45 +286,6 @@ public class Temperature
         });
     }
 
-    /**
-     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
-     * <br>
-     * @param type The type of TempModifier to be stored
-     * @return The NBT tag name for the given type
-     */
-    public static String getModifierTag(Type type)
-    {
-        return switch (type)
-        {
-            case CORE  -> "coreTempModifiers";
-            case WORLD -> "worldTempModifiers";
-            case BASE  -> "baseTempModifiers";
-            case RATE  -> "rateTempModifiers";
-            case MAX   -> "maxTempModifiers";
-            case MIN   -> "minTempModifiers";
-            default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
-        };
-    }
-
-    /**
-     * Used for storing Temperature values in the player's persistent data (NBT). <br>
-     * <br>
-     * @param type The type of Temperature to be stored. ({@link Type#WORLD} should only be stored when needed to prevent lag)
-     * @return The NBT tag name for the given type
-     */
-    public static String getTempTag(Type type)
-    {
-        return switch (type)
-        {
-            case CORE  -> "coreTemp";
-            case WORLD -> "worldTemp";
-            case BASE  -> "baseTemp";
-            case MAX   -> "maxWorldTemp";
-            case MIN   -> "minWorldTemp";
-            default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
-        };
-    }
-
     public static void updateTemperature(Player player, ITemperatureCap cap, boolean instant)
     {
         if (!player.level.isClientSide && cap instanceof PlayerTempCap playerCap)
@@ -315,32 +305,42 @@ public class Temperature
     }
 
     /**
-     * @return  a double representing what the Temperature would be after a TempModifier is applied.
-     * @param player the player this modifier should use
-     * @param modifiers the modifier(s) being applied to the {@code Temperature}
+     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of TempModifier to be stored
+     * @return The NBT tag name for the given type
      */
-    public static double applyModifiers(double temp, @Nonnull Player player, @Nonnull TempModifier... modifiers)
+    public static String getModifierTag(Type type)
     {
-        double temp2 = temp;
-        for (TempModifier modifier : modifiers)
-        {
-            if (modifier == null) continue;
-
-            temp2 = player.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
-                    ? modifier.update(temp2, player)
-                    : modifier.getResult(temp2);
-        }
-        return temp2;
+        return switch (type)
+                {
+                    case CORE  -> "coreTempModifiers";
+                    case WORLD -> "worldTempModifiers";
+                    case BASE  -> "baseTempModifiers";
+                    case RATE  -> "rateTempModifiers";
+                    case MAX   -> "maxTempModifiers";
+                    case MIN   -> "minTempModifiers";
+                    default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
+                };
     }
 
     /**
-     * @return a double representing what the Temperature would be after a list of TempModifier(s) are applied.
-     * @param player the player this list of modifiers should use
-     * @param modifiers the list of modifiers being applied to the {@code Temperature}
+     * Used for storing Temperature values in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of Temperature to be stored. ({@link Type#WORLD} should only be stored when needed to prevent lag)
+     * @return The NBT tag name for the given type
      */
-    public static double applyModifiers(double temp, @Nonnull Player player, @Nonnull Collection<TempModifier> modifiers)
+    public static String getTempTag(Type type)
     {
-        return applyModifiers(temp, player, modifiers.toArray(new TempModifier[0]));
+        return switch (type)
+                {
+                    case CORE  -> "coreTemp";
+                    case WORLD -> "worldTemp";
+                    case BASE  -> "baseTemp";
+                    case MAX   -> "maxWorldTemp";
+                    case MIN   -> "minWorldTemp";
+                    default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
+                };
     }
 
     /**
@@ -348,10 +348,10 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #MAX}: The hottest temperature the player can withstand before affecting body temperature. <br>
-     * {@link #MIN}: The coldest temperature the player can withstand before affecting body temperature. <br>
+     * {@link #MAX}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
+     * {@link #MIN}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * <br>
-     * {@link #CORE}: The core temperature of the player. <br>
+     * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
      * {@link #BODY}: The sum of the player's core and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
@@ -367,6 +367,10 @@ public class Temperature
         RATE
     }
 
+    /**
+     * Units of measurement used by Cold Sweat.<br>
+     * Most calculations are done in MC units, then converted to C or F when they are displayed.<br>
+     */
     public enum Units
     {
         F,
