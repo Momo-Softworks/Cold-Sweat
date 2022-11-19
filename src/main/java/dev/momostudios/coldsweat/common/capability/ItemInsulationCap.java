@@ -16,6 +16,8 @@ public class ItemInsulationCap implements IInsulatableCap
 {
     private List<ItemStack> insulationItems = new ArrayList<>();
     private List<Pair<Double, Double>> insulation = new ArrayList<>();
+    int saveCooldown = 0;
+    CompoundTag savedTag = new CompoundTag();
 
     @Override
     public ImmutableList<ItemStack> getInsulationItems()
@@ -57,6 +59,8 @@ public class ItemInsulationCap implements IInsulatableCap
                 this.insulation.add((Pair.of(cold, hot)));
             }
         }
+
+        saveCooldown = 0;
     }
 
     public void addInsulationItem(ItemStack stack)
@@ -82,17 +86,25 @@ public class ItemInsulationCap implements IInsulatableCap
     @Override
     public CompoundTag serializeNBT()
     {
+        // For some reason Forge runs this every tick,
+        // so we store the last-saved tag and return it
+        if (saveCooldown > 0)
+        {
+            saveCooldown--;
+            return savedTag;
+        }
+
         ListTag list = new ListTag();
         for (ItemStack stack : insulationItems)
         {
-            CompoundTag tag = new CompoundTag();
-            stack.save(tag);
-            list.add(tag);
+            list.add(stack.save(new CompoundTag()));
         }
 
         CompoundTag nbt = new CompoundTag();
         nbt.put("Insulation", list);
 
+        saveCooldown = 400;
+        savedTag = nbt;
         return nbt;
     }
 
