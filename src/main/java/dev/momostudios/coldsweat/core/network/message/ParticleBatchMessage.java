@@ -71,7 +71,6 @@ public class ParticleBatchMessage
 
     public static class ParticlePlacement
     {
-        ParticleOptions particle;
         double x, y, z, vx, vy, vz;
 
         public ParticlePlacement(double x, double y, double z, double vx, double vy, double vz)
