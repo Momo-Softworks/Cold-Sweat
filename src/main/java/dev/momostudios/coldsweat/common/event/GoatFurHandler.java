@@ -61,22 +61,57 @@ public class GoatFurHandler
         Player player = event.getPlayer();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof Goat && stack.getItem() == Items.SHEARS && !entity.getEntityData().get(GOAT_SHEARED.get()))
+        if (entity instanceof Goat goat && stack.getItem() == Items.SHEARS && !entity.getEntityData().get(GOAT_SHEARED.get()))
         {
             // use shears
             stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
             player.swing(event.getHand());
             // play sound
-            entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
+            goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
             // spawn item
             Random rand = new Random();
-            ItemEntity item = entity.spawnAtLocation(new ItemStack(ModItems.GOAT_FUR), 1f);
+            ItemEntity item = goat.spawnAtLocation(new ItemStack(ModItems.GOAT_FUR), 1f);
             if (item != null)
                 item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
 
+            // Random chance to ram the player when sheared
+            if (!goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
+            {
+                // set ram cooldown ticks
+                goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
+                // stop active goals
+                goat.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
+
+                // start lowering head
+                TaskScheduler.scheduleServer(() -> {
+                    ClientboundEntityEventPacket packet = new ClientboundEntityEventPacket(goat, (byte) 58);
+                    ((ServerChunkCache) goat.level.getChunkSource()).broadcastAndSend(goat, packet);
+                }, 5);
+
+                // look at player
+                BehaviorUtils.lookAtEntity(goat, player);
+                // stop walking
+                goat.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+
+                // set ram target to player pos
+                goat.getBrain().setMemory(MemoryModuleType.RAM_TARGET, player.position());
+                TaskScheduler.scheduleServer(() -> {
+                    if (player.distanceTo(goat) <= 10)
+                    {
+                        goat.playSound(goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_PREPARE_RAM : SoundEvents.GOAT_PREPARE_RAM, 1.0F, 1.0F);
+                        goat.getBrain().setMemory(MemoryModuleType.RAM_TARGET, player.position());
+                    }
+                }, 30);
+
+                // trigger ram
+                goat.getBrain().setActiveActivityIfPossible(Activity.RAM);
+            }
+
             // set sheared
-            entity.getEntityData().set(GOAT_SHEARED.get(), true);
+            goat.getEntityData().set(GOAT_SHEARED.get(), true);
+            // save sheared timestamp
+            goat.getPersistentData().putInt("LastSheared", goat.tickCount);
             event.setResult(PlayerInteractEvent.Result.ALLOW);
         }
     }
