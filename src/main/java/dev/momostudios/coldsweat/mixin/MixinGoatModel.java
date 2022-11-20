@@ -2,6 +2,8 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.event.GoatFurHandler;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.GoatModel;
 import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,6 +12,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.animal.goat.Goat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,9 +37,14 @@ public class MixinGoatModel extends QuadrupedModel<Goat>
         base.getChild("body").addOrReplaceChild("body2", CubeListBuilder.create().texOffs(0, 28).addBox(-5.0F, -18.0F, -8.0F, 11.0F, 14.0F, 11.0F), PartPose.offset(0.0F, 0.0F, 0.0F));
     }
 
-    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/animal/goat/Goat;FFFFF)V", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
-    private void setupAnim(Goat goat, float p_170588_, float p_170589_, float p_170590_, float p_170591_, float p_170592_, CallbackInfo ci)
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/animal/goat/Goat;FFFFF)V", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
+    private void setupAnim(Goat goat, float p_170588_, float p_170589_, float p_170590_, float p_170591_, float partialTick, CallbackInfo ci)
     {
         body.getChild("body2").visible = !goat.getEntityData().get(GoatFurHandler.GOAT_SHEARED.get());
+        // smooth out head ramming animation
+        if (CSMath.isBetween(goat.getRammingXHeadRot(), 0f, 0.523f))
+        {
+            head.xRot += CSMath.toRadians(Minecraft.getInstance().getFrameTime());
+        }
     }
 }
