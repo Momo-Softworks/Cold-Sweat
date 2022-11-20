@@ -35,10 +35,10 @@ public class EntitySettingsConfig
         BUILDER.pop();
 
         goatFurGrowth = BUILDER
-                .comment("Defines how often a goat will try to grow its fur, and the chance of it succeeding",
-                        "Format: [ticks, chance]")
+                .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
+                        "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", List.of(
-                        1200, 0.15
+                        1200, 2400, 0.20
                 ), it -> it instanceof Number);
 
         SPEC = BUILDER.build();

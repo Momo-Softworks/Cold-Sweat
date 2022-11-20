@@ -8,6 +8,7 @@ import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.ModList;
+import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class ConfigSettings
     public static ValueLoader<Map<Item, Double>> ICEBOX_FUEL;
     public static ValueLoader<Map<Item, Double>> HEARTH_FUEL;
 
-    public static ValueLoader<Pair<Integer, Double>> GOAT_FUR_TIMINGS;
+    public static ValueLoader<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
 
     // Makes the settings instantiation collapsible & easier to read
     static
@@ -123,7 +124,7 @@ public class ConfigSettings
         GOAT_FUR_TIMINGS = ValueLoader.of(() ->
         {
             List<?> entry = EntitySettingsConfig.getInstance().goatFurGrowth();
-            return Pair.of(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).doubleValue());
+            return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         });
 
         if (ModList.get().isLoaded("sereneseasons"))

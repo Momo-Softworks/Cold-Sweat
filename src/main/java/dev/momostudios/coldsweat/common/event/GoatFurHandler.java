@@ -86,8 +86,11 @@ public class GoatFurHandler
     public static void onGoatTick(LivingEvent.LivingUpdateEvent event)
     {
         Entity entity = event.getEntity();
-        if (entity instanceof Goat && !entity.level.isClientSide && entity.tickCount % ConfigSettings.GOAT_FUR_TIMINGS.get().getFirst() == 0
-        && Math.random() < ConfigSettings.GOAT_FUR_TIMINGS.get().getSecond() && entity.getEntityData().get(GOAT_SHEARED.get()))
+        Triplet<Integer, Integer, Double> furConfig = ConfigSettings.GOAT_FUR_TIMINGS.get();
+        // entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
+        if (entity instanceof Goat && !entity.level.isClientSide && entity.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC()
+        // growth cooldown has passed and goat is sheared
+        && entity.tickCount - entity.getPersistentData().getInt("LastSheared") >= furConfig.getB() && entity.getEntityData().get(GOAT_SHEARED.get()))
         {
             WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, entity, SoundSource.NEUTRAL, 0.5f, 0.6f);
             WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, entity, SoundSource.NEUTRAL, 0.5f, 0.8f);
