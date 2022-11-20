@@ -1,20 +1,30 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.util.config.ValueLoader;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -24,6 +34,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.PacketDistributor;
+import oshi.util.tuples.Triplet;
 
 import java.lang.reflect.Field;
 import java.util.Random;
@@ -129,6 +141,18 @@ public class GoatFurHandler
         {
             WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, entity, SoundSource.NEUTRAL, 0.5f, 0.6f);
             WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, entity, SoundSource.NEUTRAL, 0.5f, 0.8f);
+
+            // spawn particles
+            ParticleBatchMessage particles = new ParticleBatchMessage();
+            Random rand = new Random();
+            for (int i = 0; i < rand.nextDouble() * 10 + 5; i++)
+            {
+                particles.addParticle(ParticleTypes.SPIT, new ParticleBatchMessage.ParticlePlacement(entity.getX() + rand.nextDouble() - 0.5,
+                        entity.getY() + entity.getBbHeight() / 2 + rand.nextDouble() - 0.5,
+                        entity.getZ() + rand.nextDouble() - 0.5, 0, 0, 0));
+            }
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), particles);
+            // set not sheared
             entity.getEntityData().set(GOAT_SHEARED.get(), false);
         }
     }
