@@ -763,7 +763,7 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.2-b01
+2.2-b01a
 - Revamped the armor insulation system:
       - Each piece of armor has a number of slots that can be filled with insulation
       - A graphic of the armor's insulation will display in the item's tooltip
@@ -773,7 +773,6 @@ Technical Changes:
             - Hoglin Hide: Provides strong hot insulation
       - Leather armor can still be sewed to armor, filling all of its insulation slots
       - Insulation items can be combined in different ways for more specific use-cases
-      - Insulation items can be recovered by crafting the armor with shears in the Sewing Table
       - Because there are now two types of insulation, some configs have been changed to match
         (not deleting the old ones may cause a crash)
       - The number of insulation slots in helmets, chestplates, leggings, and boots is now configurable
@@ -792,16 +791,31 @@ Fixes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.2-b02
+2.2-b01b
 - Insulation items can now be removed with Shears in the Sewing Table
+- Enchanted insulation items will now (irreversibly) transfer compatible enchantments to the armor when being sewn
 - The world temperature gauge is now much more responsive
 - Updated the Goat texture to look better when sheared
-- Extended the Goat Fur's growth time to 15% chance every 60 seconds (from 45)
+- Changed Goats' fur growth:
+      - There is now a 2-minute minimum cooldown (configurable)
+      - After this time, it tries to grow it back every 1 minute (configurable)
+      - There is a 20% chance for this to succeed (configurable)
 
 Fixes:
 - Fixed player temperature sometimes not changing if it is at 0
 - Fixed crash related to Goats that might occur when joining the world
+- Fixed some configs being reset when any changes are made
 
+Technical Changes:
+- "Temperature" is no longer an object type
+      - All instances of Temperature have been replaced by double values
+      - Replaced "with()" with the static method "Temperature.apply()"
+      - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
+- Renamed methods in TempHelper (Temperature):
+      - "getTemperature()" -> "get()"
+      - "setTemperature()" -> "set()"
+      - "addTemperature()" -> "add()"
+- The insulation system now uses capabilities instead of NBT
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
