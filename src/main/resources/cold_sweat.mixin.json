@@ -5,7 +5,6 @@
   "client": [
     "MixinGoatModel",
     "MixinHumanoidModel",
-    "MixinLevelRender",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
   ],

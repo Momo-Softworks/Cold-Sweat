@@ -8,7 +8,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import dev.momostudios.coldsweat.api.event.client.RenderLevelEvent;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthPathManagement;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
@@ -33,6 +32,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -47,9 +47,10 @@ public class HearthDebugRenderer
     public static Map<BlockPos, Set<Pair<BlockPos, ArrayList<Direction>>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
-    public static void onLevelRendered(RenderLevelEvent event)
+    public static void onLevelRendered(RenderLevelStageEvent event)
     {
-        if (Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().hearthDebug())
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES
+        && Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().hearthDebug())
         {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -57,7 +58,7 @@ public class HearthDebugRenderer
             Frustum frustum = event.getFrustum();
             PoseStack ps = event.getPoseStack();
             Vec3 camPos = event.getCamera().getPosition();
-            Level level = event.getLevel();
+            Level level = player.level;
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.enableBlend();
@@ -186,6 +187,7 @@ public class HearthDebugRenderer
             }
             RenderSystem.disableBlend();
             ps.popPose();
+            buffer.endBatch(RenderType.LINES);
         }
     }
 
