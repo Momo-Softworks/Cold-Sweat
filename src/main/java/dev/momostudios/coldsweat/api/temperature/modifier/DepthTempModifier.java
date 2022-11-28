@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -10,7 +11,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -26,8 +29,8 @@ public class DepthTempModifier extends TempModifier
         double midTemp = (ConfigSettings.getInstance().maxTemp + ConfigSettings.getInstance().minTemp) / 2;
         BlockPos playerPos = player.blockPosition();
 
-        Map<Integer, Double> lightLevels = new HashMap<>();
-        Map<Double, Double> depthLevels = new HashMap<>();
+        List<Pair<Integer, Double>> lightLevels = new ArrayList<>();
+        List<Pair<Double, Double>> depthLevels = new ArrayList<>();
 
         for (BlockPos pos : WorldHelper.getNearbyPositions(playerPos, SAMPLES, 3))
         {
@@ -36,8 +39,8 @@ public class DepthTempModifier extends TempModifier
             double depth = Math.max(0, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - playerPos.getY());
             int light = player.level.getBrightness(LightLayer.SKY, pos);
 
-            lightLevels.put(light, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos))));
-            depthLevels.put(depth, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos))));
+            lightLevels.add(Pair.of(light, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos)))));
+            depthLevels.add(Pair.of(depth, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos)))));
         }
 
         double light = CSMath.weightedAverage(lightLevels);
@@ -45,10 +48,10 @@ public class DepthTempModifier extends TempModifier
 
         return temp ->
         {
-            Map<Double, Double> valueMap = new HashMap<>();
-            valueMap.put(temp, 0.8);
-            valueMap.put(CSMath.blend(midTemp, temp, light, 0, 15), 2.0);
-            valueMap.put(CSMath.blend(temp, midTemp, depth, 4, 20), 4.0);
+            List<Pair<Number, Number>> valueMap = new ArrayList<>();
+            valueMap.add(Pair.of(temp, 0.8));
+            valueMap.add(Pair.of(CSMath.blend(midTemp, temp, light, 0, 15), 2.0));
+            valueMap.add(Pair.of(CSMath.blend(temp, midTemp, depth, 4, 20), 4.0));
 
             return CSMath.weightedAverage(valueMap);
         };

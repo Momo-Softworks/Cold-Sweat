@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.util.math;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
@@ -11,7 +12,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class CSMath
@@ -188,14 +189,14 @@ public class CSMath
      * @param values The map of values to average (value, weight).
      * @return The average of the values in the given array.
      */
-    public static double weightedAverage(Map<? extends Number, ? extends Number> values)
+    public static <A extends Number, B extends Number> double weightedAverage(List<Pair<A, B>> values)
     {
         double sum = 0;
         double weightSum = 0;
-        for (Map.Entry<? extends Number, ? extends Number> entry : values.entrySet())
+        for (Pair<A, B> entry : values)
         {
-            double weight = entry.getValue().doubleValue();
-            sum += entry.getKey().doubleValue() * weight;
+            double weight = entry.getSecond().doubleValue();
+            sum += entry.getFirst().doubleValue() * weight;
             weightSum += weight;
         }
         return sum / Math.max(1, weightSum);
@@ -293,6 +294,10 @@ public class CSMath
         return Math.abs(value1) < Math.abs(value2) ? value1 : value2;
     }
 
+    public static double reduce(double value, double amount)
+    {
+        return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
+    }
 
     public static Vec3 getMiddle(BlockPos pos)
     {
