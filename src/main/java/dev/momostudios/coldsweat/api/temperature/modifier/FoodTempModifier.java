@@ -13,13 +13,13 @@ public class FoodTempModifier extends TempModifier
 
     public FoodTempModifier(double effect)
     {
-        addArgument("effect", effect);
+        this.getNBT().putDouble("effect", effect);
     }
 
     @Override
     public Function<Double, Double> calculate(Player player)
     {
-        return temp -> temp + this.<Double>getArgument("effect");
+        return temp -> temp + this.getNBT().getDouble("effect");
     }
 
     @Override

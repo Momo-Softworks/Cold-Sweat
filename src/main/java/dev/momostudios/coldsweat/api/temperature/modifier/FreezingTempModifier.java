@@ -8,7 +8,7 @@ public class FreezingTempModifier extends TempModifier
 {
     public FreezingTempModifier(double chill)
     {
-        this.addArgument("chill", chill);
+        this.getNBT().putDouble("chill", chill);
     }
 
     public FreezingTempModifier()
@@ -19,7 +19,7 @@ public class FreezingTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(Player player)
     {
-        return temp -> temp - this.<Double>getArgument("chill");
+        return temp -> temp - this.getNBT().getDouble("chill");
     }
 
     @Override

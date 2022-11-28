@@ -12,12 +12,12 @@ public class WaterTempModifier extends TempModifier
 {
     public WaterTempModifier()
     {
-        addArgument("strength", 0.01);
+        this(0.01);
     }
 
     public WaterTempModifier(double strength)
     {
-        addArgument("strength", strength);
+        this.getNBT().putDouble("strength", strength);
     }
 
     @Override
@@ -27,12 +27,12 @@ public class WaterTempModifier extends TempModifier
         double maxTemp = ConfigSettings.getInstance().maxTemp;
         double minTemp = ConfigSettings.getInstance().minTemp;
 
-        double strength = this.<Double>getArgument("strength");
+        double strength = this.getNBT().getDouble("strength");
         double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));
         double addAmount = player.isInWaterOrBubble() ? 0.01 : player.level.isRainingAt(player.blockPosition()) ? 0.005 : returnRate;
         double maxStrength = CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
 
-        setArgument("strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
+        this.getNBT().putDouble("strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
 
         // If the strength is 0, this TempModifier expires
         if (strength <= 0.0)
@@ -51,7 +51,7 @@ public class WaterTempModifier extends TempModifier
             }
         }
 
-        return temp -> temp - this.<Double>getArgument("strength");
+        return temp -> temp - this.getNBT().getDouble("strength");
     }
 
     @Override

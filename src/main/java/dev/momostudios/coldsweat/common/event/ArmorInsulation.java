@@ -68,7 +68,7 @@ public class ArmorInsulation
             }
 
             TempModifier currentMod = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
-            if (currentMod == null || (double) currentMod.getArgument("cold") != cold || (double) currentMod.getArgument("hot") != hot)
+            if (currentMod == null || currentMod.getNBT().getDouble("cold") != cold || currentMod.getNBT().getDouble("hot") != hot)
             {
                 if (cold == 0 && hot == 0 && currentMod != null)
                     Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);

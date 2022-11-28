@@ -13,16 +13,23 @@ public class InsulationTempModifier extends TempModifier
 
     public InsulationTempModifier(double cold, double hot)
     {
-        addArgument("cold", cold);
-        addArgument("hot", hot);
+        this.getNBT().putDouble("cold", cold);
+        this.getNBT().putDouble("hot", hot);
     }
 
     @Override
     public Function<Double, Double> calculate(Player player)
     {
-        double cold = Math.max(1d, this.<Double>getArgument("cold") / 8d);
-        double hot = Math.max(1d, this.<Double>getArgument("hot") / 8d);
-        return temp -> temp / (temp > 0 ? hot : cold);
+        double cold = this.getNBT().getDouble("cold") / 8d;
+        double hot = this.getNBT().getDouble("hot") / 8d;
+        return temp ->
+        {
+            if (temp > 0)
+            {
+                return hot >= 0 ? temp / (1 + hot) : temp * (1 - hot);
+            }
+            else return cold >= 0 ? temp / (1 + cold) : temp * (1 - cold);
+        };
     }
 
     public String getID()

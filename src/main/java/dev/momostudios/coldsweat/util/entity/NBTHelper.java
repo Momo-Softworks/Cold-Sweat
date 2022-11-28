@@ -113,10 +113,7 @@ public class NBTHelper
         modifierTag.putString("id", modifier.getID());
 
         // Add the modifier's arguments
-        modifier.getArguments().forEach((name, value) ->
-        {
-            modifierTag.put(name, getTagFromObject(value));
-        });
+        modifierTag.put("data", modifier.getNBT());
 
         // Read the modifier's expiration time
         if (modifier.getExpireTime() != -1)
@@ -138,15 +135,7 @@ public class NBTHelper
         TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
 
         if (newModifier == null) return null;
-        modifierTag.getAllKeys().forEach(key ->
-        {
-            // Add the modifier's arguments
-            List<String> invalidArgs = Arrays.asList("id", "expireTicks", "tickRate", "ticksExisted");
-            if (key != null && !invalidArgs.contains(modifierTag.get(key).getAsString()))
-            {
-                newModifier.addArgument(key, getObjectFromTag(modifierTag.get(key)));
-            }
-        });
+        newModifier.setNBT(modifierTag.getCompound("data"));
 
         // Set the modifier's expiration time
         if (modifierTag.contains("expireTicks"))

@@ -11,13 +11,13 @@ public class MountTempModifier extends TempModifier
     }
 
     public MountTempModifier(double strength) {
-        addArgument("strength", strength);
+        this.getNBT().putDouble("strength", strength);
     }
 
     @Override
     public Function<Double, Double> calculate(Player player)
     {
-        return temp -> temp * (1.0D - Math.min(1, this.<Double>getArgument("strength")));
+        return temp -> temp * (1.0D - Math.min(1, this.getNBT().getDouble("strength")));
     }
 
     public String getID()

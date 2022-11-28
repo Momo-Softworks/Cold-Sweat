@@ -12,12 +12,12 @@ public class HearthTempModifier extends TempModifier
 {
     public HearthTempModifier()
     {
-        addArgument("strength", 0);
+       this(0);
     }
 
     public HearthTempModifier(int strength)
     {
-        addArgument("strength", strength);
+        this.getNBT().putInt("strength", strength);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class HearthTempModifier extends TempModifier
         double mid = (min + max) / 2;
         double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
 
-        int insulationStrength = this.<Integer>getArgument("strength");
+        int insulationStrength = this.getNBT().getInt("strength");
 
         return temp -> CSMath.blend(temp, CSMath.weightedAverage(temp, mid, 1 - hearthStrength, 1.0), insulationStrength, 0, 10);
     }

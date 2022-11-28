@@ -13,13 +13,13 @@ public class WaterskinTempModifier extends TempModifier
 
     public WaterskinTempModifier(double temp)
     {
-        addArgument("temperature", temp);
+        this.getNBT().putDouble("temperature", temp);
     }
 
     @Override
     public Function<Double, Double>  calculate(Player player)
     {
-        return temp -> temp + this.<Double>getArgument("temperature");
+        return temp -> temp + this.getNBT().getDouble("temperature");
     }
 
     public String getID()

@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -22,7 +23,7 @@ import java.util.function.Function;
  */
 public abstract class TempModifier
 {
-    ConcurrentHashMap<String, Object> args = new ConcurrentHashMap<>();
+     CompoundTag nbt = new CompoundTag();
     int expireTicks = -1;
     int ticksExisted = 0;
     int tickRate = 1;
@@ -30,65 +31,27 @@ public abstract class TempModifier
     double lastOutput = 0;
     Function<Double, Double> function = temp -> temp;
 
-
     /**
      * Default constructor.<br>
      */
     public TempModifier() {}
 
-    /**
-     * Adds a new argument to this TempModifier.<br>
-     * @param name is the name of the argument. Used to retrieve the argument in {@link #getArgument(String)}
-     * @param arg is value of the argument. It is stored in the {@link Player}'s NBT.
-     */
-    public void addArgument(String name, Object arg)
+    public CompoundTag getNBT()
     {
-        args.put(name, arg);
+        return nbt;
     }
 
-    /**
-     * @param name The name of the argument
-     * @return A generic object with the value of the requested argument.
-     */
-    public <T> T getArgument(String name)
+    public void setNBT(CompoundTag data)
     {
-        return (T) args.get(name);
-    }
-
-    /**
-     * Sets the specified argument of the TempModifier instance to the given value.<br>
-     * @param name The name of the argument
-     * @param arg The new value of the argument
-     */
-    public void setArgument(String name, Object arg)
-    {
-        try
-        {
-            args.put(name, arg);
-        }
-        catch (Exception e)
-        {
-            throw new IllegalArgumentException(
-                    "Argument type mismatch trying to set argument \"" + name + "\" of " + this.getID() + " to " + arg
-                    + " (expected " + args.get(name).getClass().getName() + ")");
-        }
-    }
-
-    public void clearArgument(String name)
-    {
-        args.remove(name);
-    }
-
-    public final Map<String, Object> getArguments() {
-        return args;
+        this.nbt = data;
     }
 
     /**
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
-     * This is basically a simple in-out system. It is given a {@link Temperature}, and returns a new Temperature based on the PlayerEntity.<br>
+     * This is basically a simple in-out system. It is given a temperature, and returns a new temperature based on the PlayerEntity.<br>
      * <br>
      * @param player the player that is being affected by the modifier.<br>
-     * @return the new {@link Temperature}.<br>
+     * @return the new temperature.<br>
      */
     protected abstract Function<Double, Double> calculate(Player player);
 
