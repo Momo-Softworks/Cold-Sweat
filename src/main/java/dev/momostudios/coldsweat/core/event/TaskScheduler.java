@@ -1,10 +1,13 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -23,15 +26,19 @@ public class TaskScheduler
             if (schedule.isEmpty()) return;
 
             // Iterate through all active tasks
-            schedule.entrySet().removeIf(task ->
+            Iterator<Map.Entry<Runnable, Integer>> iterator = schedule.entrySet().iterator();
+            while (iterator.hasNext())
             {
-                if (task.getValue() <= 0)
+                Map.Entry<Runnable, Integer> entry = iterator.next();
+                int ticks = entry.getValue();
+
+                // If the task is ready to run, run it and remove it from the schedule
+                if (ticks <= 0)
                 {
                     try
                     {
-                        // Run the task and remove it from the scheduler
-                        task.getKey().run();
-                        return true;
+                        entry.getKey().run();
+                        iterator.remove();
                     }
                     catch (Exception e)
                     {
@@ -39,13 +46,12 @@ public class TaskScheduler
                         e.printStackTrace();
                     }
                 }
-                // Tick timer
+                // Otherwise, decrement the task's tick count
                 else
                 {
-                    task.setValue(task.getValue() - 1);
+                    entry.setValue(ticks - 1);
                 }
-                return false;
-            });
+            }
         }
     }
 
