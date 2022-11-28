@@ -244,7 +244,11 @@ public class SewingContainer extends AbstractContainerMenu
         if (this.getItem(1).getItem() instanceof ShearsItem)
         {
             // Damage shears
-            input2.hurt(1, new Random(), null);
+            if (!player.isCreative())
+            {
+                input2.hurt(1, new Random(), null);
+            }
+
             input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
             {
                 // Put the insulation item that was removed in the first input slot
@@ -336,7 +340,10 @@ public class SewingContainer extends AbstractContainerMenu
 
                 // Remove "Insulated" tag if armor has no insulation left
                 if (cap.getInsulationItems().isEmpty())
-                    processed.getOrCreateTag().putBoolean("Insulated", false);
+                {
+                    processed.getOrCreateTag().remove("Insulated");
+                    processed.getOrCreateTag().remove("Insulation");
+                }
             }
 
             this.setItem(2, processed);
