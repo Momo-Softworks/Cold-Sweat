@@ -157,7 +157,7 @@ public class PlayerTempCap implements ITemperatureCap
             // Multiply it by -CSMath.getSign(bodyTemp) to make it go toward 0
             double tempLimit = newCoreTemp > 0 ? maxTemp : minTemp;
             double changeBy = Math.max((Math.abs(newWorldTemp - tempLimit) / 3d) * config.rate, config.rate / 10) * -CSMath.getSign(newCoreTemp);
-            CSMath.getLeastExtreme(changeBy, -coreTemp);
+            newCoreTemp += CSMath.getLeastExtreme(changeBy, -coreTemp);
         }
 
         // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
