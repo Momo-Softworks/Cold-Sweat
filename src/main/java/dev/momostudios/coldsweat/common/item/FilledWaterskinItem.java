@@ -5,9 +5,14 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -19,7 +24,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FilledWaterskinItem extends Item
@@ -27,6 +43,97 @@ public class FilledWaterskinItem extends Item
     public FilledWaterskinItem()
     {
         super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
+
+        DispenserBlock.registerBehavior(this, (source, stack) ->
+        {
+            BlockPos pos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
+            Level level = source.getLevel();
+            ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+            double itemTemp = stack.getOrCreateTag().getDouble("temperature");
+
+            // Play sound
+            level.playLocalSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
+                    SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+
+            // Spawn particles
+            Random rand = new Random();
+            for (int i = 0; i < 6; i++)
+            {
+                TaskScheduler.scheduleServer(() ->
+                {
+                    ParticleBatchMessage particles = new ParticleBatchMessage();
+                    for (int p = 0; p < rand.nextInt(5) + 5; p++)
+                    {
+                        particles.addParticle(ParticleTypes.FALLING_WATER,
+                                new ParticleBatchMessage.ParticlePlacement(pos.getX() + rand.nextDouble(),
+                                                                           pos.getY() + rand.nextDouble(),
+                                                                           pos.getZ() + rand.nextDouble(), 0, 0, 0));
+                    }
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) chunk), particles);
+                }, i);
+            }
+
+            final AABB[] aabb = { new AABB(pos).inflate(0.5) };
+
+            // Spawn a hitbox that falls at the same rate as the particles and gives players below the waterskin effect
+            new Object()
+            {
+                double acceleration = 0;
+                int tick = 0;
+                // Track affected players to prevent duplicate effects
+                List<Player> affectedPlayers = new ArrayList<>();
+
+                void start()
+                {
+                    MinecraftForge.EVENT_BUS.register(this);
+                }
+
+                @SubscribeEvent
+                public void onTick(TickEvent.WorldTickEvent event)
+                {
+                    if (event.world.isClientSide == level.isClientSide && event.phase == TickEvent.Phase.START)
+                    {
+                        // Temperature of waterskin weakens over time
+                        double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
+
+                        // Move the box down at the speed of gravity
+                        AABB movedBox;
+                        aabb[0] = movedBox = aabb[0].move(0, -acceleration, 0);
+
+                        // If there's ground, stop
+                        BlockPos pos = new BlockPos(movedBox.minX, movedBox.minY, movedBox.minZ);
+                        if (WorldHelper.isSpreadBlocked(level, WorldHelper.getBlockState(chunk, pos), pos, Direction.DOWN, Direction.DOWN))
+                        {
+                            MinecraftForge.EVENT_BUS.unregister(this);
+                            return;
+                        }
+
+                        // Apply the waterskin modifier to all entities in the box
+                        level.getEntitiesOfClass(Player.class, movedBox).forEach(player ->
+                        {
+                            if (!affectedPlayers.contains(player))
+                            {
+                                // Apply the effect and store the player
+                                Temperature.addModifier(player, new WaterskinTempModifier(waterTemp).expires(0), Temperature.Type.CORE, true);
+                                affectedPlayers.add(player);
+                            }
+                        });
+
+                        // Increase the speed of the box
+                        acceleration += 0.0052;
+                        tick++;
+
+                        // Expire after 5 seconds
+                        if (tick > 100)
+                        {
+                            MinecraftForge.EVENT_BUS.unregister(this);
+                        }
+                    }
+                }
+            }.start();
+
+            return getEmpty(stack);
+        });
     }
 
     @Override
@@ -63,25 +170,22 @@ public class FilledWaterskinItem extends Item
                 SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
         // Create empty waterskin item
-        ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
-
-        // Preserve NBT (except temperature)
-        emptyWaterskin.setTag(itemstack.getTag());
-        emptyWaterskin.removeTagKey("temperature");
+        ItemStack emptyStack = getEmpty(itemstack);
 
         // Add the item to the player's inventory
-        if (player.getInventory().contains(emptyWaterskin))
+        if (player.getInventory().contains(emptyStack))
         {
-            player.addItem(emptyWaterskin);
+            player.addItem(emptyStack);
             player.setItemInHand(hand, ItemStack.EMPTY);
         }
         else
         {
-            player.setItemInHand(hand, emptyWaterskin);
+            player.setItemInHand(hand, emptyStack);
         }
 
         player.swing(hand);
 
+        // spawn falling water particles
         Random rand = new Random();
         for (int i = 0; i < 6; i++)
         {
@@ -96,10 +200,26 @@ public class FilledWaterskinItem extends Item
                 }
             }, i);
         }
+        player.clearFire();
+
         player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
         player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
 
         return ar;
+    }
+
+    public static ItemStack getEmpty(ItemStack stack)
+    {
+        if (stack.getItem() instanceof FilledWaterskinItem)
+        {
+            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
+
+            // Preserve NBT (except temperature)
+            emptyWaterskin.setTag(stack.getTag());
+            emptyWaterskin.removeTagKey("temperature");
+            return emptyWaterskin;
+        }
+        return stack;
     }
 
     @Override
