@@ -50,7 +50,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             boolean end = i == slots - 1;
 
             // background
-            GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, (end ? 6 : 0), 5, 6, 4, 32, 16);
+            GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, (end ? 6 : 0), 1, 6, 4, 32, 16);
         }
 
         for (int i = 0; i < insulationValues.size(); i++)
@@ -61,18 +61,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             int uvX = cold == hot ? 0
                     : cold > hot ? 6
                     : 12;
+            int uvY = cold + hot >= 2 ? 7 : 11;
 
             // cells
-            GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, uvX, 0, 6, 4, 32, 16);
+            GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, uvX, uvY, 6, 4, 32, 16);
         }
 
         for (int i = 0; i < slots; i++)
         {
             boolean end = i == slots - 1;
             // border
-            GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 6 : 0), 10, (end ? 7 : 6), 6, 32, 16);
+            GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 18 : 12), 0, (end ? 7 : 6), 6, 32, 16);
         }
         // icon
-        GuiComponent.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 16);
+        GuiComponent.blit(poseStack, x, y - 1, 0, 24, 7, 8, 8, 32, 16);
     }
 }
