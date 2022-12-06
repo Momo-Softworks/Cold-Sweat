@@ -7,13 +7,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 
 public class BlockTempRegistry
 {
     public static final LinkedList<BlockTemp> BLOCK_EFFECTS = new LinkedList<>();
-    public static final HashMap<Block, BlockTemp> MAPPED_BLOCKS = new HashMap<>();
+    public static final IdentityHashMap<Block, BlockTemp> MAPPED_BLOCKS = new IdentityHashMap<>();
     public static final BlockTemp DEFAULT_BLOCK_EFFECT = new BlockTemp() {
         @Override
         public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
