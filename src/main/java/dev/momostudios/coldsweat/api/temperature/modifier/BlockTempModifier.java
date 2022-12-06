@@ -60,7 +60,7 @@ public class BlockTempModifier extends TempModifier
                         if (CSMath.isBetween(effectAmount, be.minEffect(), be.maxEffect()))
                         {
                             // Get Vector positions of the centers of the source block and player
-                            Vec3 pos = new Vec3(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5);
+                            Vec3 pos = Vec3.atCenterOf(blockpos);
 
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
@@ -85,11 +85,9 @@ public class BlockTempModifier extends TempModifier
                                     blocks.getAndIncrement();
                             }, 3);
 
-                            // Calculate the decrease in effectiveness due to blocks in the way
-                            double blockDampening = blocks.get();
-
                             // Store this block type's total effect on the player
-                            double blockTempTotal = effectAmount + tempToAdd / (blockDampening + 1);
+                            // Dampen the effect with each block between the player and the block
+                            double blockTempTotal = effectAmount + tempToAdd / (blocks.get() + 1);
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
                         }
                     }

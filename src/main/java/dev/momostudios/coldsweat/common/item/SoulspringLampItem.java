@@ -94,9 +94,9 @@ public class SoulspringLampItem extends Item
                 }
             }
             // If the conditions are not met, turn off the lamp
-            else
+            else if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
             {
-                if (stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
+                if (stack.getOrCreateTag().getBoolean("isOn"))
                 {
                     stack.getOrCreateTag().putInt("stateChangeTimer", 10);
                     stack.getOrCreateTag().putBoolean("isOn", false);
@@ -107,9 +107,11 @@ public class SoulspringLampItem extends Item
                     WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_OFF, player, SoundSource.PLAYERS, 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
             }
-
-            // Decrement the state change timer
-            NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+            else
+            {
+                // Decrement the state change timer
+                NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+            }
         }
     }
 

@@ -74,9 +74,9 @@ public class Temperature
     }
 
     /**
-     * @return a double representing what the Temperature would be after a list of TempModifier(s) are applied.
+     * @return a double representing what the temperature would be after a collection of TempModifier(s) are applied.
      * @param player the player this list of modifiers should use
-     * @param modifiers the list of modifiers being applied to the {@code Temperature}
+     * @param modifiers the list of modifiers being applied to the player's temperature
      */
     public static double apply(double temp, @Nonnull Player player, @Nonnull Collection<TempModifier> modifiers)
     {
@@ -100,14 +100,10 @@ public class Temperature
     public static <T extends TempModifier> T getModifier(Player player, Type type, Class<T> modClass)
     {
         AtomicReference<TempModifier> mod = new AtomicReference<>(null);
-        for (TempModifier modifier : player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()).getModifiers(type))
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
-            if (modifier.getClass().equals(modClass))
-            {
-                mod.set(modifier);
-                break;
-            }
-        }
+            cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst().ifPresent(mod::set);
+        });
         return (T) mod.get();
     }
 
