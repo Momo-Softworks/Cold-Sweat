@@ -45,7 +45,7 @@ public class ArmorInsulation
                 {
                     // Add the armor's defense value to the insulation value.
                     cold += armorItem.getDefense();
-                    cold += armorItem.getDefense();
+                    hot += armorItem.getDefense();
 
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
