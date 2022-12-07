@@ -32,6 +32,7 @@ public class ColdSweatConfig
 
     private static final ForgeConfigSpec.BooleanValue damageScaling;
     private static final ForgeConfigSpec.BooleanValue requireThermometer;
+    private static final ForgeConfigSpec.BooleanValue checkSleep;
 
     private static final ForgeConfigSpec.IntValue gracePeriodLength;
     private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
@@ -43,7 +44,6 @@ public class ColdSweatConfig
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
-
 
     static 
     {
@@ -77,10 +77,13 @@ public class ColdSweatConfig
         /*
          Misc. things that are affected by temperature
          */
-        BUILDER.push("Misc things that are affected by temperature");
+        BUILDER.push("Misc temperature-related things");
         damageScaling = BUILDER
             .comment("Sets whether damage scales with difficulty")
             .define("Damage Scaling", true);
+        checkSleep = BUILDER
+            .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
+            .define("Prevent Sleep When in Danger", true);
         BUILDER.pop();
 
         /*
@@ -248,6 +251,11 @@ public class ColdSweatConfig
     public double getHearthEffect()
     {
         return hearthEffect.get();
+    }
+
+    public boolean isSleepChecked()
+    {
+        return checkSleep.get();
     }
 
     /*

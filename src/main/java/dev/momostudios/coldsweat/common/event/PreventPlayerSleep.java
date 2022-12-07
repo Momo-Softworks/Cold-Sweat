@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -16,7 +17,7 @@ public class PreventPlayerSleep
     public static void onTrySleep(PlayerSleepInBedEvent event)
     {
         // There's already something blocking the player from sleeping
-        if (event.getResultStatus() != null) return;
+        if (event.getResultStatus() != null || ColdSweatConfig.getInstance().isSleepChecked()) return;
 
         Player player = event.getPlayer();
         double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
