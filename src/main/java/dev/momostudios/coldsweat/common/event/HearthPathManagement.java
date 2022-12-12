@@ -19,7 +19,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber
 public class HearthPathManagement
 {
-    public static LinkedHashMap<BlockPos, Integer> HEARTH_POSITIONS = new LinkedHashMap<>();
+    public static final LinkedHashMap<BlockPos, Integer> HEARTH_POSITIONS = new LinkedHashMap<>();
 
     public static final Set<Pair<BlockPos, String>> DISABLED_HEARTHS = new HashSet<>();
 
@@ -32,13 +32,16 @@ public class HearthPathManagement
         // Only update if the shape has changed
         if (event.getPrevState().getShape(level, pos) != event.getNewState().getShape(level, pos))
         {
-            for (Map.Entry<BlockPos, Integer> entry : HEARTH_POSITIONS.entrySet())
+            synchronized (HEARTH_POSITIONS.entrySet())
             {
-                BlockPos hearthPos = entry.getKey();
-                int range = entry.getValue();
-                if (pos.closerThan(hearthPos, range) && level.getBlockEntity(hearthPos) instanceof HearthBlockEntity hearth)
+                for (Map.Entry<BlockPos, Integer> entry : HEARTH_POSITIONS.entrySet())
                 {
-                    hearth.sendBlockUpdate(pos);
+                    BlockPos hearthPos = entry.getKey();
+                    int range = entry.getValue();
+                    if (pos.closerThan(hearthPos, range) && level.getBlockEntity(hearthPos) instanceof HearthBlockEntity hearth)
+                    {
+                        hearth.sendBlockUpdate(pos);
+                    }
                 }
             }
         }
