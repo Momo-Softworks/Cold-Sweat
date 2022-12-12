@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -99,12 +98,20 @@ public class Temperature
     @Nullable
     public static <T extends TempModifier> T getModifier(Player player, Type type, Class<T> modClass)
     {
-        AtomicReference<TempModifier> mod = new AtomicReference<>(null);
-        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        return getModifier(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap()), type, modClass);
+    }
+
+    @Nullable
+    public static <T extends TempModifier> T getModifier(ITemperatureCap cap, Type type, Class<T> modClass)
+    {
+        for (TempModifier modifier : cap.getModifiers(type))
         {
-            cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst().ifPresent(mod::set);
-        });
-        return (T) mod.get();
+            if (modClass.isInstance(modifier))
+            {
+                return (T) modifier;
+            }
+        }
+        return null;
     }
 
     /**
