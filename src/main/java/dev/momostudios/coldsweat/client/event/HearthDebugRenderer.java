@@ -198,14 +198,15 @@ public class HearthDebugRenderer
         && Minecraft.getInstance().level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
         && ClientSettingsConfig.getInstance().hearthDebug())
         {
-            HEARTH_LOCATIONS.clear();
             for (Map.Entry<BlockPos, Integer> entry : HearthPathManagement.HEARTH_POSITIONS.entrySet())
             {
                 BlockPos pos = entry.getKey();
                 BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
                 if (blockEntity instanceof HearthBlockEntity hearth)
                 {
-                    ArrayList<BlockPos> paths = hearth.getPaths().stream().map(SpreadPath::getPos).collect(Collectors.toCollection(ArrayList::new));
+                    if (!(HEARTH_LOCATIONS.get(pos) == null || hearth.getPaths().size() > HEARTH_LOCATIONS.get(pos).size())) continue;
+
+                    List<BlockPos> paths = hearth.getPaths().stream().map(SpreadPath::getPos).toList();
                     HEARTH_LOCATIONS.put(pos, paths.stream().map(bp ->
                     {
                         ArrayList<Direction> dirs = new ArrayList<>();
