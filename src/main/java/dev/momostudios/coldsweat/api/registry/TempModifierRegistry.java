@@ -50,8 +50,7 @@ public class TempModifierRegistry
         }
         catch (Exception e)
         {
-            ColdSweat.LOGGER.error("TempModifier \"" + id + "\" does not have a default constructor. This will cause issues!");
-            return TEMP_MODIFIERS.get(id);
+            throw new UnsupportedOperationException("TempModifier \"" + id + "\" does not have a default constructor!");
         }
     }
 }

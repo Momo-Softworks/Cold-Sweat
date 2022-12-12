@@ -217,7 +217,7 @@ public class PlayerTempCap implements ITemperatureCap
         // Save the player's temperature data
         for (Type type : VALID_TEMPERATURE_TYPES)
         {
-            nbt.putDouble(Temperature.getTempTag(type), this.getTemp(type));
+            nbt.putDouble(NBTHelper.getTemperatureTag(type), this.getTemp(type));
         }
         return nbt;
     }
@@ -236,7 +236,7 @@ public class PlayerTempCap implements ITemperatureCap
             }
 
             // Write the list of modifiers to the player's persistent data
-            nbt.put(Temperature.getModifierTag(type), modifiers);
+            nbt.put(NBTHelper.getModifierTag(type), modifiers);
         }
         return nbt;
     }
@@ -255,7 +255,7 @@ public class PlayerTempCap implements ITemperatureCap
     {
         for (Type type : VALID_TEMPERATURE_TYPES)
         {
-            setTemp(type, nbt.getDouble(Temperature.getTempTag(type)));
+            setTemp(type, nbt.getDouble(NBTHelper.getTemperatureTag(type)));
         }
     }
 
@@ -266,7 +266,7 @@ public class PlayerTempCap implements ITemperatureCap
             getModifiers(type).clear();
 
             // Get the list of modifiers from the player's persistent data
-            ListTag modifiers = nbt.getList(Temperature.getModifierTag(type), 10);
+            ListTag modifiers = nbt.getList(NBTHelper.getModifierTag(type), 10);
 
             // For each modifier in the list
             modifiers.forEach(modNBT ->

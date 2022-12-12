@@ -32,7 +32,7 @@ public abstract class TempModifier
     Function<Double, Double> function = temp -> temp;
 
     /**
-     * Default constructor.<br>
+     * Default constructor (REQUIRED for proper registration).<br>
      */
     public TempModifier() {}
 
