@@ -478,13 +478,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Get the player's temperature
         if (!(shouldUseHotFuel && shouldUseColdFuel))
         {
-            HearthTempModifier mod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
-            double temp = (mod != null) ? mod.getLastInput() : Temperature.get(player, Temperature.Type.WORLD);
+            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            {
+                double temp = cap.getTemp(Temperature.Type.WORLD);
+                if (CSMath.isInRange(temp, config.minTemp, config.maxTemp))
+                {
+                    HearthTempModifier mod = Temperature.getModifier(cap, Temperature.Type.WORLD, HearthTempModifier.class);
+                    if (mod != null) temp = mod.getLastInput();
+                }
 
-            // Tell the hearth to use hot fuel
-            shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < config.minTemp);
-            // Tell the hearth to use cold fuel
-            shouldUseColdFuel = shouldUseColdFuel || (coldFuel > 0 && temp > config.maxTemp);
+                // Tell the hearth to use hot fuel
+                shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < config.minTemp);
+                // Tell the hearth to use cold fuel
+                shouldUseColdFuel = shouldUseColdFuel || (coldFuel > 0 && temp > config.maxTemp);
+            });
         }
 
         if (shouldUseHotFuel || shouldUseColdFuel)
