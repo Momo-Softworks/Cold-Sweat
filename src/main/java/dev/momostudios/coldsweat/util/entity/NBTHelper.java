@@ -1,14 +1,13 @@
 package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Predicate;
 
 public class NBTHelper
@@ -86,5 +85,44 @@ public class NBTHelper
             tag.putInt(key, value + amount);
         }
         return value + amount;
+    }
+
+    /**
+     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of TempModifier to be stored
+     * @return The NBT tag name for the given type
+     */
+    public static String getModifierTag(Temperature.Type type)
+    {
+        return switch (type)
+        {
+            case CORE  -> "coreTempModifiers";
+            case WORLD -> "worldTempModifiers";
+            case BASE  -> "baseTempModifiers";
+            case RATE  -> "rateTempModifiers";
+            case MAX   -> "maxTempModifiers";
+            case MIN   -> "minTempModifiers";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
+        };
+    }
+
+    /**
+     * Used for storing Temperature values in the player's persistent data (NBT). <br>
+     * <br>
+     * @param type The type of Temperature to be stored. ({@link Temperature.Type#WORLD} should only be stored when needed to prevent lag)
+     * @return The NBT tag name for the given type
+     */
+    public static String getTemperatureTag(Temperature.Type type)
+    {
+        return switch (type)
+        {
+            case CORE  -> "coreTemp";
+            case WORLD -> "worldTemp";
+            case BASE  -> "baseTemp";
+            case MAX   -> "maxWorldTemp";
+            case MIN   -> "minWorldTemp";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
+        };
     }
 }

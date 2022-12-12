@@ -301,45 +301,6 @@ public class Temperature
     }
 
     /**
-     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
-     * <br>
-     * @param type The type of TempModifier to be stored
-     * @return The NBT tag name for the given type
-     */
-    public static String getModifierTag(Type type)
-    {
-        return switch (type)
-                {
-                    case CORE  -> "coreTempModifiers";
-                    case WORLD -> "worldTempModifiers";
-                    case BASE  -> "baseTempModifiers";
-                    case RATE  -> "rateTempModifiers";
-                    case MAX   -> "maxTempModifiers";
-                    case MIN   -> "minTempModifiers";
-                    default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
-                };
-    }
-
-    /**
-     * Used for storing Temperature values in the player's persistent data (NBT). <br>
-     * <br>
-     * @param type The type of Temperature to be stored. ({@link Type#WORLD} should only be stored when needed to prevent lag)
-     * @return The NBT tag name for the given type
-     */
-    public static String getTempTag(Type type)
-    {
-        return switch (type)
-                {
-                    case CORE  -> "coreTemp";
-                    case WORLD -> "worldTemp";
-                    case BASE  -> "baseTemp";
-                    case MAX   -> "maxWorldTemp";
-                    case MIN   -> "minWorldTemp";
-                    default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
-                };
-    }
-
-    /**
      * Defines all temperature stats in Cold Sweat. <br>
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
