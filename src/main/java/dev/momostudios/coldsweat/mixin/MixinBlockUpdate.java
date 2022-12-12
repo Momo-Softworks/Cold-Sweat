@@ -2,7 +2,9 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -19,10 +21,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <br>
  * The event isn't called if the chunk does not have the {@link ChunkStatus#FULL} status to prevent chunkloading deadlocks.
  */
-@Mixin(Level.class)
+@Mixin(ServerLevel.class)
 public class MixinBlockUpdate
 {
-    Level level = (Level) (Object) this;
+    ServerLevel level = (ServerLevel) (Object) this;
 
     @Inject(method = "onBlockStateChange", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
