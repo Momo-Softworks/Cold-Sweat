@@ -25,13 +25,13 @@ public class ClientConfigRecieveMessage
     public static void encode(ClientConfigRecieveMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBoolean(message.openMenu);
-        buffer.writeNbt(ConfigHelper.writeConfigSettingsToNBT(message.configSettings));
+        buffer.writeNbt(ConfigHelper.writeToNBT(message.configSettings));
     }
 
     public static ClientConfigRecieveMessage decode(FriendlyByteBuf buffer)
     {
         boolean onJoin = buffer.readBoolean();
-        ConfigSettings configSettings = ConfigHelper.readConfigSettingsFromNBT(buffer.readNbt());
+        ConfigSettings configSettings = ConfigHelper.readFromNBT(buffer.readNbt());
 
         return new ClientConfigRecieveMessage(configSettings, onJoin);
     }

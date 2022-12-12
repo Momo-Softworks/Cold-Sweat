@@ -9,6 +9,8 @@ import net.minecraft.world.item.ItemStack;
 
 public class PlayerHelper
 {
+    private PlayerHelper() {}
+
     public static ItemStack getItemInHand(LivingEntity player, HumanoidArm hand)
     {
         return player.getItemInHand(hand == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);

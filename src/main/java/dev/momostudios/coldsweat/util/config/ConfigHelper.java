@@ -16,7 +16,9 @@ import java.util.*;
 
 public class ConfigHelper
 {
-    public static CompoundTag writeConfigSettingsToNBT(ConfigSettings config)
+    private ConfigHelper() {}
+
+    public static CompoundTag writeToNBT(ConfigSettings config)
     {
         CompoundTag tag = new CompoundTag();
         tag.putInt("difficulty", config.difficulty);
@@ -32,7 +34,7 @@ public class ConfigHelper
         return tag;
     }
 
-    public static ConfigSettings readConfigSettingsFromNBT(CompoundTag tag)
+    public static ConfigSettings readFromNBT(CompoundTag tag)
     {
         ConfigSettings config = new ConfigSettings();
         if (tag == null)
@@ -190,7 +192,8 @@ public class ConfigHelper
                     // Maps the biome ID to the temperature (and variance if present)
                     map.put(biome.getRegistryName(), Pair.of(min, max));
                 }
-            } catch (Exception ignored) {}
+            }
+            catch (Exception ignored) {}
         }
         return map;
     }

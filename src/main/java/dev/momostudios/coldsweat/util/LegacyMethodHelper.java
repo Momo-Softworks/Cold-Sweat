@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class LegacyMethodHelper
 {
+    private LegacyMethodHelper() {}
+
     @Nullable
     public static Biome getBiome(Level level, BlockPos blockPos)
     {

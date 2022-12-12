@@ -32,6 +32,8 @@ import java.util.function.Predicate;
  */
 public class Temperature
 {
+    private Temperature() {}
+
     /**
      * Returns the player's temperature of the specified type.
      */

@@ -17,6 +17,8 @@ import java.util.function.BiConsumer;
 
 public class CSMath
 {
+    private CSMath() {}
+
     /**
      * Converts a double temperature to a different unit. If {@code from} and {@code to} are the same, returns {@code value}.<br>
      * @param value The temperature to convert.

@@ -21,12 +21,12 @@ public class ClientConfigSendMessage
 
     public static void encode(ClientConfigSendMessage message, FriendlyByteBuf buffer)
     {
-        buffer.writeNbt(ConfigHelper.writeConfigSettingsToNBT(message.configSettings));
+        buffer.writeNbt(ConfigHelper.writeToNBT(message.configSettings));
     }
 
     public static ClientConfigSendMessage decode(FriendlyByteBuf buffer)
     {
-        return new ClientConfigSendMessage(ConfigHelper.readConfigSettingsFromNBT(buffer.readNbt()));
+        return new ClientConfigSendMessage(ConfigHelper.readFromNBT(buffer.readNbt()));
     }
 
     public static void handle(ClientConfigSendMessage message, Supplier<NetworkEvent.Context> contextSupplier)

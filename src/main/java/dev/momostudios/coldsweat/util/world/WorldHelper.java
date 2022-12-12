@@ -27,11 +27,12 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public class WorldHelper
 {
+    private WorldHelper() {}
+
     /**
      * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
      * Ignores minecraft:cave_air<br>

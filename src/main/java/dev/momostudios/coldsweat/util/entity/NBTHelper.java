@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 
 public class NBTHelper
 {
+    private NBTHelper() {}
+
     public static CompoundTag modifierToTag(TempModifier modifier)
     {
         // Write the modifier's data to a CompoundTag
