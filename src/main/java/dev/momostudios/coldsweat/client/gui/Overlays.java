@@ -222,7 +222,8 @@ public class Overlays
 
             // Blend body temp (per tick)
             PREV_BODY_TEMP = BODY_TEMP;
-            BODY_TEMP += (PLAYER_CAP.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
+            double currentTemp = PLAYER_CAP.getTemp(Temperature.Type.BODY);
+            BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (PLAYER_CAP.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
 
             // Handle effects for the icon (bobbing, stage, transition)
             if (SHOW_BODY_TEMP)
