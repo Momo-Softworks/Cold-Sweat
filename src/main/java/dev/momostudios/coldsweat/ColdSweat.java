@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat;
 
+import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.init.*;
@@ -68,6 +69,7 @@ public class ColdSweat
     {
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
+        Overlays.registerOverlays();
     }
 
     @SubscribeEvent

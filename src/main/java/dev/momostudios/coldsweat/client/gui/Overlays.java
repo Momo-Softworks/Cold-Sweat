@@ -18,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.gui.ForgeIngameGui;
-import net.minecraftforge.client.gui.IIngameOverlay;
 import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,15 +29,15 @@ public class Overlays
     public static ITemperatureCap PLAYER_CAP = new PlayerTempCap();
 
     // Stuff for world temperature
+    public static double WORLD_TEMP = 0;
     static boolean SHOW_WORLD_TEMP = false;
     static double PREV_WORLD_TEMP = 0;
-    public static double WORLD_TEMP = 0;
     static double MAX_OFFSET = 0;
     static double MIN_OFFSET = 0;
 
     // Stuff for body temperature
+    public static double BODY_TEMP = 0;
     static boolean SHOW_BODY_TEMP = false;
-    static double BODY_TEMP = 0;
     static double PREV_BODY_TEMP = 0;
     static int BLEND_BODY_TEMP = 0;
     static int ICON_BOB = 0;
@@ -50,138 +49,140 @@ public class Overlays
 
     static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
-    public static final IIngameOverlay WORLD_TEMP_ELEMENT = OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "World Temp", (gui, poseStack, partialTick, width, height) ->
+    public static void registerOverlays()
     {
-        gui.setupOverlayRenderState(true, false);
-        
-        LocalPlayer player = Minecraft.getInstance().player;
-
-        if (player != null && SHOW_WORLD_TEMP)
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "World Temp", (gui, poseStack, partialTick, width, height) ->
         {
-            double min = ConfigSettings.getInstance().minTemp + MIN_OFFSET;
-            double max = ConfigSettings.getInstance().maxTemp + MAX_OFFSET;
+            gui.setupOverlayRenderState(true, false);
 
-            // Get player world temperature
-            double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            LocalPlayer player = Minecraft.getInstance().player;
 
-            // Get the temperature severity
-            int severity = getWorldSeverity(temp, min, max);
-
-            // Set text color
-            int color = switch (severity)
+            if (player != null && SHOW_WORLD_TEMP && !Minecraft.getInstance().options.hideGui)
             {
-                case  2,3  -> 16297781;
-                case  4    -> 16728089;
-                case -2,-3 -> 8443135;
-                case -4    -> 4236031;
-                default -> 14737376;
-            };
+                double min = ConfigSettings.getInstance().minTemp + MIN_OFFSET;
+                double max = ConfigSettings.getInstance().maxTemp + MAX_OFFSET;
+
+                // Get player world temperature
+                double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+
+                // Get the temperature severity
+                int severity = getWorldSeverity(temp, min, max);
+
+                // Set text color
+                int color = switch (severity)
+                        {
+                            case  2,3  -> 16297781;
+                            case  4    -> 16728089;
+                            case -2,-3 -> 8443135;
+                            case -4    -> 4236031;
+                            default -> 14737376;
+                        };
 
 
-            /* Render gauge */
+                /* Render gauge */
 
-            poseStack.pushPose();
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-
-            // Set gauge texture
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
-
-            // Render frame
-            GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.worldGaugeX(), height - 19 + CLIENT_CONFIG.worldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
-
-            RenderSystem.disableBlend();
-
-            // Sets the text bobbing offset (or none if disabled)
-            int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min, max) && player.tickCount % 2 == 0 ? 1 : 0;
-
-            // Render text
-            int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
-
-            Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.tempOffset()) + "",
-            /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.worldGaugeX(),
-            /* Y */ height - 15 - bob + CLIENT_CONFIG.worldGaugeY(), color);
-            poseStack.popPose();
-        }
-    });
-
-    public static final IIngameOverlay BODY_TEMP_ELEMENT = OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "Body Temp", (gui, poseStack, partialTick, width, height) ->
-    {
-        gui.setupOverlayRenderState(true, false);
-        Minecraft mc = Minecraft.getInstance();
-
-        if (mc.cameraEntity instanceof Player player && SHOW_BODY_TEMP)
-        {
-            // Blend body temp (per frame)
-            BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
-
-            // Get text color
-            int color = switch (BODY_TEMP_SEVERITY)
-            {
-                case  7, -7 -> 16777215;
-                case  6 -> 16777132;
-                case  5 -> 16767856;
-                case  4 -> 16759634;
-                case  3 -> 16751174;
-                case -3 -> 6078975;
-                case -4 -> 7528447;
-                case -5 -> 8713471;
-                case -6 -> 11599871;
-                default -> BLEND_BODY_TEMP > 0 ? 16744509
-                        : BLEND_BODY_TEMP < 0 ? 4233468
-                        : 11513775;
-            };
-
-            // Get the outer border color when readout is > 100
-            int colorBG =
-                    BLEND_BODY_TEMP < 0 ? 1122643 :
-                    BLEND_BODY_TEMP > 0 ? 5376516 :
-                    0;
-
-
-            int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
-            int threatOffset =
-                    !CLIENT_CONFIG.iconBobbing() ? 0
-                    : bobLevel == 2 ? ICON_BOB
-                    : bobLevel == 3 ? player.tickCount % 2
-                    : 0;
-
-            RenderSystem.defaultBlendFunc();
-
-            // Render old icon (if blending)
-            RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
-            if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
-            {
-                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                poseStack.pushPose();
                 RenderSystem.enableBlend();
-                RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+                // Set gauge texture
+                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
+
+                // Render frame
+                GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.worldGaugeX(), height - 19 + CLIENT_CONFIG.worldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
+
+                RenderSystem.disableBlend();
+
+                // Sets the text bobbing offset (or none if disabled)
+                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min, max) && player.tickCount % 2 == 0 ? 1 : 0;
+
+                // Render text
+                int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+
+                Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.tempOffset()) + "",
+                        /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.worldGaugeX(),
+                        /* Y */ height - 15 - bob + CLIENT_CONFIG.worldGaugeY(), color);
+                poseStack.popPose();
             }
-            // Render new icon on top of old icon (if blending)
-            // Otherwise this is just the regular icon
-            GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
-            RenderSystem.setShaderColor(1, 1, 1, 1);
+        });
 
-            // Render Readout
-            Font font = mc.font;
-            int scaledWidth = mc.getWindow().getGuiScaledWidth();
-            int scaledHeight = mc.getWindow().getGuiScaledHeight();
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "Body Temp", (gui, poseStack, partialTick, width, height) ->
+        {
+            gui.setupOverlayRenderState(true, false);
+            Minecraft mc = Minecraft.getInstance();
 
-            String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-            float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.bodyReadoutX();
-            float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.bodyReadoutY();
+            if (mc.cameraEntity instanceof Player player && SHOW_BODY_TEMP && !Minecraft.getInstance().options.hideGui)
+            {
+                // Blend body temp (per frame)
+                BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
-            // Draw the outline
-            font.draw(poseStack, s, x + 1, y, colorBG);
-            font.draw(poseStack, s, x - 1, y, colorBG);
-            font.draw(poseStack, s, x, y + 1, colorBG);
-            font.draw(poseStack, s, x, y - 1, colorBG);
+                // Get text color
+                int color = switch (BODY_TEMP_SEVERITY)
+                        {
+                            case  7, -7 -> 16777215;
+                            case  6 -> 16777132;
+                            case  5 -> 16767856;
+                            case  4 -> 16759634;
+                            case  3 -> 16751174;
+                            case -3 -> 6078975;
+                            case -4 -> 7528447;
+                            case -5 -> 8713471;
+                            case -6 -> 11599871;
+                            default -> BLEND_BODY_TEMP > 0 ? 16744509
+                                    : BLEND_BODY_TEMP < 0 ? 4233468
+                                    : 11513775;
+                        };
 
-            // Draw the readout
-            font.draw(poseStack, s, x, y, color);
-        }
-    });
+                // Get the outer border color when readout is > 100
+                int colorBG =
+                        BLEND_BODY_TEMP < 0 ? 1122643 :
+                                BLEND_BODY_TEMP > 0 ? 5376516 :
+                                        0;
+
+                int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
+                int threatOffset =
+                        !CLIENT_CONFIG.iconBobbing() ? 0
+                                : bobLevel == 2 ? ICON_BOB
+                                : bobLevel == 3 ? player.tickCount % 2
+                                : 0;
+
+                RenderSystem.defaultBlendFunc();
+
+                // Render old icon (if blending)
+                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
+                if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
+                {
+                    GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                    RenderSystem.enableBlend();
+                    RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
+                }
+                // Render new icon on top of old icon (if blending)
+                // Otherwise this is just the regular icon
+                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+
+                // Render Readout
+                Font font = mc.font;
+                int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                int scaledHeight = mc.getWindow().getGuiScaledHeight();
+
+                String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.bodyReadoutX();
+                float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.bodyReadoutY();
+
+                // Draw the outline
+                font.draw(poseStack, s, x + 1, y, colorBG);
+                font.draw(poseStack, s, x - 1, y, colorBG);
+                font.draw(poseStack, s, x, y + 1, colorBG);
+                font.draw(poseStack, s, x, y - 1, colorBG);
+
+                // Draw the readout
+                font.draw(poseStack, s, x, y, color);
+            }
+        });
+    }
 
     // Handle temperature blending and transitions
     @SubscribeEvent
