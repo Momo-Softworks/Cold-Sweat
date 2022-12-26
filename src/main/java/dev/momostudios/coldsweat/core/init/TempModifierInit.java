@@ -141,6 +141,7 @@ public class TempModifierInit
         event.register(new HearthTempModifier());
         event.register(new FoodTempModifier());
         event.register(new FreezingTempModifier());
+        event.register(new FireTempModifier());
 
         if (ModList.get().isLoaded("sereneseasons"))
         {

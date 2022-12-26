@@ -47,13 +47,16 @@ public class AddTempModifiers
         Player player = event.player;
 
         // Water / Rain
-        if (!player.level.isClientSide && player.tickCount % 5 == 0)
+        if (!player.level.isClientSide && player.tickCount % 5 == 0 && event.phase == TickEvent.Phase.START)
         {
             if (player.isInWaterRainOrBubble())
                 Temperature.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
 
             if (player.getTicksFrozen() > 0)
                 Temperature.replaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
+
+            if (player.isOnFire())
+                Temperature.replaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
         }
     }
 
