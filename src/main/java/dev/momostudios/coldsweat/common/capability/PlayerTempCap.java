@@ -147,8 +147,8 @@ public class PlayerTempCap implements ITemperatureCap
 
         // Sync the temperature values to the client
         if ((neverSynced
-        || ((Math.abs(syncedValues[0] - newCoreTemp) >= 1 && showBodyTemp))
-        || ((Math.abs(syncedValues[1] - newBaseTemp) >= 1 && showBodyTemp))
+        || (((int) syncedValues[0] != (int) newCoreTemp && showBodyTemp))
+        || (((int) syncedValues[1] != (int) newBaseTemp && showBodyTemp))
         || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
         || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
         || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
