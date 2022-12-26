@@ -2,10 +2,9 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
-import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -19,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Called when a block state is changed.<br>
  * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}.<br>
  * <br>
- * The event isn't called if the chunk does not have the {@link ChunkStatus#FULL} status to prevent chunkloading deadlocks.
+ * Updates must be delayed by 1 tick to prevent chunk deadlocking.
  */
 @Mixin(ServerLevel.class)
 public class MixinBlockUpdate
@@ -31,11 +30,14 @@ public class MixinBlockUpdate
     {
         if (oldState != newState)
         {
-            ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
-            if (chunk != null && chunk.getStatus() == ChunkStatus.FULL)
+            TaskScheduler.scheduleServer(() ->
             {
-                MinecraftForge.EVENT_BUS.post(new BlockChangedEvent(pos, oldState, newState, level));
-            }
+                ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+                if (chunk != null)
+                {
+                    MinecraftForge.EVENT_BUS.post(new BlockChangedEvent(pos, oldState, newState, level));
+                }
+            }, 1);
         }
     }
 }
