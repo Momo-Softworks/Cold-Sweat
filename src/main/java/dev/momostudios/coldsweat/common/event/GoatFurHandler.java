@@ -17,6 +17,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -88,7 +89,8 @@ public class GoatFurHandler
                 item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
 
             // Random chance to ram the player when sheared
-            if (!player.isCreative() && !goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
+            if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
+            && !goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
             {
                 // set ram cooldown ticks
                 goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
