@@ -10,12 +10,13 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler
 {
-    static volatile LinkedHashMap<Runnable, Integer> SERVER_SCHEDULE = new LinkedHashMap<>();
-    static volatile LinkedHashMap<Runnable, Integer> CLIENT_SCHEDULE = new LinkedHashMap<>();
+    static volatile ConcurrentHashMap<Runnable, Integer> SERVER_SCHEDULE = new ConcurrentHashMap<>();
+    static volatile ConcurrentHashMap<Runnable, Integer> CLIENT_SCHEDULE = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static synchronized void runScheduledTasks(TickEvent event)
