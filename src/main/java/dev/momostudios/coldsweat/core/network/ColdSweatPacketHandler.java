@@ -28,5 +28,6 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(7, HearthResetMessage.class, HearthResetMessage::encode, HearthResetMessage::decode, HearthResetMessage::handle);
         INSTANCE.registerMessage(8, DisableHearthParticlesMessage.class, DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode, DisableHearthParticlesMessage::handle);
         INSTANCE.registerMessage(9, ParticleBatchMessage.class, ParticleBatchMessage::encode, ParticleBatchMessage::decode, ParticleBatchMessage::handle);
+        INSTANCE.registerMessage(10, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
     }
 }

@@ -55,7 +55,7 @@ public class ItemInsulationCap implements IInsulatableCap
             int coldSign = CSMath.getSign(cold);
             int hotSign = CSMath.getSign(hot);
             // If both are positive or negative, then there is overlap (neutral)
-            double neutral = hotSign == coldSign ? CSMath.getLeastExtreme(cold, hot) : 0;
+            double neutral = hotSign == coldSign ? CSMath.smallest(cold, hot) : 0;
 
             neutralTotal += neutral;
             // Subtract neutral from cold/hot to get just the remainder

@@ -1,9 +1,6 @@
 package dev.momostudios.coldsweat.client.event;
 
-import dev.momostudios.coldsweat.client.gui.tooltip.ClientInsulationTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.InsulationTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,5 +15,6 @@ public class RegisterTooltips
     {
         MinecraftForgeClient.registerTooltipComponentFactory(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
         MinecraftForgeClient.registerTooltipComponentFactory(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulationValues(), tooltip.getStack()));
+        MinecraftForgeClient.registerTooltipComponentFactory(InsulatorTooltip.class, tooltip -> new ClientInsulatorTooltip(tooltip.getInsulationValues()));
     }
 }

@@ -4,6 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.InsulationTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.InsulatorTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -40,9 +43,8 @@ public class ItemTooltipInfo
             if (celsius) temp = CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
             temp += ClientSettingsConfig.getInstance().tempOffset() / 2.0;
 
-            event.getToolTip().add(1, new TextComponent("\u00a77" + new TranslatableComponent(
-                "item.cold_sweat.waterskin.filled").getString()
-                    + " (\u00a7" + color + (int) temp + " \u00b0" + tempUnits + "\u00a77)\u00a7r"));
+            event.getToolTip().add(1, new TextComponent("§7" + new TranslatableComponent(
+                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
         }
         else if (stack.getItem() instanceof ArmorItem && stack.getOrCreateTag().getBoolean("Insulated"))
         {
@@ -50,18 +52,10 @@ public class ItemTooltipInfo
         }
         else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
-            if (Screen.hasShiftDown())
+            if (!Screen.hasShiftDown())
             {
-                event.getToolTip().add(1, new TextComponent("                 "));
-
-                int fuelItems = ConfigSettings.LAMP_FUEL_ITEMS.get().size();
-                int blankLines = CSMath.ceil(fuelItems / 6d) * 16 / Minecraft.getInstance().font.lineHeight + 1;
-                for (int i = 0; i < blankLines; i++)
-                {
-                    event.getToolTip().add(2 + i, new TextComponent("                        "));
-                }
+                event.getToolTip().add(1, new TextComponent("         §9? §7'Shift'"));
             }
-            else event.getToolTip().add(1, new TextComponent("         \u00a79? \u00a77'Shift'"));
 
             if (event.getFlags().isAdvanced())
             {
@@ -74,8 +68,14 @@ public class ItemTooltipInfo
     public static void renderArmorTooltip(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
-        if (stack.getItem() instanceof ArmorItem && stack.getOrCreateTag().getBoolean("Insulated"))
+        // Add the armor insulation tooltip if the armor has insulation
+        if (stack.getItem() instanceof SoulspringLampItem)
         {
+            event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
+        }
+        else if (stack.getItem() instanceof ArmorItem && stack.getOrCreateTag().getBoolean("Insulated"))
+        {
+            // Create the list of insulation pairs from NBT
             List<Pair<Double, Double>> insulation = stack.getOrCreateTag().getList("Insulation", 10).stream()
             .map(nbt ->
             {
@@ -83,6 +83,11 @@ public class ItemTooltipInfo
                 return Pair.of(compound.getDouble("Cold"), compound.getDouble("Hot"));
             }).toList();
             event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack)));
+        }
+        // If the item is an insulator, add the tooltip
+        else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()) || ConfigSettings.INSULATING_ARMORS.get().containsKey(stack.getItem()))
+        {
+            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))));
         }
     }
 }
