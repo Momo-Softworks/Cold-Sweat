@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.GoatFurHandler;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -40,7 +41,10 @@ public class MixinGoatModel extends QuadrupedModel<Goat>
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/animal/goat/Goat;FFFFF)V", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
     private void setupAnim(Goat goat, float p_170588_, float p_170589_, float p_170590_, float p_170591_, float partialTick, CallbackInfo ci)
     {
-        body.getChild("body2").visible = !goat.getEntityData().get(GoatFurHandler.GOAT_SHEARED.get());
+        goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+        {
+            body.getChild("body2").visible = !cap.isSheared();
+        });
         // smooth out head ramming animation
         if (CSMath.isBetween(goat.getRammingXHeadRot(), 0f, 0.523f))
         {
