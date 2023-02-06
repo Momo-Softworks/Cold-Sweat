@@ -8,16 +8,17 @@ import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.util.compat.ModGetters;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
@@ -28,7 +29,12 @@ public class TempModifierInit
 {
     // Trigger registry events
     @SubscribeEvent
-    public static void registerTempModifiers(ServerStartedEvent event)
+    public static void registerServer(ServerStartedEvent event)
+    {
+        rebuildRegistries();
+    }
+
+    public static void rebuildRegistries()
     {
         TempModifierRegistry.flush();
         BlockTempRegistry.flush();
@@ -89,7 +95,7 @@ public class TempModifierInit
                         new BlockTemp(effectBlocks.toArray(new Block[0]))
                         {
                             @Override
-                            public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+                            public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                             {
                                 return weaken ? CSMath.blend(temp, 0, distance, 0.5, range) : temp;
                             }
@@ -143,7 +149,7 @@ public class TempModifierInit
         event.register(new FreezingTempModifier());
         event.register(new FireTempModifier());
 
-        if (ModList.get().isLoaded("sereneseasons"))
+        if (ModGetters.isSereneSeasonsLoaded())
         {
             try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
             catch (Exception ignored) {}
