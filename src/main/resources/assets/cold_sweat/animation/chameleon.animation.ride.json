@@ -1,0 +1,114 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.chameleon.ride": {
+			"loop": true,
+			"animation_length": 0.04167,
+			"bones": {
+				"Body": {
+					"rotation": {
+						"vector": [-20, 0, 0]
+					},
+					"position": {
+						"vector": [0, 10, 0]
+					}
+				},
+				"Head": {
+					"rotation": {
+						"vector": [20, 0, 0]
+					}
+				},
+				"RightFrontLeg": {
+					"rotation": {
+						"vector": [3.61644, -19.6835, -10.62758]
+					}
+				},
+				"RightFrontLeg2": {
+					"rotation": {
+						"vector": [0, 0, -90]
+					}
+				},
+				"RightFrontFoot1": {
+					"rotation": {
+						"vector": [-11.59948, 9.57658, -50.97496]
+					}
+				},
+				"LeftFrontLeg": {
+					"rotation": {
+						"vector": [-0.90956, 19.98015, 19.83978]
+					}
+				},
+				"LeftFrontLeg2": {
+					"rotation": {
+						"vector": [0, 0, 72.5]
+					}
+				},
+				"LeftFrontFoot1": {
+					"rotation": {
+						"vector": [0, 0, 82.5]
+					}
+				},
+				"LeftFrontFoot2": {
+					"rotation": {
+						"vector": [0, 0, 7.5]
+					}
+				},
+				"RightBackLeg": {
+					"rotation": {
+						"vector": [0, 0, 15]
+					}
+				},
+				"RightBackLeg2": {
+					"rotation": {
+						"vector": [0, 0, -105]
+					}
+				},
+				"RightBackFoot1": {
+					"rotation": {
+						"vector": [0, 0, -87.5]
+					}
+				},
+				"RightBackFoot2": {
+					"rotation": {
+						"vector": [0, 0, -47.5]
+					}
+				},
+				"LeftBackLeg": {
+					"rotation": {
+						"vector": [10.82777, -19.84302, -26.89942]
+					}
+				},
+				"LeftBackLeg2": {
+					"rotation": {
+						"vector": [0, 0, 130]
+					}
+				},
+				"LeftBackFoot1": {
+					"rotation": {
+						"vector": [0, 0, 50]
+					}
+				},
+				"LeftBackFoot2": {
+					"rotation": {
+						"vector": [0, 0, -10]
+					}
+				},
+				"Tail": {
+					"rotation": {
+						"vector": [-21.17283, -18.74724, 7.09597]
+					}
+				},
+				"Tail2": {
+					"rotation": {
+						"vector": [-23.78773, -18.42031, 7.92945]
+					}
+				},
+				"Tail3": {
+					"rotation": {
+						"vector": [-36.69146, -16.27014, 11.79198]
+					}
+				}
+			}
+		}
+	}
+}

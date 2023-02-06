@@ -42,6 +42,18 @@ public class AddTempModifiers
     }
 
     @SubscribeEvent
+    public static void onMobCreated(EntityJoinWorldEvent event)
+    {
+        if (event.getEntity() instanceof Chameleon chameleon)
+        {
+            Temperature.addModifier(chameleon, new BiomeTempModifier(9).tickRate(20), Temperature.Type.WORLD, false);
+            Temperature.addModifier(chameleon, new BlockTempModifier(4).tickRate(20), Temperature.Type.WORLD, false);
+            if (ModGetters.isSereneSeasonsLoaded())
+                Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor(ColdSweat.SERENESEASONS_ID + ":season").tickRate(60), Temperature.Type.WORLD, false);
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;

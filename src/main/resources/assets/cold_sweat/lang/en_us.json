@@ -14,6 +14,8 @@
   "item.cold_sweat.hoglin_hide":         "Hoglin Hide",
   "item.cold_sweat.waterskin.filled":    "Filled",
   "item.cold_sweat.insulated_minecart":  "Minecart with Insulation",
+  "item.cold_sweat.chameleon_molt":      "Chameleon Molt",
+  "item.cold_sweat.chameleon_spawn_egg": "Chameleon Spawn Egg",
 
 
   "entity.cold_sweat.chameleon": "Chameleon",
