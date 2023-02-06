@@ -38,76 +38,56 @@ public class ItemInsulationCap implements IInsulatableCap
         insulationItems.sort(Comparator.comparingDouble(stack -> ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), Pair.of(0d, 0d)).getFirst()));
         insulation.clear();
 
-        double coldTotal = 0;
-        double hotTotal = 0;
         double neutralTotal = 0;
 
         // Iterate through insulation items and tally up cold, hot, and neutral insulation
         for (ItemStack stack : insulationItems)
         {
             // Get the item's insulation
-            Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), Pair.of(0d, 0d));
+            Pair<Double, Double> insulVal = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), Pair.of(0d, 0d));
 
             // Break it up into cold and hot
-            double cold = insulation.getFirst();
-            double hot = insulation.getSecond();
+            double cold = insulVal.getFirst();
+            double hot = insulVal.getSecond();
             // Get whether each is positive or negative
             int coldSign = CSMath.getSign(cold);
             int hotSign = CSMath.getSign(hot);
             // If both are positive or negative, then there is overlap (neutral)
-            double neutral = hotSign == coldSign ? CSMath.smallest(cold, hot) : 0;
+            double neutral = hotSign == coldSign ? CSMath.least(cold, hot) : 0;
 
             neutralTotal += neutral;
             // Subtract neutral from cold/hot to get just the remainder
-            coldTotal += CSMath.reduce(cold, neutral);
-            hotTotal += CSMath.reduce(hot, neutral);
-        }
-        // Get whether the totals are positive or negative
-        int coldSign = CSMath.getSign(coldTotal);
-        int hotSign = CSMath.getSign(hotTotal);
-        int neutralSign = CSMath.getSign(neutralTotal);
+            double coldTotal = CSMath.shrink(cold, neutral);
+            double hotTotal = CSMath.shrink(hot, neutral);
 
-        // Tally up the cold slots
-        double coldAbs = Math.abs(coldTotal);
-        // Use floor to exclude the remainder; only whole values
-        for (int i = 0; i < CSMath.floor(coldAbs / 2); i++)
-        {
-            this.insulation.add((Pair.of(2d * coldSign, 0d)));
-        }
-        // Add the remainder as its own slot
-        double coldRemainder = coldAbs - CSMath.floor(coldAbs);
-        if (coldRemainder > 0)
-        {
-            this.insulation.add((Pair.of(coldRemainder * coldSign, 0d)));
-        }
+            // Get whether the totals are positive or negative
+            int neutralSign = CSMath.getSign(neutralTotal);
 
-        // Tally up the neutral slots
-        double neutralAbs = Math.abs(neutralTotal);
-        // Use floor to exclude the remainder; only whole values
-        for (int i = 0; i < CSMath.floor(neutralAbs); i++)
-        {
-            this.insulation.add((Pair.of(neutralSign * 1d, neutralSign * 1d)));
-        }
-        // Add the remainder as its own slot
-        double neutralRemainder = neutralAbs - CSMath.floor(neutralAbs);
-        if (neutralRemainder > 0)
-        {
-            this.insulation.add((Pair.of(neutralRemainder * neutralSign, neutralRemainder * neutralSign)));
-        }
+            // Tally up the cold slots
+            // Use floor to exclude the remainder; only whole values
+            for (int i = 0; i < CSMath.ceil(Math.abs(coldTotal) / 2); i++)
+            {
+                double coldVal = CSMath.least(coldSign * 2d, coldTotal - i*2);
+                double hotVal = CSMath.least(CSMath.shrink(2d, coldVal), hotTotal);
+                this.insulation.add((Pair.of(coldVal, hotVal)));
+                hotTotal -= hotVal;
+            }
 
-        // Tally up the cold slots
-        double hotAbs = Math.abs(hotTotal);
-        // Use floor to exclude the remainder; only whole values
-        for (int i = 0; i < CSMath.floor(hotAbs / 2); i++)
-        {
-            this.insulation.add((Pair.of(0d, 2d * hotSign)));
+            // Tally up the neutral slots
+            for (int i = 0; i < CSMath.ceil(Math.abs(neutralTotal)); i++)
+            {
+                double val = CSMath.least(neutralSign, neutralTotal - i);
+                this.insulation.add((Pair.of(val, val)));
+            }
+
+            // Tally up the hot slots
+            for (int i = 0; i < CSMath.ceil(Math.abs(hotTotal) / 2); i++)
+            {
+                double val = CSMath.least(hotSign * 2d, hotTotal - i*2);
+                this.insulation.add((Pair.of(0d, val)));
+            }
         }
-        // Add the remainder as its own slot
-        double hotRemainder = hotAbs - CSMath.floor(hotAbs);
-        if (hotRemainder > 0)
-        {
-            this.insulation.add((Pair.of(0d, hotRemainder * hotSign)));
-        }
+        insulation.sort(Comparator.comparingDouble(pair -> Math.abs(pair.getFirst() - 2)));
 
         saveCooldown = 0;
     }

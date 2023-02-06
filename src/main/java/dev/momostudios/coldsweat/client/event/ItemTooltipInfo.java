@@ -46,20 +46,11 @@ public class ItemTooltipInfo
             event.getToolTip().add(1, new TextComponent("§7" + new TranslatableComponent(
                 "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
         }
-        else if (stack.getItem() instanceof ArmorItem && stack.getOrCreateTag().getBoolean("Insulated"))
-        {
-            event.getToolTip().add(1, new TextComponent("                 "));
-        }
         else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
-            if (!Screen.hasShiftDown())
-            {
-                event.getToolTip().add(1, new TextComponent("         §9? §7'Shift'"));
-            }
-
             if (event.getFlags().isAdvanced())
             {
-                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 2), new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
+                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
             }
         }
     }

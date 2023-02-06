@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -31,12 +32,10 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SewingContainer extends AbstractContainerMenu
 {
@@ -184,6 +183,9 @@ public class SewingContainer extends AbstractContainerMenu
             {
                 super.onTake(player, stack);
                 SewingContainer.this.takeOutput(stack);
+
+                if (!SewingContainer.this.playerInventory.player.level.isClientSide)
+                    TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
             }
         });
 
@@ -237,66 +239,100 @@ public class SewingContainer extends AbstractContainerMenu
     private void takeOutput(ItemStack stack)
     {
         Player player = this.playerInventory.player;
-        ItemStack input1 = this.sewingInventory.getItem(0);
-        ItemStack input2 = this.sewingInventory.getItem(1);
+        ItemStack input1 = this.getItem(0);
+        ItemStack input2 = this.getItem(1);
 
-        // If insulation is being removed
-        if (this.getItem(1).getItem() instanceof ShearsItem)
+        input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
         {
-            // Damage shears
-            if (!player.isCreative())
-            {
-                input2.hurt(1, new Random(), null);
-            }
+            ItemStack armorItem;
 
-            input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+            // If insulation is being removed
+            if (this.getItem(1).getItem() instanceof ShearsItem)
             {
-                // Put the insulation item that was removed in the first input slot
-                this.setItem(0, cap.getInsulationItems().get(cap.getInsulationItems().size() - 1));
+                // Damage shears
+                if (!player.isCreative())
+                {
+                    input2.hurt(1, new Random(), null);
+                }
+
+                // Remove the last insulation item added
+                cap.removeInsulationItem(cap.getInsulationItems().size() - 1);
                 // Play shear sound
                 player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
-            });
-        }
-        // If insulation is being added
-        else
-        {
-            // Remove input items
-            this.growItem(0, -1);
-            this.growItem(1, -1);
-            player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
-        }
+
+                serializeInsulation(input1, cap);
+            }
+            // If insulation is being added
+            else
+            {
+                // Remove input items
+                this.growItem(0, -1);
+                this.growItem(1, -1);
+                player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+            }
+        });
 
         // Get equip sound for the armor item
         SoundEvent equipSound = stack.getItem().getEquipSound();
         if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
     }
 
-    private ItemStack testForRecipe()
+    static void serializeInsulation(ItemStack stack, IInsulatableCap cap)
+    {
+        stack.getOrCreateTag().putBoolean("Insulated", cap.getInsulationItems().size() > 0);
+
+        // Set NBT data that will be synced to the client (only used for tooltip)
+        ListTag list = new ListTag();
+        for (Pair<Double, Double> pair : cap.getInsulation())
+        {
+            CompoundTag tag = new CompoundTag();
+            tag.putDouble("Cold", pair.getFirst());
+            tag.putDouble("Hot", pair.getSecond());
+            list.add(tag);
+        }
+        stack.getOrCreateTag().put("Insulation", list);
+
+        // Remove "Insulated" tag if armor has no insulation left
+        if (cap.getInsulationItems().isEmpty())
+        {
+            stack.getOrCreateTag().remove("Insulated");
+            stack.getOrCreateTag().remove("Insulation");
+        }
+    }
+
+    private void testForRecipe()
     {
         ItemStack armorItem = this.getItem(0);
         ItemStack insulatorItem = this.getItem(1);
-        ItemStack result = ItemStack.EMPTY;
 
         // Is the first item armor, and the second item an insulator
         if (armorItem.getItem() instanceof ArmorItem)
         {
-            ItemStack processed = armorItem.copy();
-            IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap());
-            int filledSlots = insulCap.getInsulationItems().size();
-
             // Shears are used to remove insulation
-            if (insulatorItem.getItem() instanceof ShearsItem && filledSlots > 0)
+            if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                insulCap.removeInsulationItem(insulCap.getInsulationItems().size() - 1);
+                armorItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+                {
+                    if (cap.getInsulationItems().size() > 0)
+                    {
+                        this.setItem(2, cap.getInsulationItems().get(cap.getInsulationItems().size() - 1).copy());
+                    }
+                });
             }
             // Item is for insulation
             else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem())
             && (!(insulatorItem.getItem() instanceof ArmorItem)
             || LivingEntity.getEquipmentSlotForItem(armorItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
+                ItemStack processed = armorItem.copy();
+                IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap());
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);
+
+                // Cancel crafting if the insulation provided by the insulator is too much
+                if (insulCap.getInsulation().size() > ArmorInsulation.getInsulationSlots(armorItem))
+                    return;
 
                 // Transfer enchantments
                 Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(processed);
@@ -313,43 +349,12 @@ public class SewingContainer extends AbstractContainerMenu
                     }
                     return false;
                 });
+
+                serializeInsulation(processed, insulCap);
+
+                this.setItem(2, processed);
             }
-            else return ItemStack.EMPTY;
-
-            processed.getOrCreateTag().putBoolean("Insulated", true);
-
-            // Set NBT data that will be synced to the client (only used for tooltip)
-            ListTag list = new ListTag();
-            for (Pair<Double, Double> pair : insulCap.getInsulation())
-            {
-                CompoundTag tag = new CompoundTag();
-                tag.putDouble("Cold", pair.getFirst());
-                tag.putDouble("Hot", pair.getSecond());
-                list.add(tag);
-            }
-            processed.getOrCreateTag().put("Insulation", list);
-
-            LazyOptional<IInsulatableCap> optCap = processed.getCapability(ModCapabilities.ITEM_INSULATION);
-            if (optCap.isPresent())
-            {
-                IInsulatableCap cap = optCap.orElse(new ItemInsulationCap());
-
-                // Cancel crafting if the insulation provided by the insulator is too much
-                if (cap.getInsulation().size() > ArmorInsulation.getInsulationSlots(armorItem))
-                    return ItemStack.EMPTY;
-
-                // Remove "Insulated" tag if armor has no insulation left
-                if (cap.getInsulationItems().isEmpty())
-                {
-                    processed.getOrCreateTag().remove("Insulated");
-                    processed.getOrCreateTag().remove("Insulation");
-                }
-            }
-
-            this.setItem(2, processed);
-            result = processed;
         }
-        return result;
     }
 
     public SewingContainer(final int windowId, final Player playerInv, BlockPos pos)
