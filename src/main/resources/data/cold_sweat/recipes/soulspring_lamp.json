@@ -27,6 +27,9 @@
   },
   "result": {
     "item": "cold_sweat:soulspring_lamp",
-    "count": 1
+    "count": 1,
+    "nbt": {
+      "fuel": 64
+    }
   }
 }

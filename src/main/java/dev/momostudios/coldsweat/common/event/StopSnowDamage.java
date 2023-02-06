@@ -28,7 +28,7 @@ public class StopSnowDamage
     public static void playerFreezingTick(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (!player.level.isClientSide() && player.getTicksFrozen() > 0)
+        if (!player.level.isClientSide() && event.phase == TickEvent.Phase.END && player.getTicksFrozen() > 0)
         {
             TempModifier insulationModifier;
             double insulation = 0;

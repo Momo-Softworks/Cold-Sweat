@@ -55,12 +55,7 @@ public class GoatFurHandler
                 goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
-                Random rand = new Random();
-                ItemEntity item = goat.spawnAtLocation(new ItemStack(ModItems.GOAT_FUR), 1f);
-                if (item != null)
-                {
-                    item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
-                }
+                WorldHelper.spawnItemOnEntity(goat, new ItemStack(ModItems.GOAT_FUR));
 
                 // Random chance to ram the player when sheared
                 if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
@@ -125,7 +120,7 @@ public class GoatFurHandler
                     WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, SoundSource.NEUTRAL, 0.5f, 0.8f);
 
                     // Spawn particles
-                    WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 10, 0.5f, 0.5f, 0.5f, 0.05f);
+                    WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
                     // Set not sheared
                     cap.setSheared(false);
                     syncData(goat);
@@ -139,7 +134,7 @@ public class GoatFurHandler
         goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
         {
             if (!goat.level.isClientSide)
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> goat), new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId()));
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> goat), new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId(), goat.level.dimension().location().toString()));
         });
     }
 }

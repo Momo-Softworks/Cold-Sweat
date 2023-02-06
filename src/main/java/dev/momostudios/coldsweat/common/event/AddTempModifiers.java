@@ -1,14 +1,18 @@
 package dev.momostudios.coldsweat.common.event;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.BlockInit;
+import dev.momostudios.coldsweat.util.compat.ModGetters;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +23,6 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
@@ -32,11 +35,11 @@ public class AddTempModifiers
         {
             TaskScheduler.scheduleServer(() ->
             {
-                Temperature.addModifier(player, new BiomeTempModifier().tickRate(10),  Temperature.Type.WORLD, false);
-                if (ModList.get().isLoaded("sereneseasons"))
-                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(20), Temperature.Type.WORLD, false);
-                Temperature.addModifier(player, new DepthTempModifier().tickRate(10), Temperature.Type.WORLD, false);
-                Temperature.addModifier(player, new BlockTempModifier().tickRate(4),  Temperature.Type.WORLD, false);
+                Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10),  Temperature.Type.WORLD, false);
+                if (ModGetters.isSereneSeasonsLoaded())
+                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor(ColdSweat.SERENESEASONS_ID + ":season").tickRate(40), Temperature.Type.WORLD, false);
+                Temperature.addModifier(player, new DepthTempModifier().tickRate(15), Temperature.Type.WORLD, false);
+                Temperature.addModifier(player, new BlockTempModifier(7).tickRate(4),  Temperature.Type.WORLD, false);
             }, 10);
         }
     }
@@ -61,7 +64,7 @@ public class AddTempModifiers
         // Water / Rain
         if (!player.level.isClientSide && player.tickCount % 5 == 0 && event.phase == TickEvent.Phase.START)
         {
-            if (player.isInWaterRainOrBubble())
+            if (WorldHelper.isWet(player))
                 Temperature.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
 
             if (player.getTicksFrozen() > 0)
@@ -143,7 +146,7 @@ public class AddTempModifiers
             float foodTemp = ConfigSettings.VALID_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
             if (foodTemp != 0)
             {
-                Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(1), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
             }
         }
     }

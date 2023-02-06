@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.util.compat.ModGetters;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -27,6 +28,8 @@ public class WorldSettingsConfig
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps = null;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps = null;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps = null;
+
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> chameleonBiomes;
 
     static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -95,7 +98,7 @@ public class WorldSettingsConfig
         ));
 
         /* Biomes o' Plenty biomes */
-        if (ModList.get().isLoaded("biomesoplenty"))
+        if (ModGetters.isBiomesOPlentyLoaded())
         {
             biomeBuilder.addAll(List.of(
                 List.of("biomesoplenty:bayou", 67, 78, "F"),
@@ -172,8 +175,21 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
+        BUILDER.push("Mob Spawning");
+        chameleonBiomes = BUILDER
+                .comment("Defines the biomes that Chameleons can spawn in")
+                .defineList("Chameleon Spawn Biomes", List.of(
+                        "minecraft:jungle",
+                        "minecraft:sparse_jungle",
+                        "minecraft:bamboo_jungle",
+                        "biomesoplenty:rainforest",
+                        "biomesoplenty:rocky_rainforest",
+                        "biomesoplenty:fungal_jungle"
+                        ), it -> it instanceof String);
+        BUILDER.pop();
+
         /* Serene Seasons config */
-        if (ModList.get().isLoaded("sereneseasons"))
+        if (ModList.get().isLoaded(ColdSweat.SERENESEASONS_ID))
         {
             BUILDER.comment("Format: [season-start, season-mid, season-end]",
                             "Applied as an offset to the world's temperature")
@@ -277,5 +293,9 @@ public class WorldSettingsConfig
     }
     public void setDimensionTemperatures(List<? extends List<?>> list) {
         dimensionTemps.set(list);
+    }
+
+    public List<? extends String> chameleonBiomes() {
+        return chameleonBiomes.get();
     }
 }

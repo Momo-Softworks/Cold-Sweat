@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.client.gui.config.AbstractConfigPage;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -11,8 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Supplier;
 
@@ -20,8 +21,8 @@ public class ConfigPageOne extends AbstractConfigPage
 {
     Screen parentScreen;
     ConfigSettings configSettings;
-    private final String ON;
-    private final String OFF;
+    private final String on;
+    private final String off;
 
     public ConfigPageOne(Screen parentScreen, ConfigSettings configSettings)
     {
@@ -32,8 +33,8 @@ public class ConfigPageOne extends AbstractConfigPage
         }
         this.parentScreen = parentScreen;
         this.configSettings = configSettings;
-        ON = new TranslatableComponent("options.on").getString();
-        OFF = new TranslatableComponent("options.off").getString();
+        on = new TranslatableComponent("options.on").getString();
+        off = new TranslatableComponent("options.off").getString();
     }
 
     @Override
@@ -70,14 +71,12 @@ public class ConfigPageOne extends AbstractConfigPage
                 (clientConfig.celsius() ? new TranslatableComponent("cold_sweat.config.celsius.name").getString() :
                 new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString()), button ->
         {
+            Player player = Minecraft.getInstance().player;
+
             clientConfig.setCelsius(!clientConfig.celsius());
             // Update the world temp. gauge when the button is pressed
-            Overlays.WORLD_TEMP = CSMath.convertUnits(Overlays.PLAYER_CAP.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, properUnits.get(), true);
-
-            // Update the button text to reflect the current setting
-            button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.units.name").getString() + ": " +
-                    (clientConfig.celsius() ? new TranslatableComponent("cold_sweat.config.celsius.name").getString() :
-                            new TranslatableComponent("cold_sweat.config.fahrenheit.name").getString())));
+            if (player != null)
+                Overlays.WORLD_TEMP = CSMath.convertUnits(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits.get(), true);
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
@@ -124,22 +123,22 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Misc. Temp Effects
         this.addButton("ice_resistance", Side.RIGHT,
-                () -> new TranslatableComponent("cold_sweat.config.ice_resistance.name").getString() + ": " + (configSettings.iceRes ? ON : OFF),
+                () -> new TranslatableComponent("cold_sweat.config.ice_resistance.name").getString() + ": " + (configSettings.iceRes ? on : off),
                 button -> configSettings.iceRes = !configSettings.iceRes,
                 true, true, false, new TranslatableComponent("cold_sweat.config.ice_resistance.desc").getString());
 
         this.addButton("fire_resistance", Side.RIGHT,
-                () -> new TranslatableComponent("cold_sweat.config.fire_resistance.name").getString() + ": " + (configSettings.fireRes ? ON : OFF),
+                () -> new TranslatableComponent("cold_sweat.config.fire_resistance.name").getString() + ": " + (configSettings.fireRes ? on : off),
                 button -> configSettings.fireRes = !configSettings.fireRes,
                 true, true, false, new TranslatableComponent("cold_sweat.config.fire_resistance.desc").getString());
 
         this.addButton("require_thermometer", Side.RIGHT,
-                () -> new TranslatableComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (configSettings.requireThermometer ? ON : OFF),
+                () -> new TranslatableComponent("cold_sweat.config.require_thermometer.name").getString() + ": " + (configSettings.requireThermometer ? on : off),
                 button -> configSettings.requireThermometer = !configSettings.requireThermometer,
                 true, true, false, new TranslatableComponent("cold_sweat.config.require_thermometer.desc").getString());
 
         this.addButton("damage_scaling", Side.RIGHT,
-                () -> new TranslatableComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (configSettings.damageScaling ? ON : OFF),
+                () -> new TranslatableComponent("cold_sweat.config.damage_scaling.name").getString() + ": " + (configSettings.damageScaling ? on : off),
                 button -> configSettings.damageScaling = !configSettings.damageScaling,
                 true, true, false, new TranslatableComponent("cold_sweat.config.damage_scaling.desc").getString());
     }

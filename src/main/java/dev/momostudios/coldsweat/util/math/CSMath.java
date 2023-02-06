@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.util.math;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
@@ -64,6 +65,45 @@ public class CSMath
         return input * (float) (180 / Math.PI);
     }
 
+    public static Vector3d getEulerAngles(Quaternion quat)
+    {
+        double ysqr = quat.i() * quat.i();
+
+        // roll (x-axis rotation)
+        double t0 = +2.0 * (quat.r() * quat.i() + quat.j() * quat.k());
+        double t1 = +1.0 - 2.0 * (ysqr + quat.j() * quat.j());
+        double roll = Math.atan2(t0, t1);
+
+        // pitch (y-axis rotation)
+        double t2 = +2.0 * (quat.r() * quat.j() - quat.k() * quat.i());
+        t2 = Math.min(t2, 1.0);
+        t2 = Math.max(t2, -1.0);
+        double pitch = Math.asin(t2);
+
+        // yaw (z-axis rotation)
+        double t3 = +2.0 * (quat.r() * quat.k() + quat.i() * quat.j());
+        double t4 = +1.0 - 2.0 * (ysqr + quat.k() * quat.k());
+        double yaw = Math.atan2(t3, t4);
+
+        return new Vector3d(roll, pitch, yaw);
+    }
+
+    public static Quaternion getQuaternion(double x, double y, double z)
+    {
+        double cy = Math.cos(z * 0.5);
+        double sy = Math.sin(z * 0.5);
+        double cp = Math.cos(y * 0.5);
+        double sp = Math.sin(y * 0.5);
+        double cr = Math.cos(x * 0.5);
+        double sr = Math.sin(x * 0.5);
+
+        return new Quaternion(
+            (float) (sr * cp * cy - cr * sp * sy),
+            (float) (cr * sp * cy + sr * cp * sy),
+            (float) (cr * cp * sy - sr * sp * cy),
+            (float) (cr * cp * cy + sr * sp * sy));
+    }
+
     public static double clamp(double value, double min, double max) {
         return value < min ? min : value > max ? max : value;
     }
@@ -78,12 +118,54 @@ public class CSMath
 
     public static int ceil(double value)
     {
-        return (int) (value + (1 - (value % 1)));
+        if (value >= 0)
+        {
+            double remainder = value % 1;
+            return (int) (remainder != 0 ? value + 1 - (value % 1) : value);
+        }
+        else
+        {
+            int sign = getSign(value);
+            double abs = Math.abs(value);
+            double remainder = abs % 1;
+            return (int) (remainder != 0 ? abs + 1 - (abs % 1) : abs) * sign;
+        }
     }
 
     public static int floor(double value)
     {
-        return (int) (value - (value % 1));
+        if (value >= 0)
+        {
+            double remainder = value % 1;
+            return (int) (remainder != 0 ? value - (value % 1) : value);
+        }
+        else
+        {
+            int sign = getSign(value);
+            double abs = Math.abs(value);
+            double remainder = abs % 1;
+            return (int) (remainder != 0 ? abs - (abs % 1) : abs) * sign;
+        }
+    }
+
+    public static double max(double... values)
+    {
+        double max = values[0];
+        for (double value : values)
+        {
+            if (value > max) max = value;
+        }
+        return max;
+    }
+
+    public static double min(double... values)
+    {
+        double min = values[0];
+        for (double value : values)
+        {
+            if (value < min) min = value;
+        }
+        return min;
     }
 
     /**
@@ -125,6 +207,20 @@ public class CSMath
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendTo - blendFrom) + blendFrom;
+    }
+
+    public static double blendLog(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
+    {
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return (blendTo - blendFrom) / Math.sqrt(rangeMax - rangeMin) * Math.sqrt(factor - rangeMin) + blendFrom;
+    }
+
+    public static float blendLog(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    {
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return (blendTo - blendFrom) / (float) Math.sqrt(rangeMax - rangeMin) * (float) Math.sqrt(factor - rangeMin) + blendFrom;
     }
 
     public static double getDistance(Entity entity, Vec3 pos)
@@ -283,20 +379,66 @@ public class CSMath
     /**
      * @return The value that is farther from 0.
      */
-    public static double getMostExtreme(double value1, double value2)
+    public static double most(double... values)
     {
-        return Math.abs(value1) > Math.abs(value2) ? value1 : value2;
+        double mostExtreme = 0;
+        for (double value : values)
+        {
+            if (Math.abs(value) > Math.abs(mostExtreme))
+            {
+                mostExtreme = value;
+            }
+        }
+        return mostExtreme;
     }
 
     /**
      * @return The value that is closer to 0.
      */
-    public static double getLeastExtreme(double value1, double value2)
+    public static double least(double... values)
     {
-        return Math.abs(value1) < Math.abs(value2) ? value1 : value2;
+        double smallest = values[0];
+        for (double value : values)
+        {
+            if (Math.abs(value) < Math.abs(smallest))
+            {
+                smallest = value;
+            }
+        }
+        return smallest;
     }
 
-    public static double reduce(double value, double amount)
+    public static boolean asExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) == Math.abs(value2);
+    }
+
+    public static boolean moreExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) > Math.abs(value2);
+    }
+
+    public static boolean lessExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) < Math.abs(value2);
+    }
+
+    public static boolean asOrMoreExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) >= Math.abs(value2);
+    }
+
+    public static boolean asOrLessExtreme(double value1, double value2)
+    {
+        return Math.abs(value1) <= Math.abs(value2);
+    }
+
+    public static double shrink(double value, double amount)
+    {
+        return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
+    }
+
+    public static int shrink(int value, int amount)
     {
         return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
     }
@@ -341,5 +483,19 @@ public class CSMath
                     shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1)));
         }
         return shapeHolder[1];
+    }
+
+    public static int packedLightFromRGBA(int r, int g, int b, int a)
+    {
+        return (r << 20) | (g << 4) | (b >> 12) | (a << 24);
+    }
+
+    public static int addLight(int packedLight, int r, int g, int b, int a)
+    {
+        return packedLightFromRGBA(
+                Math.min(15, (packedLight >> 20) + r),
+                Math.min(15, (packedLight >> 4 & 0xF) + g),
+                Math.min(15, (packedLight & 0xF) + b),
+                Math.min(15, (packedLight >> 24) + a));
     }
 }

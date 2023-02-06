@@ -18,8 +18,8 @@ public class ColdSweatPacketHandler
 
     public static void init()
     {
-        INSTANCE.registerMessage(0, PlayerTempSyncMessage.class, PlayerTempSyncMessage::encode, PlayerTempSyncMessage::decode, PlayerTempSyncMessage::handle);
-        INSTANCE.registerMessage(1, PlayerModifiersSyncMessage.class, PlayerModifiersSyncMessage::encode, PlayerModifiersSyncMessage::decode, PlayerModifiersSyncMessage::handle);
+        INSTANCE.registerMessage(0, TemperatureSyncMessage.class, TemperatureSyncMessage::encode, TemperatureSyncMessage::decode, TemperatureSyncMessage::handle);
+        INSTANCE.registerMessage(1, TempModifiersSyncMessage.class, TempModifiersSyncMessage::encode, TempModifiersSyncMessage::decode, TempModifiersSyncMessage::handle);
         INSTANCE.registerMessage(2, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
         INSTANCE.registerMessage(3, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
         INSTANCE.registerMessage(4, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
@@ -29,5 +29,6 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(8, DisableHearthParticlesMessage.class, DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode, DisableHearthParticlesMessage::handle);
         INSTANCE.registerMessage(9, ParticleBatchMessage.class, ParticleBatchMessage::encode, ParticleBatchMessage::decode, ParticleBatchMessage::handle);
         INSTANCE.registerMessage(10, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
+        INSTANCE.registerMessage(11, ChameleonEatMessage.class, ChameleonEatMessage::encode, ChameleonEatMessage::decode, ChameleonEatMessage::handle);
     }
 }

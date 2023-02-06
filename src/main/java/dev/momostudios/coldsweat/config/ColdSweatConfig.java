@@ -45,6 +45,13 @@ public class ColdSweatConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
 
+    private static final ForgeConfigSpec.BooleanValue cameraSway;
+    private static final ForgeConfigSpec.BooleanValue heatstrokeFog;
+    private static final ForgeConfigSpec.BooleanValue freezingHearts;
+    private static final ForgeConfigSpec.BooleanValue coldKnockback;
+    private static final ForgeConfigSpec.BooleanValue coldMining;
+    private static final ForgeConfigSpec.BooleanValue coldMovement;
+
     static 
     {
         showConfigButton = BUILDER
@@ -100,6 +107,34 @@ public class ColdSweatConfig
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
         BUILDER.pop();
+
+
+        BUILDER.push("Temperature Effects");
+            BUILDER.push("Hot");
+            cameraSway = BUILDER
+                .comment("When set to true, the camera will sway randomly when the player is too hot")
+                .define("Camera Sway", true);
+            heatstrokeFog = BUILDER
+                .comment("When set to true, the player's view distance will decrease when they are too hot")
+                .define("Heatstroke Fog", true);
+            BUILDER.pop();
+
+            BUILDER.push("Cold");
+            freezingHearts = BUILDER
+                .comment("When set to true, some of the player's hearts will freeze when they are too cold, preventing regeneration")
+                .define("Freezing Hearts", true);
+            coldKnockback = BUILDER
+                .comment("When set to true, the player's attack knockback will be reduced when they are too cold")
+                .define("Cold Knockback Reduction", true);
+            coldMovement = BUILDER
+                .comment("When set to true, the player's movement speed will be reduced when they are too cold")
+                .define("Cold Slowness", true);
+            coldMining = BUILDER
+                .comment("When set to true, the player's mining speed will be reduced when they are too cold")
+                .define("Cold Mining Fatigue", true);
+            BUILDER.pop();
+        BUILDER.pop();
+
 
         BUILDER.push("Grace Period Details");
                 gracePeriodLength = BUILDER
@@ -258,6 +293,36 @@ public class ColdSweatConfig
         return checkSleep.get();
     }
 
+    public boolean cameraSway()
+    {
+        return cameraSway.get();
+    }
+
+    public boolean heatstrokeFog()
+    {
+        return heatstrokeFog.get();
+    }
+
+    public boolean freezingHearts()
+    {
+        return freezingHearts.get();
+    }
+
+    public boolean coldKnockback()
+    {
+        return coldKnockback.get();
+    }
+
+    public boolean coldMining()
+    {
+        return coldMining.get();
+    }
+
+    public boolean coldMovement()
+    {
+        return coldMovement.get();
+    }
+
     /*
      * Safe set methods for config values
      */
@@ -301,6 +366,36 @@ public class ColdSweatConfig
     public void setGracePeriodEnabled(boolean enabled)
     {
         gracePeriodEnabled.set(enabled);
+    }
+
+    public void setCameraSway(boolean sway)
+    {
+        cameraSway.set(sway);
+    }
+
+    public void setHeatstrokeFog(boolean fog)
+    {
+        heatstrokeFog.set(fog);
+    }
+
+    public void setFreezingHearts(boolean hearts)
+    {
+        freezingHearts.set(hearts);
+    }
+
+    public void setColdKnockback(boolean knockback)
+    {
+        coldKnockback.set(knockback);
+    }
+
+    public void setColdMining(boolean mining)
+    {
+        coldMining.set(mining);
+    }
+
+    public void setColdMovement(boolean movement)
+    {
+        coldMovement.set(movement);
     }
 
     public void save() {

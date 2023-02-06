@@ -2,13 +2,11 @@ package dev.momostudios.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -26,8 +24,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
-    public static ITemperatureCap PLAYER_CAP = new PlayerTempCap();
-
     // Stuff for world temperature
     public static double WORLD_TEMP = 0;
     static boolean SHOW_WORLD_TEMP = false;
@@ -71,7 +67,7 @@ public class Overlays
                 // Set text color
                 int color = switch (severity)
                         {
-                            case  2,3  -> 16297781;
+                            case  2, 3 -> 16297781;
                             case  4    -> 16728089;
                             case -2,-3 -> 8443135;
                             case -4    -> 4236031;
@@ -188,82 +184,71 @@ public class Overlays
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().cameraEntity instanceof Player player)
+        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null)
         {
-            // Ensure player temp capability is stored
-            if (PLAYER_CAP == null || player.tickCount % 40 == 0)
+            Player player = Minecraft.getInstance().player;
+
+
+            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(icap ->
             {
-                PLAYER_CAP = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).orElse(new PlayerTempCap());
-            }
+                if (!(icap instanceof PlayerTempCap cap)) return;
 
+                SHOW_WORLD_TEMP = cap.shouldShowWorldTemp();
+                SHOW_BODY_TEMP = cap.shouldShowBodyTemp();
+                /* World Temp */
 
-            /* World Temp */
-
-            if (SHOW_WORLD_TEMP)
-            {
-                boolean celsius = CLIENT_CONFIG.celsius();
-
-                // Get temperature in actual degrees
-                double worldTemp = PLAYER_CAP.getTemp(Temperature.Type.WORLD);
-                double realTemp = CSMath.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-
-                // Calculate the blended world temp for this tick
-                double diff = realTemp - WORLD_TEMP;
-                PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 2d;
-
-                // Update max/min offset
-                MAX_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MAX);
-                MIN_OFFSET = PLAYER_CAP.getTemp(Temperature.Type.MIN);
-            }
-
-
-            /* Body Temp */
-
-            // Blend body temp (per tick)
-            PREV_BODY_TEMP = BODY_TEMP;
-            double currentTemp = PLAYER_CAP.getTemp(Temperature.Type.BODY);
-            BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (PLAYER_CAP.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
-
-            // Handle effects for the icon (bobbing, stage, transition)
-            if (SHOW_BODY_TEMP)
-            {
-                // Get icon bob
-                ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
-
-                // Get the severity of the player's body temperature
-                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
-
-                // Get the icon to be displayed
-                int neededIcon = CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
-
-                // Start transition
-                if (BODY_ICON != neededIcon)
+                if (SHOW_WORLD_TEMP)
                 {
-                    BODY_ICON = neededIcon;
-                    BODY_TRANSITION_PROGRESS = 0;
+                    boolean celsius = CLIENT_CONFIG.celsius();
+
+                    // Get temperature in actual degrees
+                    double worldTemp = cap.getTemp(Temperature.Type.WORLD);
+                    double realTemp = CSMath.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+
+                    // Calculate the blended world temp for this tick
+                    double diff = realTemp - WORLD_TEMP;
+                    PREV_WORLD_TEMP = WORLD_TEMP;
+                    WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
+
+                    // Update max/min offset
+                    MAX_OFFSET = cap.getTemp(Temperature.Type.MAX);
+                    MIN_OFFSET = cap.getTemp(Temperature.Type.MIN);
                 }
 
-                // Tick the transition progress
-                if (PREV_BODY_ICON != BODY_ICON
-                && BODY_TRANSITION_PROGRESS++ >= BODY_BLEND_TIME)
-                {
-                    PREV_BODY_ICON = BODY_ICON;
-                }
-            }
-        }
-    }
 
-    @SubscribeEvent
-    public static void updateDisplayCondition(TickEvent.PlayerTickEvent event)
-    {
-        if (event.phase == TickEvent.Phase.START)
-        {
-            Player player = event.player;
-            SHOW_WORLD_TEMP = !ConfigSettings.getInstance().requireThermometer
-                            || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
-                            || player.getOffhandItem().getItem() == ModItems.THERMOMETER;
-            SHOW_BODY_TEMP = !player.isCreative() && !player.isSpectator();
+                /* Body Temp */
+
+                // Blend body temp (per tick)
+                PREV_BODY_TEMP = BODY_TEMP;
+                double currentTemp = cap.getTemp(Temperature.Type.BODY);
+                BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
+
+                // Handle effects for the icon (bobbing, stage, transition)
+                if (SHOW_BODY_TEMP)
+                {
+                    // Get icon bob
+                    ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
+
+                    // Get the severity of the player's body temperature
+                    BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
+
+                    // Get the icon to be displayed
+                    int neededIcon = CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
+
+                    // Start transition
+                    if (BODY_ICON != neededIcon)
+                    {
+                        BODY_ICON = neededIcon;
+                        BODY_TRANSITION_PROGRESS = 0;
+                    }
+
+                    // Tick the transition progress
+                    if (PREV_BODY_ICON != BODY_ICON && BODY_TRANSITION_PROGRESS++ >= BODY_BLEND_TIME)
+                    {
+                        PREV_BODY_ICON = BODY_ICON;
+                    }
+                }
+            });
         }
     }
 

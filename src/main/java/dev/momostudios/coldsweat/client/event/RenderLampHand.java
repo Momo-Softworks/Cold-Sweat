@@ -1,8 +1,10 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import dev.momostudios.coldsweat.util.entity.PlayerHelper;
+import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -36,12 +38,13 @@ public class RenderLampHand
     @SubscribeEvent
     public static void onHandRender(RenderHandEvent event)
     {
-
         if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP)
         {
             LocalPlayer player = Minecraft.getInstance().player;
+            if (player == null) return;
+
             PoseStack ms = event.getPoseStack();
-            boolean isRightHand = PlayerHelper.getArmFromHand(event.getHand(), player) == HumanoidArm.RIGHT;
+            boolean isRightHand = EntityHelper.getArmFromHand(event.getHand(), player) == HumanoidArm.RIGHT;
 
             event.setCanceled(true);
 
@@ -70,14 +73,20 @@ public class RenderLampHand
 
             ms.scale(0.75f, 0.8f, 0.72f);
 
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             PlayerRenderer handRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+            VertexConsumer buffer = event.getMultiBufferSource().getBuffer(handRenderer.getModel().renderType(handRenderer.getTextureLocation(player)));
             if (isRightHand)
             {
                 ms.mulPose(Vector3f.ZP.rotationDegrees(98));
                 ms.mulPose(Vector3f.YP.rotationDegrees(170.0F));
                 ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
                 ms.translate(event.getEquipProgress() * 1, -event.getEquipProgress() * 0.2, -event.getEquipProgress() * 0.2);
+
+                if (player.isInvisible()) buffer.color(1, 1, 1, 0.25f);
                 handRenderer.renderRightHand(ms, event.getMultiBufferSource(), event.getPackedLight(), player);
+                RenderSystem.setShaderColor(1, 1, 1, 1);
             }
             else
             {
@@ -85,8 +94,12 @@ public class RenderLampHand
                 ms.mulPose(Vector3f.YP.rotationDegrees(190.0F));
                 ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
                 ms.translate(-event.getEquipProgress() * 1, -event.getEquipProgress() * 0.2, -event.getEquipProgress() * 0.2);
+
+                if (player.isInvisible()) buffer.color(1, 1, 1, 0.25f);
                 handRenderer.renderLeftHand(ms, event.getMultiBufferSource(), event.getPackedLight(), player);
+                RenderSystem.setShaderColor(1, 1, 1, 1);
             }
+            RenderSystem.disableBlend();
             ms.popPose();
 
             ms.pushPose();

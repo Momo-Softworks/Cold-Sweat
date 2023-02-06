@@ -4,6 +4,7 @@
   "package": "dev.momostudios.coldsweat.mixin",
   "client": [
     "MixinGoatModel",
+    "MixinHeartRender",
     "MixinHumanoidModel",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"

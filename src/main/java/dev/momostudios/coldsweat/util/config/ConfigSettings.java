@@ -5,9 +5,9 @@ import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
+import dev.momostudios.coldsweat.util.compat.ModGetters;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fml.ModList;
 import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
@@ -127,7 +127,7 @@ public class ConfigSettings
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         });
 
-        if (ModList.get().isLoaded("sereneseasons"))
+        if (ModGetters.isSereneSeasonsLoaded())
         {
             SUMMER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().summerTemps());
             AUTUMN_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().autumnTemps());

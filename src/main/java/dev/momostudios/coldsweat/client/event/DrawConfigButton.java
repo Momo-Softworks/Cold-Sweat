@@ -34,8 +34,7 @@ public class DrawConfigButton
                     }
                     else
                     {
-                        Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen,
-                                new ConfigSettings(ColdSweatConfig.getInstance())));
+                        Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen, ConfigSettings.getInstance()));
                     }
                 })
             );

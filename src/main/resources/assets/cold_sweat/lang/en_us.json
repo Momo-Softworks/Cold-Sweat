@@ -61,6 +61,7 @@
   "cold_sweat.config.section.hud_settings":         "HUD Settings",
   "cold_sweat.config.section.other":                "Other Temperature Settings",
   "cold_sweat.config.section.temperature_details":  "Temperature Management",
+  "cold_sweat.config.section.temperature_effects":  "Temperature Effects",
 
   "cold_sweat.config.difficulty.super_easy.name":   "Super Easy",
   "cold_sweat.config.difficulty.easy.name":         "Easy",
@@ -103,6 +104,10 @@
   "cold_sweat.config.temperature_rate.name":        "Rate Modifier",
   "cold_sweat.config.units.name":                   "Units",
   "cold_sweat.config.world_temp_location.name":     "*World Temp. Offset",
+
+  "cold_sweat.config.camera_sway.name":             "Camera Sway",
+  "cold_sweat.config.camera_sway.description":      "Sways the camera randomly when the player is too hot",
+
 
   "cold_sweat.config.custom_hotbar.desc":           "Whether or not to use Cold Sweat's custom hotbar layout (disable this if it is clashing with other mods).",
   "cold_sweat.config.damage_scaling.desc":          "Whether or not Minecraft's difficulty affects the intensity of temperature-related damage.",

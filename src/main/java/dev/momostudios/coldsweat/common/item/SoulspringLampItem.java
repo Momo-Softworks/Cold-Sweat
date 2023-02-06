@@ -53,44 +53,44 @@ public class SoulspringLampItem extends Item
             double temp;
 
             // Is selected
-            if ((isSelected || player.getOffhandItem() == stack))
+            TempModifier lampMod;
+            if ((isSelected || player.getOffhandItem() == stack)
+            // Is in valid dimension
+            && ConfigSettings.LAMP_DIMENSIONS.get().contains(worldIn.dimension().location().toString())
+            // Is world temp more than max
+            && (temp = (lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)) != null
+                ? lampMod.getLastInput()
+                : Temperature.get(player, Temperature.Type.WORLD)) > max && getFuel(stack) > 0)
             {
-                TempModifier lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class);
-                // Is world temp more than max
-                if (ConfigSettings.LAMP_DIMENSIONS.get().contains(worldIn.dimension().location().toString())
-                // Is in valid dimension
-                && (temp = lampMod != null ? lampMod.getLastInput() : Temperature.get(player, Temperature.Type.WORLD)) > max && getFuel(stack) > 0)
+                if (player.tickCount % 5 == 0)
                 {
-                    if (player.tickCount % 5 == 0)
+                    // Drain fuel
+                    if (!(player.isCreative() || player.isSpectator()))
+                        addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
+
+                    // Affect nearby players
+                    double rad = 3.5d;
+                    AABB bb = new AABB(player.getX() - rad, player.getY() - rad, player.getZ() - rad,
+                                       player.getX() + rad, player.getY() + rad, player.getZ() + rad);
+
+                    for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
                     {
-                        // Drain fuel
-                        if (!(player.isCreative() || player.isSpectator()))
-                            addFuel(stack, -0.01d * CSMath.clamp(temp - max, 1d, 3d));
-
-                        // Affect nearby players
-                        double rad = 3.5d;
-                        AABB bb = new AABB(player.getX() - rad, player.getY() - rad, player.getZ() - rad,
-                                           player.getX() + rad, player.getY() + rad, player.getZ() + rad);
-
-                        for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
-                        {
-                            // Extend modifier time if it is present
-                            SoulLampTempModifier modifier = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
-                            if (modifier != null)
-                                modifier.expires(modifier.getTicksExisted() + 5);
-                            else
-                                Temperature.replaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
-                        }
+                        // Extend modifier time if it is present
+                        SoulLampTempModifier modifier = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                        if (modifier != null)
+                            modifier.expires(modifier.getTicksExisted() + 5);
+                        else
+                            Temperature.replaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
                     }
+                }
 
-                    // If the conditions are met, turn on the lamp
-                    if (!stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
-                    {
-                        stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                        stack.getOrCreateTag().putBoolean("isOn", true);
+                // If the conditions are met, turn on the lamp
+                if (!stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
+                {
+                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
+                    stack.getOrCreateTag().putBoolean("isOn", true);
 
-                        WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, player, SoundSource.PLAYERS, 1.5f, (float) Math.random() / 5f + 0.9f);
-                    }
+                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, player, SoundSource.PLAYERS, 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
             }
             // If the conditions are not met, turn off the lamp
@@ -198,6 +198,6 @@ public class SoulspringLampItem extends Item
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack stack)
     {
-        return Optional.of(new SoulspringTooltip(getFuel(stack)));
+        return Optional.empty();//Optional.of(new SoulspringTooltip(getFuel(stack)));
     }
 }
