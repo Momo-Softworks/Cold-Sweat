@@ -35,24 +35,34 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     @Override
     public int getHeight()
     {
-        return 0;
+        return Screen.hasShiftDown() ? CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) * 32 + 16 : 14;
     }
 
     @Override
     public int getWidth(Font font)
     {
-        return 0;
+        return Screen.hasShiftDown() ? Math.min(6, ConfigSettings.LAMP_FUEL_ITEMS.get().size()) * 16 : 32;
     }
 
+    @Override
+    public void renderText(Font font, int x, int y, Matrix4f matrix, MultiBufferSource.BufferSource buffer)
+    {
+        if (!Screen.hasShiftDown())
+        {
+            font.drawInBatch("§9? §8'Shift'", x + 34, y + 1, 0, false, matrix, buffer, false, 0, 15728880);
+        }
+    }
+
+    @Override
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
         List<Item> fuelItems = ConfigSettings.LAMP_FUEL_ITEMS.get();
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-        GuiComponent.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
-        GuiComponent.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y + 1, 0, 0, 0, 30, 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y + 1, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
         if (Screen.hasShiftDown())
         {
-            GuiComponent.blit(poseStack, x + 34, y, 0, 0, 24, 16, 10, 30, 34);
+            GuiComponent.blit(poseStack, x + 34, y + 1, 0, 0, 24, 16, 10, 30, 34);
 
             for (int i = 0; i < fuelItems.size(); i++)
             {
