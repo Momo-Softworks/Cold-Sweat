@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "cold_sweat:hearth_bottom",
+    "cold_sweat:hearth_top",
+    "cold_sweat:boiler"
+  ]
+}

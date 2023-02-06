@@ -54,7 +54,8 @@ public class BoilerBlock extends Block implements EntityBlock
                 .sound(SoundType.STONE)
                 .destroyTime(2f)
                 .explosionResistance(10f)
-                .lightLevel(getLightValueLit(13));
+                .lightLevel(getLightValueLit(13))
+                .requiresCorrectToolForDrops();
     }
 
     private static ToIntFunction<BlockState> getLightValueLit(int lightValue)
