@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
@@ -15,7 +15,7 @@ public class MountTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
         return temp -> temp * (1.0D - Math.min(1, this.getNBT().getDouble("strength")));
     }

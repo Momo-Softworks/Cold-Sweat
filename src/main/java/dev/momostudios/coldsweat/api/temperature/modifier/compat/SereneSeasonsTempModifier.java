@@ -1,9 +1,10 @@
 package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import sereneseasons.api.season.ISeasonState;
 import sereneseasons.api.season.SeasonHelper;
 
@@ -12,11 +13,11 @@ import java.util.function.Function;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
-        if (player.level.dimensionType().natural())
+        if (entity.level.dimensionType().natural())
         {
-            ISeasonState season = SeasonHelper.getSeasonState(player.level);
+            ISeasonState season = SeasonHelper.getSeasonState(entity.level);
             double startValue;
             double endValue;
             switch (season.getSubSeason())
@@ -49,6 +50,6 @@ public class SereneSeasonsTempModifier extends TempModifier
 
     @Override
     public String getID() {
-        return "sereneseasons:season";
+        return ColdSweat.SERENESEASONS_ID + ":season";
     }
 }

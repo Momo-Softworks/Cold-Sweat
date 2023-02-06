@@ -5,7 +5,9 @@ import dev.momostudios.coldsweat.common.block.BoilerBlock;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BoilerBlockTemp extends BlockTemp
@@ -16,7 +18,7 @@ public class BoilerBlockTemp extends BlockTemp
     }
 
     @Override
-    public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+    public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
         if (this.hasBlock(state.getBlock()) && state.getValue(BoilerBlock.LIT))
         {

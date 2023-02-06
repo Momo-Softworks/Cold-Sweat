@@ -1,7 +1,8 @@
 package dev.momostudios.coldsweat.api.temperature.block_temp;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -19,7 +20,7 @@ public abstract class BlockTemp
      * @return the temperature of the block. This is ADDED to the world temperature.
      * Temperature is on the Minecraft scale, in which 0 is a snow biome and 2 is a desert (see {@link LavaBlockTemp} for an example)
      */
-    public abstract double getTemperature(Player player, BlockState state, BlockPos pos, double distance);
+    public abstract double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
     public BlockTemp(Block... blocks)
     {

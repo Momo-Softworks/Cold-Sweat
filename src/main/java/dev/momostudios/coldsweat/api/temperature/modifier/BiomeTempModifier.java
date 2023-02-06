@@ -1,13 +1,12 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.util.LegacyMethodHelper;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 
@@ -15,15 +14,23 @@ import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
 {
-    static int SAMPLES = 64;
+    public BiomeTempModifier()
+    {
+        this(25);
+    }
+
+    public BiomeTempModifier(int samples)
+    {
+        this.getNBT().putInt("Samples", samples);
+    }
 
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
         try
         {
             double worldTemp = 0;
-            ResourceLocation dimensionID = player.level.dimension().location();
+            ResourceLocation dimensionID = entity.level.dimension().location();
             Number dimensionOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
 
             if (dimensionOverride != null)
@@ -32,12 +39,17 @@ public class BiomeTempModifier extends TempModifier
             }
             else
             {
-                double time = Math.sin(player.level.getDayTime() / (12000 / Math.PI));
+                double time = Math.sin(entity.level.getDayTime() / (12000 / Math.PI));
+                int samples = this.getNBT().getInt("Samples");
+                // Failsafe for old TempModifiers
+                if (samples < 1) {
+                    samples = 25;
+                    this.getNBT().putInt("Samples", 25);
+                }
 
-                for (BlockPos blockPos : WorldHelper.getNearbyPositions(player.blockPosition(), SAMPLES, 16))
+                for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
-                    Biome biome = LegacyMethodHelper.getBiome(player.level, blockPos);
-                    if (biome == null) continue;
+                    Biome biome = entity.level.getBiomeManager().getBiome(blockPos).value();
                     ResourceLocation biomeID = biome.getRegistryName();
 
                     Pair<Double, Double> configTemp;
@@ -60,11 +72,11 @@ public class BiomeTempModifier extends TempModifier
                     double max = configTemp.getSecond();
 
                     // If time doesn't exist in the player's dimension, don't use it
-                    DimensionType dimension = player.level.dimensionType();
+                    DimensionType dimension = entity.level.dimensionType();
                     if (!dimension.hasCeiling())
-                        worldTemp += CSMath.blend(min, max, time, -1, 1) / SAMPLES;
+                        worldTemp += CSMath.blend(min, max, time, -1, 1) / samples;
                     else
-                        worldTemp += CSMath.average(max, min) / SAMPLES;
+                        worldTemp += CSMath.average(max, min) / samples;
                 }
 
                 worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);

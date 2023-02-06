@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.api.event.common;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
@@ -19,7 +20,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
      * {@link #maxCount} determines whether the TempModifier may be added if an instance already exists. <br>
-     * {@link #player} is the player the TempModifier is being applied to. <br>
+     * {@link #entity} is the player the TempModifier is being applied to. <br>
      * {@link #type} determines the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY} <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
@@ -30,7 +31,7 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        private Player player;
+        private LivingEntity entity;
         private TempModifier modifier;
         public int maxCount;
         public Temperature.Type type;
@@ -51,14 +52,14 @@ public class TempModifierEvent extends Event
             this.modifier = modifier;
         }
 
-        public final Player getPlayer() {
-            return player;
+        public final LivingEntity getEntity() {
+            return entity;
         }
 
-        public Add(TempModifier modifier, Player player, Temperature.Type type, int duplicates)
+        public Add(TempModifier modifier, LivingEntity entity, Temperature.Type type, int duplicates)
         {
             maxCount = duplicates;
-            this.player = player;
+            this.entity = entity;
             this.type = type;
             this.modifier = modifier;
         }
@@ -68,7 +69,7 @@ public class TempModifierEvent extends Event
     /**
      * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
      * <br>
-     * {@link #player} is the player the TempModifier is being removed from. <br>
+     * {@link #entity} is the player the TempModifier is being removed from. <br>
      * {@link #type} is the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
@@ -81,14 +82,14 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Remove extends TempModifierEvent
     {
-        public final Player player;
+        public final LivingEntity entity;
         public final Temperature.Type type;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(Player player, Temperature.Type type, int count, Predicate<TempModifier> condition)
+        public Remove(LivingEntity entity, Temperature.Type type, int count, Predicate<TempModifier> condition)
         {
-            this.player = player;
+            this.entity = entity;
             this.type = type;
             this.count = count;
             this.condition = condition;
@@ -96,12 +97,19 @@ public class TempModifierEvent extends Event
         public void setCount(int count) {
             this.count = count;
         }
+
         public void setCondition(Predicate<TempModifier> condition) {
             this.condition = condition;
         }
+
         public int getCount() {
             return count;
         }
+
+        public final LivingEntity getEntity() {
+            return entity;
+        }
+
         public Predicate<TempModifier> getCondition() {
             return condition;
         }
@@ -117,7 +125,7 @@ public class TempModifierEvent extends Event
         /**
          * Fired at the beginning of {@code calculate()}, before the {@code getValue()} method is called. <br>
          * <br>
-         * {@link #player} - The player the TempModifier is attached to. <br>
+         * {@link #entity} - The player the TempModifier is attached to. <br>
          * {@link #modifier} - The TempModifier running the method. <br>
          * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
          * <br>
@@ -127,13 +135,13 @@ public class TempModifierEvent extends Event
         @Cancelable
         public static class Pre extends Calculate
         {
-            public final Player player;
+            public final LivingEntity entity;
             private final TempModifier modifier;
             private double temperature;
 
-            public Pre(TempModifier modifier, Player player, double temperature)
+            public Pre(TempModifier modifier, LivingEntity entity, double temperature)
             {
-                this.player = player;
+                this.entity = entity;
                 this.modifier = modifier;
                 this.temperature = temperature;
             }
@@ -149,7 +157,7 @@ public class TempModifierEvent extends Event
         /**
          * Fired by {@code calculate()} after the {@code getResult()} method is run, but before the value is returned <br>
          * <br>
-         * {@link #player} is the player the TempModifier is attached to. <br>
+         * {@link #entity} is the player the TempModifier is attached to. <br>
          * {@link #modifier} is the TempModifier running the method. <br>
          * {@link #temperature} is the Temperature after the {@code getValue())} method has been called. <br>
          * <br>
@@ -157,13 +165,13 @@ public class TempModifierEvent extends Event
          */
         public static class Post extends Calculate
         {
-            public final Player player;
+            public final LivingEntity entity;
             private final TempModifier modifier;
             private double temperature;
 
-            public Post(TempModifier modifier, Player player, double temperature)
+            public Post(TempModifier modifier, LivingEntity entity, double temperature)
             {
-                this.player = player;
+                this.entity = entity;
                 this.modifier = modifier;
                 this.temperature = temperature;
             }

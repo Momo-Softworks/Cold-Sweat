@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -50,28 +51,28 @@ public abstract class TempModifier
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
      * This is basically a simple in-out system. It is given a temperature, and returns a new temperature based on the PlayerEntity.<br>
      * <br>
-     * @param player the player that is being affected by the modifier.<br>
+     * @param entity the entity that is being affected by the modifier.<br>
      * @return the new temperature.<br>
      */
-    protected abstract Function<Double, Double> calculate(Player player);
+    protected abstract Function<Double, Double> calculate(LivingEntity entity);
 
     /**
-     * Posts this TempModifier's {@link #calculate(Player)} to the Forge event bus.<br>
+     * Posts this TempModifier's {@link #calculate(LivingEntity)} to the Forge event bus.<br>
      * Returns the stored value if this TempModifier has a tickRate set, and it is not the right tick.<br>
      * <br>
-     * @param temp the Temperature being fed into the {@link #calculate(Player)} method.
-     * @param player the player that is being affected by the modifier.
+     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity)} method.
+     * @param entity the entity that is being affected by the modifier.
      */
-    public double update(double temp, Player player)
+    public double update(double temp, LivingEntity entity)
     {
-        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, player, temp);
+        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
         if (pre.isCanceled()) return temp;
 
-        this.function = this.calculate(player);
+        this.function = this.calculate(entity);
 
-        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, player, this.getResult(pre.getTemperature()));
+        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
 
         return post.getTemperature();
@@ -111,7 +112,7 @@ public abstract class TempModifier
     }
 
     /**
-     * TempModifiers can be configured to run {@link TempModifier#calculate(Player)} at a specified interval.<br>
+     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
      * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>

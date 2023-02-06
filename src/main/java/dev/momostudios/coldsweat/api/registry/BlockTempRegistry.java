@@ -3,7 +3,9 @@ package dev.momostudios.coldsweat.api.registry;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,7 +18,7 @@ public class BlockTempRegistry
     public static final HashMap<Block, BlockTemp> MAPPED_BLOCKS = new HashMap<>();
     public static final BlockTemp DEFAULT_BLOCK_EFFECT = new BlockTemp() {
         @Override
-        public double getTemperature(Player player, BlockState state, BlockPos pos, double distance)
+        public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
         {
             return 0;
         }

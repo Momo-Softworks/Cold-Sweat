@@ -4,32 +4,30 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModEffects;
-import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import top.theillusivec4.curios.api.CuriosApi;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
  */
-public class PlayerTempCap implements ITemperatureCap
+public class EntityTempCap implements ITemperatureCap
 {
     static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.MAX, Type.MIN, Type.WORLD};
     static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.MAX, Type.MIN, Type.WORLD};
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
+    int syncTimer = 0;
 
     // Map valid temperature types to a new EnumMap
     EnumMap<Type, Double> temperatures = Arrays.stream(VALID_MODIFIER_TYPES).collect(
@@ -42,9 +40,6 @@ public class PlayerTempCap implements ITemperatureCap
             () -> new EnumMap<>(Type.class),
             (map, type) -> map.put(type, new ArrayList<>()),
             EnumMap::putAll);
-
-    public boolean showBodyTemp;
-    public boolean showWorldTemp;
 
     public double getTemp(Type type)
     {
@@ -80,16 +75,6 @@ public class PlayerTempCap implements ITemperatureCap
         return getModifiers(type).stream().anyMatch(mod::isInstance);
     }
 
-    public boolean shouldShowBodyTemp()
-    {
-        return showBodyTemp;
-    }
-
-    public boolean shouldShowWorldTemp()
-    {
-        return showWorldTemp;
-    }
-
     public void clearModifiers(Type type)
     {
         getModifiers(type).clear();
@@ -103,25 +88,18 @@ public class PlayerTempCap implements ITemperatureCap
         {
             Temperature.apply(0, player, getModifiers(type));
         }
-
-        if (player.tickCount % 20 == 0)
-        {
-            calculateVisibility(player);
-        }
     }
 
     public void tick(LivingEntity entity)
     {
-        if (!(entity instanceof Player player)) return;
-
         ConfigSettings config = ConfigSettings.getInstance();
 
         // Tick expiration time for world modifiers
-        double newWorldTemp = Temperature.apply(0, player, getModifiers(Type.WORLD));
-        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, getModifiers(Type.CORE));
-        double newBaseTemp  = Temperature.apply(0, player, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, player, getModifiers(Type.MAX));
-        double newMinOffset = Temperature.apply(0, player, getModifiers(Type.MIN));
+        double newWorldTemp = Temperature.apply(0, entity, getModifiers(Type.WORLD));
+        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, getModifiers(Type.CORE));
+        double newBaseTemp  = Temperature.apply(0, entity, getModifiers(Type.BASE));
+        double newMaxOffset = Temperature.apply(0, entity, getModifiers(Type.MAX));
+        double newMinOffset = Temperature.apply(0, entity, getModifiers(Type.MIN));
 
         double maxTemp = config.maxTemp + newMaxOffset;
         double minTemp = config.minTemp + newMinOffset;
@@ -129,12 +107,12 @@ public class PlayerTempCap implements ITemperatureCap
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
-        // Don't change player temperature if they're in creative/spectator mode
-        if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
+        // If temp is dangerous, change core temp
+        if (magnitude != 0)
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
             double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
-            newCoreTemp += Temperature.apply(changeBy, player, getModifiers(Type.RATE));
+            newCoreTemp += Temperature.apply(changeBy, entity, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
         int tempSign = CSMath.getSign(newCoreTemp);
@@ -145,12 +123,6 @@ public class PlayerTempCap implements ITemperatureCap
             newCoreTemp += CSMath.least(changeBy, -getTemp(Type.CORE));
         }
 
-        // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
-        if (player.tickCount % 20 == 0)
-        {
-            calculateVisibility(player);
-        }
-
         // Write the new temperature values
         setTemp(Type.BASE, newBaseTemp);
         setTemp(Type.CORE, CSMath.clamp(newCoreTemp, -150f, 150f));
@@ -158,52 +130,46 @@ public class PlayerTempCap implements ITemperatureCap
         setTemp(Type.MAX, newMaxOffset);
         setTemp(Type.MIN, newMinOffset);
 
+        if (syncTimer > 0)
+            syncTimer--;
+
         // Sync the temperature values to the client
-        if ((neverSynced
-        || (((int) syncedValues[0] != (int) newCoreTemp && showBodyTemp))
-        || (((int) syncedValues[1] != (int) newBaseTemp && showBodyTemp))
-        || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
-        || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
-        || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
+        if (syncTimer <= 0 && (neverSynced
+        || (((int) syncedValues[0] != (int) newCoreTemp))
+        || (((int) syncedValues[1] != (int) newBaseTemp))
+        || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02))
+        || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02))
+        || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02))))
         {
-            Temperature.updateTemperature(player, this, false);
+            Temperature.updateTemperature(entity, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
             neverSynced = false;
+            syncTimer = 20;
         }
 
+        /*
         // Calculate body/base temperatures with modifiers
         double bodyTemp = getTemp(Type.BODY);
 
         //Deal damage to the player if temperature is critical
-        if (!player.isCreative() && !player.isSpectator())
+        if (!entity.isCreative() && !entity.isSpectator())
         {
-            if (player.tickCount % 40 == 0 && !player.hasEffect(ModEffects.GRACE))
+            if (entity.tickCount % 40 == 0 && !entity.hasEffect(ModEffects.GRACE))
             {
                 boolean damageScaling = config.damageScaling;
 
-                if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
+                if (bodyTemp >= 100 && !(entity.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
                 {
-                    player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
+                    entity.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
                 }
-                else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
+                else if (bodyTemp <= -100 && !(entity.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
                 {
-                    player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
+                    entity.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
                 }
             }
         }
         else setTemp(Type.CORE, 0);
-    }
-
-    public void calculateVisibility(Player player)
-    {
-        if (player.tickCount % 20 == 0)
-        {
-            showWorldTemp = !ConfigSettings.getInstance().requireThermometer
-                    || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
-                    || player.getOffhandItem().getItem() == ModItems.THERMOMETER
-                    || ModGetters.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
-            showBodyTemp = !player.isCreative() && !player.isSpectator();
-        }
+        */
     }
 
     @Override

@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
@@ -21,11 +22,8 @@ public class HearthTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
-        double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-        player.getPersistentData().putDouble("preHearthTemp", worldTemp);
-
         ConfigSettings config = ConfigSettings.getInstance();
 
         double min = config.minTemp;

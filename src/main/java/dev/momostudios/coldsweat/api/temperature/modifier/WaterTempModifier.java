@@ -3,7 +3,9 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
@@ -21,15 +23,15 @@ public class WaterTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
-        double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
+        double worldTemp = Temperature.get(entity, Temperature.Type.WORLD);
         double maxTemp = ConfigSettings.getInstance().maxTemp;
         double minTemp = ConfigSettings.getInstance().minTemp;
 
         double strength = this.getNBT().getDouble("strength");
         double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));
-        double addAmount = player.isInWaterOrBubble() ? 0.01 : player.level.isRainingAt(player.blockPosition()) ? 0.005 : returnRate;
+        double addAmount = WorldHelper.isWet(entity) ? 0.01 : entity.level.isRainingAt(entity.blockPosition()) ? 0.005 : returnRate;
         double maxStrength = CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
 
         this.getNBT().putDouble("strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
@@ -40,14 +42,14 @@ public class WaterTempModifier extends TempModifier
             this.expires(this.getTicksExisted() - 1);
         }
 
-        if (!player.isInWater())
+        if (!entity.isInWater())
         {
             if (Math.random() < Math.min(0.5, strength))
             {
-                double randX = player.getBbWidth() * (Math.random() - 0.5);
-                double randY = (player.getEyeHeight() * 0.8) * Math.random();
-                double randZ = player.getBbWidth() * (Math.random() - 0.5);
-                player.level.addParticle(ParticleTypes.FALLING_WATER, player.getX() + randX, player.getY() + randY, player.getZ() + randZ, 0, 0, 0);
+                double randX = entity.getBbWidth() * (Math.random() - 0.5);
+                double randY = (entity.getEyeHeight() * 0.8) * Math.random();
+                double randZ = entity.getBbWidth() * (Math.random() - 0.5);
+                entity.level.addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
             }
         }
 

@@ -6,7 +6,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -21,27 +21,41 @@ import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
 {
-    public BlockTempModifier() {}
+    public BlockTempModifier()
+    {
+        this(7);
+    }
+
+    public BlockTempModifier(int range)
+    {
+        this.getNBT().putInt("Range", range);
+    }
 
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
 
-        Level level = player.level;
+        Level level = entity.level;
+        int range = this.getNBT().getInt("Range");
+        // Failsafe for old TempModifiers
+        if (range < 1) {
+            range = 7;
+            this.getNBT().putInt("Range", 7);
+        }
 
-        for (int x = -7; x < 7; x++)
+        for (int x = -range; x < range; x++)
         {
-            for (int z = -7; z < 7; z++)
+            for (int z = -range; z < range; z++)
             {
-                LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk((player.blockPosition().getX() + x) >> 4, (player.blockPosition().getZ() + z) >> 4, ChunkStatus.FULL, false);
+                LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk((entity.blockPosition().getX() + x) >> 4, (entity.blockPosition().getZ() + z) >> 4, ChunkStatus.FULL, false);
                 if (chunk == null) continue;
 
-                for (int y = -7; y < 7; y++)
+                for (int y = -range; y < range; y++)
                 {
                     try
                     {
-                        BlockPos blockpos = player.blockPosition().offset(x, y, z);
+                        BlockPos blockpos = entity.blockPosition().offset(x, y, z);
 
                         LevelChunkSection subchunk = WorldHelper.getChunkSection(chunk, blockpos.getY());
                         BlockState state = subchunk.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
@@ -67,14 +81,14 @@ public class BlockTempModifier extends TempModifier
                             AtomicInteger blocks = new AtomicInteger();
 
                             // Gets the closest point in the player's BB to the block
-                            double playerRadius = player.getBbWidth() / 2;
-                            Vec3 playerClosest = new Vec3(CSMath.clamp(pos.x, player.getX() - playerRadius, player.getX() + playerRadius),
-                                                          CSMath.clamp(pos.y, player.getY(), player.getY() + player.getBbHeight()),
-                                                          CSMath.clamp(pos.z, player.getZ() - playerRadius, player.getZ() + playerRadius));
+                            double playerRadius = entity.getBbWidth() / 2;
+                            Vec3 playerClosest = new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
+                                                          CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
+                                                          CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
 
                             // Get the temperature of the block given the player's distance
                             double distance = CSMath.getDistance(playerClosest, pos);
-                            double tempToAdd = be.getTemperature(player, state, blockpos, distance);
+                            double tempToAdd = be.getTemperature(level, entity, state, blockpos, distance);
 
                             Vec3 ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);

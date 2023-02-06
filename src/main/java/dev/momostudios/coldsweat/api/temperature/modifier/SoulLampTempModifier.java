@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
 public class SoulLampTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(Player player)
+    public Function<Double, Double> calculate(LivingEntity entity)
     {
         double almostMax = ConfigSettings.getInstance().maxTemp * 0.99;
         return temp ->
