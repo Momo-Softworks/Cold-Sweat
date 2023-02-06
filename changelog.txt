@@ -349,7 +349,7 @@ Technical Changes:
 
 Fixes:
 - Fixed hotbar temperature icon not working properly in Celsius mode
-- Fixed crash caused by conflictions with modded capabilities
+- Fixed crash caused by conflicts with modded capabilities
 - Fixed TempModifiers not syncing to client
 - Fixed the top half of the Hearth being named "block.cold_sweat.hearth_top"
 
@@ -360,7 +360,7 @@ Fixes:
 - Fixed buggy shift-click behavior in the Sewing Table
 - Fixed Water not affecting the world temperature properly in some cases
 - Fixed occasional crash when syncing the player's temperature from the server to the client in singleplayer
-- Added some more detailed explanaitons to some config files
+- Added some more detailed explanations to some config files
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -816,6 +816,78 @@ Technical Changes:
       - "setTemperature()" -> "set()"
       - "addTemperature()" -> "add()"
 - The insulation system now uses capabilities instead of NBT
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b01c
+- Armor insulation configs now have better support for items with total insulation values smaller than 2
+      - Negative values work against positive values, speeding up the rate at which the player's temperature changes
+      - Added icons for partial insulation values to the armor insulation tooltip
+- Shears are no longer damaged when removing insulation from armor in creative mode
+- Waterskins now extinguish the player when used
+- Waterskins now have custom dispense behavior
+      - The dispenser pours the waterskin's contents onto players below
+      - The water's effect weakens over distance (does nothing after ~20 blocks)
+- The Soulspring Lamp can now be fuelled by attacking an entity at full health with it
+      - This restores up to 4 fuel
+      - Does not work on undead entities or ones below full health
+- Added a config option to disable the mod preventing sleep if the player is too hot/cold
+
+Fixes:
+- Fixed player temperature never naturally returning to 0
+- Fixed goats trying to ram players in creative mode
+
+Technical Changes:
+- TempModifiers now have a full CompoundTag attached to each instance
+      - This can be used to store any custom data that needs to be saved
+      - Replaces the old "arguments" system
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b02a
+- Added various negative effects that are inflicted on the player if they are too hot/cold:
+      - Hot (disorients the player):
+            - Reduced view distance at temperatures above 50 (less range as temperature increases)
+            - Blurred vision as temperature increases above 50
+            - Randomly drifting camera as temperature increases above 50
+      - Cold (dangerous to the player):
+            - Reduced mining/movement speed (slower as temperature decreases)
+            - Player attack knockback is reduced (less knockback as temperature decreases)
+            - Up to 50% of the player's hearts freeze over (frozen hearts cannot be regenerated)
+- Added new mob: Chameleon
+      - Spawn in tropical biomes (Like jungles)
+      - Change color according to the temperature around them (it can be a useful thermometer replacement!)
+      - It might trust you if you throw it a spider eye
+            - Chameleons can trust multiple players
+            - You can right-click a chameleon that trusts you to carry it on your head
+            - Eventually, chameleons will do other things when fed different items
+      - Occasionally, a chameleon will shed its skin, dropping the new Chameleon Molt item
+            - Chameleon molt will have important uses in future updates, so don't throw it away!
+- Items that can be used as insulation now have a tooltip displaying their effects
+- Insulation tooltips are now more clear about positive/negative insulation values
+- the Thermometer can now be equipped as a charm if Curios is installed
+- Slightly tweaked how removing insulation works to make removing multiple items more streamlined
+- Added "minecart with insulation" item
+      - Crafted with a minecart and minecart insulation
+- Retextured minecart insulation
+- Reorganized the Cold Sweat creative tab to group items more logically
+
+Fixes:
+- Fixed crash related to goats' stored data
+- Fixed performance issue caused by extreme amounts of block updates
+- Fixed the Soulspring Lamp sometimes not being activated/deactivated properly
+- Fixed the Soulspring Lamp starting off empty when crafted
+- Fixed blocks not being mineable with the correct tool
+- Fixed UI elements sometimes showing when the UI is supposed to be hidden and vice versa
+- Fixed goats trying to ram players in peaceful mode
+- Fixed food items configured to affect temperature being double-effective
+- Fixed insulation tooltips sometimes overlapping other tooltips
+- Fixed Soulspring Lamp tooltip not being properly sized when Shift is held and advanced tooltips are disabled
+
+Technical Changes:
+- Revamped the temperature system to allow all living entities to have their own temperatures
+      - Although the system has been reworked in the backend, there is very little difference in implementation aside from some method parameters
+      - This may pave the way for livestock temperature to make a return in the future
 
 TO-DO
 - Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
