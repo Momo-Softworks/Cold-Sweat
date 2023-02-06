@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b01b'
+version = '2.2-b02a'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -28,6 +28,7 @@ java {
 
 minecraft {
     mappings channel: 'official', version: '1.18.2'
+    accessTransformer = file("src/main/resources/META-INF/coldsweat_at.cfg")
     runs {
         client {
             workingDirectory project.file('run')
@@ -93,14 +94,18 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    mavenCentral()
 }
 
 dependencies {
+    implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
     minecraft 'net.minecraftforge:forge:1.18.2-40.1.84'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3599022")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3824951")
-    //runtimeOnly fg.deobf("curse.maven:seasons-291874:3804257")
+    compileOnly fg.deobf("curse.maven:werewolves-417851:4050257")
+    compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
+    implementation fg.deobf("curse.maven:curios-309927:3841948")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
 }
