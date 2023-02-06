@@ -2,8 +2,10 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.util.compat.ModGetters;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.SoulFireBlock;
@@ -20,7 +22,8 @@ public class MixinSoulFire
     at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, CallbackInfo ci)
     {
-        if (state.getBlock() instanceof SoulFireBlock && ColdSweatConfig.getInstance().isSoulFireCold())
+        if (state.getBlock() instanceof SoulFireBlock && ColdSweatConfig.getInstance().isSoulFireCold()
+        && !(entity instanceof ItemEntity && ModGetters.isSpiritLoaded()))
         {
             entity.setIsInPowderSnow(true);
             entity.clearFire();

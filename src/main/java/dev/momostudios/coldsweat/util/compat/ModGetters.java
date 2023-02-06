@@ -24,4 +24,9 @@ public class ModGetters
     {
         return ModList.get().isLoaded("werewolves");
     }
+
+    public static boolean isSpiritLoaded()
+    {
+        return ModList.get().isLoaded("spirit");
+    }
 }
