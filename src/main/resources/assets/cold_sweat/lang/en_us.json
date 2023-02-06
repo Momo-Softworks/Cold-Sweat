@@ -51,10 +51,14 @@
 
 
   "entity.player.damage.freeze":   "Player freezes",
+  "entity.chameleon.ambient":      "Chameleon chirps",
+  "entity.chameleon.hurt":         "Chameleon hisses",
   "item.soulspring_lamp.on":       "Soulspring Lamp Ignites",
   "item.soulspring_lamp.off":      "Soulspring Lamp Extinguishes",
 
+
   "cold_sweat.screen.hearth.show_particles": "Show air particles",
+
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.difficulty.name":      "Difficulty Settings",

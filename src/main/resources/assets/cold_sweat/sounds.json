@@ -14,6 +14,44 @@
       }
     ]
   },
+  "entity.chameleon.ambient":
+  {
+    "subtitle": "entity.chameleon.ambient",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_1",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_2",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_3",
+        "stream": true
+      }
+    ]
+  },
+  "entity.chameleon.hurt":
+  {
+    "subtitle": "entity.chameleon.hurt",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_hurt_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_hurt_1",
+        "stream": true
+      }
+    ]
+  },
   "item.soulspring_lamp.on":
   {
     "subtitle": "item.soulspring_lamp.on",
@@ -27,7 +65,7 @@
   },
   "item.soulspring_lamp.off":
   {
-    "subtitle": "item.soulspring_lamp.off",
+      "subtitle": "item.soulspring_lamp.off",
     "sounds":
     [
       {

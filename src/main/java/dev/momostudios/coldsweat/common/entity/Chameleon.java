@@ -10,6 +10,7 @@ import dev.momostudios.coldsweat.core.network.message.ChameleonEatMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +20,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -150,6 +152,20 @@ public class Chameleon extends TamableAnimal
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob parent)
     {
         return EntityInit.CHAMELEON.get().create(level);
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound()
+    {
+        return ModSounds.CHAMELEON_AMBIENT;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source)
+    {
+        return ModSounds.CHAMELEON_HURT;
     }
 
     public boolean isWalking()

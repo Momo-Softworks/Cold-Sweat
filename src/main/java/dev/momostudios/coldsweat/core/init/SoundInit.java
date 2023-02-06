@@ -19,4 +19,8 @@ public class SoundInit
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.soulspring_lamp.off")));
     public static final RegistryObject<SoundEvent> HEARTH_FUEL_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel")));
+    public static final RegistryObject<SoundEvent> CHAMELEON_AMBIENT_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.ambient",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.ambient")));
+    public static final RegistryObject<SoundEvent> CHAMELEON_HURT_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.hurt",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.hurt")));
 }
