@@ -41,11 +41,6 @@ public class TempEffectsClient
     static float Y_SWAY_SPEED = 0;
     static float Y_SWAY_BLEND = 0;
 
-    static Uniform BLUR_DIR = null;
-    static Uniform BLUR_RADIUS = null;
-    static Field POST_PASSES = null;
-    static boolean BLUR_APPLIED = false;
-
     // Sway the player's camera when the player is too hot; swaying is more drastic at higher temperatures
     @SubscribeEvent
     public static void setCamera(EntityViewRenderEvent.CameraSetup event)
@@ -60,40 +55,43 @@ public class TempEffectsClient
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
 
-            // Camera "shivers" when temp is < -50
-            if (BLEND_TEMP <= -50)
+            if (ColdSweatConfig.getInstance().isCameraSwayEnabled())
             {
-                float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
-                double tickTime = player.tickCount + event.getPartialTicks();
-                float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime) / 3);
-                player.setYRot(player.getYRot() + shiverAmount);
-            }
-            else if (BLEND_TEMP > 50)
-            {
-                float factor = CSMath.blend(0, 8, BLEND_TEMP, 50, 100);
-                double tickTime = player.tickCount + event.getPartialTicks();
+                // Camera "shivers" when temp is < -50
+                if (BLEND_TEMP <= -50)
+                {
+                    float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
+                    double tickTime = player.tickCount + event.getPartialTicks();
+                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime) / 3);
+                    player.setYRot(player.getYRot() + shiverAmount);
+                }
+                else if (BLEND_TEMP > 50)
+                {
+                    float factor = CSMath.blend(0, 8, BLEND_TEMP, 50, 100);
+                    double tickTime = player.tickCount + event.getPartialTicks();
 
-                // Set random sway speed every once in a while
-                if (Math.abs(X_SWAY_BLEND - X_SWAY_SPEED) < 0.1f)
-                    X_SWAY_SPEED = (float) (Math.random() * 0.5f);
-                if (Math.abs(Y_SWAY_BLEND - Y_SWAY_SPEED) < 0.1f)
-                    Y_SWAY_SPEED = (float) (Math.random() * 0.5f);
+                    // Set random sway speed every once in a while
+                    if (Math.abs(X_SWAY_BLEND - X_SWAY_SPEED) < 0.1f)
+                        X_SWAY_SPEED = (float) (Math.random() * 0.5f);
+                    if (Math.abs(Y_SWAY_BLEND - Y_SWAY_SPEED) < 0.1f)
+                        Y_SWAY_SPEED = (float) (Math.random() * 0.5f);
 
-                // Blend to the new sway speed
-                X_SWAY_BLEND += (X_SWAY_SPEED - X_SWAY_BLEND) * frameTime / 1000;
-                Y_SWAY_BLEND += (Y_SWAY_SPEED - Y_SWAY_BLEND) * frameTime / 1000;
+                    // Blend to the new sway speed
+                    X_SWAY_BLEND += (X_SWAY_SPEED - X_SWAY_BLEND) * frameTime / 1000;
+                    Y_SWAY_BLEND += (Y_SWAY_SPEED - Y_SWAY_BLEND) * frameTime / 1000;
 
-                // Apply the sway speed to a sin function
-                float xOffs = (float) (Math.sin(tickTime / 500 * X_SWAY_BLEND) * factor);
-                float yOffs = (float) (Math.sin(tickTime / 500 * Y_SWAY_BLEND) * factor);
+                    // Apply the sway speed to a sin function
+                    float xOffs = (float) (Math.sin(tickTime / 500 * X_SWAY_BLEND) * factor);
+                    float yOffs = (float) (Math.sin(tickTime / 500 * Y_SWAY_BLEND) * factor);
 
-                // Apply the sway
-                player.setXRot(player.getXRot() + xOffs - PREV_X_SWAY);
-                player.setYRot(player.getYRot() + yOffs - PREV_Y_SWAY);
+                    // Apply the sway
+                    player.setXRot(player.getXRot() + xOffs - PREV_X_SWAY);
+                    player.setYRot(player.getYRot() + yOffs - PREV_Y_SWAY);
 
-                // Save the previous sway
-                PREV_X_SWAY = xOffs;
-                PREV_Y_SWAY = yOffs;
+                    // Save the previous sway
+                    PREV_X_SWAY = xOffs;
+                    PREV_Y_SWAY = yOffs;
+                }
             }
         }
     }
@@ -160,6 +158,10 @@ public class TempEffectsClient
             RenderSystem.defaultBlendFunc();
         }
     }
+
+    static Uniform BLUR_RADIUS = null;
+    static Field POST_PASSES = null;
+    static boolean BLUR_APPLIED = false;
 
     static
     {

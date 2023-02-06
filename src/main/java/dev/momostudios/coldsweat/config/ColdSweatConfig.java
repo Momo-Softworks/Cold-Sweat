@@ -293,7 +293,7 @@ public class ColdSweatConfig
         return checkSleep.get();
     }
 
-    public boolean cameraSway()
+    public boolean isCameraSwayEnabled()
     {
         return cameraSway.get();
     }
