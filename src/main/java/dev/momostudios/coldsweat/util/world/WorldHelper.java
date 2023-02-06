@@ -1,15 +1,20 @@
 package dev.momostudios.coldsweat.util.world;
 
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -27,6 +32,7 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
 
 public class WorldHelper
@@ -81,7 +87,7 @@ public class WorldHelper
      * @param samples The total number of checks performed.
      * @param interval How far apart each check is. Higher values = less dense and larger search area
      */
-    public static List<BlockPos> getNearbyPositions(BlockPos pos, int samples, int interval)
+    public static List<BlockPos> getPositionGrid(BlockPos pos, int samples, int interval)
     {
         List<BlockPos> posList = new ArrayList<>();
         int sampleRoot = (int) Math.sqrt(samples);
@@ -156,6 +162,8 @@ public class WorldHelper
 
     public static BlockState getBlockState(ChunkAccess chunk, BlockPos blockpos)
     {
+        if (chunk == null) return Blocks.AIR.defaultBlockState();
+
         int x = blockpos.getX();
         int y = blockpos.getY();
         int z = blockpos.getZ();
@@ -188,6 +196,19 @@ public class WorldHelper
     {
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
                 new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
+    }
+
+    public static boolean isWet(Entity entity)
+    {
+        BlockPos pos = entity.blockPosition();
+        ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+        return entity.isInWater() || isRainingAt(entity.level, pos) || WorldHelper.getBlockState(chunk, pos).is(Blocks.BUBBLE_COLUMN);
+    }
+
+    public static boolean isRainingAt(Level level, BlockPos pos)
+    {
+        Biome biome = level.getBiome(pos).value();
+        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos, 256);
     }
 
     /**
@@ -262,5 +283,59 @@ public class WorldHelper
             }
         }
         return null;
+    }
+
+    public static void spawnParticle(Level level, ParticleOptions particle, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+    {
+        if (!level.isClientSide)
+        {
+            ParticleBatchMessage particles = new ParticleBatchMessage();
+            particles.addParticle(particle, new ParticleBatchMessage.ParticlePlacement(x, y, z, xSpeed, ySpeed, zSpeed));
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) level.getChunk((int) x >> 4, (int) z >> 4, ChunkStatus.FULL)), particles);
+        }
+        else
+        {
+            level.addParticle(particle, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
+    }
+
+    public static void spawnParticleBatch(Level level, ParticleOptions particle, double x, double y, double z, double xSpread, double ySpread, double zSpread, double count, double speed)
+    {
+        Random rand = new Random();
+
+        if (!level.isClientSide)
+        {
+            ParticleBatchMessage particles = new ParticleBatchMessage();
+            for (int i = 0; i < count; i++)
+            {
+                Vec3 vec = new Vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().scale(speed);
+                particles.addParticle(particle, new ParticleBatchMessage.ParticlePlacement(
+                        x + xSpread - rand.nextDouble() * (xSpread * 2),
+                        y + ySpread - rand.nextDouble() * (ySpread * 2),
+                        z + zSpread - rand.nextDouble() * (zSpread * 2), vec.x, vec.y, vec.z));
+            }
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) level.getChunk((int) x >> 4, (int) z >> 4, ChunkStatus.FULL)), particles);
+        }
+        else
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Vec3 vec = new Vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().scale(speed);
+                level.addParticle(particle,
+                        x + xSpread - rand.nextDouble() * (xSpread * 2),
+                        y + ySpread - rand.nextDouble() * (ySpread * 2),
+                        z + zSpread - rand.nextDouble() * (zSpread * 2), vec.x, vec.y, vec.z);
+            }
+        }
+    }
+
+    public static void spawnItemOnEntity(Entity entity, ItemStack stack)
+    {
+        Random rand = new Random();
+        ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
+        if (item != null)
+        {
+            item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+        }
     }
 }
