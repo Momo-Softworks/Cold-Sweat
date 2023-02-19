@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.core.event;
 
-import dev.momostudios.coldsweat.config.WorldSettingsConfig;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -14,9 +14,10 @@ public class AddEntitySpawns
     @SubscribeEvent
     public static void onBiomeLoading(BiomeLoadingEvent event)
     {
-        if (WorldSettingsConfig.getInstance().chameleonBiomes().contains(event.getName().toString()))
+        Integer weight = ConfigSettings.CHAMELEON_BIOMES.get().get(event.getName().toString());
+        if (weight != null)
         {
-            event.getSpawns().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(ModEntities.CHAMELEON, 8, 1, 1));
+            event.getSpawns().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(ModEntities.CHAMELEON, weight, 1, 1));
         }
     }
 }
