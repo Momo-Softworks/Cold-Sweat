@@ -1,0 +1,28 @@
+{
+  "parent": "cold_sweat:extreme_temps",
+  "display": {
+    "icon": {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    "title": "Soul of the Sea",
+    "description": "Using a Heart of the Sea, craft a Soulspring Lamp, a vital tool in your arsenal against the Nether's inferno",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "cold_sweat:soulspring_lamp"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

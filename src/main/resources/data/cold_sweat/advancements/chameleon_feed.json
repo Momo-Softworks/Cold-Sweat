@@ -1,0 +1,30 @@
+{
+  "parent": "cold_sweat:root",
+  "display": {
+    "icon": {
+      "item": "cold_sweat:chameleon_molt"
+    },
+    "title": "Chameleon World",
+    "description": "Feed a chameleon; useful for exploration and doubles as a great hat",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:thrown_item_picked_up_by_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "cold_sweat:chameleon"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

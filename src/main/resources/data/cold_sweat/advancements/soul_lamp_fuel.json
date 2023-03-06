@@ -1,0 +1,20 @@
+{
+  "parent": "cold_sweat:soul_of_the_sea",
+  "display": {
+    "icon": {
+      "item": "cold_sweat:soulspring_lamp"
+    },
+    "title": "A Problem for Later",
+    "description": "Fuel the soulspring lamp by clicking it with fuel in your inventory",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "cold_sweat:soulspring_lamp_fuelled",
+      "conditions": {}
+    }
+  }
+}

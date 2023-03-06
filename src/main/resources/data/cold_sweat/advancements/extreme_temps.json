@@ -1,0 +1,26 @@
+{
+  "parent": "cold_sweat:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:dead_bush"
+    },
+    "title": "Inhospitable",
+    "description": "Find a place that's too hot or cold to survive",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "cold_sweat:temperature",
+      "conditions": {
+        "type": "world",
+        "temperature": {
+            "below": "min_habitable",
+            "above": "max_habitable"
+        }
+      }
+    }
+  }
+}

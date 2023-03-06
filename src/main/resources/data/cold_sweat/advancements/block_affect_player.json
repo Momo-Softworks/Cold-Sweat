@@ -1,0 +1,24 @@
+{
+  "parent": "cold_sweat:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:campfire"
+    },
+    "title": "Huddle Close",
+    "description": "Use a block to warm up or cool down",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "cold_sweat:block_affects_player",
+      "conditions": {
+        "distance": 3,
+        "blocks": {
+        }
+      }
+    }
+  }
+}

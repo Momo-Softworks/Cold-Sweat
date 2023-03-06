@@ -1,0 +1,19 @@
+{
+  "display": {
+    "icon": {
+      "item": "cold_sweat:thermometer"
+    },
+    "title": "Cold Sweat",
+    "description": "Keep warm and you'll be fine",
+    "background": "minecraft:textures/block/smooth_basalt.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}
