@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.core.init;
 
+import dev.momostudios.coldsweat.common.blockentity.ThermolithBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,4 +25,6 @@ public class BlockEntityInit
             BLOCK_ENTITY_TYPES.register("icebox", () -> BlockEntityType.Builder.of(IceboxBlockEntity::new, BlockInit.ICEBOX.get()).build(null));
     public static final RegistryObject<BlockEntityType<HearthBlockEntity>> HEARTH_BLOCK_ENTITY_TYPE =
             BLOCK_ENTITY_TYPES.register("hearth", () -> BlockEntityType.Builder.of(HearthBlockEntity::new, BlockInit.HEARTH_BOTTOM.get()).build(null));
+    public static final RegistryObject<BlockEntityType<ThermolithBlockEntity>> THERMOLITH_BLOCK_ENTITY_TYPE =
+            BLOCK_ENTITY_TYPES.register("thermolith", () -> BlockEntityType.Builder.of(ThermolithBlockEntity::new, BlockInit.THERMOLITH.get()).build(null));
 }

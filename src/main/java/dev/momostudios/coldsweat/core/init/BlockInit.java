@@ -19,4 +19,5 @@ public class BlockInit
     public static final RegistryObject<Block> MINECART_INSULATION = BLOCKS.register("minecart_insulation", () -> new MinecartInsulationBlock(MinecartInsulationBlock.getProperties()));
     public static final RegistryObject<Block> HEARTH_BOTTOM = BLOCKS.register("hearth_bottom", () -> new HearthBottomBlock(HearthBottomBlock.getProperties()));
     public static final RegistryObject<Block> HEARTH_TOP = BLOCKS.register("hearth_top", () -> new HearthTopBlock(HearthTopBlock.getProperties()));
+    public static final RegistryObject<Block> THERMOLITH = BLOCKS.register("thermolith", () -> new ThermolithBlock(ThermolithBlock.getProperties()));
 }
