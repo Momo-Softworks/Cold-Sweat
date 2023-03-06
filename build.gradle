@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b02a'
+version = '2.2-b03a'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -70,9 +70,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'coldsweat', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'cold_sweat', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             mods {
-                coldsweat {
+                cold_sweat {
                     source sourceSets.main
                 }
             }
@@ -101,12 +101,17 @@ dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
     minecraft 'net.minecraftforge:forge:1.18.2-40.1.84'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    compileOnly fg.deobf("curse.maven:sereneapi-291874:3599022")
     runtimeOnly fg.deobf("curse.maven:spark-361579:3824951")
+    compileOnly fg.deobf("curse.maven:sereneapi-291874:3599022")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4050257")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
-    implementation fg.deobf("curse.maven:curios-309927:3841948")
-    runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
+    compileOnly fg.deobf("curse.maven:curios-309927:3841948")
+    compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256")
+    compileOnly fg.deobf("curse.maven:carrots-311327:4382778")
+    implementation fg.deobf("curse.maven:byg-247560:4036050")
+    implementation fg.deobf("curse.maven:biomesoplenty-220318:3759236")
+    implementation fg.deobf("curse.maven:create-328085:4371807")
+    implementation fg.deobf("curse.maven:flywheel-486392:4341461")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
 }
 
@@ -114,7 +119,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "coldsweat",
+                "Specification-Title"     : "cold_sweat",
                 "Specification-Vendor"    : "Mikul",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
