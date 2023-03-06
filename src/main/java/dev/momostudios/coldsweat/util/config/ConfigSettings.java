@@ -34,7 +34,7 @@ public class ConfigSettings
 
     public static ValueLoader<Integer> WATERSKIN_STRENGTH;
 
-    public static ValueLoader<List<Item>> LAMP_FUEL_ITEMS;
+    public static ValueLoader<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
     public static ValueLoader<List<String>> LAMP_DIMENSIONS;
 

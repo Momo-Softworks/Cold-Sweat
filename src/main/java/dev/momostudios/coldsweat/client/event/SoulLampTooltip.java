@@ -32,7 +32,7 @@ public class SoulLampTooltip
                 float fuel = screen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
-                if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().contains(carriedStack.getItem()))
+                if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
                 {
                     int fuelValue = screen.getMenu().getCarried().getCount();
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();

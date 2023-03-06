@@ -18,7 +18,7 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> iceboxItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
 
@@ -39,46 +39,46 @@ public final class ItemSettingsConfig
                 .comment("Defines items that can use as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
-                .defineList("Boiler", Arrays.asList
+                .defineList("Boiler", List.of
                                 (
-                                        Arrays.asList("minecraft:coal",         37),
-                                        Arrays.asList("minecraft:charcoal",     37),
-                                        Arrays.asList("minecraft:coal_block",   333),
-                                        Arrays.asList("minecraft:magma_block",  333),
-                                        Arrays.asList("minecraft:lava_bucket",  1000)
+                                        List.of("minecraft:coal",         37),
+                                        List.of("minecraft:charcoal",     37),
+                                        List.of("minecraft:coal_block",   333),
+                                        List.of("minecraft:magma_block",  333),
+                                        List.of("minecraft:lava_bucket",  1000)
                                 ),
                         it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
 
         iceboxItems = BUILDER
-                .defineList("Icebox", Arrays.asList
+                .defineList("Icebox", List.of
                                 (
-                                        Arrays.asList("minecraft:snowball",     37),
-                                        Arrays.asList("minecraft:clay",         37),
-                                        Arrays.asList("minecraft:snow_block",   333),
-                                        Arrays.asList("minecraft:water_bucket", 333),
-                                        Arrays.asList("minecraft:ice",          333),
-                                        Arrays.asList("minecraft:packed_ice",   1000)
+                                        List.of("minecraft:snowball",     37),
+                                        List.of("minecraft:clay",         37),
+                                        List.of("minecraft:snow_block",   333),
+                                        List.of("minecraft:water_bucket", 333),
+                                        List.of("minecraft:ice",          333),
+                                        List.of("minecraft:packed_ice",   1000)
                                 ),
                         it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
 
         hearthItems = BUILDER
                 .comment("Negative values indicate cold fuel")
-                .defineList("Hearth", Arrays.asList
+                .defineList("Hearth", List.of
                                 (
                                         // Hot
-                                        Arrays.asList("minecraft:coal",         37),
-                                        Arrays.asList("minecraft:charcoal",     37),
-                                        Arrays.asList("minecraft:coal_block",   333),
-                                        Arrays.asList("minecraft:magma_block",  333),
-                                        Arrays.asList("minecraft:lava_bucket",  1000),
+                                        List.of("minecraft:coal",         37),
+                                        List.of("minecraft:charcoal",     37),
+                                        List.of("minecraft:coal_block",   333),
+                                        List.of("minecraft:magma_block",  333),
+                                        List.of("minecraft:lava_bucket",  1000),
 
                                         // Cold
-                                        Arrays.asList("minecraft:snowball",     -37),
-                                        Arrays.asList("minecraft:clay",         -37),
-                                        Arrays.asList("minecraft:snow_block",   -333),
-                                        Arrays.asList("minecraft:water_bucket", -333),
-                                        Arrays.asList("minecraft:ice",          -333),
-                                        Arrays.asList("minecraft:packed_ice",   -1000)
+                                        List.of("minecraft:snowball",     -37),
+                                        List.of("minecraft:clay",         -37),
+                                        List.of("minecraft:snow_block",   -333),
+                                        List.of("minecraft:water_bucket", -333),
+                                        List.of("minecraft:ice",          -333),
+                                        List.of("minecraft:packed_ice",   -1000)
                                 ),
                         it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         BUILDER.pop();
@@ -90,18 +90,18 @@ public final class ItemSettingsConfig
         soulLampItems = BUILDER
                 .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
                         "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
-                .defineList("Fuel Items", Arrays.asList
+                .defineList("Fuel Items", List.of
                                 (
-                                        "minecraft:warped_stem",
-                                        "minecraft:warped_hyphae",
-                                        "minecraft:stripped_warped_stem",
-                                        "minecraft:stripped_warped_hyphae",
-                                        "minecraft:crimson_stem",
-                                        "minecraft:crimson_hyphae",
-                                        "minecraft:stripped_crimson_stem",
-                                        "minecraft:stripped_crimson_hyphae"
+                                        List.of("minecraft:warped_stem",             1),
+                                        List.of("minecraft:warped_hyphae",           1),
+                                        List.of("minecraft:stripped_warped_stem",    1),
+                                        List.of("minecraft:stripped_warped_hyphae",  1),
+                                        List.of("minecraft:crimson_stem",            1),
+                                        List.of("minecraft:crimson_hyphae",          1),
+                                        List.of("minecraft:stripped_crimson_stem",   1),
+                                        List.of("minecraft:stripped_crimson_hyphae", 1)
                                 ),
-                        it -> it instanceof String);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         soulLampDimensions = BUILDER
                 .comment("Defines the dimensions that the Soulspring Lamp can be used in",
@@ -131,7 +131,9 @@ public final class ItemSettingsConfig
                                         List.of("minecraft:leather_boots",      4, 4),
                                         List.of("minecraft:leather",            1, 1),
                                         List.of("cold_sweat:hoglin_hide",       0, 2),
-                                        List.of("cold_sweat:goat_fur",          2, 0)
+                                        List.of("cold_sweat:goat_fur",          2, 0),
+                                        List.of("#minecraft:wool",            1.5, 0),
+                                        List.of("minecraft:slime_ball",       0, 1.5)
                                 ),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
@@ -145,7 +147,7 @@ public final class ItemSettingsConfig
                                         List.of("minecraft:leather_leggings",   5, 5),
                                         List.of("minecraft:leather_boots",      4, 4)
                                 ),
-                        it -> it instanceof List list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
         insulationSlots = BUILDER
                 .comment("Defines how many insulation slots armor pieces have")
@@ -225,7 +227,7 @@ public final class ItemSettingsConfig
         return insulationSlots.get();
     }
 
-    public List<? extends String> soulLampItems()
+    public List<? extends List<?>> soulLampItems()
     {
         return soulLampItems.get();
     }
@@ -275,7 +277,7 @@ public final class ItemSettingsConfig
         insulationSlots.set(slots);
     }
 
-    public void setSoulLampItems(List<? extends String> items)
+    public void setSoulLampItems(List<? extends List<?>> items)
     {
         soulLampItems.set(items);
     }
