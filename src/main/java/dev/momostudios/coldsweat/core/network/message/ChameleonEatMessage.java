@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -32,9 +32,9 @@ public class ChameleonEatMessage
         context.enqueueWork(() ->
         {
             Entity entity = Minecraft.getInstance().level.getEntity(message.entityId);
-            if (entity instanceof Chameleon)
+            if (entity instanceof ChameleonEntity)
             {
-                ((Chameleon) entity).eatAnimation();
+                ((ChameleonEntity) entity).eatAnimation();
             }
         });
         context.setPacketHandled(true);

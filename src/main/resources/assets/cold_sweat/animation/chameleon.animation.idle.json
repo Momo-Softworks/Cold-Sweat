@@ -13,32 +13,32 @@
 				},
 				"LeftBackLeg": {
 					"rotation": {
-						"vector": [0, 7.5, -17.5]
+						"vector": [0, -20, -17.5]
 					}
 				},
 				"LeftBackLeg2": {
 					"rotation": {
-						"vector": [0, 0, 107.5]
+						"vector": [35.23163, -6.13784, 103.18163]
 					}
 				},
 				"LeftFrontLeg": {
 					"rotation": {
-						"vector": [0, -7.5, -17.5]
+						"vector": [0, 0, -17.5]
 					}
 				},
 				"LeftFrontLeg2": {
 					"rotation": {
-						"vector": [20, -5, 110]
+						"vector": [0, -5, 110]
 					}
 				},
 				"RightFrontLeg": {
 					"rotation": {
-						"vector": [0, 7.5, 17.5]
+						"vector": [0, -15, 17.5]
 					}
 				},
 				"RightFrontLeg2": {
 					"rotation": {
-						"vector": [20, "-", "-110"]
+						"vector": [20.07031, -4.69776, -111.71394]
 					}
 				},
 				"RightBackLeg": {
@@ -48,7 +48,7 @@
 				},
 				"RightBackLeg2": {
 					"rotation": {
-						"vector": [0, 0, "-107.5"]
+						"vector": [-2.5, 0, -107.5]
 					}
 				},
 				"Tail": {
@@ -145,27 +145,27 @@
 				},
 				"LeftFrontFoot1": {
 					"rotation": {
-						"vector": [42.5, 0, -2.5]
+						"vector": [70.20535, 3.19965, -1.0044]
 					}
 				},
 				"LeftFrontFoot2": {
 					"rotation": {
-						"vector": [30, 0, -2.5]
+						"vector": [50, 0, -2.5]
 					}
 				},
 				"RightFrontFoot1": {
 					"rotation": {
-						"vector": [42.5, 0, -2.5]
+						"vector": [42.69996, 1.99017, 2.72344]
 					}
 				},
 				"RightFrontFoot2": {
 					"rotation": {
-						"vector": [30, 0, -2.5]
+						"vector": [29.9055, -2.49762, 1.83287]
 					}
 				},
 				"LeftBackFoot1": {
 					"rotation": {
-						"vector": [0, 2, 0]
+						"vector": [0.08727, 1.9981, 2.50152]
 					}
 				},
 				"Tail3": {
@@ -254,15 +254,25 @@
 							"vector": [0, -20, 2.5]
 						},
 						"4.5": {
-							"vector": [-17.5, 30, 2.5],
+							"vector": [0, 30, 2.5],
 							"easing": "easeInElastic"
 						},
 						"5.5833": {
-							"vector": [-17.5, 30, 2.5]
+							"vector": [0, 30, 2.5]
 						},
 						"5.6667": {
 							"vector": [0, 0, 0]
 						}
+					}
+				},
+				"RightBackFoot1": {
+					"rotation": {
+						"vector": [0, -2.5, 0]
+					}
+				},
+				"LeftBackFoot2": {
+					"rotation": {
+						"vector": [0, 0, 2.5]
 					}
 				}
 			}
