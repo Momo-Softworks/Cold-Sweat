@@ -2,50 +2,29 @@ package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
+import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
+import dev.momostudios.coldsweat.common.block.HearthTopBlock;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.util.world.SpreadPath;
+import io.netty.util.internal.ConcurrentSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber
 public class HearthPathManagement
 {
-    public static final LinkedHashMap<BlockPos, Integer> HEARTH_POSITIONS = new LinkedHashMap<>();
-
+    public static final Set<BlockPos> HEARTH_POSITIONS = new HashSet<>();
     public static final Set<Pair<BlockPos, String>> DISABLED_HEARTHS = new HashSet<>();
-
-    // When a block update happens in the world, store the position of the chunk so nearby Hearths will be notified
-    @SubscribeEvent
-    public static void onBlockUpdated(BlockChangedEvent event)
-    {
-        BlockPos pos = event.getPos();
-        Level level = event.getLevel();
-        // Only update if the shape has changed
-        if (event.getPrevState().getShape(level, pos) != event.getNewState().getShape(level, pos))
-        {
-            synchronized (HEARTH_POSITIONS.entrySet())
-            {
-                for (Map.Entry<BlockPos, Integer> entry : HEARTH_POSITIONS.entrySet())
-                {
-                    BlockPos hearthPos = entry.getKey();
-                    int range = entry.getValue();
-                    if (pos.closerThan(hearthPos, range) && level.getBlockEntity(hearthPos) instanceof HearthBlockEntity hearth)
-                    {
-                        hearth.sendBlockUpdate(pos);
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * Save the player's disabled hearths on logout
@@ -89,14 +68,5 @@ public class HearthPathManagement
             CompoundTag hearthData = disabledHearths.getCompound(key);
             DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("pos")), hearthData.getString("level")));
         }
-    }
-
-    /**
-     * Clear the list of Hearths when the server is closed (the player might be changing worlds)
-     */
-    @SubscribeEvent
-    public static void onServerClosed(ServerStoppedEvent event)
-    {
-        HEARTH_POSITIONS.clear();
     }
 }

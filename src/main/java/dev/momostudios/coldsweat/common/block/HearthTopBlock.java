@@ -44,8 +44,7 @@ public class HearthTopBlock extends Block
                 .explosionResistance(10f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion()
-                .dynamicShape()
-                .requiresCorrectToolForDrops();
+                .dynamicShape();
     }
 
     public HearthTopBlock(Block.Properties properties)
