@@ -828,9 +828,6 @@ Technical Changes:
 - Waterskins now have custom dispense behavior
       - The dispenser pours the waterskin's contents onto players below
       - The water's effect weakens over distance (does nothing after ~20 blocks)
-- The Soulspring Lamp can now be fuelled by attacking an entity at full health with it
-      - This restores up to 4 fuel
-      - Does not work on undead entities or ones below full health
 - Added a config option to disable the mod preventing sleep if the player is too hot/cold
 
 Fixes:
@@ -855,7 +852,7 @@ Technical Changes:
             - Player attack knockback is reduced (less knockback as temperature decreases)
             - Up to 50% of the player's hearts freeze over (frozen hearts cannot be regenerated)
 - Added new mob: Chameleon
-      - Spawn in tropical biomes (Like jungles)
+      - Spawns in tropical biomes (Like jungles)
       - Change color according to the temperature around them (it can be a useful thermometer replacement!)
       - It might trust you if you throw it a spider eye
             - Chameleons can trust multiple players
@@ -883,11 +880,64 @@ Fixes:
 - Fixed food items configured to affect temperature being double-effective
 - Fixed insulation tooltips sometimes overlapping other tooltips
 - Fixed Soulspring Lamp tooltip not being properly sized when Shift is held and advanced tooltips are disabled
+- Items will now always burn in soul fire when the Spirit mod is installed to prevent incompatibility
 
 Technical Changes:
 - Revamped the temperature system to allow all living entities to have their own temperatures
       - Although the system has been reworked in the backend, there is very little difference in implementation aside from some method parameters
       - This may pave the way for livestock temperature to make a return in the future
 
-TO-DO
-- Added screen effects when the player is hot or cold, helped in large part by Softi on our Discord server
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b03a
+* Added new block: Thermolith
+      - Outputs a redstone signal based on the temperature of the nearby area (from 0 to 15 from minimum to maximum temperature set in the config)
+      - Crafted with 3 chameleon molt and 4 terracotta
+* Chameleons can now perform new actions when fed certain items:
+      - Magma cream, nether wart, cactus: Chameleon will point towards nearest hot biome (temperature > 1.7) within 2000 blocks 1 minute
+      - Snowball, beetroot, sweet berries: Chameleon will point towards the nearest cold biome (temperature < 0.2) within 2000 blocks for 1 minute
+      - Slimeball, ink sac, cocoa beans: Chameleon will point towards the nearest humid biome (temperature > 0.8 and downfall > 0.85) within 2000 blocks for 1 minute
+      - Spider eye, fermented spider eye, fish: Heals 3 health for the chameleon
+* Added new default insulation items:
+      - Wool: 1.5 points of cold insulation, which is right between leather (1) and goat fur (2)
+      - Slimeball: 1.5 points of hot insulation, which is right between leather (1) and hoglin hide (2)
+      ! 'item-settings.toml' will need to be deleted for these changes to take effect
+* Added support for Armor Underwear:
+      - Simple linings now allow the player to withstand more drastic temperatures
+      - Ozzy lining adapts to the player's body temperature and makes either hot or cold environments more habitable accordingly
+      - Otto/Ollie linings will protect against freezing/burning damage respectively. Each lining reduces the damage by 25%, up to 100%
+      - Otto/Ollie linings also lessen temperature debuffs
+* Added support for Oh the Biomes You'll Go!:
+      - Rebalanced several biomes' temperatures to be more accurate in Cold Sweat's temperature system
+      - Chameleons can now spawn in BYG biomes
+      ! 'world-settings.toml' and 'entity-settings.toml' will need to be deleted for these changes to take effect
+- Added the ability to pipe temperature-controlled air from the hearth using Create's pipes
+- Chameleons can now spawn in desert-like biomes
+- Chameleon taming items can now be configured
+- Reduced the time it takes for the chameleon to complete shedding from 1 minute to 30 seconds
+- The chameleon will now drop 1-3 chameleon molt when shedding
+- New chameleon sounds for ambient, death, and eat
+- Darkened the green chameleon texture so it isn't so washed-out
+- Fuel items for the soulspring lamp can now be configured to give different amounts of fuel
+- When a block is changed near a hearth, only the parts of the hearth's area-of-effect that stem from that block will be updated
+      - For example, if a door is closed, only the area through the door will be updated
+- Retextured the top of the sewing table to look less like a crafting table
+* Added new recipe unlocks and advancements when certain criteria are met to help progression
+
+Fixes:
+- Fixed crash when hovering over insulation items in certain cases
+- Fixed chameleon ambient/hurt sounds not following the entity's position (Vanilla Minecraft bug)
+- Fixed chameleon animations sometimes being applied to other chameleons
+- Fixed bug that prevented block updates from being detected by the hearth
+- Fixed bug that set the chameleon's shed cooldown to an extremely high negative number when reloading the world
+- Fixed negative temperature effects being applied when the player has fire/ice resistance or grace
+- Fixed heatstroke blur effect not persisting when perspective is changed (F5)
+- Fixed HUD elements showing/hiding being delayed when switching gamemodes
+- Fixed modded campfires not emitting heat
+- Fixed the chameleon becoming desynched if the player it is riding enters water
+
+
+Technical Changes:
+- Entities are now given the temperature capability on an EntityType basis instead of an individual basis
+      - Prevents every entity in the world being unnecessarily scanned for the capability every tick (performance improvement)
+
