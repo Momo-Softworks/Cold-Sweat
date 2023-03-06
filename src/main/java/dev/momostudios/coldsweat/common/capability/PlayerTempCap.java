@@ -4,7 +4,8 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
@@ -13,6 +14,8 @@ import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +30,8 @@ public class PlayerTempCap implements ITemperatureCap
 {
     static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.MAX, Type.MIN, Type.WORLD};
     static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.MAX, Type.MIN, Type.WORLD};
+
+    ConfigSettings config = ConfigSettings.getInstance();
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
@@ -95,13 +100,14 @@ public class PlayerTempCap implements ITemperatureCap
         getModifiers(type).clear();
     }
 
+    @Override
     public void tickDummy(LivingEntity entity)
     {
         if (!(entity instanceof Player player)) return;
 
         for (Type type : VALID_MODIFIER_TYPES)
         {
-            Temperature.apply(0, player, getModifiers(type));
+            Temperature.apply(0, player, type, getModifiers(type));
         }
 
         if (player.tickCount % 20 == 0)
@@ -110,18 +116,17 @@ public class PlayerTempCap implements ITemperatureCap
         }
     }
 
+    @Override
     public void tick(LivingEntity entity)
     {
-        if (!(entity instanceof Player player)) return;
-
-        ConfigSettings config = ConfigSettings.getInstance();
+        if (!(entity instanceof ServerPlayer player)) return;
 
         // Tick expiration time for world modifiers
-        double newWorldTemp = Temperature.apply(0, player, getModifiers(Type.WORLD));
-        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, getModifiers(Type.CORE));
-        double newBaseTemp  = Temperature.apply(0, player, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, player, getModifiers(Type.MAX));
-        double newMinOffset = Temperature.apply(0, player, getModifiers(Type.MIN));
+        double newWorldTemp = Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
+        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, Type.CORE, getModifiers(Type.CORE));
+        double newBaseTemp  = Temperature.apply(0, player, Type.BASE, getModifiers(Type.BASE));
+        double newMaxOffset = Temperature.apply(0, player, Type.MAX, getModifiers(Type.MAX));
+        double newMinOffset = Temperature.apply(0, player, Type.MIN, getModifiers(Type.MIN));
 
         double maxTemp = config.maxTemp + newMaxOffset;
         double minTemp = config.minTemp + newMinOffset;
@@ -134,7 +139,7 @@ public class PlayerTempCap implements ITemperatureCap
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
             double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
-            newCoreTemp += Temperature.apply(changeBy, player, getModifiers(Type.RATE));
+            newCoreTemp += Temperature.apply(changeBy, player, Type.RATE, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
         int tempSign = CSMath.getSign(newCoreTemp);
@@ -147,16 +152,14 @@ public class PlayerTempCap implements ITemperatureCap
 
         // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
         if (player.tickCount % 20 == 0)
-        {
-            calculateVisibility(player);
+        {   calculateVisibility(player);
         }
 
+        // Test for custom recipe rewards
+        this.rewardRecipes(player);
+
         // Write the new temperature values
-        setTemp(Type.BASE, newBaseTemp);
-        setTemp(Type.CORE, CSMath.clamp(newCoreTemp, -150f, 150f));
-        setTemp(Type.WORLD, newWorldTemp);
-        setTemp(Type.MAX, newMaxOffset);
-        setTemp(Type.MIN, newMinOffset);
+        this.setTemperatures(player, new double[]{newWorldTemp, newMaxOffset, newMinOffset, CSMath.clamp(newCoreTemp, -150, 150), newBaseTemp});
 
         // Sync the temperature values to the client
         if ((neverSynced
@@ -174,35 +177,66 @@ public class PlayerTempCap implements ITemperatureCap
         // Calculate body/base temperatures with modifiers
         double bodyTemp = getTemp(Type.BODY);
 
+        boolean hasGrace = player.hasEffect(ModEffects.GRACE);
+        boolean hasFireResist = player.hasEffect(MobEffects.FIRE_RESISTANCE);
+        boolean hasIceResist = player.hasEffect(ModEffects.ICE_RESISTANCE);
+
         //Deal damage to the player if temperature is critical
         if (!player.isCreative() && !player.isSpectator())
         {
-            if (player.tickCount % 40 == 0 && !player.hasEffect(ModEffects.GRACE))
+            if (player.tickCount % 40 == 0 && !hasGrace)
             {
-                boolean damageScaling = config.damageScaling;
-
-                if (bodyTemp >= 100 && !(player.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
+                if (bodyTemp >= 100 && !(hasFireResist && config.fireRes))
                 {
-                    player.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
+                    this.dealTempDamage(player, ModDamageSources.HOT, 2f);
                 }
-                else if (bodyTemp <= -100 && !(player.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
+                else if (bodyTemp <= -100 && !(hasIceResist && config.iceRes))
                 {
-                    player.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
+                    this.dealTempDamage(player, ModDamageSources.COLD, 2f);
                 }
             }
         }
         else setTemp(Type.CORE, 0);
     }
 
+    private void setTemperatures(ServerPlayer player, double[] temps)
+    {
+        for (Type type : VALID_TEMPERATURE_TYPES)
+        {
+            double oldTemp = getTemp(type);
+            double newTemp = temps[type.ordinal()];
+            if (oldTemp != newTemp)
+                ModTriggers.TEMPERATURE_CHANGED.trigger(player, type, getTemp(type));
+
+            this.setTemp(type, newTemp);
+        }
+    }
+
     public void calculateVisibility(Player player)
     {
-        if (player.tickCount % 20 == 0)
+        showWorldTemp = !ConfigSettings.getInstance().requireThermometer
+                || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
+                || player.getOffhandItem().getItem() == ModItems.THERMOMETER
+                || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
+        showBodyTemp = !player.isCreative() && !player.isSpectator();
+    }
+
+    private void rewardRecipes(ServerPlayer player)
+    {
+        // Give the recipe for waterskin
+        boolean hasGrace = player.hasEffect(ModEffects.GRACE);
+
+        if (!CSMath.isInRange((int) this.getTemp(Type.CORE), -10, 10) && !hasGrace
+        && !player.getRecipeBook().contains(new ResourceLocation("cold_sweat:waterskin")))
         {
-            showWorldTemp = !ConfigSettings.getInstance().requireThermometer
-                    || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
-                    || player.getOffhandItem().getItem() == ModItems.THERMOMETER
-                    || ModGetters.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
-            showBodyTemp = !player.isCreative() && !player.isSpectator();
+            player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation("cold_sweat:waterskin")});
+        }
+
+        //Give the recipe for thermometer
+        if (!CSMath.isInRange(this.getTemp(Type.WORLD), config.minTemp + this.getTemp(Type.MIN), config.maxTemp + this.getTemp(Type.MAX)) && !hasGrace
+        && !player.getRecipeBook().contains(new ResourceLocation("cold_sweat:thermometer")))
+        {
+            player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation("cold_sweat:thermometer")});
         }
     }
 
