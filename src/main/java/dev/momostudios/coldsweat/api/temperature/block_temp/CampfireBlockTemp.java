@@ -4,17 +4,18 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class CampfireBlockTemp extends BlockTemp
 {
     public CampfireBlockTemp()
     {
-        super(Blocks.CAMPFIRE);
+        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
     }
 
     @Override
