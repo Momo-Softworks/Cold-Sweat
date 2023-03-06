@@ -5,11 +5,11 @@ import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.BlockInit;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -36,23 +36,27 @@ public class AddTempModifiers
             TaskScheduler.scheduleServer(() ->
             {
                 Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10),  Temperature.Type.WORLD, false);
-                if (ModGetters.isSereneSeasonsLoaded())
-                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor(ColdSweat.SERENESEASONS_ID + ":season").tickRate(40), Temperature.Type.WORLD, false);
+                if (CompatManager.isSereneSeasonsLoaded())
+                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(40), Temperature.Type.WORLD, false);
                 Temperature.addModifier(player, new DepthTempModifier().tickRate(15), Temperature.Type.WORLD, false);
                 Temperature.addModifier(player, new BlockTempModifier(7).tickRate(4),  Temperature.Type.WORLD, false);
-            }, 10);
+            }, 1);
         }
     }
 
     @SubscribeEvent
     public static void onMobCreated(EntityJoinWorldEvent event)
     {
-        if (event.getEntity() instanceof Chameleon chameleon)
+        if (event.getEntity() instanceof ChameleonEntity chameleon)
         {
-            Temperature.addModifier(chameleon, new BiomeTempModifier(9).tickRate(20), Temperature.Type.WORLD, false);
-            Temperature.addModifier(chameleon, new BlockTempModifier(4).tickRate(20), Temperature.Type.WORLD, false);
-            if (ModGetters.isSereneSeasonsLoaded())
-                Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor(ColdSweat.SERENESEASONS_ID + ":season").tickRate(60), Temperature.Type.WORLD, false);
+            TaskScheduler.scheduleServer(() ->
+            {
+                Temperature.addModifier(chameleon, new BiomeTempModifier(9).tickRate(40), Temperature.Type.WORLD, false);
+                if (CompatManager.isSereneSeasonsLoaded())
+                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false);
+                Temperature.addModifier(chameleon, new DepthTempModifier().tickRate(40), Temperature.Type.WORLD, false);
+                Temperature.addModifier(chameleon, new BlockTempModifier(4).tickRate(20), Temperature.Type.WORLD, false);
+            }, 1);
         }
     }
 
@@ -128,7 +132,7 @@ public class AddTempModifiers
                 }
                 else
                 {
-                    EntitySettingsConfig.getInstance().insulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
+                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
                     {
                         float insulationAmount = ((Number) entityID.get(1)).floatValue();
                         Temperature.addModifier(player, new MountTempModifier(insulationAmount).expires(1), Temperature.Type.RATE, false);
