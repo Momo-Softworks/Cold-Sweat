@@ -14,16 +14,20 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
+    static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
+
     // Stuff for world temperature
     public static double WORLD_TEMP = 0;
     static boolean SHOW_WORLD_TEMP = false;
@@ -43,7 +47,7 @@ public class Overlays
     static int BODY_BLEND_TIME = 10;
     static int BODY_TEMP_SEVERITY = 0;
 
-    static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
+    static GameType GAME_MODE = null;
 
     public static void registerOverlays()
     {
@@ -55,24 +59,24 @@ public class Overlays
 
             if (player != null && SHOW_WORLD_TEMP && !Minecraft.getInstance().options.hideGui)
             {
-                double min = ConfigSettings.getInstance().minTemp + MIN_OFFSET;
-                double max = ConfigSettings.getInstance().maxTemp + MAX_OFFSET;
+                double min = ConfigSettings.getInstance().minTemp;
+                double max = ConfigSettings.getInstance().maxTemp;
 
                 // Get player world temperature
                 double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                 // Get the temperature severity
-                int severity = getWorldSeverity(temp, min, max);
+                int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
 
                 // Set text color
                 int color = switch (severity)
-                        {
-                            case  2, 3 -> 16297781;
-                            case  4    -> 16728089;
-                            case -2,-3 -> 8443135;
-                            case -4    -> 4236031;
-                            default -> 14737376;
-                        };
+                {
+                    case  2, 3 -> 16297781;
+                    case  4    -> 16728089;
+                    case -2,-3 -> 8443135;
+                    case -4    -> 4236031;
+                    default -> 14737376;
+                };
 
 
                 /* Render gauge */
@@ -92,7 +96,7 @@ public class Overlays
                 RenderSystem.disableBlend();
 
                 // Sets the text bobbing offset (or none if disabled)
-                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min, max) && player.tickCount % 2 == 0 ? 1 : 0;
+                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -184,22 +188,32 @@ public class Overlays
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null)
+        Player player = Minecraft.getInstance().player;
+        if (event.phase == TickEvent.Phase.START && player != null)
         {
-            Player player = Minecraft.getInstance().player;
-
-
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(icap ->
             {
                 if (!(icap instanceof PlayerTempCap cap)) return;
 
+                // Update GUI visibility based on game mode
+                if (Minecraft.getInstance().gameMode != null)
+                {
+                    GameType gameMode = Minecraft.getInstance().gameMode.getPlayerMode();
+                    if (GAME_MODE != gameMode)
+                    {
+                        cap.calculateVisibility(player);
+                        GAME_MODE = gameMode;
+                    }
+                }
                 SHOW_WORLD_TEMP = cap.shouldShowWorldTemp();
                 SHOW_BODY_TEMP = cap.shouldShowBodyTemp();
+
+
                 /* World Temp */
 
+                boolean celsius = CLIENT_CONFIG.celsius();
                 if (SHOW_WORLD_TEMP)
                 {
-                    boolean celsius = CLIENT_CONFIG.celsius();
 
                     // Get temperature in actual degrees
                     double worldTemp = cap.getTemp(Temperature.Type.WORLD);
@@ -213,6 +227,10 @@ public class Overlays
                     // Update max/min offset
                     MAX_OFFSET = cap.getTemp(Temperature.Type.MAX);
                     MIN_OFFSET = cap.getTemp(Temperature.Type.MIN);
+                }
+                else
+                {
+                    PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertUnits(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                 }
 
 
@@ -252,9 +270,10 @@ public class Overlays
         }
     }
 
-    static int getWorldSeverity(double temp, double min, double max)
+    static int getWorldSeverity(double temp, double min, double max, double offsMin, double offsMax)
     {
-        return (int) CSMath.blend(-4, 4, temp, min, max);
+        double mid = (max + min) / 2;
+        return (int) (temp < mid ? CSMath.blend(-4, 0, temp, min + offsMin, mid) : CSMath.blend(0, 4, temp, mid, max + offsMax));
     }
 
     static int getBodySeverity(int temp)
