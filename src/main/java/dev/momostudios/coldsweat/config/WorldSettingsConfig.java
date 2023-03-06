@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -29,16 +29,14 @@ public class WorldSettingsConfig
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps = null;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps = null;
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> chameleonBiomes;
-
-    static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
+    public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
     static
     {
         /*
          Dimensions
          */
-        BUILDER.comment("Format: [[\"dimension-1\", temperature-1], [\"dimension-2\", temperature-2]... etc]",
+        BUILDER.comment("Format: [[\"dimension_1\", temperature1], [\"dimension_2\", temperature2]... etc]",
                         "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end",
                         "Note: all temperatures are in Minecraft units",
                         "°F to MC = (x - 32) / 42",
@@ -64,7 +62,7 @@ public class WorldSettingsConfig
         /*
          Biomes
          */
-        BUILDER.comment("Format: [[\"biome-1\", temp-low, temp-high, *units], [\"biome-2\", temp-low, temp-high, *units]... etc]",
+        BUILDER.comment("Format: [[\"biome_1\", tempLow, tempHigh, *units], [\"biome_2\", tempLow, tempHigh, *units]... etc]",
                        "temp-low: The temperature of the biome at midnight",
                        "temp-high: The temperature of the biome at noon",
                        "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)",
@@ -98,7 +96,7 @@ public class WorldSettingsConfig
         ));
 
         /* Biomes o' Plenty biomes */
-        if (ModGetters.isBiomesOPlentyLoaded())
+        if (CompatManager.isBiomesOPlentyLoaded())
         {
             biomeBuilder.addAll(List.of(
                 List.of("biomesoplenty:bayou", 67, 78, "F"),
@@ -139,13 +137,36 @@ public class WorldSettingsConfig
                 List.of("biomesoplenty:wooded_wasteland", 78, 95, "F")));
         }
 
+        /* BYG Biomes*/
+        if (CompatManager.isBiomesYoullGoLoaded())
+        {
+            biomeBuilder.addAll(List.of(
+                    List.of("byg:coniferous_forest", 52, 70, "F"),
+                    List.of("byg:autumnal_forest", 60, 75, "F"),
+                    List.of("byg:autumnal_taiga", 56, 68, "F"),
+                    List.of("byg:baobab_savanna", 70, 95, "F"),
+                    List.of("byg:dacite_ridges", 40, 65, "F"),
+                    List.of("byg:firecracker_shrubland", 72, 105, "F"),
+                    List.of("byg:frosted_taiga", 22, 48, "F"),
+                    List.of("byg:cypress_swamplands", 68, 82, "F"),
+                    List.of("byg:dead_sea", 72, 82, "F"),
+                    List.of("byg:lush_stacks", 66, 75, "F"),
+                    List.of("byg:fragment_forest", 43, 64, "F"),
+                    List.of("byg:frosted_coniferous_forest", 8, 31, "F"),
+                    List.of("byg:maple_taiga", 53, 71, "F"),
+                    List.of("byg:skyris_vale", 65, 78, "F"),
+                    List.of("byg:twilight_meadow", 49, 66, "F"),
+                    List.of("byg:weeping_witch_forest", 56, 73, "F"),
+                    List.of("byg:zelkova_forest", 44, 61, "F")));
+        }
+
 
         biomeOffsets = BUILDER
             .comment("Applies an offset to the temperature of a biome (in Minecraft units).")
             .defineList("Biome Temperature Offsets", List.of(),
                 it ->
                 {
-                    if (it instanceof List list)
+                    if (it instanceof List<?> list)
                     {
                         if (list.size() == 2)
                         {
@@ -162,7 +183,7 @@ public class WorldSettingsConfig
             .defineList("Biome Temperatures", biomeBuilder,
                 it ->
                 {
-                    if (it instanceof List list)
+                    if (it instanceof List<?> list)
                     {
                         if (list.size() == 2)
                         {
@@ -175,21 +196,8 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
-        BUILDER.push("Mob Spawning");
-        chameleonBiomes = BUILDER
-                .comment("Defines the biomes that Chameleons can spawn in")
-                .defineList("Chameleon Spawn Biomes", List.of(
-                        "minecraft:jungle",
-                        "minecraft:sparse_jungle",
-                        "minecraft:bamboo_jungle",
-                        "biomesoplenty:rainforest",
-                        "biomesoplenty:rocky_rainforest",
-                        "biomesoplenty:fungal_jungle"
-                        ), it -> it instanceof String);
-        BUILDER.pop();
-
         /* Serene Seasons config */
-        if (ModList.get().isLoaded(ColdSweat.SERENESEASONS_ID))
+        if (CompatManager.isSereneSeasonsLoaded())
         {
             BUILDER.comment("Format: [season-start, season-mid, season-end]",
                             "Applied as an offset to the world's temperature")
@@ -293,9 +301,5 @@ public class WorldSettingsConfig
     }
     public void setDimensionTemperatures(List<? extends List<?>> list) {
         dimensionTemps.set(list);
-    }
-
-    public List<? extends String> chameleonBiomes() {
-        return chameleonBiomes.get();
     }
 }
