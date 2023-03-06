@@ -154,5 +154,10 @@ public class TempModifierInit
             try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
             catch (Exception ignored) {}
         }
+
+        if (CompatManager.isArmorUnderwearLoaded())
+        {   try { event.register((TempModifier) Class.forName(armorUnder).getConstructor().newInstance()); }
+            catch (Exception ignored) {}
+        }
     }
 }

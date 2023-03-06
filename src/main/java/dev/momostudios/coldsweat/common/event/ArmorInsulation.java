@@ -2,12 +2,14 @@ package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -73,7 +75,14 @@ public class ArmorInsulation
                 if (cold == 0 && hot == 0 && currentMod != null)
                     Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
                 else
-                    Temperature.replaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(10), Temperature.Type.RATE);
+                    Temperature.replaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
+            }
+
+            // Armor underwear compat
+            if (CompatManager.isArmorUnderwearLoaded())
+            {
+                Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.MAX, false);
+                Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.MIN, false);
             }
         }
     }
