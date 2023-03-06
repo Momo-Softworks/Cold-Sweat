@@ -10,6 +10,7 @@
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
+    "EntityRidingMixin",
     "MixinBlockUpdate",
     "MixinMinecart",
     "MixinSoulFire"

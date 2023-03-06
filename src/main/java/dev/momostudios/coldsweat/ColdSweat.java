@@ -2,11 +2,13 @@ package dev.momostudios.coldsweat;
 
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.*;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -35,7 +37,6 @@ public class ColdSweat
     public static final boolean REMAP_MIXINS = false;
 
     public static final String MOD_ID = "cold_sweat";
-    public static final String SERENESEASONS_ID = "sereneseasons";
 
     public ColdSweat()
     {
@@ -45,10 +46,8 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
         bus.addListener(this::registerCaps);
-        if (ModGetters.isCuriosLoaded())
-        {
-            bus.addListener(this::registerCurioSlots);
-        }
+        if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
+
 
         BlockInit.BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
@@ -94,6 +93,7 @@ public class ColdSweat
     {
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
+        // Register GUI elements
         Overlays.registerOverlays();
     }
 
@@ -108,4 +108,5 @@ public class ColdSweat
     {
         InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE, () -> SlotTypePreset.CHARM.getMessageBuilder().build());
     }
+
 }

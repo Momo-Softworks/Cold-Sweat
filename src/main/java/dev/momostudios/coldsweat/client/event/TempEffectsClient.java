@@ -10,18 +10,22 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -40,6 +44,9 @@ public class TempEffectsClient
     static float X_SWAY_BLEND = 0;
     static float Y_SWAY_SPEED = 0;
     static float Y_SWAY_BLEND = 0;
+
+    static int COLD_IMMUNITY = 0;
+    static int HOT_IMMUNITY  = 0;
 
     // Sway the player's camera when the player is too hot; swaying is more drastic at higher temperatures
     @SubscribeEvent
@@ -212,21 +219,26 @@ public class TempEffectsClient
                 float playerTemp = (float) Overlays.BODY_TEMP;
                 if (playerTemp >= 50)
                 {
+                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100);
+                    if (blur > 0 && mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json"))
+                    {   BLUR_APPLIED = false;
+                    }
                     if (!BLUR_APPLIED)
                     {
                         mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
                         BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
                         BLUR_APPLIED = true;
                     }
-                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100);
-                    BLUR_RADIUS.set(blur);
+                    if (BLUR_RADIUS != null)
+                    {   BLUR_RADIUS.set(blur);
+                    }
                 }
                 else if (BLUR_APPLIED)
                 {
                     BLUR_RADIUS.set(0f);
                     BLUR_APPLIED = false;
                 }
-            } catch (Exception ignored) { ignored.printStackTrace(); }
+            } catch (Exception ignored) {}
         }
     }
 }

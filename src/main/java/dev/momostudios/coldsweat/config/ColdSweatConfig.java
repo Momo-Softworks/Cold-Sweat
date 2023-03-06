@@ -166,13 +166,13 @@ public class ColdSweatConfig
                                         Arrays.asList(Blocks.PACKED_ICE.getRegistryName().toString(),  -0.2, 4, true, 1.0),
                                         Arrays.asList(Blocks.BLUE_ICE.getRegistryName().toString(),    -0.3, 4, true, 1.0)
                                 ),
-                        it -> true);
+                        it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
         BUILDER.pop();
 
-        BUILDER.push("Hearth Strength");
-        hearthEffect = BUILDER
-                .comment("How strong the hearth is (default: 0.5)")
-                .defineInRange("Hearth Strength", 0.5, 0, 1.0);
+        BUILDER.push("Hearth");
+            hearthEffect = BUILDER
+                    .comment("How strong the hearth is (default: 0.5)")
+                    .defineInRange("Hearth Strength", 0.5, 0, 1.0);
         BUILDER.pop();
 
         BUILDER.push("Cold Soul Fire");

@@ -23,8 +23,7 @@ public class MixinMinecart
                 value = "INVOKE",
                 target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
             ),
-            remap = ColdSweat.REMAP_MIXINS,
-            cancellable = true)
+            remap = ColdSweat.REMAP_MIXINS)
     public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
     {
         ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();

@@ -6,11 +6,11 @@ public class ModDamageSources
 {
     private ModDamageSources() {}
 
-    public static final DamageSource COLD = (new DamageSource("cold"))
+    public static final DamageSource COLD = (new DamageSource("cold_sweat:cold"))
         .bypassArmor()
         .bypassMagic();
 
-    public static final DamageSource HOT  = (new DamageSource("hot"))
+    public static final DamageSource HOT  = (new DamageSource("cold_sweat:hot"))
         .bypassArmor()
         .bypassMagic()
         .setIsFire();

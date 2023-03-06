@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -25,7 +26,7 @@ public class BiomeTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         try
         {

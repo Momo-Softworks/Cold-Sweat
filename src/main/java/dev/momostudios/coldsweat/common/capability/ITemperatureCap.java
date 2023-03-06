@@ -1,10 +1,13 @@
 package dev.momostudios.coldsweat.common.capability;
 
+import dev.momostudios.coldsweat.api.event.common.TemperatureDamageEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.List;
 
@@ -18,6 +21,12 @@ public interface ITemperatureCap
     void copy(ITemperatureCap cap);
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);
+    default void dealTempDamage(LivingEntity target, DamageSource source, float amount)
+    {
+        TemperatureDamageEvent event = new TemperatureDamageEvent(target, source, amount);
+        if (!MinecraftForge.EVENT_BUS.post(event))
+            target.hurt(ConfigSettings.getInstance().damageScaling ? source.setScalesWithDifficulty() : source, event.getAmount());
+    }
 
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag tag);

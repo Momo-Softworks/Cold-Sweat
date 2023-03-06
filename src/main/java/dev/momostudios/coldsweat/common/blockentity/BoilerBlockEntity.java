@@ -96,9 +96,9 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
     {
-        if (te instanceof BoilerBlockEntity iceboxTE)
+        if (te instanceof BoilerBlockEntity boilerTE)
         {
-            iceboxTE.tick(level, state, pos);
+            boilerTE.tick(level, state, pos);
         }
     }
 

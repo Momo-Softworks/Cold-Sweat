@@ -27,7 +27,7 @@ public class MixinBlockUpdate
     @Inject(method = "onBlockStateChange", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
-        if (BlockUpdateLimiter.UPDATES_THIS_TICK < 10 && oldState.equals(newState))
+        if (BlockUpdateLimiter.UPDATES_THIS_TICK < 10 && !oldState.equals(newState))
         {
             TaskScheduler.scheduleServer(() ->
             {

@@ -8,8 +8,6 @@ import dev.momostudios.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -30,7 +28,7 @@ import java.util.List;
 public class ItemTooltipInfo
 {
     @SubscribeEvent
-    public static void addTTInfo(ItemTooltipEvent event)
+    public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
         if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
@@ -56,7 +54,7 @@ public class ItemTooltipInfo
     }
 
     @SubscribeEvent
-    public static void renderArmorTooltip(RenderTooltipEvent.GatherComponents event)
+    public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
         // Add the armor insulation tooltip if the armor has insulation
@@ -76,9 +74,13 @@ public class ItemTooltipInfo
             event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack)));
         }
         // If the item is an insulator, add the tooltip
-        else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()) || ConfigSettings.INSULATING_ARMORS.get().containsKey(stack.getItem()))
+        else
         {
-            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))));
+            Pair<Double, Double> itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem());
+            if (itemInsul != null)
+            {
+                event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(itemInsul)));
+            }
         }
     }
 }

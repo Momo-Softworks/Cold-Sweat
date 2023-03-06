@@ -23,7 +23,7 @@ public class WaterTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         double worldTemp = Temperature.get(entity, Temperature.Type.WORLD);
         double maxTemp = ConfigSettings.getInstance().maxTemp;

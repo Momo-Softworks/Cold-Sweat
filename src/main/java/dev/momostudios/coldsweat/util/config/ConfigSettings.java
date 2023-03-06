@@ -5,7 +5,7 @@ import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import oshi.util.tuples.Triplet;
@@ -43,6 +43,9 @@ public class ConfigSettings
     public static ValueLoader<Map<Item, Double>> HEARTH_FUEL;
 
     public static ValueLoader<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
+
+    public static ValueLoader<Map<String, Integer>> CHAMELEON_BIOMES;
+    public static ValueLoader<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
 
     // Makes the settings instantiation collapsible & easier to read
     static
@@ -111,10 +114,10 @@ public class ConfigSettings
 
         LAMP_FUEL_ITEMS = ValueLoader.of(() ->
         {
-            List<Item> list = new ArrayList<>();
-            for (String itemID : ItemSettingsConfig.getInstance().soulLampItems())
+            Map<Item, Integer> list = new HashMap<>();
+            for (List<?> item : ItemSettingsConfig.getInstance().soulLampItems())
             {
-                list.addAll(ConfigHelper.getItems(itemID));
+                ConfigHelper.getItems((String) item.get(0)).forEach(i -> list.put(i, (Integer) item.get(1)));
             }
             return list;
         });
@@ -123,11 +126,35 @@ public class ConfigSettings
 
         GOAT_FUR_TIMINGS = ValueLoader.of(() ->
         {
-            List<?> entry = EntitySettingsConfig.getInstance().goatFurGrowth();
+            List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         });
 
-        if (ModGetters.isSereneSeasonsLoaded())
+        CHAMELEON_BIOMES = ValueLoader.of(() ->
+        {
+            Map<String, Integer> map = new HashMap<>();
+            for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
+            {
+                map.put((String) entry.get(0), ((Number) entry.get(1)).intValue());
+            }
+            return map;
+        });
+
+        CHAMELEON_TAME_ITEMS = ValueLoader.of(() ->
+        {
+            Map<Item, Integer> map = new HashMap<>();
+            for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonTameItems())
+            {
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {
+                    map.put(item, ((Number) entry.get(1)).intValue());
+                }
+            }
+            return map;
+        });
+
+        if (CompatManager.isSereneSeasonsLoaded())
         {
             SUMMER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().summerTemps());
             AUTUMN_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
@@ -149,11 +176,12 @@ public class ConfigSettings
 
     private static ConfigSettings INSTANCE = new ConfigSettings();
 
-    public ConfigSettings() {}
+    public ConfigSettings()
+    {   this(ColdSweatConfig.getInstance());
+    }
 
     public static ConfigSettings getInstance()
-    {
-        return INSTANCE;
+    {   return INSTANCE;
     }
 
     public static void setInstance(ConfigSettings instance)
@@ -162,8 +190,7 @@ public class ConfigSettings
     }
 
     public ConfigSettings(ColdSweatConfig config)
-    {
-        readValues(config);
+    {   readValues(config);
     }
 
     public void readValues(ColdSweatConfig config)

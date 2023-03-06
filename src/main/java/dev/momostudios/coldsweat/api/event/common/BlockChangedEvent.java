@@ -25,7 +25,7 @@ public class BlockChangedEvent extends Event
         return pos;
     }
 
-    public BlockState getPrevState()
+    public BlockState getOldState()
     {
         return prevState;
     }

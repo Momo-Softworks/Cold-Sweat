@@ -86,7 +86,7 @@ public class EntityTempCap implements ITemperatureCap
 
         for (Type type : VALID_MODIFIER_TYPES)
         {
-            Temperature.apply(0, player, getModifiers(type));
+            Temperature.apply(0, player, type, getModifiers(type));
         }
     }
 
@@ -95,11 +95,11 @@ public class EntityTempCap implements ITemperatureCap
         ConfigSettings config = ConfigSettings.getInstance();
 
         // Tick expiration time for world modifiers
-        double newWorldTemp = Temperature.apply(0, entity, getModifiers(Type.WORLD));
-        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, getModifiers(Type.CORE));
-        double newBaseTemp  = Temperature.apply(0, entity, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, entity, getModifiers(Type.MAX));
-        double newMinOffset = Temperature.apply(0, entity, getModifiers(Type.MIN));
+        double newWorldTemp = Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
+        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
+        double newBaseTemp  = Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
+        double newMaxOffset = Temperature.apply(0, entity, Type.MAX, getModifiers(Type.MAX));
+        double newMinOffset = Temperature.apply(0, entity, Type.MIN, getModifiers(Type.MIN));
 
         double maxTemp = config.maxTemp + newMaxOffset;
         double minTemp = config.minTemp + newMinOffset;
@@ -112,7 +112,7 @@ public class EntityTempCap implements ITemperatureCap
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
             double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
-            newCoreTemp += Temperature.apply(changeBy, entity, getModifiers(Type.RATE));
+            newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
         int tempSign = CSMath.getSign(newCoreTemp);
@@ -134,17 +134,17 @@ public class EntityTempCap implements ITemperatureCap
             syncTimer--;
 
         // Sync the temperature values to the client
-        if (syncTimer <= 0 && (neverSynced
-        || (((int) syncedValues[0] != (int) newCoreTemp))
-        || (((int) syncedValues[1] != (int) newBaseTemp))
-        || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02))
-        || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02))
-        || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02))))
+        if (syncTimer <= 0 || (neverSynced
+        || (int) syncedValues[0] != (int) newCoreTemp
+        || (int) syncedValues[1] != (int) newBaseTemp
+        || Math.abs(syncedValues[2] - newWorldTemp) >= 0.02
+        || Math.abs(syncedValues[3] - newMaxOffset) >= 0.02
+        || Math.abs(syncedValues[4] - newMinOffset) >= 0.02))
         {
             Temperature.updateTemperature(entity, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
             neverSynced = false;
-            syncTimer = 20;
+            syncTimer = 40;
         }
 
         /*

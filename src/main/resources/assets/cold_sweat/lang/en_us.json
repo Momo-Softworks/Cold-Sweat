@@ -4,6 +4,7 @@
   "block.cold_sweat.hearth_top":        "Hearth",
   "block.cold_sweat.icebox":            "Icebox",
   "block.cold_sweat.sewing_table":      "Sewing Table",
+  "block.cold_sweat.thermolith":        "Thermolith",
 
 
   "item.cold_sweat.minecart_insulation": "Minecart Insulation",
@@ -44,17 +45,19 @@
   "itemGroup.cold_sweat": "Cold Sweat",
 
 
-  "death.attack.cold":          "%1$s froze to death",
-  "death.attack.cold.player":   "%1$s froze to death whilst fighting %2$s",
-  "death.attack.hot":           "%1$s died of heatstroke",
-  "death.attack.hot.player":    "%1$s died of heatstroke whilst fighting %2$s",
+  "death.attack.cold_sweat:cold":          "%1$s froze to death",
+  "death.attack.cold_sweat:cold.player":   "%1$s froze to death whilst fighting %2$s",
+  "death.attack.cold_sweat:hot":           "%1$s died of heatstroke",
+  "death.attack.cold_sweat:hot.player":    "%1$s died of heatstroke whilst fighting %2$s",
 
 
   "entity.player.damage.freeze":   "Player freezes",
-  "entity.chameleon.ambient":      "Chameleon chirps",
+  "entity.chameleon.ambient":      "Chameleon chirrups",
   "entity.chameleon.hurt":         "Chameleon hisses",
-  "item.soulspring_lamp.on":       "Soulspring Lamp Ignites",
-  "item.soulspring_lamp.off":      "Soulspring Lamp Extinguishes",
+  "entity.chameleon.death":        "Chameleon dies",
+  "entity.chameleon.shed":         "Chameleon sheds",
+  "item.soulspring_lamp.on":       "Soulspring Lamp ignites",
+  "item.soulspring_lamp.off":      "Soulspring Lamp extinguishes",
 
 
   "cold_sweat.screen.hearth.show_particles": "Show air particles",

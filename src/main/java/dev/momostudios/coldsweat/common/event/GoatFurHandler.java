@@ -116,8 +116,8 @@ public class GoatFurHandler
                 // Growth cooldown has passed and goat is sheared
                 if (goat.tickCount - cap.lastSheared() >= furConfig.getB() && cap.isSheared())
                 {
-                    WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, goat, SoundSource.NEUTRAL, 0.5f, 0.6f);
-                    WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, SoundSource.NEUTRAL, 0.5f, 0.8f);
+                    WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, goat, goat.getSoundSource(), 0.5f, 0.6f);
+                    WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, goat.getSoundSource(), 0.5f, 0.8f);
 
                     // Spawn particles
                     WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);

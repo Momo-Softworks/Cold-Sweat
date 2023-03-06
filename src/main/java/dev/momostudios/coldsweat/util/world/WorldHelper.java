@@ -4,6 +4,9 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -14,6 +17,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,6 +34,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.PacketDistributor;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -104,7 +109,7 @@ public class WorldHelper
         return posList;
     }
 
-    public static boolean canSeeSky(LevelChunk chunk, Level level, BlockPos pos, int maxDistance)
+    public static boolean canSeeSky(LevelChunk chunk, LevelAccessor level, BlockPos pos, int maxDistance)
     {
         for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
         {
@@ -128,15 +133,16 @@ public class WorldHelper
         return true;
     }
 
-    public static boolean canSeeSky(Level level, BlockPos pos, int maxDistance)
+    public static boolean canSeeSky(LevelAccessor level, BlockPos pos, int maxDistance)
     {
         LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
         return chunk == null || canSeeSky(chunk, level, pos, maxDistance);
     }
 
-    public static boolean isSpreadBlocked(Level level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
+    public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         if (state.isAir()) return false;
+        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM || state.getBlock() == ModBlocks.HEARTH_TOP) return false;
         VoxelShape shape = state.getBlock().getShape(state, level, pos, CollisionContext.empty());
 
         return isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir)
@@ -178,7 +184,7 @@ public class WorldHelper
         }
     }
 
-    public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
+    public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)
     {
         LevelChunkSection[] sections = chunk.getSections();
         return sections[Math.min(sections.length - 1, (y >> 4) - chunk.getMinSection())];
@@ -194,8 +200,17 @@ public class WorldHelper
      */
     public static void playEntitySound(SoundEvent sound, Entity entity, SoundSource source, float volume, float pitch)
     {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
+        if (!entity.isSilent())
+        {
+            if (!entity.level.isClientSide)
+            {
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
+                        new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
+            }
+            else
+            {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity));
+            }
+        }
     }
 
     public static boolean isWet(Entity entity)

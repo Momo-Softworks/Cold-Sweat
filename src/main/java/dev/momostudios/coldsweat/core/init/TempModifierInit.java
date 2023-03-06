@@ -8,7 +8,7 @@ import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.util.compat.ModGetters;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
@@ -21,7 +21,7 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -63,41 +63,35 @@ public class TempModifierInit
         {
             try
             {
-                // Check if required fields are present
-                if (!(effectBuilder.get(0) instanceof String)
-                || !(effectBuilder.get(1) instanceof Number configTemp)
-                || !(effectBuilder.get(2) instanceof Number configRange))
-                {
-                    throw new Exception("Invalid BlockTemp format");
-                }
-
+                // Get IDs associated with this config entry
                 String[] blockIDs = ((String) effectBuilder.get(0)).split(",");
+                // Temp of block
+                final double blockTemp = ((Number) effectBuilder.get(1)).doubleValue();
+                // Range of effect
+                final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
 
-                final double temp    = configTemp.doubleValue();
-                final double range   = configRange.doubleValue();
-                final boolean weaken = effectBuilder.size() < 4 || !(effectBuilder.get(2) instanceof Boolean) || (boolean) effectBuilder.get(3);
+                // Weakens over distance?
+                final boolean weaken = effectBuilder.size() < 4 || (boolean) effectBuilder.get(3);
 
+                // Get min/max effect
                 final double maxChange = effectBuilder.size() == 5 && effectBuilder.get(4) instanceof Number
                         ? ((Number) effectBuilder.get(4)).doubleValue()
                         : Double.MAX_VALUE;
 
-                final double maxEffect = temp > 0 ?  maxChange :  Double.MAX_VALUE;
-                final double minEffect = temp < 0 ? -maxChange : -Double.MAX_VALUE;
+                final double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
+                final double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
 
-                List<Block> effectBlocks = new ArrayList<>();
+                // Parse block IDs into blocks
+                List<Block> effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toList();
 
-                for (String id : blockIDs)
-                {
-                    effectBlocks.addAll(ConfigHelper.getBlocks(id));
-                }
-
+                // Generate BlockTemp
                 event.register(
                         new BlockTemp(effectBlocks.toArray(new Block[0]))
                         {
                             @Override
                             public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                             {
-                                return weaken ? CSMath.blend(temp, 0, distance, 0.5, range) : temp;
+                                return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
                             }
 
                             @Override
@@ -134,7 +128,9 @@ public class TempModifierInit
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
-        String sereneSeasons = "dev.momostudios.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier";
+        String compatPath = "dev.momostudios.coldsweat.api.temperature.modifier.compat.";
+        String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
+        String armorUnder = compatPath + "ArmorUnderTempModifier";
 
         event.register(new BlockTempModifier());
         event.register(new BiomeTempModifier());
@@ -149,9 +145,9 @@ public class TempModifierInit
         event.register(new FreezingTempModifier());
         event.register(new FireTempModifier());
 
-        if (ModGetters.isSereneSeasonsLoaded())
-        {
-            try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
+        // Compat
+        if (CompatManager.isSereneSeasonsLoaded())
+        {   try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
             catch (Exception ignored) {}
         }
 

@@ -48,7 +48,7 @@ public class WaterskinItem extends Item
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());
-                filledWaterskin.getOrCreateTag().putDouble("temperature", CSMath.clamp((Temperature.apply(0, player,
+                filledWaterskin.getOrCreateTag().putDouble("temperature", CSMath.clamp((Temperature.apply(0, player, Temperature.Type.WORLD,
                         new BiomeTempModifier(),
                         new BlockTempModifier()
                 ) - (CSMath.average(ConfigSettings.getInstance().maxTemp, ConfigSettings.getInstance().minTemp))) * 15, -50, 50));

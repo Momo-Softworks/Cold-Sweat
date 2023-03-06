@@ -31,6 +31,7 @@ public class ColdSweatGroup extends CreativeModeTab
         ModItems.INSULATED_MINECART.fillItemCategory(this, items);
         ModItems.SOULSPRING_LAMP.fillItemCategory(this, items);
         ModItems.THERMOMETER.fillItemCategory(this, items);
+        ModItems.THERMOLITH.fillItemCategory(this, items);
         ModItems.HEARTH.fillItemCategory(this, items);
         ModItems.BOILER.fillItemCategory(this, items);
         ModItems.ICEBOX.fillItemCategory(this, items);

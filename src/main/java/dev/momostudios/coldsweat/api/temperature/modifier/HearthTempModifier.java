@@ -22,7 +22,7 @@ public class HearthTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         ConfigSettings config = ConfigSettings.getInstance();
 

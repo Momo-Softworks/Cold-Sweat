@@ -3,12 +3,8 @@ package dev.momostudios.coldsweat.common.capability;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.EnableTemperatureEvent;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
-import dev.momostudios.coldsweat.util.entity.EntityHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +15,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,6 +37,7 @@ public class EntityTempManager
                 EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
                 MinecraftForge.EVENT_BUS.post(enableEvent);
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) return;
+                EnableTemperatureEvent.ENABLED_ENTITIES.add(entity.getType());
             }
 
             // Make a new capability instance to attach to the entity
@@ -87,6 +83,8 @@ public class EntityTempManager
     public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
     {
         LivingEntity entity = event.getEntityLiving();
+        if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
+
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
         {
             if (!entity.level.isClientSide)

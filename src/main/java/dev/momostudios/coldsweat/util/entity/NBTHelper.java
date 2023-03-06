@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 public class NBTHelper
@@ -37,12 +38,16 @@ public class NBTHelper
         return modifierTag;
     }
 
+    @Nullable
     public static TempModifier tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
+        TempModifier newModifier;
+        try
+        {
+            newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
+        } catch (Exception e) { return null; }
 
-        if (newModifier == null) return null;
         newModifier.setNBT(modifierTag.getCompound("data"));
 
         // Set the modifier's expiration time

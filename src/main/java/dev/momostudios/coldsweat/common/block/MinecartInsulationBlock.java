@@ -20,7 +20,7 @@ public class MinecartInsulationBlock extends Block
         return Properties
                 .of(Material.WOOL)
                 .sound(SoundType.WOOL)
-                .strength(2f, 5f);
+                .strength(0f, 0f);
     }
 
     public static Item.Properties getItemProperties()

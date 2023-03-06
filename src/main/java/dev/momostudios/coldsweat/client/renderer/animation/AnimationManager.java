@@ -6,7 +6,6 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import org.apache.commons.lang3.function.TriFunction;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -42,7 +41,7 @@ public class AnimationManager
                 map.putAll(getChildrenMap(child));
             }
             return map;
-        } catch (Exception ignored) {ignored.printStackTrace();}
+        } catch (Exception ignored) {}
         return null;
     }
 

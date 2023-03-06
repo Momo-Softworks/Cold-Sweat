@@ -62,7 +62,7 @@ public class Temperature
      * @param entity the entity this modifier should use
      * @param modifiers the modifier(s) being applied to the {@code Temperature}
      */
-    public static double apply(double temp, @Nonnull LivingEntity entity, @Nonnull TempModifier... modifiers)
+    public static double apply(double temp, @Nonnull LivingEntity entity, Type type, @Nonnull TempModifier... modifiers)
     {
         double temp2 = temp;
         for (TempModifier modifier : modifiers)
@@ -70,7 +70,7 @@ public class Temperature
             if (modifier == null) continue;
 
             temp2 = entity.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
-                    ? modifier.update(temp2, entity)
+                    ? modifier.update(temp2, entity, type)
                     : modifier.getResult(temp2);
         }
         return temp2;
@@ -81,9 +81,9 @@ public class Temperature
      * @param entity the entity this list of modifiers should use
      * @param modifiers the list of modifiers being applied to the player's temperature
      */
-    public static double apply(double temp, @Nonnull LivingEntity entity, @Nonnull Collection<TempModifier> modifiers)
+    public static double apply(double temp, @Nonnull LivingEntity entity, Type type, @Nonnull Collection<TempModifier> modifiers)
     {
-        return apply(temp, entity, modifiers.toArray(new TempModifier[0]));
+        return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
     }
 
     /**
@@ -335,13 +335,34 @@ public class Temperature
      */
     public enum Type
     {
-        WORLD,
-        MAX,
-        MIN,
-        CORE,
-        BASE,
-        BODY,
-        RATE
+        WORLD("world"),
+        MAX("max"),
+        MIN("max"),
+        CORE("core"),
+        BASE("base"),
+        BODY("body"),
+        RATE("rate");
+
+        private final String id;
+
+        Type(String id)
+        {
+            this.id = id;
+        }
+
+        public String getID()
+        {
+            return id;
+        }
+        public static Type fromID(String id)
+        {
+            for (Type type : values())
+            {
+                if (type.getID().equals(id))
+                    return type;
+            }
+            return null;
+        }
     }
 
     /**

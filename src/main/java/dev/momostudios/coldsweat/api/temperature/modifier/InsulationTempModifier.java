@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -19,7 +20,7 @@ public class InsulationTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         double cold = this.getNBT().getDouble("cold") / 8d;
         double hot = this.getNBT().getDouble("hot") / 8d;

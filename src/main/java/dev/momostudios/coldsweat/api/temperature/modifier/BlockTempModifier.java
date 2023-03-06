@@ -2,10 +2,13 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
+import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,7 +35,7 @@ public class BlockTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
 
@@ -103,6 +106,9 @@ public class BlockTempModifier extends TempModifier
                             // Dampen the effect with each block between the player and the block
                             double blockTempTotal = effectAmount + tempToAdd / (blocks.get() + 1);
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
+
+                            if (entity instanceof ServerPlayer player)
+                                ModTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance);
                         }
                     }
                     catch (Exception ignored) {}

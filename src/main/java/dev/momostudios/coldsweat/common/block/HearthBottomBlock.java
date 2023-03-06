@@ -63,8 +63,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 .requiresCorrectToolForDrops()
                 .noOcclusion()
                 .dynamicShape()
-                .lightLevel(state -> state.getValue(LAVA) * 3)
-                .requiresCorrectToolForDrops();
+                .lightLevel(state -> state.getValue(LAVA) * 3);
     }
 
     public static Item.Properties getItemProperties()

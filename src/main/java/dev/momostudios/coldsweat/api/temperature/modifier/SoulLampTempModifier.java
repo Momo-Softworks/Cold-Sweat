@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -8,7 +9,7 @@ import java.util.function.Function;
 public class SoulLampTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         double almostMax = ConfigSettings.getInstance().maxTemp * 0.99;
         return temp ->

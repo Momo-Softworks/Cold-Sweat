@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,7 +14,7 @@ import java.util.function.Function;
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         if (entity.level.dimensionType().natural())
         {
@@ -50,6 +51,6 @@ public class SereneSeasonsTempModifier extends TempModifier
 
     @Override
     public String getID() {
-        return ColdSweat.SERENESEASONS_ID + ":season";
+        return "sereneseasons:season";
     }
 }

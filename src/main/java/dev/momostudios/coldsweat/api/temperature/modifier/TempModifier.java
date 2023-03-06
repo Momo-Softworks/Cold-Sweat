@@ -2,14 +2,12 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -54,23 +52,23 @@ public abstract class TempModifier
      * @param entity the entity that is being affected by the modifier.<br>
      * @return the new temperature.<br>
      */
-    protected abstract Function<Double, Double> calculate(LivingEntity entity);
+    protected abstract Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type);
 
     /**
-     * Posts this TempModifier's {@link #calculate(LivingEntity)} to the Forge event bus.<br>
+     * Posts this TempModifier's {@link #calculate(LivingEntity, dev.momostudios.coldsweat.api.util.Temperature.Type)} to the Forge event bus.<br>
      * Returns the stored value if this TempModifier has a tickRate set, and it is not the right tick.<br>
      * <br>
-     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity)} method.
+     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, dev.momostudios.coldsweat.api.util.Temperature.Type)} method.
      * @param entity the entity that is being affected by the modifier.
      */
-    public double update(double temp, LivingEntity entity)
+    public double update(double temp, LivingEntity entity, Temperature.Type type)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
         if (pre.isCanceled()) return temp;
 
-        this.function = this.calculate(entity);
+        this.function = this.calculate(entity, type);
 
         TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);

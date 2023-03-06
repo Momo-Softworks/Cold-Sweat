@@ -50,7 +50,7 @@ public class TempModifierRegistry
         }
         catch (Exception e)
         {
-            throw new UnsupportedOperationException("TempModifier \"" + id + "\" does not have a default constructor!", e);
+            throw new UnsupportedOperationException("TempModifier \"" + id + "\" does not have a default constructor or is not registered!", e);
         }
     }
 }

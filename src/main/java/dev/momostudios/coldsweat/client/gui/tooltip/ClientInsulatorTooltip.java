@@ -142,7 +142,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
     {
         for (int i = 0; i < slots; i++)
         {
-            int uvY = insulation - i * CSMath.getSign(insulation) * 2 > 1 ? 8 : 12;
+            int uvY = insulation - i * CSMath.getSign(insulation) * 2 >= 2 ? 8 : 12;
             GuiComponent.blit(poseStack, x + i*6, y, 0, uvX, uvY, 6, 4, 32, 16);
         }
     }

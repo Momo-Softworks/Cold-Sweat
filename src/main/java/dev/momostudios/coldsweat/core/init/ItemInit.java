@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.core.init;
 
+import dev.momostudios.coldsweat.common.block.*;
 import dev.momostudios.coldsweat.common.item.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -9,10 +10,6 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.block.BoilerBlock;
-import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
-import dev.momostudios.coldsweat.common.block.IceboxBlock;
-import dev.momostudios.coldsweat.common.block.SewingTableBlock;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraftforge.registries.RegistryObject;
 

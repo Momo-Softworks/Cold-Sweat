@@ -35,22 +35,20 @@ public class TaskScheduler
 
                 // If the task is ready to run, run it and remove it from the schedule
                 if (ticks <= 0)
-                {
-                    try
-                    {
-                        entry.getKey().run();
+                {   try
+                    {   entry.getKey().run();
                         iterator.remove();
                     }
                     catch (Exception e)
                     {
                         ColdSweat.LOGGER.error("Error while running scheduled task", e);
                         e.printStackTrace();
+                        iterator.remove();
                     }
                 }
                 // Otherwise, decrement the task's tick count
                 else
-                {
-                    entry.setValue(ticks - 1);
+                {   entry.setValue(ticks - 1);
                 }
             }
         }

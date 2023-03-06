@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
@@ -26,15 +27,16 @@ public class MixinHeartRender
     private static final ResourceLocation ICONS_TEXTURE = new ResourceLocation("minecraft", "textures/gui/icons.png");
     private static int HEART_COUNTER = 0;
 
-    Gui gui = (Gui) (Object) this;
-
     @Inject(method = "renderHeart(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Gui$HeartType;IIIZZ)V", at = @At("TAIL"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
     private void renderHeart(PoseStack ps, Gui.HeartType type, int x, int y, int texV, boolean blink, boolean half, CallbackInfo ci)
     {
         Player player = Minecraft.getInstance().player;
-        double temp = Overlays.BODY_TEMP;
+
         if (player != null)
         {
+            if (player.hasEffect(ModEffects.ICE_RESISTANCE)) return;
+            double temp = Overlays.BODY_TEMP;
+
             int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(0.5f, 1, temp, -100, -50));
             int frozenHearts = frozenHealth / 2;
             int u = blink || type == Gui.HeartType.CONTAINER ? 14 : half ? 7 : 0;

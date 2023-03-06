@@ -5,29 +5,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class SpreadPath
 {
-    Direction direction;
-    BlockPos pos;
-    boolean frozen = false;
-    int step = 0;
-
-    public SpreadPath(BlockPos pos)
-    {
-        this.pos = pos;
-        this.direction = Direction.UP;
-    }
+    private final Direction direction;
+    private final BlockPos pos;
+    private boolean frozen = false;
+    private final HashSet<SpreadPath> children = new HashSet<>();
+    private BlockPos origin;
 
     public SpreadPath(BlockPos pos, Direction direction)
     {
         this.direction = direction;
         this.pos = pos;
+        this.origin = pos;
+    }
+
+    public SpreadPath(BlockPos pos)
+    {
+        this(pos, Direction.UP);
     }
 
     public SpreadPath(int x, int y, int z, Direction direction)
     {
-        this.direction = direction;
-        this.pos = new BlockPos(x, y, z);
+        this(new BlockPos(x, y, z), direction);
     }
 
     public BlockPos getPos()
@@ -39,10 +42,23 @@ public class SpreadPath
     {
         return this.frozen;
     }
-
     public void freeze()
     {
         this.frozen = true;
+    }
+    public void setFrozen(boolean frozen)
+    {
+        this.frozen = frozen;
+    }
+
+    public BlockPos getOrigin()
+    {
+        return this.origin;
+    }
+    public SpreadPath setOrigin(BlockPos origin)
+    {
+        this.origin = origin;
+        return this;
     }
 
     public int getX()
@@ -58,21 +74,36 @@ public class SpreadPath
         return pos.getZ();
     }
 
-    public int getStep()
-    {
-        return this.step;
-    }
-
     public Direction getDirection()
     {
         return direction;
     }
 
+    public Set<SpreadPath> getAllChildren()
+    {
+        Set<SpreadPath> allChildren = new HashSet<>();
+        for (SpreadPath child : children)
+        {
+            allChildren.add(child);
+            allChildren.addAll(child.getAllChildren());
+        }
+        return allChildren;
+    }
+
+    public SpreadPath addChild(SpreadPath child)
+    {
+        this.children.add(child);
+        return this;
+    }
+
+    public void clearChildren()
+    {
+        this.children.clear();
+    }
+
     public SpreadPath offset(int x, int y, int z)
     {
-        SpreadPath path = new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
-        path.step = this.step + (int) CSMath.getDistance(pos, path.pos);
-        return path;
+        return new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
     }
 
     public SpreadPath offset(Direction dir)
@@ -88,6 +119,33 @@ public class SpreadPath
     public SpreadPath offset(BlockPos pos)
     {
         return offset(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public SpreadPath spreadTo(BlockPos pos)
+    {
+        SpreadPath path = new SpreadPath(pos, CSMath.getDirectionFrom(this.pos, pos));
+        this.addChild(path);
+        return path;
+    }
+
+    public SpreadPath spreadTo(Direction dir)
+    {
+        SpreadPath path = new SpreadPath(this.pos.relative(dir), dir);
+        this.addChild(path.setOrigin(this.origin));
+        return path;
+    }
+
+    public SpreadPath spreadTo(BlockPos pos, Direction dir)
+    {
+        SpreadPath path = new SpreadPath(pos, dir);
+        this.addChild(path.setOrigin(this.origin));
+        return path;
+    }
+
+    public SpreadPath spreadTo(SpreadPath path)
+    {
+        this.addChild(path);
+        return path;
     }
 
     public boolean withinDistance(Vec3i vector, double distance)
@@ -106,11 +164,9 @@ public class SpreadPath
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SpreadPath that = (SpreadPath) o;
-
-        return pos.equals(that.pos);
+        return o instanceof SpreadPath that
+        && pos.getX() == that.pos.getX()
+        && pos.getY() == that.pos.getY()
+        && pos.getZ() == that.pos.getZ();
     }
 }

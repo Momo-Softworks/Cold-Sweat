@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -18,7 +19,7 @@ public class WaterskinTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double>  calculate(LivingEntity entity)
+    public Function<Double, Double>  calculate(LivingEntity entity, Temperature.Type type)
     {
         return temp -> temp + this.getNBT().getDouble("temperature");
     }

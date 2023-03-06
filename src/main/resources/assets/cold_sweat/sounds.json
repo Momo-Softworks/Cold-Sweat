@@ -37,6 +37,66 @@
       }
     ]
   },
+  "entity.chameleon.find":
+  {
+    "subtitle": "entity.chameleon.ambient",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_find_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_find_1",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_find_2",
+        "stream": true
+      }
+    ]
+  },
+  "entity.chameleon.tongue.in":
+  {
+      "subtitle": "entity.chameleon.tongue.in",
+      "sounds":
+      [
+        {
+          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_0",
+          "stream": true
+        },
+        {
+          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_1",
+          "stream": true
+        }
+      ]
+  },
+  "entity.chameleon.tongue.out":
+  {
+    "subtitle": "entity.chameleon.tongue.out",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_1",
+        "stream": true
+      }
+    ]
+  },
+  "entity.chameleon.death":
+  {
+    "subtitle": "entity.chameleon.death",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_death",
+        "stream": true
+      }
+    ]
+  },
   "entity.chameleon.hurt":
   {
     "subtitle": "entity.chameleon.hurt",
@@ -48,6 +108,15 @@
       },
       {
         "name": "cold_sweat:entity/chameleon/chameleon_hurt_1",
+        "stream": true
+      }
+    ]
+  },
+  "entity.chameleon.shed": {
+    "subtitle": "entity.chameleon.shed",
+    "sounds": [
+      {
+        "name": "minecraft:block/beehive/exit",
         "stream": true
       }
     ]

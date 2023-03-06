@@ -18,4 +18,5 @@ public class ModItems
     public static final Item SEWING_TABLE = ItemInit.SEWING_TABLE.get();
     public static final Item INSULATED_MINECART = ItemInit.INSULATED_MINECART.get();
     public static final Item CHAMELEON_MOLT = ItemInit.CHAMELEON_MOLT.get();
+    public static final Item THERMOLITH = ItemInit.THERMOLITH.get();
 }

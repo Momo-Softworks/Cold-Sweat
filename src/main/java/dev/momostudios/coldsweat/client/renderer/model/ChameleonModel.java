@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.renderer.ChameleonAnimations;
 import dev.momostudios.coldsweat.client.renderer.animation.AnimationManager;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
@@ -16,22 +16,26 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
+public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "chameleon"), "main");
 
 	final Map<String, ModelPart> modelParts;
 	final ModelPart body;
-	Chameleon chameleon;
+	ChameleonEntity chameleon;
 	boolean tongueVisible = false;
 
 	public ChameleonModel(ModelPart root)
@@ -111,18 +115,20 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 	@Override
 	public void setupAnim(@NotNull T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
 	{
+		chameleon = entity;
 		if (!Minecraft.getInstance().isPaused())
 		{
 			AnimationManager.loadAnimationStates(entity, modelParts);
 
 			float tickDelta = Minecraft.getInstance().getDeltaFrameTime();
+			float partialTick = Minecraft.getInstance().getFrameTime();
 			ModelPart head = modelParts.get("Head");
 			ModelPart rightEye = modelParts.get("RightEye");
 			ModelPart leftEye = modelParts.get("LeftEye");
 
 			// get the pitch (up/down) of the head in Radians
 			float desiredXHead = CSMath.toRadians(headPitch);
-			boolean hasLookTarget = entity.isWalking() || entity.getEatTimer() < entity.getEatAnimLength();
+			boolean hasLookTarget = entity.isWalking() || entity.getEatTimer() > 0;
 			// Blend smoothly to the desired pitch using frameTime
 			// There is no slop in head rotation if the Chameleon is moving
 			entity.xRotHead += ((hasLookTarget ? desiredXHead : CSMath.clamp(entity.xRotHead, desiredXHead - 0.4f, desiredXHead + 0.4f)) - entity.xRotHead) * tickDelta;
@@ -172,49 +178,145 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 
 			AnimationManager.animateEntity(entity, (animTime, frameTime) ->
 			{
-				Map manualParts = new HashMap(modelParts);
-				manualParts.remove("Head");
-				manualParts.remove("LeftEye");
-				manualParts.remove("RightEye");
+				BlockPos trackingPos = chameleon.getTrackingPos();
+
+				Map<String, ModelPart> animatedParts = new HashMap<>(modelParts);
+				animatedParts.remove("Head");
+				animatedParts.remove("LeftEye");
+				animatedParts.remove("RightEye");
+				ModelPart tail  = animatedParts.remove("Tail");
+				ModelPart tail2 = animatedParts.remove("Tail2");
+				ModelPart tail3 = animatedParts.remove("Tail3");
 
 				// Riding player animation
 				if (this.riding && entity.getVehicle() instanceof Player player)
 				{
-					float partialTick = Minecraft.getInstance().getFrameTime();
 					float playerYaw = CSMath.blend(player.yHeadRotO, player.yHeadRot, partialTick, 0, 1);
+					animTime += frameTime;
 
-					ChameleonAnimations.RIDE.animateAll(manualParts, animTime, false);
+					ChameleonAnimations.RIDE.animateAll(animatedParts, animTime, false);
+
+					// Free up the tail if the chameleon is pointing toward a biome
+					if (trackingPos == null)
+					{
+						ChameleonAnimations.RIDE.animate("Tail",  tail,  animTime, false);
+						ChameleonAnimations.RIDE.animate("Tail2", tail2, animTime, false);
+						ChameleonAnimations.RIDE.animate("Tail3", tail3, animTime, false);
+					}
 
 					body.y -= (player.getBbHeight() / 2) * 16 - 4;
 					body.yRot = CSMath.toRadians(playerYaw) - CSMath.toRadians(CSMath.blend(player.yBodyRotO, player.yBodyRot, partialTick, 0, 1));
-					head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick));
-					head.xRot = CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick));
+					head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick)) + 0.2f;
+					head.xRot = CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick)) + 0.2f;
 				}
 				// Walk animation
 				else if (entity.isWalking())
 				{
 					float walkSpeed = Math.min(0.15f, new Vec2((float) entity.getDeltaMovement().x, (float) entity.getDeltaMovement().z).length());
-					animTime += (frameTime * walkSpeed * 45);
-					ChameleonAnimations.WALK.animateAll(manualParts, animTime, false);
-					ChameleonAnimations.WALK.animate("Head", modelParts.get("Head"), animTime, true);
+					animTime += (frameTime * walkSpeed * 30);
+
+					ChameleonAnimations.WALK.animateAll(animatedParts, animTime, false);
+					ChameleonAnimations.WALK.animate("Head", head, animTime, true);
+					if (trackingPos == null)
+					{
+						ChameleonAnimations.WALK.animate("Tail",  tail,  animTime, false);
+						ChameleonAnimations.WALK.animate("Tail2", tail2, animTime, false);
+						ChameleonAnimations.WALK.animate("Tail3", tail3, animTime, false);
+					}
 				}
 				// Idle animation
 				else
 				{
 					animTime += frameTime;
-					ChameleonAnimations.IDLE.animateAll(manualParts, animTime, false);
+					ChameleonAnimations.IDLE.animateAll(animatedParts, animTime, false);
+
+					// Free up the tail if the chameleon is pointing toward a biome
+					if (trackingPos == null)
+					{
+						ChameleonAnimations.WALK.animate("Tail",  tail,  0, false);
+						ChameleonAnimations.WALK.animate("Tail2", tail2, 0, false);
+						ChameleonAnimations.WALK.animate("Tail3", tail3, 0, false);
+					}
+				}
+
+				// Point the tail toward the biome the Chameleon is tracking (if present)
+				if (trackingPos != null)
+				{
+					Vec3 entityPos = entity.getPosition(partialTick);
+					Vec3 trackingDirection = new Vec3(trackingPos.getX() - entityPos.x, 0, trackingPos.getZ() - entityPos.z);
+					float playerRotX = 0;
+					float rotY;
+
+					if (entity.getVehicle() instanceof Player player)
+					{
+						playerRotX = player.getViewXRot(partialTick);
+						rotY = CSMath.blend(player.yHeadRotO, player.yHeadRot, partialTick, 0, 1);
+					}
+					else rotY = CSMath.blend(entity.yBodyRotO, entity.yBodyRot, partialTick, 0, 1);
+
+					// Get the angle between the entity's position and the tracking position (radians)
+					float angle = (float) Math.atan2(trackingDirection.z, trackingDirection.x) - CSMath.toRadians(Mth.wrapDegrees(rotY));
+
+					float desiredTailRot = angle + CSMath.toRadians(90);
+
+					// Side-to-side tail movement
+					tail2.yRot = (float) Math.sin(desiredTailRot) / 1.3f;
+					tail.yRot = tail2.yRot;
+					tail3.yRot = tail2.yRot;
+
+					// Up-and-down tail movement
+					tail2.xRot = Math.max(0, (float) Math.sin(desiredTailRot - Math.PI / 2) + 0.2f);
+					tail3.xRot = tail2.xRot / 1.5f;
+					tail.xRot = tail3.xRot - CSMath.toRadians(playerRotX) / 1.25f + 0.1f;
 				}
 
 				// Eat animation (applied on top of other anims)
-				if (entity.getEatTimer() < entity.getEatAnimLength() - 1)
+				if (entity.getEatTimer() > 0)
 				{
 					tongueVisible = true;
-					ChameleonAnimations.EAT.animateAll(modelParts, (float) CSMath.blend(0, 0.5, entity.getEatTimer() + Minecraft.getInstance().getFrameTime(), 0, entity.getEatAnimLength()), true);
+					ChameleonAnimations.EAT.animateAll(modelParts, CSMath.blend(0.5f, 0f, entity.getEatTimer() - Minecraft.getInstance().getFrameTime(), 0, entity.getEatAnimLength()), true);
 				}
 				else
 				{
 					tongueVisible = false;
 				}
+
+				// Move the tail in accordance with the velocity of the player it's riding
+				float playerXHead = 0;
+				if (entity.getVehicle() instanceof Player player)
+				{	playerXHead = CSMath.toRadians(player.getViewXRot(partialTick));
+				}
+
+				Vec3 velocity = playerXHead != 0 ? entity.getVehicle().getDeltaMovement() : entity.getDeltaMovement();
+				// Side-to-side tail movement (disabled if the chameleon is tracking a biome)
+				if (entity.getTrackingPos() == null)
+				{
+					float speed = (float) Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+					float tailSpeed = Math.min(0.1f, speed / 2) + 0.01f;
+
+					float deltaTime = Minecraft.getInstance().getDeltaFrameTime();
+					chameleon.tailPhase += 2 * Math.PI * deltaTime * tailSpeed;
+
+					// Calculate sine wave value with phase shift
+					float speedStraightFactor = (3 + speed * 30);
+					float tailRot1 = (float) Math.sin(chameleon.tailPhase - 0) / speedStraightFactor;
+					float tailRot2 = (float) Math.sin(chameleon.tailPhase - 1) / speedStraightFactor;
+					float tailRot3 = (float) Math.sin(chameleon.tailPhase - 2) / speedStraightFactor;
+
+					float tailRotation = (1 + Math.abs(tail.xRot - 0.2f) * 1);
+
+					tail.yRot  = tailRot1 / tailRotation;
+					tail2.yRot = tailRot2 / tailRotation;
+					tail3.yRot = tailRot3 / tailRotation;
+				}
+
+				// Up/down tail movement (takes into account player head rotation)
+				float playerYVel = (float) velocity.y;
+				float tailRot = entity.xRotTail += (CSMath.clamp(playerYVel, -0.5, 0.5) - entity.xRotTail) * frameTime * 8;
+				tailRot *= CSMath.clamp(Math.abs(tail.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
+				tail.xRot  += tailRot;
+				tail2.xRot += tailRot;
+				tail3.xRot += tailRot;
 
 				return animTime;
 			});
@@ -233,6 +335,8 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 
 	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
 	{
+		if (chameleon == null) return;
+
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		float partialTick = Minecraft.getInstance().getFrameTime();

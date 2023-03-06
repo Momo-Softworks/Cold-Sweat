@@ -120,15 +120,13 @@ public class CSMath
     {
         if (value >= 0)
         {
-            double remainder = value % 1;
-            return (int) (remainder != 0 ? value + 1 - (value % 1) : value);
+            return (int) Math.ceil(value);
         }
         else
         {
             int sign = getSign(value);
             double abs = Math.abs(value);
-            double remainder = abs % 1;
-            return (int) (remainder != 0 ? abs + 1 - (abs % 1) : abs) * sign;
+            return (int) Math.ceil(abs) * sign;
         }
     }
 
@@ -136,15 +134,13 @@ public class CSMath
     {
         if (value >= 0)
         {
-            double remainder = value % 1;
-            return (int) (remainder != 0 ? value - (value % 1) : value);
+            return (int) Math.floor(value);
         }
         else
         {
             int sign = getSign(value);
             double abs = Math.abs(value);
-            double remainder = abs % 1;
-            return (int) (remainder != 0 ? abs - (abs % 1) : abs) * sign;
+            return (int) Math.floor(abs) * sign;
         }
     }
 
@@ -221,6 +217,16 @@ public class CSMath
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (float) Math.sqrt(rangeMax - rangeMin) * (float) Math.sqrt(factor - rangeMin) + blendFrom;
+    }
+
+    public static double averagePair(Pair<? extends Number, ? extends Number> pair)
+    {
+        return (pair.getFirst().doubleValue() + pair.getSecond().doubleValue()) / 2;
+    }
+
+    public static Pair<Double, Double> addPairs(Pair<? extends Number, ? extends Number> pair1, Pair<? extends Number, ? extends Number> pair2)
+    {
+        return new Pair<>(pair1.getFirst().doubleValue() + pair2.getFirst().doubleValue(), pair1.getSecond().doubleValue() + pair2.getSecond().doubleValue());
     }
 
     public static double getDistance(Entity entity, Vec3 pos)
@@ -305,7 +311,7 @@ public class CSMath
         return new Vec3(vec.x, vec.y, vec.z);
     }
 
-    public static Direction getDirectionFromVector(double x, double y, double z)
+    public static Direction getDirectionFrom(double x, double y, double z)
     {
         Direction direction = Direction.NORTH;
         double f = Float.MIN_VALUE;
@@ -324,9 +330,14 @@ public class CSMath
         return direction;
     }
 
-    public static Direction getDirectionFromVector(Vec3 vec3)
+    public static Direction getDirectionFrom(Vec3 vec3)
     {
-        return getDirectionFromVector(vec3.x, vec3.y, vec3.z);
+        return getDirectionFrom(vec3.x, vec3.y, vec3.z);
+    }
+
+    public static Direction getDirectionFrom(BlockPos from, BlockPos to)
+    {
+        return getDirectionFrom(to.getX() - from.getX(), to.getY() - from.getY(), to.getZ() - from.getZ());
     }
 
     public static <T> void breakableForEach(Collection<T> collection, BiConsumer<T, InterruptableStreamer<T>> consumer)
@@ -357,7 +368,7 @@ public class CSMath
         return value > max ? 1 : value < min ? -1 : 0;
     }
 
-    public static double crop(double value, int sigFigs)
+    public static double sigFigs(double value, int sigFigs)
     {
         return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
     }
