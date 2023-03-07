@@ -110,8 +110,8 @@ dependencies {
     compileOnly fg.deobf("curse.maven:carrots-311327:4382778")
     implementation fg.deobf("curse.maven:byg-247560:4036050")
     implementation fg.deobf("curse.maven:biomesoplenty-220318:3759236")
-    implementation fg.deobf("curse.maven:create-328085:4371807")
-    implementation fg.deobf("curse.maven:flywheel-486392:4341461")
+    compileOnly fg.deobf("curse.maven:create-328085:4371807")
+    compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
 }
 

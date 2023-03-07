@@ -53,7 +53,8 @@ public class EatObjectsGoal extends Goal
         List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
         for (Entity ent : items)
         {
-            if (ent instanceof ItemEntity itemEntity && itemEntity.getThrower() != null)
+            if (ent instanceof ItemEntity itemEntity && itemEntity.getThrower() != null
+            && (this.entity.getTrustedPlayers().contains(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
                 Item item = itemEntity.getItem().getItem();
                 if (this.wantedItems.contains(item) && this.entity.getCooldown(item) <= 0)

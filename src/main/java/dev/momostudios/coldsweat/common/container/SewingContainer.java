@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
@@ -243,16 +244,11 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack input2 = this.getItem(1);
 
         input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
-        {
-            ItemStack armorItem;
-
-            // If insulation is being removed
+        {   // If insulation is being removed
             if (this.getItem(1).getItem() instanceof ShearsItem)
-            {
-                // Damage shears
+            {   // Damage shears
                 if (!player.isCreative())
-                {
-                    input2.hurt(1, new Random(), null);
+                {   input2.hurt(1, player.getRandom(), null);
                 }
 
                 // Remove the last insulation item added
@@ -264,8 +260,7 @@ public class SewingContainer extends AbstractContainerMenu
             }
             // If insulation is being added
             else
-            {
-                // Remove input items
+            {   // Remove input items
                 this.growItem(0, -1);
                 this.growItem(1, -1);
                 player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);

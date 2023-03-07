@@ -5,8 +5,8 @@
       "item": "cold_sweat:chameleon_molt"
     },
     "title": "Chameleon World",
-    "description": "Feed a chameleon; useful for exploration and doubles as a great hat",
-    "frame": "goal",
+    "description": "Tame a chameleon. They're useful for exploration and double as a hat",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false

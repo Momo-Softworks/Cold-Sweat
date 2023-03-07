@@ -6,7 +6,7 @@
     },
     "title": "A Problem for Later",
     "description": "Fuel the soulspring lamp by clicking it with fuel in your inventory",
-    "frame": "goal",
+    "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false

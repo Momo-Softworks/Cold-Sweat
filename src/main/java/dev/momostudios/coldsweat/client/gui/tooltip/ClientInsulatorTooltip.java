@@ -42,7 +42,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
     {
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
-        neutral = (cold > 0 == hot > 0 ? CSMath.least(cold, hot) : 0) * 2;
+        neutral = (cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0) * 2;
         hot -= neutral/2;
         cold -= neutral/2;
 

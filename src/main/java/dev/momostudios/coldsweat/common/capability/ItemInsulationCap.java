@@ -38,8 +38,6 @@ public class ItemInsulationCap implements IInsulatableCap
         insulationItems.sort(Comparator.comparingDouble(stack -> ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), Pair.of(0d, 0d)).getFirst()));
         insulation.clear();
 
-        double neutralTotal = 0;
-
         // Iterate through insulation items and tally up cold, hot, and neutral insulation
         for (ItemStack stack : insulationItems)
         {
@@ -49,42 +47,27 @@ public class ItemInsulationCap implements IInsulatableCap
             // Break it up into cold and hot
             double cold = insulVal.getFirst();
             double hot = insulVal.getSecond();
-            // Get whether each is positive or negative
-            int coldSign = CSMath.getSign(cold);
-            int hotSign = CSMath.getSign(hot);
-            // If both are positive or negative, then there is overlap (neutral)
-            double neutral = hotSign == coldSign ? CSMath.least(cold, hot) : 0;
+            double neutral = cold > 0 == hot > 0 ? cold + hot : 0;
 
-            neutralTotal += neutral;
-            // Subtract neutral from cold/hot to get just the remainder
-            double coldTotal = CSMath.shrink(cold, neutral);
-            double hotTotal = CSMath.shrink(hot, neutral);
-
-            // Get whether the totals are positive or negative
-            int neutralSign = CSMath.getSign(neutralTotal);
-
-            // Tally up the cold slots
-            // Use floor to exclude the remainder; only whole values
-            for (int i = 0; i < CSMath.ceil(Math.abs(coldTotal) / 2); i++)
+            // Cold insulation
+            for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
             {
-                double coldVal = CSMath.least(coldSign * 2d, coldTotal - i*2);
-                double hotVal = CSMath.least(CSMath.shrink(2d, coldVal), hotTotal);
-                this.insulation.add((Pair.of(coldVal, hotVal)));
-                hotTotal -= hotVal;
+                double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i), 1);
+                insulation.add(Pair.of(coldInsul, 0d));
             }
 
-            // Tally up the neutral slots
-            for (int i = 0; i < CSMath.ceil(Math.abs(neutralTotal)); i++)
+            // Neutral insulation
+            for (int i = 0; i < CSMath.ceil(Math.abs(neutral)) / 2; i++)
             {
-                double val = CSMath.least(neutralSign, neutralTotal - i);
-                this.insulation.add((Pair.of(val, val)));
+                double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+                insulation.add(Pair.of(neutralInsul, neutralInsul));
             }
 
-            // Tally up the hot slots
-            for (int i = 0; i < CSMath.ceil(Math.abs(hotTotal) / 2); i++)
+            // Hot insulation
+            for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
             {
-                double val = CSMath.least(hotSign * 2d, hotTotal - i*2);
-                this.insulation.add((Pair.of(0d, val)));
+                double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i), 1);
+                insulation.add(Pair.of(hotInsul, 0d));
             }
         }
         insulation.sort(Comparator.comparingDouble(pair -> Math.abs(pair.getFirst() - 2)));
