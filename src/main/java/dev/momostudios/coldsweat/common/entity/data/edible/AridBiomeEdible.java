@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.biome.Biome;
 
 public class AridBiomeEdible extends Edible
@@ -21,7 +21,7 @@ public class AridBiomeEdible extends Edible
     }
 
     @Override
-    public void onEaten(ChameleonEntity entity, ItemStack stack)
+    public void onEaten(ChameleonEntity entity, ItemEntity item)
     {
         if (!entity.level.isClientSide)
         {
@@ -41,7 +41,7 @@ public class AridBiomeEdible extends Edible
                     WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
                     WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
-                    super.onEaten(entity, stack);
+                    super.onEaten(entity, item);
                 }
                 else
                 {
