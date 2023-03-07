@@ -5,10 +5,10 @@
       "item": "minecraft:leather_chestplate"
     },
     "title": {
-        "translate": "cold_sweat.task.full_insulation.title"
+        "translate": "advancements.cold_sweat.full_insulation.title"
     },
     "description": {
-        "translate": "cold_sweat.task.full_insulation.description"
+        "translate": "advancements.cold_sweat.full_insulation.description"
     },
     "frame": "task",
     "show_toast": true,

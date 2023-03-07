@@ -5,10 +5,10 @@
       "item": "cold_sweat:hearth"
     },
     "title": {
-        "translate": "cold_sweat.advancement.place_hearth.title"
+        "translate": "advancements.cold_sweat.place_hearth.title"
     },
     "description": {
-        "translate": "cold_sweat.advancement.place_hearth.description"
+        "translate": "advancements.cold_sweat.place_hearth.description"
     },
     "frame": "task",
     "show_toast": true,

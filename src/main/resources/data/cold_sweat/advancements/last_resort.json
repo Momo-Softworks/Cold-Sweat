@@ -5,10 +5,10 @@
       "item": "minecraft:flint_and_steel"
     },
     "title": {
-      "translate": "cold_sweat.last_resort.title"
+      "translate": "advancements.cold_sweat.last_resort.title"
     },
     "description": {
-      "translate": "cold_sweat.last_resort.description"
+      "translate": "advancements.cold_sweat.last_resort.description"
     },
     "frame": "challenge",
     "show_toast": true,

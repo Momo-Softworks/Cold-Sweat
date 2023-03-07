@@ -5,10 +5,10 @@
       "item": "minecraft:campfire"
     },
     "title": {
-        "translate": "cold_sweat.advancement.huddle_close.title"
+        "translate": "advancements.cold_sweat.huddle_close.title"
     },
     "description": {
-        "translate": "cold_sweat.advancement.huddle_close.description"
+        "translate": "advancements.cold_sweat.huddle_close.description"
     },
     "frame": "task",
     "show_toast": true,

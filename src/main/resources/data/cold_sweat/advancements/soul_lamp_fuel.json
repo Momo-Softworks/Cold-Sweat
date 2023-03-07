@@ -5,10 +5,10 @@
       "item": "cold_sweat:soulspring_lamp"
     },
     "title": {
-      "translate": "cold_sweat.advancement.soul_lamp_fuel.title"
+      "translate": "advancements.cold_sweat.soul_lamp_fuel.title"
     },
     "description": {
-      "translate": "cold_sweat.advancement.soul_lamp_fuel.description"
+      "translate": "advancements.cold_sweat.soul_lamp_fuel.description"
     },
     "frame": "task",
     "show_toast": true,

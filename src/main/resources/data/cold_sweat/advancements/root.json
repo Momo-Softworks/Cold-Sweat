@@ -4,10 +4,10 @@
       "item": "cold_sweat:thermometer"
     },
     "title": {
-        "translate": "cold_sweat.advancement.root.title"
+        "translate": "advancements.cold_sweat.root.title"
     },
     "description": {
-        "translate": "cold_sweat.advancement.root.description"
+        "translate": "advancements.cold_sweat.root.description"
     },
     "background": "minecraft:textures/block/smooth_basalt.png",
     "frame": "task",

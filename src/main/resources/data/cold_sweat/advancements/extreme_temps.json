@@ -5,10 +5,10 @@
       "item": "minecraft:dead_bush"
     },
     "title": {
-      "translate": "cold_sweat.task.extreme_temps.title"
+      "translate": "advancements.cold_sweat.extreme_temps.title"
     },
     "description": {
-      "translate": "cold_sweat.task.extreme_temps.description"
+      "translate": "advancements.cold_sweat.extreme_temps.description"
     },
     "frame": "task",
     "show_toast": true,

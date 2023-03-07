@@ -5,10 +5,10 @@
       "item": "minecraft:lava_bucket"
     },
     "title": {
-        "translate": "cold_sweat.advancement.lava_sea.title"
+        "translate": "advancements.cold_sweat.lava_sea.title"
     },
     "description": {
-        "translate": "cold_sweat.advancement.lava_sea.description"
+        "translate": "advancements.cold_sweat.lava_sea.description"
     },
     "frame": "challenge",
     "show_toast": true,
