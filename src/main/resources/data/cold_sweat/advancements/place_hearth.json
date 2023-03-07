@@ -4,8 +4,12 @@
     "icon": {
       "item": "cold_sweat:hearth"
     },
-    "title": "Home Sweet Home",
-    "description": "Use a hearth to stay safe in your base",
+    "title": {
+        "translate": "cold_sweat.advancement.place_hearth.title"
+    },
+    "description": {
+        "translate": "cold_sweat.advancement.place_hearth.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

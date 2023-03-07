@@ -3,8 +3,12 @@
     "icon": {
       "item": "cold_sweat:thermometer"
     },
-    "title": "Cold Sweat",
-    "description": "Keep warm and you'll be fine",
+    "title": {
+        "translate": "cold_sweat.advancement.root.title"
+    },
+    "description": {
+        "translate": "cold_sweat.advancement.root.description"
+    },
     "background": "minecraft:textures/block/smooth_basalt.png",
     "frame": "task",
     "show_toast": false,

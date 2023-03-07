@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:lava_bucket"
     },
-    "title": "The Pit of Fire",
-    "description": "Stand next to a sea of lava",
+    "title": {
+        "translate": "cold_sweat.advancement.lava_sea.title"
+    },
+    "description": {
+        "translate": "cold_sweat.advancement.lava_sea.description"
+    },
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,

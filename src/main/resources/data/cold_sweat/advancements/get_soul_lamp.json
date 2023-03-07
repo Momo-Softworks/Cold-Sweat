@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:heart_of_the_sea"
     },
-    "title": "Soul of the Sea",
-    "description": "Using a Heart of the Sea, craft a Soulspring Lamp, a vital tool in your arsenal against the Nether's inferno",
+    "title": {
+      "translate": "advancements.cold_sweat.get_soul_lamp.title"
+    },
+    "description": {
+      "translate": "advancements.cold_sweat.get_soul_lamp.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

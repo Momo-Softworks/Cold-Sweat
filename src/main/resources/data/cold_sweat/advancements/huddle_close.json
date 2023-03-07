@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:campfire"
     },
-    "title": "Huddle Close",
-    "description": "Use a block to warm up or cool down",
+    "title": {
+        "translate": "cold_sweat.advancement.huddle_close.title"
+    },
+    "description": {
+        "translate": "cold_sweat.advancement.huddle_close.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

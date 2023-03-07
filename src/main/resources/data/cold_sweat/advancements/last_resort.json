@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:flint_and_steel"
     },
-    "title": "Last Resort",
-    "description": "Set yourself on fire to warm up",
+    "title": {
+      "translate": "cold_sweat.last_resort.title"
+    },
+    "description": {
+      "translate": "cold_sweat.last_resort.description"
+    },
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,

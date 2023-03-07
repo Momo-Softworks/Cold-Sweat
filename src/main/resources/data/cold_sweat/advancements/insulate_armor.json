@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:leather"
     },
-    "title": "Comfy Attire",
-    "description": "Insulate your armor to protect yourself from the elements",
+    "title": {
+        "translate": "advancements.cold_sweat.insulate_armor.title"
+    },
+    "description": {
+        "translate": "advancements.cold_sweat.insulate_armor.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

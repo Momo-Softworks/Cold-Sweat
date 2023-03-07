@@ -4,8 +4,12 @@
     "icon": {
       "item": "minecraft:dead_bush"
     },
-    "title": "Inhospitable",
-    "description": "Find a place that's too hot or cold to survive",
+    "title": {
+      "translate": "cold_sweat.task.extreme_temps.title"
+    },
+    "description": {
+      "translate": "cold_sweat.task.extreme_temps.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

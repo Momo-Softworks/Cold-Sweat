@@ -4,8 +4,12 @@
     "icon": {
       "item": "cold_sweat:chameleon_molt"
     },
-    "title": "Chameleon World",
-    "description": "Tame a chameleon. They're useful for exploration and double as a hat",
+    "title": {
+        "translate": "advancements.cold_sweat.tame_chameleon.title"
+    },
+    "description": {
+        "translate": "advancements.cold_sweat.tame_chameleon.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,

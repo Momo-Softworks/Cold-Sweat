@@ -4,8 +4,12 @@
     "icon": {
       "item": "cold_sweat:soulspring_lamp"
     },
-    "title": "A Problem for Later",
-    "description": "Fuel the soulspring lamp by clicking it with fuel in your inventory",
+    "title": {
+      "translate": "cold_sweat.advancement.soul_lamp_fuel.title"
+    },
+    "description": {
+      "translate": "cold_sweat.advancement.soul_lamp_fuel.description"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
