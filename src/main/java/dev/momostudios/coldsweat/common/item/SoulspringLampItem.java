@@ -5,8 +5,6 @@ import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -16,6 +14,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -29,6 +29,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -145,34 +147,38 @@ public class SoulspringLampItem extends Item
     }
 
     // Restore fuel if player hits an enemy
-    @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
+    @SubscribeEvent
+    public static void onEntityHit(LivingAttackEvent event)
     {
-        // If fuel < 64 and target NOT player
-        if (attacker instanceof Player && getFuel(stack) < 64 && !(target instanceof Player)
-        && target.getHealth() > target.getMaxHealth() - 1 && target.getMobType() != MobType.UNDEAD)
+        if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntityLiving() instanceof Player))
         {
-            // Add fuel
-            addFuel(stack, (int) Math.min(4, target.getMaxHealth()));
+            LivingEntity target = event.getEntityLiving();
+            ItemStack stack = event.getEntityLiving().getMainHandItem();
 
-            // Spawn particles
-            ParticleBatchMessage packet = new ParticleBatchMessage();
-            Random rand = new Random();
-            // Spawn random particles proportionally to the entity's size
-            for (int i = 0; i < CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50); i++)
+            // If fuel < 64 and target NOT player
+            if (getFuel(stack) < 64
+            && target.getMobType() != MobType.UNDEAD
+            && !target.getPersistentData().getBoolean("SoulSucked"))
             {
-                packet.addParticle(ParticleTypes.SOUL, new ParticleBatchMessage.ParticlePlacement(
-                        target.getX() + target.getBbWidth() * rand.nextFloat(),
-                        target.getY() + target.getBbHeight() * rand.nextFloat(),
-                        target.getZ() + target.getBbWidth() * rand.nextFloat(),
-                        rand.nextFloat() * 0.2f - 0.1f, rand.nextFloat() * 0.2f - 0.1f, rand.nextFloat() * 0.2f - 0.1f));
+                target.getPersistentData().putBoolean("SoulSucked", true);
+
+                // Add fuel
+                addFuel(stack, (int) Math.min(8, target.getMaxHealth()));
+                float extraDamage = Math.max(0, 8 - event.getAmount());
+                if (extraDamage > 0)
+                    target.hurt(new EntityDamageSource(DamageSource.MAGIC.msgId, attacker), extraDamage);
+
+                // Spawn particles
+                if (!target.level.isClientSide)
+                {
+                    int particleCount = (int) CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50);
+                    WorldHelper.spawnParticleBatch(attacker.level, ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
+                        target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
+                }
+                // Play soul stealing sound
+                WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
             }
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), packet);
-            // Play soul stealing sound
-            WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
-            return true;
         }
-        return super.hurtEnemy(stack, attacker, target);
     }
 
     @Override
