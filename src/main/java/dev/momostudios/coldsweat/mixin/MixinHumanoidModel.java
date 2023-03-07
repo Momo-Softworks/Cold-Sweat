@@ -42,23 +42,21 @@ public class MixinHumanoidModel
         Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
 
-        switch (model.rightArmPose)
+        if (!CSMath.isInRange(rightArmRot, -0.01, 0.01))
         {
-            case EMPTY ->
+            switch (model.rightArmPose)
             {
-                this.rightArm.xRot = this.rightArm.xRot - rightArmRot;
-                this.rightArm.yRot = 0.0F;
-            }
-            case BLOCK ->
-            {
-                this.rightArm.xRot = this.rightArm.xRot * 0.5F - 0.9424779F - rightArmRot;
-                this.rightArm.yRot = -((float) Math.PI / 6F);
-            }
-            case ITEM ->
-            {
-                this.rightArm.xRot = this.rightArm.xRot * (holdingLamp ? 0.15F : 0.5f) - ((float) Math.PI / 10F) - rightArmRot;
-                this.rightArm.zRot = this.rightArm.zRot * (holdingLamp ? 0.15F : 0.5f);
-                this.rightArm.yRot = 0.0F;
+                case EMPTY ->
+                {
+                    this.rightArm.xRot = this.rightArm.xRot - rightArmRot;
+                    this.rightArm.yRot = 0.0F;
+                }
+                case ITEM ->
+                {
+                    this.rightArm.xRot = this.rightArm.xRot * (holdingLamp ? 0.15F : 1f) - ((float) Math.PI / 10F) - rightArmRot;
+                    this.rightArm.zRot = this.rightArm.zRot * (holdingLamp ? 0.15F : 1f);
+                    this.rightArm.yRot = 0.0F;
+                }
             }
         }
     }
@@ -75,23 +73,21 @@ public class MixinHumanoidModel
         Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
 
-        switch (model.leftArmPose)
+        if (!CSMath.isInRange(leftArmRot, -0.01, 0.01))
         {
-            case EMPTY ->
+            switch (model.leftArmPose)
             {
-                this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
-                this.leftArm.yRot = 0.0F;
-            }
-            case BLOCK ->
-            {
-                this.leftArm.xRot = this.leftArm.xRot * 0.5f - 0.9424779F - leftArmRot;
-                this.leftArm.yRot = ((float) Math.PI / 6F);
-            }
-            case ITEM ->
-            {
-                this.leftArm.xRot = this.leftArm.xRot * (holdingLamp ? 0.15F : 0.5f) - ((float) Math.PI / 10F) - leftArmRot;
-                this.leftArm.zRot = this.leftArm.zRot * (holdingLamp ? 0.15F : 0.5f);
-                this.leftArm.yRot = 0.0F;
+                case EMPTY ->
+                {
+                    this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
+                    this.leftArm.yRot = 0.0F;
+                }
+                case ITEM ->
+                {
+                    this.leftArm.xRot = this.leftArm.xRot * (holdingLamp ? 0.15F : 1f) - ((float) Math.PI / 10F) - leftArmRot;
+                    this.leftArm.zRot = this.leftArm.zRot * (holdingLamp ? 0.15F : 1f);
+                    this.leftArm.yRot = 0.0F;
+                }
             }
         }
     }
