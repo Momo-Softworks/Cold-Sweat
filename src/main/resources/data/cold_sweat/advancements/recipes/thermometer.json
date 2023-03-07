@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "temperature": {
+      "trigger": "cold_sweat:temperature",
+      "conditions": {
+        "type": "world",
+        "temperature": {
+          "below": "min_habitable",
+          "above": "max_habitable"
+        }
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:thermometer"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "temperature",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cold_sweat:thermometer"
+    ]
+  }
+}

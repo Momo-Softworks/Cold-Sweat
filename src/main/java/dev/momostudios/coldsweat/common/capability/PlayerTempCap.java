@@ -155,9 +155,6 @@ public class PlayerTempCap implements ITemperatureCap
         {   calculateVisibility(player);
         }
 
-        // Test for custom recipe rewards
-        this.rewardRecipes(player);
-
         // Write the new temperature values
         this.setTemperatures(player, new double[]{newWorldTemp, newMaxOffset, newMinOffset, CSMath.clamp(newCoreTemp, -150, 150), newBaseTemp});
 
@@ -219,25 +216,6 @@ public class PlayerTempCap implements ITemperatureCap
                 || player.getOffhandItem().getItem() == ModItems.THERMOMETER
                 || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
         showBodyTemp = !player.isCreative() && !player.isSpectator();
-    }
-
-    private void rewardRecipes(ServerPlayer player)
-    {
-        // Give the recipe for waterskin
-        boolean hasGrace = player.hasEffect(ModEffects.GRACE);
-
-        if (!CSMath.isInRange((int) this.getTemp(Type.CORE), -10, 10) && !hasGrace
-        && !player.getRecipeBook().contains(new ResourceLocation("cold_sweat:waterskin")))
-        {
-            player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation("cold_sweat:waterskin")});
-        }
-
-        //Give the recipe for thermometer
-        if (!CSMath.isInRange(this.getTemp(Type.WORLD), config.minTemp + this.getTemp(Type.MIN), config.maxTemp + this.getTemp(Type.MAX)) && !hasGrace
-        && !player.getRecipeBook().contains(new ResourceLocation("cold_sweat:thermometer")))
-        {
-            player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation("cold_sweat:thermometer")});
-        }
     }
 
     @Override

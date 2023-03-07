@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "temperature": {
+      "trigger": "cold_sweat:temperature",
+      "conditions": {
+        "type": "core",
+        "temperature":
+        {
+          "above": 10,
+          "below": -10
+        },
+        "player": [
+          {
+            "condition": "minecraft:inverted",
+            "term": {
+              "condition": "minecraft:entity_properties",
+              "entity": "this",
+              "predicate": {
+                "effects": {
+                  "cold_sweat:grace": {}
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:waterskin"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "temperature",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cold_sweat:waterskin"
+    ]
+  }
+}
