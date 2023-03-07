@@ -1,11 +1,14 @@
 package dev.momostudios.coldsweat.core.advancement.trigger;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Arrays;
 
 public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulatedTrigger.Instance>
 {
@@ -15,7 +18,7 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
     protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
     {
         ItemPredicate armorStack = ItemPredicate.fromJson(json.get("armor_item"));
-        ItemPredicate insulStack = ItemPredicate.fromJson(json.get("insulation_item"));
+        ItemPredicate[] insulStack = ItemPredicate.fromJsonArray(json.get("insulation_item"));
 
         return new Instance(player, armorStack, insulStack);
     }
@@ -34,9 +37,9 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
     public static class Instance extends AbstractCriterionTriggerInstance
     {
         private final ItemPredicate armorStack;
-        private final ItemPredicate insulStack;
+        private final ItemPredicate[] insulStack;
 
-        public Instance(EntityPredicate.Composite player, ItemPredicate armorStack, ItemPredicate insulStack)
+        public Instance(EntityPredicate.Composite player, ItemPredicate armorStack, ItemPredicate[] insulStack)
         {
             super(ID, player);
             this.armorStack = armorStack;
@@ -45,7 +48,8 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
 
         public boolean matches(ItemStack fuelStack, ItemStack lampStack)
         {
-            return this.armorStack.matches(fuelStack) && this.insulStack.matches(lampStack);
+            return (this.armorStack == null || this.armorStack.matches(fuelStack))
+                && (this.insulStack == null || Arrays.stream(this.insulStack).anyMatch(predicate -> predicate.matches(lampStack)));
         }
 
         @Override
@@ -53,8 +57,14 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
         {
             JsonObject obj = super.serializeToJson(context);
 
-            obj.add("armor_item", this.insulStack.serializeToJson());
-            obj.add("insulation_item", this.insulStack.serializeToJson());
+            if (this.armorStack != null)
+                obj.add("armor_item", this.armorStack.serializeToJson());
+
+            JsonArray jsonarray = new JsonArray();
+            for (ItemPredicate itemPredicate : insulStack)
+            {   jsonarray.add(itemPredicate.serializeToJson());
+            }
+            obj.add("items", jsonarray);
 
             return obj;
         }

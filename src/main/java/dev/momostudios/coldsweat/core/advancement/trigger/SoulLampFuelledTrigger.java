@@ -1,10 +1,8 @@
 package dev.momostudios.coldsweat.core.advancement.trigger;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -65,11 +63,12 @@ public class SoulLampFuelledTrigger extends SimpleCriterionTrigger<SoulLampFuell
             JsonObject obj = super.serializeToJson(context);
 
             obj.add("lamp_item", this.lampStack.serializeToJson());
-            JsonObject fuelStack = new JsonObject();
-            for (int i = 0; i < this.fuelStack.length; i++)
-            {   fuelStack.add("fuel_item_" + i, this.fuelStack[i].serializeToJson());
+
+            JsonArray jsonarray = new JsonArray();
+            for (ItemPredicate itemPredicate : fuelStack)
+            {   jsonarray.add(itemPredicate.serializeToJson());
             }
-            obj.add("fuel_item", fuelStack);
+            obj.add("items", jsonarray);
 
             return obj;
         }

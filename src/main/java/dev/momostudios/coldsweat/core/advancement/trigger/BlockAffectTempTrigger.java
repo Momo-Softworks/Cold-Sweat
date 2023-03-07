@@ -15,9 +15,10 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
     @Override
     protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
     {
+        double distance = json.has("distance") ? json.get("distance").getAsDouble() : 0;
+        double totalEffect = json.has("total_effect") ? json.get("total_effect").getAsDouble() : 0;
         BlockPredicate block = BlockPredicate.fromJson(json.get("blocks"));
-        double distance = json.get("distance").getAsDouble();
-        return new Instance(player, block, distance);
+        return new Instance(player, block, distance, totalEffect);
     }
 
     @Override
@@ -25,24 +26,29 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
     {   return ID;
     }
 
-    public void trigger(ServerPlayer player, BlockPos pos, double distance)
-    {   this.trigger(player, triggerInstance -> triggerInstance.matches(player.getLevel(), pos, distance));
+    public void trigger(ServerPlayer player, BlockPos pos, double distance, double totalEffect)
+    {   this.trigger(player, triggerInstance -> triggerInstance.matches(player.getLevel(), pos, distance, totalEffect));
     }
 
     public static class Instance extends AbstractCriterionTriggerInstance
     {
         BlockPredicate block;
         double distance;
+        double totalEffect;
 
-        public Instance(EntityPredicate.Composite player, BlockPredicate block,  double distance)
+        public Instance(EntityPredicate.Composite player, BlockPredicate block, double distance, double totalEffect)
         {
             super(ID, player);
             this.block = block;
             this.distance = distance;
+            this.totalEffect = totalEffect;
         }
 
-        public boolean matches(ServerLevel level, BlockPos pos, double distance)
-        {   return distance <= this.distance && block.matches(level, pos);
+        public boolean matches(ServerLevel level, BlockPos pos, double distance, double totalEffect)
+        {
+            return (this.distance == 0 || distance <= this.distance)
+                && (this.totalEffect == 0 || (this.totalEffect < 0 ? totalEffect < this.totalEffect : totalEffect > this.totalEffect))
+                && (block == null || block.matches(level, pos));
         }
 
         @Override
@@ -50,6 +56,10 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
         {
             JsonObject obj = super.serializeToJson(context);
 
+            if (distance != 0)
+                obj.addProperty("distance", distance);
+            if (totalEffect != 0)
+                obj.addProperty("total_effect", totalEffect);
             obj.add("blocks", block.serializeToJson());
 
             return obj;
