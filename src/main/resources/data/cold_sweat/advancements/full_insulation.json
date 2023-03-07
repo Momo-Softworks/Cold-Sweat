@@ -1,10 +1,10 @@
 {
-  "parent": "cold_sweat:extreme_temps",
+  "parent": "cold_sweat:insulate_armor",
   "display": {
     "icon": {
-      "item": "minecraft:leather"
+      "item": "minecraft:leather_chestplate"
     },
-    "title": "Comfy Attire",
+    "title": "Dressed for the Occasion",
     "description": "Insulate your armor to protect yourself from the elements",
     "frame": "task",
     "show_toast": true,

@@ -132,7 +132,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     if (te.getHotFuel() >= lavaFuel * 0.99)
                     {
                         Vec3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
-                        Vec3 lavaSidePos = CSMath.getMiddle(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
+                        Vec3 lavaSidePos = CSMath.getCenterPos(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
 
                         if (rayTraceResult.getLocation().distanceTo(lavaSidePos) < 0.4)
                         {
@@ -159,7 +159,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     if (te.getColdFuel() >= waterFuel * 0.99)
                     {
                         Vec3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
-                        Vec3 waterSidePos = CSMath.getMiddle(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
+                        Vec3 waterSidePos = CSMath.getCenterPos(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
 
                         if (rayTraceResult.getLocation().distanceTo(waterSidePos) < 0.4)
                         {

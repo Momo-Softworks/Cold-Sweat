@@ -1,5 +1,5 @@
 {
-  "parent": "cold_sweat:extreme_temps",
+  "parent": "cold_sweat:huddle_close",
   "display": {
     "icon": {
       "item": "minecraft:flint_and_steel"
@@ -12,9 +12,14 @@
     "hidden": true
   },
   "criteria": {
-    "on_fire": {
-      "trigger": "minecraft:tick",
+    "freezing_on_fire":
+    {
+      "trigger": "cold_sweat:temperature",
       "conditions": {
+        "type": "world",
+        "temperature": {
+          "below": "min_habitable"
+        },
         "player": [
           {
             "condition": "minecraft:entity_properties",
@@ -26,15 +31,6 @@
             }
           }
         ]
-      }
-    },
-    "freezing": {
-      "trigger": "cold_sweat:temperature",
-      "conditions": {
-        "type": "world",
-        "temperature": {
-          "below": "min_habitable"
-        }
       }
     }
   }

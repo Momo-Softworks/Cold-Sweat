@@ -108,7 +108,7 @@ public class BlockTempModifier extends TempModifier
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
 
                             if (entity instanceof ServerPlayer player)
-                                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance);
+                                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance, blockTempTotal);
                         }
                     }
                     catch (Exception ignored) {}

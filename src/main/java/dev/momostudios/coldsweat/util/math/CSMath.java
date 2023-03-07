@@ -454,7 +454,7 @@ public class CSMath
         return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
     }
 
-    public static Vec3 getMiddle(BlockPos pos)
+    public static Vec3 getCenterPos(BlockPos pos)
     {
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }

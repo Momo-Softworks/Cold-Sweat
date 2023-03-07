@@ -384,7 +384,7 @@ public class ChameleonEntity extends Animal
                 }
                 if ((edible = ChameleonEdibles.getEdible(itemEntity.getItem().getItem())) != null)
                 {
-                    edible.onEaten(this, itemEntity.getItem());
+                    edible.onEaten(this, itemEntity);
                 }
             }
             this.setEatTimestamp(this.tickCount);

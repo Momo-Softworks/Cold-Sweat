@@ -5,24 +5,28 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.common.command.impl.TempCommand;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 
+@Mod.EventBusSubscriber
 public class CommandInit
 {
-    private static final ArrayList<BaseCommand> commands = new ArrayList();
+    private static final ArrayList<BaseCommand> COMMANDS = new ArrayList<>();
 
+    @SubscribeEvent
     public static void registerCommands(final RegisterCommandsEvent event)
     {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
-        commands.add(new TempCommand("temperature", 2, true));
-        commands.add(new TempCommand("temp", 2, true));
+        COMMANDS.add(new TempCommand("temperature", 2, true));
+        COMMANDS.add(new TempCommand("temp", 2, true));
 
-        commands.forEach(command -> {
+        COMMANDS.forEach(command ->
+        {
             if (command.isEnabled() && command.setExecution() != null)
-            {
-                dispatcher.register(command.getBuilder());
+            {   dispatcher.register(command.getBuilder());
             }
         });
     }

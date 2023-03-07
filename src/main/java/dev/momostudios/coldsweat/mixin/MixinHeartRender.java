@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.common.event.TempEffectsCommon;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
@@ -37,7 +38,11 @@ public class MixinHeartRender
             if (player.hasEffect(ModEffects.ICE_RESISTANCE)) return;
             double temp = Overlays.BODY_TEMP;
 
-            int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(0.5f, 1, temp, -100, -50));
+            // Get protection from armor underwear
+            float coldLiningFactor = CSMath.blend(0.5f, 1, TempEffectsCommon.getArmorUnderProt(player, true), 0, 4);
+            if (coldLiningFactor == 1) return;
+
+            int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(coldLiningFactor, 1, temp, -100, -50));
             int frozenHearts = frozenHealth / 2;
             int u = blink || type == Gui.HeartType.CONTAINER ? 14 : half ? 7 : 0;
 

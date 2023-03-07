@@ -67,13 +67,6 @@ public class ColdSweat
         EntitySettingsConfig.setup();
     }
 
-    @SubscribeEvent
-    public void registerCommands(final RegisterCommandsEvent event)
-    {
-        CommandInit.registerCommands(event);
-    }
-
-    @SubscribeEvent
     public void commonSetup(final FMLCommonSetupEvent event)
     {
         ColdSweatPacketHandler.init();
@@ -82,6 +75,7 @@ public class ColdSweat
             SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn);
 
+            // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
@@ -89,7 +83,6 @@ public class ColdSweat
         });
     }
 
-    @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event)
     {
         // Fix hearth transparency
@@ -98,13 +91,11 @@ public class ColdSweat
         Overlays.registerOverlays();
     }
 
-    @SubscribeEvent
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
         event.register(ITemperatureCap.class);
     }
 
-    @SubscribeEvent
     public void registerCurioSlots(InterModEnqueueEvent event)
     {
         InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE, () -> SlotTypePreset.CHARM.getMessageBuilder().build());

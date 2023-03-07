@@ -1,0 +1,36 @@
+{
+  "parent": "cold_sweat:extreme_temps",
+  "display": {
+    "icon": {
+      "item": "cold_sweat:hearth"
+    },
+    "title": "Home Sweet Home",
+    "description": "Use a hearth to stay safe in your base",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_insulation": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "cold_sweat:insulated": {}
+        }
+      }
+    },
+    "placed_hearth": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "block": "cold_sweat:hearth_bottom"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "placed_hearth",
+      "has_insulation"
+    ]
+  ]
+}

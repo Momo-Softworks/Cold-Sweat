@@ -923,21 +923,41 @@ Technical Changes:
       - For example, if a door is closed, only the area through the door will be updated
 - Retextured the top of the sewing table to look less like a crafting table
 * Added new recipe unlocks and advancements when certain criteria are met to help progression
+- The soulspring lamp can now be used more offensively, stealing up to 8 health from a target on attack. This can only be done once per entity
 
 Fixes:
 - Fixed crash when hovering over insulation items in certain cases
 - Fixed chameleon ambient/hurt sounds not following the entity's position (Vanilla Minecraft bug)
 - Fixed chameleon animations sometimes being applied to other chameleons
-- Fixed bug that prevented block updates from being detected by the hearth
-- Fixed bug that set the chameleon's shed cooldown to an extremely high negative number when reloading the world
+- Fixed block updates not being detected by the hearth
+- Fixed reloading the world causing chameleons' shed cooldowns to be set to an extremely high negative number
 - Fixed negative temperature effects being applied when the player has fire/ice resistance or grace
 - Fixed heatstroke blur effect not persisting when perspective is changed (F5)
 - Fixed HUD elements showing/hiding being delayed when switching gamemodes
 - Fixed modded campfires not emitting heat
 - Fixed the chameleon becoming desynched if the player it is riding enters water
+- Fixed the shield's blocking animation being misaligned
+- Fixed the soulspring lamp not gaining fuel when attacking
 
 
 Technical Changes:
 - Entities are now given the temperature capability on an EntityType basis instead of an individual basis
       - Prevents every entity in the world being unnecessarily scanned for the capability every tick (performance improvement)
+- TempModifier#calculate() will now be passed a Temperature.Type representing the type of temperature the modifier is attached to
+      - This means TempModifiers are now able to perform different functions depending on how they are applied (world, core, rate, etc.)
+- Added new advancement triggers related to Cold Sweat-specific events:
+      - "cold_sweat:temperature_changed":
+            - Triggered when the player's temperature changes
+            - Can discriminate based on the type of temperature being affected
+            - Can also be configured to only trigger when the temperature is within a certain range
+      - "cold_sweat:block_affects_temperature":
+            - Triggered when a nearby block affects the player's temperature
+            - Arguments for distance, block type, and the total effect this block type has had on the player
+      - "cold_sweat:soul_lamp_fueled":
+            - Triggered when the player fuels a soulspring lamp
+            - Arguments for the amount of fuel added
+      - "cold_sweat:armor_insulated":
+            - Triggered when the player equips armor with insulation
+            - Arguments for the armor item stack and insulation item stack
+            - NOT triggered when insulation is removed with shears
 

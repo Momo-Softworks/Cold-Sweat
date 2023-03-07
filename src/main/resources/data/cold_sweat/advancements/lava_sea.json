@@ -1,0 +1,27 @@
+{
+  "parent": "cold_sweat:huddle_close",
+  "display": {
+    "icon": {
+      "item": "minecraft:lava_bucket"
+    },
+    "title": "The Pit of Fire",
+    "description": "Stand next to a sea of lava",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "near_lava": {
+      "trigger": "cold_sweat:block_affects_temperature",
+      "conditions": {
+        "total_effect": 3.75,
+        "blocks": {
+          "blocks": [
+            "minecraft:lava"
+          ]
+        }
+      }
+    }
+  }
+}
