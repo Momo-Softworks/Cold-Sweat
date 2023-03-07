@@ -269,6 +269,10 @@ public class SewingContainer extends AbstractContainerMenu
                 this.growItem(0, -1);
                 this.growItem(1, -1);
                 player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+
+                // Trigger advancement criteria
+                if (player instanceof ServerPlayer serverPlayer)
+                    ModAdvancementTriggers.ARMOR_INSULATED.trigger(serverPlayer, input1, input2);
             }
         });
 

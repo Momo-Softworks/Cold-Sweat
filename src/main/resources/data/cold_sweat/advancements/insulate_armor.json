@@ -1,0 +1,20 @@
+{
+  "parent": "cold_sweat:extreme_temps",
+  "display": {
+    "icon": {
+      "item": "minecraft:leather_chestplate"
+    },
+    "title": "Dressed for the Occasion",
+    "description": "Insulate your armor to protect yourself from the elements",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "cold_sweat:armor_insulated",
+      "conditions": {}
+    }
+  }
+}
