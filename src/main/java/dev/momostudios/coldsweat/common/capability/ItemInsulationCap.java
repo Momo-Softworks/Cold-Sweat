@@ -52,22 +52,22 @@ public class ItemInsulationCap implements IInsulatableCap
             // Cold insulation
             for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
             {
-                double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i), 1);
+                double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
                 insulation.add(Pair.of(coldInsul, 0d));
             }
 
             // Neutral insulation
             for (int i = 0; i < CSMath.ceil(Math.abs(neutral)) / 2; i++)
             {
-                double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
-                insulation.add(Pair.of(neutralInsul, neutralInsul));
+                double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i * 2), 2);
+                insulation.add(Pair.of(neutralInsul / 2, neutralInsul / 2));
             }
 
             // Hot insulation
             for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
             {
-                double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i), 1);
-                insulation.add(Pair.of(hotInsul, 0d));
+                double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
+                insulation.add(Pair.of(0d, hotInsul));
             }
         }
         insulation.sort(Comparator.comparingDouble(pair -> Math.abs(pair.getFirst() - 2)));
