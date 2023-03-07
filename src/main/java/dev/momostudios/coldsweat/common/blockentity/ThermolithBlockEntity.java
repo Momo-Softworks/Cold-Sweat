@@ -48,17 +48,17 @@ public class ThermolithBlockEntity extends BlockEntity
             if (dummy == null)
             {
                 dummy = new ChameleonEntity(ModEntities.CHAMELEON, this.level);
-                dummy.setPos(pos.getX(), pos.getY(), pos.getZ());
+                dummy.setPos(CSMath.getCenterPos(pos));
             }
 
+            List<TempModifier> modifiers = new ArrayList<>();
             // TempModifiers to use for temp calculation
-            List<TempModifier> modifiers = new ArrayList<>(List.of(
-                    new BlockTempModifier(7),
-                    new DepthTempModifier(),
-                    new BiomeTempModifier(16)));
+            modifiers.add(new BiomeTempModifier(16));
             if (CompatManager.isSereneSeasonsLoaded())
-            {   modifiers.add(TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(20));
+            {   modifiers.add(TempModifierRegistry.getEntryFor("sereneseasons:season"));
             }
+            modifiers.add(new DepthTempModifier());
+            modifiers.add(new BlockTempModifier(7));
 
             // Handle signal output / neighbor updates
             double temperature = Temperature.apply(0, dummy, Temperature.Type.WORLD, modifiers);
