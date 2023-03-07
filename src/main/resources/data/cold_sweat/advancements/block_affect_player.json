@@ -13,7 +13,7 @@
   },
   "criteria": {
     "requirement": {
-      "trigger": "cold_sweat:block_affects_player",
+      "trigger": "cold_sweat:block_affects_temperature",
       "conditions": {
         "distance": 3,
         "blocks": {

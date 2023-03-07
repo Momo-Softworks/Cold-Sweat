@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTempTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "block_affects_player");
+    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "block_affects_temperature");
 
     @Override
     protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
