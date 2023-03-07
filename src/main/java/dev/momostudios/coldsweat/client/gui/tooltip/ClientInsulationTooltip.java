@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -53,35 +52,37 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         int fullCell = 8;
         int partialCell = 12;
 
-        List<Pair<Double, Double>> posInsul = new ArrayList<>();
-        List<Pair<Double, Double>> negInsul = new ArrayList<>();
+        List<Pair<Double, Double>> positiveInsul = new ArrayList<>();
+        List<Pair<Double, Double>> negativeInsul = new ArrayList<>();
         for (Pair<Double, Double> value : insulationValues)
         {
             double cold = value.getFirst();
             double hot = value.getSecond();
-            if (CSMath.asOrMoreExtreme(cold + hot, CSMath.most(cold, hot)))
+            // If both are positive or negative, add to the same list
+            if (cold > 0 == hot > 0 || cold == 0 || hot == 0)
             {
-                if (cold + hot > 0)
-                    posInsul.add(value);
+                if (cold > 0 || hot > 0)
+                    positiveInsul.add(value);
                 else
-                    negInsul.add(value);
+                    negativeInsul.add(value);
             }
+            // If one is positive and one is negative, split them into two lists
             else
             {
                 if (cold > 0)
-                    posInsul.add(Pair.of(cold, 0.0));
+                    positiveInsul.add(Pair.of(cold, 0.0));
                 else
-                    negInsul.add(Pair.of(cold, 0.0));
+                    negativeInsul.add(Pair.of(cold, 0.0));
 
                 if (hot > 0)
-                    posInsul.add(Pair.of(0.0, hot));
+                    positiveInsul.add(Pair.of(0.0, hot));
                 else
-                    negInsul.add(Pair.of(0.0, hot));
+                    negativeInsul.add(Pair.of(0.0, hot));
             }
         }
 
         // Positive (default) insulation bar
-        if (posInsul.size() > 0)
+        if (positiveInsul.size() > 0)
         {
             for (int i = 0; i < slots; i++)
             {
@@ -89,9 +90,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 1, 6, 4, 32, 16);
             }
 
-            for (int i = 0; i < posInsul.size(); i++)
+            for (int i = 0; i < positiveInsul.size(); i++)
             {
-                Pair<Double, Double> value = posInsul.get(i);
+                Pair<Double, Double> value = positiveInsul.get(i);
                 double cold = value.getFirst();
                 double hot = value.getSecond();
                 int uvX = cold == hot ? 0
@@ -116,7 +117,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
 
         // Negative insulation bar
-        if (negInsul.size() > 0)
+        if (negativeInsul.size() > 0)
         {
             for (int i = 0; i < slots; i++)
             {
@@ -124,9 +125,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 GuiComponent.blit(poseStack, x + 7 + i*6 + barLength, y + 1, 0, 0, 1, 6, 4, 32, 16);
             }
 
-            for (int i = 0; i < negInsul.size(); i++)
+            for (int i = 0; i < negativeInsul.size(); i++)
             {
-                Pair<Double, Double> value = negInsul.get(i);
+                Pair<Double, Double> value = negativeInsul.get(i);
                 double cold = value.getFirst();
                 double hot = value.getSecond();
                 int uvX = cold == hot ? 0
