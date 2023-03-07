@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.item;
 import dev.momostudios.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
@@ -202,7 +202,7 @@ public class SoulspringLampItem extends Item
             fuelStack.shrink((64 - (int) currentFuel) / getFuelForStack(fuelStack));
 
             if (player instanceof ServerPlayer serverPlayer)
-                ModTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
+                ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
 
             return true;
         }

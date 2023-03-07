@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -108,7 +108,7 @@ public class BlockTempModifier extends TempModifier
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
 
                             if (entity instanceof ServerPlayer player)
-                                ModTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance);
+                                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance);
                         }
                     }
                     catch (Exception ignored) {}

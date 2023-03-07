@@ -119,8 +119,8 @@ public class EntityTempCap implements ITemperatureCap
         if (tempSign != 0 && magnitude != tempSign)
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.most(factor * config.rate, config.rate / 10d * -tempSign);
-            newCoreTemp += CSMath.least(changeBy, -getTemp(Type.CORE));
+            double changeBy = CSMath.maxAbs(factor * config.rate, config.rate / 10d * -tempSign);
+            newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
         }
 
         // Write the new temperature values

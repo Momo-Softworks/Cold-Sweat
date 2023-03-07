@@ -390,7 +390,7 @@ public class CSMath
     /**
      * @return The value that is farther from 0.
      */
-    public static double most(double... values)
+    public static double maxAbs(double... values)
     {
         double mostExtreme = 0;
         for (double value : values)
@@ -406,7 +406,7 @@ public class CSMath
     /**
      * @return The value that is closer to 0.
      */
-    public static double least(double... values)
+    public static double minAbs(double... values)
     {
         double smallest = values[0];
         for (double value : values)
@@ -446,7 +446,7 @@ public class CSMath
 
     public static double shrink(double value, double amount)
     {
-        return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
+        return (Math.abs(value) - amount) * getSign(value);
     }
 
     public static int shrink(int value, int amount)

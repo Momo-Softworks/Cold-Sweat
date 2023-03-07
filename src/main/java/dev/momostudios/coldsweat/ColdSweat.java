@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.*;
-import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
@@ -82,9 +82,10 @@ public class ColdSweat
             SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn);
 
-            CriteriaTriggers.register(ModTriggers.TEMPERATURE_CHANGED);
-            CriteriaTriggers.register(ModTriggers.SOUL_LAMP_FUELLED);
-            CriteriaTriggers.register(ModTriggers.BLOCK_AFFECTS_TEMP);
+            CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
+            CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
+            CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
+            CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
     }
 

@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
-import dev.momostudios.coldsweat.core.advancement.trigger.ModTriggers;
+import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.ModDamageSources;
@@ -146,8 +146,8 @@ public class PlayerTempCap implements ITemperatureCap
         if (tempSign != 0 && magnitude != tempSign)
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.most(factor * config.rate, config.rate / 10d * -tempSign);
-            newCoreTemp += CSMath.least(changeBy, -getTemp(Type.CORE));
+            double changeBy = CSMath.maxAbs(factor * config.rate, config.rate / 10d * -tempSign);
+            newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
         }
 
         // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
@@ -206,7 +206,7 @@ public class PlayerTempCap implements ITemperatureCap
             double oldTemp = getTemp(type);
             double newTemp = temps[type.ordinal()];
             if (oldTemp != newTemp)
-                ModTriggers.TEMPERATURE_CHANGED.trigger(player, type, getTemp(type));
+                ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, type, getTemp(type));
 
             this.setTemp(type, newTemp);
         }
