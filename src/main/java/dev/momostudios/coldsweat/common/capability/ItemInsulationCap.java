@@ -47,7 +47,9 @@ public class ItemInsulationCap implements IInsulatableCap
             // Break it up into cold and hot
             double cold = insulVal.getFirst();
             double hot = insulVal.getSecond();
-            double neutral = cold > 0 == hot > 0 ? cold + hot : 0;
+            double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
+            if (cold == neutral) cold = 0;
+            if (hot == neutral) hot = 0;
 
             // Cold insulation
             for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
@@ -57,10 +59,10 @@ public class ItemInsulationCap implements IInsulatableCap
             }
 
             // Neutral insulation
-            for (int i = 0; i < CSMath.ceil(Math.abs(neutral)) / 2; i++)
+            for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
             {
-                double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i * 2), 2);
-                insulation.add(Pair.of(neutralInsul / 2, neutralInsul / 2));
+                double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+                insulation.add(Pair.of(neutralInsul, neutralInsul));
             }
 
             // Hot insulation
