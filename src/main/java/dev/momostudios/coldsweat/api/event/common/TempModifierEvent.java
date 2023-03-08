@@ -19,7 +19,6 @@ public class TempModifierEvent extends Event
     /**
      * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
-     * {@link #maxCount} determines whether the TempModifier may be added if an instance already exists. <br>
      * {@link #entity} is the player the TempModifier is being applied to. <br>
      * {@link #type} determines the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY} <br>
      * <br>
@@ -31,14 +30,9 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        private LivingEntity entity;
+        private final LivingEntity entity;
         private TempModifier modifier;
-        public int maxCount;
         public Temperature.Type type;
-
-        public void setMaxCount(int count) {
-            this.maxCount = count;
-        }
 
         public void setModifierType(Temperature.Type newType) {
             this.type = newType;
@@ -56,9 +50,8 @@ public class TempModifierEvent extends Event
             return entity;
         }
 
-        public Add(TempModifier modifier, LivingEntity entity, Temperature.Type type, int duplicates)
+        public Add(TempModifier modifier, LivingEntity entity, Temperature.Type type)
         {
-            maxCount = duplicates;
             this.entity = entity;
             this.type = type;
             this.modifier = modifier;

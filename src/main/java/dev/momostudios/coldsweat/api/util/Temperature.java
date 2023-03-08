@@ -21,6 +21,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,23 +144,23 @@ public class Temperature
      */
     public static void replaceModifier(Player player, TempModifier modifier, Type type)
     {
-        addModifier(player, modifier, type, 1, true);
+        addModifier(player, modifier, type, false, Addition.of(Addition.Relation.REPLACE, Addition.Order.FIRST, mod -> modifier.getClass().isInstance(mod)));
     }
 
     /**
      * Adds the given modifier to the player.<br>
      * If duplicates are disabled and the modifier already exists, this action will fail.
-     * @param allowDuplicates allows or disallows duplicate TempModifiers to be applied
+     * @param allowDupes allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDuplicates)
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes)
     {
-        addModifier(entity, modifier, type, allowDuplicates ? Integer.MAX_VALUE : 1, false);
+        addModifier(entity, modifier, type, allowDupes, Addition.of(Addition.Relation.AFTER, Addition.Order.LAST, null));
     }
 
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, int maxCount, boolean replace)
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
     {
-        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, type, maxCount);
+        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, type);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
@@ -169,29 +170,31 @@ public class Temperature
                 getTemperatureCap(entity).ifPresent(cap ->
                 {
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
+                    Predicate<TempModifier> predicate = params.getPredicate();
+                    if (predicate == null) predicate = mod -> true;
 
-                    // Find all the modifiers of this type
-                    List<TempModifier> matchingMods = modifiers.stream().filter(mod -> mod.getID().equals(newModifier.getID())).toList();
-                    int matchingCount = matchingMods.size();
+                    // Get the start of the iterator & which direction it's going
+                    int start = params.getOrder() == Addition.Order.FIRST ? 0 : modifiers.size() - 1;
+                    int increment = params.getOrder() == Addition.Order.FIRST ? 1 : -1;
 
-                    // If there are more modifiers than allowed
-                    if (matchingCount >= event.maxCount)
+                    boolean replace = params.relation == Addition.Relation.REPLACE;
+                    boolean after = params.relation == Addition.Relation.AFTER;
+                    // Iterate through the list of modifiers for the injection point
+                    for (int i = CSMath.clamp(start, 0, modifiers.size() - 1); i < modifiers.size(); i += increment)
                     {
-                        // If replacing, delete extra modifiers
-                        if (replace)
+                        // Inject success
+                        if (predicate.test(modifiers.get(i)))
                         {
-                            modifiers.removeAll(matchingMods.stream().limit(matchingMods.size() - (event.maxCount - 1)).toList());
-                            matchingCount = 0;
+                            // Remove the modifier at this position if REPLACE
+                            if (replace) modifiers.remove(i);
+                            // Always add the modifier if REPLACE or if duplicates are allowed
+                            if (replace || allowDupes)
+                            {   modifiers.add(after ? i + 1 : i, event.getModifier());
+                            }
+                            // Update the modifiers and return
+                            updateModifiers(entity, cap);
+                            return;
                         }
-                        // Otherwise the modifier can't be added
-                        else return;
-                    }
-
-                    // Add the modifier and update
-                    if (matchingCount < event.maxCount)
-                    {
-                        modifiers.add(event.getModifier());
-                        updateModifiers(entity, cap);
                     }
                 });
             }
@@ -374,5 +377,47 @@ public class Temperature
         F,
         C,
         MC
+    }
+
+    public static class Addition
+    {
+        private final Predicate<TempModifier> predicate;
+        private final Relation relation;
+        private final Order order;
+
+        private Addition(Relation relation, Order order, Predicate<TempModifier> predicate)
+        {   this.relation = relation;
+            this.predicate = predicate;
+            this.order = order;
+        }
+
+        public static Addition of(Relation relation, Order order, Predicate<TempModifier> predicate)
+        {   return new Addition(relation, order, predicate);
+        }
+
+        public Relation getRelation()
+        {   return relation;
+        }
+
+        public Predicate<TempModifier> getPredicate()
+        {   return predicate;
+        }
+
+        public Order getOrder()
+        {   return order;
+        }
+
+        public enum Order
+        {
+            FIRST,
+            LAST
+        }
+
+        public enum Relation
+        {
+            BEFORE,
+            AFTER,
+            REPLACE
+        }
     }
 }
