@@ -11,7 +11,9 @@ import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -36,19 +38,13 @@ public class ArmorInsulation
         {
             Map<Item, Pair<Double, Double>> insulatingArmors = ConfigSettings.INSULATING_ARMORS.get();
 
+            int fullyInsulated = 0;
             double cold = 0;
             double hot = 0;
-            for (EquipmentSlot slot : EquipmentSlot.values())
+            for (ItemStack armorStack : player.getArmorSlots())
             {
-                if (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) continue;
-
-                ItemStack armorStack = player.getItemBySlot(slot);
                 if (armorStack.getItem() instanceof ArmorItem armorItem)
                 {
-                    // Add the armor's defense value to the insulation value.
-                    cold += armorItem.getDefense();
-                    hot += armorItem.getDefense();
-
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
                     Pair<Double, Double> insulationValue = insulatingArmors.get(armorStack.getItem());
@@ -57,15 +53,27 @@ public class ArmorInsulation
                         cold += insulationValue.getFirst();
                         hot += insulationValue.getSecond();
                     }
-                    // Add the armor's insulation value from the Sewing Table
-                    List<Pair<Double, Double>> insulation = armorStack.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap()).getInsulation();
+                    else
+                    {   // Add the armor's insulation value from the Sewing Table
+                        List<Pair<Double, Double>> insulation = armorStack.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap()).getInsulation();
 
-                    // Get the armor's insulation values
-                    for (Pair<Double, Double> value : insulation)
-                    {
-                        cold += value.getFirst();
-                        hot += value.getSecond();
+                        // Get the armor's insulation values
+                        for (Pair<Double, Double> value : insulation)
+                        {
+                            cold += value.getFirst();
+                            hot += value.getSecond();
+                        }
+
+                        // Used for tracking "fully_insulated" advancement
+                        if ((cold + hot) / 2 >= getInsulationSlots(armorStack))
+                        {   fullyInsulated++;
+                        }
                     }
+
+                    // Add the armor's defense value to the insulation value.
+                    cold += armorItem.getDefense();
+                    hot += armorItem.getDefense();
+
                 }
             }
 
@@ -83,6 +91,14 @@ public class ArmorInsulation
             {
                 Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.MAX, false);
                 Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.MIN, false);
+            }
+
+            // Award advancement for full insulation
+            if (fullyInsulated >= 4 && player instanceof ServerPlayer serverPlayer)
+            {
+                Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));
+                if (advancement != null)
+                    serverPlayer.getAdvancements().award(advancement, "requirement");
             }
         }
     }
