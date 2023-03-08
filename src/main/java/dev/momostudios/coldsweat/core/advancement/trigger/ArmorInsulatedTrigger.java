@@ -48,8 +48,8 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
 
         public boolean matches(ItemStack fuelStack, ItemStack lampStack)
         {
-            return (this.armorStack == null || this.armorStack.matches(fuelStack))
-                && (this.insulStack == null || Arrays.stream(this.insulStack).anyMatch(predicate -> predicate.matches(lampStack)));
+            return this.armorStack.matches(fuelStack)
+                && (this.insulStack.length == 0 || Arrays.stream(this.insulStack).anyMatch(predicate -> predicate.matches(lampStack)));
         }
 
         @Override
@@ -57,14 +57,13 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
         {
             JsonObject obj = super.serializeToJson(context);
 
-            if (this.armorStack != null)
-                obj.add("armor_item", this.armorStack.serializeToJson());
+            obj.add("armor_item", this.armorStack.serializeToJson());
 
             JsonArray jsonarray = new JsonArray();
             for (ItemPredicate itemPredicate : insulStack)
             {   jsonarray.add(itemPredicate.serializeToJson());
             }
-            obj.add("items", jsonarray);
+            obj.add("insulation_item", jsonarray);
 
             return obj;
         }
