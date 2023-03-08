@@ -32,9 +32,7 @@
     }
   },
   "requirements": [
-    [
-      "placed_hearth",
-      "has_insulation"
-    ]
+    [ "placed_hearth" ],
+    [ "has_insulation" ]
   ]
 }

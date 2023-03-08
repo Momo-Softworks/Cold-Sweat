@@ -17,8 +17,7 @@
   },
   "criteria": {
     "requirement": {
-      "trigger": "cold_sweat:armor_insulated",
-      "conditions": {}
+      "trigger": "cold_sweat:armor_insulated"
     }
   }
 }

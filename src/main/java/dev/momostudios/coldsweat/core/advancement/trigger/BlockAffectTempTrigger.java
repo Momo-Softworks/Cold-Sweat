@@ -33,22 +33,22 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
     public static class Instance extends AbstractCriterionTriggerInstance
     {
         BlockPredicate block;
-        double distance;
-        double totalEffect;
+        MinMaxBounds.Doubles distance;
+        MinMaxBounds.Doubles totalEffect;
 
         public Instance(EntityPredicate.Composite player, BlockPredicate block, double distance, double totalEffect)
         {
             super(ID, player);
             this.block = block;
-            this.distance = distance;
-            this.totalEffect = totalEffect;
+            this.distance = MinMaxBounds.Doubles.atMost(distance);
+            this.totalEffect = totalEffect < 0 ? MinMaxBounds.Doubles.atMost(totalEffect) : MinMaxBounds.Doubles.atLeast(totalEffect);
         }
 
         public boolean matches(ServerLevel level, BlockPos pos, double distance, double totalEffect)
         {
-            return (this.distance == 0 || distance <= this.distance)
-                && (this.totalEffect == 0 || (this.totalEffect < 0 ? totalEffect < this.totalEffect : totalEffect > this.totalEffect))
-                && (block == null || block.matches(level, pos));
+            return this.distance.matches(distance)
+                && this.totalEffect.matches(totalEffect)
+                && this.block.matches(level, pos);
         }
 
         @Override
@@ -56,11 +56,9 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
         {
             JsonObject obj = super.serializeToJson(context);
 
-            if (distance != 0)
-                obj.addProperty("distance", distance);
-            if (totalEffect != 0)
-                obj.addProperty("total_effect", totalEffect);
-            obj.add("blocks", block.serializeToJson());
+            obj.add("distance", this.distance.serializeToJson());
+            obj.add("total_effect", this.totalEffect.serializeToJson());
+            obj.add("blocks", this.block.serializeToJson());
 
             return obj;
         }

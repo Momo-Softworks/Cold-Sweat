@@ -10,7 +10,7 @@
     "description": {
         "translate": "advancements.cold_sweat.full_insulation.description"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false
