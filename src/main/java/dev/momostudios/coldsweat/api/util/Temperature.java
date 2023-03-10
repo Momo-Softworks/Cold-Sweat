@@ -21,9 +21,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -167,36 +165,47 @@ public class Temperature
             TempModifier newModifier = event.getModifier();
             if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
             {
-                getTemperatureCap(entity).ifPresent(cap ->
+                LazyOptional<ITemperatureCap> icap = getTemperatureCap(entity);
+                if (icap.isPresent())
                 {
+                    ITemperatureCap cap = icap.orElse(new PlayerTempCap());
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
-                    Predicate<TempModifier> predicate = params.getPredicate();
-                    if (predicate == null) predicate = mod -> true;
-
-                    // Get the start of the iterator & which direction it's going
-                    int start = params.getOrder() == Addition.Order.FIRST ? 0 : modifiers.size() - 1;
-                    int increment = params.getOrder() == Addition.Order.FIRST ? 1 : -1;
-
-                    boolean replace = params.relation == Addition.Relation.REPLACE;
-                    boolean after = params.relation == Addition.Relation.AFTER;
-                    // Iterate through the list of modifiers for the injection point
-                    for (int i = CSMath.clamp(start, 0, modifiers.size() - 1); i < modifiers.size(); i += increment)
+                    if (modifiers.isEmpty())
+                    {   modifiers.add(event.getModifier());
+                    }
+                    else
                     {
-                        // Inject success
-                        if (predicate.test(modifiers.get(i)))
+                        Predicate<TempModifier> predicate = params.getPredicate();
+                        if (predicate == null) predicate = mod -> true;
+                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(event.getModifier().getID())))
+                        {   return;
+                        }
+
+                        boolean replace = params.relation == Addition.Relation.REPLACE;
+                        boolean after = params.relation == Addition.Relation.AFTER;
+                        boolean forward = params.order == Addition.Order.FIRST;
+                        // Get the start of the iterator & which direction it's going
+                        int start = forward ? 0 : modifiers.size() - 1;
+
+                        // Iterate through the list (backwards if "forward" is false)
+                        for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
                         {
-                            // Remove the modifier at this position if REPLACE
-                            if (replace) modifiers.remove(i);
-                            // Always add the modifier if REPLACE or if duplicates are allowed
-                            if (replace || allowDupes)
-                            {   modifiers.add(after ? i + 1 : i, event.getModifier());
+                            TempModifier mod = modifiers.get(i);
+
+                            // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
+                            if (predicate.test(mod))
+                            {
+                                if (replace)
+                                {   modifiers.set(i, event.getModifier());
+                                }
+                                else
+                                {   modifiers.add(i + (after ? 1 : 0), event.getModifier());
+                                }
+                                break;
                             }
-                            // Update the modifiers and return
-                            updateModifiers(entity, cap);
-                            return;
                         }
                     }
-                });
+                }
             }
             else
             {
