@@ -3,10 +3,9 @@ package dev.momostudios.coldsweat.util.world;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
+import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -202,13 +201,13 @@ public class WorldHelper
     {
         if (!entity.isSilent())
         {
-            if (!entity.level.isClientSide)
+            if (entity.level.isClientSide)
+            {   ClientOnlyHelper.playEntitySound(sound, source, volume, pitch, entity);
+            }
+            else
             {
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
                         new PlaySoundMessage(sound.getRegistryName().toString(), source, volume, pitch, entity.getId()));
-            }
-            else
-            {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity));
             }
         }
     }
