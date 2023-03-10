@@ -41,9 +41,10 @@ public class TempEffectsClient
     static float PREV_X_SWAY = 0;
     static float PREV_Y_SWAY = 0;
     static float X_SWAY_SPEED = 0;
-    static float X_SWAY_BLEND = 0;
     static float Y_SWAY_SPEED = 0;
-    static float Y_SWAY_BLEND = 0;
+    static float X_SWAY_PHASE = 0;
+    static float Y_SWAY_PHASE = 0;
+    static float TIME_SINCE_NEW_SWAY = 0;
 
     static int COLD_IMMUNITY = 0;
     static int HOT_IMMUNITY  = 0;
@@ -56,7 +57,7 @@ public class TempEffectsClient
         if (!Minecraft.getInstance().isPaused() && player != null)
         {
             // Get the FPS of the game
-            float frameTime = Minecraft.getInstance().getDeltaFrameTime() * 3;
+            float frameTime = Minecraft.getInstance().getDeltaFrameTime();
             float temp = (float) Temperature.get(player, Temperature.Type.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
@@ -69,28 +70,30 @@ public class TempEffectsClient
                 {
                     float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
                     double tickTime = player.tickCount + event.getPartialTicks();
-                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime) / 3);
+                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime));
                     player.setYRot(player.getYRot() + shiverAmount);
                 }
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
                 {
                     float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
                     float factor = CSMath.blend(0, 8, immunityModifier, 50, 100);
-                    double tickTime = player.tickCount + event.getPartialTicks();
 
                     // Set random sway speed every once in a while
-                    if (Math.abs(X_SWAY_BLEND - X_SWAY_SPEED) < 0.1f)
-                        X_SWAY_SPEED = (float) (Math.random() * 0.5f);
-                    if (Math.abs(Y_SWAY_BLEND - Y_SWAY_SPEED) < 0.1f)
-                        Y_SWAY_SPEED = (float) (Math.random() * 0.5f);
+                    if (TIME_SINCE_NEW_SWAY > 100)
+                    {
+                        TIME_SINCE_NEW_SWAY = 0;
+                        X_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
+                        Y_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
+                    }
+                    TIME_SINCE_NEW_SWAY += frameTime;
 
                     // Blend to the new sway speed
-                    X_SWAY_BLEND += (X_SWAY_SPEED - X_SWAY_BLEND) * frameTime / 1000;
-                    Y_SWAY_BLEND += (Y_SWAY_SPEED - Y_SWAY_BLEND) * frameTime / 1000;
+                    X_SWAY_PHASE += 2 * Math.PI * frameTime * X_SWAY_SPEED;
+                    Y_SWAY_PHASE += 2 * Math.PI * frameTime * Y_SWAY_SPEED;
 
                     // Apply the sway speed to a sin function
-                    float xOffs = (float) (Math.sin(tickTime / 500 * X_SWAY_BLEND) * factor);
-                    float yOffs = (float) (Math.sin(tickTime / 500 * Y_SWAY_BLEND) * factor);
+                    float xOffs = (float) (Math.sin(X_SWAY_PHASE) * factor);
+                    float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * factor);
 
                     // Apply the sway
                     player.setXRot(player.getXRot() + xOffs - PREV_X_SWAY);
