@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.client.gui.config;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageTwo;
-import dev.momostudios.coldsweat.core.network.message.ClientConfigSendMessage;
+import dev.momostudios.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 
 import java.text.DecimalFormat;
@@ -39,12 +38,12 @@ public class ConfigScreen
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = PAGES.size() - 1;
 
-    public static Screen getPage(int index, Screen parentScreen, ConfigSettings configSettings)
+    public static Screen getPage(int index, Screen parentScreen)
     {
         index = Math.max(FIRST_PAGE, Math.min(LAST_PAGE, index));
         try
         {
-            return PAGES.get(index).getConstructor(Screen.class, ConfigSettings.class).newInstance(parentScreen, configSettings);
+            return PAGES.get(index).getConstructor(Screen.class).newInstance(parentScreen);
         }
         catch (Exception e)
         {
@@ -53,21 +52,20 @@ public class ConfigScreen
         }
     }
 
-    public static void saveConfig(ConfigSettings configSettings)
+    public static void saveConfig()
     {
         if (Minecraft.getInstance().player != null)
         {
             if (Minecraft.getInstance().player.getPermissionLevel() >= 2)
             {
                 if (!MC.isLocalServer())
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigSendMessage(configSettings));
+                    ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
                 else
-                    ColdSweatConfig.getInstance().writeValues(configSettings);
+                    ConfigSettings.saveValues();
             }
         }
         else
-            ColdSweatConfig.getInstance().writeValues(configSettings);
-        ConfigSettings.setInstance(configSettings);
+            ConfigSettings.saveValues();
     }
 
     @SubscribeEvent

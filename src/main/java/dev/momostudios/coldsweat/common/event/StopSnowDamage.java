@@ -18,7 +18,7 @@ public class StopSnowDamage
     @SubscribeEvent
     public static void onSnowDamage(LivingAttackEvent event)
     {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.getInstance().iceRes)
+        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
         {
             event.setCanceled(true);
         }
@@ -32,7 +32,7 @@ public class StopSnowDamage
         {
             TempModifier insulationModifier;
             double insulation = 0;
-            boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.getInstance().iceRes;
+            boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get();
             if (hasIcePotion
             || ((insulation = ((insulationModifier = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class)) == null ? 0
             : insulationModifier.getNBT().getDouble("chill"))) > 0 && (player.tickCount % Math.max(1, 37 - insulation)) == 0))

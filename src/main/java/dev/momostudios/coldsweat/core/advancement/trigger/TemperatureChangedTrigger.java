@@ -29,9 +29,9 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
             {
                 String builtinValue = values.get("below").getAsString();
                 if (builtinValue.equals("max_habitable"))
-                    below = ConfigSettings.getInstance().maxTemp;
+                    below = ConfigSettings.MAX_TEMP.get();
                 else if (builtinValue.equals("min_habitable"))
-                    below = ConfigSettings.getInstance().minTemp;
+                    below = ConfigSettings.MIN_TEMP.get();
             }
         }
 
@@ -45,9 +45,9 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
             {
                 String builtinValue = values.get("above").getAsString();
                 if (builtinValue.equals("max_habitable"))
-                    above = ConfigSettings.getInstance().maxTemp;
+                    above = ConfigSettings.MAX_TEMP.get();
                 else if (builtinValue.equals("min_habitable"))
-                    above = ConfigSettings.getInstance().minTemp;
+                    above = ConfigSettings.MIN_TEMP.get();
             }
         }
 

@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
 
@@ -24,10 +23,8 @@ public class HearthTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        ConfigSettings config = ConfigSettings.getInstance();
-
-        double min = config.minTemp;
-        double max = config.maxTemp;
+        double min = ConfigSettings.MIN_TEMP.get();
+        double max = ConfigSettings.MAX_TEMP.get();
         double mid = (min + max) / 2;
         double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
 

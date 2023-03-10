@@ -19,7 +19,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -59,8 +58,8 @@ public class Overlays
 
             if (player != null && SHOW_WORLD_TEMP && !Minecraft.getInstance().options.hideGui)
             {
-                double min = ConfigSettings.getInstance().minTemp;
-                double max = ConfigSettings.getInstance().maxTemp;
+                double min = ConfigSettings.MIN_TEMP.get();
+                double max = ConfigSettings.MAX_TEMP.get();
 
                 // Get player world temperature
                 double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);

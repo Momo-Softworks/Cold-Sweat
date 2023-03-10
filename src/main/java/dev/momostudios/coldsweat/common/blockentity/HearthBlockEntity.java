@@ -7,7 +7,6 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.client.event.HearthDebugRenderer;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
@@ -18,6 +17,7 @@ import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
+import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -60,15 +60,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
-    ConfigSettings config = ConfigSettings.getInstance();
-
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     ArrayList<SpreadPath> paths = new ArrayList<>();
     // Used for client-side rendering of the Hearth's F3 debug
@@ -554,16 +551,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 double temp = cap.getTemp(Temperature.Type.WORLD);
-                if (CSMath.isInRange(temp, config.minTemp, config.maxTemp))
+                if (CSMath.isInRange(temp, ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()))
                 {
                     HearthTempModifier mod = Temperature.getModifier(cap, Temperature.Type.WORLD, HearthTempModifier.class);
                     if (mod != null) temp = mod.getLastInput();
                 }
 
                 // Tell the hearth to use hot fuel
-                shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < config.minTemp);
+                shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < ConfigSettings.MIN_TEMP.get());
                 // Tell the hearth to use cold fuel
-                shouldUseColdFuel = shouldUseColdFuel || (coldFuel > 0 && temp > config.maxTemp);
+                shouldUseColdFuel = shouldUseColdFuel || (coldFuel > 0 && temp > ConfigSettings.MAX_TEMP.get());
             });
         }
 
@@ -715,7 +712,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         pathLookup.clear();
         pathLookup.addAll(newPaths.stream().map(SpreadPath::getPos).toList());
         if (this.level.isClientSide)
-            HearthDebugRenderer.HEARTH_LOCATIONS.put(this.blockPos, new HashMap<>());
+            ClientOnlyHelper.addHearthPosition(this.blockPos);
     }
 
     public void addPath(SpreadPath path)
@@ -757,7 +754,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         super.setRemoved();
         HearthPathManagement.HEARTH_POSITIONS.remove(this.blockPos);
-        HearthDebugRenderer.HEARTH_LOCATIONS.remove(this.blockPos);
+        if (level.isClientSide)
+            ClientOnlyHelper.removeHearthPosition(this.blockPos);
     }
 
     public ArrayList<SpreadPath> getPaths()

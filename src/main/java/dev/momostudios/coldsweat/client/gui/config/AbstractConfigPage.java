@@ -46,7 +46,6 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     private final Screen parentScreen;
-    private final ConfigSettings configSettings;
 
     public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
     public Map<String, List<FormattedText>> tooltips = new HashMap<>();
@@ -69,11 +68,10 @@ public abstract class AbstractConfigPage extends Screen
     @Nullable
     public abstract BaseComponent sectionTwoTitle();
 
-    public AbstractConfigPage(Screen parentScreen, ConfigSettings configSettings)
+    public AbstractConfigPage(Screen parentScreen)
     {
         super(new TranslatableComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
-        this.configSettings = configSettings;
     }
 
     public int index()
@@ -196,7 +194,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configSettings.difficulty = 4;
+                        ConfigSettings.DIFFICULTY.set(4);
                     onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -207,7 +205,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configSettings.difficulty = 4;
+                        ConfigSettings.DIFFICULTY.set(4);
                     onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -218,7 +216,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        configSettings.difficulty = 4;
+                        ConfigSettings.DIFFICULTY.set(4);
                     onValueWrite.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -279,7 +277,7 @@ public abstract class AbstractConfigPage extends Screen
             leftRightPressed.accept(-1);
 
             if (setsCustomDifficulty)
-                configSettings.difficulty = 4;
+                ConfigSettings.DIFFICULTY.set(4);
         });
         leftButton.active = shouldBeActive;
 
@@ -289,7 +287,7 @@ public abstract class AbstractConfigPage extends Screen
             upDownPressed.accept(-1);
 
             if (setsCustomDifficulty)
-                configSettings.difficulty = 4;
+                ConfigSettings.DIFFICULTY.set(4);
         });
         upButton.active = shouldBeActive;
 
@@ -299,7 +297,7 @@ public abstract class AbstractConfigPage extends Screen
             upDownPressed.accept(1);
 
             if (setsCustomDifficulty)
-                configSettings.difficulty = 4;
+                ConfigSettings.DIFFICULTY.set(4);
         });
         downButton.active = shouldBeActive;
 
@@ -309,7 +307,7 @@ public abstract class AbstractConfigPage extends Screen
             leftRightPressed.accept(1);
 
             if (setsCustomDifficulty)
-                configSettings.difficulty = 4;
+                ConfigSettings.DIFFICULTY.set(4);
         });
         rightButton.active = shouldBeActive;
 
@@ -319,7 +317,7 @@ public abstract class AbstractConfigPage extends Screen
             reset.run();
 
             if (setsCustomDifficulty)
-                configSettings.difficulty = 4;
+                ConfigSettings.DIFFICULTY.set(4);
         });
         resetButton.active = shouldBeActive;
 
@@ -354,12 +352,12 @@ public abstract class AbstractConfigPage extends Screen
 
         // Navigation
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
-                button -> mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen, configSettings)));
+                button -> mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen)));
         if (this.index() < ConfigScreen.LAST_PAGE)
             this.addRenderableWidget(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
-                button -> mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen, configSettings)));
+                button -> mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
             this.addRenderableWidget(prevNavButton);
     }

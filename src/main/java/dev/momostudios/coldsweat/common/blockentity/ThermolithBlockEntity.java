@@ -25,7 +25,6 @@ public class ThermolithBlockEntity extends BlockEntity
 {
     private ChameleonEntity dummy = null;
     private int signal = 0;
-    ConfigSettings config = ConfigSettings.getInstance();
 
     public ThermolithBlockEntity(BlockPos pos, BlockState state)
     {
@@ -62,7 +61,7 @@ public class ThermolithBlockEntity extends BlockEntity
 
             // Handle signal output / neighbor updates
             double temperature = Temperature.apply(0, dummy, Temperature.Type.WORLD, modifiers);
-            int newSignal = (int) CSMath.blend(0, 15, temperature, config.minTemp, config.maxTemp);
+            int newSignal = (int) CSMath.blend(0, 15, temperature, ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
 
             if (newSignal != signal)
             {

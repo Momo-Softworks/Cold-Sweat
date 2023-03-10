@@ -25,7 +25,7 @@ public interface ITemperatureCap
     {
         TemperatureDamageEvent event = new TemperatureDamageEvent(target, source, amount);
         if (!MinecraftForge.EVENT_BUS.post(event))
-            target.hurt(ConfigSettings.getInstance().damageScaling ? source.setScalesWithDifficulty() : source, event.getAmount());
+            target.hurt(ConfigSettings.DAMAGE_SCALING.get() ? source.setScalesWithDifficulty() : source, event.getAmount());
     }
 
     CompoundTag serializeNBT();

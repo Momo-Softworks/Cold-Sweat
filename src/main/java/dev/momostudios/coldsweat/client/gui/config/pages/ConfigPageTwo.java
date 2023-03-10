@@ -13,14 +13,12 @@ import javax.annotation.Nullable;
 
 public class ConfigPageTwo extends AbstractConfigPage
 {
-    private final ConfigSettings configSettings;
     private final String ON;
     private final String OFF;
 
-    public ConfigPageTwo(Screen parentScreen, ConfigSettings configSettings)
+    public ConfigPageTwo(Screen parentScreen)
     {
-        super(parentScreen, configSettings);
-        this.configSettings = configSettings;
+        super(parentScreen);
         ON = new TranslatableComponent("options.on").getString();
         OFF = new TranslatableComponent("options.off").getString();
     }
@@ -52,20 +50,20 @@ public class ConfigPageTwo extends AbstractConfigPage
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
         // Enable Grace Period
-        this.addButton("grace_toggle", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": " + (configSettings.graceEnabled ? ON : OFF),
+        this.addButton("grace_toggle", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": " + (ConfigSettings.GRACE_ENABLED.get() ? ON : OFF),
                 button ->
                 {
-                    configSettings.graceEnabled = !configSettings.graceEnabled;
+                    ConfigSettings.GRACE_ENABLED.set(!ConfigSettings.GRACE_ENABLED.get());
 
                     button.setMessage(new TextComponent(new TranslatableComponent("cold_sweat.config.grace_period.name").getString() + ": "
-                            + (configSettings.graceEnabled ? ON : OFF)));
+                            + (ConfigSettings.GRACE_ENABLED.get() ? ON : OFF)));
                 },
                 true, true, false, new TranslatableComponent("cold_sweat.config.grace_period.desc").getString());
 
         // Grace Period Length
         this.addDecimalInput("grace_length", Side.LEFT, new TranslatableComponent("cold_sweat.config.grace_period_length.name"),
-                value -> configSettings.graceLength = value.intValue(),
-                input -> input.setValue(configSettings.graceLength + ""),
+                value -> ConfigSettings.GRACE_LENGTH.set(value.intValue()),
+                input -> input.setValue(ConfigSettings.GRACE_LENGTH + ""),
                 true, true, false, new TranslatableComponent("cold_sweat.config.grace_period_length.desc_1").getString(),
                             "§7"+new TranslatableComponent("cold_sweat.config.grace_period_length.desc_2").getString()+"§r");
 
@@ -115,6 +113,6 @@ public class ConfigPageTwo extends AbstractConfigPage
     public void onClose()
     {
         super.onClose();
-        ConfigScreen.saveConfig(configSettings);
+        ConfigScreen.saveConfig();
     }
 }

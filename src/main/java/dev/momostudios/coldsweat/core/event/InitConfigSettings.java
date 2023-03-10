@@ -1,17 +1,16 @@
 package dev.momostudios.coldsweat.core.event;
 
-import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
-public class CreateConfigSettings
+public class InitConfigSettings
 {
     @SubscribeEvent
-    public static void onServerStart(ServerStartedEvent event)
+    public static void onServerStarted(ServerStartedEvent event)
     {
-        ConfigSettings.getInstance().readValues(ColdSweatConfig.getInstance());
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.reload());
     }
 }

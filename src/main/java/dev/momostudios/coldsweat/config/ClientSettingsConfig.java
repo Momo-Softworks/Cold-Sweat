@@ -42,7 +42,7 @@ public class ClientSettingsConfig
                 .comment("Sets all temperatures to be displayed in Celsius")
                 .define("Celsius", false);
         tempOffset = BUILDER
-                .comment("(Visually) offsets the temperature for personalization (default: 0, so a Plains biome is 75 \u00b0F or 21 \u00b0C)")
+                .comment("(Visually) offsets the temperature for personalization (default: 0, so a Plains biome is 75 °F or 21 °C)")
                 .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 

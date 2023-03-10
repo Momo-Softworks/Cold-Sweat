@@ -25,7 +25,7 @@ public class DepthTempModifier extends TempModifier
     {
         if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
 
-        double midTemp = (ConfigSettings.getInstance().maxTemp + ConfigSettings.getInstance().minTemp) / 2;
+        double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
         BlockPos playerPos = entity.blockPosition();
 
         List<Pair<Integer, Double>> lightLevels = new ArrayList<>();

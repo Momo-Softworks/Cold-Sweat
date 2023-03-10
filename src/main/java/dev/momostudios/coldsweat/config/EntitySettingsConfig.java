@@ -138,4 +138,9 @@ public class EntitySettingsConfig
     public List<? extends List<?>> getChameleonTameItems() {
         return chameleonTameItems.get();
     }
+
+    public void setGoatFurStats(List<? extends Number> list)
+    {
+        goatFurGrowth.set(list);
+    }
 }

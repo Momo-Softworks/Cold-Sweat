@@ -18,44 +18,6 @@ public class ConfigHelper
 {
     private ConfigHelper() {}
 
-    public static CompoundTag writeToNBT(ConfigSettings config)
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt("difficulty", config.difficulty);
-        tag.putDouble("minTemp", config.minTemp);
-        tag.putDouble("maxTemp", config.maxTemp);
-        tag.putDouble("rate", config.rate);
-        tag.putBoolean("fireResistance", config.fireRes);
-        tag.putBoolean("iceResistance", config.iceRes);
-        tag.putBoolean("damageScaling", config.damageScaling);
-        tag.putBoolean("requireThermometer", config.requireThermometer);
-        tag.putInt("graceLength", config.graceLength);
-        tag.putBoolean("graceEnabled", config.graceEnabled);
-        return tag;
-    }
-
-    public static ConfigSettings readFromNBT(CompoundTag tag)
-    {
-        ConfigSettings config = new ConfigSettings();
-        if (tag == null)
-        {
-            ColdSweat.LOGGER.error("Failed to read config settings!");
-            return config;
-        }
-
-        config.difficulty = tag.getInt("difficulty");
-        config.minTemp = tag.getDouble("minTemp");
-        config.maxTemp = tag.getDouble("maxTemp");
-        config.rate = tag.getDouble("rate");
-        config.fireRes = tag.getBoolean("fireResistance");
-        config.iceRes = tag.getBoolean("iceResistance");
-        config.damageScaling = tag.getBoolean("damageScaling");
-        config.requireThermometer = tag.getBoolean("requireThermometer");
-        config.graceLength = tag.getInt("graceLength");
-        config.graceEnabled = tag.getBoolean("graceEnabled");
-        return config;
-    }
-
     public static List<Block> getBlocks(String... ids)
     {
         List<Block> blocks = new ArrayList<>();
@@ -194,6 +156,111 @@ public class ConfigHelper
                 }
             }
             catch (Exception ignored) {}
+        }
+        return map;
+    }
+
+    public static CompoundTag writeNBTBoolean(boolean value, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean(key, value);
+        return tag;
+    }
+
+    public static CompoundTag writeNBTInt(int value, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt(key, value);
+        return tag;
+    }
+
+    public static CompoundTag writeNBTDouble(double value, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble(key, value);
+        return tag;
+    }
+
+    public static CompoundTag writeNBTString(String value, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putString(key, value);
+        return tag;
+    }
+
+    public static CompoundTag writeNBTPairMap(Map<ResourceLocation, Pair<Double, Double>> map, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<ResourceLocation, Pair<Double, Double>> entry : map.entrySet())
+        {
+            CompoundTag biomeTag = new CompoundTag();
+            biomeTag.putDouble("min", entry.getValue().getFirst());
+            biomeTag.putDouble("max", entry.getValue().getSecond());
+            mapTag.put(entry.getKey().toString(), biomeTag);
+        }
+        tag.put(key, mapTag);
+        return tag;
+    }
+
+    public static Map<ResourceLocation, Pair<Double, Double>> readNBTPairMap(CompoundTag tag, String key)
+    {
+        Map<ResourceLocation, Pair<Double, Double>> map = new HashMap<>();
+        CompoundTag mapTag = tag.getCompound(key);
+        for (String biomeID : mapTag.getAllKeys())
+        {
+            CompoundTag biomeTag = mapTag.getCompound(biomeID);
+            map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("min"), biomeTag.getDouble("max")));
+        }
+        return map;
+    }
+
+    public static CompoundTag writeNBTDoubleMap(Map<ResourceLocation, Double> map, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<ResourceLocation, Double> entry : map.entrySet())
+        {
+            mapTag.putDouble(entry.getKey().toString(), entry.getValue());
+        }
+        tag.put(key, mapTag);
+        return tag;
+    }
+
+    public static Map<ResourceLocation, Double> readNBTDoubleMap(CompoundTag tag, String key)
+    {
+        Map<ResourceLocation, Double> map = new HashMap<>();
+        CompoundTag mapTag = tag.getCompound(key);
+        for (String biomeID : mapTag.getAllKeys())
+        {
+            map.put(new ResourceLocation(biomeID), mapTag.getDouble(biomeID));
+        }
+        return map;
+    }
+
+    public static CompoundTag writeNBTItemMap(Map<Item, Pair<Double, Double>> map, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<Item, Pair<Double, Double>> entry : map.entrySet())
+        {
+            CompoundTag itemTag = new CompoundTag();
+            itemTag.putDouble("value1", entry.getValue().getFirst());
+            itemTag.putDouble("value2", entry.getValue().getSecond());
+            mapTag.put(entry.getKey().getRegistryName().toString(), itemTag);
+        }
+        tag.put(key, mapTag);
+        return tag;
+    }
+
+    public static Map<Item, Pair<Double, Double>> readNBTItemMap(CompoundTag tag, String key)
+    {
+        Map<Item, Pair<Double, Double>> map = new HashMap<>();
+        CompoundTag mapTag = tag.getCompound(key);
+        for (String itemID : mapTag.getAllKeys())
+        {
+            CompoundTag itemTag = mapTag.getCompound(itemID);
+            map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)), Pair.of(itemTag.getDouble("value1"), itemTag.getDouble("value2")));
         }
         return map;
     }

@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -206,21 +205,6 @@ public class ColdSweatConfig
     public static ColdSweatConfig getInstance()
     {
         return CONFIG_REFERENCE;
-    }
-
-    public void writeValues(ConfigSettings cache)
-    {
-        setDifficulty(cache.difficulty);
-        setMaxHabitable(cache.maxTemp);
-        setMinHabitable(cache.minTemp);
-        setRateMultiplier(cache.rate);
-        setFireResistanceEnabled(cache.fireRes);
-        setIceResistanceEnabled(cache.iceRes);
-        setDamageScaling(cache.damageScaling);
-        setRequireThermometer(cache.requireThermometer);
-        setGracePeriodLength(cache.graceLength);
-        setGracePeriodEnabled(cache.graceEnabled);
-        save();
     }
 
     /*

@@ -6,7 +6,7 @@ import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
+import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
@@ -23,6 +23,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class ArmorInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        List<Pair<Double, Double>> insulation = armorStack.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap()).getInsulation();
+                        List<Pair<Double, Double>> insulation = armorStack.getCapability(ModCapabilities.ITEM_INSULATION).map(IInsulatableCap::getInsulation).orElse(new ArrayList<>());
 
                         // Get the armor's insulation values
                         for (Pair<Double, Double> value : insulation)

@@ -145,7 +145,7 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = 0.1 * ConfigSettings.getInstance().rate * CSMath.getSign(itemTemp);
+                double temp = 0.1 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
                 double newTemp = itemTemp - temp;
                 if (CSMath.isInRange(newTemp, -1, 1)) newTemp = 0;
 

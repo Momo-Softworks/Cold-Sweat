@@ -1,40 +1,20 @@
 package dev.momostudios.coldsweat.core.network.message;
 
+import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class PlaySoundMessage
 {
-    static Constructor<?> SOUND_MAKER;
-    static Method PLAY_METHOD;
-
-    static
-    {
-        try
-        {
-            SOUND_MAKER = ObfuscationReflectionHelper.findConstructor(Class.forName("net.minecraft.client.resources.sounds.EntityBoundSoundInstance"),
-                    SoundEvent.class, SoundSource.class, float.class, float.class, Entity.class);
-            PLAY_METHOD = ObfuscationReflectionHelper.findMethod(Class.forName("net.minecraft.client.sounds.SoundManager"), "m_120367_",
-                    Class.forName("net.minecraft.client.resources.sounds.SoundInstance"));
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     String sound;
     int soundChars;
     SoundSource source;
@@ -79,15 +59,7 @@ public class PlaySoundMessage
 
                 if (entity != null && sound != null)
                 {
-                    try
-                    {
-                        PLAY_METHOD.invoke(Minecraft.getInstance().getSoundManager(), SOUND_MAKER.newInstance(sound,
-                                message.source, message.volume, message.pitch, entity));
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
+                    ClientOnlyHelper.playEntitySound(sound, message.source, message.volume, message.pitch, entity);
                 }
             }
         });

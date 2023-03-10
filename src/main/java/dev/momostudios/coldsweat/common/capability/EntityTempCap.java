@@ -92,8 +92,6 @@ public class EntityTempCap implements ITemperatureCap
 
     public void tick(LivingEntity entity)
     {
-        ConfigSettings config = ConfigSettings.getInstance();
-
         // Tick expiration time for world modifiers
         double newWorldTemp = Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
@@ -101,8 +99,8 @@ public class EntityTempCap implements ITemperatureCap
         double newMaxOffset = Temperature.apply(0, entity, Type.MAX, getModifiers(Type.MAX));
         double newMinOffset = Temperature.apply(0, entity, Type.MIN, getModifiers(Type.MIN));
 
-        double maxTemp = config.maxTemp + newMaxOffset;
-        double minTemp = config.minTemp + newMinOffset;
+        double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
+        double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
@@ -111,7 +109,7 @@ public class EntityTempCap implements ITemperatureCap
         if (magnitude != 0)
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
+            double changeBy = Math.max((difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(), Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)) * magnitude;
             newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
@@ -119,7 +117,7 @@ public class EntityTempCap implements ITemperatureCap
         if (tempSign != 0 && magnitude != tempSign)
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.maxAbs(factor * config.rate, config.rate / 10d * -tempSign);
+            double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
             newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
         }
 

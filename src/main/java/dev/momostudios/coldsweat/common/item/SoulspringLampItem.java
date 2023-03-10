@@ -32,9 +32,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
-
-import java.util.Random;
 
 @Mod.EventBusSubscriber
 public class SoulspringLampItem extends Item
@@ -49,7 +46,7 @@ public class SoulspringLampItem extends Item
     {
         if (entityIn instanceof Player player && !worldIn.isClientSide)
         {
-            double max = ConfigSettings.getInstance().maxTemp;
+            double max = ConfigSettings.MAX_TEMP.get();
             double temp;
 
             // Is selected
@@ -152,8 +149,10 @@ public class SoulspringLampItem extends Item
     {
         if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntityLiving() instanceof Player))
         {
+            ItemStack stack = attacker.getMainHandItem();
+            if (!(stack.getItem() instanceof SoulspringLampItem)) return;
+
             LivingEntity target = event.getEntityLiving();
-            ItemStack stack = event.getEntityLiving().getMainHandItem();
 
             // If fuel < 64 and target NOT player
             if (getFuel(stack) < 64

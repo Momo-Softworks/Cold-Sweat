@@ -281,8 +281,7 @@ public class ChameleonEntity extends Animal
         // Control temperature
         if (this.tickCount % 20 == 0)
         {   // Use the player's temperature if mounted
-            ConfigSettings config = ConfigSettings.getInstance();
-            this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Type.WORLD), config.minTemp, config.maxTemp);
+            this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Type.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
         }
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 

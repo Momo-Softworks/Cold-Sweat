@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.core.network.message;
 
+import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,11 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 public class DisableHearthParticlesMessage
@@ -50,19 +48,6 @@ public class DisableHearthParticlesMessage
         return new DisableHearthParticlesMessage(buffer.readInt(), buffer.readUtf(), buffer.readNbt());
     }
 
-    static Class MINECRAFT = null;
-    static Method GET_INSTANCE = null;
-    static Field CLIENT_LEVEL = null;
-    static
-    {
-        try
-        {
-            MINECRAFT = Class.forName("net.minecraft.client.Minecraft");
-            GET_INSTANCE = ObfuscationReflectionHelper.findMethod(MINECRAFT, "m_91087_");
-            CLIENT_LEVEL = ObfuscationReflectionHelper.findField(MINECRAFT, " f_91073_");
-        } catch (Exception ignored) {}
-    }
-
     public static void handle(DisableHearthParticlesMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
@@ -70,8 +55,8 @@ public class DisableHearthParticlesMessage
         {
             try
             {
-                Level level = (context.getDirection().getReceptionSide().isClient() && ((Level) CLIENT_LEVEL.get(GET_INSTANCE.invoke(null))).dimension().location().toString().equals(message.worldKey))
-                        ? (Level) CLIENT_LEVEL.get(GET_INSTANCE.invoke(null))
+                Level level = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.worldKey))
+                        ? ClientOnlyHelper.getClientLevel()
                         : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
                 if (level != null)
                 {

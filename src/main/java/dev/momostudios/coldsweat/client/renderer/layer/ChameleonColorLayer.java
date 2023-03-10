@@ -34,24 +34,23 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
         {
             // Overlay color
 
-            ConfigSettings config = ConfigSettings.getInstance();
-            float midTemp = (float) CSMath.average(config.minTemp, config.maxTemp);
+            float midTemp = (float) CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (!CSMath.isInRange(chameleon.getTemperature(), CSMath.average(config.minTemp, midTemp), CSMath.average(config.maxTemp, midTemp)))
+            if (!CSMath.isInRange(chameleon.getTemperature(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp)))
             {
                 if (chameleon.getTemperature() > midTemp)
                 {
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_RED);
-                    float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(0f, 1f, chameleon.getTemperature(), CSMath.average(config.maxTemp, midTemp), config.maxTemp);
+                    float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(0f, 1f, chameleon.getTemperature(), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp), ConfigSettings.MAX_TEMP.get());
                     if (alpha > 0)
                         ((ChameleonModel<ChameleonEntity>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
                 }
                 else
                 {
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_BLUE);
-                    float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(1f, 0f, chameleon.getTemperature(), config.minTemp, CSMath.average(config.minTemp, midTemp));
+                    float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(1f, 0f, chameleon.getTemperature(), ConfigSettings.MIN_TEMP.get(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp));
                     if (alpha > 0)
                         ((ChameleonModel<ChameleonEntity>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
                 }

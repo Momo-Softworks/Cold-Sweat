@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ClientConfigAskMessage;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -17,27 +18,24 @@ public class ClientJoinSetup
     static boolean GENERATED = false;
 
     @SubscribeEvent
-    public static void onJoin(EntityJoinWorldEvent event)
+    public static void onJoin(ClientPlayerNetworkEvent.LoggedInEvent event)
     {
-        if (!GENERATED && event.getWorld().isClientSide() && event.getEntity() == Minecraft.getInstance().player)
+        if (!GENERATED)
         {
             GENERATED = true;
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(false));
+            ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         }
+
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.reload());
+        TempModifierInit.rebuildRegistries();
     }
 
     @SubscribeEvent
-    public static void onLeave(EntityLeaveWorldEvent event)
+    public static void onLeave(ClientPlayerNetworkEvent.LoggedOutEvent event)
     {
-        if (GENERATED && event.getWorld().isClientSide() && event.getEntity() == Minecraft.getInstance().player)
+        if (GENERATED)
         {
             GENERATED = false;
         }
-    }
-
-    @SubscribeEvent
-    public static void registerClient(ClientPlayerNetworkEvent.LoggedInEvent event)
-    {
-        TempModifierInit.rebuildRegistries();
     }
 }

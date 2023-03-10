@@ -14,7 +14,6 @@ import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,8 +29,6 @@ public class PlayerTempCap implements ITemperatureCap
 {
     static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.MAX, Type.MIN, Type.WORLD};
     static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.MAX, Type.MIN, Type.WORLD};
-
-    ConfigSettings config = ConfigSettings.getInstance();
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
@@ -128,8 +125,8 @@ public class PlayerTempCap implements ITemperatureCap
         double newMaxOffset = Temperature.apply(0, player, Type.MAX, getModifiers(Type.MAX));
         double newMinOffset = Temperature.apply(0, player, Type.MIN, getModifiers(Type.MIN));
 
-        double maxTemp = config.maxTemp + newMaxOffset;
-        double minTemp = config.minTemp + newMinOffset;
+        double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
+        double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
@@ -138,7 +135,7 @@ public class PlayerTempCap implements ITemperatureCap
         if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
         {
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = Math.max((difference / 7d) * (float)config.rate, Math.abs((float) config.rate / 50d)) * magnitude;
+            double changeBy = Math.max((difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(), Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)) * magnitude;
             newCoreTemp += Temperature.apply(changeBy, player, Type.RATE, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
@@ -146,7 +143,7 @@ public class PlayerTempCap implements ITemperatureCap
         if (tempSign != 0 && magnitude != tempSign)
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.maxAbs(factor * config.rate, config.rate / 10d * -tempSign);
+            double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
             newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
         }
 
@@ -183,11 +180,11 @@ public class PlayerTempCap implements ITemperatureCap
         {
             if (player.tickCount % 40 == 0 && !hasGrace)
             {
-                if (bodyTemp >= 100 && !(hasFireResist && config.fireRes))
+                if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
                 {
                     this.dealTempDamage(player, ModDamageSources.HOT, 2f);
                 }
-                else if (bodyTemp <= -100 && !(hasIceResist && config.iceRes))
+                else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
                 {
                     this.dealTempDamage(player, ModDamageSources.COLD, 2f);
                 }
@@ -211,7 +208,7 @@ public class PlayerTempCap implements ITemperatureCap
 
     public void calculateVisibility(Player player)
     {
-        showWorldTemp = !ConfigSettings.getInstance().requireThermometer
+        showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
                 || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
                 || player.getOffhandItem().getItem() == ModItems.THERMOMETER
                 || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();

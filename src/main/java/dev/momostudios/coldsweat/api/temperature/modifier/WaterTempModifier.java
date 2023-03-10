@@ -6,7 +6,6 @@ import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
 
@@ -26,8 +25,8 @@ public class WaterTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         double worldTemp = Temperature.get(entity, Temperature.Type.WORLD);
-        double maxTemp = ConfigSettings.getInstance().maxTemp;
-        double minTemp = ConfigSettings.getInstance().minTemp;
+        double maxTemp = ConfigSettings.MAX_TEMP.get();
+        double minTemp = ConfigSettings.MIN_TEMP.get();
 
         double strength = this.getNBT().getDouble("strength");
         double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));

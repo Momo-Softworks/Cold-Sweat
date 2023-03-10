@@ -8,7 +8,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ColdSweatPacketHandler
 {
-    private static final String PROTOCOL_VERSION = "0.1.1";
+    private static final String PROTOCOL_VERSION = "0.1.2";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(ColdSweat.MOD_ID, "main"),
             () -> PROTOCOL_VERSION,
@@ -20,15 +20,14 @@ public class ColdSweatPacketHandler
     {
         INSTANCE.registerMessage(0, TemperatureSyncMessage.class, TemperatureSyncMessage::encode, TemperatureSyncMessage::decode, TemperatureSyncMessage::handle);
         INSTANCE.registerMessage(1, TempModifiersSyncMessage.class, TempModifiersSyncMessage::encode, TempModifiersSyncMessage::decode, TempModifiersSyncMessage::handle);
-        INSTANCE.registerMessage(2, ClientConfigSendMessage.class, ClientConfigSendMessage::encode, ClientConfigSendMessage::decode, ClientConfigSendMessage::handle);
+        INSTANCE.registerMessage(2, SyncConfigSettingsMessage.class, SyncConfigSettingsMessage::encode, SyncConfigSettingsMessage::decode, SyncConfigSettingsMessage::handle);
         INSTANCE.registerMessage(3, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
-        INSTANCE.registerMessage(4, ClientConfigRecieveMessage.class, ClientConfigRecieveMessage::encode, ClientConfigRecieveMessage::decode, ClientConfigRecieveMessage::handle);
-        INSTANCE.registerMessage(5, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
-        INSTANCE.registerMessage(6, BlockDataUpdateMessage.class, BlockDataUpdateMessage::encode, BlockDataUpdateMessage::decode, BlockDataUpdateMessage::handle);
-        INSTANCE.registerMessage(7, HearthResetMessage.class, HearthResetMessage::encode, HearthResetMessage::decode, HearthResetMessage::handle);
-        INSTANCE.registerMessage(8, DisableHearthParticlesMessage.class, DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode, DisableHearthParticlesMessage::handle);
-        INSTANCE.registerMessage(9, ParticleBatchMessage.class, ParticleBatchMessage::encode, ParticleBatchMessage::decode, ParticleBatchMessage::handle);
-        INSTANCE.registerMessage(10, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
-        INSTANCE.registerMessage(11, ChameleonEatMessage.class, ChameleonEatMessage::encode, ChameleonEatMessage::decode, ChameleonEatMessage::handle);
+        INSTANCE.registerMessage(4, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
+        INSTANCE.registerMessage(5, BlockDataUpdateMessage.class, BlockDataUpdateMessage::encode, BlockDataUpdateMessage::decode, BlockDataUpdateMessage::handle);
+        INSTANCE.registerMessage(6, HearthResetMessage.class, HearthResetMessage::encode, HearthResetMessage::decode, HearthResetMessage::handle);
+        INSTANCE.registerMessage(7, DisableHearthParticlesMessage.class, DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode, DisableHearthParticlesMessage::handle);
+        INSTANCE.registerMessage(8, ParticleBatchMessage.class, ParticleBatchMessage::encode, ParticleBatchMessage::decode, ParticleBatchMessage::handle);
+        INSTANCE.registerMessage(9, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
+        INSTANCE.registerMessage(10, ChameleonEatMessage.class, ChameleonEatMessage::encode, ChameleonEatMessage::decode, ChameleonEatMessage::handle);
     }
 }

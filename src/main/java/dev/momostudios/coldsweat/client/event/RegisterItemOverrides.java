@@ -38,9 +38,8 @@ public class RegisterItemOverrides
                 LocalPlayer player = Minecraft.getInstance().player;
                 if (player != null)
                 {
-                    ConfigSettings config = ConfigSettings.getInstance();
-                    double minTemp = config.minTemp;
-                    double maxTemp = config.maxTemp;
+                    double minTemp = ConfigSettings.MIN_TEMP.get();
+                    double maxTemp = ConfigSettings.MAX_TEMP.get();
 
                     double worldTemp = player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0);
 

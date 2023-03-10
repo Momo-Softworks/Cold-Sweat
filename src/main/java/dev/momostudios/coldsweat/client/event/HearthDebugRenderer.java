@@ -24,7 +24,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -47,7 +46,7 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HearthDebugRenderer
 {
-    public static Map<BlockPos, Map<SpreadPath, ArrayList<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
+    public static Map<BlockPos, Map<SpreadPath, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
     public static void onLevelRendered(RenderLevelStageEvent event)
@@ -128,16 +127,16 @@ public class HearthDebugRenderer
             LevelChunk workingChunk = (LevelChunk) level.getChunk(new BlockPos(0, 0, 0));
             float viewDistance = Minecraft.getInstance().options.renderDistance * 2f;
 
-            for (Map.Entry<BlockPos, Map<SpreadPath, ArrayList<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
+            for (Map.Entry<BlockPos, Map<SpreadPath, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {
                 if (HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
 
-                Map<SpreadPath, ArrayList<Direction>> points = entry.getValue();
-                for (Map.Entry<SpreadPath, ArrayList<Direction>> pair : points.entrySet())
+                Map<SpreadPath, Collection<Direction>> points = entry.getValue();
+                for (Map.Entry<SpreadPath, Collection<Direction>> pair : points.entrySet())
                 {
                     SpreadPath path = pair.getKey();
                     BlockPos pos = path.getPos();
-                    ArrayList<Direction> directions = pair.getValue();
+                    Collection<Direction> directions = pair.getValue();
 
                     float x = path.getX();
                     float y = path.getY();
@@ -205,7 +204,7 @@ public class HearthDebugRenderer
                     Collection<SpreadPath> paths = hearth.getPaths();
                     Set<BlockPos> lookup = hearth.getPathLookup();
 
-                    Map<SpreadPath, ArrayList<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
+                    Map<SpreadPath, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
                     if (pathMap.size() != paths.size())
                     {
                         HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->

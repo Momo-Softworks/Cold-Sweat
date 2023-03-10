@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.api.util.Temperature;
@@ -147,7 +146,7 @@ public class AddTempModifiers
     {
         if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
         {
-            float foodTemp = ConfigSettings.VALID_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
+            float foodTemp = ConfigSettings.TEMPERATURE_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
             if (foodTemp != 0)
             {
                 Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);

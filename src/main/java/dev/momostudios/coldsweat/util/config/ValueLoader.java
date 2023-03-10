@@ -1,9 +1,13 @@
 package dev.momostudios.coldsweat.util.config;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -12,14 +16,17 @@ import java.util.function.Supplier;
  */
 public class ValueLoader<T>
 {
-    T value;
-    Supplier<T> valueCreator;
+    private T value;
+    private final Supplier<T> valueCreator;
+    private Function<T, CompoundTag> encoder;
+    private Function<CompoundTag, T> decoder;
+    private Consumer<T> saver;
+    private boolean synced = false;
 
     public ValueLoader(Supplier<T> valueCreator)
     {
         this.valueCreator = valueCreator;
         this.value = valueCreator.get();
-        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public static <V> ValueLoader<V> of(Supplier<V> valueCreator)
@@ -27,19 +34,41 @@ public class ValueLoader<T>
         return new ValueLoader<>(valueCreator);
     }
 
-    @SubscribeEvent
-    public void onLoaded(ServerStartedEvent event)
+    public static <V> ValueLoader<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
     {
-        this.load();
+        ValueLoader<V> loader = new ValueLoader<>(valueCreator);
+        loader.encoder = encoder;
+        loader.decoder = decoder;
+        loader.saver = saver;
+        loader.synced = true;
+        return loader;
     }
 
     public T get()
-    {
-        return value;
+    {   return value;
     }
 
-    public void load()
-    {
-        this.value = valueCreator.get();
+    public void set(T value)
+    {   this.value = value;
+    }
+
+    public void reload()
+    {   this.value = valueCreator.get();
+    }
+
+    public CompoundTag encode()
+    {   return encoder.apply(value);
+    }
+
+    public void decode(CompoundTag tag)
+    {   this.value = decoder.apply(tag);
+    }
+
+    public void save()
+    {   saver.accept(value);
+    }
+
+    public boolean isSynced()
+    {   return synced;
     }
 }

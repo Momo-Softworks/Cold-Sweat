@@ -24,7 +24,6 @@ import java.util.List;
 public class ConfigPageDifficulty extends Screen
 {
     private final Screen parentScreen;
-    private final ConfigSettings configSettings;
 
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
@@ -32,11 +31,10 @@ public class ConfigPageDifficulty extends Screen
 
     ResourceLocation configButtons = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_gui.png");
 
-    public ConfigPageDifficulty(Screen parentScreen, ConfigSettings configSettings)
+    public ConfigPageDifficulty(Screen parentScreen)
     {
         super(new TranslatableComponent("cold_sweat.config.section.difficulty.name"));
         this.parentScreen = parentScreen;
-        this.configSettings = configSettings;
     }
 
     public int index()
@@ -73,7 +71,7 @@ public class ConfigPageDifficulty extends Screen
 
         // Get max text length (used to extend the text box if it's too wide)
         int longestLine = 0;
-        for (String text : DifficultyDescriptions.getListFor(configSettings.difficulty))
+        for (String text : DifficultyDescriptions.getListFor(ConfigSettings.DIFFICULTY.get()))
         {
             String ttLine = "  " + text + "  ";
             // Add the text and a new line to the list
@@ -105,13 +103,13 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
 
         // Draw Slider Head
-        this.blit(poseStack, this.width / 2 - 78 + (configSettings.difficulty * 37), this.height / 2 - 58,
+        this.blit(poseStack, this.width / 2 - 78 + (ConfigSettings.DIFFICULTY.get() * 37), this.height / 2 - 58,
                 isMouseOverSlider(mouseX, mouseY) ? 6 : 0, 128, 6, 16);
 
         // Draw Difficulty Title
-        String difficultyName = ConfigScreen.difficultyName(configSettings.difficulty);
+        String difficultyName = ConfigScreen.difficultyName(ConfigSettings.DIFFICULTY.get());
         this.font.drawShadow(poseStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
-                this.height / 2.0f - 84, ConfigScreen.difficultyColor(configSettings.difficulty));
+                this.height / 2.0f - 84, ConfigScreen.difficultyColor(ConfigSettings.DIFFICULTY.get()));
 
         // Render Button(s)
         super.render(poseStack, mouseX, mouseY, partialTicks);
@@ -120,50 +118,50 @@ public class ConfigPageDifficulty extends Screen
     private void close()
     {
         // Super Easy
-        if (configSettings.difficulty == 0)
+        if (ConfigSettings.DIFFICULTY.get() == 0)
         {
-            configSettings.minTemp = CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.maxTemp = CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.rate = 0.5;
-            configSettings.requireThermometer = false;
-            configSettings.damageScaling = false;
-            configSettings.fireRes = true;
-            configSettings.iceRes = true;
+            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.TEMP_RATE.set(0.5);
+            ConfigSettings.REQUIRE_THERMOMETER.set(false);
+            ConfigSettings.DAMAGE_SCALING.set(false);
+            ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
+            ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
         }
         // Easy
-        else if (configSettings.difficulty == 1)
+        else if (ConfigSettings.DIFFICULTY.get() == 1)
         {
-            configSettings.minTemp = CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.maxTemp = CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.rate = 0.75;
-            configSettings.requireThermometer = false;
-            configSettings.damageScaling = false;
-            configSettings.fireRes = true;
-            configSettings.iceRes = true;
+            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.TEMP_RATE.set(0.75);
+            ConfigSettings.REQUIRE_THERMOMETER.set(false);
+            ConfigSettings.DAMAGE_SCALING.set(false);
+            ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
+            ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
         }
         // Normal
-        else if (configSettings.difficulty == 2)
+        else if (ConfigSettings.DIFFICULTY.get() == 2)
         {
-            configSettings.minTemp = CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.maxTemp = CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.rate = 1.0;
-            configSettings.requireThermometer = true;
-            configSettings.damageScaling = true;
-            configSettings.fireRes = false;
-            configSettings.iceRes = false;
+            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.TEMP_RATE.set(1.0);
+            ConfigSettings.REQUIRE_THERMOMETER.set(true);
+            ConfigSettings.DAMAGE_SCALING.set(true);
+            ConfigSettings.FIRE_RESISTANCE_ENABLED.set(false);
+            ConfigSettings.ICE_RESISTANCE_ENABLED.set(false);
         }
         // Hard
-        else if (configSettings.difficulty == 3)
+        else if (ConfigSettings.DIFFICULTY.get() == 3)
         {
-            configSettings.minTemp = CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.maxTemp = CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true);
-            configSettings.rate = 1.5;
-            configSettings.requireThermometer = true;
-            configSettings.damageScaling = true;
-            configSettings.fireRes = false;
-            configSettings.iceRes = false;
+            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.TEMP_RATE.set(1.5);
+            ConfigSettings.REQUIRE_THERMOMETER.set(true);
+            ConfigSettings.DAMAGE_SCALING.set(true);
+            ConfigSettings.FIRE_RESISTANCE_ENABLED.set(false);
+            ConfigSettings.ICE_RESISTANCE_ENABLED.set(false);
         }
-        ConfigScreen.saveConfig(configSettings);
+        ConfigScreen.saveConfig();
         ConfigScreen.MC.setScreen(parentScreen);
     }
 
@@ -202,11 +200,11 @@ public class ConfigPageDifficulty extends Screen
                 newDifficulty = 4;
             }
 
-            if (newDifficulty != configSettings.difficulty)
+            if (newDifficulty != ConfigSettings.DIFFICULTY.get())
             {
                 ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
             }
-            configSettings.difficulty = newDifficulty;
+            ConfigSettings.DIFFICULTY.set(newDifficulty);
         }
     }
 }
