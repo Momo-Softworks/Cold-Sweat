@@ -276,23 +276,15 @@ public class SewingContainer extends AbstractContainerMenu
         if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
     }
 
-    static void serializeInsulation(ItemStack stack, IInsulatableCap cap)
+    static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
     {
-        stack.getOrCreateTag().putBoolean("Insulated", cap.getInsulationItems().size() > 0);
+        stack.getOrCreateTag().putBoolean("Insulated", iCap.getInsulationItems().size() > 0);
 
-        // Set NBT data that will be synced to the client (only used for tooltip)
-        ListTag list = new ListTag();
-        for (Pair<Double, Double> pair : cap.getInsulation())
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.putDouble("Cold", pair.getFirst());
-            tag.putDouble("Hot", pair.getSecond());
-            list.add(tag);
-        }
-        stack.getOrCreateTag().put("Insulation", list);
+        if (iCap instanceof ItemInsulationCap cap)
+            cap.serializeSimple(stack);
 
         // Remove "Insulated" tag if armor has no insulation left
-        if (cap.getInsulationItems().isEmpty())
+        if (iCap.getInsulationItems().isEmpty())
         {
             stack.getOrCreateTag().remove("Insulated");
             stack.getOrCreateTag().remove("Insulation");

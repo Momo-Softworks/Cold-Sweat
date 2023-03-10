@@ -12,6 +12,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -62,5 +63,21 @@ public class ItemInsulationManager
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
         }
+    }
+
+    @SubscribeEvent
+    public static void onInventoryChanged(PlayerContainerEvent event)
+    {
+        event.getPlayer().inventoryMenu.slots.forEach(slot ->
+        {
+            ItemStack stack = slot.getItem();
+            stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
+            {
+                if (iCap instanceof ItemInsulationCap cap)
+                {
+                    cap.serializeSimple(stack);
+                }
+            });
+        });
     }
 }

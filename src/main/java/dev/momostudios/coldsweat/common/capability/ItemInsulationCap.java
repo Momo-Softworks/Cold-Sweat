@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 public class ItemInsulationCap implements IInsulatableCap
 {
     private List<ItemStack> insulationItems = new ArrayList<>();
-    private List<Pair<Double, Double>> insulation = new ArrayList<>();
+    private final List<Pair<Double, Double>> insulation = new ArrayList<>();
     int saveCooldown = 0;
     CompoundTag savedTag = new CompoundTag();
 
@@ -35,7 +37,6 @@ public class ItemInsulationCap implements IInsulatableCap
     // Sorts the items and insulation values based on their temperatures
     void calculateInsulation()
     {
-        insulationItems.sort(Comparator.comparingDouble(stack -> ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), Pair.of(0d, 0d)).getFirst()));
         insulation.clear();
 
         // Iterate through insulation items and tally up cold, hot, and neutral insulation
@@ -85,9 +86,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public ItemStack removeInsulationItem(ItemStack stack)
     {
-        this.insulationItems.remove(stack);
-        calculateInsulation();
-        return stack;
+        return removeInsulationItem(insulationItems.indexOf(stack));
     }
 
     public ItemStack removeInsulationItem(int index)
@@ -128,5 +127,32 @@ public class ItemInsulationCap implements IInsulatableCap
         this.insulationItems = tag.getList("Insulation", 10).stream().map(nbt ->
                 ItemStack.of((CompoundTag) nbt)).collect(Collectors.toList());
         calculateInsulation();
+    }
+
+    public void serializeSimple(ItemStack stack)
+    {
+        CompoundTag tag = stack.getOrCreateTag();
+        ListTag list = new ListTag();
+        for (Pair<Double, Double> pair : insulation)
+        {
+            CompoundTag compound = new CompoundTag();
+            compound.putDouble("Cold", pair.getFirst());
+            compound.putDouble("Hot", pair.getSecond());
+            list.add(compound);
+        }
+        tag.put("Insulation", list);
+    }
+
+    public List<Pair<Double, Double>> deserializeSimple(ItemStack stack)
+    {
+        insulation.clear();
+        List<Pair<Double, Double>> newInsul = stack.getOrCreateTag().getList("Insulation", 10).stream()
+        .map(nbt ->
+        {
+            CompoundTag compound = (CompoundTag) nbt;
+            return Pair.of(compound.getDouble("Cold"), compound.getDouble("Hot"));
+        }).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        insulation.addAll(newInsul);
+        return newInsul;
     }
 }

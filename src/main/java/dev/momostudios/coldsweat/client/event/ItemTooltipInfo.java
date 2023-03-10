@@ -6,9 +6,11 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.InsulationTooltip;
 import dev.momostudios.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
+import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ArmorItem;
@@ -22,6 +24,8 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -62,25 +66,57 @@ public class ItemTooltipInfo
         {
             event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
-        else if (stack.getItem() instanceof ArmorItem && stack.getOrCreateTag().getBoolean("Insulated"))
+        // If the item is an insulator, add the tooltip
+        else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        {
+            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))));
+        }
+        // If the item is insulated armor
+        else if (stack.getItem() instanceof ArmorItem)
         {
             // Create the list of insulation pairs from NBT
-            List<Pair<Double, Double>> insulation = stack.getOrCreateTag().getList("Insulation", 10).stream()
-            .map(nbt ->
+            List<Pair<Double, Double>> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
+            .map(c -> c instanceof ItemInsulationCap cap ? cap.deserializeSimple(stack) : new ArrayList<Pair<Double, Double>>())
+            .orElse(new ArrayList<>());
+
+            // If the item has intrinsic insulation due to configs, add it to the list
+            List<Pair<Double, Double>> builtinInsul = new ArrayList<>();
+            ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(stack.getItem(), (item, pair) ->
             {
-                CompoundTag compound = (CompoundTag) nbt;
-                return Pair.of(compound.getDouble("Cold"), compound.getDouble("Hot"));
-            }).toList();
-            event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack)));
-        }
-        // If the item is an insulator, add the tooltip
-        else
-        {
-            Pair<Double, Double> itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem());
-            if (itemInsul != null)
-            {
-                event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(itemInsul)));
-            }
+                double cold = pair.getFirst();
+                double hot = pair.getSecond();
+                double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
+                if (cold == neutral) cold = 0;
+                if (hot == neutral) hot = 0;
+                // Cold insulation
+                for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
+                {
+                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
+                    builtinInsul.add(Pair.of(coldInsul, 0d));
+                }
+
+                // Neutral insulation
+                for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
+                {
+                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+                    builtinInsul.add(Pair.of(neutralInsul, neutralInsul));
+                }
+
+                // Hot insulation
+                for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
+                {
+                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
+                    builtinInsul.add(Pair.of(0d, hotInsul));
+                }
+                return pair;
+            });
+            insulation.addAll(builtinInsul);
+            insulation.sort(Comparator.comparingDouble(pair -> Math.abs(pair.getFirst() - 2)));
+
+            int barSize = builtinInsul.size() + (stack.getOrCreateTag().getBoolean("Insulated") ? ArmorInsulation.getInsulationSlots(stack) : 0);
+
+            if (!insulation.isEmpty())
+                event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
         }
     }
 }

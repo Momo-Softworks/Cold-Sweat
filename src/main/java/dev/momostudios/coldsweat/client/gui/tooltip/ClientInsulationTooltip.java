@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -21,12 +23,14 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 {
     List<Pair<Double, Double>> insulationValues;
     ItemStack stack;
+    int size;
     int width = 0;
 
-    public ClientInsulationTooltip(List<Pair<Double, Double>> insulationValues, ItemStack stack)
+    public ClientInsulationTooltip(List<Pair<Double, Double>> insulationValues, ItemStack stack, int size)
     {
         this.insulationValues = insulationValues;
         this.stack = stack;
+        this.size = size;
     }
 
     @Override
@@ -45,9 +49,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     {
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
 
-        int slots = ArmorInsulation.getInsulationSlots(stack);
+        int slots = this.size;
         int barLength = slots * 6 + 12;
-        width = 0;
+        this.width = 0;
 
         int fullCell = 8;
         int partialCell = 12;
@@ -113,7 +117,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             // icon
             GuiComponent.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 16);
 
-            width = barLength;
+            this.width = barLength;
         }
 
         // Negative insulation bar
@@ -152,7 +156,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             // negative sign
             GuiComponent.blit(poseStack, x + 3 + barLength, y + 3, 0, 19, 5, 5, 3, 32, 16);
 
-            width += barLength;
+            this.width += barLength;
         }
     }
 }
