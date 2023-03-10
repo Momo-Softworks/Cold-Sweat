@@ -899,18 +899,19 @@ Technical Changes:
       - Slimeball, ink sac, cocoa beans: Chameleon will point towards the nearest humid biome (temperature > 0.8 and downfall > 0.85) within 2000 blocks for 1 minute
       - Spider eye, fermented spider eye, fish: Heals 3 health for the chameleon
 * Added new default insulation items:
-      - Wool: 1.5 points of cold insulation, which is right between leather (1) and goat fur (2)
-      - Slimeball: 1.5 points of hot insulation, which is right between leather (1) and hoglin hide (2)
+      - Wool: 1.5 points of cold insulation, making it a half-step between leather (1) and goat fur (2)
+      - Slimeball: 1.5 points of hot insulation, making it a half-step between leather (1) and hoglin hide (2)
       ! 'item-settings.toml' will need to be deleted for these changes to take effect
 * Added support for Armor Underwear:
       - Simple linings now allow the player to withstand more drastic temperatures
       - Ozzy lining adapts to the player's body temperature and makes either hot or cold environments more habitable accordingly
-      - Otto/Ollie linings will protect against freezing/burning damage respectively. Each lining reduces the damage by 25%, up to 100%
+      - Otto/Ollie linings will protect against freezing/burning damage respectively. Each lined armor piece reduces the damage by 25%, up to 100%
       - Otto/Ollie linings also lessen temperature debuffs
 * Added support for Oh the Biomes You'll Go!:
       - Rebalanced several biomes' temperatures to be more accurate in Cold Sweat's temperature system
       - Chameleons can now spawn in BYG biomes
       ! 'world-settings.toml' and 'entity-settings.toml' will need to be deleted for these changes to take effect
+* Added new recipe unlocks and advancements when certain criteria are met to help progression
 - Added the ability to pipe temperature-controlled air from the hearth using Create's pipes
 - Chameleons can now spawn in desert-like biomes
 - Chameleon taming items can now be configured
@@ -922,7 +923,6 @@ Technical Changes:
 - When a block is changed near a hearth, only the parts of the hearth's area-of-effect that stem from that block will be updated
       - For example, if a door is closed, only the area through the door will be updated
 - Retextured the top of the sewing table to look less like a crafting table
-* Added new recipe unlocks and advancements when certain criteria are met to help progression
 - The soulspring lamp can now be used more offensively, stealing up to 8 health from a target on attack. This can only be done once per entity
 
 Fixes:
@@ -938,6 +938,7 @@ Fixes:
 - Fixed the chameleon becoming desynched if the player it is riding enters water
 - Fixed the shield's blocking animation being misaligned
 - Fixed the soulspring lamp not gaining fuel when attacking
+- Fixed camera sway at extremely hot temperature being almost negligible
 
 
 Technical Changes:
@@ -960,4 +961,31 @@ Technical Changes:
             - Triggered when the player equips armor with insulation
             - Arguments for the armor item stack and insulation item stack
             - NOT triggered when insulation is removed with shears
+- The /temperature command now works on entities
+- Added much more granular control for the order in which TempModifiers are applied:
+      - The base Temperature#addModifier() method now takes a Temperature.Addition parameter
+      - Temperature.Addition has three parameters:
+            - Relation (BEFORE, AFTER, or REPLACE)
+            - Order (FIRST, LAST)
+            - Predicate<TempModifier>
+            - The method will scan through the list of modifiers on the entity (in reverse order if Relation is LAST) and find the first modifier that matches the Predicate
+                  - It will insert the new modifier before or after this modifier, or replace it, depending on the Relation
+      - A Temperature.Addition is created like so:
+            - Temperature.Addition.of(AFTER, LAST, modifier -> modifier instanceof MyTempModifier)
+            - This example will place the newly inserter TempModifier after the last instance of MyTempModifier in the entity's list of TempModifiers
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b03b
+
+Fixes:
+- Fixed TempModifiers sometimes not being applied properly, causing temperature from certain sources to be ignored
+- Fixed attacking an entity triggering the soul stealing effect regardless of if the soulspring lamp is equipped
+- Fixed some config settings not being synced between server and client
+- Fixed goats not losing their fur after being sheared on a server, allowing for infinite fur
+- Fixed items defined in the "Insulating Armors" config not displaying the insulation tooltip
+
+Technical Changes:
+- All configs now use a much more flexible and modular system of instantiation and syncing (you can use it too!)
+      - This creates a standard way for all configs to be synced via packets and written to the server's config files if needed
+      - Non-synced configs can also be created
