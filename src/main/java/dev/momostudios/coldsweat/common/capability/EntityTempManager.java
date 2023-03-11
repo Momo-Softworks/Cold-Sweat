@@ -107,6 +107,11 @@ public class EntityTempManager
                     return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
                 });
             }
+
+            if (entity instanceof Player && entity.tickCount % 60 == 0)
+            {
+                Temperature.updateModifiers(entity, cap);
+            }
         });
     }
 

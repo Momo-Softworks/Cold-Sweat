@@ -165,10 +165,8 @@ public class Temperature
             TempModifier newModifier = event.getModifier();
             if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
             {
-                LazyOptional<ITemperatureCap> icap = getTemperatureCap(entity);
-                if (icap.isPresent())
+                getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    ITemperatureCap cap = icap.orElse(new PlayerTempCap());
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
                     if (modifiers.isEmpty())
                     {   modifiers.add(event.getModifier());
@@ -205,7 +203,9 @@ public class Temperature
                             }
                         }
                     }
-                }
+
+                    updateModifiers(entity, cap);
+                });
             }
             else
             {

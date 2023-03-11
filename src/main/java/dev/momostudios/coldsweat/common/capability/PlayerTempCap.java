@@ -103,13 +103,11 @@ public class PlayerTempCap implements ITemperatureCap
         if (!(entity instanceof Player player)) return;
 
         for (Type type : VALID_MODIFIER_TYPES)
-        {
-            Temperature.apply(0, player, type, getModifiers(type));
+        {   Temperature.apply(0, player, type, getModifiers(type));
         }
 
         if (player.tickCount % 20 == 0)
-        {
-            calculateVisibility(player);
+        {   calculateVisibility(player);
         }
     }
 
@@ -181,12 +179,10 @@ public class PlayerTempCap implements ITemperatureCap
             if (player.tickCount % 40 == 0 && !hasGrace)
             {
                 if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-                {
-                    this.dealTempDamage(player, ModDamageSources.HOT, 2f);
+                {   this.dealTempDamage(player, ModDamageSources.HOT, 2f);
                 }
                 else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-                {
-                    this.dealTempDamage(player, ModDamageSources.COLD, 2f);
+                {   this.dealTempDamage(player, ModDamageSources.COLD, 2f);
                 }
             }
         }
