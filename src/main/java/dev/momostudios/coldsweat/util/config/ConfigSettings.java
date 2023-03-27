@@ -69,6 +69,7 @@ public class ConfigSettings
 
     // Entity Settings
     public static ValueLoader<Map<String, Integer>> CHAMELEON_BIOMES;
+    public static ValueLoader<Map<String, Integer>> GOAT_BIOMES;
     public static ValueLoader<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
 
 
@@ -315,6 +316,16 @@ public class ConfigSettings
         {
             Map<String, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
+            {
+                map.put((String) entry.get(0), ((Number) entry.get(1)).intValue());
+            }
+            return map;
+        });
+
+        GOAT_BIOMES = ValueLoader.of(() ->
+        {
+            Map<String, Integer> map = new HashMap<>();
+            for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
             {
                 map.put((String) entry.get(0), ((Number) entry.get(1)).intValue());
             }

@@ -88,6 +88,42 @@ public class EntitySettingsConfig
                 .comment("Defines the biomes that Chameleons can spawn in")
                 .defineList("Chameleon Spawn Biomes", chameleonBiomes,
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
+
+        goatBiomes = BUILDER
+                .comment("Defines additional biomes that goats can spawn in",
+                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
+                         "Not affected by the \"Increase Goat Spawns\" option")
+                .defineList("Goat Spawn Biomes", ListBuilder.begin(
+                                List.of("minecraft:meadow", 4),
+                                List.of("minecraft:windswept_hills", 8),
+                                List.of("minecraft:windswept_forest", 8),
+                                List.of("minecraft:windswept_gravelly_hills", 8),
+                                List.of("minecraft:grove", 8),
+                                List.of("minecraft:stony_peaks", 8))
+                            .addIf(CompatManager.isBiomesOPlentyLoaded(),
+                                () -> List.of("biomesoplenty:boreal_forest", 8),
+                                () -> List.of("biomesoplenty:jade_cliffs", 8),
+                                () -> List.of("biomesoplenty:crag", 3))
+                            .addIf(CompatManager.isBiomesYoullGoLoaded(),
+                                () -> List.of("byg:canadian_shield", 8),
+                                () -> List.of("byg:guiana_shield", 8),
+                                () -> List.of("byg:fragment_forest", 128),
+                                () -> List.of("byg:howling_peaks", 8),
+                                () -> List.of("byg:dacite_ridges", 8))
+                            .addIf(CompatManager.isTerralithLoaded(),
+                                () -> List.of("terralith:blooming_plateau", 8),
+                                () -> List.of("terralith:rocky_mountains", 8),
+                                () -> List.of("terralith:alpine_grove", 8),
+                                () -> List.of("terralith:scarlet_mountains", 8),
+                                () -> List.of("terralith:windswept_spires", 16),
+                                () -> List.of("terralith:cloud_forest", 8),
+                                () -> List.of("terralith:haze_mountain", 8)
+                        ).build(),
+                        it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
+
+        increaseGoatSpawns = BUILDER
+                .comment("If true, goats will spawn more frequently in the world")
+                .define("Increase Goat Spawns", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
