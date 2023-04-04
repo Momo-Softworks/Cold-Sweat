@@ -7,10 +7,13 @@ import dev.momostudios.coldsweat.client.gui.tooltip.InsulationTooltip;
 import dev.momostudios.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ArmorItem;
@@ -25,6 +28,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,7 +46,7 @@ public class ItemTooltipInfo
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";
             temp = temp / 2 + 95;
-            if (celsius) temp = CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
+            if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
             temp += ClientSettingsConfig.getInstance().tempOffset() / 2.0;
 
             event.getToolTip().add(1, new TextComponent("§7" + new TranslatableComponent(
@@ -66,21 +70,29 @@ public class ItemTooltipInfo
         {
             event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
-        // If the item is an insulator, add the tooltip
+        // If the item is an insulation ingredient, add the tooltip
         else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
         {
-            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))));
+            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false)));
+        }
+        else if (ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        {
+            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true)));
         }
         // If the item is insulated armor
         else if (stack.getItem() instanceof ArmorItem)
         {
             // Create the list of insulation pairs from NBT
-            List<Pair<Double, Double>> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
-            .map(c -> c instanceof ItemInsulationCap cap ? cap.deserializeSimple(stack) : new ArrayList<Pair<Double, Double>>())
-            .orElse(new ArrayList<>());
+            List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
+            .map(c ->
+            {
+                if (c instanceof ItemInsulationCap cap)
+                {   return cap;
+                }
+                return new ItemInsulationCap();
+            }).map(cap -> cap.deserializeSimple(stack)).orElse(new ArrayList<>());
 
-            // If the item has intrinsic insulation due to configs, add it to the list
-            List<Pair<Double, Double>> builtinInsul = new ArrayList<>();
+            // If the armor has intrinsic insulation due to configs, add it to the list
             ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(stack.getItem(), (item, pair) ->
             {
                 double cold = pair.getFirst();
@@ -92,30 +104,31 @@ public class ItemTooltipInfo
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
                 {
                     double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
-                    builtinInsul.add(Pair.of(coldInsul, 0d));
+                    insulation.add(new ItemInsulationCap.Insulation(coldInsul, 0d));
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
                 {
                     double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
-                    builtinInsul.add(Pair.of(neutralInsul, neutralInsul));
+                    insulation.add(new Insulation(neutralInsul, neutralInsul));
                 }
 
                 // Hot insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
                 {
                     double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
-                    builtinInsul.add(Pair.of(0d, hotInsul));
+                    insulation.add(new Insulation(0d, hotInsul));
                 }
                 return pair;
             });
-            insulation.addAll(builtinInsul);
-            insulation.sort(Comparator.comparingDouble(pair -> Math.abs(pair.getFirst() - 2)));
 
-            int barSize = builtinInsul.size() + (stack.getOrCreateTag().getBoolean("Insulated") ? ArmorInsulation.getInsulationSlots(stack) : 0);
+            // Sort the insulation values from cold to hot
+            ItemInsulationCap.sortInsulationList(insulation);
 
-            if (!insulation.isEmpty())
+            // Calculate the number of slots and render the insulation bar
+            int barSize = stack.getOrCreateTag().getBoolean("Insulated") ? insulation.size() : 0;
+            if (barSize > 0)
                 event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
         }
     }

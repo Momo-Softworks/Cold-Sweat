@@ -13,7 +13,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -154,7 +153,7 @@ public class SewingContainer extends AbstractContainerMenu
             public boolean mayPlace(ItemStack stack)
             {
                 Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
-                return insulation.getFirst() > 0 || insulation.getSecond() > 0 || stack.getItem() instanceof ShearsItem;
+                return insulation.getFirst() != 0 || insulation.getSecond() != 0 || stack.getItem() instanceof ShearsItem;
             }
             @Override
             public void onTake(Player player, ItemStack stack)
@@ -244,15 +243,17 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack input2 = this.getItem(1);
 
         input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
-        {   // If insulation is being removed
+        {
+            // If insulation is being removed
             if (this.getItem(1).getItem() instanceof ShearsItem)
-            {   // Damage shears
+            {
+                // Damage shears
                 if (!player.isCreative())
                 {   input2.hurt(1, player.getRandom(), null);
                 }
 
                 // Remove the last insulation item added
-                cap.removeInsulationItem(cap.getInsulationItems().size() - 1);
+                cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
                 // Play shear sound
                 player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
 
@@ -278,16 +279,18 @@ public class SewingContainer extends AbstractContainerMenu
 
     static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
     {
-        stack.getOrCreateTag().putBoolean("Insulated", iCap.getInsulationItems().size() > 0);
-
         if (iCap instanceof ItemInsulationCap cap)
             cap.serializeSimple(stack);
 
         // Remove "Insulated" tag if armor has no insulation left
-        if (iCap.getInsulationItems().isEmpty())
+        if (iCap.getInsulation().isEmpty())
         {
             stack.getOrCreateTag().remove("Insulated");
             stack.getOrCreateTag().remove("Insulation");
+        }
+        // Add "Insulated" tag if armor has insulation
+        else
+        {   stack.getOrCreateTag().putBoolean("Insulated", true);
         }
     }
 
@@ -304,19 +307,19 @@ public class SewingContainer extends AbstractContainerMenu
             {
                 armorItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
                 {
-                    if (cap.getInsulationItems().size() > 0)
+                    if (cap.getInsulation().size() > 0)
                     {
-                        this.setItem(2, cap.getInsulationItems().get(cap.getInsulationItems().size() - 1).copy());
+                        this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
                 });
             }
             // Item is for insulation
-            else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem())
+            else if ((ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()) || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()))
             && (!(insulatorItem.getItem() instanceof ArmorItem)
             || LivingEntity.getEquipmentSlotForItem(armorItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = armorItem.copy();
-                IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElse(new ItemInsulationCap());
+                IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);
@@ -395,7 +398,7 @@ public class SewingContainer extends AbstractContainerMenu
         {
             ItemStack slotItem = slot.getItem();
             newStack = slotItem.copy();
-            if (CSMath.isInRange(index, 0, 2))
+            if (CSMath.withinRange(index, 0, 2))
             {
                 if (this.moveItemStackTo(slotItem, 3, 39, true))
                 {
@@ -406,7 +409,7 @@ public class SewingContainer extends AbstractContainerMenu
             else
             {
                 Pair<Double, Double> itemValue = ArmorInsulation.getItemInsulation(slotItem);
-                if (itemValue.getFirst() > 0 || itemValue.getSecond() > 0 || slotItem.getItem() instanceof ShearsItem)
+                if (itemValue.getFirst() != 0 || itemValue.getSecond() != 0 || slotItem.getItem() instanceof ShearsItem)
                 {
                     if (this.moveItemStackTo(slotItem, 1, 2, false))
                     {
@@ -430,7 +433,7 @@ public class SewingContainer extends AbstractContainerMenu
                     }
                     else return ItemStack.EMPTY;
                 }
-                else if (CSMath.isInRange(index, slots.size() - 9, slots.size()))
+                else if (CSMath.withinRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(slotItem, 3, 29, false))
                     {
@@ -438,7 +441,7 @@ public class SewingContainer extends AbstractContainerMenu
                     }
                     else return ItemStack.EMPTY;
                 }
-                else if (CSMath.isInRange(index, 3, slots.size() - 9))
+                else if (CSMath.withinRange(index, 3, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(slotItem, slots.size() - 9, slots.size(), false))
                     {

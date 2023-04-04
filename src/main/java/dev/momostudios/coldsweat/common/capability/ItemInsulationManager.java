@@ -4,7 +4,9 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -12,12 +14,16 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
@@ -25,7 +31,9 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
-        if (event.getObject().getItem() instanceof ArmorItem && !ConfigSettings.INSULATION_ITEMS.get().containsKey(event.getObject().getItem()))
+        if (event.getObject().getItem() instanceof ArmorItem
+        && !ConfigSettings.INSULATION_ITEMS.get().containsKey(event.getObject().getItem())
+        && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(event.getObject().getItem()))
         {
             // Make a new capability instance to attach to the item
             IInsulatableCap itemInsulationCap = new ItemInsulationCap();
@@ -66,18 +74,29 @@ public class ItemInsulationManager
     }
 
     @SubscribeEvent
-    public static void onInventoryChanged(PlayerContainerEvent event)
+    public static void handleInventoryOpen(PlayerContainerEvent event)
     {
-        event.getPlayer().inventoryMenu.slots.forEach(slot ->
+        event.getPlayer().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
+    {
+        // if the inventory screen is open
+        Player player = event.player;
+        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 5 == 0
+        && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
-            ItemStack stack = slot.getItem();
-            stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
+            player.getArmorSlots().forEach(stack ->
             {
-                if (iCap instanceof ItemInsulationCap cap)
+                stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
                 {
-                    cap.serializeSimple(stack);
-                }
+                    if (iCap instanceof ItemInsulationCap cap)
+                    {
+                        cap.serializeSimple(stack);
+                    }
+                });
             });
-        });
+        }
     }
 }

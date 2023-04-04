@@ -217,6 +217,31 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setInsulatingItems(list);
         });
 
+        ADAPTIVE_INSULATION_ITEMS = addSyncedSetting("adaptive_insulation_items", () ->
+        {
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (List<?> entry : ItemSettingsConfig.getInstance().adaptiveInsulatingItems())
+            {
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
+                }
+            }
+            return map;
+        },
+        encoder -> ConfigHelper.writeNBTItemMap(encoder, "AdaptiveInsulationItems"),
+        decoder -> ConfigHelper.readNBTItemMap(decoder, "AdaptiveInsulationItems"),
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
+            {
+                Pair<Double, Double> pair = entry.getValue();
+                list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), pair.getFirst(), pair.getSecond()));
+            }
+            ItemSettingsConfig.getInstance().setAdaptiveInsulatingItems(list);
+        });
+
         INSULATING_ARMORS = addSyncedSetting("insulating_armors", () ->
         {
             Map<Item, Pair<Double, Double>> map = new HashMap<>();
@@ -238,6 +263,28 @@ public class ConfigSettings
             {   list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
             }
             ItemSettingsConfig.getInstance().setInsulatingArmor(list);
+        });
+        INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
+        {
+            List<? extends Number> list = ItemSettingsConfig.getInstance().insulationSlots();
+            return new Integer[] { list.get(0).intValue(), list.get(1).intValue(), list.get(2).intValue(), list.get(3).intValue() };
+        },
+        encoder ->
+        {
+            CompoundTag tag = new CompoundTag();
+            tag.putInt("Head", encoder[0]);
+            tag.putInt("Chest", encoder[1]);
+            tag.putInt("Legs", encoder[2]);
+            tag.putInt("Feet", encoder[3]);
+            return tag;
+        },
+        decoder ->
+        {
+            return new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") };
+        },
+        saver ->
+        {
+            ItemSettingsConfig.getInstance().setInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
         });
 
         TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
