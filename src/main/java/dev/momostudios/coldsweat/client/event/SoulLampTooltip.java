@@ -34,7 +34,7 @@ public class SoulLampTooltip
 
                 if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
                 {
-                    int fuelValue = screen.getMenu().getCarried().getCount();
+                    int fuelValue = screen.getMenu().getCarried().getCount() * ConfigSettings.LAMP_FUEL_ITEMS.get().get(carriedStack.getItem());
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 

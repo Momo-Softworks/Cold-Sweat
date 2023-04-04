@@ -1,5 +1,5 @@
 {
-  "parent": "cold_sweat:soul_of_the_sea",
+  "parent": "cold_sweat:get_soul_lamp",
   "display": {
     "icon": {
       "item": "cold_sweat:soulspring_lamp"

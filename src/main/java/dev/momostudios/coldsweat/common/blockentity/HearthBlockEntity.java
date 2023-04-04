@@ -6,6 +6,7 @@ import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
@@ -60,8 +61,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
@@ -238,13 +237,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             this.rebuildCooldown = 100;
 
             // Find paths that need to be removed
-            Collection<SpreadPath> toRemove = paths.stream().filter(path -> notifyQueue.contains(path.getPos()) && path.getPos() != pos)
-                                                   .flatMap(path ->
-                                                   {
-                                                       Stream<SpreadPath> pathStream = path.getAllChildren().stream();
-                                                       path.clearChildren();
-                                                       return pathStream;
-                                                   }).collect(Collectors.toSet());
+            Collection<SpreadPath> toRemove = Arrays.asList(paths.stream().unordered()
+                                                    .filter(path -> notifyQueue.contains(path.getPos()) && path.getPos() != pos)
+                                                    .flatMap(path -> path.getAllChildren().stream().peek(SpreadPath::clearChildren))
+                                                    .toArray(SpreadPath[]::new));
 
             // Remove updated paths
             paths.removeAll(toRemove);
@@ -453,9 +449,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                 if (player == null || CSMath.getDistance(spreadPath.getPos(), player.blockPosition()) > 1)
                                     continue;
 
-                                MobEffectInstance effect = player.getEffect(ModEffects.INSULATION);
+                                TempModifier modifier = Temperature.getModifier(player, Temperature.Type.WORLD, mod -> mod instanceof HearthTempModifier);
 
-                                if ((effect == null || effect.getDuration() < 60))
+                                if (modifier == null || modifier.getTicksExisted() >= modifier.getExpireTime() - 20)
                                 {
                                     this.insulatePlayer(player);
                                     break;
@@ -551,7 +547,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                 double temp = cap.getTemp(Temperature.Type.WORLD);
-                if (CSMath.isInRange(temp, ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()))
+                if (CSMath.withinRange(temp, ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()))
                 {
                     HearthTempModifier mod = Temperature.getModifier(cap, Temperature.Type.WORLD, HearthTempModifier.class);
                     if (mod != null) temp = mod.getLastInput();

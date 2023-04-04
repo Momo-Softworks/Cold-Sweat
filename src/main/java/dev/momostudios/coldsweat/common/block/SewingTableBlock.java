@@ -53,12 +53,10 @@ public class SewingTableBlock extends Block implements MenuProvider
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (worldIn.isClientSide)
-        {
-            return InteractionResult.SUCCESS;
+        {   return InteractionResult.SUCCESS;
         }
         else
-        {
-            NetworkHooks.openGui((ServerPlayer)player, this, pos);
+        {   NetworkHooks.openGui((ServerPlayer)player, this, pos);
             return InteractionResult.CONSUME;
         }
     }

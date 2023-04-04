@@ -22,8 +22,8 @@ public class PreventPlayerSleep
         Player player = event.getPlayer();
         double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
         double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-        double minTemp = ConfigSettings.MIN_TEMP.get() + Temperature.get(player, Temperature.Type.MIN);
-        double maxTemp = ConfigSettings.MAX_TEMP.get() + Temperature.get(player, Temperature.Type.MAX);
+        double minTemp = ConfigSettings.MIN_TEMP.get() + Temperature.get(player, Temperature.Type.FLOOR);
+        double maxTemp = ConfigSettings.MAX_TEMP.get() + Temperature.get(player, Temperature.Type.CEIL);
 
         // If the player's body temperature is critical
         if (!CSMath.isBetween(bodyTemp, -100, 100))
@@ -32,7 +32,7 @@ public class PreventPlayerSleep
             event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
         // If the player's world temperature is critical
-        else if (!CSMath.isInRange(worldTemp, minTemp, maxTemp))
+        else if (!CSMath.withinRange(worldTemp, minTemp, maxTemp))
         {
             player.displayClientMessage(new TranslatableComponent("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
             event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);

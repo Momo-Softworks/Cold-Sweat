@@ -63,7 +63,7 @@ public class ConfigPageTwo extends AbstractConfigPage
         // Grace Period Length
         this.addDecimalInput("grace_length", Side.LEFT, new TranslatableComponent("cold_sweat.config.grace_period_length.name"),
                 value -> ConfigSettings.GRACE_LENGTH.set(value.intValue()),
-                input -> input.setValue(ConfigSettings.GRACE_LENGTH + ""),
+                input -> input.setValue(ConfigSettings.GRACE_LENGTH.get() + ""),
                 true, true, false, new TranslatableComponent("cold_sweat.config.grace_period_length.desc_1").getString(),
                             "§7"+new TranslatableComponent("cold_sweat.config.grace_period_length.desc_2").getString()+"§r");
 

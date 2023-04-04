@@ -99,6 +99,6 @@ public class DifficultyDescriptions
     private static String getTemp(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + temp + rs + " °F / " + color + df.format(CSMath.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true)) + rs + " °C";
+        return color + temp + rs + " °F / " + color + df.format(CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true)) + rs + " °C";
     }
 }

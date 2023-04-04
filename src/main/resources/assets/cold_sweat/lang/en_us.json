@@ -17,6 +17,7 @@
   "item.cold_sweat.insulated_minecart":  "Minecart with Insulation",
   "item.cold_sweat.chameleon_molt":      "Chameleon Molt",
   "item.cold_sweat.chameleon_spawn_egg": "Chameleon Spawn Egg",
+  "item.cold_sweat.soul_sprout":         "Soul Sprout",
 
 
   "entity.cold_sweat.chameleon": "Chameleon",
@@ -170,6 +171,8 @@
   "advancements.cold_sweat.lava_sea.description": "Stand next to a sea of lava",
   "advancements.cold_sweat.place_hearth.title": "Home Sweet Home",
   "advancements.cold_sweat.place_hearth.description": "Use a hearth to stay safe in your base",
-  "advancements.cold_sweat.soul_lamp_fuel.title": "Just a Little Longer",
-  "advancements.cold_sweat.soul_lamp_fuel.description": "Fuel the soulspring lamp by clicking it with fuel in your inventory"
+  "advancements.cold_sweat.soul_lamp_fuel.title": "Delaying the Inevitable",
+  "advancements.cold_sweat.soul_lamp_fuel.description": "Fuel the soulspring lamp by clicking it with fuel in your inventory",
+  "advancements.cold_sweat.chameleon_find_biome.title": "Follow the Leader",
+  "advancements.cold_sweat.chameleon_find_biome.description": "Follow a chameleon's tail to find a new biome"
 }

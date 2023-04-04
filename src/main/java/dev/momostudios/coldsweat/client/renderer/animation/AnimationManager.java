@@ -19,7 +19,7 @@ public class AnimationManager
     static Field CHILDREN_FIELD = null;
 
     public static Map<Entity, Float> ANIMATION_TIMERS = new ConcurrentHashMap<>();
-    static HashMap<EntityType, Map<String, PartPose>> DEFAULT_POSES = new HashMap<>();
+    static HashMap<EntityType<?>, Map<String, PartPose>> DEFAULT_POSES = new HashMap<>();
     static Map<Entity, Map<String, PartPose>> ANIMATION_STATES = new ConcurrentHashMap<>();
 
     static

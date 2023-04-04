@@ -120,8 +120,8 @@ public class ConfigPageDifficulty extends Screen
         // Super Easy
         if (ConfigSettings.DIFFICULTY.get() == 0)
         {
-            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true));
-            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true));
             ConfigSettings.TEMP_RATE.set(0.5);
             ConfigSettings.REQUIRE_THERMOMETER.set(false);
             ConfigSettings.DAMAGE_SCALING.set(false);
@@ -131,8 +131,8 @@ public class ConfigPageDifficulty extends Screen
         // Easy
         else if (ConfigSettings.DIFFICULTY.get() == 1)
         {
-            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true));
-            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true));
             ConfigSettings.TEMP_RATE.set(0.75);
             ConfigSettings.REQUIRE_THERMOMETER.set(false);
             ConfigSettings.DAMAGE_SCALING.set(false);
@@ -142,8 +142,8 @@ public class ConfigPageDifficulty extends Screen
         // Normal
         else if (ConfigSettings.DIFFICULTY.get() == 2)
         {
-            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true));
-            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true));
             ConfigSettings.TEMP_RATE.set(1.0);
             ConfigSettings.REQUIRE_THERMOMETER.set(true);
             ConfigSettings.DAMAGE_SCALING.set(true);
@@ -153,8 +153,8 @@ public class ConfigPageDifficulty extends Screen
         // Hard
         else if (ConfigSettings.DIFFICULTY.get() == 3)
         {
-            ConfigSettings.MIN_TEMP.set(CSMath.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true));
-            ConfigSettings.MAX_TEMP.set(CSMath.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true));
+            ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true));
             ConfigSettings.TEMP_RATE.set(1.5);
             ConfigSettings.REQUIRE_THERMOMETER.set(true);
             ConfigSettings.DAMAGE_SCALING.set(true);

@@ -10,7 +10,9 @@ import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.math.ListBuilder;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -28,33 +30,32 @@ import net.minecraftforge.fml.common.Mod;
 public class AddTempModifiers
 {
     @SubscribeEvent
-    public static void onPlayerCreated(EntityJoinWorldEvent event)
+    public static void onEntityCreated(EntityJoinWorldEvent event)
     {
         if (event.getEntity() instanceof Player player && !player.level.isClientSide)
         {
             TaskScheduler.scheduleServer(() ->
             {
-                Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10),  Temperature.Type.WORLD, false);
-                if (CompatManager.isSereneSeasonsLoaded())
-                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(40), Temperature.Type.WORLD, false);
-                Temperature.addModifier(player, new DepthTempModifier().tickRate(15), Temperature.Type.WORLD, false);
-                Temperature.addModifier(player, new BlockTempModifier(7).tickRate(4),  Temperature.Type.WORLD, false);
+                Temperature.addModifiersSimple(player, Temperature.Type.WORLD, ListBuilder.begin(new BiomeTempModifier(25).tickRate(10))
+                                                                    .addIf(CompatManager.isSereneSeasonsLoaded(),
+                                                                        () -> TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(40))
+                                                                    .add(new DepthTempModifier().tickRate(15),
+                                                                        new BlockTempModifier(7).tickRate(4)).build(), false);
+
+                Temperature.set(player, Temperature.Type.WORLD, Temperature.apply(0, player, Temperature.Type.WORLD, Temperature.getModifiers(player, Temperature.Type.WORLD)));
             }, 1);
         }
-    }
-
-    @SubscribeEvent
-    public static void onMobCreated(EntityJoinWorldEvent event)
-    {
-        if (event.getEntity() instanceof ChameleonEntity chameleon)
+        else if (event.getEntity() instanceof ChameleonEntity chameleon)
         {
             TaskScheduler.scheduleServer(() ->
             {
-                Temperature.addModifier(chameleon, new BiomeTempModifier(9).tickRate(40), Temperature.Type.WORLD, false);
-                if (CompatManager.isSereneSeasonsLoaded())
-                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false);
-                Temperature.addModifier(chameleon, new DepthTempModifier().tickRate(40), Temperature.Type.WORLD, false);
-                Temperature.addModifier(chameleon, new BlockTempModifier(4).tickRate(20), Temperature.Type.WORLD, false);
+                Temperature.addModifiersSimple(chameleon, Temperature.Type.WORLD, ListBuilder.begin(new BiomeTempModifier(9).tickRate(40))
+                                                                                             .addIf(CompatManager.isSereneSeasonsLoaded(),
+                                                                                                 () -> TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60))
+                                                                                             .add(new DepthTempModifier().tickRate(40),
+                                                                                                 new BlockTempModifier(4).tickRate(20)).build(), false);
+                Temperature.set(chameleon, Temperature.Type.WORLD, Temperature.apply(0, chameleon, Temperature.Type.WORLD, Temperature.getModifiers(chameleon, Temperature.Type.WORLD)));
+                chameleon.setTemperature((float) Temperature.get(chameleon, Temperature.Type.WORLD));
             }, 1);
         }
     }
@@ -71,10 +72,10 @@ public class AddTempModifiers
                 Temperature.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
 
             if (player.getTicksFrozen() > 0)
-                Temperature.replaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
+                Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
 
             if (player.isOnFire())
-                Temperature.replaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
+                Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
         }
     }
 
@@ -87,7 +88,7 @@ public class AddTempModifiers
             if (event instanceof PotionEvent.PotionAddedEvent)
             {
                 MobEffectInstance effect = event.getPotionEffect();
-                Temperature.replaceModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Type.WORLD);
+                Temperature.addOrReplaceModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Type.WORLD);
             }
             else if (event instanceof PotionEvent.PotionRemoveEvent)
             {
@@ -150,6 +151,11 @@ public class AddTempModifiers
             if (foodTemp != 0)
             {
                 Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
+            }
+
+            if (event.getItem().getItem() == ModItems.SOUL_SPROUT)
+            {
+                Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Type.BASE);
             }
         }
     }

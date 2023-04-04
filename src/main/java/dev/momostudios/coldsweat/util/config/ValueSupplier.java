@@ -1,10 +1,6 @@
 package dev.momostudios.coldsweat.util.config;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -14,7 +10,7 @@ import java.util.function.Supplier;
  * Contains a value that updates again once Forge has been fully loaded. Mostly used for static fields.
  * @param <T> The variable type that this object is storing
  */
-public class ValueLoader<T>
+public class ValueSupplier<T>
 {
     private T value;
     private final Supplier<T> valueCreator;
@@ -23,20 +19,20 @@ public class ValueLoader<T>
     private Consumer<T> saver;
     private boolean synced = false;
 
-    public ValueLoader(Supplier<T> valueCreator)
+    public ValueSupplier(Supplier<T> valueCreator)
     {
         this.valueCreator = valueCreator;
         this.value = valueCreator.get();
     }
 
-    public static <V> ValueLoader<V> of(Supplier<V> valueCreator)
+    public static <V> ValueSupplier<V> of(Supplier<V> valueCreator)
     {
-        return new ValueLoader<>(valueCreator);
+        return new ValueSupplier<>(valueCreator);
     }
 
-    public static <V> ValueLoader<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
+    public static <V> ValueSupplier<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
     {
-        ValueLoader<V> loader = new ValueLoader<>(valueCreator);
+        ValueSupplier<V> loader = new ValueSupplier<>(valueCreator);
         loader.encoder = encoder;
         loader.decoder = decoder;
         loader.saver = saver;
@@ -52,7 +48,7 @@ public class ValueLoader<T>
     {   this.value = value;
     }
 
-    public void reload()
+    public void load()
     {   this.value = valueCreator.get();
     }
 

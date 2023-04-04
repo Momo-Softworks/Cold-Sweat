@@ -20,4 +20,5 @@ public class BlockInit
     public static final RegistryObject<Block> HEARTH_BOTTOM = BLOCKS.register("hearth_bottom", () -> new HearthBottomBlock(HearthBottomBlock.getProperties()));
     public static final RegistryObject<Block> HEARTH_TOP = BLOCKS.register("hearth_top", () -> new HearthTopBlock(HearthTopBlock.getProperties()));
     public static final RegistryObject<Block> THERMOLITH = BLOCKS.register("thermolith", () -> new ThermolithBlock(ThermolithBlock.getProperties()));
+    public static final RegistryObject<Block> SOUL_STALK = BLOCKS.register("soul_stalk", () -> new SoulStalkBlock(SoulStalkBlock.getProperties()));
 }

@@ -15,9 +15,7 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -58,6 +56,7 @@ public class ColdSweat
         ParticleTypesInit.PARTICLES.register(bus);
         PotionInit.POTIONS.register(bus);
         SoundInit.SOUNDS.register(bus);
+        FeatureInit.FEATURES.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
@@ -87,6 +86,7 @@ public class ColdSweat
     {
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
+        ItemBlockRenderTypes.setRenderLayer(BlockInit.SOUL_STALK.get(), RenderType.cutoutMipped());
         // Register GUI elements
         Overlays.registerOverlays();
     }
@@ -100,5 +100,4 @@ public class ColdSweat
     {
         InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE, () -> SlotTypePreset.CHARM.getMessageBuilder().build());
     }
-
 }

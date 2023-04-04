@@ -19,4 +19,6 @@ public class ModItems
     public static final Item INSULATED_MINECART = ItemInit.INSULATED_MINECART.get();
     public static final Item CHAMELEON_MOLT = ItemInit.CHAMELEON_MOLT.get();
     public static final Item THERMOLITH = ItemInit.THERMOLITH.get();
+    public static final Item SOUL_SPROUT = ItemInit.SOUL_SPROUT.get();
+    public static final Item CHAMELEON_SPAWN_EGG = ItemInit.CHAMELEON_SPAWN_EGG.get();
 }

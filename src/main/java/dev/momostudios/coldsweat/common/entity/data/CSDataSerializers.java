@@ -49,7 +49,7 @@ public class CSDataSerializers
         }
 
         public Set<UUID> copy(Set<UUID> value)
-        {   return value;
+        {   return new HashSet<>(value);
         }
     };
 
@@ -78,7 +78,7 @@ public class CSDataSerializers
 
         @NotNull
         public Set<Item> copy(@NotNull Set<Item> value)
-        {   return value;
+        {   return new HashSet<>(value);
         }
     };
 
@@ -106,7 +106,7 @@ public class CSDataSerializers
         }
 
         public Map<Item, Integer> copy(Map<Item, Integer> value)
-        {   return value;
+        {   return new HashMap<>(value);
         }
     };
 

@@ -27,13 +27,13 @@ public class ArmorUnderTempModifier extends TempModifier
         {
             switch (type)
             {
-                case MIN ->
+                case FLOOR ->
                 {
                     totalOffset += Math.min(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
                 }
-                case MAX ->
+                case CEIL ->
                 {
                     totalOffset += Math.max(0,
                             Armory.getTLining(stack).getModifier() * 5
@@ -48,7 +48,7 @@ public class ArmorUnderTempModifier extends TempModifier
             }
         }
 
-        double returnTemp = CSMath.convertUnits(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
+        double returnTemp = CSMath.convertTemp(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
         return temp -> returnTemp;
     }
 

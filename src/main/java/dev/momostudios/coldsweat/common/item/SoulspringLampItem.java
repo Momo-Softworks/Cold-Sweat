@@ -77,7 +77,7 @@ public class SoulspringLampItem extends Item
                         if (modifier != null)
                             modifier.expires(modifier.getTicksExisted() + 5);
                         else
-                            Temperature.replaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                            Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
                     }
                 }
 

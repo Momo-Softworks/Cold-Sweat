@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.common.block.IceboxBlock;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -29,11 +28,11 @@ public class IceboxBlockTemp extends BlockTemp
 
     @Override
     public double minEffect() {
-        return CSMath.convertUnits(-40, Temperature.Units.F, Temperature.Units.MC, false);
+        return CSMath.convertTemp(-40, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double minTemperature() {
-        return CSMath.convertUnits(32, Temperature.Units.F, Temperature.Units.MC, true);
+        return CSMath.convertTemp(32, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

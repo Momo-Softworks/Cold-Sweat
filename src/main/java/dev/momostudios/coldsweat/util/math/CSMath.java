@@ -28,7 +28,7 @@ public class CSMath
      * @param absolute Used when dealing with world temperatures with Minecraft units.
      * @return The converted temperature.
      */
-    public static double convertUnits(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
+    public static double convertTemp(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
     {
         return switch (from)
         {
@@ -167,7 +167,7 @@ public class CSMath
     /**
      * Calculates if the given value is between two values (inclusive)
      */
-    public static boolean isInRange(double value, double min, double max) {
+    public static boolean withinRange(double value, double min, double max) {
         return value >= min && value <= max;
     }
 
@@ -446,7 +446,7 @@ public class CSMath
 
     public static double shrink(double value, double amount)
     {
-        return (Math.abs(value) - amount) * getSign(value);
+        return Math.max(0, Math.abs(value) - amount) * getSign(value);
     }
 
     public static int shrink(int value, int amount)

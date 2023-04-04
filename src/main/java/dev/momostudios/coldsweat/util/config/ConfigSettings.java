@@ -25,52 +25,54 @@ import java.util.function.Supplier;
  */
 public class ConfigSettings
 {
-    public static final Map<String, ValueLoader<?>> SYNCED_SETTINGS = new HashMap<>();
+    public static final Map<String, ValueSupplier<?>> SYNCED_SETTINGS = new HashMap<>();
 
     // Settings visible in the config screen
-    public static ValueLoader<Integer> DIFFICULTY;
-    public static ValueLoader<Double> MAX_TEMP;
-    public static ValueLoader<Double> MIN_TEMP;
-    public static ValueLoader<Double> TEMP_RATE;
-    public static ValueLoader<Boolean> FIRE_RESISTANCE_ENABLED;
-    public static ValueLoader<Boolean> ICE_RESISTANCE_ENABLED;
-    public static ValueLoader<Boolean> DAMAGE_SCALING;
-    public static ValueLoader<Boolean> REQUIRE_THERMOMETER;
-    public static ValueLoader<Integer> GRACE_LENGTH;
-    public static ValueLoader<Boolean> GRACE_ENABLED;
+    public static ValueSupplier<Integer> DIFFICULTY;
+    public static ValueSupplier<Double> MAX_TEMP;
+    public static ValueSupplier<Double> MIN_TEMP;
+    public static ValueSupplier<Double> TEMP_RATE;
+    public static ValueSupplier<Boolean> FIRE_RESISTANCE_ENABLED;
+    public static ValueSupplier<Boolean> ICE_RESISTANCE_ENABLED;
+    public static ValueSupplier<Boolean> DAMAGE_SCALING;
+    public static ValueSupplier<Boolean> REQUIRE_THERMOMETER;
+    public static ValueSupplier<Integer> GRACE_LENGTH;
+    public static ValueSupplier<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static ValueLoader<Map<ResourceLocation, Pair<Double, Double>>> BIOME_TEMPS;
-    public static ValueLoader<Map<ResourceLocation, Pair<Double, Double>>> BIOME_OFFSETS;
-    public static ValueLoader<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
-    public static ValueLoader<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
-    public static ValueLoader<Double[]> SUMMER_TEMPS;
-    public static ValueLoader<Double[]> AUTUMN_TEMPS;
-    public static ValueLoader<Double[]> WINTER_TEMPS;
-    public static ValueLoader<Double[]> SPRING_TEMPS;
+    public static ValueSupplier<Map<ResourceLocation, Pair<Double, Double>>> BIOME_TEMPS;
+    public static ValueSupplier<Map<ResourceLocation, Pair<Double, Double>>> BIOME_OFFSETS;
+    public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
+    public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static ValueSupplier<Double[]> SUMMER_TEMPS;
+    public static ValueSupplier<Double[]> AUTUMN_TEMPS;
+    public static ValueSupplier<Double[]> WINTER_TEMPS;
+    public static ValueSupplier<Double[]> SPRING_TEMPS;
 
     // Item settings
-    public static ValueLoader<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
-    public static ValueLoader<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static ValueSupplier<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
+    public static ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static ValueSupplier<Integer[]> INSULATION_SLOTS;
 
-    public static ValueLoader<Map<Item, Double>> TEMPERATURE_FOODS;
+    public static ValueSupplier<Map<Item, Double>> TEMPERATURE_FOODS;
 
-    public static ValueLoader<Integer> WATERSKIN_STRENGTH;
+    public static ValueSupplier<Integer> WATERSKIN_STRENGTH;
 
-    public static ValueLoader<Map<Item, Integer>> LAMP_FUEL_ITEMS;
+    public static ValueSupplier<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
-    public static ValueLoader<List<String>> LAMP_DIMENSIONS;
+    public static ValueSupplier<List<String>> LAMP_DIMENSIONS;
 
-    public static ValueLoader<Map<Item, Double>> BOILER_FUEL;
-    public static ValueLoader<Map<Item, Double>> ICEBOX_FUEL;
-    public static ValueLoader<Map<Item, Double>> HEARTH_FUEL;
+    public static ValueSupplier<Map<Item, Double>> BOILER_FUEL;
+    public static ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
+    public static ValueSupplier<Map<Item, Double>> HEARTH_FUEL;
 
-    public static ValueLoader<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
+    public static ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
 
     // Entity Settings
-    public static ValueLoader<Map<String, Integer>> CHAMELEON_BIOMES;
-    public static ValueLoader<Map<String, Integer>> GOAT_BIOMES;
-    public static ValueLoader<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
+    public static ValueSupplier<Map<String, Integer>> CHAMELEON_BIOMES;
+    public static ValueSupplier<Map<String, Integer>> GOAT_BIOMES;
+    public static ValueSupplier<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -188,9 +190,9 @@ public class ConfigSettings
             WorldSettingsConfig.getInstance().setDimensionOffsets(list);
         });
 
-        BOILER_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
-        HEARTH_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
-        ICEBOX_FUEL = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
+        BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
+        HEARTH_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
+        ICEBOX_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
         {
@@ -238,9 +240,9 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setInsulatingArmor(list);
         });
 
-        TEMPERATURE_FOODS = ValueLoader.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
+        TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
 
-        WATERSKIN_STRENGTH = ValueLoader.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
+        WATERSKIN_STRENGTH = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
 
         LAMP_FUEL_ITEMS = addSyncedSetting("lamp_fuel_items", () ->
         {
@@ -281,7 +283,7 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setSoulLampItems(list);
         });
 
-        LAMP_DIMENSIONS = ValueLoader.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
+        LAMP_DIMENSIONS = ValueSupplier.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
 
         GOAT_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
         {
@@ -312,7 +314,7 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
-        CHAMELEON_BIOMES = ValueLoader.of(() ->
+        CHAMELEON_BIOMES = ValueSupplier.of(() ->
         {
             Map<String, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
@@ -322,7 +324,7 @@ public class ConfigSettings
             return map;
         });
 
-        GOAT_BIOMES = ValueLoader.of(() ->
+        GOAT_BIOMES = ValueSupplier.of(() ->
         {
             Map<String, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
@@ -332,7 +334,7 @@ public class ConfigSettings
             return map;
         });
 
-        CHAMELEON_TAME_ITEMS = ValueLoader.of(() ->
+        CHAMELEON_TAME_ITEMS = ValueSupplier.of(() ->
         {
             Map<Item, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonTameItems())
@@ -348,16 +350,16 @@ public class ConfigSettings
 
         if (CompatManager.isSereneSeasonsLoaded())
         {
-            SUMMER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().summerTemps());
-            AUTUMN_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
-            WINTER_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().winterTemps());
-            SPRING_TEMPS = ValueLoader.of(() -> WorldSettingsConfig.getInstance().springTemps());
+            SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().summerTemps());
+            AUTUMN_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
+            WINTER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().winterTemps());
+            SPRING_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().springTemps());
         }
     }
 
-    public static <T> ValueLoader<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
+    public static <T> ValueSupplier<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
     {
-        ValueLoader<T> loader = ValueLoader.synced(supplier, writer, reader, saver);
+        ValueSupplier<T> loader = ValueSupplier.synced(supplier, writer, reader, saver);
         SYNCED_SETTINGS.put(id, loader);
         return loader;
     }
@@ -384,10 +386,10 @@ public class ConfigSettings
 
     public static void saveValues()
     {
-        SYNCED_SETTINGS.values().forEach(loader ->
+        SYNCED_SETTINGS.values().forEach(value ->
         {
-            if (loader.isSynced())
-                loader.save();
+            if (value.isSynced())
+                value.save();
         });
     }
 }

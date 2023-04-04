@@ -4,11 +4,8 @@ import dev.momostudios.coldsweat.core.init.TempModifierInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ClientConfigAskMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,7 +23,7 @@ public class ClientJoinSetup
             ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         }
 
-        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.reload());
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.load());
         TempModifierInit.rebuildRegistries();
     }
 

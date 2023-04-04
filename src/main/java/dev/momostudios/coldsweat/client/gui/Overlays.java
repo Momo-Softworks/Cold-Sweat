@@ -62,7 +62,7 @@ public class Overlays
                 double max = ConfigSettings.MAX_TEMP.get();
 
                 // Get player world temperature
-                double temp = CSMath.convertUnits(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                double temp = CSMath.convertTemp(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
@@ -95,7 +95,7 @@ public class Overlays
                 RenderSystem.disableBlend();
 
                 // Sets the text bobbing offset (or none if disabled)
-                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.isInRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
+                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -216,7 +216,7 @@ public class Overlays
 
                     // Get temperature in actual degrees
                     double worldTemp = cap.getTemp(Temperature.Type.WORLD);
-                    double realTemp = CSMath.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
 
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
@@ -224,12 +224,12 @@ public class Overlays
                     WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
 
                     // Update max/min offset
-                    MAX_OFFSET = cap.getTemp(Temperature.Type.MAX);
-                    MIN_OFFSET = cap.getTemp(Temperature.Type.MIN);
+                    MAX_OFFSET = cap.getTemp(Temperature.Type.CEIL);
+                    MIN_OFFSET = cap.getTemp(Temperature.Type.FLOOR);
                 }
                 else
                 {
-                    PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertUnits(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertTemp(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                 }
 
 
@@ -269,7 +269,7 @@ public class Overlays
         }
     }
 
-    static int getWorldSeverity(double temp, double min, double max, double offsMin, double offsMax)
+    public static int getWorldSeverity(double temp, double min, double max, double offsMin, double offsMax)
     {
         double mid = (max + min) / 2;
         return (int) (temp < mid ? CSMath.blend(-4, 0, temp, min + offsMin, mid) : CSMath.blend(0, 4, temp, mid, max + offsMax));

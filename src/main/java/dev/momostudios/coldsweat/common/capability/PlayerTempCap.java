@@ -27,8 +27,8 @@ import java.util.*;
  */
 public class PlayerTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.MAX, Type.MIN, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.MAX, Type.MIN, Type.WORLD};
+    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.CEIL, Type.FLOOR, Type.WORLD};
+    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.CEIL, Type.FLOOR, Type.WORLD};
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
@@ -120,8 +120,8 @@ public class PlayerTempCap implements ITemperatureCap
         double newWorldTemp = Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, Type.CORE, getModifiers(Type.CORE));
         double newBaseTemp  = Temperature.apply(0, player, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, player, Type.MAX, getModifiers(Type.MAX));
-        double newMinOffset = Temperature.apply(0, player, Type.MIN, getModifiers(Type.MIN));
+        double newMaxOffset = Temperature.apply(0, player, Type.CEIL, getModifiers(Type.CEIL));
+        double newMinOffset = Temperature.apply(0, player, Type.FLOOR, getModifiers(Type.FLOOR));
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
@@ -155,11 +155,11 @@ public class PlayerTempCap implements ITemperatureCap
 
         // Sync the temperature values to the client
         if ((neverSynced
-        || (((int) syncedValues[0] != (int) newCoreTemp && showBodyTemp))
-        || (((int) syncedValues[1] != (int) newBaseTemp && showBodyTemp))
-        || ((Math.abs(syncedValues[2] - newWorldTemp) >= 0.02 && showWorldTemp))
-        || ((Math.abs(syncedValues[3] - newMaxOffset) >= 0.02 && showWorldTemp))
-        || ((Math.abs(syncedValues[4] - newMinOffset) >= 0.02 && showWorldTemp))))
+        || ((int) syncedValues[0] != (int) newCoreTemp
+        || ((int) syncedValues[1] != (int) newBaseTemp) && showBodyTemp)
+        || (Math.abs(syncedValues[2] - newWorldTemp) >= 0.02
+        ||  Math.abs(syncedValues[3] - newMaxOffset) >= 0.02
+        ||  Math.abs(syncedValues[4] - newMinOffset) >= 0.02) && showWorldTemp))
         {
             Temperature.updateTemperature(player, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };
@@ -311,7 +311,7 @@ public class PlayerTempCap implements ITemperatureCap
                 if (modifier != null)
                     getModifiers(type).add(modifier);
                 else
-                    ColdSweat.LOGGER.error("Failed to load modifier of type {}", type);
+                    ColdSweat.LOGGER.error("Failed to load modifier \"{}\" of type {}", ((CompoundTag) modNBT).getString("id"), type);
             });
         }
     }

@@ -55,7 +55,7 @@ public class AddEntitySpawns
     @SubscribeEvent
     public static void onBiomeTagsBuild(TagsUpdatedEvent event)
     {
-        ConfigSettings.GOAT_BIOMES.reload();
-        ConfigSettings.CHAMELEON_BIOMES.reload();
+        ConfigSettings.GOAT_BIOMES.load();
+        ConfigSettings.CHAMELEON_BIOMES.load();
     }
 }

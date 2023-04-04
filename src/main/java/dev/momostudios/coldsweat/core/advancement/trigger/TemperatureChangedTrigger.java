@@ -84,10 +84,10 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
             if (type != this.type) return false;
 
             if (below <= above)
-            {   return !CSMath.isInRange(value, below, above);
+            {   return !CSMath.withinRange(value, below, above);
             }
             else
-            {   return CSMath.isInRange(value, above, below);
+            {   return CSMath.withinRange(value, above, below);
             }
         }
 

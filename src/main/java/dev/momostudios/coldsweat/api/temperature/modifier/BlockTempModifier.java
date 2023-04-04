@@ -125,7 +125,7 @@ public class BlockTempModifier extends TempModifier
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
-                if (!CSMath.isInRange(temp, min, max)) continue;
+                if (!CSMath.withinRange(temp, min, max)) continue;
                 temp = CSMath.clamp(temp + effect.getValue(), min, max);
             }
             return temp;

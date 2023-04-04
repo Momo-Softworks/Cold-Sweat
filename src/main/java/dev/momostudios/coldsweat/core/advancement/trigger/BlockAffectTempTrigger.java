@@ -40,7 +40,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
         {
             super(ID, player);
             this.block = block;
-            this.distance = MinMaxBounds.Doubles.atMost(distance);
+            this.distance = distance > 0 ? MinMaxBounds.Doubles.atMost(distance) : MinMaxBounds.Doubles.atLeast(0);
             this.totalEffect = totalEffect < 0 ? MinMaxBounds.Doubles.atMost(totalEffect) : MinMaxBounds.Doubles.atLeast(totalEffect);
         }
 

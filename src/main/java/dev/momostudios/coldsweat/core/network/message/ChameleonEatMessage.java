@@ -31,10 +31,8 @@ public class ChameleonEatMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            Entity entity = Minecraft.getInstance().level.getEntity(message.entityId);
-            if (entity instanceof ChameleonEntity)
-            {
-                ((ChameleonEntity) entity).eatAnimation();
+            if (Minecraft.getInstance().level.getEntity(message.entityId) instanceof ChameleonEntity chameleon)
+            {   chameleon.eatAnimation();
             }
         });
         context.setPacketHandled(true);

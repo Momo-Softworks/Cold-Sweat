@@ -22,8 +22,8 @@ import java.util.List;
  */
 public class EntityTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.MAX, Type.MIN, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.MAX, Type.MIN, Type.WORLD};
+    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.CEIL, Type.FLOOR, Type.WORLD};
+    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.CEIL, Type.FLOOR, Type.WORLD};
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
@@ -96,8 +96,8 @@ public class EntityTempCap implements ITemperatureCap
         double newWorldTemp = Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
         double newBaseTemp  = Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, entity, Type.MAX, getModifiers(Type.MAX));
-        double newMinOffset = Temperature.apply(0, entity, Type.MIN, getModifiers(Type.MIN));
+        double newMaxOffset = Temperature.apply(0, entity, Type.CEIL, getModifiers(Type.CEIL));
+        double newMinOffset = Temperature.apply(0, entity, Type.FLOOR, getModifiers(Type.FLOOR));
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
@@ -125,8 +125,8 @@ public class EntityTempCap implements ITemperatureCap
         setTemp(Type.BASE, newBaseTemp);
         setTemp(Type.CORE, CSMath.clamp(newCoreTemp, -150f, 150f));
         setTemp(Type.WORLD, newWorldTemp);
-        setTemp(Type.MAX, newMaxOffset);
-        setTemp(Type.MIN, newMinOffset);
+        setTemp(Type.CEIL, newMaxOffset);
+        setTemp(Type.FLOOR, newMinOffset);
 
         if (syncTimer > 0)
             syncTimer--;
@@ -270,7 +270,7 @@ public class EntityTempCap implements ITemperatureCap
                 if (modifier != null)
                     getModifiers(type).add(modifier);
                 else
-                    ColdSweat.LOGGER.error("Failed to load modifier of type {}", type);
+                    ColdSweat.LOGGER.error("Failed to load modifier \"{}\" of type {}", ((CompoundTag) modNBT).getString("id"), type);
             });
         }
     }

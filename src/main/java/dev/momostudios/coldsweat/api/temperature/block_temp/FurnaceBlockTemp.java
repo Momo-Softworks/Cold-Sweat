@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
@@ -36,11 +35,11 @@ public class FurnaceBlockTemp extends BlockTemp
 
     @Override
     public double maxEffect() {
-        return CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, false);
+        return CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double maxTemperature() {
-        return CSMath.convertUnits(600, Temperature.Units.F, Temperature.Units.MC, true);
+        return CSMath.convertTemp(600, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

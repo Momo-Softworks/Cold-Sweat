@@ -147,7 +147,7 @@ public class FilledWaterskinItem extends Item
             {
                 double temp = 0.1 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
                 double newTemp = itemTemp - temp;
-                if (CSMath.isInRange(newTemp, -1, 1)) newTemp = 0;
+                if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 

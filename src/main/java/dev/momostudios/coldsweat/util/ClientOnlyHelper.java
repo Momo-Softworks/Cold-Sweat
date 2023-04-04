@@ -12,6 +12,10 @@ import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 
+/**
+ * This class is an abstraction layer for some methods in client-oriented classes
+ * so Forge doesn't throw a fit when it tries to load the class on the wrong side.
+ */
 public class ClientOnlyHelper
 {
     public static void playEntitySound(SoundEvent sound, SoundSource source, float volume, float pitch, Entity entity)

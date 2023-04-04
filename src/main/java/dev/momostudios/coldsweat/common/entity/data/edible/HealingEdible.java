@@ -15,13 +15,14 @@ public class HealingEdible extends Edible
     }
 
     @Override
-    public void onEaten(ChameleonEntity entity, ItemEntity item)
+    public Result onEaten(ChameleonEntity entity, ItemEntity item)
     {
-        super.onEaten(entity, item);
-        if (!entity.level.isClientSide && item.getThrower() != null && entity.getTrustedPlayers().contains(item.getThrower()))
+        if (!entity.level.isClientSide && item.getThrower() != null && entity.isPlayerTrusted(item.getThrower()))
         {
             entity.heal(6);
             WorldHelper.spawnParticle(entity.level, ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(), 0, 0, 0);
+            return Result.SUCCESS;
         }
+        return Result.FAIL;
     }
 }

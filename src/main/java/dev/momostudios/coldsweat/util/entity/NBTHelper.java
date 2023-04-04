@@ -108,8 +108,8 @@ public class NBTHelper
             case WORLD -> "worldTempModifiers";
             case BASE  -> "baseTempModifiers";
             case RATE  -> "rateTempModifiers";
-            case MAX   -> "maxTempModifiers";
-            case MIN   -> "minTempModifiers";
+            case CEIL -> "maxTempModifiers";
+            case FLOOR -> "minTempModifiers";
             default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
         };
     }
@@ -127,8 +127,8 @@ public class NBTHelper
             case CORE  -> "coreTemp";
             case WORLD -> "worldTemp";
             case BASE  -> "baseTemp";
-            case MAX   -> "maxWorldTemp";
-            case MIN   -> "minWorldTemp";
+            case CEIL -> "maxWorldTemp";
+            case FLOOR -> "minWorldTemp";
             default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
         };
     }

@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.util.world;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
+import dev.momostudios.coldsweat.core.network.message.SyncForgeDataMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
@@ -343,7 +344,7 @@ public class WorldHelper
         }
     }
 
-    public static void spawnItemOnEntity(Entity entity, ItemStack stack)
+    public static void entityDropItem(Entity entity, ItemStack stack)
     {
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
@@ -351,5 +352,10 @@ public class WorldHelper
         {
             item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
         }
+    }
+
+    public static void syncEntityForgeData(Entity entity)
+    {
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new SyncForgeDataMessage(entity));
     }
 }

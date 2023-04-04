@@ -40,11 +40,10 @@ public class BiomeTempModifier extends TempModifier
             }
             else
             {
-                double time = Math.sin(entity.level.getDayTime() / (12000 / Math.PI));
                 int samples = this.getNBT().getInt("Samples");
                 // Failsafe for old TempModifiers
-                if (samples < 1) {
-                    samples = 25;
+                if (samples < 1)
+                {   samples = 25;
                     this.getNBT().putInt("Samples", 25);
                 }
 
@@ -75,7 +74,7 @@ public class BiomeTempModifier extends TempModifier
                     // If time doesn't exist in the player's dimension, don't use it
                     DimensionType dimension = entity.level.dimensionType();
                     if (!dimension.hasCeiling())
-                        worldTemp += CSMath.blend(min, max, time, -1, 1) / samples;
+                        worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / samples;
                     else
                         worldTemp += CSMath.average(max, min) / samples;
                 }

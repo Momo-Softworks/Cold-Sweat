@@ -6,7 +6,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -29,11 +28,11 @@ public class BoilerBlockTemp extends BlockTemp
 
     @Override
     public double maxEffect() {
-        return CSMath.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, false);
+        return CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double maxTemperature() {
-        return CSMath.convertUnits(212, Temperature.Units.F, Temperature.Units.MC, true);
+        return CSMath.convertTemp(212, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

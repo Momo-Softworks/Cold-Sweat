@@ -11,6 +11,6 @@ public class InitConfigSettings
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event)
     {
-        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.reload());
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.load());
     }
 }
