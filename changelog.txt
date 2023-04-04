@@ -868,7 +868,7 @@ Technical Changes:
       - Crafted with a minecart and minecart insulation
 - Retextured minecart insulation
 - Reorganized the Cold Sweat creative tab to group items more logically
-
+ 
 Fixes:
 - Fixed crash related to goats' stored data
 - Fixed performance issue caused by extreme amounts of block updates
@@ -979,13 +979,109 @@ Technical Changes:
 2.2-b03b
 
 Fixes:
-- Fixed TempModifiers sometimes not being applied properly, causing temperature from certain sources to be ignored
-- Fixed attacking an entity triggering the soul stealing effect regardless of if the soulspring lamp is equipped
-- Fixed some config settings not being synced between server and client
-- Fixed goats not losing their fur after being sheared on a server, allowing for infinite fur
+* Fixed TempModifiers sometimes not being applied properly, causing temperature from certain sources to be ignored
+- Fixed TempModifiers not being synced to the client
+* Fixed attacking an entity triggering the soul stealing effect regardless of if the soulspring lamp is equipped
+* Fixed some config settings not being synced between server and client
+* Fixed goats' data not syncing on servers
 - Fixed items defined in the "Insulating Armors" config not displaying the insulation tooltip
 
 Technical Changes:
 - All configs now use a much more flexible and modular system of instantiation and syncing (you can use it too!)
       - This creates a standard way for all configs to be synced via packets and written to the server's config files if needed
       - Non-synced configs can also be created
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b03c
+
+Fixes:
+* Fixed crash when a chameleon does not have a biome it is actively tracking
+* Fixed goats not losing their fur after being sheared on a server, allowing for infinite fur
+- Fixed chameleons' data sometimes not being synced to clients on a server
+- Fixed chameleons eating an entire stack of items when dropped for them, instead of just 1
+- Fixed "The Pit of Fire" advancement being too difficult to complete
+- When a chameleon eats an item, all items associated with that action will now be put on cooldown
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b03d
+
+* Added support for Environmental:
+      - Adjusted the temperature of the marsh biome to be more in line with other swamp-like biomes
+      - Yak pants now provide insulation when worn
+      - Yak hair blocks can be used as an insulation item (equivalent to goat fur)
+            - For balancing purposes, it also has 1 negative heat insulation
+      ! 'world-settings.toml' and 'item-settings.toml' will need to be deleted for these changes to take effect
+* Added support for Atmospheric:
+      - Adjusted the temperatures of several biomes to be more realistic in Cold Sweat's temperature system
+      - Chameleons can now spawn in dunes and rainforest biomes from Atmospheric
+      ! 'world-settings.toml' and 'entity-settings.toml' will need to be deleted for these changes to take effect
+- Adjusted the spawn rates of goats so it is actually possible to happen upon them in the wild
+      - Can now spawn in more biomes, including those from from Biomes O' Plenty, BYG, and Atmospheric
+      ! 'entity-settings.toml' may need to be deleted for these changes to take effect
+- "The Pit of Fire" advancement now requires the player to be in the nether, surrounded by more lava
+- A Thermometer placed in an item frame will now display the exact temperature when hovered
+
+Fixes:
+* Fixed crash when navigating to page 2 of the config screen
+* Fixed crash when a chameleon with no trusted players is loaded
+* Fixed issue that prevented temperature-affecting things, like the hearth, from working properly
+      - More specifically, TempModifiers added in "REPLACE" mode were not being applied
+- Fixed entities/players always spawning with a world temperature of 32 °F or 0 °C
+- Fixed the thermometer's texture updating in GUIs where it shouldn't (in the advancement menu, for example
+- Fixed the thermometer displaying temperature incorrectly when placed in an item frame or thrown on the ground
+- Fixed thermometers stacking to 64
+
+Technical Changes:
+- Biome tags are no longer supported in configs due to tags loading very late in the game's runtime
+- Added new method getTemperatureAt(BlockPos, Level)
+        - As you probably could have guessed, this method returns the world's temperature at the given position (using Cold Sweat's default TempModifiers)
+- Added new event: EntityPickEvent
+        - Fired when the player uses pick-block (middle-click) on an entity
+        - Allows for changing the ItemStack returned
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b03e
+- Added support for Terralith biomes
+        - Adjusted the temperatures of several biomes to be more fitting in Cold Sweat's temperature system
+        ! 'world-settings.toml' will need to be deleted for these changes to take effect
+
+Translation Updates:
+- Updated Russian translation (by @Xemay on Discord)
+
+Fixes:
+- Fixed occasional crash when a block update happened in the world
+- Fixed middle-clicking an entity not working (i.e. not giving the player a spawn egg)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04a
+* New block: Soul Stalk
+      - Grows on soul sand and naturally generates in the Nether
+            - Grows like sugar cane, up to 6 blocks tall
+            - Grows much faster in hot environments
+      - When it grows, the new stalk will have a 50% chance to bear a soul berry
+      - The top bulb always drops a soul berry
+* New item: Soul Berry
+      - Can be eaten to restore 3 hunger points (1.5 bars)
+      - Lowers the player's body temperature by 20 degrees when eaten (effect lasts 45 seconds)
+      - Can be planted on soul sand to grow a soul stalk
+      - Can be used as an effective source of fuel for the soulspring lamp
+      ! 'item-settings.toml' will need to be deleted for this change to take effect
+* Chameleon molt can now be used as insulation
+      - This is a special new "adaptive" insulation item type
+            - Slowly adjusts its insulation value from hot to cold according to the player's environment
+            - This process is slow, taking about 2 minutes to fully transition from cold to hot
+      - Has the same raw insulation power as rabbit hide & wool
+- Rabbit Hide is now the mid-tier hot insulation item (instead of slimeballs)
+      ! 'item-settings.toml' will need to be deleted for this change to take effect
+- Added an advancement that unlocks the boiler & icebox recipes when the player makes a waterskin
+- Ice resistance potions are now brewed with a soul sprout instead of prismarine crystals
+
+Fixes:
+
+Technical Changes:
+- Block Temperatures can now be given a "predicate", which makes the block emit/not emit temperature based on its state (i.e. a campfire being lit)
+
