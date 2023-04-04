@@ -16,13 +16,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber
 public class TempModifierInit
@@ -82,15 +85,51 @@ public class TempModifierInit
                 final double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
 
                 // Parse block IDs into blocks
-                List<Block> effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toList();
+                Block[] effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toArray(Block[]::new);
 
-                // Generate BlockTemp
+                // Get block predicate
+                List<Predicate<BlockState>> blockPredicates = new ArrayList<>();
+                if (effectBuilder.size() == 6 && effectBuilder.get(5) instanceof String)
+                {
+                    String[] predicateList = ((String) effectBuilder.get(5)).split(",");
+
+                    for (String predicate : predicateList)
+                    {
+                        // Split into name-value pairs separated by "="
+                        String[] pair = predicate.split("=");
+                        // Get the property with the given name
+                        Property<?> property = effectBlocks[0].getStateDefinition().getProperty(pair[0]);
+                        if (property != null)
+                        {
+                            // Parse the desired values that the user configured
+                            String rawValue = pair[1];
+                            Object value = property.getValueClass().equals(Boolean.class)
+                                    ? Boolean.parseBoolean(rawValue)
+                                    : property.getValueClass().equals(Integer.class)
+                                    ? Integer.parseInt(rawValue)
+                                    : property.getValueClass().equals(String.class)
+                                    ? rawValue
+                                    : null;
+
+                            // Add a new predicate to the list
+                            blockPredicates.add(state ->
+                            {
+                                // If the value is valid and matches, return true
+                                return value != null && state.getValue(property).equals(value);
+                            });
+                        }
+                    }
+                }
+
                 event.register(
-                        new BlockTemp(effectBlocks.toArray(new Block[0]))
+                        new BlockTemp(effectBlocks)
                         {
                             @Override
                             public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                             {
+                                // Check the list of predicates first
+                                if (!blockPredicates.isEmpty() && !blockPredicates.stream().allMatch(pred -> pred.test(state))) return 0;
+
                                 return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
                             }
 
@@ -120,7 +159,6 @@ public class TempModifierInit
         event.register(new CampfireBlockTemp());
         event.register(new IceboxBlockTemp());
         event.register(new BoilerBlockTemp());
-        event.register(new SoulCampfireBlockTemp());
         event.register(new NetherPortalBlockTemp());
     }
 
@@ -144,6 +182,7 @@ public class TempModifierInit
         event.register(new FoodTempModifier());
         event.register(new FreezingTempModifier());
         event.register(new FireTempModifier());
+        event.register(new SoulSproutTempModifier());
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())
