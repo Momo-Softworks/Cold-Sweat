@@ -1,10 +1,8 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.common.capability.IShearableCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.SyncShearableDataMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -20,19 +18,17 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 import oshi.util.tuples.Triplet;
-
-import java.util.Random;
 
 @Mod.EventBusSubscriber
 public class GoatFurHandler
@@ -48,6 +44,11 @@ public class GoatFurHandler
         {
             goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
+                if (cap.isSheared())
+                {   event.setResult(PlayerInteractEvent.Result.DENY);
+                    return;
+                }
+
                 // Use shears
                 player.swing(event.getHand(), true);
                 stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
@@ -55,7 +56,7 @@ public class GoatFurHandler
                 goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
-                WorldHelper.spawnItemOnEntity(goat, new ItemStack(ModItems.GOAT_FUR));
+                WorldHelper.entityDropItem(goat, new ItemStack(ModItems.GOAT_FUR));
 
                 // Random chance to ram the player when sheared
                 if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
@@ -126,6 +127,15 @@ public class GoatFurHandler
                     syncData(goat);
                 }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLoaded(EntityJoinWorldEvent event)
+    {
+        Entity entity = event.getEntity();
+        if (entity instanceof Goat goat && !goat.level.isClientSide)
+        {   TaskScheduler.scheduleServer(() -> syncData(goat), 20);
         }
     }
 

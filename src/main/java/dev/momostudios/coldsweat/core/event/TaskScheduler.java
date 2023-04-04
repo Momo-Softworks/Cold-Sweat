@@ -7,49 +7,50 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler
 {
-    static volatile ConcurrentHashMap<Runnable, Integer> SERVER_SCHEDULE = new ConcurrentHashMap<>();
-    static volatile ConcurrentHashMap<Runnable, Integer> CLIENT_SCHEDULE = new ConcurrentHashMap<>();
+    static final Map<Runnable, Integer> SERVER_SCHEDULE = Collections.synchronizedMap(new HashMap<>());
+    static final Map<Runnable, Integer> CLIENT_SCHEDULE = Collections.synchronizedMap(new HashMap<>());
 
     @SubscribeEvent
-    public static synchronized void runScheduledTasks(TickEvent event)
+    public static void runScheduledTasks(TickEvent event)
     {
         if ((event instanceof TickEvent.ServerTickEvent || event instanceof TickEvent.ClientTickEvent) && event.phase == TickEvent.Phase.START)
         {
             Map<Runnable, Integer> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
-            if (schedule.isEmpty()) return;
 
-            // Iterate through all active tasks
-            Iterator<Map.Entry<Runnable, Integer>> iterator = schedule.entrySet().iterator();
-            while (iterator.hasNext())
+            synchronized (schedule)
             {
-                Map.Entry<Runnable, Integer> entry = iterator.next();
-                int ticks = entry.getValue();
+                // Iterate through all active tasks
+                schedule.entrySet().removeIf(entry ->
+                {
+                    int ticks = entry.getValue();
 
-                // If the task is ready to run, run it and remove it from the schedule
-                if (ticks <= 0)
-                {   try
-                    {   entry.getKey().run();
-                        iterator.remove();
-                    }
-                    catch (Exception e)
+                    // If the task is ready to run, run it and remove it from the schedule
+                    if (ticks <= 0)
                     {
-                        ColdSweat.LOGGER.error("Error while running scheduled task", e);
-                        e.printStackTrace();
-                        iterator.remove();
+                        try
+                        {
+                            entry.getKey().run();
+                        }
+                        catch (Exception e)
+                        {
+                            ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                            e.printStackTrace();
+                        }
+                        return true;
                     }
-                }
-                // Otherwise, decrement the task's tick count
-                else
-                {   entry.setValue(ticks - 1);
-                }
+                    // Otherwise, decrement the task's tick count
+                    else
+                    {
+                        entry.setValue(ticks - 1);
+                        return false;
+                    }
+                });
             }
         }
     }

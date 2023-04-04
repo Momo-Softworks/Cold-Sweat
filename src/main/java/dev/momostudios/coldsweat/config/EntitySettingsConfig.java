@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.util.compat.CompatManager;
+import dev.momostudios.coldsweat.util.math.ListBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -8,7 +9,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class EntitySettingsConfig
@@ -22,6 +22,8 @@ public class EntitySettingsConfig
 
     static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     public static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
+    public static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
+    public static ForgeConfigSpec.BooleanValue increaseGoatSpawns;
 
     static
     {
@@ -53,40 +55,47 @@ public class EntitySettingsConfig
         BUILDER.pop();
 
         BUILDER.push("Mob Spawning");
-        List<List<?>> chameleonBiomes = new ArrayList<>(List.of(
-                List.of("minecraft:jungle", 8),
-                List.of("minecraft:sparse_jungle", 8),
-                List.of("minecraft:bamboo_jungle", 8),
-                List.of("minecraft:desert", 8),
-                List.of("minecraft:desert_hills", 8),
-                List.of("minecraft:desert_lakes", 8)
-        ));
-        if (CompatManager.isBiomesOPlentyLoaded())
-        {
-            chameleonBiomes.addAll(List.of(
-                List.of("biomesoplenty:rainforest", 16),
-                List.of("biomesoplenty:rocky_rainforest", 16),
-                List.of("biomesoplenty:fungal_jungle", 16),
-                List.of("biomesoplenty:lush_desert", 8),
-                List.of("biomesoplenty:tropics", 16),
-                List.of("biomesoplenty:outback", 8),
-                List.of("biomesoplenty:lush_desert", 8)));
-        }
-        if (CompatManager.isBiomesYoullGoLoaded())
-        {
-            chameleonBiomes.addAll(List.of(
-                List.of("byg:tropical_rainforest", 16),
-                List.of("byg:atacama_desert", 8),
-                List.of("byg:cypress_swamplands", 8),
-                List.of("byg:guiana_shield", 16),
-                List.of("byg:mojave_desert", 8),
-                List.of("byg:mojave_desert", 8),
-                List.of("byg:windswept_desert", 8)
-            ));
-        }
-        EntitySettingsConfig.chameleonBiomes = BUILDER
-                .comment("Defines the biomes that Chameleons can spawn in")
-                .defineList("Chameleon Spawn Biomes", chameleonBiomes,
+        chameleonBiomes = BUILDER
+                .comment("Defines the biomes that Chameleons can spawn in",
+                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
+                .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
+                                List.of("minecraft:bamboo_jungle", 8),
+                                List.of("minecraft:jungle", 8),
+                                List.of("minecraft:sparse_jungle", 8),
+                                List.of("minecraft:desert", 8),
+                                List.of("minecraft:desert_hills", 8),
+                                List.of("minecraft:desert_lakes", 8))
+                            .addIf(CompatManager.isBiomesOPlentyLoaded(),
+                                () -> List.of("biomesoplenty:lush_desert", 8),
+                                () -> List.of("biomesoplenty:tropics", 16),
+                                () -> List.of("biomesoplenty:outback", 8),
+                                () -> List.of("biomesoplenty:lush_desert", 8))
+                            .addIf(CompatManager.isBiomesYoullGoLoaded(),
+                                () -> List.of("byg:tropical_rainforest", 8),
+                                () -> List.of("byg:jacaranda_forest", 8),
+                                () -> List.of("byg:guiana_shield", 8),
+                                () -> List.of("byg:crag_gardens", 8),
+                                () -> List.of("byg:atacama_desert", 5),
+                                () -> List.of("byg:cypress_swamplands", 8),
+                                () -> List.of("byg:mojave_desert", 5),
+                                () -> List.of("byg:windswept_desert", 8))
+                            .addIf(CompatManager.isAtmosphericLoaded(),
+                                () -> List.of("atmospheric:dunes", 5),
+                                () -> List.of("atmospheric:flourishing_dunes", 8),
+                                () -> List.of("atmospheric:rocky_dunes", 4),
+                                () -> List.of("atmospheric:petrified_dunes", 3),
+                                () -> List.of("atmospheric:rainforest", 8),
+                                () -> List.of("atmospheric:sparse_rainforest", 6),
+                                () -> List.of("atmospheric:rainforest_basin", 8),
+                                () -> List.of("atmospheric:sparse_rainforest_basin", 6))
+                           .addIf(CompatManager.isTerralithLoaded(),
+                                () -> List.of("terralith:red_oasis", 12),
+                                () -> List.of("terralith:desert_oasis", 12),
+                                () -> List.of("terralith:tropical_jungle", 8),
+                                () -> List.of("terralith:arid_highlands", 8),
+                                () -> List.of("terralith:rocky_jungle", 12),
+                                () -> List.of("terralith:brushland", 12)
+                        ).build(),
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         goatBiomes = BUILDER
@@ -170,6 +179,9 @@ public class EntitySettingsConfig
     public List<? extends List<?>> getChameleonSpawnBiomes() {
         return chameleonBiomes.get();
     }
+    public List<? extends List<?>> getGoatSpawnBiomes() {
+        return goatBiomes.get();
+    }
 
     public List<? extends List<?>> getChameleonTameItems() {
         return chameleonTameItems.get();
@@ -178,5 +190,9 @@ public class EntitySettingsConfig
     public void setGoatFurStats(List<? extends Number> list)
     {
         goatFurGrowth.set(list);
+    }
+
+    public boolean areGoatSpawnsIncreased() {
+        return increaseGoatSpawns.get();
     }
 }

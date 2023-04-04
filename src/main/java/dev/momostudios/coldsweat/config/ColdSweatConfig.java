@@ -97,11 +97,11 @@ public class ColdSweatConfig
          */
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
-                .comment("Minimum habitable temperature (default: " + CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true) + ")")
-                .defineInRange("Minimum Habitable Temperature", CSMath.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Minimum habitable temperature (default: " + CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true) + ")")
+                .defineInRange("Minimum Habitable Temperature", CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
-                .comment("Maximum habitable temperature (default: " + CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true) + ")")
-                .defineInRange("Maximum Habitable Temperature", CSMath.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Maximum habitable temperature (default: " + CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true) + ")")
+                .defineInRange("Maximum Habitable Temperature", CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
@@ -144,26 +144,29 @@ public class ColdSweatConfig
                 .define("Grace Period Enabled", true);
         BUILDER.pop();
 
-        BUILDER.push("Block Effects");
+        BUILDER.push("Block Temperatures");
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>], [etc...], [etc...]]",
+                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, *<predicates>], [etc...], [etc...]]",
                          "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
                          "",
                          "Arguments:",
                          "block-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
                          "temperature: the temperature of the block, in Minecraft units",
                          "falloff: the block is less effective as distance increases",
-                         "max effect: the max temperature change this block can cause to a player (even with multiple blocks)")
+                         "max effect: the maximum temperature change this block can cause to a player (even with multiple blocks)",
+                         "predicates: the state that the block has to be in for the temperature to be applied (lit=true for a campfire, for example).",
+                         "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
                 .defineList("BlockTemps", Arrays.asList
                                 (
-                                        Arrays.asList(Blocks.SOUL_FIRE.getRegistryName().toString(),   -0.2, 7, true, 0.8),
-                                        Arrays.asList(Blocks.FIRE.getRegistryName().toString(),         0.2, 7, true, 0.8),
-                                        Arrays.asList(Blocks.MAGMA_BLOCK.getRegistryName().toString(), 0.15, 3, true, 0.6),
-                                        Arrays.asList(Blocks.ICE.getRegistryName().toString(),         -0.1, 4, true, 0.5),
-                                        Arrays.asList(Blocks.PACKED_ICE.getRegistryName().toString(),  -0.2, 4, true, 1.0),
-                                        Arrays.asList(Blocks.BLUE_ICE.getRegistryName().toString(),    -0.3, 4, true, 1.0)
+                                        Arrays.asList("minecraft:soul_fire",     -0.2, 7, true, 0.8),
+                                        Arrays.asList("minecraft:fire",           0.2, 7, true, 0.8),
+                                        Arrays.asList("minecraft:magma_block",   0.15, 3, true, 0.6),
+                                        Arrays.asList("minecraft:soul_campfire", -0.2, 3, true, 0.6, "lit=true"),
+                                        Arrays.asList("minecraft:ice",           -0.1, 4, true, 0.5),
+                                        Arrays.asList("minecraft:packed_ice",    -0.2, 4, true, 1.0),
+                                        Arrays.asList("minecraft:blue_ice",      -0.3, 4, true, 1.0)
                                 ),
                         it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
         BUILDER.pop();

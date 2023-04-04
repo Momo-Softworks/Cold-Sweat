@@ -14,9 +14,9 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class EatObjectsGoal extends Goal
@@ -54,7 +54,7 @@ public class EatObjectsGoal extends Goal
         for (Entity ent : items)
         {
             if (ent instanceof ItemEntity itemEntity && itemEntity.getThrower() != null
-            && (this.entity.getTrustedPlayers().contains(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
+            && (this.entity.isPlayerTrusted(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
                 Item item = itemEntity.getItem().getItem();
                 if (this.wantedItems.contains(item) && this.entity.getCooldown(item) <= 0)
@@ -119,8 +119,15 @@ public class EatObjectsGoal extends Goal
                     {
                         this.entity.onEatEntity(this.target);
                         this.target.remove(Entity.RemovalReason.KILLED);
+
                         if (this.target instanceof ItemEntity item)
                         {   this.entity.onItemPickup(item);
+
+                            if (item.getItem().getCount() > 0)
+                            {   ItemStack stack = item.getItem().copy();
+                                stack.shrink(1);
+                                WorldHelper.entityDropItem(this.entity, stack);
+                            }
                         }
 
                         // Play tongue in sound

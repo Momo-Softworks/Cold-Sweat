@@ -1,5 +1,5 @@
 {
-  "parent": "cold_sweat:extreme_temps",
+  "parent": "cold_sweat:root",
   "display": {
     "icon": {
       "item": "minecraft:leather"

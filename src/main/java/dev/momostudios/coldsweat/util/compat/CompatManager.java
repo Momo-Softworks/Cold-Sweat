@@ -24,6 +24,9 @@ public class CompatManager
     private static final boolean ARMOR_UNDERWEAR_LOADED = ModList.get().isLoaded("armorunder");
     private static final boolean BYG_LOADED = ModList.get().isLoaded("byg");
     private static final boolean CREATE_LOADED = ModList.get().isLoaded("create");
+    private static final boolean ATMOSPHERIC_LOADED = ModList.get().isLoaded("atmospheric");
+    private static final boolean ENVIRONMENTAL_LOADED = ModList.get().isLoaded("environmental");
+    private static final boolean TERRALITH_LOADED = ModList.get().isLoaded("terralith");
 
     public static boolean isBiomesOPlentyLoaded()
     {
@@ -56,6 +59,18 @@ public class CompatManager
     public static boolean isCreateLoaded()
     {
         return CREATE_LOADED;
+    }
+    public static boolean isAtmosphericLoaded()
+    {
+        return ATMOSPHERIC_LOADED;
+    }
+    public static boolean isEnvironmentalLoaded()
+    {
+        return ENVIRONMENTAL_LOADED;
+    }
+    public static boolean isTerralithLoaded()
+    {
+        return TERRALITH_LOADED;
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)

@@ -29,5 +29,6 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(8, ParticleBatchMessage.class, ParticleBatchMessage::encode, ParticleBatchMessage::decode, ParticleBatchMessage::handle);
         INSTANCE.registerMessage(9, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
         INSTANCE.registerMessage(10, ChameleonEatMessage.class, ChameleonEatMessage::encode, ChameleonEatMessage::decode, ChameleonEatMessage::handle);
+        INSTANCE.registerMessage(11, SyncForgeDataMessage.class, SyncForgeDataMessage::encode, SyncForgeDataMessage::decode, SyncForgeDataMessage::handle);
     }
 }
