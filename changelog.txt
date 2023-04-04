@@ -1082,6 +1082,9 @@ Fixes:
 
 Fixes:
 
+Translation Updates:
+- Added Brazilian Portuguese translation (by @Vellar on Discord)
+
 Technical Changes:
 - Block Temperatures can now be given a "predicate", which makes the block emit/not emit temperature based on its state (i.e. a campfire being lit)
 
