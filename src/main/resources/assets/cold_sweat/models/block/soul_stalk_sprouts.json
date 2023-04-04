@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "cold_sweat:blocks/soul_stalk_sprouts"
+  }
+}
