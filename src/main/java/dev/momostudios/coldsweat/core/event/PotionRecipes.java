@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.core.init.PotionInit;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -20,7 +21,7 @@ public class PotionRecipes
         event.enqueueWork(() ->
         {
             ItemStack awkward = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD);
-            ItemStack packedIce = new ItemStack(Items.PRISMARINE_CRYSTALS);
+            ItemStack packedIce = new ItemStack(ModItems.SOUL_SPROUT);
             ItemStack iceResPotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get());
             BrewingRecipeRegistry.addRecipe(Ingredient.of(awkward), Ingredient.of(packedIce), iceResPotion);
         });
