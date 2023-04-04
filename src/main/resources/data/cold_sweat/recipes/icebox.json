@@ -3,7 +3,7 @@
   "pattern":
   [
     "CCC",
-    "PBP",
+    "P P",
     "PPP"
   ],
   "key":
@@ -11,10 +11,6 @@
     "C":
     {
       "item": "minecraft:cobblestone_slab"
-    },
-    "B":
-    {
-      "item": "minecraft:bucket"
     },
     "P":
     {

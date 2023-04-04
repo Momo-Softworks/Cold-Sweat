@@ -3,8 +3,8 @@
   "pattern":
   [
     "CCC",
-    "CBC",
-    "CCC"
+    "D D",
+    "DDD"
   ],
   "key":
   {
@@ -12,9 +12,9 @@
     {
       "item": "minecraft:cobblestone"
     },
-    "B":
+    "D":
     {
-      "item": "minecraft:bucket"
+      "item": "minecraft:polished_deepslate"
     }
   },
   "result":
