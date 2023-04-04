@@ -1,0 +1,23 @@
+{
+  "parent": "cold_sweat:tame_chameleon",
+  "display": {
+    "icon": {
+      "item": "minecraft:compass"
+    },
+    "title": {
+        "translate": "advancements.cold_sweat.chameleon_find_biome.title"
+    },
+    "description": {
+        "translate": "advancements.cold_sweat.chameleon_find_biome.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
