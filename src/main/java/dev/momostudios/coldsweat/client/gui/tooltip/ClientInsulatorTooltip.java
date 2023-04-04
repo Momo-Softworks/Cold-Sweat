@@ -19,11 +19,13 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
     double cold = 0;
     double hot = 0;
     double neutral = 0;
+    boolean isAdaptive;
     int width = 0;
 
-    public ClientInsulatorTooltip(Pair<Double, Double> insulationValues)
+    public ClientInsulatorTooltip(Pair<Double, Double> insulationValues, boolean isAdaptive)
     {
         this.insulationValues = insulationValues;
+        this.isAdaptive = isAdaptive;
     }
 
     @Override
@@ -55,7 +57,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
         // Render positive and negative insulation separately
         int barLength = 0;
-        int totalPosSlots = CSMath.ceil(CSMath.max(coldSlots, hotSlots, neutralSlots));
+        int totalPosSlots = isAdaptive ? 1 : CSMath.ceil(CSMath.max(coldSlots, hotSlots, neutralSlots));
         int totalNegSlots = CSMath.ceil(Math.abs(CSMath.min(coldSlots, hotSlots, neutralSlots)));
 
         if (totalPosSlots > 0)
@@ -63,25 +65,31 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             for (int i = 0; i < totalPosSlots; i++)
             {
                 // background
-                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 1, 6, 4, 32, 16);
+                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
-            int xOffs = 0;
-            if (cold > 0)
+            if (isAdaptive)
             {
-                renderCells(poseStack, x + 7, y + 1, coldSlots, cold, 6); // cold cells
-                xOffs += coldSlots * 6;
+                renderCells(poseStack, x + 7, y + 1, 1, 2, 0); // adaptive cells
             }
-            if (neutral > 0)
+            else
             {
-                renderCells(poseStack, x + 7 + xOffs, y + 1, neutralSlots, neutral, 0); // neutral cells
-                xOffs += neutralSlots * 6;
+                int xOffs = 0;
+                if (cold > 0)
+                {
+                    renderCells(poseStack, x + 7, y + 1, coldSlots, cold, 12); // cold cells
+                    xOffs += coldSlots * 6;
+                }
+                if (neutral > 0)
+                {
+                    renderCells(poseStack, x + 7 + xOffs, y + 1, neutralSlots, neutral, 6); // neutral cells
+                    xOffs += neutralSlots * 6;
+                }
+                if (hot > 0)
+                {
+                    renderCells(poseStack, x + 7 + xOffs, y + 1, hotSlots, hot, 18); // hot cells
+                }
             }
-            if (hot > 0)
-            {
-                renderCells(poseStack, x + 7 + xOffs, y + 1, hotSlots, hot, 12); // hot cells
-            }
-
             for (int i = 0; i < totalPosSlots; i++)
             {
                 boolean end = i == totalPosSlots - 1;
@@ -99,7 +107,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             for (int i = 0; i < totalNegSlots; i++)
             {
                 // background
-                GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y + 1, 0, 0, 1, 6, 4, 32, 16);
+                GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
             int xOffs = 0;
