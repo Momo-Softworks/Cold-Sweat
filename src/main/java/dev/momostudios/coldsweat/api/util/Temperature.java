@@ -3,18 +3,28 @@ package dev.momostudios.coldsweat.api.util;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
+import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.DepthTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.TempModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.TemperatureSyncMessage;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
+import dev.momostudios.coldsweat.util.math.ListBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
@@ -43,7 +53,7 @@ public class Temperature
         return getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
     }
 
-    public static void set(LivingEntity entity, double value, Type type)
+    public static void set(LivingEntity entity, Type type, double value)
     {
         getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
     }
@@ -83,6 +93,18 @@ public class Temperature
     public static double apply(double temp, @Nonnull LivingEntity entity, Type type, @Nonnull Collection<TempModifier> modifiers)
     {
         return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
+    }
+
+    static Map<ResourceLocation, WitherSkeleton> DUMMIES = new HashMap<>();
+    public static double getTemperatureAt(BlockPos pos, Level level)
+    {
+        LivingEntity dummy = DUMMIES.computeIfAbsent(level.dimension().location(), dim -> new WitherSkeleton(EntityType.WITHER_SKELETON, level));
+        dummy.setPos(CSMath.getCenterPos(pos));
+        return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
+                                                      .addIf(CompatManager.isSereneSeasonsLoaded(),
+                                                          () -> TempModifierRegistry.getEntryFor("sereneseasons:season"))
+                                                      .add(new DepthTempModifier(),
+                                                           new BlockTempModifier(7)).build());
     }
 
     /**
@@ -140,9 +162,21 @@ public class Temperature
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
+    public static void addOrReplaceModifier(Player player, TempModifier modifier, Type type)
+    {
+        addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+    }
+
+    /**
+     * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
+     * It will not add the modifier if an existing instance of the same TempModifier class is not found.<br>
+     * @param player The player to apply the modifier to
+     * @param modifier The modifier to apply
+     * @param type The type of temperature to apply the modifier to
+     */
     public static void replaceModifier(Player player, TempModifier modifier, Type type)
     {
-        addModifier(player, modifier, type, false, Addition.of(Addition.Relation.REPLACE, Addition.Order.FIRST, mod -> modifier.getClass().isInstance(mod)));
+        addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
     /**
@@ -153,7 +187,7 @@ public class Temperature
      */
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes)
     {
-        addModifier(entity, modifier, type, allowDupes, Addition.of(Addition.Relation.AFTER, Addition.Order.LAST, null));
+        addModifier(entity, modifier, type, allowDupes, Addition.of(Addition.Mode.AFTER, Addition.Order.LAST, null));
     }
 
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
@@ -168,22 +202,25 @@ public class Temperature
                 getTemperatureCap(entity).ifPresent(cap ->
                 {
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
-                    if (modifiers.isEmpty())
-                    {   modifiers.add(event.getModifier());
-                    }
-                    else
+                    try
                     {
                         Predicate<TempModifier> predicate = params.getPredicate();
                         if (predicate == null) predicate = mod -> true;
-                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(event.getModifier().getID())))
-                        {   return;
+
+                        boolean replace = params.mode == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
+                        boolean after = params.mode == Addition.Mode.AFTER;
+                        boolean forward = params.order == Addition.Order.FIRST;
+
+                        TempModifier newMod = event.getModifier();
+
+                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID()))
+                        && !replace)
+                        {
+                            return;
                         }
 
-                        boolean replace = params.relation == Addition.Relation.REPLACE;
-                        boolean after = params.relation == Addition.Relation.AFTER;
-                        boolean forward = params.order == Addition.Order.FIRST;
                         // Get the start of the iterator & which direction it's going
-                        int start = forward ? 0 : modifiers.size() - 1;
+                        int start = forward ? 0 : (modifiers.size() - 1);
 
                         // Iterate through the list (backwards if "forward" is false)
                         for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
@@ -194,17 +231,23 @@ public class Temperature
                             if (predicate.test(mod))
                             {
                                 if (replace)
-                                {   modifiers.set(i, event.getModifier());
+                                {   modifiers.set(i, newMod);
                                 }
                                 else
-                                {   modifiers.add(i + (after ? 1 : 0), event.getModifier());
+                                {   modifiers.add(i + (after ? 1 : 0), newMod);
                                 }
-                                break;
+                                return;
                             }
                         }
-                    }
 
-                    updateModifiers(entity, cap);
+                        // Add the modifier if the insertion check fails
+                        if (params.mode != Addition.Mode.REPLACE)
+                        {   modifiers.add(newMod);
+                        }
+                    }
+                    finally
+                    {   updateModifiers(entity, cap);
+                    }
                 });
             }
             else
@@ -212,6 +255,30 @@ public class Temperature
                 ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
             }
         }
+    }
+
+    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Type type, boolean allowDupes)
+    {
+        for (TempModifier modifier : modifiers)
+        {
+            addModifier(entity, modifier, type, allowDupes);
+        }
+    }
+
+    public static void addModifiersSimple(LivingEntity entity, Type type, List<TempModifier> modifiers, boolean duplicates)
+    {
+        getTemperatureCap(entity).ifPresent(cap ->
+        {
+            List<TempModifier> list = cap.getModifiers(type);
+            for (TempModifier modifier : modifiers)
+            {
+                if (!duplicates && list.stream().anyMatch(mod -> mod.getID().equals(modifier.getID())))
+                {   continue;
+                }
+                list.add(modifier);
+            }
+            updateModifiers(entity, cap);
+        });
     }
 
     /**
@@ -337,8 +404,8 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #MAX}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
-     * {@link #MIN}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
+     * {@link #CEIL}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
+     * {@link #FLOOR}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * <br>
      * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
@@ -348,8 +415,8 @@ public class Temperature
     public enum Type
     {
         WORLD("world"),
-        MAX("max"),
-        MIN("max"),
+        CEIL("max"),
+        FLOOR("max"),
         CORE("core"),
         BASE("base"),
         BODY("body"),
@@ -391,21 +458,21 @@ public class Temperature
     public static class Addition
     {
         private final Predicate<TempModifier> predicate;
-        private final Relation relation;
+        private final Mode mode;
         private final Order order;
 
-        private Addition(Relation relation, Order order, Predicate<TempModifier> predicate)
-        {   this.relation = relation;
+        private Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
+        {   this.mode = mode;
             this.predicate = predicate;
             this.order = order;
         }
 
-        public static Addition of(Relation relation, Order order, Predicate<TempModifier> predicate)
-        {   return new Addition(relation, order, predicate);
+        public static Addition of(Mode mode, Order order, Predicate<TempModifier> predicate)
+        {   return new Addition(mode, order, predicate);
         }
 
-        public Relation getRelation()
-        {   return relation;
+        public Mode getRelation()
+        {   return mode;
         }
 
         public Predicate<TempModifier> getPredicate()
@@ -422,11 +489,12 @@ public class Temperature
             LAST
         }
 
-        public enum Relation
+        public enum Mode
         {
             BEFORE,
             AFTER,
-            REPLACE
+            REPLACE,
+            REPLACE_OR_ADD
         }
     }
 }
