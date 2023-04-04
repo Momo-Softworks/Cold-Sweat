@@ -2,12 +2,10 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
-import dev.momostudios.coldsweat.common.event.BlockUpdateLimiter;
-import dev.momostudios.coldsweat.core.event.TaskScheduler;
+import dev.momostudios.coldsweat.common.event.BlockUpdateRegulator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,16 +25,9 @@ public class MixinBlockUpdate
     @Inject(method = "onBlockStateChange", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
-        if (BlockUpdateLimiter.UPDATES_THIS_TICK < 10 && !oldState.equals(newState))
+        if (!oldState.equals(newState))
         {
-            TaskScheduler.scheduleServer(() ->
-            {
-                if (level.getChunkSource().hasChunk(pos.getX() >> 4, pos.getZ() >> 4))
-                {
-                    MinecraftForge.EVENT_BUS.post(new BlockChangedEvent(pos, oldState, newState, level));
-                }
-            }, 1);
-            BlockUpdateLimiter.UPDATES_THIS_TICK++;
+            BlockUpdateRegulator.EVENTS.add(new BlockChangedEvent(pos, oldState, newState, level));
         }
     }
 }
