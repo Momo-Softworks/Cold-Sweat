@@ -47,10 +47,10 @@ public class HandleSoulLampAnim
             if (player.getItemInHand(LEFT_HANDED ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND).getItem() == ModItems.SOULSPRING_LAMP)
             {
                 //isOn = PlayerHelper.getItemInHand(player, HumanoidArm.RIGHT).getOrCreateTag().getBoolean("isOn");
-                float post = rightArmRot.getFirst();
-                if (post < 69.99)
+                float prevRot = rightArmRot.getFirst();
+                if (prevRot < 69.99)
                 {
-                    RIGHT_ARM_ROTATIONS.put(player, Pair.of(post + (70 - post) / 3f, post));
+                    RIGHT_ARM_ROTATIONS.put(player, Pair.of(prevRot + (70 - prevRot) / 3f, prevRot));
                 }
             }
             else
@@ -70,15 +70,15 @@ public class HandleSoulLampAnim
                 float prevRot = leftArmRot.getFirst();
                 if (prevRot < 69.99)
                 {
-                    LEFT_ARM_ROTATIONS.put(player, Pair.of(prevRot + (71 - prevRot) / 3f, prevRot));
+                    LEFT_ARM_ROTATIONS.put(player, Pair.of(prevRot + (70 - prevRot) / 3f, prevRot));
                 }
             }
             else
             {
-                float post = leftArmRot.getFirst();
-                if (post > 0.01)
+                float prevRot = leftArmRot.getFirst();
+                if (prevRot > 0.01)
                 {
-                    LEFT_ARM_ROTATIONS.put(player, Pair.of(post + (0 - post) / 3f, post));
+                    LEFT_ARM_ROTATIONS.put(player, Pair.of(prevRot + (0 - prevRot) / 3f, prevRot));
                 }
             }
 
