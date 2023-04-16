@@ -54,8 +54,8 @@ public class MixinHumanoidModel
                 }
                 case ITEM ->
                 {
-                    this.rightArm.xRot = this.rightArm.xRot * (holdingLamp ? 0.15F : 1f) - (holdingLamp ? (float)Math.PI / 10F : 0) - rightArmRot;
-                    this.rightArm.zRot = this.rightArm.zRot * (holdingLamp ? 0.15F : 1f) - (holdingLamp ? 0.05F : 0f);
+                    this.rightArm.xRot = (holdingLamp ? this.rightArm.xRot * 0.15f - 0.35f : this.rightArm.xRot) - rightArmRot;
+                    this.rightArm.zRot = this.rightArm.zRot - (holdingLamp ? 0.05F : 0f);
                     this.rightArm.yRot = 0;
                 }
             }
@@ -81,12 +81,13 @@ public class MixinHumanoidModel
                 case EMPTY ->
                 {
                     this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
+                    this.leftArm.zRot = this.leftArm.zRot + (holdingLamp ? 0.05F : 0f);
                     this.leftArm.yRot = 0.0F;
                 }
                 case ITEM ->
                 {
-                    this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
-                    this.leftArm.zRot = this.leftArm.zRot * (holdingLamp ? 0.15F : 1f);
+                    this.leftArm.xRot = (holdingLamp ? this.leftArm.xRot * 0.15f - 0.35f : this.leftArm.xRot) - leftArmRot;
+                    this.leftArm.zRot = this.leftArm.zRot + (holdingLamp ? 0.05F : 0f);
                     this.leftArm.yRot = 0.0F;
                 }
             }
