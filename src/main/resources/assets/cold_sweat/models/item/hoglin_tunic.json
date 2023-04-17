@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "cold_sweat:items/hoglin_tunic"
+  }
+}

@@ -115,15 +115,19 @@ public final class ItemSettingsConfig
                         "\"cold\": The amount of cold insulation the item provides.",
                         "\"hot\": The amount of heat insulation the item provides.")
                 .defineList("Insulation Ingredients", ListBuilder.begin(
-                                List.of("minecraft:leather_helmet", 4, 4),
+                                List.of("minecraft:leather_helmet",     4, 4),
                                 List.of("minecraft:leather_chestplate", 6, 6),
-                                List.of("minecraft:leather_leggings", 5, 5),
-                                List.of("minecraft:leather_boots", 4, 4),
-                                List.of("minecraft:leather", 1, 1),
-                                List.of("cold_sweat:hoglin_hide", 0, 2),
-                                List.of("cold_sweat:goat_fur", 2, 0),
-                                List.of("#minecraft:wool", 1.5, 0),
-                                List.of("minecraft:rabbit_hide", 0, 1.5))
+                                List.of("minecraft:leather_leggings",   5, 5),
+                                List.of("minecraft:leather_boots",      4, 4),
+                                List.of("minecraft:leather",            1, 1),
+                                List.of("cold_sweat:hoglin_hide",       0, 2),
+                                List.of("cold_sweat:goat_fur",          2, 0),
+                                List.of("#minecraft:wool",            1.5, 0),
+                                List.of("minecraft:rabbit_hide",        0, 1.5),
+                                List.of("cold_sweat:hoglin_headpiece",  0, 8),
+                                List.of("cold_sweat:hoglin_tunic",      0, 12),
+                                List.of("cold_sweat:hoglin_trousers",   0, 10),
+                                List.of("cold_sweat:hoglin_hooves",     0, 8))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_hair", 2, -1)
                         ).build(),
@@ -147,14 +151,19 @@ public final class ItemSettingsConfig
                                 List.of("minecraft:leather_helmet",     4, 4),
                                 List.of("minecraft:leather_chestplate", 6, 6),
                                 List.of("minecraft:leather_leggings",   5, 5),
-                                List.of("minecraft:leather_boots",      4, 4))
+                                List.of("minecraft:leather_boots",      4, 4),
+                                List.of("cold_sweat:hoglin_headpiece",  0, 8),
+                                List.of("cold_sweat:hoglin_tunic",      0, 12),
+                                List.of("cold_sweat:hoglin_trousers",   0, 10),
+                                List.of("cold_sweat:hoglin_hooves",     0, 8))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_pants",   5, 5)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
         insulationSlots = BUILDER
-                .comment("Defines how many insulation slots armor pieces have")
+                .comment("Defines how many insulation slots armor pieces have",
+                         "Format: [head, chest, legs, feet]")
                 .defineList("Insulation Slots", List.of(4, 6, 5, 4),
                         it -> it instanceof Number);
 

@@ -18,6 +18,10 @@
   "item.cold_sweat.chameleon_molt":      "Chameleon Molt",
   "item.cold_sweat.chameleon_spawn_egg": "Chameleon Spawn Egg",
   "item.cold_sweat.soul_sprout":         "Soul Sprout",
+  "item.cold_sweat.hoglin_headpiece":    "Hoglin Headpiece",
+  "item.cold_sweat.hoglin_tunic":        "Hoglin Tunic",
+  "item.cold_sweat.hoglin_trousers":     "Hoglin Trousers",
+  "item.cold_sweat.hoglin_hooves":       "Hoglin Hooves",
 
 
   "entity.cold_sweat.chameleon": "Chameleon",

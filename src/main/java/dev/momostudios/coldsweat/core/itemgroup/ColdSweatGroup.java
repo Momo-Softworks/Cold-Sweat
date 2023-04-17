@@ -37,5 +37,9 @@ public class ColdSweatGroup extends CreativeModeTab
         ModItems.BOILER.fillItemCategory(this, items);
         ModItems.ICEBOX.fillItemCategory(this, items);
         ModItems.SEWING_TABLE.fillItemCategory(this, items);
+        ModItems.HOGLIN_HEADPIECE.fillItemCategory(this, items);
+        ModItems.HOGLIN_TUNIC.fillItemCategory(this, items);
+        ModItems.HOGLIN_TROUSERS.fillItemCategory(this, items);
+        ModItems.HOGLIN_HOOVES.fillItemCategory(this, items);
     }
 }
