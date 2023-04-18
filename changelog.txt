@@ -1070,6 +1070,16 @@ Fixes:
       - Can be planted on soul sand to grow a soul stalk
       - Can be used as an effective source of fuel for the soulspring lamp
       ! 'item-settings.toml' will need to be deleted for this change to take effect
+* New Armor Set: Hoglin Hide
+      - Crafted with hoglin hide in typical armor patterns
+      - Each armor piece provides maximum heat insulation
+      - Cannot be insulated in the sewing table
+      - Can be used as insulation for other items (similar to leather armor)
+* New Armor Set: Goat Fur
+      - Crafted with goat fur in typical armor patterns
+      - Each armor piece provides maximum cold insulation
+      - Cannot be insulated in the sewing table
+      - Can be used as insulation for other items (similar to leather armor)
 * Chameleon molt can now be used as insulation
       - This is a special new "adaptive" insulation item type
             - Slowly adjusts its insulation value from hot to cold according to the player's environment
@@ -1081,6 +1091,7 @@ Fixes:
 - Ice resistance potions are now brewed with a soul sprout instead of prismarine crystals
 
 Fixes:
+- Fixed crash when breaking special minecart types (chest, hopper, insulated, etc.)
 
 Translation Updates:
 - Added Brazilian Portuguese translation (by @Vellar on Discord)
