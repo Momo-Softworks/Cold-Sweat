@@ -103,7 +103,7 @@ public class RenderLampHand
             ms.popPose();
 
             ms.pushPose();
-            ms.translate(-event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.15, -0.05);
+            ms.translate(-event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.15 + (isRightHand ? 0 : -0.075), -0.05);
             try
             {
                 RENDER_ITEM.invoke(Minecraft.getInstance().getItemInHandRenderer(),
