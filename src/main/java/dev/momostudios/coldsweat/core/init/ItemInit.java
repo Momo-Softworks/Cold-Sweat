@@ -46,6 +46,15 @@ public class ItemInit
     public static final RegistryObject<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlot.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
+    public static final RegistryObject<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+
     // Block Items
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> ICEBOX = ITEMS.register("icebox", () -> new BlockItem(BlockInit.ICEBOX.get(), IceboxBlock.getItemProperties()));

@@ -41,5 +41,9 @@ public class ColdSweatGroup extends CreativeModeTab
         ModItems.HOGLIN_TUNIC.fillItemCategory(this, items);
         ModItems.HOGLIN_TROUSERS.fillItemCategory(this, items);
         ModItems.HOGLIN_HOOVES.fillItemCategory(this, items);
+        ModItems.GOAT_FUR_CAP.fillItemCategory(this, items);
+        ModItems.GOAT_FUR_PARKA.fillItemCategory(this, items);
+        ModItems.GOAT_FUR_PANTS.fillItemCategory(this, items);
+        ModItems.GOAT_FUR_BOOTS.fillItemCategory(this, items);
     }
 }

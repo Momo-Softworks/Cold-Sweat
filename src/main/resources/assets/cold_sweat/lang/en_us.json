@@ -22,6 +22,10 @@
   "item.cold_sweat.hoglin_tunic":        "Hoglin Tunic",
   "item.cold_sweat.hoglin_trousers":     "Hoglin Trousers",
   "item.cold_sweat.hoglin_hooves":       "Hoglin Hooves",
+  "item.cold_sweat.goat_fur_cap":        "Goat Fur Cap",
+  "item.cold_sweat.goat_fur_parka":      "Goat Fur Parka",
+  "item.cold_sweat.goat_fur_pants":      "Goat Fur Pants",
+  "item.cold_sweat.goat_fur_boots":      "Goat Fur Boots",
 
 
   "entity.cold_sweat.chameleon": "Chameleon",

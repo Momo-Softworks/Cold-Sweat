@@ -25,4 +25,8 @@ public class ModItems
     public static final Item HOGLIN_TUNIC = ItemInit.HOGLIN_TUNIC.get();
     public static final Item HOGLIN_TROUSERS = ItemInit.HOGLIN_TROUSERS.get();
     public static final Item HOGLIN_HOOVES = ItemInit.HOGLIN_HOOVES.get();
+    public static final Item GOAT_FUR_CAP = ItemInit.GOAT_FUR_CAP.get();
+    public static final Item GOAT_FUR_PARKA = ItemInit.GOAT_FUR_PARKA.get();
+    public static final Item GOAT_FUR_PANTS = ItemInit.GOAT_FUR_PANTS.get();
+    public static final Item GOAT_FUR_BOOTS = ItemInit.GOAT_FUR_BOOTS.get();
 }
