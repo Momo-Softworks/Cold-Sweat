@@ -126,7 +126,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
                 if (isAdaptive)
                 {
-                    int tempOffset = factor > 0 ? -4 : 0;
+                    int tempOffset = factor >= 0 ? -4 : 0;
                     cellU = 0;
                     cellV = 8 + tempOffset;
                     GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 12 + tempOffset, 6, 4, 32, 16);
