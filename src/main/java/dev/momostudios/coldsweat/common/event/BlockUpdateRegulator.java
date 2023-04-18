@@ -7,23 +7,24 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mod.EventBusSubscriber
 public class BlockUpdateRegulator
 {
-    public static List<BlockChangedEvent> EVENTS = new ArrayList<>();
+    public static final List<BlockChangedEvent> EVENTS = Collections.synchronizedList(new ArrayList<>());
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event)
     {
         if (event.phase == TickEvent.Phase.END)
         {
-            for (BlockChangedEvent changedEvent : EVENTS)
+            synchronized (EVENTS)
             {
-                MinecraftForge.EVENT_BUS.post(changedEvent);
+                EVENTS.forEach(MinecraftForge.EVENT_BUS::post);
+                EVENTS.clear();
             }
-            EVENTS.clear();
         }
     }
 }
