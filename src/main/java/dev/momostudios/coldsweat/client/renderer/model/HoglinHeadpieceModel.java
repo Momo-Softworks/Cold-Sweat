@@ -27,7 +27,7 @@ public class HoglinHeadpieceModel<T extends LivingEntity> extends HumanoidModel<
                 .texOffs(0, 64).addBox(-7.0F, -14.075F, -5.675F, 2.0F, 8.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 64).mirror().addBox(5.0F, -14.075F, -5.675F, 2.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false)
                 .texOffs(0, 78).addBox(0.0F, -16.075F, -1.65F, 0.0F, 17.0F, 12.0F, new CubeDeformation(0.0F)),
-                                                         PartPose.offsetAndRotation(0.0F, -0.5F, 3.0F, 0.3927F, 0.0F, 0.0F));
+                                                         PartPose.offsetAndRotation(0.0F, -1.5F, 3.0F, 0.3927F, 0.0F, 0.0F));
 
         PartDefinition left_ear = mainHead.addOrReplaceChild("left_ear", CubeListBuilder.create()
                 .texOffs(0, 107).addBox(0.0F, -0.5F, -1.5F, 5.0F, 1.0F, 3.0F,
