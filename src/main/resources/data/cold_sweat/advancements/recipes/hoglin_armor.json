@@ -1,0 +1,58 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "cold_sweat:hoglin_hide"
+            ]
+          }
+        ]
+      }
+    },
+    "has_helm_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:hoglin_headpiece"
+      }
+    },
+    "has_chest_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:hoglin_tunic"
+      }
+    },
+    "has_legs_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:hoglin_trousers"
+      }
+    },
+    "has_boots_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cold_sweat:hoglin_hooves"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_item",
+      "has_helm_recipe",
+      "has_chest_recipe",
+      "has_legs_recipe",
+      "has_boots_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cold_sweat:hoglin_headpiece",
+      "cold_sweat:hoglin_tunic",
+      "cold_sweat:hoglin_trousers",
+      "cold_sweat:hoglin_hooves"
+    ]
+  }
+}
