@@ -220,9 +220,9 @@ public class TempEffectsClient
             try
             {
                 float playerTemp = (float) Overlays.BODY_TEMP;
-                if (playerTemp >= 50)
+                if (playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
-                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100);
+                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / HOT_IMMUNITY;
                     if (blur > 0 && mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json"))
                     {   BLUR_APPLIED = false;
                     }
