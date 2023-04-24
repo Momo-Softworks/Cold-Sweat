@@ -79,7 +79,7 @@ public class TempEffectsClient
                     float factor = CSMath.blend(0, 8, immunityModifier, 50, 100);
 
                     // Set random sway speed every once in a while
-                    if (TIME_SINCE_NEW_SWAY > 100)
+                    if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
                     {
                         TIME_SINCE_NEW_SWAY = 0;
                         X_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
