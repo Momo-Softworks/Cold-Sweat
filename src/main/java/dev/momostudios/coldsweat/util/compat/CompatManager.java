@@ -11,7 +11,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.jwaresoftware.mcmods.lib.api.combat.Armory;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collection;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -99,16 +99,13 @@ public class CompatManager
         if (ARMOR_UNDERWEAR_LOADED
         && ((isDamageCold = event.getSource() == ModDamageSources.COLD) || event.getSource() == ModDamageSources.HOT))
         {
-            AtomicInteger liners = new AtomicInteger();
-            event.getEntityLiving().getArmorSlots().forEach(stack ->
-            {
-                if (isDamageCold ? hasOttoLiner(stack) : hasOllieLiner(stack))
-                    liners.getAndIncrement();
-            });
+            int liners = (int) ((Collection<ItemStack>) event.getEntityLiving().getArmorSlots()).stream()
+                    .filter(stack -> isDamageCold ? hasOttoLiner(stack) : hasOllieLiner(stack))
+                    .count();
 
-            float newAmount = CSMath.blend(event.getAmount(), 0, liners.get(), 0, 4);
-            if (newAmount == 0)
-            {   event.setCanceled(true);
+            float newAmount = CSMath.blend(event.getAmount(), 0, liners, 0, 4);
+            if (liners >= 4)
+            {   event.negate();
                 return;
             }
             event.setAmount(newAmount);

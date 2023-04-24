@@ -24,7 +24,8 @@ public interface ITemperatureCap
     default void dealTempDamage(LivingEntity target, DamageSource source, float amount)
     {
         TemperatureDamageEvent event = new TemperatureDamageEvent(target, source, amount);
-        if (!MinecraftForge.EVENT_BUS.post(event))
+        MinecraftForge.EVENT_BUS.post(event);
+        if (event.getAmount() > 0)
             target.hurt(ConfigSettings.DAMAGE_SCALING.get() ? source.setScalesWithDifficulty() : source, event.getAmount());
     }
 
