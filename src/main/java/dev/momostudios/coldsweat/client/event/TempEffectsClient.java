@@ -222,13 +222,12 @@ public class TempEffectsClient
                 float playerTemp = (float) Overlays.BODY_TEMP;
                 if (playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
-                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / HOT_IMMUNITY;
+                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
                     if (blur > 0 && mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json"))
                     {   BLUR_APPLIED = false;
                     }
                     if (!BLUR_APPLIED)
-                    {
-                        mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
+                    {   mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
                         BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
                         BLUR_APPLIED = true;
                     }
@@ -237,8 +236,7 @@ public class TempEffectsClient
                     }
                 }
                 else if (BLUR_APPLIED)
-                {
-                    BLUR_RADIUS.set(0f);
+                {   BLUR_RADIUS.set(0f);
                     BLUR_APPLIED = false;
                 }
             } catch (Exception ignored) {}
