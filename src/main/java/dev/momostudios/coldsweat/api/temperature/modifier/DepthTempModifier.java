@@ -28,28 +28,24 @@ public class DepthTempModifier extends TempModifier
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
         BlockPos playerPos = entity.blockPosition();
 
-        List<Pair<Integer, Double>> lightLevels = new ArrayList<>();
         List<Pair<Double, Double>> depthLevels = new ArrayList<>();
 
-        for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 3))
+        for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 5))
         {
             ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
             double depth = Math.max(0, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - playerPos.getY());
-            int light = entity.level.getBrightness(LightLayer.SKY, pos);
 
-            lightLevels.add(Pair.of(light, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos)))));
             depthLevels.add(Pair.of(depth, Math.max(0, 16 - Math.sqrt(pos.distSqr(playerPos)))));
         }
 
-        double light = CSMath.weightedAverage(lightLevels);
         double depth = CSMath.weightedAverage(depthLevels);
 
         return temp ->
         {
             List<Pair<Number, Number>> valueMap = new ArrayList<>();
             valueMap.add(Pair.of(temp, 0.8));
-            valueMap.add(Pair.of(CSMath.blend(midTemp, temp, light, 0, 15), 2.0));
+            valueMap.add(Pair.of(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15), 2.0));
             valueMap.add(Pair.of(CSMath.blend(temp, midTemp, depth, 4, 20), 4.0));
 
             return CSMath.weightedAverage(valueMap);
