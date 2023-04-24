@@ -27,11 +27,11 @@ public class GoatBootsModel<T extends LivingEntity> extends HumanoidModel<T>
 
         PartDefinition right_boot = right_leg.addOrReplaceChild("right_boot", CubeListBuilder.create()
                 .texOffs(48, 80).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F,
-                                        new CubeDeformation(scale)), PartPose.offset(-0.25F, -0.8F, 0.0F));
+                                        new CubeDeformation(scale)), PartPose.offset(-0.25F, -0.5F, 0.0F));
 
         PartDefinition left_boot = left_leg.addOrReplaceChild("left_boot", CubeListBuilder.create()
                 .texOffs(48, 80).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F,
-                                        new CubeDeformation(scale)).mirror(false), PartPose.offset(0.25F, -0.8F, 0.0F));
+                                        new CubeDeformation(scale)).mirror(false), PartPose.offset(0.25F, -0.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
     }
