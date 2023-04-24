@@ -197,9 +197,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.RIDE.animate("Tail",  tail,  animTime, false);
-						ChameleonAnimations.RIDE.animate("Tail2", tail2, animTime, false);
-						ChameleonAnimations.RIDE.animate("Tail3", tail3, animTime, false);
+						ChameleonAnimations.RIDE.animate("Tail",  tail,  0, false);
+						ChameleonAnimations.RIDE.animate("Tail2", tail2, 0, false);
+						ChameleonAnimations.RIDE.animate("Tail3", tail3, 0, false);
 					}
 
 					body.y -= (player.getBbHeight() / 2) * 16 - 4;
