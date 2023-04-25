@@ -44,7 +44,6 @@ public class EntityTempManager
             ITemperatureCap tempCap = entity instanceof Player ? new PlayerTempCap() : new EntityTempCap();
             // Optional that holds the capability instance
             LazyOptional<ITemperatureCap> capOptional = LazyOptional.of(() -> tempCap);
-            Capability<ITemperatureCap> capability = ModCapabilities.PLAYER_TEMPERATURE;
 
             // Capability provider
             ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
@@ -54,7 +53,7 @@ public class EntityTempManager
                 public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
                 {
                     // If the requested cap is the temperature cap, return the temperature cap
-                    if (cap == capability)
+                    if (cap == ModCapabilities.PLAYER_TEMPERATURE)
                     {
                         return capOptional.cast();
                     }
@@ -88,13 +87,11 @@ public class EntityTempManager
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
         {
             if (!entity.level.isClientSide)
-            {
-                // Tick modifiers serverside
+            {   // Tick modifiers serverside
                 cap.tick(entity);
             }
             else
-            {
-                // Tick modifiers clientside
+            {   // Tick modifiers clientside
                 cap.tickDummy(entity);
             }
 
@@ -109,8 +106,7 @@ public class EntityTempManager
             }
 
             if (entity instanceof Player && entity.tickCount % 60 == 0)
-            {
-                Temperature.updateModifiers(entity, cap);
+            {   Temperature.updateModifiers(entity, cap);
             }
         });
     }
