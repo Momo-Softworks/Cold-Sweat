@@ -205,7 +205,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 					body.y -= (player.getBbHeight() / 2) * 16 - 4;
 					body.yRot = CSMath.toRadians(playerYaw) - CSMath.toRadians(CSMath.blend(player.yBodyRotO, player.yBodyRot, partialTick, 0, 1));
 					head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick)) + 0.2f;
-					head.xRot = CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick)) + 0.2f;
+					head.xRot = CSMath.clamp(CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick)) + 0.2f, -1f, 1f);
 				}
 				// Walk animation
 				else if (entity.isWalking())
