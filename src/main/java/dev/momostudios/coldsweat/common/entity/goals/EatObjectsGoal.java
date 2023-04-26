@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.UUID;
 
 public class EatObjectsGoal extends Goal
 {
@@ -57,7 +58,8 @@ public class EatObjectsGoal extends Goal
             && (this.entity.isPlayerTrusted(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
                 Item item = itemEntity.getItem().getItem();
-                if (this.wantedItems.contains(item) && this.entity.getCooldown(item) <= 0)
+                if (this.wantedItems.contains(item) && this.entity.getCooldown(item) <= 0
+                && ChameleonEdibles.getEdible(item).shouldEat(this.entity, itemEntity))
                 {
                     this.target = ent;
                     this.lookPos = ent.position();
@@ -123,10 +125,11 @@ public class EatObjectsGoal extends Goal
                         if (this.target instanceof ItemEntity item)
                         {   this.entity.onItemPickup(item);
 
+                            UUID thrower = item.getThrower();
                             if (item.getItem().getCount() > 0)
                             {   ItemStack stack = item.getItem().copy();
                                 stack.shrink(1);
-                                WorldHelper.entityDropItem(this.entity, stack);
+                                WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
                             }
                         }
 
