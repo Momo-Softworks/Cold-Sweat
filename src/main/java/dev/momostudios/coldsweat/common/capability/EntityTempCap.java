@@ -10,7 +10,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,12 +81,11 @@ public class EntityTempCap implements ITemperatureCap
 
     public void tickDummy(LivingEntity entity)
     {
-        if (!(entity instanceof Player player)) return;
-
-        for (Type type : VALID_MODIFIER_TYPES)
-        {
-            Temperature.apply(0, player, type, getModifiers(type));
-        }
+        Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
+        Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
+        Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
+        Temperature.apply(0, entity, Type.CEIL, getModifiers(Type.CEIL));
+        Temperature.apply(0, entity, Type.FLOOR, getModifiers(Type.FLOOR));
     }
 
     public void tick(LivingEntity entity)

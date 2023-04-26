@@ -428,7 +428,8 @@ public class ChameleonEntity extends Animal
     @Override
     public double getMyRidingOffset()
     {
-        return 0.5;
+        return this.getVehicle() instanceof Player player && player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
+               ? 0.15 : 0;
     }
 
     public static boolean canSpawn(EntityType<ChameleonEntity> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, Random random)

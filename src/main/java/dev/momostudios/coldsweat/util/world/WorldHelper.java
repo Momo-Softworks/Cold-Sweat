@@ -344,7 +344,7 @@ public class WorldHelper
         }
     }
 
-    public static void entityDropItem(Entity entity, ItemStack stack)
+    public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
     {
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
@@ -352,6 +352,7 @@ public class WorldHelper
         {
             item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
         }
+        return item;
     }
 
     public static void syncEntityForgeData(Entity entity)
