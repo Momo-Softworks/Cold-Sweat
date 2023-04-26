@@ -1099,3 +1099,17 @@ Translation Updates:
 Technical Changes:
 - Block Temperatures can now be given a "predicate", which makes the block emit/not emit temperature based on its state (i.e. a campfire being lit)
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04b
+
+Fixes:
+- Fixed the heatstroke blur effect being applied when the player has immunity
+- Fixed inaccurate depth detection leading to unpredictable temperatures when standing near sloped surfaces
+- Fixed some visual bugs & inconsistencies when a chameleon is on the player's head
+- Fixed camera sway not starting immediately when the player's temperature is above 50
+- Fixed skins with an outer leg layer poking out through goat fur boots & hoglin hooves
+- Fixed the chameleon eating spider eyes even when at full health and the player is already trusted
+
+Technical Changes:
+- Items with both item insulation and equipment insulation (like leather armor) will show both bars if the values are different
