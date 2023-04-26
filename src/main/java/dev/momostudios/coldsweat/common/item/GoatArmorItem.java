@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.client.event.RegisterModels;
 import dev.momostudios.coldsweat.client.renderer.model.GoatParkaModel;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -37,14 +38,14 @@ public class GoatArmorItem extends ArmorItem
                     {
                         GoatParkaModel<?> model = RegisterModels.GOAT_PARKA_MODEL;
                         ModelPart fluff = model.body.getChild("fluff");
-                        float headPitch = entityLiving.getXRot();
+                        float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getFrameTime());
+                        float headYaw = CSMath.blend(entityLiving.yRotO, entityLiving.getYRot(), Minecraft.getInstance().getFrameTime(), 0, 1);
+                        float bodyYaw = entityLiving.yBodyRot;
+                        float netHeadYaw = CSMath.clamp(headYaw - bodyYaw, -30, 30);
 
-                        if (!CSMath.withinRange(headPitch, -20f, 20f))
-                        {   fluff.xRot = CSMath.toRadians(CSMath.shrink(CSMath.clamp(headPitch, -60f, 60f), 20));
-                        }
-                        else fluff.xRot = 0;
-                        fluff.y = 1;
-
+                        fluff.xRot = CSMath.toRadians(CSMath.clamp(headPitch, 0, 60f)) / 2;
+                        fluff.zRot = -CSMath.toRadians(netHeadYaw) * fluff.xRot / 2;
+                        fluff.x = fluff.zRot * 2;
                         yield model;
                     }
                     case LEGS -> RegisterModels.GOAT_PANTS_MODEL;
