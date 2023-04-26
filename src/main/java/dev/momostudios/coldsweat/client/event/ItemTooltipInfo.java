@@ -10,9 +10,11 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -23,13 +25,8 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -65,22 +62,24 @@ public class ItemTooltipInfo
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
+        Pair<Double, Double> itemInsul = null;
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {
             event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null)
         {
             event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false)));
         }
-        else if (ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null)
         {
             event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true)));
         }
+        Minecraft.getInstance().player.displayClientMessage(new TextComponent(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())+""), true);
         // If the item is insulated armor
-        else if (stack.getItem() instanceof ArmorItem)
+        if (stack.getItem() instanceof ArmorItem && (itemInsul == null || !ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()).equals(itemInsul)))
         {
             // Create the list of insulation pairs from NBT
             List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
@@ -127,7 +126,7 @@ public class ItemTooltipInfo
             ItemInsulationCap.sortInsulationList(insulation);
 
             // Calculate the number of slots and render the insulation bar
-            int barSize = stack.getOrCreateTag().getBoolean("Insulated") ? insulation.size() : 0;
+            int barSize = insulation.size();
             if (barSize > 0)
                 event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
         }
