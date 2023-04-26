@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 
 public class HealingEdible extends Edible
 {
@@ -24,5 +23,11 @@ public class HealingEdible extends Edible
             return Result.SUCCESS;
         }
         return Result.FAIL;
+    }
+
+    @Override
+    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
+    {
+        return entity.getHealth() < entity.getMaxHealth() || (item.getThrower() != null && !entity.isPlayerTrusted(item.getThrower()));
     }
 }

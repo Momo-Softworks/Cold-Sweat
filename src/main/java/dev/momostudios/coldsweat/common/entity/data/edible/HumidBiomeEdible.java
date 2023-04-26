@@ -62,4 +62,10 @@ public class HumidBiomeEdible extends Edible
         }
         return Result.FAIL;
     }
+
+    @Override
+    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
+    {
+        return true;
+    }
 }

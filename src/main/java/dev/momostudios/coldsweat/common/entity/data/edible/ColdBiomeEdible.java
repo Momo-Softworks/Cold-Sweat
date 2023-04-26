@@ -13,7 +13,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 
 public class ColdBiomeEdible extends Edible
@@ -74,5 +73,11 @@ public class ColdBiomeEdible extends Edible
             }
         }
         return Result.FAIL;
+    }
+
+    @Override
+    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
+    {
+        return true;
     }
 }
