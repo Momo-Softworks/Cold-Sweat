@@ -15,7 +15,6 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ArmorItem;
@@ -65,19 +64,15 @@ public class ItemTooltipInfo
         Pair<Double, Double> itemInsul = null;
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
-        {
-            event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
+        {   event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null)
-        {
-            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false)));
+        {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false)));
         }
         else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null)
-        {
-            event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true)));
+        {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true)));
         }
-        Minecraft.getInstance().player.displayClientMessage(new TextComponent(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())+""), true);
         // If the item is insulated armor
         if (stack.getItem() instanceof ArmorItem && (itemInsul == null || !ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()).equals(itemInsul)))
         {
@@ -128,7 +123,8 @@ public class ItemTooltipInfo
             // Calculate the number of slots and render the insulation bar
             int barSize = insulation.size();
             if (barSize > 0)
-                event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
+            {   event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
+            }
         }
     }
 }

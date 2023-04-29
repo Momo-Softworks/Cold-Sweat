@@ -1104,6 +1104,7 @@ Technical Changes:
 2.2-b04b
 
 Fixes:
+- Fixed items not dropping on death when killed by temperature in some cases
 - Fixed the heatstroke blur effect being applied when the player has immunity
 - Fixed inaccurate depth detection leading to unpredictable temperatures when standing near sloped surfaces
 - Fixed some visual bugs & inconsistencies when a chameleon is on the player's head
