@@ -119,12 +119,10 @@ public class CSMath
     public static int ceil(double value)
     {
         if (value >= 0)
-        {
-            return (int) Math.ceil(value);
+        {   return (int) Math.ceil(value);
         }
         else
-        {
-            int sign = getSign(value);
+        {   int sign = getSign(value);
             double abs = Math.abs(value);
             return (int) Math.ceil(abs) * sign;
         }
@@ -133,12 +131,10 @@ public class CSMath
     public static int floor(double value)
     {
         if (value >= 0)
-        {
-            return (int) Math.floor(value);
+        {   return (int) Math.floor(value);
         }
         else
-        {
-            int sign = getSign(value);
+        {   int sign = getSign(value);
             double abs = Math.abs(value);
             return (int) Math.floor(abs) * sign;
         }
@@ -274,7 +270,6 @@ public class CSMath
 
     /**
      * Takes an average of the two values, with weight<br>
-     * The weight of an item should NEVER be 0.<br>
      * @param val1 The first value.
      * @param val2 The second value.
      * @param weight1 The weight of the first value.
@@ -287,8 +282,7 @@ public class CSMath
     }
 
     /**
-     * Takes an average of all the values in the given map, with weight<br>
-     * The weight of an item should NEVER be 0.<br>
+     * Takes an average of all the values in the given list, with weight<br>
      * <br>
      * @param values The map of values to average (value, weight).
      * @return The average of the values in the given array.
@@ -311,6 +305,10 @@ public class CSMath
         return new Vec3(vec.x, vec.y, vec.z);
     }
 
+    /**
+     * Returns a {@link Direction} from the given vector.
+     * @return The direction.
+     */
     public static Direction getDirectionFrom(double x, double y, double z)
     {
         Direction direction = Direction.NORTH;
@@ -345,6 +343,10 @@ public class CSMath
         new InterruptableStreamer<T>(collection).run(consumer);
     }
 
+    /**
+     * Simple try/catch block that ignores errors.
+     * @param runnable The code to run upon success.
+     */
     public static void tryCatch(Runnable runnable)
     {
         try
@@ -354,6 +356,9 @@ public class CSMath
         catch (Throwable ignored) {}
     }
 
+    /**
+     * @return 1 if the given value is positive, -1 if it is negative, and 0 if it is 0.
+     */
     public static int getSign(double value)
     {
         if (value == 0) return 0;
@@ -361,13 +366,19 @@ public class CSMath
     }
 
     /**
-     * Returns 1 if the given value is above the range, -1 if it is below the range, and 0 if it is within the range.
+     * @return 1 if the given value is above the range, -1 if it is below the range, and 0 if it is within the range.
      */
     public static int getSignForRange(double value, double min, double max)
     {
         return value > max ? 1 : value < min ? -1 : 0;
     }
 
+    /**
+     * Limits the decimal places of the value to the given amount.
+     * @param value The value to limit.
+     * @param sigFigs The amount of decimal places to limit to.
+     * @return The value with the decimal places limited.
+     */
     public static double sigFigs(double value, int sigFigs)
     {
         return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
@@ -419,46 +430,61 @@ public class CSMath
         return smallest;
     }
 
-    public static boolean asExtreme(double value1, double value2)
+    public static boolean equalAbs(double value1, double value2)
     {
         return Math.abs(value1) == Math.abs(value2);
     }
 
-    public static boolean moreExtreme(double value1, double value2)
+    public static boolean greaterAbs(double value1, double value2)
     {
         return Math.abs(value1) > Math.abs(value2);
     }
 
-    public static boolean lessExtreme(double value1, double value2)
+    public static boolean lessAbs(double value1, double value2)
     {
         return Math.abs(value1) < Math.abs(value2);
     }
 
-    public static boolean asOrMoreExtreme(double value1, double value2)
+    public static boolean greaterEqualAbs(double value1, double value2)
     {
         return Math.abs(value1) >= Math.abs(value2);
     }
 
-    public static boolean asOrLessExtreme(double value1, double value2)
+    public static boolean lessEqualAbs(double value1, double value2)
     {
         return Math.abs(value1) <= Math.abs(value2);
     }
 
+    /**
+     * Lowers the absolute value of the given number by [amount].
+     */
     public static double shrink(double value, double amount)
     {
         return Math.max(0, Math.abs(value) - amount) * getSign(value);
     }
 
+    /**
+     * Integer overload for {@link #shrink(double, double)}
+     */
     public static int shrink(int value, int amount)
     {
         return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
     }
 
+    /**
+     * @return A Vec3 at the center of the given BlockPos.
+     */
     public static Vec3 getCenterPos(BlockPos pos)
     {
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
+    /**
+     * Rotates a VoxelShape to the given direction, assuming it is facing north.
+     * @param to The direction to rotate to.
+     * @param shape The shape to rotate.
+     * @return The rotated shape.
+     */
     public static VoxelShape rotateShape(Direction to, VoxelShape shape)
     {
         // shapeHolder[0] is the old shape, shapeHolder[1] is the new shape
@@ -476,6 +502,12 @@ public class CSMath
         return shapeHolder[0];
     }
 
+    /**
+     * "Flattens" the given VoxelShape into a 2D projection along the given axis.
+     * @param axis The axis to flatten along.
+     * @param shape The shape to flatten.
+     * @return The flattened shape.
+     */
     public static VoxelShape flattenShape(Direction.Axis axis, VoxelShape shape)
     {
         // Flatten the shape into a 2D projection
@@ -494,19 +526,5 @@ public class CSMath
                     shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1)));
         }
         return shapeHolder[1];
-    }
-
-    public static int packedLightFromRGBA(int r, int g, int b, int a)
-    {
-        return (r << 20) | (g << 4) | (b >> 12) | (a << 24);
-    }
-
-    public static int addLight(int packedLight, int r, int g, int b, int a)
-    {
-        return packedLightFromRGBA(
-                Math.min(15, (packedLight >> 20) + r),
-                Math.min(15, (packedLight >> 4 & 0xF) + g),
-                Math.min(15, (packedLight & 0xF) + b),
-                Math.min(15, (packedLight >> 24) + a));
     }
 }
