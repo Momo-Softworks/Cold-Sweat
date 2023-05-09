@@ -69,8 +69,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             }
 
             if (isAdaptive)
-            {
-                renderCells(poseStack, x + 7, y + 1, 1, 2, 0); // adaptive cells
+            {   renderCells(poseStack, x + 7, y + 1, coldSlots, Math.ceil(cold), 0); // adaptive cells
             }
             else
             {
