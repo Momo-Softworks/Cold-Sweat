@@ -48,24 +48,24 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         hot -= neutral/2;
         cold -= neutral/2;
 
-        int coldSlots = CSMath.ceil(cold/2);
-        int neutralSlots = CSMath.ceil(neutral/2);
-        int hotSlots = CSMath.ceil(hot/2);
+        int coldSlots = Math.abs(CSMath.ceil(cold/2));
+        int neutralSlots = Math.abs(CSMath.ceil(neutral/2));
+        int hotSlots = Math.abs(CSMath.ceil(hot/2));
         width = coldSlots + neutralSlots + hotSlots;
 
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
 
         // Render positive and negative insulation separately
         int barLength = 0;
-        int totalPosSlots = isAdaptive ? 1 : CSMath.ceil(CSMath.max(coldSlots, hotSlots, neutralSlots));
-        int totalNegSlots = CSMath.ceil(Math.abs(CSMath.min(coldSlots, hotSlots, neutralSlots)));
+        int totalPosSlots = isAdaptive ? coldSlots : CSMath.ceil(CSMath.max(coldSlots, hotSlots, neutralSlots));
+        int totalNegSlots = CSMath.ceil(Math.abs(CSMath.min(CSMath.ceil(cold/2), CSMath.ceil(hot/2), CSMath.ceil(neutral/2))));
 
+        // Positive insulation bar
         if (totalPosSlots > 0)
         {
+            // background
             for (int i = 0; i < totalPosSlots; i++)
-            {
-                // background
-                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 16);
+            {   GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
             if (isAdaptive)
@@ -76,18 +76,15 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             {
                 int xOffs = 0;
                 if (cold > 0)
-                {
-                    renderCells(poseStack, x + 7, y + 1, coldSlots, cold, 12); // cold cells
+                {   renderCells(poseStack, x + 7, y + 1, coldSlots, cold, 12); // cold cells
                     xOffs += coldSlots * 6;
                 }
                 if (neutral > 0)
-                {
-                    renderCells(poseStack, x + 7 + xOffs, y + 1, neutralSlots, neutral, 6); // neutral cells
+                {   renderCells(poseStack, x + 7 + xOffs, y + 1, neutralSlots, neutral, 6); // neutral cells
                     xOffs += neutralSlots * 6;
                 }
                 if (hot > 0)
-                {
-                    renderCells(poseStack, x + 7 + xOffs, y + 1, hotSlots, hot, 18); // hot cells
+                {   renderCells(poseStack, x + 7 + xOffs, y + 1, hotSlots, hot, 18); // hot cells
                 }
             }
             for (int i = 0; i < totalPosSlots; i++)
@@ -102,34 +99,32 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             barLength += totalPosSlots * 6 + 12;
         }
 
+        // Negative insulation bar
         if (totalNegSlots > 0)
         {
+            // background
             for (int i = 0; i < totalNegSlots; i++)
-            {
-                // background
-                GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y + 1, 0, 0, 0, 6, 4, 32, 16);
+            {   GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
+            // slots
             int xOffs = 0;
             if (cold < 0)
-            {
-                renderCells(poseStack, x + 7 + barLength, y + 1, -coldSlots, -cold, 6); // cold cells
-                xOffs += -coldSlots * 6;
+            {   renderCells(poseStack, x + 7 + barLength, y + 1, coldSlots, -cold, 12); // cold cells
+                xOffs += coldSlots * 6;
             }
             if (neutral < 0)
-            {
-                renderCells(poseStack, x + 7 + barLength + xOffs, y + 1, -neutralSlots, -neutral, 0); // neutral cells
-                xOffs += -neutralSlots * 6;
+            {   renderCells(poseStack, x + 7 + barLength + xOffs, y + 1, neutralSlots, -neutral, 6); // neutral cells
+                xOffs += neutralSlots * 6;
             }
             if (hot < 0)
-            {
-                renderCells(poseStack, x + 7 + barLength + xOffs, y + 1, -hotSlots, -hot, 12); // hot cells
+            {   renderCells(poseStack, x + 7 + barLength + xOffs, y + 1, hotSlots, -hot, 18); // hot cells
             }
 
+            // border
             for (int i = 0; i < totalNegSlots; i++)
             {
                 boolean end = i == totalNegSlots - 1;
-                // border
                 GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 16);
             }
 
