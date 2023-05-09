@@ -103,7 +103,7 @@ public class EntitySettingsConfig
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
                          "Not affected by the \"Increase Goat Spawns\" option")
                 .defineList("Goat Spawn Biomes", ListBuilder.begin(
-                                List.of("minecraft:meadow", 4),
+                                List.of("minecraft:meadow", 3),
                                 List.of("minecraft:windswept_hills", 8),
                                 List.of("minecraft:windswept_forest", 8),
                                 List.of("minecraft:windswept_gravelly_hills", 8),

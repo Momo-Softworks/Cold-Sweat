@@ -10,10 +10,10 @@ import net.minecraftforge.fml.common.Mod;
 public class RegisterTooltips
 {
     @SubscribeEvent
-    public static void registerTooltips(final RegisterClientTooltipComponentFactoriesEvent event)
+    public static void registerTooltips(RegisterClientTooltipComponentFactoriesEvent event)
     {
         event.register(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
-        event.register(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getStack(), tooltip.getSize()));
+        event.register(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getStack()));
         event.register(InsulatorTooltip.class, tooltip -> new ClientInsulatorTooltip(tooltip.getInsulationValues(), tooltip.isAdaptive()));
     }
 }
