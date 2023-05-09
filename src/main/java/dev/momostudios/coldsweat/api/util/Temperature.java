@@ -416,7 +416,7 @@ public class Temperature
     {
         WORLD("world"),
         CEIL("max"),
-        FLOOR("max"),
+        FLOOR("min"),
         CORE("core"),
         BASE("base"),
         BODY("body"),
