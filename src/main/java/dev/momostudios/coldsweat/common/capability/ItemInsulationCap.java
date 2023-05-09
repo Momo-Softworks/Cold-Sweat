@@ -40,11 +40,11 @@ public class ItemInsulationCap implements IInsulatableCap
                 double cold = insul.getFirst();
                 double hot = insul.getSecond();
                 double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
-                if (cold == neutral) cold = 0;
-                if (hot == neutral) hot = 0;
+                CSMath.shrink(cold, neutral);
+                CSMath.shrink(hot, neutral);
 
                 // Cold insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
+                for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
                 {
                     double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
                     newValues.add(new Insulation(coldInsul, 0d));
@@ -58,7 +58,7 @@ public class ItemInsulationCap implements IInsulatableCap
                 }
 
                 // Hot insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
+                for (int i = 0; i < CSMath.ceil(Math.abs(hot) / 2); i++)
                 {
                     double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
                     newValues.add(new Insulation(0d, hotInsul));
@@ -330,6 +330,12 @@ public class ItemInsulationCap implements IInsulatableCap
         {
             return hot;
         }
+
+        @Override
+        public String toString()
+        {
+            return "Insulation{" + "cold=" + cold + ", hot=" + hot + '}';
+        }
     }
 
     public static class AdaptiveInsulation extends InsulationPair
@@ -363,6 +369,12 @@ public class ItemInsulationCap implements IInsulatableCap
         public double getSpeed()
         {
             return speed;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "AdaptiveInsulation{" + "insulation=" + insulation + ", factor=" + factor + ", speed=" + speed + '}';
         }
     }
 }

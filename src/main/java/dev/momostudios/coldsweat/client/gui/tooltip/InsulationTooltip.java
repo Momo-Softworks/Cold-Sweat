@@ -12,11 +12,10 @@ public class InsulationTooltip implements TooltipComponent
     ItemStack stack;
     int size;
 
-    public InsulationTooltip(List<ItemInsulationCap.InsulationPair> insulation, ItemStack stack, int size)
+    public InsulationTooltip(List<ItemInsulationCap.InsulationPair> insulation, ItemStack stack)
     {
         this.insulation = insulation;
         this.stack = stack;
-        this.size = size;
     }
 
     public List<ItemInsulationCap.InsulationPair> getInsulation()
@@ -27,10 +26,5 @@ public class InsulationTooltip implements TooltipComponent
     public ItemStack getStack()
     {
         return stack;
-    }
-
-    public int getSize()
-    {
-        return size;
     }
 }

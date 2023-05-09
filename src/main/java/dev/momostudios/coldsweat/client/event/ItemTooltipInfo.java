@@ -121,9 +121,8 @@ public class ItemTooltipInfo
             ItemInsulationCap.sortInsulationList(insulation);
 
             // Calculate the number of slots and render the insulation bar
-            int barSize = insulation.size();
-            if (barSize > 0)
-            {   event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack, barSize)));
+            if (insulation.size() > 0)
+            {   event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack)));
             }
         }
     }

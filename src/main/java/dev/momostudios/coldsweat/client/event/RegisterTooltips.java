@@ -14,7 +14,7 @@ public class RegisterTooltips
     public static void registerTooltips(final FMLClientSetupEvent event)
     {
         MinecraftForgeClient.registerTooltipComponentFactory(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
-        MinecraftForgeClient.registerTooltipComponentFactory(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getStack(), tooltip.getSize()));
+        MinecraftForgeClient.registerTooltipComponentFactory(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getStack()));
         MinecraftForgeClient.registerTooltipComponentFactory(InsulatorTooltip.class, tooltip -> new ClientInsulatorTooltip(tooltip.getInsulationValues(), tooltip.isAdaptive()));
     }
 }
