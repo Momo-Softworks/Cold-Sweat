@@ -99,17 +99,23 @@ public class WorldHelper
         int sampleRoot = (int) Math.sqrt(samples);
         int radius = (sampleRoot * interval) / 2;
 
-        for (int x = 0; x < sampleRoot; x++)
+        for (int x = -radius; x < radius; x += interval)
         {
-            for (int z = 0; z < sampleRoot; z++)
+            for (int z = -radius; z < radius; z += interval)
             {
-                posList.add(pos.offset(x * interval - radius, 0, z * interval - radius));
+                posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
             }
         }
 
         return posList;
     }
 
+    /**
+     * More accurate method for detecting skylight access. Relies on block hitbox shape instead of light level.
+     * @param pos The position to check
+     * @param maxDistance The maximum distance to check
+     * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
+     */
     public static boolean canSeeSky(LevelChunk chunk, LevelAccessor level, BlockPos pos, int maxDistance)
     {
         for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
@@ -120,15 +126,13 @@ public class WorldHelper
 
             // If this subchunk is only air, skip it
             if (subchunk.hasOnlyAir())
-            {
-                i += 16 - (i % 16);
+            {   i += 16 - (i % 16);
                 continue;
             }
 
             BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
             if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
-            {
-                return false;
+            {   return false;
             }
         }
         return true;
@@ -176,12 +180,10 @@ public class WorldHelper
         int z = blockpos.getZ();
 
         try
-        {
-            return getChunkSection(chunk, y).getStates().get(x & 15, y & 15, z & 15);
+        {   return getChunkSection(chunk, y).getStates().get(x & 15, y & 15, z & 15);
         }
         catch (Exception e)
-        {
-            return chunk.getBlockState(blockpos);
+        {   return chunk.getBlockState(blockpos);
         }
     }
 
@@ -264,11 +266,9 @@ public class WorldHelper
                 BlockState state = getChunkSection(workingChunk, pos.getY()).getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
 
                 // If the block isn't air, then we hit something
-                if (!state.isAir())
-                {
-                    maxHits--;
-                    if (maxHits <= 0) break;
-                }
+                if (!state.isAir() && --maxHits <= 0)
+                    break;
+
                 rayTracer.accept((LevelChunk) workingChunk, state, pos);
             }
         }
