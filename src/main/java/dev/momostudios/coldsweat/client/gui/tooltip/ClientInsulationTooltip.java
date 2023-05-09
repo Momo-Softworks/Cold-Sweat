@@ -24,14 +24,12 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 {
     List<ItemInsulationCap.InsulationPair> insulation;
     ItemStack stack;
-    int size;
-    int width = 0;
+     int width = 0;
 
-    public ClientInsulationTooltip(List<ItemInsulationCap.InsulationPair> insulation, ItemStack stack, int size)
+    public ClientInsulationTooltip(List<ItemInsulationCap.InsulationPair> insulation, ItemStack stack)
     {
         this.insulation = insulation;
         this.stack = stack;
-        this.size = size;
     }
 
     @Override
@@ -94,7 +92,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 double factor = insul.getFactor();
                 double hot = CSMath.blend(0, insulation, factor, -1, 1);
                 double cold = CSMath.blend(insulation, 0, factor, -1, 1);
-                // If both are positive or negative, add to the same list
+                // If positive, add to positive list, else add to negative list
                 if (insulation >= 0)
                 {   positiveInsul.add(new Triplet<>(cold, hot, factor));
                 }
@@ -105,15 +103,16 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
 
         // Positive (default) insulation bar
-        if (positiveInsul.size() > 0)
+        int posSlots = positiveInsul.size();
+        if (posSlots > 0)
         {
-            for (int i = 0; i < slots; i++)
+            for (int i = 0; i < Math.max(slots, posSlots); i++)
             {
                 // background
                 GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
-            for (int i = 0; i < positiveInsul.size(); i++)
+            for (int i = 0; i < posSlots; i++)
             {
                 Triplet<Double, Double, Double> value = positiveInsul.get(i);
                 double cold = value.getA();
@@ -154,10 +153,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 RenderSystem.disableBlend();
             }
 
-            for (int i = 0; i < slots; i++)
+            // border
+            for (int i = 0; i < Math.max(slots, posSlots); i++)
             {
-                boolean end = i == slots - 1;
-                // border
+                boolean end = i == Math.max(slots, posSlots) - 1;
                 GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 16);
             }
             // icon
@@ -167,15 +166,16 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
 
         // Negative insulation bar
-        if (negativeInsul.size() > 0)
+        int negSlots = negativeInsul.size();
+        if (negSlots > 0)
         {
-            for (int i = 0; i < slots; i++)
+            for (int i = 0; i < Math.max(slots, negSlots); i++)
             {
                 // background
                 GuiComponent.blit(poseStack, x + 7 + i*6 + barLength, y + 1, 0, 0, 0, 6, 4, 32, 16);
             }
 
-            for (int i = 0; i < negativeInsul.size(); i++)
+            for (int i = 0; i < negSlots; i++)
             {
                 Triplet<Double, Double, Double> value = negativeInsul.get(i);
                 double cold = value.getA();
@@ -214,10 +214,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 RenderSystem.disableBlend();
             }
 
-            for (int i = 0; i < slots; i++)
+            // border
+            for (int i = 0; i < Math.max(slots, negSlots); i++)
             {
-                boolean end = i == slots - 1;
-                // border
+                boolean end = i == Math.max(slots, negSlots) - 1;
                 GuiComponent.blit(poseStack, x + 7 + i*6 + barLength, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 16);
             }
             // icon
