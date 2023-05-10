@@ -26,6 +26,6 @@ public class FoodTempModifier extends TempModifier
     @Override
     public String getID()
     {
-        return "cold_sweat:food";
+        return "cold_sweat:consumable";
     }
 }

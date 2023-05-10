@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Function;
 
@@ -36,6 +35,6 @@ public class InsulationTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:insulated_armor";
+        return "cold_sweat:armor";
     }
 }
