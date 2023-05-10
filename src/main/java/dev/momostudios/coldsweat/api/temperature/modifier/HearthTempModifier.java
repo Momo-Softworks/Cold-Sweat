@@ -35,6 +35,6 @@ public class HearthTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:hearth_insulation";
+        return "cold_sweat:hearth";
     }
 }

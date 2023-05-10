@@ -23,6 +23,6 @@ public class MountTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:insulated_mount";
+        return "cold_sweat:mount";
     }
 }

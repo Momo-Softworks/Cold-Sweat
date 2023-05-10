@@ -93,6 +93,6 @@ public class BiomeTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:biome_temperature";
+        return "cold_sweat:biome";
     }
 }

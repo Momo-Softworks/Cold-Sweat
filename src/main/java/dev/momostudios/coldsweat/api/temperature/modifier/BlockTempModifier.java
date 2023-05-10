@@ -134,6 +134,6 @@ public class BlockTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:nearby_blocks";
+        return "cold_sweat:blocks";
     }
 }
