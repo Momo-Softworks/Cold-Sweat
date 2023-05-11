@@ -36,7 +36,7 @@ public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRende
             float ridingOffset = (float) entity.getMyRidingOffset();
             ps.translate(0, -(ridingOffset - 0.05), 0);
             ps.mulPose(CSMath.getQuaternion(CSMath.toRadians(playerHeadPitch), -CSMath.toRadians(playerHeadYaw), 0));
-            ps.translate(0, ridingOffset + 0.5, 0);
+            ps.translate(0, ridingOffset, 0);
             ps.mulPose(CSMath.getQuaternion(0, CSMath.toRadians(playerHeadYaw), 0));
 
         }
