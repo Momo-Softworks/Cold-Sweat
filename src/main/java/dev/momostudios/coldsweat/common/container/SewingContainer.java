@@ -36,6 +36,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SewingContainer extends AbstractContainerMenu
 {
@@ -325,8 +326,24 @@ public class SewingContainer extends AbstractContainerMenu
                 insulCap.addInsulationItem(insulator);
 
                 // Cancel crafting if the insulation provided by the insulator is too much
-                if (insulCap.getInsulation().size() > ArmorInsulation.getInsulationSlots(armorItem))
+                AtomicInteger posInsul = new AtomicInteger();
+                AtomicInteger negInsul = new AtomicInteger();
+                // Get the total positive/negative insulation of the armor
+                insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(pair ->
+                {
+                    if (pair instanceof ItemInsulationCap.Insulation insul)
+                    {   if (insul.getHot() > 0 || insul.getCold() > 0) posInsul.getAndIncrement();
+                        else negInsul.getAndIncrement();
+                    }
+                    if (pair instanceof ItemInsulationCap.AdaptiveInsulation insul)
+                    {   if (insul.getInsulation() > 0) posInsul.getAndIncrement();
+                        else negInsul.getAndIncrement();
+                    }
+                });
+                if (posInsul.get() > ArmorInsulation.getInsulationSlots(armorItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(armorItem))
+                {
                     return;
+                }
 
                 // Transfer enchantments
                 Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(processed);
