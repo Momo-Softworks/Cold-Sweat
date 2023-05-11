@@ -164,7 +164,7 @@ public class WorldSettingsConfig
                             () -> List.of("byg:fragment_forest", 43, 64, "F"),
                             () -> List.of("byg:frosted_coniferous_forest", 8, 31, "F"),
                             () -> List.of("byg:maple_taiga", 53, 71, "F"),
-                            () -> List.of("byg:skyris_vale", 65, 78, "F"),
+                            () -> List.of("byg:skyris_vale", 42, 68, "F"),
                             () -> List.of("byg:twilight_meadow", 49, 66, "F"),
                             () -> List.of("byg:weeping_witch_forest", 56, 73, "F"),
                             () -> List.of("byg:subzero_hypogeal", -10, -10, "F"),

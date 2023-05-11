@@ -8,7 +8,6 @@ import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -52,7 +51,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     {
         return Properties
                 .of(Material.STONE)
-                .sound(SoundType.NETHERITE_BLOCK)
+                .sound(SoundType.GILDED_BLACKSTONE)
                 .strength(2f)
                 .explosionResistance(10f)
                 .requiresCorrectToolForDrops()

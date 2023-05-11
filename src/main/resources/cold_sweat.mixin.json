@@ -15,6 +15,7 @@
     "InventoryOpenServerMixin",
     "MixinBlockUpdate",
     "MixinMinecart",
+    "MixinSoulCampfire",
     "MixinSoulFire",
     "PickEntityMixin"
   ],

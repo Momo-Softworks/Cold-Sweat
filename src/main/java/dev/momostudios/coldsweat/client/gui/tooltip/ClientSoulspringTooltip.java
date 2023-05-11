@@ -31,7 +31,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     @Override
     public int getHeight()
     {
-        return Screen.hasShiftDown() ? CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) * 16 + 16 : 14;
+        return Screen.hasShiftDown() ? CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) * 16 + 14 : 10;
     }
 
     @Override
