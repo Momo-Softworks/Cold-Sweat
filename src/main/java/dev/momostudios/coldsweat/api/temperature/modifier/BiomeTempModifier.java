@@ -12,13 +12,14 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
 {
     public BiomeTempModifier()
     {
-        this(25);
+        this(16);
     }
 
     public BiomeTempModifier(int samples)
@@ -44,11 +45,16 @@ public class BiomeTempModifier extends TempModifier
                 int samples = this.getNBT().getInt("Samples");
                 // Failsafe for old TempModifiers
                 if (samples < 1)
-                {   samples = 25;
+                {   samples = 16;
                     this.getNBT().putInt("Samples", 25);
                 }
 
-                for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
+                List<BlockPos> posGrid = WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16);
+                // Sample biomes 1 chunk up and down as well
+                posGrid.addAll(WorldHelper.getPositionGrid(entity.blockPosition().above(16), 9, 16));
+                posGrid.addAll(WorldHelper.getPositionGrid(entity.blockPosition().below(16), 9, 16));
+
+                for (BlockPos blockPos : posGrid)
                 {
                     Biome biome = entity.level.getBiomeManager().getBiome(blockPos).value();
                     ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
@@ -75,9 +81,9 @@ public class BiomeTempModifier extends TempModifier
                     // If time doesn't exist in the player's dimension, don't use it
                     DimensionType dimension = entity.level.dimensionType();
                     if (!dimension.hasCeiling())
-                        worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / samples;
+                        worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / (samples + 18);
                     else
-                        worldTemp += CSMath.average(max, min) / samples;
+                        worldTemp += CSMath.average(max, min) / (samples + 18);
                 }
 
                 worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
