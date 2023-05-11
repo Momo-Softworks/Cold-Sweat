@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.mojang.datafixers.util.Pair;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
@@ -34,17 +35,23 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -58,13 +65,25 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
+    static Method TICK_DOWN_EFFECT;
+    static
+    {
+        try
+        {   TICK_DOWN_EFFECT = ObfuscationReflectionHelper.findMethod(MobEffectInstance.class, "m_19579_");
+            TICK_DOWN_EFFECT.setAccessible(true);
+        }
+        catch (Exception ignored) {}
+    }
+
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     ArrayList<SpreadPath> paths = new ArrayList<>();
     // Used for client-side rendering of the Hearth's F3 debug
@@ -74,6 +93,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     // Stores previously-called chunks for quicker access
     HashMap<ChunkPos, LevelChunk> loadedChunks = new HashMap<>();
+
+    List<MobEffectInstance> effects = new ArrayList<>();
 
     private static final int INSULATION_TIME = 1200;
     public static final int MAX_FUEL = 1000;
@@ -165,6 +186,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         tag.putInt("hotFuel",  this.getHotFuel());
         tag.putInt("coldFuel", this.getColdFuel());
         tag.putInt("insulationLevel", insulationLevel);
+        saveEffects(tag);
+
         return tag;
     }
 
@@ -175,6 +198,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.setHotFuel(tag.getInt("hotFuel"));
         this.setColdFuel(tag.getInt("coldFuel"));
         insulationLevel = tag.getInt("insulationLevel");
+        loadEffects(tag);
     }
 
     @Override
@@ -228,6 +252,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     this.isPlayerNearby = true;
                 }
             }
+        }
+
+        // Tick down the time for each effect
+        if (!effects.isEmpty())
+        {
+            effects.removeIf(effect ->
+            {
+                try
+                {
+                    TICK_DOWN_EFFECT.invoke(effect);
+                    if (effect.getDuration() <=0) return true;
+                } catch (Exception ignored) {}
+                return false;
+            });
         }
 
         // Reset if a nearby block has been updated
@@ -451,7 +489,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                                 TempModifier modifier = Temperature.getModifier(player, Temperature.Type.WORLD, mod -> mod instanceof HearthTempModifier);
 
-                                if (modifier == null || modifier.getTicksExisted() >= modifier.getExpireTime() - 20)
+                                if (modifier == null || modifier.getTicksExisted() >= modifier.getExpireTime() - 60)
                                 {
                                     this.insulatePlayer(player);
                                     break;
@@ -486,25 +524,43 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             ItemStack fuelStack = this.getItems().get(0);
             if (!fuelStack.isEmpty())
             {
-                int itemFuel = getItemFuel(fuelStack);
-                if (itemFuel != 0)
+                // Potion items
+                List<MobEffectInstance> itemEffects = PotionUtils.getMobEffects(fuelStack);
+                if (!itemEffects.isEmpty() && !itemEffects.equals(effects))
                 {
-                    int fuel = itemFuel > 0 ? hotFuel : coldFuel;
-                    if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
+                    if (fuelStack.getItem() instanceof PotionItem)
+                    {   this.getItems().set(0, Items.GLASS_BOTTLE.getDefaultInstance());
+                    }
+                    else if (!fuelStack.hasContainerItem() || fuelStack.getCount() > 1)
+                    {   fuelStack.shrink(1);
+                    }
+                    else
+                    {   this.getItems().set(0, fuelStack.getContainerItem());
+                    }
+
+                    level.playSound(null, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
+                    effects.clear();
+                    effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
+                }
+                // Normal fuel items
+                else
+                {
+                    int itemFuel = getItemFuel(fuelStack);
+                    if (itemFuel != 0)
                     {
-                        if (fuelStack.hasContainerItem())
+                        int fuel = itemFuel > 0 ? hotFuel : coldFuel;
+                        if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
                         {
-                            if (fuelStack.getCount() == 1)
+                            if (!fuelStack.hasContainerItem() || fuelStack.getCount() > 1)
+                            {   int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
+                                fuelStack.shrink(consumeCount);
+                                addFuel(itemFuel * consumeCount, hotFuel, coldFuel);
+                            }
+                            else
                             {
                                 this.setItem(0, fuelStack.getContainerItem());
                                 addFuel(itemFuel, hotFuel, coldFuel);
                             }
-                        }
-                        else
-                        {
-                            int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
-                            fuelStack.shrink(consumeCount);
-                            addFuel(itemFuel * consumeCount, hotFuel, coldFuel);
                         }
                     }
                 }
@@ -539,34 +595,34 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    boolean insulatePlayer(Player player)
+    void insulatePlayer(Player player)
     {
         // Get the player's temperature
-        if (!(shouldUseHotFuel && shouldUseColdFuel))
+        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {
-            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            double temp = cap.getTemp(Temperature.Type.WORLD);
+            double min = cap.getTemp(Temperature.Type.FLOOR);
+            double max = cap.getTemp(Temperature.Type.CEIL);
+
+            // If the player is already insulated, check the input temperature reported by the HearthTempModifier
+            AtomicDouble hearthTemp = new AtomicDouble(temp);
+            cap.getModifiers(Temperature.Type.WORLD).stream().filter(mod -> mod instanceof HearthTempModifier).forEach(mod -> hearthTemp.set(mod.getLastInput()));
+            temp = hearthTemp.get();
+
+            // Tell the hearth to use hot fuel
+            shouldUseHotFuel |= hotFuel > 0 && temp < ConfigSettings.MIN_TEMP.get() + min;
+            // Tell the hearth to use cold fuel
+            shouldUseColdFuel |= coldFuel > 0 && temp > ConfigSettings.MAX_TEMP.get() + max;
+
+            if (shouldUseHotFuel || shouldUseColdFuel)
             {
-                double temp = cap.getTemp(Temperature.Type.WORLD);
-                if (CSMath.withinRange(temp, ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()))
-                {
-                    HearthTempModifier mod = Temperature.getModifier(cap, Temperature.Type.WORLD, HearthTempModifier.class);
-                    if (mod != null) temp = mod.getLastInput();
-                }
+                int effectLevel = Math.min(9, (int) ((insulationLevel / (double) INSULATION_TIME) * 9));
+                player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
+            }
 
-                // Tell the hearth to use hot fuel
-                shouldUseHotFuel = shouldUseHotFuel || (hotFuel > 0 && temp < ConfigSettings.MIN_TEMP.get());
-                // Tell the hearth to use cold fuel
-                shouldUseColdFuel = shouldUseColdFuel || (coldFuel > 0 && temp > ConfigSettings.MAX_TEMP.get());
-            });
-        }
-
-        if (shouldUseHotFuel || shouldUseColdFuel)
-        {
-            int effectLevel = Math.min(9, (int) ((insulationLevel / (double) INSULATION_TIME) * 9));
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 100, effectLevel, false, false, true));
-            return true;
-        }
-        return false;
+            effects.forEach(effect -> player.addEffect(new MobEffectInstance(effect.getEffect(), effect.getEffect() == MobEffects.NIGHT_VISION ? 400 : 120,
+                                                                             effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon())));
+        });
     }
 
     private boolean createPipeSpread(BlockPos bpos, BlockState fromState, SpreadPath newPath, SpreadPath oldPath, Direction direction)
@@ -662,8 +718,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
             this.setChanged();
 
-            CompoundTag tag = new CompoundTag();
-            this.saveAdditional(tag);
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(blockPos)), new BlockDataUpdateMessage(this));
         }
     }
@@ -688,6 +742,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.setColdFuel(tag.getInt("coldFuel"));
         this.setHotFuel(tag.getInt("hotFuel"));
         this.insulationLevel = tag.getInt("insulationLevel");
+        this.loadEffects(tag);
         ContainerHelper.loadAllItems(tag, this.items);
     }
 
@@ -698,7 +753,29 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         tag.putInt("coldFuel", this.getColdFuel());
         tag.putInt("hotFuel", this.getHotFuel());
         tag.putInt("insulationLevel", insulationLevel);
+        this.saveEffects(tag);
         ContainerHelper.saveAllItems(tag, this.items);
+    }
+
+    void saveEffects(CompoundTag tag)
+    {
+        if (this.effects.size() > 0)
+        {
+            ListTag list = new ListTag();
+            for (MobEffectInstance effect : this.effects)
+                list.add(effect.save(new CompoundTag()));
+            tag.put("Effects", list);
+        }
+    }
+
+    void loadEffects(CompoundTag tag)
+    {
+        if (tag.contains("Effects"))
+        {
+            ListTag list = tag.getList("Effects", 10);
+            for (int i = 0; i < list.size(); i++)
+                this.effects.add(MobEffectInstance.load(list.getCompound(i)));
+        }
     }
 
     public void replacePaths(Collection<SpreadPath> newPaths)
