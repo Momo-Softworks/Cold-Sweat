@@ -14,6 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class BiomeTempModifier extends TempModifier
 {
@@ -43,47 +44,46 @@ public class BiomeTempModifier extends TempModifier
             else
             {
                 int samples = this.getNBT().getInt("Samples");
-                // Failsafe for old TempModifiers
-                if (samples < 1)
-                {   samples = 16;
-                    this.getNBT().putInt("Samples", 25);
+                if (samples <= 0)
+                {   samples = 25;
+                    this.getNBT().putInt("Samples", samples);
                 }
 
-                List<BlockPos> posGrid = WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16);
-                // Sample biomes 1 chunk up and down as well
-                posGrid.addAll(WorldHelper.getPositionGrid(entity.blockPosition().above(16), 9, 16));
-                posGrid.addAll(WorldHelper.getPositionGrid(entity.blockPosition().below(16), 9, 16));
-
-                for (BlockPos blockPos : posGrid)
+                for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
-                    Biome biome = entity.level.getBiomeManager().getBiome(blockPos).value();
-                    ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
+                    List<Biome> biomes = Stream.of(entity.level.getBiomeManager().getBiome(blockPos).value(),
+                                                   entity.level.getBiomeManager().getBiome(blockPos.above(16)).value(),
+                                                   entity.level.getBiomeManager().getBiome(blockPos.below(16)).value()).distinct().toList();
+                    for (Biome biome : biomes)
+                    {
+                        ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
 
-                    Pair<Double, Double> configTemp;
-                    double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-                    double biomeTemp = biome.getBaseTemperature();
+                        Pair<Double, Double> configTemp;
+                        double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                        double biomeTemp = biome.getBaseTemperature();
 
-                    // Get the biome's temperature, either overridden by config or calculated
-                    // Start with biome override
-                    configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
-                                 // If no override, check for offset
-                                 Pair.of((configTemp = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
-                                 // If no offset, do nothing
-                                 Pair.of(0d, 0d)))
-                                 // Add the biome's base temperature and calculate min/max based on biome's humidity
-                                 .getFirst() + biomeTemp - biomeVariance, configTemp.getSecond() + biomeTemp + biomeVariance));
+                        // Get the biome's temperature, either overridden by config or calculated
+                        // Start with biome override
+                        configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+                                     // If no override, check for offset
+                                     Pair.of((configTemp = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+                                     // If no offset, do nothing
+                                     Pair.of(0d, 0d)))
+                                     // Add the biome's base temperature and calculate min/max based on biome's humidity
+                                     .getFirst() + biomeTemp - biomeVariance, configTemp.getSecond() + biomeTemp + biomeVariance));
 
-                    // Biome temp at midnight (bottom of the sine wave)
-                    double min = configTemp.getFirst();
-                    // Biome temp at noon (top of the sine wave)
-                    double max = configTemp.getSecond();
+                        // Biome temp at midnight (bottom of the sine wave)
+                        double min = configTemp.getFirst();
+                        // Biome temp at noon (top of the sine wave)
+                        double max = configTemp.getSecond();
 
-                    // If time doesn't exist in the player's dimension, don't use it
-                    DimensionType dimension = entity.level.dimensionType();
-                    if (!dimension.hasCeiling())
-                        worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / (samples + 18);
-                    else
-                        worldTemp += CSMath.average(max, min) / (samples + 18);
+                        // If time doesn't exist in the player's dimension, don't use it
+                        DimensionType dimension = entity.level.dimensionType();
+                        if (!dimension.hasCeiling())
+                            worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / (samples * biomes.size());
+                        else
+                            worldTemp += CSMath.average(max, min) / (samples * biomes.size());
+                    }
                 }
 
                 worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
