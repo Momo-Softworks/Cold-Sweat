@@ -45,5 +45,6 @@ public class ColdSweatGroup extends CreativeModeTab
         ModItems.GOAT_FUR_PARKA.fillItemCategory(this, items);
         ModItems.GOAT_FUR_PANTS.fillItemCategory(this, items);
         ModItems.GOAT_FUR_BOOTS.fillItemCategory(this, items);
+        ModItems.CHAMELEON_SPAWN_EGG.fillItemCategory(this, items);
     }
 }
