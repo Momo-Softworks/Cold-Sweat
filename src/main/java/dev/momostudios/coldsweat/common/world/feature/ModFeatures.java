@@ -16,5 +16,5 @@ public class ModFeatures
             new RandomPatchConfiguration(64, 20, 5, PlacementUtils.onlyWhenEmpty(FeatureInit.SOUL_STALK_FEATURE.get(), NoneFeatureConfiguration.INSTANCE)));
 
     public static final Holder<PlacedFeature> SOUL_STALK_PLACEMENT = PlacementUtils.register("soul_stalk_placement", SOUL_STALK,
-            RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome(), CountPlacement.of(4));
+            RarityFilter.onAverageOnceEvery(3), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome(), CountPlacement.of(2));
 }
