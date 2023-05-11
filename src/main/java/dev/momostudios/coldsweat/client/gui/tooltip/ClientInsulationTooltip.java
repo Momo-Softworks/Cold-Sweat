@@ -49,11 +49,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
 
         int slots = ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()];
-        int barLength = slots * 6 + 12;
         this.width = 0;
-
-        int fullCellV = 8;
-        int partialCellV = 12;
 
         List<Triplet<Double, Double, Double>> positiveInsul = new ArrayList<>();
         List<Triplet<Double, Double, Double>> negativeInsul = new ArrayList<>();
@@ -70,7 +66,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     if (cold > 0 || hot > 0)
                         positiveInsul.add(new Triplet<>(cold, hot, null));
                     else
-                        negativeInsul.add(new Triplet<>(cold, hot, null));
+                        negativeInsul.add(new Triplet<>(-cold, hot, null));
                 }
                 // If one is positive and one is negative, split them into two lists
                 else
@@ -78,12 +74,12 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     if (cold > 0)
                         positiveInsul.add(new Triplet<>(cold, 0.0, null));
                     else
-                        negativeInsul.add(new Triplet<>(cold, 0.0, null));
+                        negativeInsul.add(new Triplet<>(-cold, 0.0, null));
 
                     if (hot > 0)
                         positiveInsul.add(new Triplet<>(0.0, hot, null));
                     else
-                        negativeInsul.add(new Triplet<>(0.0, hot, null));
+                        negativeInsul.add(new Triplet<>(0.0, -hot, null));
                 }
             }
             else if (value instanceof ItemInsulationCap.AdaptiveInsulation insul)
@@ -97,137 +93,107 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 {   positiveInsul.add(new Triplet<>(cold, hot, factor));
                 }
                 else
-                {   negativeInsul.add(new Triplet<>(cold, hot, factor));
+                {   negativeInsul.add(new Triplet<>(cold, -hot, factor));
                 }
             }
         }
+
+        // Render the bars
+        poseStack.pushPose();
+        width = 0;
 
         // Positive (default) insulation bar
         int posSlots = positiveInsul.size();
-        if (posSlots > 0)
-        {
-            for (int i = 0; i < Math.max(slots, posSlots); i++)
-            {
-                // background
-                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 16);
-            }
-
-            for (int i = 0; i < posSlots; i++)
-            {
-                Triplet<Double, Double, Double> value = positiveInsul.get(i);
-                double cold = value.getA();
-                double hot = value.getB();
-                Double factor = value.getC();
-                boolean isAdaptive = factor != null;
-                int cellU;
-                int cellV;
-                float alpha = 1.0f;
-
-                if (isAdaptive)
-                {
-                    int tempOffset = factor >= 0 ? -4 : 0;
-                    cellU = 0;
-                    cellV = 8 + tempOffset;
-                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 12 + tempOffset, 6, 4, 32, 16);
-                    alpha = (float) Math.abs(factor);
-                    if (factor < 0) alpha = 1.0f - alpha;
-                }
-                else
-                {
-                    cellU = // neutral
-                            cold == hot ? 6
-                            // cold
-                            : Math.abs(cold) > Math.abs(hot) ? 12
-                            // hot
-                            : 18;
-                    // partial or full cell
-                    cellV = cold + hot >= 2 ? fullCellV : partialCellV;
-                }
-
-                // cells
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-                GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 16);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                RenderSystem.disableBlend();
-            }
-
-            // border
-            for (int i = 0; i < Math.max(slots, posSlots); i++)
-            {
-                boolean end = i == Math.max(slots, posSlots) - 1;
-                GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 16);
-            }
-            // icon
-            GuiComponent.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 16);
-
-            this.width = barLength;
-        }
-
         // Negative insulation bar
         int negSlots = negativeInsul.size();
+
+        if (posSlots > 0)
+        {
+            drawInsulationBar(poseStack, x, y, slots, positiveInsul, negativeInsul.size() > 0, false);
+            poseStack.translate(Math.max(slots, posSlots) * 6 + 12, 0, 0);
+            width += posSlots * 6 + 12;
+        }
+
         if (negSlots > 0)
         {
-            for (int i = 0; i < Math.max(slots, negSlots); i++)
+            drawInsulationBar(poseStack, x, y, slots, negativeInsul, true, true);
+            width += negSlots * 6 + 12;
+        }
+
+        poseStack.popPose();
+    }
+
+    void drawInsulationBar(PoseStack poseStack, int x, int y, int armorSlots, List<Triplet<Double, Double, Double>> insul, boolean drawSign, boolean isNegative)
+    {
+        int slots = insul.size();
+
+        if (slots > 0)
+        {
+            for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {
                 // background
-                GuiComponent.blit(poseStack, x + 7 + i*6 + barLength, y + 1, 0, 0, 0, 6, 4, 32, 16);
+                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 24);
             }
 
-            for (int i = 0; i < negSlots; i++)
+            for (int i = 0; i < slots; i++)
             {
-                Triplet<Double, Double, Double> value = negativeInsul.get(i);
+                Triplet<Double, Double, Double> value = insul.get(i);
                 double cold = value.getA();
                 double hot = value.getB();
                 Double factor = value.getC();
                 boolean isAdaptive = factor != null;
                 int cellU;
-                int cellV;
-                float alpha = 1.0f;
 
                 if (isAdaptive)
                 {
-                    cellU = 0;
-                    cellV = 4;
-                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 12, 6, 4, 32, 16);
-                    alpha = (float) CSMath.blend(1, 0, factor, -1, 1);
+                    int cellV = cold + hot >= 2 ? 16 : 20;
+                    float alpha = (float) Math.abs(factor);
+                    cellU = factor < 0 ? 6 : 18;
+
+                    // Draw base green underneath
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 12, cellV, 6, 4, 32, 24);
+
+                    // Draw either hot/cold texture ontop with alpha
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
+                    RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                    RenderSystem.disableBlend();
                 }
                 else
                 {
+                    int cellV = cold + hot >= 2 ? 8 : 12;
                     cellU = // neutral
                             cold == hot ? 6
                             // cold
                             : Math.abs(cold) > Math.abs(hot) ? 12
                             // hot
                             : 18;
-                    // partial or full cell
-                    cellV = cold + hot >= 2 ? fullCellV : partialCellV;
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
                 }
-
-                // cells
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-                GuiComponent.blit(poseStack, x + 7 + i * 6 + barLength, y + 1, 0, cellU, cellV, 6, 4, 32, 16);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                RenderSystem.disableBlend();
             }
 
             // border
-            for (int i = 0; i < Math.max(slots, negSlots); i++)
+            for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {
-                boolean end = i == Math.max(slots, negSlots) - 1;
-                GuiComponent.blit(poseStack, x + 7 + i*6 + barLength, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 16);
+                boolean end = i == Math.max(armorSlots, slots) - 1;
+                GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
             }
             // icon
-            GuiComponent.blit(poseStack, x + barLength, y - 1, 0, 24, 8, 8, 8, 32, 16);
-            // positive sign
-            GuiComponent.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 16);
-            // negative sign
-            GuiComponent.blit(poseStack, x + 3 + barLength, y + 3, 0, 19, 5, 5, 3, 32, 16);
+            GuiComponent.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 24);
 
-            this.width += barLength;
+            this.width += slots * 6 + 12;
+
+            // sign
+            if (drawSign)
+            {
+                if (isNegative)
+                    GuiComponent.blit(poseStack, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
+                else
+                    GuiComponent.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+            }
         }
     }
 }
+
