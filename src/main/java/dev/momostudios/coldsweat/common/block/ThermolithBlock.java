@@ -51,7 +51,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     {
         return Properties
                 .of(Material.STONE)
-                .sound(SoundType.NETHERITE_BLOCK)
+                .sound(SoundType.GILDED_BLACKSTONE)
                 .strength(2f)
                 .explosionResistance(10f)
                 .requiresCorrectToolForDrops()
