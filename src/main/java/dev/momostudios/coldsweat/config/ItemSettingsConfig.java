@@ -89,9 +89,7 @@ public final class ItemSettingsConfig
                 .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
                         "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
                 .defineList("Fuel Items", ListBuilder.begin(
-                                List.of("cold_sweat:soul_sprout",   4),
-                                List.of("#minecraft:warped_stems",  1),
-                                List.of("#minecraft:crimson_stems", 1)
+                                List.of("cold_sweat:soul_sprout",   4)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
@@ -152,20 +150,20 @@ public final class ItemSettingsConfig
                 .comment("Defines the items that provide insulation when worn",
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]")
                 .defineList("Insulating Armor", ListBuilder.begin(
-                                List.of("minecraft:leather_helmet",     4, 4),
-                                List.of("minecraft:leather_chestplate", 6, 6),
-                                List.of("minecraft:leather_leggings",   5, 5),
-                                List.of("minecraft:leather_boots",      4, 4),
-                                List.of("cold_sweat:hoglin_headpiece",  0, 8),
-                                List.of("cold_sweat:hoglin_tunic",      0, 12),
-                                List.of("cold_sweat:hoglin_trousers",   0, 10),
-                                List.of("cold_sweat:hoglin_hooves",     0, 8),
-                                List.of("cold_sweat:goat_fur_cap",      8, 0),
-                                List.of("cold_sweat:goat_fur_parka",    12, 0),
-                                List.of("cold_sweat:goat_fur_pants",    10, 0),
-                                List.of("cold_sweat:goat_fur_boots",    8, 0))
+                                List.of("minecraft:leather_helmet",      4,  4),
+                                List.of("minecraft:leather_chestplate",  6,  6),
+                                List.of("minecraft:leather_leggings",    5,  5),
+                                List.of("minecraft:leather_boots",       4,  4),
+                                List.of("cold_sweat:hoglin_headpiece",   0,  8),
+                                List.of("cold_sweat:hoglin_tunic",       0,  12),
+                                List.of("cold_sweat:hoglin_trousers",    0,  10),
+                                List.of("cold_sweat:hoglin_hooves",      0,  8),
+                                List.of("cold_sweat:goat_fur_cap",       8,  0),
+                                List.of("cold_sweat:goat_fur_parka",     12, 0),
+                                List.of("cold_sweat:goat_fur_pants",     10, 0),
+                                List.of("cold_sweat:goat_fur_boots",     8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> List.of("environmental:yak_pants",   5, 5)
+                                () -> List.of("environmental:yak_pants", 10, -5)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
