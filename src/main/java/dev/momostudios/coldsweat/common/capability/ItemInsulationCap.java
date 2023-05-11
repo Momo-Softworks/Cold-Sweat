@@ -40,42 +40,40 @@ public class ItemInsulationCap implements IInsulatableCap
                 double cold = insul.getFirst();
                 double hot = insul.getSecond();
                 double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
-                CSMath.shrink(cold, neutral);
-                CSMath.shrink(hot, neutral);
+                cold = CSMath.shrink(cold, neutral);
+                hot  = CSMath.shrink(hot, neutral);
 
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
                 {
-                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
+                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2 * CSMath.getSign(cold));
                     newValues.add(new Insulation(coldInsul, 0d));
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
                 {
-                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), CSMath.getSign(neutral));
                     newValues.add(new Insulation(neutralInsul, neutralInsul));
                 }
 
                 // Hot insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(hot) / 2); i++)
                 {
-                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
+                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2 * CSMath.getSign(hot));
                     newValues.add(new Insulation(0d, hotInsul));
                 }
             }
             else if (ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem()))
             {
                 Pair<Double, Double> insul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem());
-                for (InsulationPair insulationPair : insulValues.stream().filter(pair -> pair instanceof AdaptiveInsulation).toList())
+                AdaptiveInsulation adaptiveInsulation = (AdaptiveInsulation) insulValues.get(0);
+
+                double insulValue = insul.getFirst();
+                for (int i = 0; i < CSMath.ceil(Math.abs(insulValue) / 2); i++)
                 {
-                    AdaptiveInsulation adaptiveInsulation = (AdaptiveInsulation) insulationPair;
-                    double value = insul.getFirst();
-                    for (int i = 0; i < CSMath.ceil(Math.abs(value)) / 2; i++)
-                    {
-                        double adaptInsul = CSMath.minAbs(CSMath.shrink(value, i * 2), 2);
-                        newValues.add(new AdaptiveInsulation(adaptInsul, adaptiveInsulation.getFactor(), insul.getSecond()));
-                    }
+                    double adaptInsul = CSMath.minAbs(CSMath.shrink(insulValue, i * 2), 2 * CSMath.getSign(insulValue));
+                    newValues.add(new AdaptiveInsulation(adaptInsul, adaptiveInsulation.getFactor(), adaptiveInsulation.getSpeed()));
                 }
             }
             insulValues.clear();
@@ -293,10 +291,27 @@ public class ItemInsulationCap implements IInsulatableCap
     {
         pairs.sort(Comparator.comparingDouble(pair ->
         {
-            if (pair instanceof AdaptiveInsulation)
-                return 3;
+            if (pair instanceof AdaptiveInsulation insul)
+                return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
             else if (pair instanceof Insulation insul)
-                return Math.abs(insul.cold - 2);
+            {
+                double abscold = Math.abs(insul.cold);
+                double abshot = Math.abs(insul.hot);
+                if (abscold >= 2 && abshot >= 2)
+                    return 2;
+                else if (abscold >= 2)
+                    return 0;
+                else if (abshot >= 2)
+                    return 4;
+                else if (abscold >= 1 && abshot >= 1)
+                    return 3;
+                else if (abscold >= 1)
+                    return 1;
+                else if (abshot >= 1)
+                    return 5;
+                else
+                    return 1;
+            }
             return 0;
         }));
         return pairs;
