@@ -3,7 +3,7 @@
   "pattern":
   [
     "CCC",
-    "D D",
+    "C C",
     "DDD"
   ],
   "key":
@@ -14,7 +14,7 @@
     },
     "D":
     {
-      "item": "minecraft:polished_deepslate"
+      "tag": "cold_sweat:boiler_craftable_deepslate"
     }
   },
   "result":
