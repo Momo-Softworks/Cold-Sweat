@@ -3,7 +3,8 @@
   "compatibilityLevel": "JAVA_17",
   "package": "dev.momostudios.coldsweat.mixin",
   "client": [
-    "InventoryOpenClientMixin",
+    "MixinInventoryOpenClient",
+    "MixinEffectsScreen",
     "MixinGoatModel",
     "MixinHeartRender",
     "MixinHumanoidModel",
@@ -11,13 +12,13 @@
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
-    "EntityRidingMixin",
-    "InventoryOpenServerMixin",
+    "MixinInventoryOpenServer",
     "MixinBlockUpdate",
+    "MixinEntityRiding",
     "MixinMinecart",
+    "MixinPickEntity",
     "MixinSoulCampfire",
-    "MixinSoulFire",
-    "PickEntityMixin"
+    "MixinSoulFire"
   ],
   "injectors": {
     "defaultRequire": 1
