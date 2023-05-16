@@ -82,8 +82,8 @@ public class ArmorInsulation
                             }
                             else if (value instanceof AdaptiveInsulation insul)
                             {
-                                cold += CSMath.blend(insul.getInsulation(), 0, insul.getFactor(), -1, 1);
-                                hot += CSMath.blend(0, insul.getInsulation(), insul.getFactor(), -1, 1);
+                                cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
+                                hot += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
                             }
                         }
 
