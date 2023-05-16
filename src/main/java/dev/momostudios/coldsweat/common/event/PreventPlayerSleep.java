@@ -17,7 +17,7 @@ public class PreventPlayerSleep
     public static void onTrySleep(PlayerSleepInBedEvent event)
     {
         // There's already something blocking the player from sleeping
-        if (event.getResultStatus() != null || ColdSweatConfig.getInstance().isSleepChecked()) return;
+        if (event.getResultStatus() != null || !ColdSweatConfig.getInstance().isSleepChecked()) return;
 
         Player player = event.getEntity();
         double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
