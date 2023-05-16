@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(LivingEntity.class)
-public class EntityRidingMixin
+public class MixinEntityRiding
 {
     @Redirect(method = "baseTick()V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;stopRiding()V"))
