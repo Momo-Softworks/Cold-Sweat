@@ -12,6 +12,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -382,6 +384,15 @@ public class CSMath
     public static double sigFigs(double value, int sigFigs)
     {
         return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
+    }
+
+    public static double round(double value, int places)
+    {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     public static int blendColors(int color1, int color2, float ratio)

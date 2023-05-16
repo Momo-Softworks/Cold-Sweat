@@ -84,11 +84,12 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
     static void renderCells(PoseStack poseStack, int x, int y, int slots, double insulation, int uvX, boolean isAdaptive)
     {
+        double rounded = CSMath.round(Math.abs(insulation), 1);
         for (int i = 0; i < slots; i++)
         {
             int uvY = isAdaptive
-                      ? (Math.abs(insulation) - i * 2 >= 1.5 ? 16 : 20)
-                      : (Math.abs(insulation) - i * 2 >= 2 ? 8 : 12);
+                      ? (rounded - i * 2 >= 2 ? 16 : 20)
+                      : (rounded - i * 2 >= 2 ? 8 : 12);
             GuiComponent.blit(poseStack, x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
         }
     }

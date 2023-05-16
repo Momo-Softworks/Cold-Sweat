@@ -127,22 +127,22 @@ public final class ItemSettingsConfig
                                 List.of("cold_sweat:hoglin_trousers",   0, 10),
                                 List.of("cold_sweat:hoglin_hooves",     0, 8),
                                 List.of("cold_sweat:goat_fur_cap",      8, 0),
-                                List.of("cold_sweat:goat_fur_parka",    12, 0),
-                                List.of("cold_sweat:goat_fur_pants",    10, 0),
+                                List.of("cold_sweat:goat_fur_parka",   12, 0),
+                                List.of("cold_sweat:goat_fur_pants",   10, 0),
                                 List.of("cold_sweat:goat_fur_boots",    8, 0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> List.of("environmental:yak_hair", 2, -1)
+                                () -> List.of("environmental:yak_hair", 1.5, -1)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
-        adaptiveInsulatingItems = BUILDER
+         adaptiveInsulatingItems = BUILDER
                 .comment("Defines insulation items that have the special \"chameleon molt\" effect",
-                         "Format: [[\"item_id\", insulation], [\"item_id\", insulation], ...etc]",
+                         "Format: [[\"item_id\", insulation, adaptSpeed], [\"item_id\", insulation, adaptSpeed], ...etc]",
                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                         "\"insulation\": The amount of insulation the item provides. Will adjust to hot/cold based on the environment.",
                         "\"adaptSpeed\": The speed at which the item adapts to the current temperature. Higher values mean faster adaptation (from 0 to 1).")
                 .defineList("Adaptive Insulation Ingredients", ListBuilder.begin(
-                                List.of("cold_sweat:chameleon_molt", 1.5, 0.0085)
+                                List.of("cold_sweat:chameleon_molt", 2, 0.0085)
                             ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
@@ -163,7 +163,7 @@ public final class ItemSettingsConfig
                                 List.of("cold_sweat:goat_fur_pants",     10, 0),
                                 List.of("cold_sweat:goat_fur_boots",     8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> List.of("environmental:yak_pants", 10, -5)
+                                () -> List.of("environmental:yak_pants", 7.5, -5)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
