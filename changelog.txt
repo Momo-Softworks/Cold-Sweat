@@ -1114,3 +1114,34 @@ Fixes:
 
 Technical Changes:
 - Items with both item insulation and equipment insulation (like leather armor) will show both bars if the values are different
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04c
+- Added new sub-command for /temperature: "showmodifiers"
+      - Displays all of the temperature modifiers present on an entity, as well as how each one affects the entity's temperature
+- Potions can now be placed into the hearth's fuel slot, giving all nearby players the effect until they leave the radius or the potion expires
+- Changed the chameleon molt texture
+- Added the chameleon spawn egg to Cold Sweat's creative tab
+- Soul stalk now generates with a more even distribution throughout the Nether
+- Removed warped/crimson stems as default fuel sources for the soulspring lamp
+      ! This change will not take effect until "item-settings.toml" is deleted
+- The boiler can now be crafted with cobbled, polished, and normal deepslate
+- Smoothed out the texture of the sewing table
+
+Fixes:
+- Fixed items with an insulation value of less than 2 not displaying or working properly
+- Fixed the insulation bar on armor items not stretching properly if the item has more than max insulation
+- Fixed adaptive insulation vales always appearing to occupy one slot
+- Fixed adaptive insulation values of more than 2 duplicating on armor
+- Fixed soul campfires not freezing the player
+- Fixed the chameleon's hitbox overlapping the player's head when mounted
+- Fixed temperature in areas of the world with 3D biomes behaving erratically
+- Fixed yak pants having different insulating properties from yak hair (Environmental)
+- Fixed the hearth allowing the Insulated effect to expire while the player is within range
+- Fixed armor insulation values above the max value being achievable under Vanilla conditions in some cases
+- Fixed the effects of the "Prevent Sleep When in Danger" config option being reversed
+
+Translation Updates:
+- Updated Chinese translation (by @wumeng on Discord)
+- Updated Brazilian Portuguese translation (by @Vellar on Discord)
