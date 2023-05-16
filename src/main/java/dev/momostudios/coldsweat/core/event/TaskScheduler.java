@@ -1,14 +1,13 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler
@@ -23,7 +22,7 @@ public class TaskScheduler
         {
             Map<Runnable, Integer> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
 
-            synchronized (schedule)
+            synchronized (event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE)
             {
                 // Iterate through all active tasks
                 schedule.entrySet().removeIf(entry ->
@@ -34,12 +33,10 @@ public class TaskScheduler
                     if (ticks <= 0)
                     {
                         try
-                        {
-                            entry.getKey().run();
+                        {   entry.getKey().run();
                         }
                         catch (Exception e)
-                        {
-                            ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                        {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
                             e.printStackTrace();
                         }
                         return true;
