@@ -3,13 +3,14 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
 import dev.momostudios.coldsweat.common.container.IceboxContainer;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
+import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -18,6 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,19 +28,30 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuProvider
+public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
+
     public static int SLOTS = 10;
     public static int MAX_FUEL = 1000;
+
+    LazyOptional<? extends IItemHandler>[] slotHandlers =
+            SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
+
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 
     List<ServerPlayer> usingPlayers = new ArrayList<>();
@@ -196,8 +209,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     {
         // Track the players using this block
         if (playerInv.player instanceof ServerPlayer serverPlayer)
-        {
-            usingPlayers.add(serverPlayer);
+        {   usingPlayers.add(serverPlayer);
         }
         return new IceboxContainer(id, playerInv, this);
     }
@@ -271,5 +283,38 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     public void clearContent()
     {
         items.clear();
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction dir)
+    {
+        return dir.getAxis() == Direction.Axis.Y ? WATERSKIN_SLOTS : FUEL_SLOT;
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction)
+    {
+        if (slot == 0)
+            return this.getItemFuel(stack) != 0;
+        else return stack.is(ModItems.WATERSKIN) || stack.is(ModItems.FILLED_WATERSKIN);
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
+    {
+        return true;
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
+        if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            if (facing == Direction.UP)
+                return slotHandlers[0].cast();
+            else if (facing == Direction.DOWN)
+                return slotHandlers[1].cast();
+            else
+                return slotHandlers[2].cast();
+        }
+        return super.getCapability(capability, facing);
     }
 }
