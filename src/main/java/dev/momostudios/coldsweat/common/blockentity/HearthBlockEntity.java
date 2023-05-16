@@ -620,7 +620,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
             }
 
-            effects.forEach(effect -> player.addEffect(new MobEffectInstance(effect.getEffect(), effect.getEffect() == MobEffects.NIGHT_VISION ? 400 : 120,
+            effects.forEach(effect -> player.addEffect(new MobEffectInstance(effect.getEffect(), effect.getEffect() == MobEffects.NIGHT_VISION ? 399 : 119,
                                                                              effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon())));
         });
     }
@@ -645,6 +645,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             }
             return true;
         }
+    }
+
+    public List<MobEffectInstance> getEffects()
+    {   return effects;
     }
 
     public static int getItemFuel(ItemStack item)
@@ -770,6 +774,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     void loadEffects(CompoundTag tag)
     {
+        this.effects.clear();
         if (tag.contains("Effects"))
         {
             ListTag list = tag.getList("Effects", 10);
