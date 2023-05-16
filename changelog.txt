@@ -1128,6 +1128,8 @@ Technical Changes:
       ! This change will not take effect until "item-settings.toml" is deleted
 - The boiler can now be crafted with cobbled, polished, and normal deepslate
 - Smoothed out the texture of the sewing table
+- The icebox/boiler now only accept items from hoppers on the correct side
+      - Waterskins are inserted from the top, fuel is inserted at the side, and waterskins can be extracted from the bottom
 
 Fixes:
 - Fixed items with an insulation value of less than 2 not displaying or working properly
