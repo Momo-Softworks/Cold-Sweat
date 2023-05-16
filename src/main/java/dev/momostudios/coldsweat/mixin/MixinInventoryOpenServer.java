@@ -6,7 +6,6 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Fixes a Forge oversight that causes the PlayerContainerEvent.Open event to not fire when a player opens their inventory.
  */
 @Mixin(ServerGamePacketListenerImpl.class)
-class InventoryOpenServerMixin
+class MixinInventoryOpenServer
 {
     @Shadow
     public ServerPlayer player;
@@ -37,7 +36,7 @@ class InventoryOpenServerMixin
 }
 
 @Mixin(Minecraft.class)
-class InventoryOpenClientMixin
+class MixinInventoryOpenClient
 {
     @Shadow
     public LocalPlayer player;
