@@ -22,7 +22,7 @@ public class TaskScheduler
         {
             Map<Runnable, Integer> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
 
-            synchronized (schedule)
+            synchronized (event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE)
             {
                 // Iterate through all active tasks
                 schedule.entrySet().removeIf(entry ->
@@ -33,12 +33,10 @@ public class TaskScheduler
                     if (ticks <= 0)
                     {
                         try
-                        {
-                            entry.getKey().run();
+                        {   entry.getKey().run();
                         }
                         catch (Exception e)
-                        {
-                            ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                        {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
                             e.printStackTrace();
                         }
                         return true;
