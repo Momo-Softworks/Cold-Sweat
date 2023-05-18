@@ -5,50 +5,44 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler
 {
-    static final Map<Runnable, Integer> SERVER_SCHEDULE = Collections.synchronizedMap(new HashMap<>());
-    static final Map<Runnable, Integer> CLIENT_SCHEDULE = Collections.synchronizedMap(new HashMap<>());
+    static final ConcurrentLinkedQueue<QueueEntry> SERVER_SCHEDULE = new ConcurrentLinkedQueue<>();
+    static final ConcurrentLinkedQueue<QueueEntry> CLIENT_SCHEDULE = new ConcurrentLinkedQueue<>();
 
     @SubscribeEvent
     public static void runScheduledTasks(TickEvent event)
     {
         if ((event instanceof TickEvent.ServerTickEvent || event instanceof TickEvent.ClientTickEvent) && event.phase == TickEvent.Phase.START)
         {
-            Map<Runnable, Integer> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
+            ConcurrentLinkedQueue<QueueEntry> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
 
-            synchronized (event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE)
+            // Iterate through all active tasks
+            schedule.removeIf(entry ->
             {
-                // Iterate through all active tasks
-                schedule.entrySet().removeIf(entry ->
-                {
-                    int ticks = entry.getValue();
+                int ticks = entry.time;
 
-                    // If the task is ready to run, run it and remove it from the schedule
-                    if (ticks <= 0)
-                    {
-                        try
-                        {   entry.getKey().run();
-                        }
-                        catch (Exception e)
-                        {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
-                            e.printStackTrace();
-                        }
-                        return true;
+                // If the task is ready to run, run it and remove it from the schedule
+                if (ticks <= 0)
+                {
+                    try
+                    {   entry.task.run();
                     }
-                    // Otherwise, decrement the task's tick count
-                    else
-                    {
-                        entry.setValue(ticks - 1);
-                        return false;
+                    catch (Exception e)
+                    {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                        e.printStackTrace();
                     }
-                });
-            }
+                    return true;
+                }
+                // Otherwise, decrement the task's tick count
+                else
+                {   entry.time = ticks - 1;
+                }
+                return false;
+            });
         }
     }
 
@@ -59,7 +53,7 @@ public class TaskScheduler
      */
     public static void scheduleServer(Runnable task, int delay)
     {
-        SERVER_SCHEDULE.put(task, delay);
+        SERVER_SCHEDULE.add(new QueueEntry(task, delay));
     }
 
     /**
@@ -69,6 +63,29 @@ public class TaskScheduler
      */
     public static void scheduleClient(Runnable task, int delay)
     {
-        CLIENT_SCHEDULE.put(task, delay);
+        CLIENT_SCHEDULE.add(new QueueEntry(task, delay));
+    }
+
+    static class QueueEntry
+    {
+        private final Runnable task;
+        private int time;
+
+        public QueueEntry(Runnable task, int time)
+        {   this.task = task;
+            this.time = time;
+        }
+
+        public Runnable getTask()
+        {   return task;
+        }
+
+        public int getTime()
+        {   return time;
+        }
+
+        public void setTime(int time)
+        {   this.time = time;
+        }
     }
 }
