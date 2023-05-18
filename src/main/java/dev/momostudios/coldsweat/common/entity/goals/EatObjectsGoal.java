@@ -126,7 +126,7 @@ public class EatObjectsGoal extends Goal
                         {   this.entity.onItemPickup(item);
 
                             UUID thrower = item.getThrower();
-                            if (item.getItem().getCount() > 0)
+                            if (item.getItem().getCount() > 1)
                             {   ItemStack stack = item.getItem().copy();
                                 stack.shrink(1);
                                 WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);

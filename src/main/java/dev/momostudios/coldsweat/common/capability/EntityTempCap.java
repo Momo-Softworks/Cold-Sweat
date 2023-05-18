@@ -16,14 +16,14 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
+import static dev.momostudios.coldsweat.common.event.EntityTempHandler.VALID_MODIFIER_TYPES;
+import static dev.momostudios.coldsweat.common.event.EntityTempHandler.VALID_TEMPERATURE_TYPES;
+
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
  */
 public class EntityTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.CEIL, Type.FLOOR, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.CEIL, Type.FLOOR, Type.WORLD};
-
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
     int syncTimer = 0;

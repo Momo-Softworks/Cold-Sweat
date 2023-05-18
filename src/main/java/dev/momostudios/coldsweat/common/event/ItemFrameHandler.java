@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.event.common.EntityPickEvent;
-import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.Component;
@@ -13,7 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
-public class ItemFrameEvents
+public class ItemFrameHandler
 {
     @SubscribeEvent
     public static void onPickItem(EntityPickEvent event)

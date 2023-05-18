@@ -1,27 +1,16 @@
 package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
-import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
-import dev.momostudios.coldsweat.common.block.HearthTopBlock;
-import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
-import dev.momostudios.coldsweat.util.world.SpreadPath;
-import io.netty.util.internal.ConcurrentSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber
-public class HearthPathManagement
+public class HearthSaveDataHandler
 {
     public static final Set<BlockPos> HEARTH_POSITIONS = new HashSet<>();
     public static final Set<Pair<BlockPos, String>> DISABLED_HEARTHS = new HashSet<>();

@@ -12,7 +12,7 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
-import dev.momostudios.coldsweat.common.event.HearthPathManagement;
+import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
@@ -132,7 +132,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
         this.addPath(new SpreadPath(blockPos).setOrigin(blockPos));
-        HearthPathManagement.HEARTH_POSITIONS.add(pos);
+        HearthSaveDataHandler.HEARTH_POSITIONS.add(pos);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -330,7 +330,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 {
                     showParticles = level.isClientSide
                             && Minecraft.getInstance().options.particles == ParticleStatus.ALL
-                            && !HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
+                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
                 }
 
 
@@ -671,7 +671,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.hotFuel = CSMath.clamp(amount, 0, MAX_FUEL);
         this.updateFuelState();
 
-        if (amount == 0 && hasHotFuel)
+        if (amount <= 0 && hasHotFuel)
         {
             hasHotFuel = false;
             level.playSound(null, blockPos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
@@ -684,7 +684,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.coldFuel = CSMath.clamp(amount, 0, MAX_FUEL);
         this.updateFuelState();
 
-        if (amount == 0 && hasColdFuel)
+        if (amount <= 0 && hasColdFuel)
         {
             hasColdFuel = false;
             level.playSound(null, blockPos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
@@ -831,7 +831,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public void setRemoved()
     {
         super.setRemoved();
-        HearthPathManagement.HEARTH_POSITIONS.remove(this.blockPos);
+        HearthSaveDataHandler.HEARTH_POSITIONS.remove(this.blockPos);
         if (level.isClientSide)
             ClientOnlyHelper.removeHearthPosition(this.blockPos);
     }

@@ -3,9 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.client.gui.tooltip.InsulationTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.InsulatorTooltip;
-import dev.momostudios.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
@@ -29,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class ItemTooltipInfo
+public class TooltipHandler
 {
     @SubscribeEvent
     public static void addSimpleTooltips(ItemTooltipEvent event)

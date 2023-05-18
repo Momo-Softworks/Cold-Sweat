@@ -223,7 +223,7 @@ public class TempEffectsClient
                 if (playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
-                    if (blur > 0 && mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json"))
+                    if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
                     {   BLUR_APPLIED = false;
                     }
                     if (!BLUR_APPLIED)

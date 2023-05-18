@@ -18,8 +18,7 @@ public class ClientJoinSetup
     public static void onJoin(ClientPlayerNetworkEvent.LoggedInEvent event)
     {
         if (!GENERATED)
-        {
-            GENERATED = true;
+        {   GENERATED = true;
             ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         }
 
@@ -31,8 +30,7 @@ public class ClientJoinSetup
     public static void onLeave(ClientPlayerNetworkEvent.LoggedOutEvent event)
     {
         if (GENERATED)
-        {
-            GENERATED = false;
+        {   GENERATED = false;
         }
     }
 }

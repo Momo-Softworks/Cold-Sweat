@@ -11,7 +11,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
-import dev.momostudios.coldsweat.common.event.HearthPathManagement;
+import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
@@ -129,7 +129,7 @@ public class HearthDebugRenderer
 
             for (Map.Entry<BlockPos, Map<SpreadPath, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {
-                if (HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
+                if (HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
 
                 Map<SpreadPath, Collection<Direction>> points = entry.getValue();
                 for (Map.Entry<SpreadPath, Collection<Direction>> pair : points.entrySet())
@@ -196,7 +196,7 @@ public class HearthDebugRenderer
         && Minecraft.getInstance().level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
         && ClientSettingsConfig.getInstance().hearthDebug())
         {
-            for (BlockPos pos : HearthPathManagement.HEARTH_POSITIONS)
+            for (BlockPos pos : HearthSaveDataHandler.HEARTH_POSITIONS)
             {
                 BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
                 if (blockEntity instanceof HearthBlockEntity hearth)

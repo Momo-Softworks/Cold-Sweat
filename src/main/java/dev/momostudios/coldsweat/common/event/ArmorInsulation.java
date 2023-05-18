@@ -36,7 +36,7 @@ public class ArmorInsulation
 {
 
     @SubscribeEvent
-    public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
+    public static void addArmorModifiers(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
         if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
@@ -67,7 +67,8 @@ public class ArmorInsulation
                         List<InsulationPair> insulation = iCap.map(cap ->
                         {
                             if (cap instanceof ItemInsulationCap cap1)
-                            {   return cap1.getInsulationValues();
+                            {   cap1.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+                                return cap1.getInsulationValues();
                             }
                             return new ArrayList<InsulationPair>();
                         }).orElse(new ArrayList<>());
@@ -90,11 +91,6 @@ public class ArmorInsulation
                         // Used for tracking "fully_insulated" advancement
                         if ((cold + hot) / 2 >= getInsulationSlots(armorStack))
                         {   fullyInsulated++;
-                        }
-
-                        if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
-                        {
-                            cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
                         }
                     }
 

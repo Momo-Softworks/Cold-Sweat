@@ -257,15 +257,7 @@ public class Temperature
         }
     }
 
-    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Type type, boolean allowDupes)
-    {
-        for (TempModifier modifier : modifiers)
-        {
-            addModifier(entity, modifier, type, allowDupes);
-        }
-    }
-
-    public static void addModifiersSimple(LivingEntity entity, Type type, List<TempModifier> modifiers, boolean duplicates)
+    public static void addModifiers(LivingEntity entity, Type type, List<TempModifier> modifiers, boolean duplicates)
     {
         getTemperatureCap(entity).ifPresent(cap ->
         {
