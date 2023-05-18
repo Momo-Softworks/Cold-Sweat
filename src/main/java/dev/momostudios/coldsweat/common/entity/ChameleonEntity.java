@@ -334,17 +334,20 @@ public class ChameleonEntity extends Animal
             || Math.sqrt(Math.pow(this.getX() - this.getTrackingPos().getX(), 2) + Math.pow(this.getZ() - this.getTrackingPos().getZ(), 2)) < 20))
             {
                 // Award nearby players the "chameleon_find_biome" advancement
-                Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
-                for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
+                if (this.getServer() != null)
                 {
-                    if (advancement != null)
+                    Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
+                    for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
                     {
-                        if (player.getAdvancements().getOrStartProgress(advancement).isDone())
-                            continue;
-                        player.getAdvancements().award(advancement, "requirement");
+                        if (advancement != null)
+                        {
+                            if (player.getAdvancements().getOrStartProgress(advancement).isDone())
+                                continue;
+                            player.getAdvancements().award(advancement, "requirement");
+                        }
                     }
+                    this.clearTrackingPos();
                 }
-                this.clearTrackingPos();
             }
         }
 
@@ -366,8 +369,7 @@ public class ChameleonEntity extends Animal
     public boolean hurt(DamageSource source, float amount)
     {
         if (source.getEntity() != null && !this.isInvulnerableTo(source))
-        {
-            this.setHurtTimestamp(this.tickCount);
+        {   this.setHurtTimestamp(this.tickCount);
         }
         return super.hurt(source, amount);
     }
@@ -375,8 +377,7 @@ public class ChameleonEntity extends Animal
     @Nullable
     @Override
     public Entity changeDimension(ServerLevel p_20118_, ITeleporter teleporter)
-    {
-        this.clearTrackingPos();
+    {   this.clearTrackingPos();
         return super.changeDimension(p_20118_, teleporter);
     }
 
@@ -393,14 +394,12 @@ public class ChameleonEntity extends Animal
                     if (player != null && !this.isPlayerTrusted(player))
                     {
                         if (player.isCreative() || Math.random() < 0.3)
-                        {
-                            this.setPersistenceRequired();
+                        {   this.setPersistenceRequired();
                             this.addTrustedPlayer(itemEntity.getThrower());
                             WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
                         }
                         else
-                        {
-                            WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                        {   WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
                         }
                     }
                 }
@@ -409,15 +408,13 @@ public class ChameleonEntity extends Animal
                     if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
                     {
                         ChameleonEdibles.EDIBLES.entrySet().stream().filter(e -> e.getValue().equals(edible)).map(Map.Entry::getKey).forEach(item ->
-                        {
-                            this.setCooldown(item, edible.getCooldown());
+                        {   this.setCooldown(item, edible.getCooldown());
                         });
                     }
                     else
                     {
                         ChameleonEdibles.EDIBLES.entrySet().stream().filter(e -> e.getValue().equals(edible)).map(Map.Entry::getKey).forEach(item ->
-                        {
-                            this.setCooldown(item, edible.getCooldown() / 4);
+                        {   this.setCooldown(item, edible.getCooldown() / 4);
                         });
                     }
                 }
