@@ -77,12 +77,20 @@ public class BiomeTempModifier extends TempModifier
                         // Biome temp at noon (top of the sine wave)
                         double max = configTemp.getSecond();
 
-                        // If time doesn't exist in the player's dimension, don't use it
+                        double divisor = (samples * biomes.size());
+
                         DimensionType dimension = entity.level.dimensionType();
                         if (!dimension.hasCeiling())
-                            worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / (samples * biomes.size());
-                        else
-                            worldTemp += CSMath.average(max, min) / (samples * biomes.size());
+                        {
+                            double altitude = entity.getY();
+                            double mid = (min + max) / 2;
+                            // Biome temp with time of day
+                            worldTemp += CSMath.blend(min, max, Math.sin(entity.level.getDayTime() / (12000 / Math.PI)), -1, 1) / divisor
+                                      // Altitude calculation
+                                      + (CSMath.blend(0, min - mid, altitude, entity.level.getSeaLevel(), entity.level.getMaxBuildHeight()) / divisor) * 2;
+                        }
+                        // If dimension has ceiling (don't use time or altitude)
+                        else worldTemp += CSMath.average(max, min) / divisor;
                     }
                 }
 
