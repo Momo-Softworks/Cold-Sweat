@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -38,6 +39,7 @@ public class BlockTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
+        Map<ChunkPos, LevelChunk> chunks = new HashMap<>();
 
         Level level = entity.level;
         int range = this.getNBT().getInt("Range");
@@ -51,7 +53,8 @@ public class BlockTempModifier extends TempModifier
         {
             for (int z = -range; z < range; z++)
             {
-                LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk((entity.blockPosition().getX() + x) >> 4, (entity.blockPosition().getZ() + z) >> 4, ChunkStatus.FULL, false);
+                LevelChunk chunk = chunks.computeIfAbsent(new ChunkPos(entity.blockPosition().getX() >> 4, entity.blockPosition().getZ() >> 4),
+                                                          (chunkPos) -> (LevelChunk) level.getChunkSource().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false));
                 if (chunk == null) continue;
 
                 for (int y = -range; y < range; y++)
@@ -74,14 +77,10 @@ public class BlockTempModifier extends TempModifier
                         double effectAmount = effectAmounts.getOrDefault(be, 0.0);
 
                         // Is totalTemp within the bounds of the BlockTemp's min/max allowed temps?
-                        if (CSMath.isBetween(effectAmount, be.minEffect(), be.maxEffect()))
+                        if (CSMath.withinRange(effectAmount, be.minEffect(), be.maxEffect()))
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vec3 pos = Vec3.atCenterOf(blockpos);
-
-                            // Cast a ray between the player and the block
-                            // Lessen the effect with each block between the player and the block
-                            AtomicInteger blocks = new AtomicInteger();
 
                             // Gets the closest point in the player's BB to the block
                             double playerRadius = entity.getBbWidth() / 2;
@@ -93,6 +92,9 @@ public class BlockTempModifier extends TempModifier
                             double distance = CSMath.getDistance(playerClosest, pos);
                             double tempToAdd = be.getTemperature(level, entity, state, blockpos, distance);
 
+                            // Cast a ray between the player and the block
+                            // Lessen the effect with each block between the player and the block
+                            AtomicInteger blocks = new AtomicInteger();
                             Vec3 ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
                             WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk,
