@@ -122,7 +122,7 @@
   "cold_sweat.config.world_temp_location.name":     "*世界温度偏移",
 
   "cold_sweat.config.camera_sway.name":             "视觉摇晃",
-  "cold_sweat.config.camera_sway.description":      "当玩家太热时随机摇晃视角",
+  "cold_sweat.config.camera_sway.desc":             "当玩家太热时随机摇晃视角",
 
   
   "cold_sweat.config.custom_hotbar.desc":           "是否使用Cold Sweat的自定义热栏布局(禁用这个，如果它与其他mod冲突)。",
