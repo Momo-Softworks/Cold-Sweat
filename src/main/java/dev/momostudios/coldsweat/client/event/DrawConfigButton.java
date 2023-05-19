@@ -7,8 +7,7 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ClientConfigAskMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -58,8 +57,11 @@ public class DrawConfigButton
                 // Disable all other buttons
                 event.getScreen().children().forEach(child ->
                 {
-                    if (child instanceof Button button && !button.getMessage().getString().equals(CommonComponents.GUI_DONE.getString()))
+                    if (child instanceof AbstractButton button && !button.getMessage().getString().equals(CommonComponents.GUI_DONE.getString()))
                     {   button.active = false;
+                    }
+                    if (child instanceof SliderButton sliderButton)
+                    {   sliderButton.active = false;
                     }
                 });
 
