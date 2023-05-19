@@ -31,9 +31,21 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue hearthDebug;
 
+    private static final ForgeConfigSpec.BooleanValue showConfigButton;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
+    static final ForgeConfigSpec.BooleanValue cameraSway;
+
 
     static 
     {
+        showConfigButton = BUILDER
+                .comment("Show the config menu button in the Options menu")
+                .define("Enable In-Game Config", true);
+        configButtonPos = BUILDER
+                .comment("The position (offset) of the config button on the screen")
+                .defineList("Config Button Position", List.of(0, 0),
+                it -> it instanceof Integer);
+
         /*
          Temperature display preferences
          */
@@ -204,6 +216,26 @@ public class ClientSettingsConfig
     public void setHearthDebug(boolean enabled) {
         hearthDebug.set(enabled);
     }
+
+    public boolean isButtonShowing()
+    {   return showConfigButton.get();
+    }
+    public List<? extends Integer> getConfigButtonPos()
+    {   return configButtonPos.get();
+    }
+    public void setConfigButtonPos(List<Integer> pos)
+    {   configButtonPos.set(pos);
+    }
+
+    public boolean isCameraSwayEnabled()
+    {
+        return ClientSettingsConfig.cameraSway.get();
+    }
+    public void setCameraSway(boolean sway)
+    {
+        ClientSettingsConfig.cameraSway.set(sway);
+    }
+
 
     public void save() {
         SPEC.save();

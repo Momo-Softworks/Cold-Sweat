@@ -74,6 +74,24 @@ public class ConfigPageTwo extends AbstractConfigPage
                 },
                 false, false, true, Component.translatable("cold_sweat.config.hearth_debug.desc").getString());
 
+        // Camera Sway
+        this.addButton("camera_sway", Side.LEFT, () -> Component.translatable("cold_sweat.config.camera_sway.name").getString()
+                        + ": " + (clientConfig.isCameraSwayEnabled() ? ON : OFF),
+                button ->
+                {
+                    clientConfig.setCameraSway(!clientConfig.isCameraSwayEnabled());
+                },
+                false, false, true, Component.translatable("cold_sweat.config.camera_sway.desc").getString());
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name").getString(),
+                button ->
+                {
+                    DrawConfigButton.DRAW_CONTROLS = true;
+                    this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                },
+                false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc").getString());
+
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
                 amount -> clientConfig.setBodyIconX(clientConfig.bodyIconX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
