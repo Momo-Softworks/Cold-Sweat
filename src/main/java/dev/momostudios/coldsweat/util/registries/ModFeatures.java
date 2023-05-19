@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.common.world.feature;
+package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.core.init.FeatureInit;
 import net.minecraft.core.Holder;
