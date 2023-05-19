@@ -10,6 +10,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -29,7 +30,7 @@ public class ConfigPageDifficulty extends Screen
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
 
-    ResourceLocation configButtons = new ResourceLocation("cold_sweat:textures/gui/screen/configs/config_gui.png");
+    static final ResourceLocation CONFIG_BUTTONS_LOCATION = new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png");
 
     public ConfigPageDifficulty(Screen parentScreen)
     {
@@ -50,7 +51,7 @@ public class ConfigPageDifficulty extends Screen
                 this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
                 this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
                 BOTTOM_BUTTON_WIDTH, 20,
-                new TranslatableComponent("gui.done"),
+                CommonComponents.GUI_DONE,
                 button -> this.close()));
     }
 
@@ -96,7 +97,7 @@ public class ConfigPageDifficulty extends Screen
         drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
 
-        RenderSystem.setShaderTexture(0, configButtons);
+        RenderSystem.setShaderTexture(0, CONFIG_BUTTONS_LOCATION);
 
         // Draw Slider Bar
         this.blit(poseStack, this.width / 2 - 76, this.height / 2 - 53, 12,
@@ -104,7 +105,7 @@ public class ConfigPageDifficulty extends Screen
 
         // Draw Slider Head
         this.blit(poseStack, this.width / 2 - 78 + (ConfigSettings.DIFFICULTY.get() * 37), this.height / 2 - 58,
-                isMouseOverSlider(mouseX, mouseY) ? 6 : 0, 128, 6, 16);
+                isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
         String difficultyName = ConfigScreen.difficultyName(ConfigSettings.DIFFICULTY.get());
