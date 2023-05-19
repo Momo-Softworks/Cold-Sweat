@@ -263,13 +263,15 @@ public abstract class AbstractConfigPage extends Screen
     protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
-        int xOffset = side == Side.LEFT ? -81 : 152;
+        int xOffset = side == Side.LEFT ? -97 : 136;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
 
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
 
-        int labelOffset = font.width(label.getString()) > 84 ?
-                font.width(label.getString()) - 84 : 0;
+        int labelWidth = font.width(label.getString());
+        int labelOffset = labelWidth > 84
+                        ? labelWidth - 84
+                        : 0;
 
         // Left button
         ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
@@ -322,18 +324,19 @@ public abstract class AbstractConfigPage extends Screen
         resetButton.active = shouldBeActive;
 
         // Add the option text
-        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
+        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
-        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 114, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        if (clientside)
+            this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
 
         this.setTooltip(id, tooltip);
         this.addWidgetBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
 
-        // Move down
+        // Add height to the list
         if (side == Side.LEFT)
-            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.5;
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
         else
-            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.5;
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
     }
 
     @Override
