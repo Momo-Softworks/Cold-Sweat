@@ -15,7 +15,6 @@ import java.util.function.Function;
  * For example, biome temperature, time of day, depth, and waterskins are all TempModifiers<br>
  *<br>
  * It is up to you to apply and remove these modifiers manually.<br>
- * To make an instant modifier that does not persist on the player, you can call {@code PlayerTemp.removeModifier()} to remove it in {@code calculate()}.<br>
  *<br>
  * TempModifiers must be REGISTERED using {@link TempModifierRegisterEvent}<br>
  * (see {@link TempModifierInit} for an example)<br>
