@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -63,7 +64,7 @@ public class TempEffectsClient
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
 
-            if (ColdSweatConfig.getInstance().isCameraSwayEnabled())
+            if (ClientSettingsConfig.getInstance().isCameraSwayEnabled())
             {
                 // Camera "shivers" when temp is < -50
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
