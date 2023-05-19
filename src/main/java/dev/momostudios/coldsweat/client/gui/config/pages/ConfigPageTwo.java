@@ -1,11 +1,14 @@
 package dev.momostudios.coldsweat.client.gui.config.pages;
 
+import dev.momostudios.coldsweat.client.event.DrawConfigButton;
 import dev.momostudios.coldsweat.client.gui.config.AbstractConfigPage;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -19,8 +22,8 @@ public class ConfigPageTwo extends AbstractConfigPage
     public ConfigPageTwo(Screen parentScreen)
     {
         super(parentScreen);
-        ON = new TranslatableComponent("options.on").getString();
-        OFF = new TranslatableComponent("options.off").getString();
+        ON = CommonComponents.OPTION_ON.getString();
+        OFF = CommonComponents.OPTION_OFF.getString();
     }
 
     @Override
@@ -76,25 +79,46 @@ public class ConfigPageTwo extends AbstractConfigPage
                 },
                 false, false, true, new TranslatableComponent("cold_sweat.config.hearth_debug.desc").getString());
 
+        // Camera Sway
+        this.addButton("camera_sway", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.camera_sway.name").getString()
+                        + ": " + (clientConfig.isCameraSwayEnabled() ? ON : OFF),
+                button ->
+                {
+                    clientConfig.setCameraSway(!clientConfig.isCameraSwayEnabled());
+                },
+                false, false, true, new TranslatableComponent("cold_sweat.config.camera_sway.desc").getString());
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.config_button_pos.name").getString(),
+                button ->
+                {
+                    DrawConfigButton.DRAW_CONTROLS = true;
+                    this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                },
+                false, false, true, new TranslatableComponent("cold_sweat.config.config_button_pos.desc").getString());
+
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),
                 amount -> clientConfig.setBodyIconX(clientConfig.bodyIconX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 amount -> clientConfig.setBodyIconY(clientConfig.bodyIconY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 () -> { clientConfig.setBodyIconX(0); clientConfig.setBodyIconY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.temp_icon_location.desc").getString());
+                false, false, true, new TranslatableComponent("cold_sweat.config.temp_icon_location.desc").getString(),
+                           "§7"+new TranslatableComponent("cold_sweat.config.offset_shift.name").getString());
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_readout_location.name"),
                 amount -> clientConfig.setBodyReadoutX(clientConfig.bodyReadoutX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 amount -> clientConfig.setBodyReadoutY(clientConfig.bodyReadoutY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 () -> { clientConfig.setBodyReadoutX(0); clientConfig.setBodyReadoutY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.temp_readout_location.desc").getString());
+                false, false, true, new TranslatableComponent("cold_sweat.config.temp_readout_location.desc").getString(),
+                           "§7"+new TranslatableComponent("cold_sweat.config.offset_shift.name").getString());
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.world_temp_location.name"),
                 amount -> clientConfig.setWorldGaugeX(clientConfig.worldGaugeX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 amount -> clientConfig.setWorldGaugeY(clientConfig.worldGaugeY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
                 () -> { clientConfig.setWorldGaugeX(0); clientConfig.setWorldGaugeY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.world_temp_location.desc").getString());
+                false, false, true, new TranslatableComponent("cold_sweat.config.world_temp_location.desc").getString(),
+                           "§7"+new TranslatableComponent("cold_sweat.config.offset_shift.name").getString());
 
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.custom_hotbar.name").getString() + ": " + (clientConfig.customHotbar() ? ON : OFF),
@@ -105,8 +129,6 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("icon_bobbing", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.icon_bobbing.name").getString() + ": " + (clientConfig.iconBobbing() ? ON : OFF),
                 button -> clientConfig.setIconBobbing(!clientConfig.iconBobbing()),
                 false, false, true, new TranslatableComponent("cold_sweat.config.icon_bobbing.desc").getString());
-
-        this.addLabel("shift_label", Side.RIGHT, new TranslatableComponent("cold_sweat.config.offset_shift.name").getString(), 11908533);
     }
 
     @Override

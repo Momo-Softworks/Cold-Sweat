@@ -2,7 +2,6 @@ package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -40,11 +39,8 @@ public class ColdSweatConfig
 
     private static final ForgeConfigSpec.BooleanValue coldSoulFire;
 
-    private static final ForgeConfigSpec.BooleanValue showConfigButton;
-
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
 
-    private static final ForgeConfigSpec.BooleanValue cameraSway;
     private static final ForgeConfigSpec.BooleanValue heatstrokeFog;
     private static final ForgeConfigSpec.BooleanValue freezingHearts;
     private static final ForgeConfigSpec.BooleanValue coldKnockback;
@@ -53,10 +49,6 @@ public class ColdSweatConfig
 
     static 
     {
-        showConfigButton = BUILDER
-                .comment("Show the config menu button in the Options menu")
-                .define("Enable In-Game Config", true);
-
         /*
          Difficulty
          */
@@ -110,9 +102,6 @@ public class ColdSweatConfig
 
         BUILDER.push("Temperature Effects");
             BUILDER.push("Hot");
-            cameraSway = BUILDER
-                .comment("When set to true, the camera will sway randomly when the player is too hot")
-                .define("Camera Sway", true);
             heatstrokeFog = BUILDER
                 .comment("When set to true, the player's view distance will decrease when they are too hot")
                 .define("Heatstroke Fog", true);
@@ -213,10 +202,6 @@ public class ColdSweatConfig
     /*
      * Non-private values for use elsewhere
      */
-    public boolean isButtonShowing()
-    {
-        return showConfigButton.get();
-    }
 
     public int getDifficulty() {
         return difficulty.get();
@@ -278,11 +263,6 @@ public class ColdSweatConfig
     public boolean isSleepChecked()
     {
         return checkSleep.get();
-    }
-
-    public boolean isCameraSwayEnabled()
-    {
-        return cameraSway.get();
     }
 
     public boolean heatstrokeFog()
@@ -353,11 +333,6 @@ public class ColdSweatConfig
     public void setGracePeriodEnabled(boolean enabled)
     {
         gracePeriodEnabled.set(enabled);
-    }
-
-    public void setCameraSway(boolean sway)
-    {
-        cameraSway.set(sway);
     }
 
     public void setHeatstrokeFog(boolean fog)
