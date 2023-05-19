@@ -113,7 +113,7 @@
   "cold_sweat.config.world_temp_location.name":     "*Смещение индикатора внешней темп.",
 
   "cold_sweat.config.camera_sway.name":             "Покачивание камеры",
-  "cold_sweat.config.camera_sway.description":      "Покачивание камеры в разные стороны когда темп. игрока слишком высокая",
+  "cold_sweat.config.camera_sway.desc":             "Покачивание камеры в разные стороны когда темп. игрока слишком высокая",
 
 
   "cold_sweat.config.custom_hotbar.desc":           "Будет ли использоваться изменённый интерфейс хотбара (выключите, если это мешает другим модам).",
