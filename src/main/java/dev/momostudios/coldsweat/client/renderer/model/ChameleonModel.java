@@ -317,7 +317,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 			});
 
 			// Move the body down to the ground
-			body.y += 23.5;
+			body.y = 23.5f;
 		}
 	}
 
@@ -350,16 +350,34 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 		}
 
 		ModelPart tongue1 = modelParts.get("Tongue1");
+		ModelPart head = body.getChild("Head");
 
 		tongue1.visible = false;
 
-		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		if (young)
+		{	head.visible = false;
+			poseStack.pushPose();
+			poseStack.scale(0.75f, 0.75f, 0.75f);
+			body.y = 32f;
+			body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+			poseStack.popPose();
+
+			head.visible = true;
+			head.y = 19.25f;
+			head.z = -2.25f;
+			head.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		}
+		else
+		{	body.y = 23.5f;
+			head.y = -5f;
+			head.z = -3f;
+			body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		}
 
 		// Render the tongue with a different VertexConsumer that culls backfaces
 		if (tongueVisible && !isOverlay)
 		{
 			poseStack.pushPose();
-			ModelPart head = modelParts.get("Head");
 			ModelPart jaw = modelParts.get("Jaw");
 
 			// vertex consumer for entityTranslucentCull
