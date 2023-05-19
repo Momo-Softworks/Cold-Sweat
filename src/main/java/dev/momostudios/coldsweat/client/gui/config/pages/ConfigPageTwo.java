@@ -59,13 +59,13 @@ public class ConfigPageTwo extends AbstractConfigPage
                     button.setMessage(Component.literal(Component.translatable("cold_sweat.config.grace_period.name").getString() + ": "
                             + (ConfigSettings.GRACE_ENABLED.get() ? ON : OFF)));
                 },
-                true, true, false, Component.translatable("cold_sweat.config.grace_period.desc").getString());
+                true, false, false, Component.translatable("cold_sweat.config.grace_period.desc").getString());
 
         // Grace Period Length
         this.addDecimalInput("grace_length", Side.LEFT, Component.translatable("cold_sweat.config.grace_period_length.name"),
                 value -> ConfigSettings.GRACE_LENGTH.set(value.intValue()),
                 input -> input.setValue(ConfigSettings.GRACE_LENGTH.get() + ""),
-                true, true, false, Component.translatable("cold_sweat.config.grace_period_length.desc_1").getString(),
+                true, false, false, Component.translatable("cold_sweat.config.grace_period_length.desc_1").getString(),
                             "§7"+Component.translatable("cold_sweat.config.grace_period_length.desc_2").getString()+"§r");
 
         // Hearth Debug
@@ -85,15 +85,6 @@ public class ConfigPageTwo extends AbstractConfigPage
                     clientConfig.setCameraSway(!clientConfig.isCameraSwayEnabled());
                 },
                 false, false, true, Component.translatable("cold_sweat.config.camera_sway.desc").getString());
-
-        // Config Button Repositioning Screen
-        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name").getString(),
-                button ->
-                {
-                    DrawConfigButton.DRAW_CONTROLS = true;
-                    this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-                },
-                false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc").getString());
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
@@ -127,6 +118,15 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("icon_bobbing", Side.RIGHT, () -> Component.translatable("cold_sweat.config.icon_bobbing.name").getString() + ": " + (clientConfig.iconBobbing() ? ON : OFF),
                 button -> clientConfig.setIconBobbing(!clientConfig.iconBobbing()),
                 false, false, true, Component.translatable("cold_sweat.config.icon_bobbing.desc").getString());
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.RIGHT, () -> Component.translatable("cold_sweat.config.config_button_pos.name").getString(),
+                       button ->
+                       {
+                           DrawConfigButton.DRAW_CONTROLS = true;
+                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                       },
+                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc").getString());
     }
 
     @Override
