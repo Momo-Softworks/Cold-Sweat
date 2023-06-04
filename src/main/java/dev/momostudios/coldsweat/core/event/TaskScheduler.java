@@ -1,14 +1,13 @@
 package dev.momostudios.coldsweat.core.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class TaskScheduler

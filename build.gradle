@@ -27,7 +27,7 @@ java {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.19.2'
     accessTransformer = file("src/main/resources/META-INF/coldsweat_at.cfg")
     runs {
         client {
@@ -94,29 +94,37 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
     mavenCentral()
 }
 
 dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.minecraftforge:forge:1.18.2-40.1.84'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.2.10'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    runtimeOnly fg.deobf("curse.maven:spark-361579:3824951")
-    compileOnly fg.deobf("curse.maven:sereneapi-291874:3599022")
-    compileOnly fg.deobf("curse.maven:werewolves-417851:4050257")
-    compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
-    implementation fg.deobf("curse.maven:curios-309927:3841948")
-    compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256")
-    compileOnly fg.deobf("curse.maven:carrots-311327:4382778")
-    runtimeOnly fg.deobf("curse.maven:byg-247560:4036050")
-    runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
-    compileOnly fg.deobf("curse.maven:create-328085:4371807")
-    compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
-    runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
-    runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4367068")
-    runtimeOnly fg.deobf("curse.maven:environmental-388992:4381294")
-    runtimeOnly fg.deobf("curse.maven:blueprint-382216:3991478")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3940240")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:4057111")
+    compileOnly fg.deobf("curse.maven:sereneapi-291874:4037228")
+    compileOnly fg.deobf("curse.maven:werewolves-417851:4318648")
+    compileOnly fg.deobf("curse.maven:vampirism-233029:4470449")
+    implementation fg.deobf("curse.maven:curios-309927:4523009")
+//    compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
+//    compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
+    runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
+    runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
+    compileOnly fg.deobf("curse.maven:create-328085:4371809")
+    runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
+    runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")
+    runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514")
+    runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:4494410")
+    runtimeOnly fg.deobf("curse.maven:geckolib-388172:4407241")
+    runtimeOnly fg.deobf("maven.modrinth:corgilib:1.19.2-1.0.0.32-forge")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

@@ -9,7 +9,7 @@ import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -73,7 +73,7 @@ public class RegisterItemOverrides
                                 default -> "§r";
                             };
                             int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().tempOffset();
-                            frame.getItem().setHoverName(new TextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
+                            frame.getItem().setHoverName(Component.literal(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
                         }
                     }
 

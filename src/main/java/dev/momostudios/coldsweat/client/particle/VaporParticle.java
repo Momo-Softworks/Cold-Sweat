@@ -49,7 +49,7 @@ public class VaporParticle extends TextureSheetParticle
     @Override
     public void tick()
     {
-        if (Minecraft.getInstance().options.particles == ParticleStatus.MINIMAL)
+        if (Minecraft.getInstance().options.particles().get() == ParticleStatus.MINIMAL)
             this.remove();
 
         this.xo = this.x;
@@ -140,7 +140,7 @@ public class VaporParticle extends TextureSheetParticle
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
+            if (Minecraft.getInstance().options.particles().get() != ParticleStatus.MINIMAL)
                 return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
             else
                 return null;
@@ -160,7 +160,7 @@ public class VaporParticle extends TextureSheetParticle
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            ParticleStatus status = Minecraft.getInstance().options.particles;
+            ParticleStatus status = Minecraft.getInstance().options.particles().get();
             if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
                 return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, true);
             else

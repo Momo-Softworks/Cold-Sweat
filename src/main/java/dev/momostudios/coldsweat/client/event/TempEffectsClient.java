@@ -21,10 +21,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -51,7 +51,7 @@ public class TempEffectsClient
 
     // Sway the player's camera when the player is too hot; swaying is more drastic at higher temperatures
     @SubscribeEvent
-    public static void setCamera(EntityViewRenderEvent.CameraSetup event)
+    public static void setCamera(ViewportEvent.ComputeCameraAngles event)
     {
         Player player = Minecraft.getInstance().player;
         if (!Minecraft.getInstance().isPaused() && player != null)
@@ -69,7 +69,7 @@ public class TempEffectsClient
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
                 {
                     float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
-                    double tickTime = player.tickCount + event.getPartialTicks();
+                    double tickTime = player.tickCount + event.getPartialTick();
                     float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime));
                     player.setYRot(player.getYRot() + shiverAmount);
                 }
@@ -134,19 +134,19 @@ public class TempEffectsClient
     }
 
     @SubscribeEvent
-    public static void renderFog(EntityViewRenderEvent event)
+    public static void renderFog(ViewportEvent event)
     {
         Player player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
             float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-            if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
+            if (event instanceof ViewportEvent.RenderFog fog)
             {
                 fog.setFarPlaneDistance(CSMath.blendLog(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
                 fog.setNearPlaneDistance(CSMath.blendLog(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
                 fog.setCanceled(true);
             }
-            else if (event instanceof EntityViewRenderEvent.FogColors fogColor)
+            else if (event instanceof ViewportEvent.ComputeFogColor fogColor)
             {
                 fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, immunityModifier, 50, 90));
                 fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, immunityModifier, 50, 90));
@@ -158,15 +158,15 @@ public class TempEffectsClient
     static ResourceLocation HAZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
 
     @SubscribeEvent
-    public static void vignette(RenderGameOverlayEvent.PreLayer event)
+    public static void vignette(RenderGuiOverlayEvent.Pre event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player != null && event.getOverlay() == ForgeIngameGui.VIGNETTE_ELEMENT
+        if (player != null && event.getOverlay() == VanillaGuiOverlay.VIGNETTE.type()
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
             float immunityModifier = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
             float opacity = CSMath.blend(0f, 1f, Math.abs(immunityModifier), 50, 100);
-            float tickTime = player.tickCount + event.getPartialTicks();
+            float tickTime = player.tickCount + event.getPartialTick();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
             double height = event.getWindow().getHeight();

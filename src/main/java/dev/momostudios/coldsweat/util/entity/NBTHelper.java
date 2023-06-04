@@ -82,7 +82,7 @@ public class NBTHelper
         }
         else if (owner instanceof BlockEntity blockEntity)
         {
-            tag = blockEntity.getTileData();
+            tag = blockEntity.getPersistentData();
         }
         else return 0;
 

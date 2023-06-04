@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -432,7 +433,7 @@ public class ChameleonEntity extends Animal
                ? 0.15 : 0;
     }
 
-    public static boolean canSpawn(EntityType<ChameleonEntity> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, Random random)
+    public static boolean canSpawn(EntityType<ChameleonEntity> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
     {
         BlockState state = level.getBlockState(pos.below());
         return state.is(BlockTags.ANIMALS_SPAWNABLE_ON)

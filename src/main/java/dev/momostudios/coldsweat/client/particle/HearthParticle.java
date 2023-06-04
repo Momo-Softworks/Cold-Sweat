@@ -56,7 +56,7 @@ public class HearthParticle extends TextureSheetParticle
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
+            if (Minecraft.getInstance().options.particles().get() != ParticleStatus.MINIMAL)
                 return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
             else
                 return null;

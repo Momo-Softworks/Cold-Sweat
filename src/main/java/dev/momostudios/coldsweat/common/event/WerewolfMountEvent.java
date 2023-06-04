@@ -13,9 +13,9 @@ public class WerewolfMountEvent
     public static void onPlayerRightClick(PlayerInteractEvent.EntityInteract event)
     {
         if (event.getTarget() instanceof Player werewolf && CompatManager.isWerewolvesLoaded()
-        && CompatManager.isWerewolf(werewolf) && !CompatManager.isWerewolf(event.getPlayer()))
+        && CompatManager.isWerewolf(werewolf) && !CompatManager.isWerewolf(event.getEntity()))
         {
-            event.getPlayer().startRiding(werewolf);
+            event.getEntity().startRiding(werewolf);
         }
     }
 }

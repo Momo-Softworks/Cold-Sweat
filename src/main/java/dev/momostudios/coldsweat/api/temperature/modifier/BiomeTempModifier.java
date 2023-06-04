@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.function.Function;
 
@@ -50,7 +51,7 @@ public class BiomeTempModifier extends TempModifier
                 for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
                     Biome biome = entity.level.getBiomeManager().getBiome(blockPos).value();
-                    ResourceLocation biomeID = biome.getRegistryName();
+                    ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
 
                     Pair<Double, Double> configTemp;
                     double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);

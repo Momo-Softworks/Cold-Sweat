@@ -193,9 +193,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     // Consume the item if not in creative
                     if (!player.isCreative())
                     {
-                        if (stack.hasContainerItem())
+                        if (stack.hasCraftingRemainingItem())
                         {
-                            ItemStack container = stack.getContainerItem();
+                            ItemStack container = stack.getCraftingRemainingItem();
                             player.setItemInHand(hand, container);
                         }
                         else
@@ -213,7 +213,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 // Open the GUI
                 else
                 {
-                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
+                    NetworkHooks.openScreen((ServerPlayer) player, te, pos);
                 }
             }
         }

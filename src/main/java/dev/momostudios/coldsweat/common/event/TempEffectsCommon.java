@@ -22,7 +22,7 @@ public class TempEffectsCommon
     @SubscribeEvent
     public static void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (!ColdSweatConfig.getInstance().coldMining() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
         // Get the player's temperature
@@ -68,7 +68,7 @@ public class TempEffectsCommon
     @SubscribeEvent
     public static void onPlayerKnockback(LivingKnockBackEvent event)
     {
-        if (event.getEntityLiving().getLastHurtByMob() instanceof Player player)
+        if (event.getEntity().getLastHurtByMob() instanceof Player player)
         {
             if (!ColdSweatConfig.getInstance().coldKnockback() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
@@ -87,7 +87,7 @@ public class TempEffectsCommon
     @SubscribeEvent
     public static void onHeal(LivingHealEvent event)
     {
-        if (event.getEntityLiving() instanceof Player player)
+        if (event.getEntity() instanceof Player player)
         {
             if (!ColdSweatConfig.getInstance().freezingHearts() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 

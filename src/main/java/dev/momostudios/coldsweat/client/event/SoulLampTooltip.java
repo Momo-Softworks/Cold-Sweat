@@ -6,7 +6,7 @@ import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,7 +23,7 @@ public class SoulLampTooltip
     static int FUEL_FADE_TIMER = 0;
 
     @SubscribeEvent
-    public static void renderInsertTooltip(ScreenEvent.DrawScreenEvent.Post event)
+    public static void renderInsertTooltip(ScreenEvent.Render.Post event)
     {
         if (event.getScreen() instanceof AbstractContainerScreen<?> screen)
         {
@@ -42,7 +42,7 @@ public class SoulLampTooltip
                     if (event.getMouseY() < slotY + 8)
                         ps.translate(0, 32, 0);
 
-                    event.getScreen().renderComponentTooltip(event.getPoseStack(), List.of(new TextComponent("       ")), slotX - 18, slotY + 1);
+                    event.getScreen().renderComponentTooltip(event.getPoseStack(), List.of(Component.literal("       ")), slotX - 18, slotY + 1);
 
                     RenderSystem.defaultBlendFunc();
 

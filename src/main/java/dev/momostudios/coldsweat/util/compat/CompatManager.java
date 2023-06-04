@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import org.jwaresoftware.mcmods.lib.api.combat.Armory;
 
 import java.util.Collection;
 
@@ -75,15 +74,15 @@ public class CompatManager
 
     public static boolean hasOzzyLiner(ItemStack stack)
     {
-        return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.TEMPERATURE_REGULATOR);
+        return false;
     }
     public static boolean hasOttoLiner(ItemStack stack)
     {
-        return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIFREEZE_SHIELD);
+        return false;
     }
     public static boolean hasOllieLiner(ItemStack stack)
     {
-        return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIBURN_SHIELD);
+        return false;
     }
 
     public static boolean isWerewolf(Player player)
@@ -99,7 +98,7 @@ public class CompatManager
         if (ARMOR_UNDERWEAR_LOADED
         && ((isDamageCold = event.getSource() == ModDamageSources.COLD) || event.getSource() == ModDamageSources.HOT))
         {
-            int liners = (int) ((Collection<ItemStack>) event.getEntityLiving().getArmorSlots()).stream()
+            int liners = (int) ((Collection<ItemStack>) event.getEntity().getArmorSlots()).stream()
                     .filter(stack -> isDamageCold ? hasOttoLiner(stack) : hasOllieLiner(stack))
                     .count();
 

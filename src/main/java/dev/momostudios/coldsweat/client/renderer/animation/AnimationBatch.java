@@ -58,7 +58,7 @@ public class AnimationBatch
         try
         {
             // Load the file pointed by the ResourceLocation
-            InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(path).getInputStream();
+            InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(path).orElseThrow().open();
 
             // Parse the file as JSON
             JsonObject obj = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();

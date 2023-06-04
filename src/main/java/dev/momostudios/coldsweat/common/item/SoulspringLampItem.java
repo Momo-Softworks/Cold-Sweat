@@ -147,12 +147,12 @@ public class SoulspringLampItem extends Item
     @SubscribeEvent
     public static void onEntityHit(LivingAttackEvent event)
     {
-        if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntityLiving() instanceof Player))
+        if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntity() instanceof Player))
         {
             ItemStack stack = attacker.getMainHandItem();
             if (!(stack.getItem() instanceof SoulspringLampItem)) return;
 
-            LivingEntity target = event.getEntityLiving();
+            LivingEntity target = event.getEntity();
 
             // If fuel < 64 and target NOT player
             if (getFuel(stack) < 64
@@ -188,7 +188,7 @@ public class SoulspringLampItem extends Item
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
     {
-        if (this.allowdedIn(tab))
+        if (this.allowedIn(tab))
         {
             ItemStack stack = new ItemStack(this);
             stack.getOrCreateTag().putBoolean("isOn", true);

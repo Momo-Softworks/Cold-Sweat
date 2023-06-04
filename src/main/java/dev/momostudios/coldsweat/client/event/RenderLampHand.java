@@ -106,10 +106,10 @@ public class RenderLampHand
             ms.translate(-event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.15 + (isRightHand ? 0 : -0.075), -0.05);
             try
             {
-                RENDER_ITEM.invoke(Minecraft.getInstance().getItemInHandRenderer(),
+                RENDER_ITEM.invoke(Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer(),
                                   player,
                                   event.getInterpolatedPitch(),
-                                  event.getPartialTicks(),
+                                  event.getPartialTick(),
                                   event.getHand(),
                                   0,
                                   event.getItemStack(),

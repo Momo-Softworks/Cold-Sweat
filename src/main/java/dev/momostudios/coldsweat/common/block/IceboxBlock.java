@@ -81,9 +81,9 @@ public class IceboxBlock extends Block implements EntityBlock
             {
                 if (!player.isCreative())
                 {
-                    if (stack.hasContainerItem())
+                    if (stack.hasCraftingRemainingItem())
                     {
-                        ItemStack container = stack.getContainerItem();
+                        ItemStack container = stack.getCraftingRemainingItem();
                         stack.shrink(1);
                         player.getInventory().add(container);
                     }
@@ -98,7 +98,7 @@ public class IceboxBlock extends Block implements EntityBlock
             }
             else if (!level.isClientSide)
             {
-                NetworkHooks.openGui((ServerPlayer) player, te, pos);
+                NetworkHooks.openScreen((ServerPlayer) player, te, pos);
             }
         }
         return InteractionResult.SUCCESS;

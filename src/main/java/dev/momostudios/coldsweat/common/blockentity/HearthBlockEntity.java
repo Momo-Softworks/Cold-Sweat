@@ -36,7 +36,6 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
@@ -149,7 +148,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth");
+        return Component.translatable("container." + ColdSweat.MOD_ID + ".hearth");
     }
 
     @Override
@@ -291,7 +290,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 if (this.ticksExisted % 10 == 0)
                 {
                     showParticles = level.isClientSide
-                            && Minecraft.getInstance().options.particles == ParticleStatus.ALL
+                            && Minecraft.getInstance().options.particles().get() == ParticleStatus.ALL
                             && !HearthPathManagement.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
                 }
 
@@ -492,11 +491,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     int fuel = itemFuel > 0 ? hotFuel : coldFuel;
                     if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
                     {
-                        if (fuelStack.hasContainerItem())
+                        if (fuelStack.hasCraftingRemainingItem())
                         {
                             if (fuelStack.getCount() == 1)
                             {
-                                this.setItem(0, fuelStack.getContainerItem());
+                                this.setItem(0, fuelStack.getCraftingRemainingItem());
                                 addFuel(itemFuel, hotFuel, coldFuel);
                             }
                         }

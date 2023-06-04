@@ -15,7 +15,7 @@ public class ClientJoinSetup
     static boolean GENERATED = false;
 
     @SubscribeEvent
-    public static void onJoin(ClientPlayerNetworkEvent.LoggedInEvent event)
+    public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event)
     {
         if (!GENERATED)
         {
@@ -28,7 +28,7 @@ public class ClientJoinSetup
     }
 
     @SubscribeEvent
-    public static void onLeave(ClientPlayerNetworkEvent.LoggedOutEvent event)
+    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event)
     {
         if (GENERATED)
         {

@@ -5,7 +5,7 @@ import dev.momostudios.coldsweat.common.entity.data.edible.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -13,9 +13,9 @@ import net.minecraftforge.fml.common.Mod;
 public class RegisterChameleonEdibles
 {
     @SubscribeEvent
-    public static void onWorldLoaded(WorldEvent.Load event)
+    public static void onWorldLoaded(LevelEvent.Load event)
     {
-        if (event.getWorld().isClientSide()) return;
+        if (event.getLevel().isClientSide()) return;
 
         EdiblesRegisterEvent edibleEvent = new EdiblesRegisterEvent();
         MinecraftForge.EVENT_BUS.post(edibleEvent);

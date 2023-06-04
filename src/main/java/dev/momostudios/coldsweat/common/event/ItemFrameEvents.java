@@ -1,13 +1,12 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.api.event.common.EntityPickEvent;
-import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -44,7 +43,7 @@ public class ItemFrameEvents
     }
 
     @SubscribeEvent
-    public static void onItemFrameLoaded(EntityJoinWorldEvent event)
+    public static void onItemFrameLoaded(EntityJoinLevelEvent event)
     {
         if (event.getEntity() instanceof ItemFrame frame && frame.getItem().getItem() == ModItems.THERMOMETER && !frame.level.isClientSide)
         {

@@ -125,7 +125,7 @@ public class HearthDebugRenderer
             };
 
             LevelChunk workingChunk = (LevelChunk) level.getChunk(new BlockPos(0, 0, 0));
-            float viewDistance = Minecraft.getInstance().options.renderDistance * 2f;
+            float viewDistance = Minecraft.getInstance().options.renderDistance().get() * 2f;
 
             for (Map.Entry<BlockPos, Map<SpreadPath, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {

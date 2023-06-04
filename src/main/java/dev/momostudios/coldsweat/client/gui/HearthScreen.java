@@ -14,7 +14,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,7 +28,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth"));
+        super(screenContainer, inv, Component.translatable("container." + ColdSweat.MOD_ID + ".hearth"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
@@ -84,7 +83,7 @@ public class HearthScreen extends AbstractContainerScreen<HearthContainer>
             @Override
             public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY)
             {
-                HearthScreen.this.renderComponentTooltip(poseStack, List.of(new TranslatableComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
+                HearthScreen.this.renderComponentTooltip(poseStack, List.of(Component.translatable("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
             }
         });
     }

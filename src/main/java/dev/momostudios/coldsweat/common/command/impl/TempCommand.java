@@ -10,7 +10,7 @@ import dev.momostudios.coldsweat.common.command.BaseCommand;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -49,7 +49,7 @@ public class TempCommand extends BaseCommand
     {
         if (entities.stream().anyMatch(entity -> !(entity instanceof LivingEntity)))
         {
-            source.sendFailure(new TranslatableComponent("commands.cold_sweat.temperature.invalid"));
+            source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;
         }
         // Set the temperature for all affected targets
@@ -68,11 +68,11 @@ public class TempCommand extends BaseCommand
         if (entities.size() == 1)
         {
             Entity target = entities.iterator().next();
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
+            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
         }
         else
         {
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
+            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -81,14 +81,14 @@ public class TempCommand extends BaseCommand
     {
         if (entities.stream().anyMatch(entity -> !(entity instanceof LivingEntity)))
         {
-            source.sendFailure(new TranslatableComponent("commands.cold_sweat.temperature.invalid"));
+            source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;
         }
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {
             //Compose & send message
             int bodyTemp = (int) Temperature.get((LivingEntity) target, Temperature.Type.BODY);
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
+            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;
     }

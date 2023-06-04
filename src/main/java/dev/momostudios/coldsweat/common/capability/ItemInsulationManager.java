@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -76,7 +75,7 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {
-        event.getPlayer().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+        event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
     }
 
     @SubscribeEvent

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ public class BlockTempRegistry
             if (MAPPED_BLOCKS.containsKey(block))
             {
                 ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockTemp ({})! Skipping BlockTemp {}...",
-                        block.getRegistryName().toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockTemp.getClass().getSimpleName());
+                        ForgeRegistries.BLOCKS.getKey(block).toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockTemp.getClass().getSimpleName());
             }
             else
             {

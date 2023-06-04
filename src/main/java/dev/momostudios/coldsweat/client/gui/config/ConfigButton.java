@@ -3,14 +3,12 @@ package dev.momostudios.coldsweat.client.gui.config;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import net.minecraft.network.chat.Component;
 
 public class ConfigButton extends Button
 {
-    public ConfigButton(int x, int y, int width, int height, BaseComponent title, Button.OnPress pressedAction)
+    public ConfigButton(int x, int y, int width, int height, Component title, Button.OnPress pressedAction)
     {
         super(x, y, width, height, title, pressedAction);
     }
@@ -29,7 +27,7 @@ public class ConfigButton extends Button
             if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
             {
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
-                        new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
+                        Component.literal(Component.translatable("cold_sweat.config.difficulty.name").getString() +
                                 " (" + ConfigScreen.difficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
             }
         }

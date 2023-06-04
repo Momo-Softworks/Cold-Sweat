@@ -15,6 +15,7 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -43,7 +44,9 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
+        bus.addListener(this::spawnPlacements);
         bus.addListener(this::registerCaps);
+        bus.addListener(Overlays::registerOverlays);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
 
@@ -71,9 +74,6 @@ public class ColdSweat
         ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
         {
-            SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn);
-
             // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
@@ -82,13 +82,17 @@ public class ColdSweat
         });
     }
 
+    public void spawnPlacements(SpawnPlacementRegisterEvent event)
+    {
+        event.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
+    }
+
     public void clientSetup(final FMLClientSetupEvent event)
     {
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
         ItemBlockRenderTypes.setRenderLayer(BlockInit.SOUL_STALK.get(), RenderType.cutoutMipped());
-        // Register GUI elements
-        Overlays.registerOverlays();
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)

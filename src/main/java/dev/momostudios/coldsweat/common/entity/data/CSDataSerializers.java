@@ -60,7 +60,7 @@ public class CSDataSerializers
             buffer.writeVarInt(value.size());
             for (Item item : value)
             {
-                buffer.writeRegistryId(item);
+                buffer.writeRegistryId(ForgeRegistries.ITEMS, item);
             }
         }
 
@@ -89,7 +89,7 @@ public class CSDataSerializers
             buffer.writeVarInt(value.size());
             for (Map.Entry<Item, Integer> entry : value.entrySet())
             {
-                buffer.writeRegistryId(entry.getKey());
+                buffer.writeRegistryId(ForgeRegistries.ITEMS, entry.getKey());
                 buffer.writeVarInt(entry.getValue());
             }
         }

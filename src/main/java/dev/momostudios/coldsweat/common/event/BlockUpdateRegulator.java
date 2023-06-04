@@ -16,7 +16,7 @@ public class BlockUpdateRegulator
     public static final List<BlockChangedEvent> EVENTS = Collections.synchronizedList(new ArrayList<>());
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent event)
+    public static void onWorldTick(TickEvent.LevelTickEvent event)
     {
         if (event.phase == TickEvent.Phase.END)
         {

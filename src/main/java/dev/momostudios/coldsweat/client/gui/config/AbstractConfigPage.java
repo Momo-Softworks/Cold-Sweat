@@ -63,14 +63,14 @@ public abstract class AbstractConfigPage extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
-    public abstract BaseComponent sectionOneTitle();
+    public abstract Component sectionOneTitle();
 
     @Nullable
-    public abstract BaseComponent sectionTwoTitle();
+    public abstract Component sectionTwoTitle();
 
     public AbstractConfigPage(Screen parentScreen)
     {
-        super(new TranslatableComponent("cold_sweat.config.title"));
+        super(Component.translatable("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
     }
 
@@ -136,10 +136,10 @@ public abstract class AbstractConfigPage extends Screen
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
         // Make the button
-        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
+        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, Component.literal(label), button1 ->
         {
             onClick.accept(button1);
-            button1.setMessage(new TextComponent(dynamicLabel.get()));
+            button1.setMessage(Component.literal(dynamicLabel.get()));
         })
         {
             @Override
@@ -185,7 +185,7 @@ public abstract class AbstractConfigPage extends Screen
                           font.width(label.getString()) - 84 : 0;
 
         // Make the input
-        EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, new TextComponent(""))
+        EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, Component.literal(""))
         {
             @Override
             public void insertText(String text)
@@ -346,7 +346,7 @@ public abstract class AbstractConfigPage extends Screen
             this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
             this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
             BOTTOM_BUTTON_WIDTH, 20,
-            new TranslatableComponent("gui.done"),
+            Component.translatable("gui.done"),
             button -> this.close())
         );
 
@@ -371,7 +371,7 @@ public abstract class AbstractConfigPage extends Screen
         drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        drawString(poseStack, this.font, new TextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
+        drawString(poseStack, this.font, Component.literal(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
 
         // Section 1 Title
         drawString(poseStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
@@ -405,7 +405,7 @@ public abstract class AbstractConfigPage extends Screen
                 List<FormattedText> tooltipList = this.tooltips.get(id);
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
-                    List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                    List<Component> tooltip = this.tooltips.get(id).stream().map(text -> Component.literal(text.getString())).collect(Collectors.toList());
                     this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
                 }
                 break;

@@ -7,7 +7,7 @@ import dev.momostudios.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,14 +69,14 @@ public class ConfigScreen
     }
 
     @SubscribeEvent
-    public static void onClicked(ScreenEvent.MouseClickedEvent event)
+    public static void onClicked(ScreenEvent.MouseButtonPressed event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = true;
     }
 
     @SubscribeEvent
-    public static void onReleased(ScreenEvent.MouseReleasedEvent event)
+    public static void onReleased(ScreenEvent.MouseButtonReleased event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = false;
@@ -84,11 +84,11 @@ public class ConfigScreen
 
     public static String difficultyName(int difficulty)
     {
-        return  difficulty == 0 ? new TranslatableComponent("cold_sweat.config.difficulty.super_easy.name").getString() :
-                difficulty == 1 ? new TranslatableComponent("cold_sweat.config.difficulty.easy.name").getString() :
-                difficulty == 2 ? new TranslatableComponent("cold_sweat.config.difficulty.normal.name").getString() :
-                difficulty == 3 ? new TranslatableComponent("cold_sweat.config.difficulty.hard.name").getString() :
-                difficulty == 4 ? new TranslatableComponent("cold_sweat.config.difficulty.custom.name").getString() : "";
+        return  difficulty == 0 ? Component.translatable("cold_sweat.config.difficulty.super_easy.name").getString() :
+                difficulty == 1 ? Component.translatable("cold_sweat.config.difficulty.easy.name").getString() :
+                difficulty == 2 ? Component.translatable("cold_sweat.config.difficulty.normal.name").getString() :
+                difficulty == 3 ? Component.translatable("cold_sweat.config.difficulty.hard.name").getString() :
+                difficulty == 4 ? Component.translatable("cold_sweat.config.difficulty.custom.name").getString() : "";
     }
 
     public static int difficultyColor(int difficulty)

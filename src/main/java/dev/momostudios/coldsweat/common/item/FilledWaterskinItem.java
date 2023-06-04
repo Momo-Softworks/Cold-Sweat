@@ -14,7 +14,7 @@ import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -89,9 +89,9 @@ public class FilledWaterskinItem extends Item
                 }
 
                 @SubscribeEvent
-                public void onTick(TickEvent.WorldTickEvent event)
+                public void onTick(TickEvent.LevelTickEvent event)
                 {
-                    if (event.world.isClientSide == level.isClientSide && event.phase == TickEvent.Phase.START)
+                    if (event.level.isClientSide == level.isClientSide && event.phase == TickEvent.Phase.START)
                     {
                         // Temperature of waterskin weakens over time
                         double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
@@ -230,6 +230,6 @@ public class FilledWaterskinItem extends Item
 
     public String getDescriptionId()
     {
-        return new TranslatableComponent("item.cold_sweat.waterskin").getString();
+        return Component.translatable("item.cold_sweat.waterskin").getString();
     }
 }

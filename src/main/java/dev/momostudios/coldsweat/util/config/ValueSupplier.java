@@ -22,7 +22,6 @@ public class ValueSupplier<T>
     public ValueSupplier(Supplier<T> valueCreator)
     {
         this.valueCreator = valueCreator;
-        this.value = valueCreator.get();
     }
 
     public static <V> ValueSupplier<V> of(Supplier<V> valueCreator)
@@ -41,7 +40,10 @@ public class ValueSupplier<T>
     }
 
     public T get()
-    {   return value;
+    {
+        if (this.value == null)
+            load();
+        return value;
     }
 
     public void set(T value)

@@ -95,9 +95,9 @@ public class BoilerBlock extends Block implements EntityBlock
                 {
                     if (!player.isCreative())
                     {
-                        if (stack.hasContainerItem())
+                        if (stack.hasCraftingRemainingItem())
                         {
-                            ItemStack container = stack.getContainerItem();
+                            ItemStack container = stack.getCraftingRemainingItem();
                             stack.shrink(1);
                             player.getInventory().add(container);
                         }
@@ -112,7 +112,7 @@ public class BoilerBlock extends Block implements EntityBlock
                 }
                 else
                 {
-                    NetworkHooks.openGui((ServerPlayer) player, blockEntity, pos);
+                    NetworkHooks.openScreen((ServerPlayer) player, blockEntity, pos);
                 }
             }
         }

@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class HotBiomeEdible extends Edible
 {
@@ -32,17 +33,17 @@ public class HotBiomeEdible extends Edible
             entity.setSearching(true);
 
             // Locate the nearest biome with temp > 1.5
-            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(holder ->
+            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findClosestBiome3d(holder ->
             {
                 Biome biome = holder.value();
-                ResourceLocation biomeName = biome.getRegistryName();
+                ResourceLocation biomeName = ForgeRegistries.BIOMES.getKey(biome);
 
                 double biomeTemp = CSMath.averagePair(ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeName,
                           ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName, CSMath.addPairs(Pair.of(0d, 0d),
                           Pair.of(biome.getBaseTemperature(), biome.getBaseTemperature())))));
 
                 return biomeTemp >= 1.5;
-            }, entity.blockPosition(), 2000, 8);
+            }, entity.blockPosition(), 2000, 32, 64);
 
             if (biomePair != null)
             {

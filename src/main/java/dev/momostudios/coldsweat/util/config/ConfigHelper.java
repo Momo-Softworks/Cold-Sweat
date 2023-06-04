@@ -143,7 +143,7 @@ public class ConfigHelper
                 }
 
                 // Maps the biome ID to the temperature (and variance if present)
-                map.put(biome.getRegistryName(), Pair.of(min, max));
+                map.put(ForgeRegistries.BIOMES.getKey(biome), Pair.of(min, max));
             }
             catch (Exception ignored) {}
         }
@@ -237,7 +237,7 @@ public class ConfigHelper
             CompoundTag itemTag = new CompoundTag();
             itemTag.putDouble("value1", entry.getValue().getFirst());
             itemTag.putDouble("value2", entry.getValue().getSecond());
-            mapTag.put(entry.getKey().getRegistryName().toString(), itemTag);
+            mapTag.put(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), itemTag);
         }
         tag.put(key, mapTag);
         return tag;

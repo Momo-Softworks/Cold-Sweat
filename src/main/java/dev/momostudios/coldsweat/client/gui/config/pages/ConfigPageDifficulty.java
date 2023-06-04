@@ -11,8 +11,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +31,7 @@ public class ConfigPageDifficulty extends Screen
 
     public ConfigPageDifficulty(Screen parentScreen)
     {
-        super(new TranslatableComponent("cold_sweat.config.section.difficulty.name"));
+        super(Component.translatable("cold_sweat.config.section.difficulty.name"));
         this.parentScreen = parentScreen;
     }
 
@@ -50,7 +48,7 @@ public class ConfigPageDifficulty extends Screen
                 this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
                 this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
                 BOTTOM_BUTTON_WIDTH, 20,
-                new TranslatableComponent("gui.done"),
+                Component.translatable("gui.done"),
                 button -> this.close()));
     }
 
@@ -67,7 +65,7 @@ public class ConfigPageDifficulty extends Screen
 
         // Get a list of TextComponents to render
         List<Component> descLines = new ArrayList<>();
-        descLines.add(new TextComponent(""));
+        descLines.add(Component.literal(""));
 
         // Get max text length (used to extend the text box if it's too wide)
         int longestLine = 0;
@@ -75,8 +73,8 @@ public class ConfigPageDifficulty extends Screen
         {
             String ttLine = "  " + text + "  ";
             // Add the text and a new line to the list
-            descLines.add(new TextComponent(ttLine));
-            descLines.add(new TextComponent(""));
+            descLines.add(Component.literal(ttLine));
+            descLines.add(Component.literal(""));
 
             int lineWidth = font.width(ttLine);
             if (lineWidth > longestLine)

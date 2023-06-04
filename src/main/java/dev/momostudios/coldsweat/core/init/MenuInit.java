@@ -13,7 +13,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class MenuInit
 {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.CONTAINERS, ColdSweat.MOD_ID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, ColdSweat.MOD_ID);
 
     public static final RegistryObject<MenuType<BoilerContainer>> BOILER_CONTAINER_TYPE =
             MENU_TYPES.register("boiler", () -> IForgeMenuType.create(BoilerContainer::new));

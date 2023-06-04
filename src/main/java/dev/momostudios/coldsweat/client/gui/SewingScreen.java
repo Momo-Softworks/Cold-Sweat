@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.SewingContainer;
@@ -15,11 +14,11 @@ import javax.annotation.Nonnull;
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    TranslatableComponent name = new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table");
+    Component name = Component.translatable("container." + ColdSweat.MOD_ID + ".sewing_table");
 
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table"));
+        super(screenContainer, inv, Component.translatable("container." + ColdSweat.MOD_ID + ".sewing_table"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 175;

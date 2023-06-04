@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.gui.ForgeIngameGui;
-import net.minecraftforge.client.gui.OverlayRegistry;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -48,9 +48,9 @@ public class Overlays
 
     static GameType GAME_MODE = null;
 
-    public static void registerOverlays()
+    public static void registerOverlays(RegisterGuiOverlaysEvent event)
     {
-        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "World Temp", (gui, poseStack, partialTick, width, height) ->
+        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "World Temp", (gui, poseStack, partialTick, width, height) ->
         {
             gui.setupOverlayRenderState(true, false);
 
@@ -107,7 +107,7 @@ public class Overlays
             }
         });
 
-        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "Body Temp", (gui, poseStack, partialTick, width, height) ->
+        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "Body Temp", (gui, poseStack, partialTick, width, height) ->
         {
             gui.setupOverlayRenderState(true, false);
             Minecraft mc = Minecraft.getInstance();

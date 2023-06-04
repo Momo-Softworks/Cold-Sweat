@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,7 +37,7 @@ public class GoatFurHandler
     public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
     {
         Entity entity = event.getTarget();
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
 
         if (entity instanceof Goat goat && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
@@ -51,7 +51,7 @@ public class GoatFurHandler
 
                 // Use shears
                 player.swing(event.getHand(), true);
-                stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
+                stack.hurtAndBreak(1, event.getEntity(), (p) -> p.broadcastBreakEvent(event.getHand()));
                 // Play sound
                 goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
@@ -105,7 +105,7 @@ public class GoatFurHandler
 
     // Regrow goat fur
     @SubscribeEvent
-    public static void onGoatTick(LivingEvent.LivingUpdateEvent event)
+    public static void onGoatTick(LivingEvent.LivingTickEvent event)
     {
         Entity entity = event.getEntity();
         Triplet<Integer, Integer, Double> furConfig = ConfigSettings.GOAT_FUR_TIMINGS.get();
@@ -131,7 +131,7 @@ public class GoatFurHandler
     }
 
     @SubscribeEvent
-    public static void onEntityLoaded(EntityJoinWorldEvent event)
+    public static void onEntityLoaded(EntityJoinLevelEvent event)
     {
         Entity entity = event.getEntity();
         if (entity instanceof Goat goat && !goat.level.isClientSide)

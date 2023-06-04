@@ -32,7 +32,7 @@ public class HearthPathManagement
     @SubscribeEvent
     public static void saveDisabledHearths(PlayerEvent.PlayerLoggedOutEvent event)
     {
-        event.getPlayer().getPersistentData().put("disabledHearths", serializeDisabledHearths());
+        event.getEntity().getPersistentData().put("disabledHearths", serializeDisabledHearths());
     }
 
     public static CompoundTag serializeDisabledHearths()
@@ -57,7 +57,7 @@ public class HearthPathManagement
     @SubscribeEvent
     public static void loadDisabledHearths(PlayerEvent.PlayerLoggedInEvent event)
     {
-        deserializeDisabledHearths(event.getPlayer().getPersistentData().getCompound("disabledHearths"));
+        deserializeDisabledHearths(event.getEntity().getPersistentData().getCompound("disabledHearths"));
     }
 
     public static void deserializeDisabledHearths(CompoundTag disabledHearths)

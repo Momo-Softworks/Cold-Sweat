@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class EntityInit
 {
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, ColdSweat.MOD_ID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ColdSweat.MOD_ID);
 
     //chameleon
     public static final RegistryObject<EntityType<ChameleonEntity>> CHAMELEON = ENTITY_TYPES.register("chameleon",

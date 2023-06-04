@@ -15,8 +15,7 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,7 +34,7 @@ public class ItemTooltipInfo
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
-        if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
+        if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getEntity() != null)
         {
             boolean celsius = ClientSettingsConfig.getInstance().celsius();
             double temp = stack.getOrCreateTag().getDouble("temperature");
@@ -45,14 +44,14 @@ public class ItemTooltipInfo
             if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
             temp += ClientSettingsConfig.getInstance().tempOffset() / 2.0;
 
-            event.getToolTip().add(1, new TextComponent("§7" + new TranslatableComponent(
-                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
+            event.getToolTip().add(1, Component.literal("§7" + Component.translatable(
+                    "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
         }
         else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (event.getFlags().isAdvanced())
             {
-                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
+                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), Component.literal("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
             }
         }
     }

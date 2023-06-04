@@ -19,7 +19,7 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 public class DrawConfigButton
 {
     @SubscribeEvent
-    public static void eventHandler(ScreenEvent.InitScreenEvent event)
+    public static void eventHandler(ScreenEvent.Init event)
     {
         if (event.getScreen() instanceof OptionsScreen && ColdSweatConfig.getInstance().isButtonShowing())
         {

@@ -56,7 +56,7 @@ public class SewingTableBlock extends Block implements MenuProvider
         {   return InteractionResult.SUCCESS;
         }
         else
-        {   NetworkHooks.openGui((ServerPlayer)player, this, pos);
+        {   NetworkHooks.openScreen((ServerPlayer)player, this, pos);
             return InteractionResult.CONSUME;
         }
     }

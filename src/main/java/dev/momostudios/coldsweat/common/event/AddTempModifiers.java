@@ -19,18 +19,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.PotionEvent;
-import net.minecraftforge.event.world.SleepFinishedTimeEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.level.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber
 public class AddTempModifiers
 {
     @SubscribeEvent
-    public static void onEntityCreated(EntityJoinWorldEvent event)
+    public static void onEntityCreated(EntityJoinLevelEvent event)
     {
         if (event.getEntity() instanceof Player player && !player.level.isClientSide)
         {
@@ -80,17 +81,17 @@ public class AddTempModifiers
     }
 
     @SubscribeEvent
-    public static void onInsulationUpdate(PotionEvent event)
+    public static void onInsulationUpdate(MobEffectEvent event)
     {
-        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getPotionEffect() != null
-        && event.getPotionEffect().getEffect() == ModEffects.INSULATION)
+        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
+        && event.getEffectInstance().getEffect() == ModEffects.INSULATION)
         {
-            if (event instanceof PotionEvent.PotionAddedEvent)
+            if (event instanceof MobEffectEvent.Added)
             {
-                MobEffectInstance effect = event.getPotionEffect();
+                MobEffectInstance effect = event.getEffectInstance();
                 Temperature.addOrReplaceModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Type.WORLD);
             }
-            else if (event instanceof PotionEvent.PotionRemoveEvent)
+            else if (event instanceof MobEffectEvent.Remove)
             {
                 Temperature.removeModifiers(player, Temperature.Type.WORLD, 1, mod -> mod instanceof HearthTempModifier);
             }
@@ -100,9 +101,9 @@ public class AddTempModifiers
     @SubscribeEvent
     public static void onSleep(SleepFinishedTimeEvent event)
     {
-        if (!event.getWorld().isClientSide())
+        if (!event.getLevel().isClientSide())
         {
-            event.getWorld().players().forEach(player ->
+            event.getLevel().players().forEach(player ->
             {
                 if (player.isSleeping())
                 {
@@ -132,7 +133,7 @@ public class AddTempModifiers
                 }
                 else
                 {
-                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
+                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(ForgeRegistries.ENTITY_TYPES.getKey(mount.getType()).toString())).findFirst().ifPresent(entityID ->
                     {
                         float insulationAmount = ((Number) entityID.get(1)).floatValue();
                         Temperature.addModifier(player, new MountTempModifier(insulationAmount).expires(1), Temperature.Type.RATE, false);
@@ -145,7 +146,7 @@ public class AddTempModifiers
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
+        if (event.getEntity() instanceof Player player && event.getItem().isEdible() && !event.getEntity().level.isClientSide)
         {
             float foodTemp = ConfigSettings.TEMPERATURE_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
             if (foodTemp != 0)

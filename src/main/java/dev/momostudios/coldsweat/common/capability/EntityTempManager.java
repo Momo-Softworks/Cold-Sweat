@@ -79,9 +79,9 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
+    public static void onLivingTick(LivingEvent.LivingTickEvent event)
     {
-        LivingEntity entity = event.getEntityLiving();
+        LivingEntity entity = event.getEntity();
         if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
 
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
@@ -117,14 +117,14 @@ public class EntityTempManager
     @SubscribeEvent
     public static void returnFromEnd(PlayerEvent.Clone event)
     {
-        if (!event.isWasDeath() && !event.getPlayer().level.isClientSide)
+        if (!event.isWasDeath() && !event.getEntity().level.isClientSide)
         {
             // Get the old player's capability
             Player oldPlayer = event.getOriginal();
             oldPlayer.reviveCaps();
 
             // Copy the capability to the new player
-            event.getPlayer().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            event.getEntity().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
             });

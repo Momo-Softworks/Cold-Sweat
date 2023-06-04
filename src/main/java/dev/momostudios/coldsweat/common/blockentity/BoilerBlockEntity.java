@@ -13,7 +13,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
@@ -86,7 +85,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".boiler");
+        return Component.translatable("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
     @Override
@@ -144,9 +143,9 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
             if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
             {
-                if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
+                if (fuelStack.hasCraftingRemainingItem() && fuelStack.getCount() == 1)
                 {
-                    this.setItem(0, fuelStack.getContainerItem());
+                    this.setItem(0, fuelStack.getCraftingRemainingItem());
                     setFuel(this.getFuel() + itemFuel);
                 }
                 else
