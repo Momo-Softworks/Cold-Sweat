@@ -13,6 +13,7 @@ import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -26,6 +27,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -37,77 +39,73 @@ import net.minecraftforge.fml.common.Mod;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant());
+    {   super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof Player player && !worldIn.isClientSide)
+        if (entityIn instanceof Player player && !level.isClientSide && player.tickCount % 5 == 0)
         {
-            double max = ConfigSettings.MAX_TEMP.get();
-            double temp;
-
-            // Is selected
-            TempModifier lampMod;
-            if ((isSelected || player.getOffhandItem() == stack)
-            // Is in valid dimension
-            && ConfigSettings.LAMP_DIMENSIONS.get().contains(worldIn.dimension().location().toString())
-            // Is world temp more than max
-            && (temp = (lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)) != null
-                ? lampMod.getLastInput()
-                : Temperature.get(player, Temperature.Type.WORLD)) > max && getFuel(stack) > 0)
+            boolean shouldBeOn = false;
+            try
             {
-                if (player.tickCount % 5 == 0)
+                if (!(isSelected || player.getOffhandItem() == stack)) return;
+                double max = ConfigSettings.MAX_TEMP.get();
+
+                TempModifier lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                double temp = lampMod != null
+                              ? lampMod.getLastInput()
+                              : Temperature.get(player, Temperature.Type.WORLD);
+
+                // Is selected
+                if ((isSelected || player.getOffhandItem() == stack)
+                // Is in valid dimension
+                && ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location().toString())
+                // Is world temp more than max
+                && temp > max && getFuel(stack) > 0)
                 {
                     // Drain fuel
                     if (!(player.isCreative() || player.isSpectator()))
                         addFuel(stack, (int) (-0.01 * CSMath.clamp(temp - max, 1, 3)));
 
                     // Affect nearby players
-                    double rad = 3.5d;
-                    AABB bb = new AABB(player.getX() - rad, player.getY() - rad, player.getZ() - rad,
-                                       player.getX() + rad, player.getY() + rad, player.getZ() + rad);
+                    double radius = 5d;
+                    AABB bb = new AABB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
+                                       player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
 
-                    for (Player entity : worldIn.getEntitiesOfClass(Player.class, bb))
+                    for (Player entity : level.getEntitiesOfClass(Player.class, bb))
                     {
                         // Extend modifier time if it is present
                         SoulLampTempModifier modifier = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
                         if (modifier != null)
-                            modifier.expires(modifier.getTicksExisted() + 5);
+                            modifier.setTicksExisted(0);
                         else
                             Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
                     }
-                }
-
-                // If the conditions are met, turn on the lamp
-                if (!stack.getOrCreateTag().getBoolean("isOn") && stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
-                {
-                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                    stack.getOrCreateTag().putBoolean("isOn", true);
-
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    shouldBeOn = true;
                 }
             }
-            // If the conditions are not met, turn off the lamp
-            else if (stack.getOrCreateTag().getInt("stateChangeTimer") <= 0)
+            finally
             {
-                if (stack.getOrCreateTag().getBoolean("isOn"))
+                CompoundTag itemTag = stack.getOrCreateTag();
+                // If the conditions are not met, turn off the lamp
+                if (itemTag.getInt("stateChangeTimer") <= 0
+                && itemTag.getBoolean("isOn") != shouldBeOn)
                 {
-                    stack.getOrCreateTag().putInt("stateChangeTimer", 10);
-                    stack.getOrCreateTag().putBoolean("isOn", false);
+                    itemTag.putInt("stateChangeTimer", 2);
+                    itemTag.putBoolean("isOn", shouldBeOn);
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
-            }
-            else
-            {
-                // Decrement the state change timer
-                NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+                else
+                {
+                    // Decrement the state change timer
+                    NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+                }
             }
         }
     }
