@@ -1,0 +1,22 @@
+{
+  "music.game": {
+    "category": "music",
+    "replace": false,
+    "sounds": [
+      {
+        "name": "cold_sweat:music/far_lands",
+        "stream": true
+      }
+    ]
+  },
+  "music.game.creative": {
+    "category": "music",
+    "replace": false,
+    "sounds": [
+      {
+        "name": "cold_sweat:music/far_lands",
+        "stream": true
+      }
+    ]
+  }
+}
