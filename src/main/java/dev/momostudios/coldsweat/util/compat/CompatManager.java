@@ -96,13 +96,14 @@ public class CompatManager
 
     public static boolean isWeather2RainingAt(Level level, BlockPos pos)
     {
-        if (!WEATHER_LOADED) return false;
+        return false;
+        /*if (!WEATHER_LOADED) return false;
         WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
         StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
         if (rainStorm == null) return false;
 
         return WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
-            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();
+            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();*/
     }
 
     @SubscribeEvent
