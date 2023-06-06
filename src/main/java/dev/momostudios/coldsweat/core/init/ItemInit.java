@@ -5,9 +5,14 @@ import dev.momostudios.coldsweat.common.block.*;
 import dev.momostudios.coldsweat.common.item.*;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registries.ModArmorMaterials;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -62,7 +67,26 @@ public class ItemInit
     public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(BlockInit.HEARTH_BOTTOM.get(), HearthBottomBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> THERMOLITH = ITEMS.register("thermolith", () -> new BlockItem(BlockInit.THERMOLITH.get(), ThermolithBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new ItemNameBlockItem(BlockInit.SOUL_STALK.get(),
-            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(5).saturationMod(1).alwaysEat().fast().build())));
+            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(5).saturationMod(1).alwaysEat().fast().build()))
+    {
+        @Override
+        public InteractionResult useOn(UseOnContext context)
+        {
+            InteractionResult interactionresult = super.useOn(context);
+            if (interactionresult == InteractionResult.CONSUME && context.getPlayer() instanceof ServerPlayer player)
+            {
+                // Grant the player the "A Seedy Place" advancement
+                if (player.getServer() != null)
+                {
+                    Advancement seedyPlace = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("minecraft", "husbandry/plant_seed"));
+                    if (seedyPlace != null)
+                    {   player.getAdvancements().award(seedyPlace, "nether_wart");
+                    }
+                }
+            }
+            return interactionresult;
+        }
+    });
 
     // Spawn Eggs
     public static final RegistryObject<ForgeSpawnEggItem> CHAMELEON_SPAWN_EGG = ITEMS.register("chameleon_spawn_egg", () ->
