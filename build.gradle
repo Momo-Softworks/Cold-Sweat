@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b04c'
+version = '2.2-b04d'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -92,13 +92,6 @@ repositories {
         url 'https://www.cursemaven.com'
         content {
             includeGroup "curse.maven"
-        }
-    }
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
         }
     }
     mavenCentral()
