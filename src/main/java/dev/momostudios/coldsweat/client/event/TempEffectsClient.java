@@ -123,13 +123,14 @@ public class TempEffectsClient
                 else HOT_IMMUNITY = 0;
 
                 if (CompatManager.isArmorUnderwearLoaded() && (COLD_IMMUNITY < 4 || HOT_IMMUNITY < 4))
-                player.getArmorSlots().forEach(stack ->
-                {
-                    if (CompatManager.hasOllieLiner(stack))
-                        HOT_IMMUNITY++;
-                    if (CompatManager.hasOttoLiner(stack))
-                        COLD_IMMUNITY++;
-                });
+                {   player.getArmorSlots().forEach(stack ->
+                    {
+                        if (CompatManager.hasOllieLiner(stack))
+                            HOT_IMMUNITY++;
+                        if (CompatManager.hasOttoLiner(stack))
+                            COLD_IMMUNITY++;
+                    });
+                }
             }
         }
     }
@@ -165,8 +166,8 @@ public class TempEffectsClient
         if (player != null && event.getOverlay() == VanillaGuiOverlay.VIGNETTE.type()
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
-            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(immunityModifier), 50, 100);
+            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
+            float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
             float tickTime = player.tickCount + event.getPartialTick();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
@@ -178,7 +179,7 @@ public class TempEffectsClient
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (immunityModifier < 0)
+            if (tempWithImmunity < 0)
                 RenderSystem.setShaderColor(0.690f, 0.894f, 0.937f, vignetteBrightness);
             else
                 RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
@@ -224,7 +225,7 @@ public class TempEffectsClient
                 if (playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
-                    if (blur > 0 && mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json"))
+                    if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
                     {   BLUR_APPLIED = false;
                     }
                     if (!BLUR_APPLIED)
