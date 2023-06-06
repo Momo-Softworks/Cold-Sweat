@@ -169,10 +169,11 @@ public class TempModifierInit
         String compatPath = "dev.momostudios.coldsweat.api.temperature.modifier.compat.";
         String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
         String armorUnder = compatPath + "ArmorUnderTempModifier";
+        String weatherStorms = compatPath + "StormTempModifier";
 
         event.register(new BlockTempModifier());
         event.register(new BiomeTempModifier());
-        event.register(new DepthTempModifier());
+        event.register(new UndergroundTempModifier());
         event.register(new InsulationTempModifier());
         event.register(new MountTempModifier());
         event.register(new WaterskinTempModifier());
@@ -192,6 +193,11 @@ public class TempModifierInit
 
         if (CompatManager.isArmorUnderwearLoaded())
         {   try { event.register((TempModifier) Class.forName(armorUnder).getConstructor().newInstance()); }
+            catch (Exception ignored) {}
+        }
+
+        if (CompatManager.isWeather2Loaded())
+        {   try { event.register((TempModifier) Class.forName(weatherStorms).getConstructor().newInstance()); }
             catch (Exception ignored) {}
         }
     }
