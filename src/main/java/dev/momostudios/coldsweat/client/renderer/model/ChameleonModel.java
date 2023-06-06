@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.renderer.ChameleonAnimations;
-import dev.momostudios.coldsweat.client.renderer.ChameleonEntityRenderer;
+import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.client.renderer.animation.AnimationManager;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -174,6 +174,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 			leftEye.yRot = entity.yRotLeftEye;
 			leftEye.zRot = entity.xRotLeftEye;
 
+			// Move the body down to the ground
+			body.y = 23.5f;
+
 			AnimationManager.saveAnimationStates(entity, modelParts);
 
 			AnimationManager.animateEntity(entity, (animTime, frameTime) ->
@@ -214,12 +217,11 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 					animTime += (frameTime * walkSpeed * 30);
 
 					ChameleonAnimations.WALK.animateAll(animatedParts, animTime, false);
-					ChameleonAnimations.WALK.animate("Head", head, animTime, true);
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.WALK.animate("Tail",  tail,  animTime, false);
-						ChameleonAnimations.WALK.animate("Tail2", tail2, animTime, false);
-						ChameleonAnimations.WALK.animate("Tail3", tail3, animTime, false);
+						ChameleonAnimations.WALK.animate("Tail",  tail,  animTime, true);
+						ChameleonAnimations.WALK.animate("Tail2", tail2, animTime, true);
+						ChameleonAnimations.WALK.animate("Tail3", tail3, animTime, true);
 					}
 				}
 				// Idle animation
@@ -231,9 +233,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.WALK.animate("Tail",  tail,  0, false);
-						ChameleonAnimations.WALK.animate("Tail2", tail2, 0, false);
-						ChameleonAnimations.WALK.animate("Tail3", tail3, 0, false);
+						ChameleonAnimations.WALK.animate("Tail",  tail,  0, true);
+						ChameleonAnimations.WALK.animate("Tail2", tail2, 0, true);
+						ChameleonAnimations.WALK.animate("Tail3", tail3, 0, true);
 					}
 				}
 
@@ -315,9 +317,6 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 
 				return animTime;
 			});
-
-			// Move the body down to the ground
-			body.y = 23.5f;
 		}
 	}
 
