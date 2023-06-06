@@ -61,10 +61,8 @@ public class EntitySettingsConfig
                 .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
                                 List.of("minecraft:bamboo_jungle", 8),
                                 List.of("minecraft:jungle", 8),
-                                List.of("minecraft:sparse_jungle", 8),
-                                List.of("minecraft:desert", 8),
-                                List.of("minecraft:desert_hills", 8),
-                                List.of("minecraft:desert_lakes", 8))
+                                List.of("minecraft:sparse_jungle", 6),
+                                List.of("minecraft:desert", 4))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> List.of("biomesoplenty:lush_desert", 8),
                                 () -> List.of("biomesoplenty:tropics", 16),
@@ -76,13 +74,13 @@ public class EntitySettingsConfig
                                 () -> List.of("byg:guiana_shield", 8),
                                 () -> List.of("byg:crag_gardens", 8),
                                 () -> List.of("byg:atacama_desert", 5),
-                                () -> List.of("byg:cypress_swamplands", 8),
+                                () -> List.of("byg:cypress_swamplands", 6),
                                 () -> List.of("byg:mojave_desert", 5),
-                                () -> List.of("byg:windswept_desert", 8))
+                                () -> List.of("byg:windswept_desert", 4))
                             .addIf(CompatManager.isAtmosphericLoaded(),
-                                () -> List.of("atmospheric:dunes", 5),
-                                () -> List.of("atmospheric:flourishing_dunes", 8),
-                                () -> List.of("atmospheric:rocky_dunes", 4),
+                                () -> List.of("atmospheric:dunes", 4),
+                                () -> List.of("atmospheric:flourishing_dunes", 6),
+                                () -> List.of("atmospheric:rocky_dunes", 3),
                                 () -> List.of("atmospheric:petrified_dunes", 3),
                                 () -> List.of("atmospheric:rainforest", 8),
                                 () -> List.of("atmospheric:sparse_rainforest", 6),
@@ -94,7 +92,7 @@ public class EntitySettingsConfig
                                 () -> List.of("terralith:tropical_jungle", 8),
                                 () -> List.of("terralith:arid_highlands", 8),
                                 () -> List.of("terralith:rocky_jungle", 12),
-                                () -> List.of("terralith:brushland", 12)
+                                () -> List.of("terralith:brushland", 8)
                         ).build(),
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
 
