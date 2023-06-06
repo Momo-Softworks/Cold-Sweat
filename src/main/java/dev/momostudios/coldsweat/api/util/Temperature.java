@@ -5,8 +5,8 @@ import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.UndergroundTempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
@@ -95,10 +95,10 @@ public class Temperature
         return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
     }
 
-    static Map<ResourceLocation, WitherSkeleton> DUMMIES = new HashMap<>();
+    static Map<ResourceLocation, Silverfish> DUMMIES = new HashMap<>();
     public static double getTemperatureAt(BlockPos pos, Level level)
     {
-        LivingEntity dummy = DUMMIES.computeIfAbsent(level.dimension().location(), dim -> new WitherSkeleton(EntityType.WITHER_SKELETON, level));
+        LivingEntity dummy = DUMMIES.computeIfAbsent(level.dimension().location(), dim -> new Silverfish(EntityType.SILVERFISH, level));
         dummy.setPos(CSMath.getCenterPos(pos));
         return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
                                                       .addIf(CompatManager.isSereneSeasonsLoaded(),
@@ -213,10 +213,8 @@ public class Temperature
 
                         TempModifier newMod = event.getModifier();
 
-                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID()))
-                        && !replace)
-                        {
-                            return;
+                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID())) && !replace)
+                        {   return;
                         }
 
                         // Get the start of the iterator & which direction it's going
@@ -257,25 +255,15 @@ public class Temperature
         }
     }
 
-    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Type type, boolean allowDupes)
-    {
-        for (TempModifier modifier : modifiers)
-        {
-            addModifier(entity, modifier, type, allowDupes);
-        }
-    }
-
-    public static void addModifiersSimple(LivingEntity entity, Type type, List<TempModifier> modifiers, boolean duplicates)
+    public static void addModifiers(LivingEntity entity, Type type, List<TempModifier> modifiers, boolean duplicates)
     {
         getTemperatureCap(entity).ifPresent(cap ->
         {
             List<TempModifier> list = cap.getModifiers(type);
             for (TempModifier modifier : modifiers)
             {
-                if (!duplicates && list.stream().anyMatch(mod -> mod.getID().equals(modifier.getID())))
-                {   continue;
-                }
-                list.add(modifier);
+                if (duplicates || list.stream().noneMatch(mod -> mod.getID().equals(modifier.getID())))
+                    cap.getModifiers(type).add(modifier);
             }
             updateModifiers(entity, cap);
         });
