@@ -8,6 +8,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class ClientSettingsConfig
 {
@@ -100,6 +101,10 @@ public class ClientSettingsConfig
         hearthDebug = BUILDER
             .comment("Displays areas that the Hearth affecting when the F3 debug menu is open")
             .define("Hearth Debug", true);
+
+        cameraSway = BUILDER
+                .comment("When set to true, the camera will sway randomly when the player is too hot")
+                .define("Camera Sway", true);
 
         SPEC = BUILDER.build();
     }
