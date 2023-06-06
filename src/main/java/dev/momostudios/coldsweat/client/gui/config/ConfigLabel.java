@@ -2,20 +2,19 @@ package dev.momostudios.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.TextComponent;
 
-public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
+public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListener, NarratableEntry
 {
     public final String id;
 
-    public String text;
-    public int color;
-    public int x;
-    public int y;
+    private int color;
 
     public ConfigLabel(String id, String text, int x, int y)
     {
@@ -24,19 +23,14 @@ public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
 
     public ConfigLabel(String id, String text, int x, int y, int color)
     {
+        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, new TextComponent(text));
         this.id = id;
-        this.text = text;
         this.x = x;
         this.y = y;
         this.color = color;
     }
 
-    public void setText(String text)
-    {
-        this.text = text;
-    }
-
-    public void setColor(int color)
+    public void setTextColor(int color)
     {
         this.color = color;
     }
@@ -44,7 +38,7 @@ public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float depth)
     {
-        Minecraft.getInstance().font.drawShadow(poseStack, this.text, this.x, this.y, color);
+        Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.x, this.y, color);
     }
 
     @Override
@@ -56,12 +50,12 @@ public class ConfigLabel implements Widget, GuiEventListener, NarratableEntry
     @Override
     public void updateNarration(NarrationElementOutput narration)
     {
-        narration.add(NarratedElementType.HINT, this.text);
+        narration.add(NarratedElementType.HINT, this.getMessage());
     }
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY)
     {
-        return mouseX >= this.x - 5 && mouseY >= this.y - 5 && mouseX < this.x + Minecraft.getInstance().font.width(this.text) + 5 && mouseY < this.y + Minecraft.getInstance().font.lineHeight + 5;
+        return mouseX >= this.x - 5 && mouseY >= this.y - 5 && mouseX < this.x + Minecraft.getInstance().font.width(this.getMessage()) + 5 && mouseY < this.y + Minecraft.getInstance().font.lineHeight + 5;
     }
 }
