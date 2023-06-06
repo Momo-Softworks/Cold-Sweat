@@ -92,23 +92,36 @@ public class CompatManager
     }
 
     @SubscribeEvent
-    public static void onLivingTempDamage(TemperatureDamageEvent event)
+    public static void onLivingTempDamage(LivingEvent event)
     {
+        if (!(event instanceof LivingDamageEvent || event instanceof LivingAttackEvent)) return;
         // Armor Underwear compat
-        boolean isDamageCold;
-        if (ARMOR_UNDERWEAR_LOADED
-        && ((isDamageCold = event.getSource() == ModDamageSources.COLD) || event.getSource() == ModDamageSources.HOT))
+        if (ARMOR_UNDERWEAR_LOADED && !event.getEntityLiving().level.isClientSide)
         {
-            int liners = (int) ((Collection<ItemStack>) event.getEntityLiving().getArmorSlots()).stream()
-                    .filter(stack -> isDamageCold ? hasOttoLiner(stack) : hasOllieLiner(stack))
-                    .count();
+            // Get the damage source from the event (different methods for LivingDamage/LivingAttack)
+            DamageSource source = event instanceof LivingDamageEvent
+                                  ? ((LivingDamageEvent) event).getSource()
+                                  : ((LivingAttackEvent) event).getSource();
+            if (source == null) return;
 
-            float newAmount = CSMath.blend(event.getAmount(), 0, liners, 0, 4);
-            if (liners >= 4)
-            {   event.negate();
-                return;
+            boolean isDamageCold;
+            if (((isDamageCold = source == ModDamageSources.COLD) || source == ModDamageSources.HOT))
+            {
+                int liners = 0;
+                for (ItemStack stack : event.getEntityLiving().getArmorSlots())
+                {
+                    if (isDamageCold ? hasOttoLiner(stack) : hasOllieLiner(stack))
+                        liners++;
+                }
+                // Cancel the event if full liners
+                if (liners >= 4)
+                {   event.setCanceled(true);
+                    return;
+                }
+                // Dampen the damage as the number of liners increases
+                if (event instanceof LivingDamageEvent damageEvent)
+                    damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
             }
-            event.setAmount(newAmount);
         }
     }
 }
