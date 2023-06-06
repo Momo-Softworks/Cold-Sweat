@@ -4,16 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -21,6 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -153,6 +152,15 @@ public abstract class AbstractConfigPage extends Screen
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
 
+        // Add the client disclaimer if the setting is marked clientside
+        if (clientside)
+        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltip = tooltipList.toArray(new String[0]);
+        }
+        // Assign the tooltip
+        this.setTooltip(id, tooltip);
+
         this.addWidgetBatch(id, List.of(button));
 
         // Mark this space as used
@@ -160,8 +168,6 @@ public abstract class AbstractConfigPage extends Screen
             this.leftSideLength += ConfigScreen.OPTION_SIZE;
         else
             this.rightSideLength += ConfigScreen.OPTION_SIZE;
-
-        this.setTooltip(id, tooltip);
     }
 
     /**
@@ -236,6 +242,13 @@ public abstract class AbstractConfigPage extends Screen
         // Add the clientside indicator
         if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
 
+        // Add the client disclaimer if the setting is marked clientside
+        if (clientside)
+        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltip = tooltipList.toArray(new String[0]);
+        }
+        // Assign the tooltip
         this.setTooltip(id, tooltip);
 
         // Add the widget
@@ -329,7 +342,15 @@ public abstract class AbstractConfigPage extends Screen
         if (clientside)
             this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
 
+        // Add the client disclaimer if the setting is marked clientside
+        if (clientside)
+        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltip = tooltipList.toArray(new String[0]);
+        }
+        // Assign the tooltip
         this.setTooltip(id, tooltip);
+
         this.addWidgetBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
 
         // Add height to the list
@@ -401,9 +422,24 @@ public abstract class AbstractConfigPage extends Screen
         {
             String id = entry.getKey();
             List<GuiEventListener> widgets = entry.getValue();
+            int minX = 0, minY = 0, maxX = 0, maxY = 0;
+            for (GuiEventListener listener : widgets)
+            {
+                if (listener instanceof AbstractWidget widget)
+                {
+                    if (minX == 0 || widget.x < minX)
+                        minX = widget.x;
+                    if (minY == 0 || widget.y < minY)
+                        minY = widget.y;
+                    if (maxX == 0 || widget.x + widget.getWidth() > maxX)
+                        maxX = widget.x + widget.getWidth();
+                    if (maxY == 0 || widget.y + widget.getHeight() > maxY)
+                        maxY = widget.y + widget.getHeight();
+                }
+            }
 
-            // if the mouse is hovering over any of the widgets in the batch, print hello
-            if (widgets.stream().anyMatch(widget -> widget.isMouseOver(mouseX, mouseY)))
+            // if the mouse is hovering over any of the widgets in the batch, show the corresponding tooltip
+            if (CSMath.withinRange(mouseX, minX, maxX) && CSMath.withinRange(mouseY, minY, maxY))
             {
                 List<FormattedText> tooltipList = this.tooltips.get(id);
                 if (tooltipList != null && !tooltipList.isEmpty())
