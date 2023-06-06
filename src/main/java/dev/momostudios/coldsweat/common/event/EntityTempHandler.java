@@ -37,15 +37,16 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.PotionEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.SleepFinishedTimeEvent;
+import net.minecraftforge.event.level.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -116,9 +117,9 @@ public class EntityTempHandler
      * Tick TempModifiers & update temperature for living entities
      */
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
+    public static void onLivingTick(LivingEvent.LivingTickEvent event)
     {
-        LivingEntity entity = event.getEntityLiving();
+        LivingEntity entity = event.getEntity();
         if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
 
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
@@ -154,14 +155,14 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void returnFromEnd(PlayerEvent.Clone event)
     {
-        if (!event.isWasDeath() && !event.getPlayer().level.isClientSide)
+        if (!event.isWasDeath() && !event.getEntity().level.isClientSide)
         {
             // Get the old player's capability
             Player oldPlayer = event.getOriginal();
             oldPlayer.reviveCaps();
 
             // Copy the capability to the new player
-            event.getPlayer().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            event.getEntity().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
             {
                oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
             });
@@ -183,7 +184,7 @@ public class EntityTempHandler
      * Add modifiers to the player & valid entities when they join the world
      */
     @SubscribeEvent
-    public static void initModifiersOnEntity(EntityJoinWorldEvent event)
+    public static void initModifiersOnEntity(EntityJoinLevelEvent event)
     {
         // Add basic TempModifiers to player
         if (event.getEntity() instanceof Player player && !player.level.isClientSide)
@@ -279,7 +280,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void cancelFreezingDamage(LivingAttackEvent event)
     {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
+        if (event.getSource() == DamageSource.FREEZE && event.getEntity().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
         {   event.setCanceled(true);
         }
     }
@@ -288,18 +289,18 @@ public class EntityTempHandler
      * Handle HearthTempModifier when the player has the Insulation effect
      */
     @SubscribeEvent
-    public static void onInsulationUpdate(PotionEvent event)
+    public static void onInsulationUpdate(MobEffectEvent event)
     {
-        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getPotionEffect() != null
-        && event.getPotionEffect().getEffect() == ModEffects.INSULATION)
+        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
+        && event.getEffectInstance().getEffect() == ModEffects.INSULATION)
         {
             // Add TempModifier on potion effect added
-            if (event instanceof PotionEvent.PotionAddedEvent)
-            {   MobEffectInstance effect = event.getPotionEffect();
+            if (event instanceof MobEffectEvent.Added)
+            {   MobEffectInstance effect = event.getEffectInstance();
                 Temperature.addOrReplaceModifier(player, new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration()), Temperature.Type.WORLD);
             }
             // Remove TempModifier on potion effect removed
-            else if (event instanceof PotionEvent.PotionRemoveEvent)
+            else if (event instanceof MobEffectEvent.Remove)
             {   Temperature.removeModifiers(player, Temperature.Type.WORLD, 1, mod -> mod instanceof HearthTempModifier);
             }
         }
@@ -311,9 +312,9 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onSleep(SleepFinishedTimeEvent event)
     {
-        if (!event.getWorld().isClientSide())
+        if (!event.getLevel().isClientSide())
         {
-            event.getWorld().players().forEach(player ->
+            event.getLevel().players().forEach(player ->
             {
                 if (player.isSleeping())
                 {
@@ -349,7 +350,7 @@ public class EntityTempHandler
                 // If insulated entity (defined in config)
                 else
                 {
-                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
+                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(ForgeRegistries.ENTITY_TYPES.getKey(mount.getType()).toString())).findFirst().ifPresent(entityID ->
                     {
                         float insulationAmount = ((Number) entityID.get(1)).floatValue();
                         Temperature.addModifier(player, new MountTempModifier(insulationAmount).expires(1), Temperature.Type.RATE, false);
@@ -365,7 +366,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
+        if (event.getEntity() instanceof Player player && event.getItem().isEdible() && !event.getEntity().level.isClientSide)
         {
             // If food item defined in config
             float foodTemp = ConfigSettings.TEMPERATURE_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
