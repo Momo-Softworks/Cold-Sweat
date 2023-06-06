@@ -5,6 +5,9 @@ import dev.momostudios.coldsweat.api.event.common.EnableTemperatureEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.api.util.Temperature.Addition.Mode;
+import dev.momostudios.coldsweat.api.util.Temperature.Addition.Order;
+import dev.momostudios.coldsweat.api.util.Temperature.Addition;
 import dev.momostudios.coldsweat.common.capability.EntityTempCap;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
@@ -15,7 +18,6 @@ import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.math.ListBuilder;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -47,6 +49,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class EntityTempHandler
@@ -185,30 +188,47 @@ public class EntityTempHandler
         // Add basic TempModifiers to player
         if (event.getEntity() instanceof Player player && !player.level.isClientSide)
         {
+            // Sometimes the entity isn't fully initialized, so wait until next tick
             TaskScheduler.scheduleServer(() ->
             {
-                Temperature.addModifiers(player, Temperature.Type.WORLD, ListBuilder.begin(new BiomeTempModifier(25).tickRate(10))
-                                                                    .addIf(CompatManager.isSereneSeasonsLoaded(),
-                                                                           () -> TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(40))
-                                                                    .add(new DepthTempModifier().tickRate(15),
-                                                                        new BlockTempModifier(7).tickRate(4)).build(), false);
+                // Basic modifiers
+                Temperature.addModifiers(player, Temperature.Type.WORLD, List.of(new BiomeTempModifier(25).tickRate(10),
+                                                                                 new UndergroundTempModifier().tickRate(10),
+                                                                                 new BlockTempModifier(7).tickRate(4)), false);
+                // Serene Seasons compat
+                if (CompatManager.isSereneSeasonsLoaded())
+                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
+                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                // Weather2 Compat
+                if (CompatManager.isWeather2Loaded())
+                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("weather2:storm").tickRate(60), Temperature.Type.WORLD, false,
+                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
                 Temperature.set(player, Temperature.Type.WORLD, Temperature.apply(0, player, Temperature.Type.WORLD, Temperature.getModifiers(player, Temperature.Type.WORLD)));
-            }, 1);
+            }, 0);
         }
         // Add basic TempModifiers to chameleons
         else if (event.getEntity() instanceof ChameleonEntity chameleon)
         {
+            // Sometimes the entity isn't fully initialized, so wait until next tick
             TaskScheduler.scheduleServer(() ->
             {
-                Temperature.addModifiers(chameleon, Temperature.Type.WORLD, ListBuilder.begin(new BiomeTempModifier(9).tickRate(40))
-                                                                                             .addIf(CompatManager.isSereneSeasonsLoaded(),
-                                                                                                 () -> TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60))
-                                                                                             .add(new DepthTempModifier().tickRate(40),
-                                                                                                 new BlockTempModifier(4).tickRate(20)).build(), false);
+                // Basic modifiers
+                Temperature.addModifiers(chameleon, Temperature.Type.WORLD, List.of(new BiomeTempModifier(9).tickRate(40),
+                                                                                    new UndergroundTempModifier().tickRate(40),
+                                                                                    new BlockTempModifier(4).tickRate(20)), false);
+                // Serene Seasons compat
+                if (CompatManager.isSereneSeasonsLoaded())
+                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
+                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                // Weather2 Compat
+                if (CompatManager.isWeather2Loaded())
+                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("weather2:storm").tickRate(60), Temperature.Type.WORLD, false,
+                                            Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+
                 Temperature.set(chameleon, Temperature.Type.WORLD, Temperature.apply(0, chameleon, Temperature.Type.WORLD, Temperature.getModifiers(chameleon, Temperature.Type.WORLD)));
                 chameleon.setTemperature((float) Temperature.get(chameleon, Temperature.Type.WORLD));
-            }, 1);
+            }, 0);
         }
     }
 
@@ -225,7 +245,7 @@ public class EntityTempHandler
         {
             if (player.tickCount % 5 == 0)
             {
-                if (WorldHelper.isWet(player))
+                if (WorldHelper.isWet(player) || (player.tickCount % 40 == 0 && WorldHelper.isRainingAt(player.level, player.blockPosition())))
                     Temperature.addModifier(player, new WaterTempModifier(0.01f), Temperature.Type.WORLD, false);
 
                 if (player.getTicksFrozen() > 0)
@@ -242,14 +262,12 @@ public class EntityTempHandler
                 boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get();
 
                 if (!hasIcePotion)
-                {
-                    insulModifier = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
+                {   insulModifier = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
                     insulation = insulModifier == null ? 0 : insulModifier.getNBT().getDouble("insulation");
                 }
 
                 if (!(hasIcePotion || insulation > 0) && (player.tickCount % Math.max(1, 37 - insulation)) == 0)
-                {
-                    player.setTicksFrozen(player.getTicksFrozen() - 1);
+                {   player.setTicksFrozen(player.getTicksFrozen() - 1);
                 }
             }
         }
