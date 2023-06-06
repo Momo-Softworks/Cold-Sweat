@@ -1,25 +1,14 @@
 package dev.momostudios.coldsweat.common.blockentity;
 
-import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
-import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.DepthTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.ThermolithBlock;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
-import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ThermolithBlockEntity extends BlockEntity
 {
@@ -54,15 +43,12 @@ public class ThermolithBlockEntity extends BlockEntity
 
             // Handle turning on/off
             if (signal == 0)
-            {
-                if (state.getValue(ThermolithBlock.POWERED))
-                {
-                    level.setBlockAndUpdate(pos, state.setValue(ThermolithBlock.POWERED, false));
+            {   if (state.getValue(ThermolithBlock.POWERED))
+                {   level.setBlockAndUpdate(pos, state.setValue(ThermolithBlock.POWERED, false));
                 }
             }
             else if (!state.getValue(ThermolithBlock.POWERED))
-            {
-                level.setBlockAndUpdate(pos, state.setValue(ThermolithBlock.POWERED, true));
+            {   level.setBlockAndUpdate(pos, state.setValue(ThermolithBlock.POWERED, true));
             }
         }
     }
