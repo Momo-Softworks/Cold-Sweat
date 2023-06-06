@@ -65,29 +65,29 @@ public class ClientSettingsConfig
         BUILDER.push("Position of the 'Steve Head' temperature gauge above the hotbar");
         bodyIconX = BUILDER
                 .comment("The x position of the gauge relative to its normal position")
-                .defineInRange("Temp. Icon X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         bodyIconY = BUILDER
                 .comment("The y position of the gauge relative to its normal position")
-                .defineInRange("Temp. Icon Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
 
         BUILDER.push("Position of the temperature number below the icon");
         bodyReadoutX = BUILDER
                 .comment("The x position of the temperature gauge relative to default")
-                .defineInRange("Temp. Readout X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         bodyReadoutY = BUILDER
                 .comment("The y position of the temperature gauge relative to default")
-                .defineInRange("Temp. Readout Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("Position of the world temperature gauge beside the hotbar");
         worldGaugeX = BUILDER
                 .comment("The x position of the temperature gauge relative to default")
-                .defineInRange("Temp. Gauge X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         worldGaugeY = BUILDER
                 .comment("The y position of the temperature gauge relative to default")
-                .defineInRange("Temp. Gauge Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("UI Options");
