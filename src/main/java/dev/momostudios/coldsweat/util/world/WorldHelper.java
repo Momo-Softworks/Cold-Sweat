@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import dev.momostudios.coldsweat.core.network.message.SyncForgeDataMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
+import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -219,13 +220,14 @@ public class WorldHelper
     {
         BlockPos pos = entity.blockPosition();
         ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
-        return entity.isInWater() || isRainingAt(entity.level, pos) || WorldHelper.getBlockState(chunk, pos).is(Blocks.BUBBLE_COLUMN);
+        return entity.isInWater() || WorldHelper.getBlockState(chunk, pos).is(Blocks.BUBBLE_COLUMN);
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
     {
         Biome biome = level.getBiome(pos).value();
-        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos, 256);
+        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos, 256)
+            || CompatManager.isWeather2RainingAt(level, pos);
     }
 
     /**
