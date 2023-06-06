@@ -54,7 +54,7 @@ public class GoatFurHandler
         Player player = event.getPlayer();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof Goat goat && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
+        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
         {
             goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
