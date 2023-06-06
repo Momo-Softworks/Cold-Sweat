@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.util.entity.ModDamageSources;
+import dev.momostudios.coldsweat.util.registries.ModDamageSources;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;

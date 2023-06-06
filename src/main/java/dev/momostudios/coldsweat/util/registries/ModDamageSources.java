@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.entity;
+package dev.momostudios.coldsweat.util.registries;
 
 import net.minecraft.world.damagesource.DamageSource;
 

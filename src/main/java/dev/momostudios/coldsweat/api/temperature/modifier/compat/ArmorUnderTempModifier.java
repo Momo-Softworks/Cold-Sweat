@@ -11,6 +11,9 @@ import org.jwaresoftware.mcmods.lib.api.combat.Armory;
 
 import java.util.function.Function;
 
+/**
+ * Special TempModifier class for Armor Underwear
+ */
 public class ArmorUnderTempModifier extends TempModifier
 {
     public ArmorUnderTempModifier() {}

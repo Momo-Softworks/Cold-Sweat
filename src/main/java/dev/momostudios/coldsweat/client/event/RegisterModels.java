@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.client.event;
 
-import dev.momostudios.coldsweat.client.renderer.ChameleonEntityRenderer;
+import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.client.renderer.model.*;
 import dev.momostudios.coldsweat.core.init.EntityInit;
 import net.minecraft.client.Minecraft;

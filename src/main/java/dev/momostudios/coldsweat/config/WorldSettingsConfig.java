@@ -23,10 +23,10 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps = null;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps = null;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps = null;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps = null;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
