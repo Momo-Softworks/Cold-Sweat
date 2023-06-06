@@ -5,8 +5,8 @@ import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.DepthTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.api.temperature.modifier.UndergroundTempModifier;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
@@ -103,7 +103,7 @@ public class Temperature
         return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
                                                       .addIf(CompatManager.isSereneSeasonsLoaded(),
                                                           () -> TempModifierRegistry.getEntryFor("sereneseasons:season"))
-                                                      .add(new DepthTempModifier(),
+                                                      .add(new UndergroundTempModifier(),
                                                            new BlockTempModifier(7)).build());
     }
 
