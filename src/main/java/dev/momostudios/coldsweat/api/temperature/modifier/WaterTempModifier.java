@@ -30,7 +30,7 @@ public class WaterTempModifier extends TempModifier
 
         double strength = this.getNBT().getDouble("strength");
         double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));
-        double addAmount = WorldHelper.isWet(entity) ? 0.01 : entity.level.isRainingAt(entity.blockPosition()) ? 0.005 : returnRate;
+        double addAmount = WorldHelper.isWet(entity) ? 0.01 : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? 0.0025 : returnRate;
         double maxStrength = CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
 
         this.getNBT().putDouble("strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
