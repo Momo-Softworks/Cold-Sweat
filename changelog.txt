@@ -1132,6 +1132,7 @@ Technical Changes:
       - Waterskins are inserted from the top, fuel is inserted at the side, and waterskins can be extracted from the bottom
 
 Fixes:
+- Fixed scheduled events sometimes crashing the game (again)
 - Fixed items with an insulation value of less than 2 not displaying or working properly
 - Fixed the insulation bar on armor items not stretching properly if the item has more than max insulation
 - Fixed adaptive insulation vales always appearing to occupy one slot
@@ -1147,3 +1148,35 @@ Fixes:
 Translation Updates:
 - Updated Chinese translation (by @wumeng on Discord)
 - Updated Brazilian Portuguese translation (by @Vellar on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04d
+* Added new original music track: Far Lands
+      - Plays randomly along with the Vanilla music in the Overworld
+* Added basic support for Weather, Storms & Tornadoes:
+      - Snowstorms will now drastically lower the temperature in the affected area
+      - Rain from storms is now treated like normal rain (makes the player wet)
+- Biome temperature now takes altitude into account more seriously
+      - Temperature will drop more substantially as height increases above sea level\
+- Optimized how biome & block temperature are calculated
+- Made several changes to the config menu:
+      - The Cold Sweat config button can now be repositioned on the screen (option in the config menu)
+      - Compacted & reworded some config settings to fit better in the menu
+      - Hovering over config options to show the tooltip is now more consistent
+      - Added config option to disable camera sway to the in-game config menu
+- Baby goats can no longer be sheared
+- Refined the chameleon walking animation slightly
+
+Fixes:
+- Fixed rare crash when completing the "Follow the Leader" advancement
+- Fixed rare crash due to general task scheduling issues
+- Fixed baby chameleons having improper hitbox size and appearing to be an adult
+- Fixed the difficulty slider having a missing texture
+- Fixed the config options for grace period causing the difficulty to be set to "custom" when changed
+- Fixed seasonal temperature affecting players underground if serene seasons is installed after the player spawns for the first time
+- Fixed incorrect biome temperature calculation underground
+      - More specifically, Cold Sweat's biome temperature system was never optimized for 1.18's 3D biomes, meaning all biomes were treated as if they were above-ground
+      - This would dull the temperatures of cave-like biomes as depth increases, which shouldn't happen for underground biomes
+- Fixed planting a soul sprout not granting the "A Seedy Place" advancement
+- Fixed players sometimes not dropping items on death when First Aid is installed
