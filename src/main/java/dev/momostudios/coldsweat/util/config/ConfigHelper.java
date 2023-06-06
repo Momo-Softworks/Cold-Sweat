@@ -150,6 +150,10 @@ public class ConfigHelper
         return map;
     }
 
+    public static List<Biome> getBiomes(List<? extends String> ids)
+    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).toList();
+    }
+
     public static CompoundTag writeNBTBoolean(boolean value, String key)
     {
         CompoundTag tag = new CompoundTag();

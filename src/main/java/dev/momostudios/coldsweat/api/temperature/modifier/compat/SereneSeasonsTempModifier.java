@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
@@ -11,6 +10,9 @@ import sereneseasons.api.season.SeasonHelper;
 
 import java.util.function.Function;
 
+/**
+ * Special TempModifier class for Serene Seasons
+ */
 public class SereneSeasonsTempModifier extends TempModifier
 {
     @Override
