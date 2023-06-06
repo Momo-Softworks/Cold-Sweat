@@ -50,7 +50,7 @@ public class Overlays
 
     public static void registerOverlays(RegisterGuiOverlaysEvent event)
     {
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "World Temp", (gui, poseStack, partialTick, width, height) ->
+        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "world_temp", (gui, poseStack, partialTick, width, height) ->
         {
             gui.setupOverlayRenderState(true, false);
 
@@ -107,7 +107,7 @@ public class Overlays
             }
         });
 
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "Body Temp", (gui, poseStack, partialTick, width, height) ->
+        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "body_temp", (gui, poseStack, partialTick, width, height) ->
         {
             gui.setupOverlayRenderState(true, false);
             Minecraft mc = Minecraft.getInstance();
@@ -137,15 +137,15 @@ public class Overlays
                 // Get the outer border color when readout is > 100
                 int colorBG =
                         BLEND_BODY_TEMP < 0 ? 1122643 :
-                                BLEND_BODY_TEMP > 0 ? 5376516 :
-                                        0;
+                        BLEND_BODY_TEMP > 0 ? 5376516 :
+                        0;
 
                 int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
                 int threatOffset =
                         !CLIENT_CONFIG.iconBobbing() ? 0
-                                : bobLevel == 2 ? ICON_BOB
-                                : bobLevel == 3 ? player.tickCount % 2
-                                : 0;
+                        : bobLevel == 2 ? ICON_BOB
+                        : bobLevel == 3 ? player.tickCount % 2
+                        : 0;
 
                 RenderSystem.defaultBlendFunc();
 
