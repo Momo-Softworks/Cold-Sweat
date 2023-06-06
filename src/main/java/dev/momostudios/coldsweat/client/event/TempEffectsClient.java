@@ -123,13 +123,14 @@ public class TempEffectsClient
                 else HOT_IMMUNITY = 0;
 
                 if (CompatManager.isArmorUnderwearLoaded() && (COLD_IMMUNITY < 4 || HOT_IMMUNITY < 4))
-                player.getArmorSlots().forEach(stack ->
-                {
-                    if (CompatManager.hasOllieLiner(stack))
-                        HOT_IMMUNITY++;
-                    if (CompatManager.hasOttoLiner(stack))
-                        COLD_IMMUNITY++;
-                });
+                {   player.getArmorSlots().forEach(stack ->
+                    {
+                        if (CompatManager.hasOllieLiner(stack))
+                            HOT_IMMUNITY++;
+                        if (CompatManager.hasOttoLiner(stack))
+                            COLD_IMMUNITY++;
+                    });
+                }
             }
         }
     }
@@ -140,18 +141,18 @@ public class TempEffectsClient
         Player player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
-            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
+            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
             {
-                fog.setFarPlaneDistance(CSMath.blendLog(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
-                fog.setNearPlaneDistance(CSMath.blendLog(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
+                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), 4f, tempWithImmunity, 50f, 100f));
+                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), 0f, tempWithImmunity, 50f, 100f));
                 fog.setCanceled(true);
             }
             else if (event instanceof EntityViewRenderEvent.FogColors fogColor)
             {
-                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, immunityModifier, 50, 90));
-                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, immunityModifier, 50, 90));
-                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, immunityModifier, 50, 90));
+                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithImmunity, 50, 90));
+                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithImmunity, 50, 90));
+                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithImmunity, 50, 90));
             }
         }
     }
@@ -165,8 +166,8 @@ public class TempEffectsClient
         if (player != null && event.getOverlay() == ForgeIngameGui.VIGNETTE_ELEMENT
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
-            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(immunityModifier), 50, 100);
+            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
+            float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
             float tickTime = player.tickCount + event.getPartialTicks();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
@@ -178,7 +179,7 @@ public class TempEffectsClient
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (immunityModifier < 0)
+            if (tempWithImmunity < 0)
                 RenderSystem.setShaderColor(0.690f, 0.894f, 0.937f, vignetteBrightness);
             else
                 RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
