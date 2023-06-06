@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.client.renderer.layer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.momostudios.coldsweat.client.renderer.ChameleonEntityRenderer;
+import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.client.renderer.model.ChameleonModel;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
