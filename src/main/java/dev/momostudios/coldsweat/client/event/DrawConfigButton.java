@@ -38,7 +38,7 @@ public class DrawConfigButton
 
             // Main config button
             ImageButton mainButton = new ImageButton(event.getScreen().width / 2 - 183 + buttonX.get(), event.getScreen().height / 6 + 110 + buttonY.get(),
-                                     24, 24, 0, 40, 24,
+                                     24, 24, 40, 40, 24,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {
@@ -71,7 +71,7 @@ public class DrawConfigButton
                             button.setWidth(button.getWidth() - 72);
                         }
                     }
-                    if (child instanceof SliderButton slider)
+                    if (child instanceof AbstractSliderButton slider)
                     {   slider.active = false;
                     }
                 });
