@@ -88,13 +88,6 @@ public class ColdSweat
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
     }
 
-    public void clientSetup(final FMLClientSetupEvent event)
-    {
-        // Fix hearth transparency
-        ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(BlockInit.SOUL_STALK.get(), RenderType.cutoutMipped());
-    }
-
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
         event.register(ITemperatureCap.class);

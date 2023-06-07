@@ -102,5 +102,6 @@
 				"down": {"uv": [0, 0, 0, 11], "rotation": 270, "texture": "#missing"}
 			}
 		}
-	]
+	],
+	"render_type": "cutout"
 }
