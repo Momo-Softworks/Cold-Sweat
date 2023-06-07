@@ -51,11 +51,11 @@ public class ColdSweatData
                                                                        GenerationStep.Decoration.VEGETAL_DECORATION));
 
         EntityType<ChameleonEntity> chameleon = EntityInit.CHAMELEON.get();
-        ConfigSettings.CHAMELEON_BIOMES.get().forEach((id, weight) ->
+        ConfigSettings.CHAMELEON_BIOMES.get().forEach((biomeID, weight) ->
         {
-            ForgeRegistries.BIOMES.getHolder(new ResourceLocation(id)).ifPresent(biomeHolder ->
+            ForgeRegistries.BIOMES.getHolder(biomeID).ifPresent(biomeHolder ->
             {
-                modifiers.put(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_spawns"),
+                modifiers.put(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_spawns_" + biomeID.getNamespace() + "_" + biomeID.getPath()),
                               ForgeBiomeModifiers.AddSpawnsBiomeModifier.singleSpawn(HolderSet.direct(biomeHolder), new MobSpawnSettings.SpawnerData(chameleon, weight, 1, 1)));
             });
         });
