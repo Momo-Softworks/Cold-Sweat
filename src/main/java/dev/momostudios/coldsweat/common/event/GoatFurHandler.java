@@ -108,9 +108,11 @@ public class GoatFurHandler
     public static void onGoatTick(LivingEvent.LivingTickEvent event)
     {
         Entity entity = event.getEntity();
+        if (!(entity instanceof Goat goat)) return;
+
         Triplet<Integer, Integer, Double> furConfig = ConfigSettings.GOAT_FUR_TIMINGS.get();
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
-        if (entity instanceof Goat goat && !goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
+        if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
             goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
