@@ -61,7 +61,7 @@ public class ConfigSettings
 
     public static ValueSupplier<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
-    public static ValueSupplier<List<String>> LAMP_DIMENSIONS;
+    public static ValueSupplier<List<ResourceLocation>> LAMP_DIMENSIONS;
 
     public static ValueSupplier<Map<Item, Double>> BOILER_FUEL;
     public static ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
@@ -70,8 +70,8 @@ public class ConfigSettings
     public static ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
 
     // Entity Settings
-    public static ValueSupplier<Map<String, Integer>> CHAMELEON_BIOMES;
-    public static ValueSupplier<Map<String, Integer>> GOAT_BIOMES;
+    public static ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
+    public static ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
     public static ValueSupplier<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
 
 
@@ -330,7 +330,7 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setSoulLampItems(list);
         });
 
-        LAMP_DIMENSIONS = ValueSupplier.of(() -> new ArrayList<>(ItemSettingsConfig.getInstance().soulLampDimensions()));
+        LAMP_DIMENSIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().soulLampDimensions().stream().map(ResourceLocation::new).toList());
 
         GOAT_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
         {
@@ -363,20 +363,20 @@ public class ConfigSettings
 
         CHAMELEON_BIOMES = ValueSupplier.of(() ->
         {
-            Map<String, Integer> map = new HashMap<>();
+            Map<ResourceLocation, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
             {
-                map.put((String) entry.get(0), ((Number) entry.get(1)).intValue());
+                map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
             }
             return map;
         });
 
         GOAT_BIOMES = ValueSupplier.of(() ->
         {
-            Map<String, Integer> map = new HashMap<>();
+            Map<ResourceLocation, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
             {
-                map.put((String) entry.get(0), ((Number) entry.get(1)).intValue());
+                map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
             }
             return map;
         });
