@@ -9,8 +9,6 @@ import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,7 +17,6 @@ import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -43,7 +40,6 @@ public class ColdSweat
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         bus.addListener(this::commonSetup);
-        bus.addListener(this::clientSetup);
         bus.addListener(this::spawnPlacements);
         bus.addListener(this::registerCaps);
         bus.addListener(Overlays::registerOverlays);
@@ -60,6 +56,8 @@ public class ColdSweat
         PotionInit.POTIONS.register(bus);
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
+        FeatureInit.PlacedFeatureInit.PLACED_FEATURES.register(bus);
+        FeatureInit.ConfiguredFeatureInit.CONFIGURED_FEATURES.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
