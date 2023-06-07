@@ -4,16 +4,11 @@ import com.mojang.serialization.Codec;
 import dev.momostudios.coldsweat.common.block.SoulStalkBlock;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
-import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 
 import java.util.Random;
 

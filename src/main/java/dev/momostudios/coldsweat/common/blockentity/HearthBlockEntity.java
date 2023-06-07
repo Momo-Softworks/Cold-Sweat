@@ -2,8 +2,8 @@ package dev.momostudios.coldsweat.common.blockentity;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.mojang.datafixers.util.Pair;
-import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;

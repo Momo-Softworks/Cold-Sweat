@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.util.compat;
 
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
-import dev.momostudios.coldsweat.util.entity.ModDamageSources;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;

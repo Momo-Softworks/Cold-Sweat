@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListener, NarratableEntry
 {
@@ -23,7 +23,7 @@ public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListe
 
     public ConfigLabel(String id, String text, int x, int y, int color)
     {
-        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, new TextComponent(text));
+        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, Component.translatable(text));
         this.id = id;
         this.x = x;
         this.y = y;
