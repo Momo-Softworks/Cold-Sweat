@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.ListBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
@@ -13,17 +14,17 @@ import java.util.List;
 
 public class EntitySettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec SPEC;
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> insulatedEntities;
-    public static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonTameItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> insulatedEntities;
+    private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonTameItems;
 
-    static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
-    public static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    public static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
-    public static ForgeConfigSpec.BooleanValue increaseGoatSpawns;
+    private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
+    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
+    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
+    private static ForgeConfigSpec.BooleanValue increaseGoatSpawns;
 
     static
     {
@@ -65,6 +66,9 @@ public class EntitySettingsConfig
                                 List.of("minecraft:desert", 4))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> List.of("biomesoplenty:lush_desert", 8),
+                                () -> List.of("biomesoplenty:rainforest", 8),
+                                () -> List.of("biomesoplenty:rocky_rainforest", 8),
+                                () -> List.of("biomesoplenty:fungal_jungle", 8),
                                 () -> List.of("biomesoplenty:tropics", 16),
                                 () -> List.of("biomesoplenty:outback", 8),
                                 () -> List.of("biomesoplenty:lush_desert", 8))
@@ -143,15 +147,10 @@ public class EntitySettingsConfig
 
         // Create the config folder
         try
-        {
-            Files.createDirectory(csConfigPath);
-        }
-        catch (Exception e)
-        {
-            // Do nothing
-        }
+        {   Files.createDirectory(csConfigPath);
+        } catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
     }
 
     public static EntitySettingsConfig getInstance()
@@ -176,6 +175,9 @@ public class EntitySettingsConfig
 
     public List<? extends List<?>> getChameleonSpawnBiomes() {
         return chameleonBiomes.get();
+    }
+    public void setChameleonSpawnBiomes(List<? extends List<?>> list) {
+        chameleonBiomes.set(list);
     }
     public List<? extends List<?>> getGoatSpawnBiomes() {
         return goatBiomes.get();
