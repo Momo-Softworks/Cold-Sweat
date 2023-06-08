@@ -86,6 +86,23 @@ public class ColdSweatData
                           ForgeBiomeModifiers.AddSpawnsBiomeModifier.singleSpawn(HolderSet.direct(biomes.getHolderOrThrow(biomes.getResourceKey(biome).get())),
                                                                                  new MobSpawnSettings.SpawnerData(chameleon, weight, 1, 1)));
         });
+        // Iterate through goat spawn biomes and create biome modifiers
+        EntityType<Goat> goat = EntityType.GOAT;
+        ConfigSettings.GOAT_BIOMES.get().forEach((biomeID, weight) ->
+        {
+            String modID = biomeID.getNamespace();
+            // Don't generate config if corresponding mod not loaded
+            if (!modID.equals("minecraft") && !ModList.get().isLoaded(modID)) return;
+
+            Biome biome = biomes.get(biomeID);
+            if (biome == null)
+            {   ColdSweat.LOGGER.warn("Goat spawn biome {} does not exist, skipping", biomeID);
+                return;
+            }
+            modifiers.put(new ResourceLocation(ColdSweat.MOD_ID, "goat_spawns_" + biomeID.getNamespace() + "_" + biomeID.getPath()),
+                          ForgeBiomeModifiers.AddSpawnsBiomeModifier.singleSpawn(HolderSet.direct(biomes.getHolderOrThrow(biomes.getResourceKey(biome).get())),
+                                                                                 new MobSpawnSettings.SpawnerData(goat, weight, 1, 1)));
+        });
 
         JsonCodecProvider<BiomeModifier> jsonCodecProvider = JsonCodecProvider.forDatapackRegistry(generator, helper, ColdSweat.MOD_ID, registryOps, ForgeRegistries.Keys.BIOME_MODIFIERS, modifiers);
         generator.addProvider(event.includeServer(), jsonCodecProvider);
