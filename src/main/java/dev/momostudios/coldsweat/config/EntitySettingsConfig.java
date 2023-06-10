@@ -60,43 +60,42 @@ public class EntitySettingsConfig
                 .comment("Defines the biomes that Chameleons can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
-                                List.of("minecraft:bamboo_jungle", 8),
-                                List.of("minecraft:jungle", 8),
-                                List.of("minecraft:sparse_jungle", 6),
-                                List.of("minecraft:desert", 4))
+                                List.of("minecraft:bamboo_jungle", 4),
+                                List.of("minecraft:jungle", 4),
+                                List.of("minecraft:sparse_jungle", 4),
+                                List.of("minecraft:desert", 3))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
-                                () -> List.of("biomesoplenty:lush_desert", 8),
-                                () -> List.of("biomesoplenty:rainforest", 8),
-                                () -> List.of("biomesoplenty:rocky_rainforest", 8),
-                                () -> List.of("biomesoplenty:fungal_jungle", 8),
-                                () -> List.of("biomesoplenty:tropics", 16),
-                                () -> List.of("biomesoplenty:outback", 8),
-                                () -> List.of("biomesoplenty:lush_desert", 8))
+                                () -> List.of("biomesoplenty:lush_desert", 3),
+                                () -> List.of("biomesoplenty:rainforest", 4),
+                                () -> List.of("biomesoplenty:rocky_rainforest", 3),
+                                () -> List.of("biomesoplenty:fungal_jungle", 3),
+                                () -> List.of("biomesoplenty:tropics", 8),
+                                () -> List.of("biomesoplenty:outback", 2))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
-                                () -> List.of("byg:tropical_rainforest", 8),
-                                () -> List.of("byg:jacaranda_forest", 8),
-                                () -> List.of("byg:guiana_shield", 8),
-                                () -> List.of("byg:crag_gardens", 8),
-                                () -> List.of("byg:atacama_desert", 5),
-                                () -> List.of("byg:cypress_swamplands", 6),
-                                () -> List.of("byg:mojave_desert", 5),
-                                () -> List.of("byg:windswept_desert", 4))
+                                () -> List.of("byg:tropical_rainforest", 4),
+                                () -> List.of("byg:jacaranda_forest", 3),
+                                () -> List.of("byg:guiana_shield", 3),
+                                () -> List.of("byg:crag_gardens", 4),
+                                () -> List.of("byg:atacama_desert", 2),
+                                () -> List.of("byg:cypress_swamplands", 3),
+                                () -> List.of("byg:mojave_desert", 2),
+                                () -> List.of("byg:windswept_desert", 2))
                             .addIf(CompatManager.isAtmosphericLoaded(),
-                                () -> List.of("atmospheric:dunes", 4),
-                                () -> List.of("atmospheric:flourishing_dunes", 6),
-                                () -> List.of("atmospheric:rocky_dunes", 3),
-                                () -> List.of("atmospheric:petrified_dunes", 3),
-                                () -> List.of("atmospheric:rainforest", 8),
+                                () -> List.of("atmospheric:dunes", 2),
+                                () -> List.of("atmospheric:flourishing_dunes", 3),
+                                () -> List.of("atmospheric:rocky_dunes", 2),
+                                () -> List.of("atmospheric:petrified_dunes", 1),
+                                () -> List.of("atmospheric:rainforest", 6),
                                 () -> List.of("atmospheric:sparse_rainforest", 6),
-                                () -> List.of("atmospheric:rainforest_basin", 8),
+                                () -> List.of("atmospheric:rainforest_basin", 6),
                                 () -> List.of("atmospheric:sparse_rainforest_basin", 6))
                            .addIf(CompatManager.isTerralithLoaded(),
-                                () -> List.of("terralith:red_oasis", 12),
-                                () -> List.of("terralith:desert_oasis", 12),
-                                () -> List.of("terralith:tropical_jungle", 8),
-                                () -> List.of("terralith:arid_highlands", 8),
-                                () -> List.of("terralith:rocky_jungle", 12),
-                                () -> List.of("terralith:brushland", 8)
+                                () -> List.of("terralith:red_oasis", 8),
+                                () -> List.of("terralith:desert_oasis", 8),
+                                () -> List.of("terralith:tropical_jungle", 6),
+                                () -> List.of("terralith:arid_highlands", 6),
+                                () -> List.of("terralith:rocky_jungle", 6),
+                                () -> List.of("terralith:brushland", 4)
                         ).build(),
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
 
