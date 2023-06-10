@@ -61,7 +61,7 @@ public class SoulspringLampItem extends Item
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location().toString())
+                && ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location())
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
@@ -102,8 +102,7 @@ public class SoulspringLampItem extends Item
                     WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
                 else
-                {
-                    // Decrement the state change timer
+                {   // Decrement the state change timer
                     NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
                 }
             }
