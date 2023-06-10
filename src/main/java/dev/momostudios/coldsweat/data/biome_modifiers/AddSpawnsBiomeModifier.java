@@ -40,7 +40,6 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
 
     @Override
     public Codec<? extends BiomeModifier> codec()
-    {
-        return BiomeCodecInit.ADD_SPAWNS_CODEC.get();
+    {   return BiomeCodecInit.ADD_SPAWNS_CODEC.get();
     }
 }
