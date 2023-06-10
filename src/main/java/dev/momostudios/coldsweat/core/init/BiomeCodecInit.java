@@ -16,6 +16,6 @@ public class BiomeCodecInit
 
     public static RegistryObject<Codec<AddSpawnsBiomeModifier>> ADD_SPAWNS_CODEC = BIOME_MODIFIER_SERIALIZERS.register("add_spawns", () ->
     RecordCodecBuilder.create(builder -> builder.group(
-            Codec.BOOL.fieldOf("use_configs").forGetter(AddSpawnsBiomeModifier::shouldUseConfigs)
+            Codec.BOOL.fieldOf("use_configs").forGetter(AddSpawnsBiomeModifier::useConfigs)
       ).apply(builder, AddSpawnsBiomeModifier::new)));
 }
