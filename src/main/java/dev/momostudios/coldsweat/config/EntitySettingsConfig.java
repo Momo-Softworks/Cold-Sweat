@@ -24,7 +24,6 @@ public class EntitySettingsConfig
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
-    private static ForgeConfigSpec.BooleanValue increaseGoatSpawns;
 
     static
     {
@@ -105,35 +104,32 @@ public class EntitySettingsConfig
                          "Not affected by the \"Increase Goat Spawns\" option")
                 .defineList("Goat Spawn Biomes", ListBuilder.begin(
                                 List.of("minecraft:meadow", 3),
-                                List.of("minecraft:windswept_hills", 8),
-                                List.of("minecraft:windswept_forest", 8),
-                                List.of("minecraft:windswept_gravelly_hills", 8),
-                                List.of("minecraft:grove", 8),
+                                List.of("minecraft:windswept_hills", 6),
+                                List.of("minecraft:windswept_forest", 6),
+                                List.of("minecraft:windswept_gravelly_hills", 4),
+                                List.of("minecraft:grove", 5),
                                 List.of("minecraft:stony_peaks", 8))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
-                                () -> List.of("biomesoplenty:boreal_forest", 8),
-                                () -> List.of("biomesoplenty:jade_cliffs", 8),
+                                () -> List.of("biomesoplenty:boreal_forest", 5),
+                                () -> List.of("biomesoplenty:jade_cliffs", 4),
                                 () -> List.of("biomesoplenty:crag", 3))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
-                                () -> List.of("byg:canadian_shield", 8),
-                                () -> List.of("byg:guiana_shield", 8),
+                                () -> List.of("byg:canadian_shield", 3),
+                                () -> List.of("byg:guiana_shield", 3),
                                 () -> List.of("byg:fragment_forest", 128),
-                                () -> List.of("byg:howling_peaks", 8),
-                                () -> List.of("byg:dacite_ridges", 8))
+                                () -> List.of("byg:howling_peaks", 6),
+                                () -> List.of("byg:shattered_glacier", 6),
+                                () -> List.of("byg:dacite_ridges", 5))
                             .addIf(CompatManager.isTerralithLoaded(),
-                                () -> List.of("terralith:blooming_plateau", 8),
-                                () -> List.of("terralith:rocky_mountains", 8),
-                                () -> List.of("terralith:alpine_grove", 8),
-                                () -> List.of("terralith:scarlet_mountains", 8),
+                                () -> List.of("terralith:blooming_plateau", 5),
+                                () -> List.of("terralith:rocky_mountains", 6),
+                                () -> List.of("terralith:alpine_grove", 6),
+                                () -> List.of("terralith:scarlet_mountains", 4),
                                 () -> List.of("terralith:windswept_spires", 16),
-                                () -> List.of("terralith:cloud_forest", 8),
-                                () -> List.of("terralith:haze_mountain", 8)
+                                () -> List.of("terralith:cloud_forest", 4),
+                                () -> List.of("terralith:haze_mountain", 4)
                         ).build(),
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
-
-        increaseGoatSpawns = BUILDER
-                .comment("If true, goats will spawn more frequently in the world")
-                .define("Increase Goat Spawns", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -189,9 +185,5 @@ public class EntitySettingsConfig
     public void setGoatFurStats(List<? extends Number> list)
     {
         goatFurGrowth.set(list);
-    }
-
-    public boolean areGoatSpawnsIncreased() {
-        return increaseGoatSpawns.get();
     }
 }
