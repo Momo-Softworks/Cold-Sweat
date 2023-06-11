@@ -138,6 +138,8 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void renderFog(ViewportEvent event)
     {
+        if (!(event instanceof ViewportEvent.RenderFog || event instanceof ViewportEvent.ComputeFogColor)) return;
+
         Player player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
@@ -148,8 +150,8 @@ public class TempEffectsClient
                 fog.setNearPlaneDistance(CSMath.blendLog(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
                 fog.setCanceled(true);
             }
-            else if (event instanceof ViewportEvent.ComputeFogColor fogColor)
-            {
+            else
+            {   ViewportEvent.ComputeFogColor fogColor = (ViewportEvent.ComputeFogColor) event;
                 fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, immunityModifier, 50, 90));
                 fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, immunityModifier, 50, 90));
                 fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, immunityModifier, 50, 90));
