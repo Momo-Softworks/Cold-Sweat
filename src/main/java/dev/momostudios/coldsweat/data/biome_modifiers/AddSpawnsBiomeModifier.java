@@ -32,7 +32,7 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
                 // Add goat spawns
                 Integer goatWeight = ConfigSettings.GOAT_BIOMES.get().get(biomeID);
                 if (goatWeight != null)
-                {   builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, goatWeight, 1, 1));
+                {   builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, goatWeight, 1, 3));
                 }
             });
         }
