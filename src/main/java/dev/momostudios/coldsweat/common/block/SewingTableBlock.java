@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,14 +78,12 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     @Override
     public Component getDisplayName()
-    {
-        return null;
+    {   return Component.translatable("container." + ColdSweat.MOD_ID + ".sewing_table");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowID, Inventory inv, Player player)
-    {
-        return new SewingContainer(windowID, inv);
+    {   return new SewingContainer(windowID, inv);
     }
 }

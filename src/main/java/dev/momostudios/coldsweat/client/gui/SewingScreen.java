@@ -14,11 +14,10 @@ import javax.annotation.Nonnull;
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    Component name = Component.translatable("container." + ColdSweat.MOD_ID + ".sewing_table");
 
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, Component.translatable("container." + ColdSweat.MOD_ID + ".sewing_table"));
+        super(screenContainer, inv, titleIn);
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 175;
@@ -37,10 +36,9 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     protected void init()
     {
         super.init();
-        this.titleLabelX = this.getXSize() / 2 - this.font.width(name) / 2;
+        this.titleLabelX = this.getXSize() / 2 - this.font.width(this.title) / 2;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
@@ -51,12 +49,10 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
         this.blit(poseStack, x, y, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
-        {
-            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
+        {   this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
         }
         if (!menu.getSlot(1).hasItem())
-        {
-            this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
+        {   this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
         }
     }
 }
