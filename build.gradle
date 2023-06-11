@@ -117,7 +117,7 @@ dependencies {
 //    compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
     runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
-    compileOnly fg.deobf("curse.maven:create-328085:4371809")
+    compileOnly fg.deobf("curse.maven:create-328085:4550987")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
     runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")
     runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514")
