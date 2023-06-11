@@ -9,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -136,8 +137,7 @@ public class BoilerBlock extends Block implements EntityBlock
         {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof BoilerBlockEntity te)
-            {
-                Containers.dropContents(level, pos, te);
+            {   Containers.dropContents(level, pos, te);
                 level.updateNeighborsAt(pos, this);
             }
         }
@@ -146,22 +146,21 @@ public class BoilerBlock extends Block implements EntityBlock
 
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
-    {
-        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LIT);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {   builder.add(FACING, LIT);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
+    public BlockState getStateForPlacement(BlockPlaceContext context)
+    {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, Level level, BlockPos pos, Random rand)
+    public void animateTick(BlockState stateIn, Level level, BlockPos pos, RandomSource rand)
     {
         if (stateIn.getValue(LIT))
         {
