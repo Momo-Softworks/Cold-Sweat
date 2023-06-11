@@ -174,8 +174,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     @Override
     public Component getDisplayName()
-    {
-        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+    {   return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
     }
 
     @Override
