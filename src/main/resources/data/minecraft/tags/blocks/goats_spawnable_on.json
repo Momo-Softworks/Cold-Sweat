@@ -2,7 +2,6 @@
   "replace": false,
   "values": [
     "#forge:stone",
-    "#forge:dirt",
     "#minecraft:dirt",
     "#forge:cobblestone",
     "#minecraft:valid_spawn"
