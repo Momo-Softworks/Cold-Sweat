@@ -103,7 +103,7 @@ public class WorldSettingsConfig
                             List.of("minecraft:stony_shore", 50, 64, "F"),
                             List.of("minecraft:snowy_beach", 38, 52, "F"),
                             List.of("minecraft:snowy_slopes", 24, 38, "F"),
-                            List.of("minecraft:windswept_forest", 40, 60, "F"),
+                            List.of("minecraft:windswept_forest", 48, 66, "F"),
                             List.of("minecraft:frozen_peaks", 15, 33, "F"),
                             List.of("minecraft:warm_ocean", 67, 76, "F"),
                             List.of("minecraft:deep_frozen_ocean", 56, 65, "F"),

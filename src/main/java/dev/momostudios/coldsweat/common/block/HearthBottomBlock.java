@@ -67,8 +67,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     public static Item.Properties getItemProperties()
-    {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1);
+    {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1);
     }
 
     public HearthBottomBlock(Block.Properties properties)
@@ -84,8 +83,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     static void calculateFacingShapes(VoxelShape shape)
     {
         for (Direction direction : Direction.values())
-        {
-            SHAPES.put(direction, CSMath.rotateShape(direction, shape));
+        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
         }
     }
 
@@ -97,22 +95,19 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
-    {
-        return SHAPES.get(state.getValue(FACING));
+    {   return SHAPES.get(state.getValue(FACING));
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
-    {
-        return type == ModBlockEntities.HEARTH ? HearthBlockEntity::tickSelf : null;
+    {   return type == ModBlockEntities.HEARTH ? HearthBlockEntity::tickSelf : null;
     }
 
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
-        return new HearthBlockEntity(pos, state);
+    {   return new HearthBlockEntity(pos, state);
     }
 
     @SuppressWarnings("deprecation")
@@ -224,8 +219,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
         if (level.getBlockState(pos.above()).isAir())
-        {
-            level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
         }
     }
 
@@ -234,16 +228,14 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
         if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP)
-        {
-            this.destroy(level, pos, state);
+        {   this.destroy(level, pos, state);
         }
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {
-        List<ItemStack> dropsOriginal = super.getDrops(state, builder);
+    {   List<ItemStack> dropsOriginal = super.getDrops(state, builder);
         if (!dropsOriginal.isEmpty())
             return dropsOriginal;
         return Collections.singletonList(new ItemStack(this, 1));
@@ -256,14 +248,12 @@ public class HearthBottomBlock extends Block implements EntityBlock
         if (state.getBlock() != newState.getBlock())
         {
             if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP)
-            {
-                level.destroyBlock(pos.above(), false);
+            {   level.destroyBlock(pos.above(), false);
             }
 
             BlockEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity)
-            {
-                Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
+            {   Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
                 level.updateNeighborsAt(pos, this);
             }
         }
@@ -272,14 +262,12 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
-    {
-        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {
-        builder.add(FACING, WATER, LAVA);
+    {   builder.add(FACING, WATER, LAVA);
     }
 
     @Override
