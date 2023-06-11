@@ -48,6 +48,7 @@ public class Overlays
 
     static GameType GAME_MODE = null;
 
+    @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event)
     {
         event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "world_temp", (gui, poseStack, partialTick, width, height) ->
