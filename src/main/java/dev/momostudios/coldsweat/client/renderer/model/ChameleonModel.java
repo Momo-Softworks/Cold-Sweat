@@ -59,11 +59,11 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 		PartDefinition TopFrill_r1 = Head.addOrReplaceChild("TopFrill_r1", CubeListBuilder.create().texOffs(30, 0).addBox(-1.0F, 1.4F, 0.05F, 2.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, -5.0F, 0.7418F, 0.0F, 0.0F));
 
 		PartDefinition Jaw = Head.addOrReplaceChild("Jaw", CubeListBuilder.create().texOffs(15, 7).addBox(-2.0F, 0.0F, -7.0F, 4.0F, 1.0F, 7.0F, new CubeDeformation(0.0F))
-																		  .texOffs(18, 15).addBox(-1.0F, 1.0F, -6.0F, 2.0F, 1.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, 0.0F));
+		.texOffs(18, 15).addBox(0.0F, 1.0F, -6.0F, 0.0F, 1.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, 0.0F));
 
-		PartDefinition RightEye = Head.addOrReplaceChild("RightEye", CubeListBuilder.create().texOffs(15, 1).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, 0.0F, -3.5F));
+		PartDefinition RightEye = Head.addOrReplaceChild("RightEye", CubeListBuilder.create().texOffs(15, 1).addBox(-1.5F, -1.5F, -1.5F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, 0.0F, -3.5F));
 
-		PartDefinition LeftEye = Head.addOrReplaceChild("LeftEye", CubeListBuilder.create().texOffs(15, 1).mirror().addBox(-1.0005F, -1.4782F, -1.634F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(1.0005F, -0.0218F, -3.366F));
+		PartDefinition LeftEye = Head.addOrReplaceChild("LeftEye", CubeListBuilder.create().texOffs(15, 1).mirror().addBox(-0.0005F, -1.4782F, -1.634F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(1.0005F, -0.0218F, -3.366F));
 
 		PartDefinition Tongue1 = Head.addOrReplaceChild("Tongue1", CubeListBuilder.create().texOffs(27, 25).addBox(-1.0F, 0.0F, -7.0F, 2.0F, 0.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, 0.0F));
 
@@ -386,7 +386,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
 			poseStack.translate(0, 1.1555, -0.18755);
 			tongue1.xRot = head.xRot + jaw.xRot / 2;
 			tongue1.yRot = head.yRot;
-			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
+			tongue1.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
 			poseStack.popPose();
 		}
 		RenderSystem.disableBlend();
