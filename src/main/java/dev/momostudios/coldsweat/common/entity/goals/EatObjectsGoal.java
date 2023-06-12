@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.entity.goals;
 
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.common.entity.data.edible.ChameleonEdibles;
+import dev.momostudios.coldsweat.common.entity.data.edible.Edible;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
@@ -16,26 +17,24 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class EatObjectsGoal extends Goal
 {
-    List<Item> wantedItems;
     List<EntityType<?>> wantedEntities;
     ChameleonEntity entity;
     Entity target;
     boolean stoppedTasks;
     Vec3 lookPos = null;
 
-    public EatObjectsGoal(ChameleonEntity chameleon, List<Item> wantedItems, List<EntityType<?>> wantedEntities)
+    public EatObjectsGoal(ChameleonEntity chameleon, List<EntityType<?>> wantedEntities)
     {
-        this.wantedItems = wantedItems;
         this.wantedEntities = wantedEntities;
         this.entity = chameleon;
-        this.wantedItems.addAll(ChameleonEdibles.EDIBLES.keySet().stream().toList());
-        this.wantedItems.addAll(ConfigSettings.CHAMELEON_TAME_ITEMS.get().keySet());
     }
 
     public boolean canContinueToUse()
@@ -58,12 +57,15 @@ public class EatObjectsGoal extends Goal
             && (this.entity.isPlayerTrusted(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
                 Item item = itemEntity.getItem().getItem();
-                if (this.wantedItems.contains(item) && this.entity.getCooldown(item) <= 0
-                && ChameleonEdibles.getEdible(item).shouldEat(this.entity, itemEntity))
+                Optional<Edible> edible = ChameleonEdibles.getEdible(item);
+                if (edible.isPresent())
                 {
-                    this.target = ent;
-                    this.lookPos = ent.position();
-                    break;
+                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity))
+                    {
+                        this.target = ent;
+                        this.lookPos = ent.position();
+                        break;
+                    }
                 }
             }
             else if (this.wantedEntities.contains(ent.getType()))

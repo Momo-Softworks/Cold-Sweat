@@ -1,10 +1,9 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
+import dev.momostudios.coldsweat.util.registries.ModTags;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -39,8 +38,8 @@ public class BoilerContainer extends AbstractContainerMenu
             this.addSlot(new Slot(te, in, -10 + in * 18, 35)
             {
                 @Override
-                public boolean mayPlace(ItemStack stack) {
-                    return stack.getItem() instanceof FilledWaterskinItem;
+                public boolean mayPlace(ItemStack stack)
+                {   return stack.is(ModTags.Items.BOILER_VALID);
                 }
             });
         }
@@ -96,22 +95,21 @@ public class BoilerContainer extends AbstractContainerMenu
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.hasItem())
+        if (slot.hasItem())
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (CSMath.withinRange(index, 0, 9))
             {
                 if (!this.moveItemStackTo(itemstack1, 10, 46, true))
-                {
-                    return ItemStack.EMPTY;
+                {   return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
             }
             else
             {
-                if (itemstack.getItem() == ModItems.FILLED_WATERSKIN)
+                if (itemstack.is(ModTags.Items.BOILER_VALID))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {

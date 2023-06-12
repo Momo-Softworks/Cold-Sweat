@@ -6,13 +6,16 @@ import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
+import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 
 public class ColdBiomeEdible extends Edible
@@ -77,7 +80,11 @@ public class ColdBiomeEdible extends Edible
 
     @Override
     public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
-    {
-        return true;
+    {   return true;
+    }
+
+    @Override
+    public TagKey<Item> associatedItems()
+    {   return ModTags.Items.CHAMELEON_COLD;
     }
 }

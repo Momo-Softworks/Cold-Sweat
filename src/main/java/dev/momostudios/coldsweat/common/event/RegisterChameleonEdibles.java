@@ -24,11 +24,10 @@ public class RegisterChameleonEdibles
     @SubscribeEvent
     public static void onEdiblesRegister(EdiblesRegisterEvent event)
     {
-        event.registerEdible(new HotBiomeEdible(), Items.MAGMA_CREAM, Items.NETHER_WART, Items.CACTUS);
-        event.registerEdible(new ColdBiomeEdible(), Items.SNOWBALL, Items.BEETROOT, Items.SWEET_BERRIES);
-        event.registerEdible(new HumidBiomeEdible(), Items.SLIME_BALL, Items.INK_SAC, Items.COCOA_BEANS);
-        event.registerEdible(new AridBiomeEdible(), Items.DRIED_KELP, Items.DEAD_BUSH, Items.RABBIT_FOOT);
-        event.registerEdible(new HealingEdible(), Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE);
-        event.registerEdible(new HealingEdible(), ItemTags.FISHES);
+        event.registerEdible(new HotBiomeEdible());
+        event.registerEdible(new ColdBiomeEdible());
+        event.registerEdible(new HumidBiomeEdible());
+        event.registerEdible(new HealingEdible());
+        event.registerEdible(new HealingEdible());
     }
 }

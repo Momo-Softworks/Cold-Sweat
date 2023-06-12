@@ -1,9 +1,12 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 
 public class HealingEdible extends Edible
 {
@@ -27,7 +30,11 @@ public class HealingEdible extends Edible
 
     @Override
     public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
-    {
-        return entity.getHealth() < entity.getMaxHealth() || (item.getThrower() != null && !entity.isPlayerTrusted(item.getThrower()));
+    {   return entity.getHealth() < entity.getMaxHealth() || (item.getThrower() != null && !entity.isPlayerTrusted(item.getThrower()));
+    }
+
+    @Override
+    public TagKey<Item> associatedItems()
+    {   return ModTags.Items.CHAMELEON_TAMING;
     }
 }

@@ -1180,3 +1180,17 @@ Fixes:
       - This would dull the temperatures of cave-like biomes as depth increases, which shouldn't happen for underground biomes
 - Fixed planting a soul sprout not granting the "A Seedy Place" advancement
 - Fixed players sometimes not dropping items on death when First Aid is installed
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04e
+- Updated Create compatibility to 5.1b
+- Increased chameleon spawn rates in jungle biomes due to thick vegetation
+- Added #boiler_valid and #icebox_valid tags
+      - These tags now determine what items can be placed into the top slots of the icebox & boiler
+
+Fixes:
+- Fixed temperature-related UI elements not rendering
+- Fixed crash when opening the sewing table menu
+- Fixed goats not being able to spawn
+- Fixed the boiler not spawning particles when lit

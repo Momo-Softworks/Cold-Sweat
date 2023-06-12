@@ -72,7 +72,6 @@ public class ConfigSettings
     // Entity Settings
     public static ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
-    public static ValueSupplier<Map<Item, Integer>> CHAMELEON_TAME_ITEMS;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -377,20 +376,6 @@ public class ConfigSettings
             for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
             {
                 map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
-            }
-            return map;
-        });
-
-        CHAMELEON_TAME_ITEMS = ValueSupplier.of(() ->
-        {
-            Map<Item, Integer> map = new HashMap<>();
-            for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonTameItems())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {
-                    map.put(item, ((Number) entry.get(1)).intValue());
-                }
             }
             return map;
         });
