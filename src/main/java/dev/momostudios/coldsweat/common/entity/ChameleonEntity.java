@@ -255,6 +255,11 @@ public class ChameleonEntity extends Animal
     }
 
     @Override
+    public int getHeadRotSpeed()
+    {   return 20;
+    }
+
+    @Override
     public void tick()
     {
         super.tick();
@@ -411,12 +416,10 @@ public class ChameleonEntity extends Animal
                 ChameleonEdibles.getEdible(itemEntity.getItem().getItem()).ifPresent(edible ->
                 {
                     if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
-                    {
-                        this.setCooldown(edible, edible.getCooldown());
+                    {   this.setCooldown(edible, edible.getCooldown());
                     }
                     else
-                    {
-                        this.setCooldown(edible, edible.getCooldown() / 4);
+                    {   this.setCooldown(edible, edible.getCooldown() / 4);
                     }
                 });
             }

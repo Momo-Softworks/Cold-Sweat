@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import dev.momostudios.coldsweat.common.entity.data.edible.Edible;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.Entity;
@@ -13,11 +12,12 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class EatObjectsGoal extends Goal
 
     public void start()
     {
-        // scan for ItemEntity in a 5-block range
+        // Scan for ItemEntity in a 5-block range
         List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
         for (Entity ent : items)
         {
@@ -97,19 +97,24 @@ public class EatObjectsGoal extends Goal
         }
 
         // Look at target position
+        this.lookPos = this.target.position().add(this.target.getDeltaMovement());
         this.entity.getLookControl().setLookAt(lookPos);
 
         if (this.entity.getEatTimer() <= 0)
         {
-            // Move to within 1.5 blocks of the ItemEntity
-            this.entity.getNavigation().moveTo(this.target, 1.5);
+            // Move to the target
+            PathNavigation navigator = this.entity.getNavigation();
+            Path path = navigator.createPath(target, 0);
+            if (path != null) navigator.moveTo(path, 1.5);
 
             // Update look position
-            this.lookPos = this.target.position().add(this.target.getDeltaMovement());
 
             // If within 1.5 blocks, eat the item
-            if (this.entity.distanceToSqr(this.target) < 2 && Math.abs(this.entity.getY() - this.target.getY()) < 1 && this.target.isAlive())
+            if (Math.sqrt(this.entity.distanceToSqr(this.target)) < 1.5 && Math.abs(this.entity.getY() - this.target.getY()) < 1 && this.target.isAlive())
             {
+                navigator.stop();
+                this.entity.getLookControl().setLookAt(lookPos);
+
                 // Play tongue stretch animation
                 this.entity.eatAnimation();
 
@@ -131,7 +136,8 @@ public class EatObjectsGoal extends Goal
                             if (item.getItem().getCount() > 0)
                             {   ItemStack stack = item.getItem().copy();
                                 stack.shrink(1);
-                                WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
+                                if (!stack.isEmpty())
+                                    WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
                             }
                         }
 
@@ -143,22 +149,19 @@ public class EatObjectsGoal extends Goal
                 // Send the entity toward the chameleon
                 TaskScheduler.scheduleServer(() ->
                 {
-                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(0.3));
-                }, this.entity.getEatAnimLength() / 2);
+                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(1));
+                }, this.entity.getEatAnimLength() / 3);
             }
 
-            if (!this.stoppedTasks)
+            this.entity.goalSelector.getRunningGoals().forEach(goal ->
             {
-                this.entity.goalSelector.getRunningGoals().forEach(goal ->
+                Goal g = goal.getGoal();
+                if (g instanceof TemptGoal || g instanceof LookAtPlayerGoal || g instanceof RandomLookAroundGoal || g instanceof LazyLookGoal)
                 {
-                    Goal g = goal.getGoal();
-                    if (g instanceof TemptGoal || g instanceof LookAtPlayerGoal || g instanceof RandomLookAroundGoal)
-                    {
-                        this.stoppedTasks = true;
-                        goal.stop();
-                    }
-                });
-            }
+                    this.stoppedTasks = true;
+                    goal.stop();
+                }
+            });
         }
     }
 
