@@ -11,7 +11,7 @@ public class SoulLampTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        double almostMax = ConfigSettings.MAX_TEMP.get() * 0.99;
+        double almostMax = ConfigSettings.MAX_TEMP.get() - 0.01;
         return temp ->
         {
             if (temp < almostMax) return temp;

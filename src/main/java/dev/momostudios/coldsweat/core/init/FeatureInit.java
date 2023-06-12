@@ -47,7 +47,7 @@ public class FeatureInit
             PLACED_FEATURES = DeferredRegister.create(Registry.PLACED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
 
             SOUL_STALK_PLACEMENT = register("soul_stalk_placement", ConfiguredFeatureInit.SOUL_STALK_CONFIGURATION, List.of(RarityFilter.onAverageOnceEvery(3),
-                                                                                                                                  InSquarePlacement.spread(), PlacementUtils.RANGE_8_8,
+                                                                                                                                  InSquarePlacement.spread(), PlacementUtils.RANGE_10_10,
                                                                                                                                   BiomeFilter.biome(), CountPlacement.of(2)));
         }
     }
