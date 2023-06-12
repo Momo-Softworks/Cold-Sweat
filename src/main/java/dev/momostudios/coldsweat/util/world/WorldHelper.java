@@ -352,8 +352,7 @@ public class WorldHelper
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
-        {
-            item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+        {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
         }
         return item;
     }

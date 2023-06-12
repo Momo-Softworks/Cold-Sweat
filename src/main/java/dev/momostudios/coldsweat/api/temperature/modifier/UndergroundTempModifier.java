@@ -82,6 +82,6 @@ public class UndergroundTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:depth";
+        return "cold_sweat:height";
     }
 }
