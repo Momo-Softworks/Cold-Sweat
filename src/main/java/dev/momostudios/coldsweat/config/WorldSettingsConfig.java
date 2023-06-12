@@ -111,7 +111,8 @@ public class WorldSettingsConfig
                             List.of("minecraft:bamboo_jungle", 76, 87, "F"),
                             List.of("minecraft:badlands", 84, 120, "F"),
                             List.of("minecraft:wooded_badlands", 80, 108, "F"),
-                            List.of("minecraft:eroded_badlands", 88, 120, "F"))
+                            List.of("minecraft:eroded_badlands", 88, 120, "F"),
+                            List.of("minecraft:deep_dark", 63, 63, "F"))
                      .addIf(CompatManager.isBiomesOPlentyLoaded(),
                             () -> List.of("biomesoplenty:bayou", 67, 78, "F"),
                             () -> List.of("biomesoplenty:bog", 62, 73, "F"),
