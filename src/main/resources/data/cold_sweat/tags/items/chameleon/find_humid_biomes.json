@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:slime_ball",
+    "minecraft:ink_sac",
+    "minecraft:cocoa_beans"
+  ]
+}

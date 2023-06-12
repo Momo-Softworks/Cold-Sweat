@@ -14,6 +14,7 @@ import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
+import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
@@ -103,9 +104,9 @@ public class ChameleonEntity extends Animal
     protected void registerGoals()
     {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.6D));
-        this.goalSelector.addGoal(2, new EatObjectsGoal(this, new ArrayList<>(), List.of(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.5D, Ingredient.of(ConfigSettings.CHAMELEON_TAME_ITEMS.get().keySet().stream().map(Item::getDefaultInstance)), false));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
+        this.goalSelector.addGoal(2, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.of(ModTags.Items.CHAMELEON_TAMING), false));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
@@ -392,7 +393,6 @@ public class ChameleonEntity extends Animal
         {
             if (entity instanceof ItemEntity itemEntity)
             {
-                Edible edible;
                 if (this.isTamingItem(itemEntity.getItem()))
                 {
                     Player player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
@@ -408,21 +408,17 @@ public class ChameleonEntity extends Animal
                         }
                     }
                 }
-                if ((edible = ChameleonEdibles.getEdible(itemEntity.getItem().getItem())) != null)
+                ChameleonEdibles.getEdible(itemEntity.getItem().getItem()).ifPresent(edible ->
                 {
                     if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
                     {
-                        ChameleonEdibles.EDIBLES.entrySet().stream().filter(e -> e.getValue().equals(edible)).map(Map.Entry::getKey).forEach(item ->
-                        {   this.setCooldown(item, edible.getCooldown());
-                        });
+                        this.setCooldown(edible, edible.getCooldown());
                     }
                     else
                     {
-                        ChameleonEdibles.EDIBLES.entrySet().stream().filter(e -> e.getValue().equals(edible)).map(Map.Entry::getKey).forEach(item ->
-                        {   this.setCooldown(item, edible.getCooldown() / 4);
-                        });
+                        this.setCooldown(edible, edible.getCooldown() / 4);
                     }
-                }
+                });
             }
             this.setEatTimestamp(this.tickCount);
         }
@@ -608,16 +604,16 @@ public class ChameleonEntity extends Animal
         this.entityData.set(EAT_TIMESTAMP, eatTimestamp);
     }
 
-    public void setCooldown(Item item, Integer time)
+    public void setCooldown(Edible edible, Integer time)
     {
         CompoundTag map = this.entityData.get(EDIBLE_COOLDOWNS);
-        map.putInt(ForgeRegistries.ITEMS.getKey(item).toString(), time);
+        map.putInt(edible.associatedItems().location().toString(), time);
         this.entityData.set(EDIBLE_COOLDOWNS, map);
     }
 
-    public Integer getCooldown(Item item)
+    public Integer getCooldown(Edible edible)
     {
-        return this.entityData.get(EDIBLE_COOLDOWNS).getInt(ForgeRegistries.ITEMS.getKey(item).toString());
+        return this.entityData.get(EDIBLE_COOLDOWNS).getInt(edible.getName());
     }
 
     public CompoundTag getCooldowns()
@@ -637,7 +633,7 @@ public class ChameleonEntity extends Animal
 
     public boolean isTamingItem(ItemStack item)
     {
-        return ConfigSettings.CHAMELEON_TAME_ITEMS.get().containsKey(item.getItem());
+        return item.is(ModTags.Items.CHAMELEON_TAMING);
     }
 
 
@@ -663,7 +659,7 @@ public class ChameleonEntity extends Animal
         for (String key : this.getCooldowns().getAllKeys())
         {
             CompoundTag cooldownTag = new CompoundTag();
-            cooldownTag.putString("Item", key);
+            cooldownTag.putString("Edible", key);
             cooldownTag.putInt("Cooldown", this.getCooldowns().getInt(key));
             edibleCooldowns.add(cooldownTag);
         }
@@ -695,9 +691,9 @@ public class ChameleonEntity extends Animal
         for (int i = 0; i < edibleCooldowns.size(); i++)
         {
             CompoundTag cooldownTag = edibleCooldowns.getCompound(i);
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(cooldownTag.getString("Item")));
-            if (item != null)
-                this.setCooldown(item, cooldownTag.getInt("Cooldown"));
+            ChameleonEdibles.EDIBLES.stream().filter(ed -> ed.getName().equals(cooldownTag.getString("Item"))).findFirst().ifPresent(edible ->
+            {   this.setCooldown(edible, cooldownTag.getInt("Cooldown"));
+            });
         }
         this.setTemperature(nbt.getFloat("Temperature"));
     }

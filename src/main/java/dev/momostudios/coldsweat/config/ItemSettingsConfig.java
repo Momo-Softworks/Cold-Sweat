@@ -38,7 +38,7 @@ public final class ItemSettingsConfig
           Fuel Items
          */
         BUILDER.push("Fuel Items")
-                .comment("Defines items that can use as fuel",
+                .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
                 .defineList("Boiler", ListBuilder.begin(

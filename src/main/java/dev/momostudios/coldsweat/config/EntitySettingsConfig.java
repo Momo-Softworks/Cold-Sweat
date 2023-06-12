@@ -19,8 +19,6 @@ public class EntitySettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> insulatedEntities;
     private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonTameItems;
-
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
@@ -44,13 +42,6 @@ public class EntitySettingsConfig
                 .defineList("Goat Fur Growth Timings", List.of(
                         1200, 2400, 0.20
                     ), it -> it instanceof Number);
-
-        chameleonTameItems = BUILDER
-                .comment("Defines the items that can be used to tame a chameleon",
-                        "Format: [\"item_id\", chance]")
-                .defineList("Chameleon Tame Items", List.of(
-                        List.of("minecraft:spider_eye", 0.3)
-                    ), it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         BUILDER.pop();
 
@@ -149,41 +140,29 @@ public class EntitySettingsConfig
     }
 
     public static EntitySettingsConfig getInstance()
-    {
-        return INSTANCE;
+    {   return INSTANCE;
     }
 
     /*
      * Non-private values for use elsewhere
      */
 
-    public List<? extends List<Object>> getInsulatedEntities() {
-        return insulatedEntities.get();
-    }
-    public void setInsulatedEntities(List<? extends List<Object>> list) {
-        insulatedEntities.set(list);
+    public List<? extends List<Object>> getInsulatedEntities()
+    {   return insulatedEntities.get();
     }
 
-    public List<?> getGoatFurStats() {
-        return goatFurGrowth.get();
+    public List<?> getGoatFurStats()
+    {   return goatFurGrowth.get();
     }
-
-    public List<? extends List<?>> getChameleonSpawnBiomes() {
-        return chameleonBiomes.get();
-    }
-    public void setChameleonSpawnBiomes(List<? extends List<?>> list) {
-        chameleonBiomes.set(list);
-    }
-    public List<? extends List<?>> getGoatSpawnBiomes() {
-        return goatBiomes.get();
-    }
-
-    public List<? extends List<?>> getChameleonTameItems() {
-        return chameleonTameItems.get();
-    }
-
     public void setGoatFurStats(List<? extends Number> list)
-    {
-        goatFurGrowth.set(list);
+    {   goatFurGrowth.set(list);
+    }
+
+    public List<? extends List<?>> getChameleonSpawnBiomes()
+    {   return chameleonBiomes.get();
+    }
+
+    public List<? extends List<?>> getGoatSpawnBiomes()
+    {   return goatBiomes.get();
     }
 }
