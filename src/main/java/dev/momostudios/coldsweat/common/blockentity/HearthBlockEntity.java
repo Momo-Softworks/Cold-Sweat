@@ -267,6 +267,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             });
         }
 
+        // Clear paths every 60 seconds to account for calculation errors
+        if (this.ticksExisted % 2400 == 0)
+        {   this.replacePaths(List.of());
+            this.forceRebuild = true;
+        }
+
         // Reset if a nearby block has been updated
         if (forceRebuild || (rebuildCooldown <= 0 && !notifyQueue.isEmpty()))
         {
@@ -336,6 +342,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 /*
                  Partition the points into logical "sub-maps" to be iterated over separately each tick
                 */
+                if (paths.isEmpty()) this.addPath(new SpreadPath(pos).setOrigin(pos));
 
                 int pathCount = paths.size();
                 // Size of each partition (defaults to 1/30th of the total paths)
