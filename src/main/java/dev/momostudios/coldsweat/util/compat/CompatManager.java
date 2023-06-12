@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.util.compat;
 
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.core.BlockPos;
@@ -12,24 +13,51 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 @Mod.EventBusSubscriber
 public class CompatManager
 {
-    private static final boolean BOP_LOADED = ModList.get().isLoaded("biomesoplenty");
-    private static final boolean SEASONS_LOADED = ModList.get().isLoaded("sereneseasons");
-    private static final boolean CURIOS_LOADED = ModList.get().isLoaded("curios");
-    private static final boolean WEREWOLVES_LOADED = ModList.get().isLoaded("werewolves");
-    private static final boolean SPIRIT_LOADED = ModList.get().isLoaded("spirit");
-    private static final boolean ARMOR_UNDERWEAR_LOADED = ModList.get().isLoaded("armorunder");
-    private static final boolean BYG_LOADED = ModList.get().isLoaded("byg");
-    private static final boolean CREATE_LOADED = ModList.get().isLoaded("create");
-    private static final boolean ATMOSPHERIC_LOADED = ModList.get().isLoaded("atmospheric");
-    private static final boolean ENVIRONMENTAL_LOADED = ModList.get().isLoaded("environmental");
-    private static final boolean TERRALITH_LOADED = ModList.get().isLoaded("terralith");
-    private static final boolean WEATHER_LOADED = ModList.get().isLoaded("weather2");
+    private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
+    private static final boolean SEASONS_LOADED = modLoaded("sereneseasons");
+    private static final boolean CURIOS_LOADED = modLoaded("curios");
+    private static final boolean WEREWOLVES_LOADED = modLoaded("werewolves");
+    private static final boolean SPIRIT_LOADED = modLoaded("spirit");
+    private static final boolean ARMOR_UNDERWEAR_LOADED = modLoaded("armorunder");
+    private static final boolean BYG_LOADED = modLoaded("byg");
+    private static final boolean CREATE_LOADED = modLoaded("create", 0, 5, 1);
+    private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
+    private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
+    private static final boolean TERRALITH_LOADED = modLoaded("terralith");
+    private static final boolean WEATHER_LOADED = modLoaded("weather2");
+
+    private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
+    {
+        if (minMajorVer > 0 || minMinorVer > 0 || minPatchVer > 0)
+        {
+            ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+            if (mod == null) return false;
+
+            ArtifactVersion version = mod.getModInfo().getVersion();
+            if (version.getMajorVersion() >= minMajorVer
+            &&  version.getMinorVersion() >= minMinorVer
+            &&  version.getIncrementalVersion() >= minPatchVer)
+            {   return true;
+            }
+            else
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID, minMajorVer + "." + minMinorVer + "." + minPatchVer);
+                return false;
+            }
+        }
+        else return ModList.get().isLoaded(modID);
+    }
+
+    private static boolean modLoaded(String modID)
+    {   return modLoaded(modID, 0, 0, 0);
+    }
 
     public static boolean isBiomesOPlentyLoaded()
     {   return BOP_LOADED;
