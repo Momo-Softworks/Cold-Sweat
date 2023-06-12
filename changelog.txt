@@ -1186,11 +1186,19 @@ Fixes:
 2.2-b04e
 - Updated Create compatibility to 5.1b
 - Increased chameleon spawn rates in jungle biomes due to thick vegetation
-- Added #boiler_valid and #icebox_valid tags
-      - These tags now determine what items can be placed into the top slots of the icebox & boiler
 
 Fixes:
 - Fixed temperature-related UI elements not rendering
 - Fixed crash when opening the sewing table menu
 - Fixed goats not being able to spawn
 - Fixed the boiler not spawning particles when lit
+
+Technical Changes:
+- Added #boiler_valid and #icebox_valid tags
+      - These tags now determine what items can be placed into the top slots of the icebox & boiler
+- Added tags for items that the chameleon can eat:
+      - #chameleon/find_hot_biomes: The chameleon will locate the nearest hot biome
+      - #chameleon/find_cold_biomes: The chameleon will locate the nearest cold biome
+      - #chameleon/find_humid_biomes: The chameleon will locate the nearest humid biome
+      - #chameleon/taming: Item used to tame a chameleon
+- Added #soulspring_lamp_valid to define dimensions that the soulspring lamp will activate in
