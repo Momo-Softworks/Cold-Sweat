@@ -57,9 +57,10 @@ public class BiomeTempModifier extends TempModifier
                     for (Holder<Biome> holder : biomeList)
                     {
                         if (holder.is(Tags.Biomes.IS_UNDERGROUND)) continue;
+                        if (holder.unwrapKey().isEmpty()) continue;
 
                         Biome biome = holder.value();
-                        ResourceLocation biomeID = biome.getRegistryName();
+                        ResourceLocation biomeID = holder.unwrapKey().get().location();
 
                         Pair<Double, Double> configTemp;
                         double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
@@ -85,8 +86,8 @@ public class BiomeTempModifier extends TempModifier
                             double mid = (min + max) / 2;
                             // Biome temp with time of day
                             worldTemp += CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1) / divisor
-                                    // Altitude calculation
-                                    + CSMath.blend(0, min - mid, altitude, level.getSeaLevel(), level.getMaxBuildHeight()) / divisor * 2;
+                                      // Altitude calculation
+                                      + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, level.getSeaLevel(), level.getMaxBuildHeight()) / divisor;
                         }
                         // If dimension has ceiling (don't use time or altitude)
                         else worldTemp += CSMath.average(max, min) / divisor;
