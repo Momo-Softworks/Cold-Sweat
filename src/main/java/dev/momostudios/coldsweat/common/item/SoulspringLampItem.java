@@ -9,6 +9,7 @@ import dev.momostudios.coldsweat.util.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
+import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -61,7 +62,7 @@ public class SoulspringLampItem extends Item
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location())
+                && (level.dimensionTypeRegistration().is(ModTags.Dimensions.SOUL_LAMP_VALID) || ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {

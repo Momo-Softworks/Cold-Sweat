@@ -1,10 +1,12 @@
 package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class ModTags
 {
@@ -19,6 +21,15 @@ public class ModTags
 
         private static TagKey<Item> createTag(String name)
         {   return ItemTags.create(new ResourceLocation(ColdSweat.MOD_ID, name));
+        }
+    }
+
+    public static class Dimensions
+    {
+        public static final TagKey<DimensionType> SOUL_LAMP_VALID = createTag("soulspring_lamp_valid");
+
+        private static TagKey<DimensionType> createTag(String name)
+        {   return TagKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(ColdSweat.MOD_ID, name));
         }
     }
 }
