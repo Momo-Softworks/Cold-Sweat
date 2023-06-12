@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,7 +37,6 @@ public class Overlays
 
     // Stuff for body temperature
     public static double BODY_TEMP = 0;
-    static boolean SHOW_BODY_TEMP = false;
     static double PREV_BODY_TEMP = 0;
     static int BLEND_BODY_TEMP = 0;
     static int ICON_BOB = 0;
@@ -56,7 +56,7 @@ public class Overlays
 
             LocalPlayer player = Minecraft.getInstance().player;
 
-            if (player != null && SHOW_WORLD_TEMP && !Minecraft.getInstance().options.hideGui)
+            if (player != null && SHOW_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
             {
                 double min = ConfigSettings.MIN_TEMP.get();
                 double max = ConfigSettings.MAX_TEMP.get();
@@ -112,7 +112,7 @@ public class Overlays
             gui.setupOverlayRenderState(true, false);
             Minecraft mc = Minecraft.getInstance();
 
-            if (mc.cameraEntity instanceof Player player && SHOW_BODY_TEMP && !Minecraft.getInstance().options.hideGui)
+            if (gui.shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
             {
                 // Blend body temp (per frame)
                 BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -144,7 +144,7 @@ public class Overlays
                 int threatOffset =
                         !CLIENT_CONFIG.iconBobbing() ? 0
                         : bobLevel == 2 ? ICON_BOB
-                        : bobLevel == 3 ? player.tickCount % 2
+                        : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
                         : 0;
 
                 RenderSystem.defaultBlendFunc();
@@ -194,18 +194,9 @@ public class Overlays
             {
                 if (!(icap instanceof PlayerTempCap cap)) return;
 
-                // Update GUI visibility based on game mode
-                if (Minecraft.getInstance().gameMode != null)
-                {
-                    GameType gameMode = Minecraft.getInstance().gameMode.getPlayerMode();
-                    if (GAME_MODE != gameMode)
-                    {
-                        cap.calculateVisibility(player);
-                        GAME_MODE = gameMode;
-                    }
-                }
+                //
+                cap.calculateVisibility(player);
                 SHOW_WORLD_TEMP = cap.shouldShowWorldTemp();
-                SHOW_BODY_TEMP = cap.shouldShowBodyTemp();
 
 
                 /* World Temp */
@@ -241,29 +232,26 @@ public class Overlays
                 BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
 
                 // Handle effects for the icon (bobbing, stage, transition)
-                if (SHOW_BODY_TEMP)
+                // Get icon bob
+                ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
+
+                // Get the severity of the player's body temperature
+                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
+
+                // Get the icon to be displayed
+                int neededIcon = CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
+
+                // Start transition
+                if (BODY_ICON != neededIcon)
                 {
-                    // Get icon bob
-                    ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
+                    BODY_ICON = neededIcon;
+                    BODY_TRANSITION_PROGRESS = 0;
+                }
 
-                    // Get the severity of the player's body temperature
-                    BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
-
-                    // Get the icon to be displayed
-                    int neededIcon = CSMath.clamp(BODY_TEMP_SEVERITY, -3, 3);
-
-                    // Start transition
-                    if (BODY_ICON != neededIcon)
-                    {
-                        BODY_ICON = neededIcon;
-                        BODY_TRANSITION_PROGRESS = 0;
-                    }
-
-                    // Tick the transition progress
-                    if (PREV_BODY_ICON != BODY_ICON && BODY_TRANSITION_PROGRESS++ >= BODY_BLEND_TIME)
-                    {
-                        PREV_BODY_ICON = BODY_ICON;
-                    }
+                // Tick the transition progress
+                if (PREV_BODY_ICON != BODY_ICON && BODY_TRANSITION_PROGRESS++ >= BODY_BLEND_TIME)
+                {
+                    PREV_BODY_ICON = BODY_ICON;
                 }
             });
         }
