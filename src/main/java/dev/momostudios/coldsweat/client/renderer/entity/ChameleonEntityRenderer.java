@@ -21,7 +21,7 @@ public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRende
 
     public ChameleonEntityRenderer(EntityRendererProvider.Context context)
     {
-        super(context, new ChameleonModel<>(context.bakeLayer(ChameleonModel.LAYER_LOCATION)), 0.3f);
+        super(context, new ChameleonModel<>(context.bakeLayer(ChameleonModel.LAYER_LOCATION)), 0.5f);
         this.addLayer(new ChameleonColorLayer<>(this));
     }
 
