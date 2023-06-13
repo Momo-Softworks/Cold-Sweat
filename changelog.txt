@@ -1184,14 +1184,10 @@ Fixes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.2-b04e
-- Updated Create compatibility to 5.1b
 - Increased chameleon spawn rates in jungle biomes due to thick vegetation
 
 Fixes:
-- Fixed temperature-related UI elements not rendering
-- Fixed crash when opening the sewing table menu
-- Fixed goats not being able to spawn
-- Fixed the boiler not spawning particles when lit
+- Fixed crash when a Create version older than 5.1 is installed
 
 Technical Changes:
 - Added #boiler_valid and #icebox_valid tags
