@@ -42,7 +42,6 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::spawnPlacements);
         bus.addListener(this::registerCaps);
-        bus.addListener(Overlays::registerOverlays);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         BlockInit.BLOCKS.register(bus);
