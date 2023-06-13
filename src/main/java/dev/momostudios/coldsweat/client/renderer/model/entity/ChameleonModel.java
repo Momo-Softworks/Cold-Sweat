@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.client.renderer.model;
+package dev.momostudios.coldsweat.client.renderer.model.entity;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;

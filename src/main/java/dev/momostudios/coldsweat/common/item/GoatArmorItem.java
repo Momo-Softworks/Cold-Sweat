@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.client.event.RegisterModels;
-import dev.momostudios.coldsweat.client.renderer.model.GoatParkaModel;
+import dev.momostudios.coldsweat.client.renderer.model.armor.GoatParkaModel;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;

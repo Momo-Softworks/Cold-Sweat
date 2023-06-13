@@ -1,7 +1,8 @@
 package dev.momostudios.coldsweat.client.event;
 
 import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
-import dev.momostudios.coldsweat.client.renderer.model.*;
+import dev.momostudios.coldsweat.client.renderer.model.armor.*;
+import dev.momostudios.coldsweat.client.renderer.model.entity.ChameleonModel;
 import dev.momostudios.coldsweat.core.init.EntityInit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;

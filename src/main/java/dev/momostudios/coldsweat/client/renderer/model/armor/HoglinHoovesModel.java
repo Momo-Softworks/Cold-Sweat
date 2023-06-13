@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.client.renderer.model;
+package dev.momostudios.coldsweat.client.renderer.model.armor;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
