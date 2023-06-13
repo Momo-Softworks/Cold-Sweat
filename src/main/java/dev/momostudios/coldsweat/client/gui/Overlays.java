@@ -17,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,8 +44,6 @@ public class Overlays
     static int BODY_TRANSITION_PROGRESS = 0;
     static int BODY_BLEND_TIME = 10;
     static int BODY_TEMP_SEVERITY = 0;
-
-    static GameType GAME_MODE = null;
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event)
@@ -197,7 +194,6 @@ public class Overlays
                 {
                     if (!(icap instanceof PlayerTempCap cap)) return;
 
-                    //
                     cap.calculateVisibility(player);
                     SHOW_WORLD_TEMP = cap.shouldShowWorldTemp();
 
