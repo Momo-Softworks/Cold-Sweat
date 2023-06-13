@@ -42,7 +42,7 @@ public class AnimationManager
             }
             return map;
         } catch (Exception ignored) {}
-        return null;
+        return Map.of();
     }
 
     public static void storeDefaultPoses(EntityType type, Map<String, ModelPart> parts)
