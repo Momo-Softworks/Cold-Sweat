@@ -20,7 +20,6 @@ public class SpreadPath
     {
         this.direction = direction;
         this.pos = pos;
-        this.origin = pos;
     }
 
     public SpreadPath(BlockPos pos)
@@ -51,16 +50,6 @@ public class SpreadPath
         this.frozen = frozen;
     }
 
-    public BlockPos getOrigin()
-    {
-        return this.origin;
-    }
-    public SpreadPath setOrigin(BlockPos origin)
-    {
-        this.origin = origin;
-        return this;
-    }
-
     public int getX()
     {
         return pos.getX();
@@ -77,6 +66,15 @@ public class SpreadPath
     public Direction getDirection()
     {
         return direction;
+    }
+
+    public BlockPos getOrigin()
+    {   return origin;
+    }
+
+    public SpreadPath setOrigin(BlockPos origin)
+    {   this.origin = origin;
+        return this;
     }
 
     public Set<SpreadPath> getAllChildren()
@@ -122,23 +120,18 @@ public class SpreadPath
     }
 
     public SpreadPath spreadTo(BlockPos pos)
-    {
-        SpreadPath path = new SpreadPath(pos, CSMath.getDirectionFrom(this.pos, pos));
-        this.addChild(path);
-        return path;
+    {   return this.spreadTo(pos, CSMath.getDirectionFrom(this.pos, pos));
     }
 
     public SpreadPath spreadTo(Direction dir)
-    {
-        SpreadPath path = new SpreadPath(this.pos.relative(dir), dir);
-        this.addChild(path.setOrigin(this.origin));
-        return path;
+    {   return this.spreadTo(this.pos.relative(dir), dir);
     }
 
     public SpreadPath spreadTo(BlockPos pos, Direction dir)
     {
         SpreadPath path = new SpreadPath(pos, dir);
-        this.addChild(path.setOrigin(this.origin));
+        path.setOrigin(this.getOrigin());
+        this.addChild(path);
         return path;
     }
 
@@ -164,9 +157,7 @@ public class SpreadPath
     @Override
     public boolean equals(Object o)
     {
-        return o instanceof SpreadPath that
-        && pos.getX() == that.pos.getX()
-        && pos.getY() == that.pos.getY()
-        && pos.getZ() == that.pos.getZ();
+        return o instanceof SpreadPath
+        && this.pos == ((SpreadPath) o).pos;
     }
 }
