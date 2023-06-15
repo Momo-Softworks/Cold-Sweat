@@ -209,7 +209,10 @@ public class ConfigSettings
         {
             List<List<?>> list = new ArrayList<>();
             for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {   list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+                }
             }
             ItemSettingsConfig.getInstance().setInsulatingItems(list);
         });
@@ -233,8 +236,10 @@ public class ConfigSettings
             List<List<?>> list = new ArrayList<>();
             for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
             {
-                Pair<Double, Double> pair = entry.getValue();
-                list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), pair.getFirst(), pair.getSecond()));
+                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+                }
             }
             ItemSettingsConfig.getInstance().setAdaptiveInsulatingItems(list);
         });
@@ -257,7 +262,10 @@ public class ConfigSettings
         {
             List<List<?>> list = new ArrayList<>();
             for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {   list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+                }
             }
             ItemSettingsConfig.getInstance().setInsulatingArmor(list);
         });
@@ -302,7 +310,10 @@ public class ConfigSettings
             CompoundTag tag = new CompoundTag();
             for (Map.Entry<Item, Integer> entry : encoder.entrySet())
             {
-                tag.putInt(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), entry.getValue());
+                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   tag.putInt(itemID.toString(), entry.getValue());
+                }
             }
             return tag;
         },
@@ -322,7 +333,10 @@ public class ConfigSettings
         {
             List<List<?>> list = new ArrayList<>();
             for (Map.Entry<Item, Integer> entry : saver.entrySet())
-            {   list.add(Arrays.asList(ForgeRegistries.ITEMS.getKey(entry.getKey()).toString(), entry.getValue()));
+            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue()));
+                }
             }
             ItemSettingsConfig.getInstance().setSoulLampItems(list);
         });
