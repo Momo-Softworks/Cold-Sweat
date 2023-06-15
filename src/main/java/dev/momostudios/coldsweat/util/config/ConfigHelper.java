@@ -241,7 +241,9 @@ public class ConfigHelper
             CompoundTag itemTag = new CompoundTag();
             itemTag.putDouble("value1", entry.getValue().getFirst());
             itemTag.putDouble("value2", entry.getValue().getSecond());
-            mapTag.put(entry.getKey().getRegistryName().toString(), itemTag);
+            ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+            if (itemID != null)
+                mapTag.put(itemID.toString(), itemTag);
         }
         tag.put(key, mapTag);
         return tag;
