@@ -43,13 +43,15 @@ public class TempEffectsCommon
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (!ColdSweatConfig.getInstance().coldMovement() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
-
         if (event.phase == TickEvent.Phase.END)
         {
             float temp = (float) Temperature.get(player, Temperature.Type.BODY);
             if (temp < -50)
             {
+                if (!ColdSweatConfig.getInstance().coldMovement()
+                || player.hasEffect(ModEffects.ICE_RESISTANCE)
+                || player.hasEffect(ModEffects.GRACE)) return;
+
                 // If not elytra flying
                 if (!player.isFallFlying())
                 {

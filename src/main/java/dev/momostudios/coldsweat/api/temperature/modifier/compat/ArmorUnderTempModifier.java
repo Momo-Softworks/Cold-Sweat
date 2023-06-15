@@ -30,14 +30,12 @@ public class ArmorUnderTempModifier extends TempModifier
             switch (type)
             {
                 case FLOOR ->
-                {
-                    totalOffset += Math.min(0,
+                {   totalOffset += Math.min(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
                 }
                 case CEIL ->
-                {
-                    totalOffset += Math.max(0,
+                {   totalOffset += Math.max(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
                 }
@@ -45,8 +43,7 @@ public class ArmorUnderTempModifier extends TempModifier
 
             // Special functionality for certain linings
             if (CompatManager.hasOzzyLiner(stack))
-            {
-                nbt.putFloat("OzzyTemp", (float) (CSMath.blend(-10, 10, bodyTemp, -100, 100)));
+            {   nbt.putFloat("OzzyTemp", (float) (CSMath.blend(-10, 10, bodyTemp, -100, 100)));
             }
         }
 
