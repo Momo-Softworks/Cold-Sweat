@@ -105,20 +105,20 @@ public class ArmorInsulation
                 }
             }
 
-            TempModifier currentMod = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
-            if (currentMod == null || currentMod.getNBT().getDouble("cold") != cold || currentMod.getNBT().getDouble("hot") != hot)
-            {
-                if (cold == 0 && hot == 0 && currentMod != null)
-                    Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
-                else
-                    Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
-            }
+            if (cold == 0 && hot == 0)
+                Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
+            else
+                Temperature.addModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE, false);
 
             // Armor underwear compat
             if (CompatManager.isArmorUnderwearLoaded())
             {
-                Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.CEIL, false);
-                Temperature.addModifier(player, TempModifierRegistry.getEntryFor("armorunder:lining").tickRate(20), Temperature.Type.FLOOR, false);
+                TempModifier armorUnderMod = TempModifierRegistry.getEntryFor("armorunder:lining");
+                if (!Temperature.hasModifier(player, Temperature.Type.CEIL, armorUnderMod.getClass()))
+                {
+                    Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.CEIL, false);
+                    Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FLOOR, false);
+                }
             }
 
             // Award advancement for full insulation
