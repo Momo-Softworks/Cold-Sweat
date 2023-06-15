@@ -10,8 +10,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
-import net.minecraft.world.effect.MobEffects;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -19,7 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
