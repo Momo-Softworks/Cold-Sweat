@@ -36,7 +36,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
         this.imageHeight = 166;
     }
 
-    Pair<BlockPos, String> levelPos = Pair.of(this.menu.te.getBlockPos(), this.menu.te.getLevel().dimension().location().toString());
+    Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.menu.te.getBlockPos(), this.menu.te.getLevel().dimension().location());
     boolean hideParticles = HearthSaveDataHandler.DISABLED_HEARTHS.contains(levelPos);
     boolean hideParticlesOld = hideParticles;
 
@@ -47,24 +47,24 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
         this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
         {
             hideParticles = !hideParticles;
+            // If particles are disabled, add the hearth to the list of disabled hearths
             if (hideParticles)
             {
                 HearthSaveDataHandler.DISABLED_HEARTHS.add(levelPos);
-                if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 20)
-                {
-                    HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.stream().findFirst().get());
+                // Limit the number of disabled hearths to 64
+                if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 64)
+                {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.iterator().next());
                 }
             }
+            // Otherwise, remove it from the list
             else
-            {
-                HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
+            {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
             }
 
             Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
             imageX.setAccessible(true);
             try
-            {
-                imageX.set(button, 176 + (!hideParticles ? 0 : 12));
+            {   imageX.set(button, 176 + (!hideParticles ? 0 : 12));
             }
             catch (Exception ignored) {}
         })

@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.event;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -12,8 +13,8 @@ import java.util.*;
 @Mod.EventBusSubscriber
 public class HearthSaveDataHandler
 {
-    public static final Set<BlockPos> HEARTH_POSITIONS = new HashSet<>();
-    public static final Set<Pair<BlockPos, String>> DISABLED_HEARTHS = new HashSet<>();
+    public static final Set<Pair<BlockPos, ResourceLocation>> HEARTH_POSITIONS = new HashSet<>();
+    public static final Set<Pair<BlockPos, ResourceLocation>> DISABLED_HEARTHS = new HashSet<>();
 
     /**
      * Save the player's disabled hearths on logout
@@ -29,11 +30,11 @@ public class HearthSaveDataHandler
         CompoundTag disabledHearths = new CompoundTag();
 
         int i = 0;
-        for (Pair<BlockPos, String> pair : DISABLED_HEARTHS)
+        for (Pair<BlockPos, ResourceLocation> pair : DISABLED_HEARTHS)
         {
             CompoundTag hearthData = new CompoundTag();
             hearthData.putLong("pos", pair.getFirst().asLong());
-            hearthData.putString("level", pair.getSecond());
+            hearthData.putString("level", pair.getSecond().toString());
             disabledHearths.put(String.valueOf(i), hearthData);
             i++;
         }
@@ -55,7 +56,7 @@ public class HearthSaveDataHandler
         for (String key : disabledHearths.getAllKeys())
         {
             CompoundTag hearthData = disabledHearths.getCompound(key);
-            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("pos")), hearthData.getString("level")));
+            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("pos")), new ResourceLocation(hearthData.getString("level"))));
         }
     }
 }

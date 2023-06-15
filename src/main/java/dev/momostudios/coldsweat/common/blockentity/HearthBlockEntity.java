@@ -70,7 +70,6 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
@@ -91,6 +90,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     List<SpreadPath> displayPaths = new ArrayList<>();
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>();
+    // Lookup exclusively used for detecting block updates within the hearth's range
     Set<BlockPos> affectedBlocks = new HashSet<>();
 
     // Stores previously-called chunks for quicker access
@@ -128,13 +128,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     boolean showParticles = true;
     int frozenPaths = 0;
     boolean spreading = true;
+    private boolean registeredLocation = false;
 
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
         super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
         this.addPath(new SpreadPath(pos).setOrigin(blockPos));
-        HearthSaveDataHandler.HEARTH_POSITIONS.add(pos);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -233,6 +233,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void tick(Level level, BlockPos pos)
     {
+        if (!this.registeredLocation)
+        {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(pos, level.dimension().location()));
+            this.registeredLocation = true;
+        }
+
         this.ticksExisted++;
 
         if (rebuildCooldown > 0) rebuildCooldown--;
@@ -316,15 +321,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 {
                     showParticles = level.isClientSide
                             && Minecraft.getInstance().options.particles == ParticleStatus.ALL
-                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
+                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location()));
                 }
 
+
+                if (paths.isEmpty()) this.addPath(new SpreadPath(pos).setOrigin(pos));
 
                 /*
                  Partition the points into logical "sub-maps" to be iterated over separately each tick
                 */
-                if (paths.isEmpty()) this.addPath(new SpreadPath(pos).setOrigin(pos));
-
                 int pathCount = paths.size();
                 // Size of each partition (defaults to 1/30th of the total paths)
                 int partSize = CSMath.clamp(pathCount / 30, 20, 400);
@@ -335,18 +340,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // Index of the first point being worked on this tick
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
-                // Keep displayPaths updated (used for F3 wireframe view)
-                if (spreading)
-                {   if (level.isClientSide && ClientSettingsConfig.getInstance().hearthDebug())
-                    {   displayPaths = paths;
-                    }
-                    affectedBlocks = pathLookup;
-                }
 
                 /*
                  Iterate over the specified partition of paths
                  */
-
                 for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
                 {   // This operation is really fast because it's an ArrayList
                     SpreadPath spreadPath = paths.get(i);
@@ -375,6 +372,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                          Try to spread to new blocks
                          */
 
+                        // The origin of the path is usually the hearth's position,
+                        // but if it's spreading through Create pipes then the origin is the end of the pipe
                         if (pathCount < this.maxPaths() && spreadPath.withinDistance(spreadPath.getOrigin(), this.getSpreadRange()))
                         {
                             /*
@@ -419,7 +418,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                     {
                                         SpreadPath newPath = spreadPath.spreadTo(tryPos, direction);
 
-                                        if (!this.spreadingThroughPipeOrAir(tryPos, fromState, newPath, direction)) continue;
+                                        // If the BlockState is a pipe, check if the new path is following the direction of the pipe
+                                        if (!this.isCorrectSpreadDirectionForPipes(tryPos, fromState, newPath, direction)) continue;
                                         if (WorldHelper.isSpreadBlocked(level, fromState, pathPos, direction, spreadPath.getDirection())) continue;
 
                                         // Add the new path to the list
@@ -434,11 +434,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                 i--;
                                 continue;
                             }
-                        }
-                        // Track frozen paths to know when the Hearth is done spreading
-                        spreadPath.freeze();
-                        if (++this.frozenPaths >= paths.size())
-                        {   this.spreading = false;
                         }
                     }
 
@@ -481,6 +476,18 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                 p--;
                             }
                         }
+                    }
+                    // Track frozen paths to know when the Hearth is done spreading
+                    spreadPath.freeze();
+                    if (++this.frozenPaths >= paths.size())
+                    {   this.spreading = false;
+                    }
+                    // Keep displayPaths updated (used for F3 wireframe view)
+                    else
+                    {   if (level.isClientSide && ClientSettingsConfig.getInstance().hearthDebug())
+                        {   displayPaths = paths;
+                        }
+                        affectedBlocks = pathLookup;
                     }
                 }
 
@@ -601,7 +608,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         });
     }
 
-    private boolean spreadingThroughPipeOrAir(BlockPos bpos, BlockState fromState, SpreadPath newPath, Direction direction)
+    private boolean isCorrectSpreadDirectionForPipes(BlockPos bpos, BlockState fromState, SpreadPath newPath, Direction direction)
     {
         if (CREATE_LOADED)
         {
@@ -795,5 +802,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public Set<BlockPos> getPathLookup()
     {   return pathLookup;
+    }
+
+    public boolean isSpreading()
+    {   return spreading;
     }
 }
