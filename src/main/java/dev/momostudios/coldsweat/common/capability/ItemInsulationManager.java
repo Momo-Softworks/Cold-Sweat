@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -21,8 +21,6 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager

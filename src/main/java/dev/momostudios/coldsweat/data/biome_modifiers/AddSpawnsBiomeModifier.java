@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.data.biome_modifiers;
 
 import com.mojang.serialization.Codec;
 import dev.momostudios.coldsweat.core.init.BiomeCodecInit;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;

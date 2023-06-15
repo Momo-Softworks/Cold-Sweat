@@ -1,11 +1,9 @@
-package dev.momostudios.coldsweat.util.config;
+package dev.momostudios.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.config.ColdSweatConfig;
-import dev.momostudios.coldsweat.config.EntitySettingsConfig;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
+import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.util.config.ValueSupplier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;

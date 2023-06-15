@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
 import sereneseasons.api.season.ISeasonState;

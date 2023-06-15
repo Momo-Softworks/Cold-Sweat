@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.client.gui.config;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.network.chat.Component;
 
 public class ConfigButton extends Button

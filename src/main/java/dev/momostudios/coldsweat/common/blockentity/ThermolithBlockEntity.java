@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.ThermolithBlock;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

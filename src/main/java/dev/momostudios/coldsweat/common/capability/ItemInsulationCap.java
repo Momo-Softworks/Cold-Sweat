@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.capability;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

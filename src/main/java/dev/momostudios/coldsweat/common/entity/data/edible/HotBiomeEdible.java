@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.entity.data.edible;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.registries.ModTags;

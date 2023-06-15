@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.core.network.message;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -54,8 +54,7 @@ public class SyncConfigSettingsMessage
         int size = buffer.readInt();
         Map<String, CompoundTag> values = new HashMap<>();
         for (int i = 0; i < size; i++)
-        {
-            values.put(buffer.readUtf(), buffer.readNbt());
+        {   values.put(buffer.readUtf(), buffer.readNbt());
         }
 
         return new SyncConfigSettingsMessage(values, openMenu);
@@ -67,13 +66,11 @@ public class SyncConfigSettingsMessage
         context.enqueueWork(() ->
         {
             for (Map.Entry<String, CompoundTag> entry : message.configValues.entrySet())
-            {
-                ConfigSettings.decode(entry.getKey(), entry.getValue());
+            {   ConfigSettings.decode(entry.getKey(), entry.getValue());
             }
 
             if (context.getDirection().getReceptionSide().isServer())
-            {
-                ConfigSettings.saveValues();
+            {   ConfigSettings.saveValues();
                 ColdSweatConfig.getInstance().save();
 
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(message.menuOpener));
@@ -81,8 +78,7 @@ public class SyncConfigSettingsMessage
             else if (context.getDirection().getReceptionSide().isClient())
             {
                 if (!message.menuOpener.equals(EMPTY_UUID))
-                {
-                    ClientOnlyHelper.openConfigScreen();
+                {   ClientOnlyHelper.openConfigScreen();
                 }
             }
         });
