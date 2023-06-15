@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
-import dev.momostudios.coldsweat.common.event.HearthPathManagement;
+import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
@@ -36,7 +36,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
     }
 
     Pair<BlockPos, String> levelPos = Pair.of(this.menu.te.getBlockPos(), this.menu.te.getLevel().dimension().location().toString());
-    boolean hideParticles = HearthPathManagement.DISABLED_HEARTHS.contains(levelPos);
+    boolean hideParticles = HearthSaveDataHandler.DISABLED_HEARTHS.contains(levelPos);
     boolean hideParticlesOld = hideParticles;
 
     @Override
@@ -48,15 +48,15 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
             hideParticles = !hideParticles;
             if (hideParticles)
             {
-                HearthPathManagement.DISABLED_HEARTHS.add(levelPos);
-                if (HearthPathManagement.DISABLED_HEARTHS.size() > 20)
+                HearthSaveDataHandler.DISABLED_HEARTHS.add(levelPos);
+                if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 20)
                 {
-                    HearthPathManagement.DISABLED_HEARTHS.remove(HearthPathManagement.DISABLED_HEARTHS.stream().findFirst().get());
+                    HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.stream().findFirst().get());
                 }
             }
             else
             {
-                HearthPathManagement.DISABLED_HEARTHS.remove(levelPos);
+                HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
             }
 
             Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
@@ -119,7 +119,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
         super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
         {
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new DisableHearthParticlesMessage(Minecraft.getInstance().player, HearthPathManagement.serializeDisabledHearths()));
+            ColdSweatPacketHandler.INSTANCE.sendToServer(new DisableHearthParticlesMessage(Minecraft.getInstance().player, HearthSaveDataHandler.serializeDisabledHearths()));
         }
     }
 }
