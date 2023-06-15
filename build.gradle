@@ -99,7 +99,7 @@ repositories {
 
 dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.2.4'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4505375")
@@ -119,7 +119,7 @@ dependencies {
     implementation fg.deobf("curse.maven:carrots-311327:4382778")
     implementation fg.deobf("curse.maven:storms-237746:4426524")
 
-    compileOnly fg.deobf("curse.maven:create-328085:4550986")
+    implementation fg.deobf("curse.maven:create-328085:4550986")
     compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3693809")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
