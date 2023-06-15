@@ -14,7 +14,7 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationP
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;

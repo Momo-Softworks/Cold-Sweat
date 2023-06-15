@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.blockentity;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.BoilerBlock;
 import dev.momostudios.coldsweat.common.container.BoilerContainer;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;

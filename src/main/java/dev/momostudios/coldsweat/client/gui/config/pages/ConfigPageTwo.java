@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.client.event.DrawConfigButton;
 import dev.momostudios.coldsweat.client.gui.config.AbstractConfigPage;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;

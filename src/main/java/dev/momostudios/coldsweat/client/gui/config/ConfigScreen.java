@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageTwo;
 import dev.momostudios.coldsweat.core.network.message.SyncConfigSettingsMessage;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
