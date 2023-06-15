@@ -50,8 +50,8 @@ public class EntitySettingsConfig
                 .comment("Defines the biomes that Chameleons can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
-                                List.of("minecraft:bamboo_jungle", 8),
-                                List.of("minecraft:jungle", 8),
+                                List.of("minecraft:bamboo_jungle", 12),
+                                List.of("minecraft:jungle", 12),
                                 List.of("minecraft:sparse_jungle", 4),
                                 List.of("minecraft:desert", 3))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
