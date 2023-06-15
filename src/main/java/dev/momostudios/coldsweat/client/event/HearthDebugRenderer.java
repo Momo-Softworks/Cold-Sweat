@@ -17,6 +17,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.SpreadPath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -192,14 +194,18 @@ public class HearthDebugRenderer
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && Minecraft.getInstance().level != null
-        && Minecraft.getInstance().level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
+        ClientLevel level = Minecraft.getInstance().level;
+        if (event.phase == TickEvent.Phase.END && level != null
+        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
         && ClientSettingsConfig.getInstance().hearthDebug())
         {
-            for (BlockPos pos : HearthSaveDataHandler.HEARTH_POSITIONS)
+            for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {
-                BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
-                if (blockEntity instanceof HearthBlockEntity hearth)
+                if (!level.dimension().location().equals(entry.getSecond())) continue;
+
+                BlockPos pos = entry.getFirst();
+                BlockEntity blockEntity = level.getBlockEntity(pos);
+                if (blockEntity instanceof HearthBlockEntity hearth && hearth.isSpreading())
                 {
                     Collection<SpreadPath> paths = hearth.getPaths();
                     Set<BlockPos> lookup = hearth.getPathLookup();
