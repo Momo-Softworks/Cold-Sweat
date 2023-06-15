@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b04e'
+version = '2.2-b04f'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -113,14 +113,14 @@ dependencies {
     compileOnly fg.deobf("curse.maven:werewolves-417851:4318648")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4470449")
     implementation fg.deobf("curse.maven:curios-309927:4523009")
-//    compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
-//    compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
+    //compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
+    //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
     runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
     compileOnly fg.deobf("curse.maven:create-328085:4550987")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
     runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")
-    runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514")
+    //runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514")
     runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
     runtimeOnly fg.deobf("curse.maven:jei-238222:4494410")
     runtimeOnly fg.deobf("curse.maven:geckolib-388172:4407241")

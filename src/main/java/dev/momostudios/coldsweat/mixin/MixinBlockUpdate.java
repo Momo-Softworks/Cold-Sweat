@@ -1,15 +1,17 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.event.common.BlockChangedEvent;
-import dev.momostudios.coldsweat.common.event.BlockUpdateRegulator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.EnumSet;
 
 /**
  * Called when a block state is changed.<br>
@@ -26,8 +28,7 @@ public class MixinBlockUpdate
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
         if (!oldState.equals(newState))
-        {
-            BlockUpdateRegulator.EVENTS.add(new BlockChangedEvent(pos, oldState, newState, level));
+        {   ForgeEventFactory.onNeighborNotify(level, pos, newState, EnumSet.allOf(Direction.class), false);
         }
     }
 }
