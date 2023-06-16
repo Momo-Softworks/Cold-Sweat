@@ -19,6 +19,8 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> iceboxItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedPotions;
+    private static final ForgeConfigSpec.BooleanValue allowPotionsInHearth;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
@@ -79,6 +81,22 @@ public final class ItemSettingsConfig
                                 List.of("minecraft:packed_ice",   -1000)
                         ).build(),
                         it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+        blacklistedPotions = BUILDER
+                .comment("Potions containing any of these effects will not be allowed in the hearth",
+                         "Format: [\"effect_id\", \"effect_id\", ...etc]")
+                .defineList("Blacklisted Potion Effects", ListBuilder.begin(
+                                "minecraft:instant_damage",
+                                "minecraft:poison",
+                                "minecraft:wither",
+                                "minecraft:weakness",
+                                "minecraft:mining_fatigue",
+                                "minecraft:slowness"
+                        ).build(),
+                        it -> it instanceof String);
+        allowPotionsInHearth = BUILDER
+                .comment("If true, potions can be used as fuel in the hearth",
+                         "This gives all players in range the potion effect")
+                .define("Allow Potions in Hearth", true);
         BUILDER.pop();
 
         /*
@@ -271,6 +289,14 @@ public final class ItemSettingsConfig
         return waterskinStrength.get();
     }
 
+    public boolean arePotionsEnabled()
+    {   return allowPotionsInHearth.get();
+    }
+
+    public List<String> getPotionBlacklist()
+    {   return (List<String>) blacklistedPotions.get();
+    }
+
     public void setBoilerItems(List<? extends List<?>> itemMap)
     {
         boilerItems.set(itemMap);
@@ -324,5 +350,13 @@ public final class ItemSettingsConfig
     public void setWaterskinStrength(int strength)
     {
         waterskinStrength.set(strength);
+    }
+
+    public void setPotionsEnabled(Boolean saver)
+    {   allowPotionsInHearth.set(saver);
+    }
+
+    public void setPotionBlacklist(List<String> saver)
+    {   blacklistedPotions.set(saver);
     }
 }

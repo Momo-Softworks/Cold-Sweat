@@ -4,9 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.config.ConfigHelper;
 import dev.momostudios.coldsweat.util.config.ValueSupplier;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -64,6 +62,8 @@ public class ConfigSettings
     public static ValueSupplier<Map<Item, Double>> BOILER_FUEL;
     public static ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
     public static ValueSupplier<Map<Item, Double>> HEARTH_FUEL;
+    public static ValueSupplier<Boolean> HEARTH_POTIONS_ENABLED;
+    public static ValueSupplier<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     public static ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
 
@@ -190,6 +190,9 @@ public class ConfigSettings
         BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
         HEARTH_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
         ICEBOX_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
+
+        HEARTH_POTIONS_ENABLED = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().arePotionsEnabled());
+        BLACKLISTED_POTIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
         {
