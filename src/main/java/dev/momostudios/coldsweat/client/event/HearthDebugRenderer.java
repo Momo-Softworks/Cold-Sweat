@@ -44,6 +44,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HearthDebugRenderer
@@ -154,7 +155,7 @@ public class HearthDebugRenderer
                     if (renderAlpha > 0.01f && frustum.isVisible(new AABB(pos)))
                     {
                         ChunkPos chunkPos = new ChunkPos(pos);
-                        if (!workingChunk.getPos().equals(chunkPos))
+                        if (workingChunk == null || !workingChunk.getPos().equals(chunkPos))
                             workingChunk = (LevelChunk) level.getChunkSource().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
 
                         if (WorldHelper.getBlockState(workingChunk, pos).getShape(level, pos).equals(Shapes.block()))
@@ -169,17 +170,17 @@ public class HearthDebugRenderer
 
                         // Remove the lines if another point is on the adjacent face
                         if (directions.contains(Direction.DOWN))
-                            Arrays.asList(nd, sd, ed, wd).forEach(lines::remove);
+                            Stream.of(nd, sd, ed, wd).forEach(lines::remove);
                         if (directions.contains(Direction.UP))
-                            Arrays.asList(nu, su, eu, wu).forEach(lines::remove);
+                            Stream.of(nu, su, eu, wu).forEach(lines::remove);
                         if (directions.contains(Direction.NORTH))
-                            Arrays.asList(nw, ne, nu, nd).forEach(lines::remove);
+                            Stream.of(nw, ne, nu, nd).forEach(lines::remove);
                         if (directions.contains(Direction.SOUTH))
-                            Arrays.asList(sw, se, su, sd).forEach(lines::remove);
+                            Stream.of(sw, se, su, sd).forEach(lines::remove);
                         if (directions.contains(Direction.WEST))
-                            Arrays.asList(nw, sw, wu, wd).forEach(lines::remove);
+                            Stream.of(nw, sw, wu, wd).forEach(lines::remove);
                         if (directions.contains(Direction.EAST))
-                            Arrays.asList(ne, se, eu, ed).forEach(lines::remove);
+                            Stream.of(ne, se, eu, ed).forEach(lines::remove);
 
                         lines.forEach(line -> line.accept(new Vector3f(x, y, z), new Vector4f(r, g, b, renderAlpha)));
                     }
@@ -205,7 +206,7 @@ public class HearthDebugRenderer
 
                 BlockPos pos = entry.getFirst();
                 BlockEntity blockEntity = level.getBlockEntity(pos);
-                if (blockEntity instanceof HearthBlockEntity hearth && hearth.isSpreading())
+                if (blockEntity instanceof HearthBlockEntity hearth)
                 {
                     Collection<SpreadPath> paths = hearth.getPaths();
                     Set<BlockPos> lookup = hearth.getPathLookup();
