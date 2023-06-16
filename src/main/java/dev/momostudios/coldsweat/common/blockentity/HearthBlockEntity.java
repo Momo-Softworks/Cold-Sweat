@@ -453,7 +453,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 double d3 = (rand.nextDouble() - 0.5) / 4;
                 double d4 = (rand.nextDouble() - 0.5) / 4;
                 double d5 = (rand.nextDouble() - 0.5) / 4;
-                //level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+                level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
             }
             if (rand.nextDouble() < hotFuel / 3000d)
             {   double d0 = x + 0.5d;
@@ -489,6 +489,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 level.playSound(null, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
                 effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
+            }
+            else if (fuelStack.is(Items.MILK_BUCKET))
+            {
+                this.getItems().set(0, fuelStack.getCraftingRemainingItem());
+                level.playSound(null, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ(), SoundEvents.WITCH_DRINK, SoundSource.BLOCKS, 1, 1);
+                effects.clear();
             }
             // Normal fuel items
             else
@@ -555,8 +561,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             {   newPath.setOrigin(bpos);
                 return true;
             }
+            return false;
         }
-        return false;
+        return true;
     }
 
     void updateNotifiedPaths()
@@ -743,7 +750,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         tag.putInt("ColdFuel", this.getColdFuel());
         tag.putInt("InsulationLevel", insulationLevel);
         saveEffects(tag);
-        System.out.println("sent update: " + this.coldFuel);
 
         return tag;
     }
@@ -756,7 +762,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.setColdFuel(tag.getInt("ColdFuel"), false);
         insulationLevel = tag.getInt("InsulationLevel");
         loadEffects(tag);
-        System.out.println("got update: " + this.coldFuel);
     }
 
     @Override

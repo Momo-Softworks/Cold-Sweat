@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -29,7 +30,7 @@ public class HearthContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                return HearthBlockEntity.getItemFuel(stack) != 0 || PotionUtils.getMobEffects(stack).size() > 0;
+                return HearthBlockEntity.getItemFuel(stack) != 0 || PotionUtils.getMobEffects(stack).size() > 0 || stack.is(Items.MILK_BUCKET);
             }
         });
 
