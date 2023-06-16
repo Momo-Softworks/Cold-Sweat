@@ -1183,15 +1183,20 @@ Fixes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.2-b04e
+2.2-b04f
 - Increased chameleon spawn rates in jungle biomes due to thick vegetation
 - Added settings to blacklist or outright disable potions from being used in the hearth
+- Milk can now be used to clear all effects from the hearth
 
 Fixes:
 - Fixed the hearth not "un-filling" the proper areas when a block is placed in some cases
 - Fixed tooltips showing insulation info when the insulation configs contain an item that doesn't exist
+- Soul stalk now only drops sticks from "middle" blocks
+      - Prevents a duplication glitch with placing/breaking a soul stalk
+      - Now only drops 0-2 sticks instead of 1-3
 
 Technical Changes:
+- Added config options to blacklist or completely disable potions from being used in the hearth
 - Added #boiler_valid and #icebox_valid tags
       - These tags now determine what items can be placed into the top slots of the icebox & boiler
 - Added tags for items that the chameleon can eat:
@@ -1203,5 +1208,4 @@ Technical Changes:
 - Updated the supported version of Create to 5.1
 - Mods that have compat but are an unsupported version will now cause the compat to disable itself instead of causing issues
       - For example, now that the minimum version of Create is 5.1, Cold Sweat will disable its Create compat if Create is below 5.1
-
 - Temperature.getModifier() now returns an Optional<T extends TempModifier> instead of potential null
