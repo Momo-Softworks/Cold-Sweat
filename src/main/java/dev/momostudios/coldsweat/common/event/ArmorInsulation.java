@@ -110,11 +110,8 @@ public class ArmorInsulation
             if (CompatManager.isArmorUnderwearLoaded())
             {
                 TempModifier armorUnderMod = TempModifierRegistry.getEntryFor("armorunder:lining");
-                if (!Temperature.hasModifier(player, Temperature.Type.CEIL, armorUnderMod.getClass()))
-                {
-                    Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.CEIL, false);
-                    Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FLOOR, false);
-                }
+                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.CEIL, false);
+                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FLOOR, false);
             }
 
             // Award advancement for full insulation
