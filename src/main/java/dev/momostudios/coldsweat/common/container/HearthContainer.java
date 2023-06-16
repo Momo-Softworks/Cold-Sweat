@@ -1,9 +1,12 @@
 package dev.momostudios.coldsweat.common.container;
 
+import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
 import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -13,7 +16,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Collection;
 import java.util.Objects;
 
 public class HearthContainer extends AbstractContainerMenu
@@ -30,7 +35,11 @@ public class HearthContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                return HearthBlockEntity.getItemFuel(stack) != 0 || PotionUtils.getMobEffects(stack).size() > 0 || stack.is(Items.MILK_BUCKET);
+                if (HearthBlockEntity.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
+                // Check if the potion is blacklisted
+                Collection< MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
+                return effects.size() > 0
+                    && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect())));
             }
         });
 

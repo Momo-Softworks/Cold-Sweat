@@ -65,6 +65,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -419,7 +420,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         }
                     }
                 }
-
                 // Drain fuel
                 if (this.ticksExisted % 80 == 0)
                 {
@@ -437,7 +437,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 }
             }
         }
-
         // Input fuel
         if (this.ticksExisted % 10 == 0)
         {   this.checkForFuel();
@@ -469,13 +468,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    void checkForFuel()
+    public void checkForFuel()
     {
         ItemStack fuelStack = this.getItems().get(0);
         if (!fuelStack.isEmpty())
         {   // Potion items
             List<MobEffectInstance> itemEffects = PotionUtils.getMobEffects(fuelStack);
-            if (!itemEffects.isEmpty() && !itemEffects.equals(effects))
+            if (ConfigSettings.HEARTH_POTIONS_ENABLED.get()
+            && !itemEffects.isEmpty() && !itemEffects.equals(effects)
+            && itemEffects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect()))))
             {
                 if (fuelStack.getItem() instanceof PotionItem)
                 {   this.getItems().set(0, Items.GLASS_BOTTLE.getDefaultInstance());
@@ -490,12 +491,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
                 effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
+                ColdSweatPacketHandler.syncBlockEntityData(this);
             }
-            else if (fuelStack.is(Items.MILK_BUCKET))
+            else if (fuelStack.is(Items.MILK_BUCKET) && !effects.isEmpty())
             {
                 this.getItems().set(0, fuelStack.getContainerItem());
                 level.playSound(null, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ(), SoundEvents.WITCH_DRINK, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
+                ColdSweatPacketHandler.syncBlockEntityData(this);
             }
             // Normal fuel items
             else
