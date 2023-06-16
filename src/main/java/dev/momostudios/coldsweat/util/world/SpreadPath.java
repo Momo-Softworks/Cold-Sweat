@@ -12,14 +12,17 @@ public class SpreadPath
 {
     private final Direction direction;
     private final BlockPos pos;
+    private final int x, y, z;
     private boolean frozen = false;
     private final HashSet<SpreadPath> children = new HashSet<>();
     private BlockPos origin;
 
     public SpreadPath(BlockPos pos, Direction direction)
-    {
-        this.direction = direction;
+    {   this.direction = direction;
         this.pos = pos;
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
     }
 
     public SpreadPath(BlockPos pos)
@@ -29,7 +32,11 @@ public class SpreadPath
 
     public SpreadPath(int x, int y, int z, Direction direction)
     {
-        this(new BlockPos(x, y, z), direction);
+        this.direction = direction;
+        this.pos = new BlockPos(x, y, z);
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public BlockPos getPos()
@@ -51,16 +58,13 @@ public class SpreadPath
     }
 
     public int getX()
-    {
-        return pos.getX();
+    {   return x;
     }
     public int getY()
-    {
-        return pos.getY();
+    {   return y;
     }
     public int getZ()
-    {
-        return pos.getZ();
+    {   return z;
     }
 
     public Direction getDirection()
