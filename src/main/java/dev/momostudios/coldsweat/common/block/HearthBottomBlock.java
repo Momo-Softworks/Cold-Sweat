@@ -15,6 +15,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -114,71 +115,53 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide)
+        if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
         {
-            if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
+            ItemStack stack = player.getItemInHand(hand);
+
+            // If the held item is a bucket, try to extract fluids
+            if (player.getItemInHand(hand).getItem() == Items.BUCKET)
             {
-                ItemStack stack = player.getItemInHand(hand);
+                Vec3 clickedPos = rayTraceResult.getLocation();
 
-                // If the held item is a bucket, try to extract fluids
-                if (player.getItemInHand(hand).getItem() == Items.BUCKET)
+                Vec3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
+                Vec3 lavaSidePos = CSMath.getCenterPos(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
+
+                Vec3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
+                Vec3 waterSidePos = CSMath.getCenterPos(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
+
+                boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
+                Vec3 sidePos = isLava ? lavaSidePos : waterSidePos;
+                BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
+                                               : ((BucketItem) Items.WATER_BUCKET);
+                int itemFuel = Math.abs(HearthBlockEntity.getItemFuel(filledBucket.getDefaultInstance()));
+                int hearthFuel = isLava ? te.getHotFuel() : te.getColdFuel();
+
+                if (hearthFuel >= itemFuel * 0.99)
                 {
-                    int lavaFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.LAVA_BUCKET.getDefaultInstance()));
-                    if (te.getHotFuel() >= lavaFuel * 0.99)
+                    if (rayTraceResult.getLocation().distanceTo(sidePos) < 0.4)
                     {
-                        Vec3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
-                        Vec3 lavaSidePos = CSMath.getCenterPos(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
-
-                        if (rayTraceResult.getLocation().distanceTo(lavaSidePos) < 0.4)
+                        if (itemFuel > 0)
                         {
-                            if (lavaFuel > 0)
-                            {
-                                // Remove fuel
-                                te.setHotFuel(te.getHotFuel() - lavaFuel);
-                                // Give filled bucket item
-                                if (stack.getCount() == 1)
-                                    player.setItemInHand(hand, Items.LAVA_BUCKET.getDefaultInstance());
-                                else
-                                {
-                                    stack.shrink(1);
-                                    player.addItem(Items.LAVA_BUCKET.getDefaultInstance());
-                                }
-                                // Play bucket sound
-                                worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                            // Remove fuel
+                            if (isLava) te.setHotFuelAndUpdate(hearthFuel - itemFuel);
+                            else        te.setColdFuelAndUpdate(hearthFuel - itemFuel);
+                            // Give filled bucket item
+                            stack.shrink(1);
+                            player.addItem(filledBucket.getDefaultInstance());
+                            // Play bucket sound
+                            worldIn.playSound(null, pos, filledBucket.getFluid().getPickupSound().get(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
 
-                                return InteractionResult.SUCCESS;
-                            }
-                        }
-                    }
-                    int waterFuel = Math.abs(HearthBlockEntity.getItemFuel(Items.WATER_BUCKET.getDefaultInstance()));
-                    if (te.getColdFuel() >= waterFuel * 0.99)
-                    {
-                        Vec3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
-                        Vec3 waterSidePos = CSMath.getCenterPos(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
-
-                        if (rayTraceResult.getLocation().distanceTo(waterSidePos) < 0.4)
-                        {
-                            if (waterFuel > 0)
-                            {
-                                // Remove fuel
-                                te.setColdFuel(te.getColdFuel() - waterFuel);
-                                // Give filled bucket item
-                                if (stack.getCount() == 1)
-                                    player.setItemInHand(hand, Items.WATER_BUCKET.getDefaultInstance());
-                                else
-                                {
-                                    stack.shrink(1);
-                                    player.addItem(Items.WATER_BUCKET.getDefaultInstance());
-                                }
-                                // Play bucket sound
-                                worldIn.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
-
-                                return InteractionResult.SUCCESS;
-                            }
+                            return InteractionResult.SUCCESS;
                         }
                     }
                 }
-
+                // Open the GUI
+                if (!worldIn.isClientSide)
+                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
+            }
+            else
+            {
                 // If the held item is fuel, try to insert the fuel
                 int itemFuel = HearthBlockEntity.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
@@ -189,13 +172,11 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     if (!player.isCreative())
                     {
                         if (stack.hasContainerItem())
-                        {
-                            ItemStack container = stack.getContainerItem();
+                        {   ItemStack container = stack.getContainerItem();
                             player.setItemInHand(hand, container);
                         }
                         else
-                        {
-                            stack.shrink(1);
+                        {   stack.shrink(1);
                         }
                     }
                     // Add the fuel
@@ -206,9 +187,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 // Open the GUI
-                else
-                {
-                    NetworkHooks.openGui((ServerPlayer) player, te, pos);
+                else if (!worldIn.isClientSide)
+                {   NetworkHooks.openGui((ServerPlayer) player, te, pos);
                 }
             }
         }
