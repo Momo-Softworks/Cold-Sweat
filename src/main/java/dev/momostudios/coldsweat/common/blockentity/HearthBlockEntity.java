@@ -588,9 +588,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             double max = cap.getTemp(Temperature.Type.CEIL);
 
             // If the player is already insulated, check the input temperature reported by the HearthTempModifier
-            AtomicDouble hearthTemp = new AtomicDouble(temp);
-            cap.getModifiers(Temperature.Type.WORLD).stream().filter(mod -> mod instanceof HearthTempModifier).forEach(mod -> hearthTemp.set(mod.getLastInput()));
-            temp = hearthTemp.get();
+            Optional<HearthTempModifier> mod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
+            if (mod.isPresent())
+                temp = mod.get().getLastInput();
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel |= hotFuel > 0 && temp < ConfigSettings.MIN_TEMP.get() + min;

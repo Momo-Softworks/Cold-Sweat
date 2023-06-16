@@ -51,6 +51,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
 public class EntityTempHandler
@@ -258,16 +260,18 @@ public class EntityTempHandler
 
             if (player.getTicksFrozen() > 0)
             {
-                TempModifier insulModifier;
-                double insulation = 0;
+                AtomicReference<Double> insulation = new AtomicReference<>((double) 0);
                 boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get();
 
                 if (!hasIcePotion)
-                {   insulModifier = Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class);
-                    insulation = insulModifier == null ? 0 : insulModifier.getNBT().getDouble("insulation");
+                {
+                    Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class).ifPresent(insulModifier ->
+                    {
+                        insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDouble("Hot") + insulModifier.getNBT().getDouble("Cold")));
+                    });
                 }
 
-                if (!(hasIcePotion || insulation > 0) && (player.tickCount % Math.max(1, 37 - insulation)) == 0)
+                if (!(hasIcePotion || insulation.get() > 0) && (player.tickCount % Math.max(1, 37 - insulation.get())) == 0)
                 {   player.setTicksFrozen(player.getTicksFrozen() - 1);
                 }
             }
