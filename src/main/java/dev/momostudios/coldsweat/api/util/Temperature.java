@@ -120,23 +120,14 @@ public class Temperature
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
-    @Nullable
-    public static <T extends TempModifier> T getModifier(LivingEntity entity, Type type, Class<T> modClass)
+    public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Type type, Class<T> modClass)
     {
         return getModifier(getTemperatureCap(entity).orElse(new PlayerTempCap()), type, modClass);
     }
 
-    @Nullable
-    public static <T extends TempModifier> T getModifier(ITemperatureCap cap, Type type, Class<T> modClass)
+    public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Type type, Class<T> modClass)
     {
-        for (TempModifier modifier : cap.getModifiers(type))
-        {
-            if (modClass.isInstance(modifier))
-            {
-                return (T) modifier;
-            }
-        }
-        return null;
+        return (Optional<T>) cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst();
     }
 
     /**
@@ -187,7 +178,7 @@ public class Temperature
      */
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes)
     {
-        addModifier(entity, modifier, type, allowDupes, Addition.of(Addition.Mode.AFTER, Addition.Order.LAST, null));
+        addModifier(entity, modifier, type, allowDupes, Addition.AT_END);
     }
 
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
@@ -202,6 +193,7 @@ public class Temperature
                 getTemperatureCap(entity).ifPresent(cap ->
                 {
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
+                    boolean changed = false;
                     try
                     {
                         Predicate<TempModifier> predicate = params.getPredicate();
@@ -234,6 +226,7 @@ public class Temperature
                                 else
                                 {   modifiers.add(i + (after ? 1 : 0), newMod);
                                 }
+                                changed = true;
                                 return;
                             }
                         }
@@ -241,10 +234,11 @@ public class Temperature
                         // Add the modifier if the insertion check fails
                         if (params.mode != Addition.Mode.REPLACE)
                         {   modifiers.add(newMod);
+                            changed = true;
                         }
                     }
                     finally
-                    {   updateModifiers(entity, cap);
+                    {   if (changed) updateModifiers(entity, cap);
                     }
                 });
             }
@@ -321,16 +315,6 @@ public class Temperature
     public static List<TempModifier> getModifiers(LivingEntity entity, Type type)
     {
         return getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(List.of());
-    }
-
-    /**
-     * @param modClass The class of the TempModifier to check for
-     * @param type The type of TempModifier to check for
-     * @return true if the player has a TempModifier that extends the given class
-     */
-    public static boolean hasModifier(LivingEntity entity, Class<? extends TempModifier> modClass, Type type)
-    {
-        return getTemperatureCap(entity).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
 
     /**
@@ -445,6 +429,9 @@ public class Temperature
 
     public static class Addition
     {
+        public static final Addition AT_END = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
+        public static final Addition AT_START = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
+
         private final Predicate<TempModifier> predicate;
         private final Mode mode;
         private final Order order;

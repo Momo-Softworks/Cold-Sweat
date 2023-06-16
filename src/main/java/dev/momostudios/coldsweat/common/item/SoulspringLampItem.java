@@ -36,6 +36,8 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Optional;
+
 @Mod.EventBusSubscriber
 public class SoulspringLampItem extends Item
 {
@@ -54,10 +56,8 @@ public class SoulspringLampItem extends Item
                 if (!(isSelected || player.getOffhandItem() == stack)) return;
                 double max = ConfigSettings.MAX_TEMP.get();
 
-                TempModifier lampMod = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class);
-                double temp = lampMod != null
-                              ? lampMod.getLastInput()
-                              : Temperature.get(player, Temperature.Type.WORLD);
+                double temp = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)
+                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Type.WORLD));
 
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
@@ -78,11 +78,13 @@ public class SoulspringLampItem extends Item
                     for (Player entity : level.getEntitiesOfClass(Player.class, bb))
                     {
                         // Extend modifier time if it is present
-                        SoulLampTempModifier modifier = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
-                        if (modifier != null)
-                            modifier.setTicksExisted(0);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                        if (mod.isPresent())
+                        {   mod.get().setTicksExisted(0);
+                        }
                         else
-                            Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        }
                     }
                     shouldBeOn = true;
                 }
