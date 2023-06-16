@@ -437,7 +437,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             }
         }
         // Input fuel
-        if (this.ticksExisted % 10 == 0)
+        if (this.ticksExisted % 100 == 0)
         {   this.checkForFuel();
         }
 

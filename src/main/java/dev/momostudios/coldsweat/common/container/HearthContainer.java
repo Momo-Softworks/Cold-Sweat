@@ -41,6 +41,12 @@ public class HearthContainer extends AbstractContainerMenu
                 return effects.size() > 0
                     && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect())));
             }
+
+            @Override
+            public void setChanged()
+            {   TaskScheduler.scheduleServer(() -> ((HearthBlockEntity) this.container).checkForFuel(), 0);
+                super.setChanged();
+            }
         });
 
         // Main player inventory slots
