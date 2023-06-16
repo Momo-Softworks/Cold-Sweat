@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
 
 public class ConfigButton extends Button
 {

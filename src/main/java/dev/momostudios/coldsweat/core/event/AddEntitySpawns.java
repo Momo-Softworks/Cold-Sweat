@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.core.event;
 
-import dev.momostudios.coldsweat.util.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
