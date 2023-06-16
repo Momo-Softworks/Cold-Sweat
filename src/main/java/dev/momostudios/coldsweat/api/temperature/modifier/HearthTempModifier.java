@@ -17,7 +17,7 @@ public class HearthTempModifier extends TempModifier
 
     public HearthTempModifier(int strength)
     {
-        this.getNBT().putInt("strength", strength);
+        this.getNBT().putInt("Strength", strength);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class HearthTempModifier extends TempModifier
         double mid = (min + max) / 2;
         double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
 
-        int insulationStrength = this.getNBT().getInt("strength");
+        int insulationStrength = this.getNBT().getInt("Strength");
 
         return temp -> CSMath.blend(temp, CSMath.weightedAverage(temp, mid, 1 - hearthStrength, 1.0), insulationStrength, 0, 10);
     }
