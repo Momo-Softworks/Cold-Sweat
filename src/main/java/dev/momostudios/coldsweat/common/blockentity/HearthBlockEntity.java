@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.api.event.common.BlockStateChangedEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
@@ -138,9 +139,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @SubscribeEvent
-    public void onBlockUpdate(BlockEvent.NeighborNotifyEvent event)
+    public void onBlockUpdate(BlockStateChangedEvent event)
     {
-        BlockPos bpos = event.getPos();
+        BlockPos bpos = event.getPosition();
         if (bpos.closerThan(blockPos, this.getMaxRange()) && affectedBlocks.contains(bpos))
         {   this.sendBlockUpdate(bpos);
         }
