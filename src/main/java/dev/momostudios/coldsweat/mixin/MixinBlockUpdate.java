@@ -1,10 +1,16 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
+import dev.momostudios.coldsweat.api.event.common.BlockStateChangedEvent;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +34,7 @@ public class MixinBlockUpdate
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
         if (!oldState.equals(newState))
-        {   ForgeEventFactory.onNeighborNotify(level, pos, newState, EnumSet.allOf(Direction.class), false);
+        {   level.getServer().execute(() -> MinecraftForge.EVENT_BUS.post(new BlockStateChangedEvent(pos, level, oldState, newState)));
         }
     }
 }
