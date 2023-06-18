@@ -1206,8 +1206,24 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.2-b04f
+- Milk can now be used to clear all effects from the hearth
 
 Fixes:
 - Fixed servers not being able to load
-- Fixed crash when a Create version older than 5.1 is installed
-- Fixed all tooltips showing insulation information when Environmental isn't loaded
+- Fixed tooltips showing insulation info when the insulation configs contain an item that doesn't exist
+- Fixed the hearth not "un-filling" the proper areas when a block is placed in some cases
+- Soul stalk now only drops sticks from "middle" blocks
+      - Prevents a duplication glitch with placing/breaking a soul stalk
+      - Now only drops 0-2 sticks instead of 1-3
+
+Technical Changes:
+- Added config options to blacklist or completely disable potions from being used in the hearth
+- Mods that have compat but are an unsupported version will now cause the compat to disable itself instead of causing issues
+      - For example, now that the minimum version of Create is 5.1, Cold Sweat will disable its Create compat if Create is below 5.1
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04g
+
+Fixes:
+- Fixed chunkloading deadlocks when generating a new world
