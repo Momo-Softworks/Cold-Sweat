@@ -1209,3 +1209,10 @@ Technical Changes:
 - Mods that have compat but are an unsupported version will now cause the compat to disable itself instead of causing issues
       - For example, now that the minimum version of Create is 5.1, Cold Sweat will disable its Create compat if Create is below 5.1
 - Temperature.getModifier() now returns an Optional<T extends TempModifier> instead of potential null
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04g
+
+Fixes:
+- Fixed chunkloading deadlocks when generating a new world
