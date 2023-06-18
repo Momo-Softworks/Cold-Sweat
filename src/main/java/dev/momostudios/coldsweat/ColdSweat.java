@@ -46,7 +46,6 @@ public class ColdSweat
         bus.addListener(this::registerCaps);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
-
         BlockInit.BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
         EntityInit.ENTITY_TYPES.register(bus);
@@ -80,6 +79,8 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
+        // Load configs to memory
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.load());
     }
 
     public void clientSetup(final FMLClientSetupEvent event)
@@ -98,6 +99,9 @@ public class ColdSweat
 
     public void registerCurioSlots(InterModEnqueueEvent event)
     {
-        InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE, () -> SlotTypePreset.CHARM.getMessageBuilder().build());
+        event.enqueueWork(() ->
+        {   InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE,
+                                 () -> SlotTypePreset.CHARM.getMessageBuilder().build());
+        });
     }
 }
