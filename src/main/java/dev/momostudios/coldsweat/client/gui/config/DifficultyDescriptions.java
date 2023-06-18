@@ -40,7 +40,7 @@ public class DifficultyDescriptions
                     new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(100, RED)),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.rate.decrease", YEL +"10%"+ CLEAR),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
-                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_on", BOLD + U_LINE, CLEAR),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
 
     private static final List<Component> HARD_DESCRIPTION = List.of(
