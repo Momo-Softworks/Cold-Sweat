@@ -55,7 +55,7 @@ public class ColdSweatConfig
         difficulty = BUILDER
                 .comment("Overrides all other config options for easy difficulty management",
                         "This value is changed by the in-game config. It does nothing otherwise.")
-                .defineInRange("Difficulty", 3, 1, 5);
+                .defineInRange("Difficulty", 2, 0, 4);
 
         /*
          Potion effects affecting the player's temperature
