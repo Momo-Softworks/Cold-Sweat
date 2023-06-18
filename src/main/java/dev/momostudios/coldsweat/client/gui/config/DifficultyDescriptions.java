@@ -2,103 +2,73 @@ package dev.momostudios.coldsweat.client.gui.config;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import dev.momostudios.coldsweat.util.math.CSMath;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class DifficultyDescriptions
 {
-    private static final String bl = ChatFormatting.BLUE.toString();
-    private static final String rd = ChatFormatting.RED.toString();
-    private static final String ye = ChatFormatting.YELLOW.toString();
-    private static final String rs = ChatFormatting.RESET.toString();
-    private static final String bold = ChatFormatting.BOLD.toString();
-    private static final String under = ChatFormatting.UNDERLINE.toString();
+    private static final String BLUE = ChatFormatting.BLUE.toString();
+    private static final String RED = ChatFormatting.RED.toString();
+    private static final String YEL = ChatFormatting.YELLOW.toString();
+    private static final String CLEAR = ChatFormatting.RESET.toString();
+    private static final String BOLD = ChatFormatting.BOLD.toString();
+    private static final String U_LINE = ChatFormatting.UNDERLINE.toString();
 
-    public static List<String> getListFor(int difficulty)
+    private static final List<Component> SUPER_EASY_DESCRIPTION = List.of(
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.min_temp", temperatureString(40, BLUE)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(120, RED)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.rate.decrease", YEL +"50%"+ CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
+
+    private static final List<Component> EASY_DESCRIPTION = List.of(
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.min_temp", temperatureString(45, BLUE)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(110, RED)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.rate.decrease", YEL +"25%"+ CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
+
+    private static final List<Component> NORMAL_DESCRIPTION = List.of(
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.min_temp", temperatureString(50, BLUE)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(100, RED)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.rate.decrease", YEL +"10%"+ CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
+
+    private static final List<Component> HARD_DESCRIPTION = List.of(
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.min_temp", temperatureString(55, BLUE)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(90, RED)),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.rate.normal"),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_off", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_on", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
+
+    private static final List<Component> CUSTOM_DESCRIPTION = Collections.singletonList(
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.custom"));
+
+    public static List<Component> getListFor(int difficulty)
     {
-        switch (difficulty)
+        return switch (difficulty)
         {
-            case 0:
-                return superEasyDescription();
-            case 1:
-                return easyDescription();
-            case 2:
-                return normalDescription();
-            case 3:
-                return hardDescription();
-            default:
-                return customDescription();
-        }
+            case 0  -> SUPER_EASY_DESCRIPTION;
+            case 1  -> EASY_DESCRIPTION;
+            case 2  -> NORMAL_DESCRIPTION;
+            case 3  -> HARD_DESCRIPTION;
+            default  -> CUSTOM_DESCRIPTION;
+        };
     }
 
-    public static List<String> superEasyDescription()
-    {
-        return Arrays.asList(
-                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(40, bl)),
-                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(120, rd)),
-                getTrans("cold_sweat.config.difficulty.description.rate.decrease", ye+"50%"+rs),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", bold + under, rs).getString()
-        );
-    }
-
-    public static List<String> easyDescription()
-    {
-        return Arrays.asList(
-                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(45, bl)),
-                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(110, rd)),
-                getTrans("cold_sweat.config.difficulty.description.rate.decrease", ye+"25%"+rs),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_off", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", bold + under, rs).getString()
-        );
-    }
-
-    public static List<String> normalDescription()
-    {
-        return Arrays.asList(
-                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(50, bl)),
-                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(100, rd)),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.rate.normal").getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_off", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_on", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.potions_off", bold + under, rs).getString()
-        );
-    }
-
-    public static List<String> hardDescription()
-    {
-        return Arrays.asList(
-                getTrans("cold_sweat.config.difficulty.description.min_temp", getTemp(60, bl)),
-                getTrans("cold_sweat.config.difficulty.description.max_temp", getTemp(90, rd)),
-                getTrans("cold_sweat.config.difficulty.description.rate.increase", ye+"50%"+rs),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_off", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_on", bold + under, rs).getString(),
-                new TranslatableComponent("cold_sweat.config.difficulty.description.potions_off", bold + under, rs).getString()
-        );
-    }
-
-    public static List<String> customDescription()
-    {
-        return Collections.singletonList(
-                new TranslatableComponent("cold_sweat.config.difficulty.description.custom").getString()
-        );
-    }
-
-    private static String getTrans(String key, Object... args)
-    {
-        return new TranslatableComponent(key, args).getString();
-    }
-
-    private static String getTemp(double temp, String color)
+    private static String temperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + temp + rs + " °F / " + color + df.format(CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true)) + rs + " °C";
+        return color + temp + CLEAR + " °F / " + color + df.format(CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true)) + CLEAR + " °C";
     }
 }
