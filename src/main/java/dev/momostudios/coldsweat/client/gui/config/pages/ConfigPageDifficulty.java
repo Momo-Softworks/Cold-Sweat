@@ -75,10 +75,11 @@ public class ConfigPageDifficulty extends Screen
         for (Component text : DifficultyDescriptions.getListFor(ConfigSettings.DIFFICULTY.get()))
         {
             // Add the text and a new line to the list
-            descLines.add(new TextComponent(" • " + text.getString() + " "));
+            Component descLine = new TextComponent(" • " + text.getString() + " ");
+            descLines.add(descLine);
             descLines.add(new TextComponent(""));
 
-            int lineWidth = font.width(text);
+            int lineWidth = font.width(descLine);
             if (lineWidth > longestLine)
                 longestLine = lineWidth;
         }
