@@ -7,7 +7,6 @@ import dev.momostudios.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -80,28 +79,5 @@ public class ConfigScreen
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = false;
-    }
-
-    public static String difficultyName(int difficulty)
-    {
-        return  difficulty == 0 ? new TranslatableComponent("cold_sweat.config.difficulty.super_easy.name").getString() :
-                difficulty == 1 ? new TranslatableComponent("cold_sweat.config.difficulty.easy.name").getString() :
-                difficulty == 2 ? new TranslatableComponent("cold_sweat.config.difficulty.normal.name").getString() :
-                difficulty == 3 ? new TranslatableComponent("cold_sweat.config.difficulty.hard.name").getString() :
-                difficulty == 4 ? new TranslatableComponent("cold_sweat.config.difficulty.custom.name").getString() : "";
-    }
-
-    public static int difficultyColor(int difficulty)
-    {
-        return  difficulty == 0 ? 16777215 :
-                difficulty == 1 ? 16768882 :
-                difficulty == 2 ? 16755024 :
-                difficulty == 3 ? 16731202 :
-                difficulty == 4 ? 10631158 : 16777215;
-    }
-
-    public static int textOptionColor()
-    {
-        return Minecraft.getInstance().player == null || Minecraft.getInstance().player.getPermissionLevel() > 2 ? 16777215 : 8421504;
     }
 }

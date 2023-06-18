@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
+import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
@@ -30,7 +31,7 @@ public class ConfigButton extends Button
             {
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
                         new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
-                                " (" + ConfigScreen.difficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
+                                " (" + ConfigPageDifficulty.difficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
             }
         }
 
