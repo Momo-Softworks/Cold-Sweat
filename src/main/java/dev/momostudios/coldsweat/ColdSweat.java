@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat;
 
-import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.*;
@@ -8,6 +7,7 @@ import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
+import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -70,19 +70,20 @@ public class ColdSweat
     {
         ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
-        {
-            // Register advancement triggers
+        {   // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
+        // Load configs to memory
+        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.load());
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)
     {
-        event.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
+        event.register(ModEntities.CHAMELEON, SpawnPlacements.Type.ON_GROUND,
+                       Heightmap.Types.MOTION_BLOCKING, ChameleonEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)
@@ -92,6 +93,9 @@ public class ColdSweat
 
     public void registerCurioSlots(InterModEnqueueEvent event)
     {
-        InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE, () -> SlotTypePreset.CHARM.getMessageBuilder().build());
+        event.enqueueWork(() ->
+        {   InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE,
+                                 () -> SlotTypePreset.CHARM.getMessageBuilder().build());
+        });
     }
 }
