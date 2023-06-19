@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -12,6 +13,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+
+import java.util.Collections;
+import java.util.List;
 
 public class MinecartInsulationBlock extends Block
 {
@@ -37,6 +42,11 @@ public class MinecartInsulationBlock extends Block
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState());
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    {   return Collections.emptyList();
     }
 
     @Override

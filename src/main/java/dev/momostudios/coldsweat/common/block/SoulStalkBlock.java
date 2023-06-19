@@ -155,8 +155,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     @SuppressWarnings("deprecation")
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {
-        List<ItemStack> drops = super.getDrops(state, builder);
+    {   List<ItemStack> drops = super.getDrops(state, builder);
         if (!drops.isEmpty())
             return drops;
 

@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -30,7 +32,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 
 public class ThermolithBlock extends Block implements EntityBlock
 {
@@ -54,14 +58,28 @@ public class ThermolithBlock extends Block implements EntityBlock
                 .sound(SoundType.GILDED_BLACKSTONE)
                 .strength(2f)
                 .explosionResistance(10f)
-                .requiresCorrectToolForDrops()
                 .noOcclusion()
                 .dynamicShape()
-                .isRedstoneConductor((state, level, pos) -> true);
+                .lightLevel(getLightValueLit(5))
+                .isRedstoneConductor((state, level, pos) -> true)
+                .requiresCorrectToolForDrops();
+    }
+
+    private static ToIntFunction<BlockState> getLightValueLit(int lightValue)
+    {   return (state) -> state.getValue(BlockStateProperties.POWERED) ? lightValue : 0;
     }
 
     public static Item.Properties getItemProperties()
     {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(64);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    {   List<ItemStack> drops = super.getDrops(state, builder);
+        if (!drops.isEmpty())
+            return drops;
+        drops.add(new ItemStack(this, 1));
+        return drops;
     }
 
     static void calculateFacingShapes(VoxelShape shape)
