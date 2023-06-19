@@ -132,8 +132,16 @@ public class PlayerTempCap implements ITemperatureCap
         // Don't change player temperature if they're in creative/spectator mode
         if (magnitude != 0 && !(player.isCreative() || player.isSpectator()))
         {
+            // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = Math.max((difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(), Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)) * magnitude;
+            double changeBy = (Math.max(
+                                // Ensure a minimum speed for temperature change
+                                (difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(),
+                                Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)
+                              // If it's hot or cold
+                              ) * magnitude)
+                    // Apply resistance from NBT
+                    * ((100 - player.getPersistentData().getInt(magnitude > 0 ? "HeatResistance" : "ColdResistance")) / 100d);
             newCoreTemp += Temperature.apply(changeBy, player, Type.RATE, getModifiers(Type.RATE));
         }
         // If the player's temperature and world temperature are not both hot or both cold
