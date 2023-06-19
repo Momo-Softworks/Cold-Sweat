@@ -264,7 +264,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 {
                     showParticles = isClient
                             && Minecraft.getInstance().options.particles().get() == ParticleStatus.ALL
-                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location().toString()));
+                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location()));
                 }
 
                 // Mark as not spreading if all paths are frozen
