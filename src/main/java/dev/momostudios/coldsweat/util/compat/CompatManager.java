@@ -33,6 +33,7 @@ public class CompatManager
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
     private static final boolean WEATHER_LOADED = modLoaded("weather2");
+    private static final boolean WYTHERS_LOADED = modLoaded("wythers");
 
     private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -94,6 +95,9 @@ public class CompatManager
     }
     public static boolean isWeather2Loaded()
     {   return WEATHER_LOADED;
+    }
+    public static boolean isWythersLoaded()
+    {   return WYTHERS_LOADED;
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
