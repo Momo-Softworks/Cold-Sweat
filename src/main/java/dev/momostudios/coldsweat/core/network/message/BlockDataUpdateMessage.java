@@ -31,7 +31,7 @@ public class BlockDataUpdateMessage
     public static void encode(BlockDataUpdateMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBlockPos(message.blockPos);
-        buffer.writeNbt(message.blockEntity.saveWithoutMetadata());
+        buffer.writeNbt(message.blockEntity.getUpdateTag());
     }
 
     public static BlockDataUpdateMessage decode(FriendlyByteBuf buffer)
@@ -52,7 +52,7 @@ public class BlockDataUpdateMessage
                     BlockEntity be = level.getBlockEntity(message.blockPos);
                     if (be != null)
                     {
-                        be.load(message.tag);
+                        be.handleUpdateTag(message.tag);
                     }
                 }
             });
