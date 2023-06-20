@@ -16,9 +16,12 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -26,6 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -34,7 +38,6 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ArmorInsulation
 {
-
     @SubscribeEvent
     public static void addArmorModifiers(TickEvent.PlayerTickEvent event)
     {
@@ -117,10 +120,26 @@ public class ArmorInsulation
             // Award advancement for full insulation
             if (fullyInsulated >= 4 && player instanceof ServerPlayer serverPlayer)
             {
-                Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));
-                if (advancement != null)
-                    serverPlayer.getAdvancements().award(advancement, "requirement");
+                if (serverPlayer.getServer() != null)
+                {
+                    Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));
+                    if (advancement != null)
+                    {   serverPlayer.getAdvancements().award(advancement, "requirement");
+                    }
+                }
             }
+        }
+    }
+
+    /**
+     * Prevent damage by magma blocks if the player has hoglin hooves
+     */
+    @SubscribeEvent
+    public static void onDamageTaken(LivingAttackEvent event)
+    {
+        DamageSource source = event.getSource();
+        if (source == DamageSource.HOT_FLOOR && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        {   event.setCanceled(true);
         }
     }
 
