@@ -16,6 +16,7 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
@@ -424,13 +425,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 if (this.ticksExisted % 80 == 0)
                 {
                     if (shouldUseColdFuel)
-                    {   this.setColdFuel(coldFuel - 1, false);
+                    {   this.setColdFuel(coldFuel - 1, true);
                     }
                     if (shouldUseHotFuel)
-                    {   this.setHotFuel(hotFuel - 1, false);
+                    {   this.setHotFuel(hotFuel - 1, true);
                     }
-                    if (shouldUseHotFuel || shouldUseColdFuel)
-                        this.updateFuelState();
+                    if ((shouldUseHotFuel || shouldUseColdFuel) && !this.level.isClientSide)
+                    {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() ->
+                                                            (LevelChunk) level.getChunkSource().getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, true)),
+                                                            new BlockDataUpdateMessage(this));
+                    }
 
                     shouldUseColdFuel = false;
                     shouldUseHotFuel = false;
@@ -641,7 +645,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         this.hotFuel = CSMath.clamp(amount, 0, MAX_FUEL);
 
-        if (amount <= 0 && hasHotFuel)
+        if (amount == 0 && hasHotFuel)
         {   hasHotFuel = false;
             level.playSound(null, blockPos, ModSounds.HEARTH_FUEL, SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
         }
@@ -671,7 +675,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void addFuel(int amount)
     {   if (amount > 0)
-            setHotFuelAndUpdate(this.hotFuel + Math.abs(amount));
+            setHotFuelAndUpdate(this.hotFuel + amount);
         else if (amount < 0)
             setColdFuelAndUpdate(this.coldFuel + Math.abs(amount));
     }
@@ -708,20 +712,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public void load(CompoundTag tag)
     {   super.load(tag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        this.setColdFuelAndUpdate(tag.getInt("coldFuel"));
-        this.setHotFuelAndUpdate(tag.getInt("hotFuel"));
-        this.insulationLevel = tag.getInt("insulationLevel");
-        this.loadEffects(tag);
+        this.handleUpdateTag(tag);
         ContainerHelper.loadAllItems(tag, this.items);
     }
 
     @Override
     public void saveAdditional(CompoundTag tag)
     {   super.saveAdditional(tag);
-        tag.putInt("coldFuel", this.getColdFuel());
-        tag.putInt("hotFuel", this.getHotFuel());
-        tag.putInt("insulationLevel", insulationLevel);
-        this.saveEffects(tag);
+        tag.merge(this.getUpdateTag());
         ContainerHelper.saveAllItems(tag, this.items);
     }
 
@@ -753,7 +751,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         tag.putInt("HotFuel",  this.getHotFuel());
         tag.putInt("ColdFuel", this.getColdFuel());
         tag.putInt("InsulationLevel", insulationLevel);
-        saveEffects(tag);
+        this.saveEffects(tag);
 
         return tag;
     }
@@ -764,8 +762,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         super.handleUpdateTag(tag);
         this.setHotFuel(tag.getInt("HotFuel"), false);
         this.setColdFuel(tag.getInt("ColdFuel"), false);
-        insulationLevel = tag.getInt("InsulationLevel");
-        loadEffects(tag);
+        this.updateFuelState();
+        this.insulationLevel = tag.getInt("InsulationLevel");
+        this.loadEffects(tag);
     }
 
     @Override
