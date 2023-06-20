@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class HearthDebugRenderer
 {
-    public static Map<BlockPos, Map<SpreadPath, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
+    public static Map<BlockPos, Map<BlockPos, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
     public static void onLevelRendered(RenderLevelStageEvent event)
@@ -130,25 +130,23 @@ public class HearthDebugRenderer
             LevelChunk workingChunk = (LevelChunk) level.getChunk(new BlockPos(0, 0, 0));
             float viewDistance = Minecraft.getInstance().options.renderDistance().get() * 2f;
 
-            for (Map.Entry<BlockPos, Map<SpreadPath, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
+            for (Map.Entry<BlockPos, Map<BlockPos, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {
                 if (HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
 
-                Map<SpreadPath, Collection<Direction>> points = entry.getValue();
-                for (Map.Entry<SpreadPath, Collection<Direction>> pair : points.entrySet())
+                Map<BlockPos, Collection<Direction>> points = entry.getValue();
+                for (Map.Entry<BlockPos, Collection<Direction>> pair : points.entrySet())
                 {
-                    SpreadPath path = pair.getKey();
-                    BlockPos pos = path.getPos();
+                    BlockPos pos = pair.getKey();
                     Collection<Direction> directions = pair.getValue();
 
-                    float x = path.getX();
-                    float y = path.getY();
-                    float z = path.getZ();
+                    float x = pos.getX();
+                    float y = pos.getY();
+                    float z = pos.getZ();
 
-                    boolean spreading = !path.isFrozen();
-                    float r = spreading ? 0.2f : 1f;
-                    float g = spreading ? 1f : 0.7f;
-                    float b = spreading ? 0.4f : 0.6f;
+                    float r = 1f;
+                    float g = 0.7f;
+                    float b = 0.6f;
 
                     float renderAlpha = CSMath.blend(1f, 0f, (float) CSMath.getDistance(player, x + 0.5f, y + 0.5f, z + 0.5f), 5, viewDistance);
 
@@ -208,21 +206,20 @@ public class HearthDebugRenderer
                 BlockEntity blockEntity = level.getBlockEntity(pos);
                 if (blockEntity instanceof HearthBlockEntity hearth)
                 {
-                    Collection<SpreadPath> paths = hearth.getPaths();
                     Set<BlockPos> lookup = hearth.getPathLookup();
 
-                    Map<SpreadPath, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
-                    if (pathMap.size() != paths.size())
+                    Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
+                    if (pathMap.size() != lookup.size())
                     {
-                        HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->
+                        HEARTH_LOCATIONS.put(pos, lookup.stream().map(bp ->
                         {
                             ArrayList<Direction> dirs = new ArrayList<>();
                             for (Direction dir : Direction.values())
                             {
-                                if (lookup.contains(path.getPos().relative(dir)))
+                                if (lookup.contains(bp.relative(dir)))
                                     dirs.add(dir);
                             }
-                            return Map.entry(path, dirs);
+                            return Map.entry(bp, dirs);
                         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, Maps::newHashMap)));
                     }
                 }

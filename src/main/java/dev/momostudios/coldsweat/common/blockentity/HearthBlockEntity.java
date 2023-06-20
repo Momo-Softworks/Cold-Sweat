@@ -85,9 +85,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
-    ArrayList<SpreadPath> paths = new ArrayList<>();
-    // Used for client-side rendering of the Hearth's F3 debug
-    ArrayList<SpreadPath> displayPaths = new ArrayList<>();
+    List<SpreadPath> paths = new ArrayList<>();
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>();
     // Lookup exclusively used for detecting block updates within the hearth's range
@@ -270,13 +268,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                 // Mark as not spreading if all paths are frozen
                 if (this.frozenPaths >= paths.size())
-                    this.spreading = false;
-                // Keep displayPaths updated (used for F3 wireframe view)
-                else if (isClient && ClientSettingsConfig.getInstance().hearthDebug())
-                {   displayPaths = new ArrayList<>(paths);
-                }
-                // Keep affectedBlocks updated (used for block update detection)
-                if (pathLookup.size() != affectedBlocks.size())
+                    this.spreading = false;// Keep affectedBlocks updated (used for block update detection)
+                if (pathLookup.size() > affectedBlocks.size())
                 {   affectedBlocks = pathLookup;
                 }
 
@@ -329,7 +322,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                         // The origin of the path is usually the hearth's position,
                         // but if it's spreading through Create pipes then the origin is the end of the pipe
-                        if (pathCount < this.maxPaths() && spreadPath.withinDistance(spreadPath.getOrigin(), this.getSpreadRange()))
+                        if (pathCount < this.maxPaths() && spreadPath.withinDistance(spreadPath.getOrigin(), this.getSpreadRange())
+                        && spreadPath.getOrigin().closerThan(pos, this.getMaxRange()))
                         {
                             /*
                              Get the chunk at this position
@@ -430,10 +424,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     if (shouldUseHotFuel)
                     {   this.setHotFuel(hotFuel - 1, true);
                     }
-                    if ((shouldUseHotFuel || shouldUseColdFuel) && !this.level.isClientSide)
-                    {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() ->
-                                                            (LevelChunk) level.getChunkSource().getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, true)),
-                                                            new BlockDataUpdateMessage(this));
+                    if (shouldUseHotFuel || shouldUseColdFuel)
+                    {   //this.sendFuelUpdates();
+                        this.updateFuelState();
                     }
 
                     shouldUseColdFuel = false;
@@ -579,6 +572,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Reset cooldown
         this.rebuildCooldown = 100;
 
+        affectedBlocks = pathLookup;
         ArrayList<SpreadPath> pathCopy = new ArrayList<>(paths);
         // Stream through paths, unfreeze them, and filter out the ones that aren't in the notify queue
         paths.stream().peek(path -> path.setFrozen(false)).filter(path -> notifyQueue.contains(path.getPos()))
@@ -586,12 +580,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         .flatMap(path -> path.getAllChildren().stream()).peek(path ->
         {   BlockPos bpos = path.getPos();
             // Remove paths from lookup table as well
+            affectedBlocks.remove(bpos);
             Arrays.stream(Direction.values()).map(bpos::relative).toList().forEach(pathLookup::remove);
         })
         // Remove updated paths and their children
         .forEach(pathCopy::remove);
         paths = pathCopy;
-        affectedBlocks = pathLookup;
 
         // Un-freeze paths so areas can be re-checked
         frozenPaths = 0;
@@ -698,6 +692,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
+    public void sendFuelUpdates()
+    {
+        if (!level.isClientSide)
+        {
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() ->
+                                                (LevelChunk) level.getChunkSource().getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, true)),
+                                                new BlockDataUpdateMessage(this));
+        }
+    }
+
     @Override
     public int getContainerSize()
     {   return SLOT_COUNT;
@@ -758,9 +762,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     @Override
     public void handleUpdateTag(CompoundTag tag)
-    {
-        super.handleUpdateTag(tag);
-        this.setHotFuel(tag.getInt("HotFuel"), false);
+    {   this.setHotFuel(tag.getInt("HotFuel"), false);
         this.setColdFuel(tag.getInt("ColdFuel"), false);
         this.updateFuelState();
         this.insulationLevel = tag.getInt("InsulationLevel");
@@ -826,10 +828,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (this.level.isClientSide)
         {   ClientOnlyHelper.removeHearthPosition(this.blockPos);
         }
-    }
-
-    public List<SpreadPath> getPaths()
-    {   return this.displayPaths;
     }
 
     public Set<BlockPos> getPathLookup()
