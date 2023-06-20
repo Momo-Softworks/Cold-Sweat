@@ -51,7 +51,7 @@ public class ConfigPageDifficulty extends Screen
                     new TranslatableComponent("cold_sweat.config.difficulty.description.min_temp", temperatureString(50, BLUE)),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.max_temp", temperatureString(100, RED)),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.rate.decrease", YEL +"10%"+ CLEAR),
-                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
+                    new TranslatableComponent("cold_sweat.config.difficulty.description.world_temp_off", BOLD + U_LINE, CLEAR),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.scaling_on", BOLD + U_LINE, CLEAR),
                     new TranslatableComponent("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
     private static final List<Component> HARD_DESCRIPTION = List.of(
@@ -124,7 +124,7 @@ public class ConfigPageDifficulty extends Screen
                 this.height - ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET,
                 ConfigScreen.BOTTOM_BUTTON_WIDTH, 20,
                 CommonComponents.GUI_DONE,
-                button -> this.close()));
+                button -> this.onClose()));
     }
 
     @Override
@@ -190,57 +190,59 @@ public class ConfigPageDifficulty extends Screen
         super.render(poseStack, mouseX, mouseY, partialTicks);
     }
 
-    private void close()
+    @Override
+    public void onClose()
     {
+        super.onClose();
         switch (ConfigSettings.DIFFICULTY.get())
-        {
-            // Super Easy
-            case 0 ->
-            {
-                ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.TEMP_RATE.set(0.5);
-                ConfigSettings.REQUIRE_THERMOMETER.set(false);
-                ConfigSettings.DAMAGE_SCALING.set(false);
-                ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-            }
-            // Easy
-            case 1 ->
-            {
-                ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.TEMP_RATE.set(0.75);
-                ConfigSettings.REQUIRE_THERMOMETER.set(false);
-                ConfigSettings.DAMAGE_SCALING.set(false);
-                ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-            }
-            // Normal
-            case 2 ->
-            {
-                ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.TEMP_RATE.set(1.0);
-                ConfigSettings.REQUIRE_THERMOMETER.set(true);
-                ConfigSettings.DAMAGE_SCALING.set(true);
-                ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-            }
-            // Hard
-            case 3 ->
-            {
-                ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true));
-                ConfigSettings.TEMP_RATE.set(1.5);
-                ConfigSettings.REQUIRE_THERMOMETER.set(true);
-                ConfigSettings.DAMAGE_SCALING.set(true);
-                ConfigSettings.FIRE_RESISTANCE_ENABLED.set(false);
-                ConfigSettings.ICE_RESISTANCE_ENABLED.set(false);
-            }
-        }
-        ConfigScreen.saveConfig();
-        ConfigScreen.MC.setScreen(parentScreen);
+                {
+                    // Super Easy
+                    case 0 ->
+                    {
+                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.TEMP_RATE.set(0.5);
+                        ConfigSettings.REQUIRE_THERMOMETER.set(false);
+                        ConfigSettings.DAMAGE_SCALING.set(false);
+                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
+                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
+                    }
+                    // Easy
+                    case 1 ->
+                    {
+                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.TEMP_RATE.set(0.75);
+                        ConfigSettings.REQUIRE_THERMOMETER.set(false);
+                        ConfigSettings.DAMAGE_SCALING.set(false);
+                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
+                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
+                    }
+                    // Normal
+                    case 2 ->
+                    {
+                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.TEMP_RATE.set(1.0);
+                        ConfigSettings.REQUIRE_THERMOMETER.set(true);
+                        ConfigSettings.DAMAGE_SCALING.set(true);
+                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
+                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
+                    }
+                    // Hard
+                    case 3 ->
+                    {
+                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true));
+                        ConfigSettings.TEMP_RATE.set(1.5);
+                        ConfigSettings.REQUIRE_THERMOMETER.set(true);
+                        ConfigSettings.DAMAGE_SCALING.set(true);
+                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(false);
+                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(false);
+                    }
+                }
+                ConfigScreen.saveConfig();
+                ConfigScreen.MC.setScreen(parentScreen);
     }
 
     boolean isMouseOverSlider(double mouseX, double mouseY)
