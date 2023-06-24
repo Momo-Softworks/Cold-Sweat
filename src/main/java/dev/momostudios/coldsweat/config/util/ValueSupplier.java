@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.config.util;
 
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
@@ -7,8 +8,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Contains a value that updates again once Forge has been fully loaded. Mostly used for static fields.
- * @param <T> The variable type that this object is storing
+ * Contains a value that updates as needed (usually when a player interacts with the config screen). <br>
+ * If added to {@link ConfigSettings#SYNCED_SETTINGS}, it will be synced to the client.
  */
 public class ValueSupplier<T>
 {

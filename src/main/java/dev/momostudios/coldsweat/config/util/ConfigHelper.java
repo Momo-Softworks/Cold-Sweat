@@ -6,8 +6,10 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 
@@ -29,7 +31,12 @@ public class ConfigHelper
                                                     tag.getKey().location().toString().equals(tagID)).findFirst();
                 optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
             }
-            else blocks.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)));
+            else
+            {
+                Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
+                if (block != Blocks.AIR)
+                    blocks.add(block);
+            }
         }
         return blocks;
     }
@@ -76,7 +83,12 @@ public class ConfigHelper
                         tag.getKey().location().toString().equals(tagID)).findFirst();
                 optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
             }
-            else items.add(ForgeRegistries.ITEMS.getValue(new ResourceLocation(id)));
+            else
+            {
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+                if (item != Items.AIR)
+                    items.add(item);
+            }
         }
         return items;
     }
