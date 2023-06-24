@@ -53,39 +53,43 @@ public class EntitySettingsConfig
                                 List.of("minecraft:bamboo_jungle", 80),
                                 List.of("minecraft:jungle", 80),
                                 List.of("minecraft:sparse_jungle", 35),
-                                List.of("minecraft:desert", 3))
+                                List.of("minecraft:desert", 1))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> List.of("biomesoplenty:lush_desert", 3),
-                                () -> List.of("biomesoplenty:rainforest", 70),
-                                () -> List.of("biomesoplenty:rocky_rainforest", 35),
+                                () -> List.of("biomesoplenty:rainforest", 40),
+                                () -> List.of("biomesoplenty:rocky_rainforest", 15),
                                 () -> List.of("biomesoplenty:fungal_jungle", 10),
                                 () -> List.of("biomesoplenty:tropics", 8),
                                 () -> List.of("biomesoplenty:outback", 2))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
-                                () -> List.of("byg:tropical_rainforest", 4),
+                                () -> List.of("byg:tropical_rainforest", 60),
                                 () -> List.of("byg:jacaranda_forest", 3),
                                 () -> List.of("byg:guiana_shield", 3),
                                 () -> List.of("byg:crag_gardens", 4),
-                                () -> List.of("byg:atacama_desert", 2),
+                                () -> List.of("byg:atacama_desert", 1),
                                 () -> List.of("byg:cypress_swamplands", 3),
-                                () -> List.of("byg:mojave_desert", 2),
+                                () -> List.of("byg:mojave_desert", 1),
                                 () -> List.of("byg:windswept_desert", 2))
                             .addIf(CompatManager.isAtmosphericLoaded(),
-                                () -> List.of("atmospheric:dunes", 2),
-                                () -> List.of("atmospheric:flourishing_dunes", 3),
-                                () -> List.of("atmospheric:rocky_dunes", 2),
-                                () -> List.of("atmospheric:petrified_dunes", 1),
+                                () -> List.of("atmospheric:dunes", 0.75),
+                                () -> List.of("atmospheric:flourishing_dunes", 1.5),
+                                () -> List.of("atmospheric:rocky_dunes", 0.75),
+                                () -> List.of("atmospheric:petrified_dunes", 0.5),
                                 () -> List.of("atmospheric:rainforest", 70),
                                 () -> List.of("atmospheric:sparse_rainforest", 40),
                                 () -> List.of("atmospheric:rainforest_basin", 50),
                                 () -> List.of("atmospheric:sparse_rainforest_basin", 30))
                            .addIf(CompatManager.isTerralithLoaded(),
-                                () -> List.of("terralith:red_oasis", 8),
-                                () -> List.of("terralith:desert_oasis", 8),
+                                () -> List.of("terralith:red_oasis", 3),
+                                () -> List.of("terralith:desert_oasis", 3),
                                 () -> List.of("terralith:tropical_jungle", 80),
-                                () -> List.of("terralith:arid_highlands", 6),
+                                () -> List.of("terralith:arid_highlands", 1.5),
                                 () -> List.of("terralith:rocky_jungle", 80),
-                                () -> List.of("terralith:brushland", 4)
+                                () -> List.of("terralith:brushland", 1.5))
+                           .addIf(CompatManager.isWythersLoaded(),
+                                () -> List.of("wythers:cactus_desert", 1),
+                                () -> List.of("wythers:tropical_forest", 10),
+                                () -> List.of("wythers:tropical_rainforest", 80)
                         ).build(),
                         it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
 
