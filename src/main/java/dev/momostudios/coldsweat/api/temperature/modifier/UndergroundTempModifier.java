@@ -17,6 +17,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
+import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +60,11 @@ public class UndergroundTempModifier extends TempModifier
                     Biome biome = holder.value();
                     double baseTemp = biome.getBaseTemperature();
                     ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-                    double biomeTemp = CSMath.averagePair(ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID, Pair.of(baseTemp, baseTemp)))
-                                     + CSMath.averagePair(ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID, Pair.of(0d, 0d)));
+                    
+                    Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID, new Triplet<>(baseTemp, baseTemp, Temperature.Units.MC));
+                    Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID, new Triplet<>(0d, 0d, Temperature.Units.MC));
+                    double biomeTemp = CSMath.averagePair(Pair.of(cTemp.getA(), cTemp.getB()))
+                                     + CSMath.averagePair(Pair.of(cOffset.getA(), cOffset.getB()));
 
                     biomeTempTotal += biomeTemp;
                     caveBiomeCount++;

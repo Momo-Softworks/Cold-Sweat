@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
 import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
+import oshi.util.tuples.Triplet;
 
 public class HotBiomeEdible extends Edible
 {
@@ -41,9 +43,11 @@ public class HotBiomeEdible extends Edible
                 Biome biome = holder.value();
                 ResourceLocation biomeName = ForgeRegistries.BIOMES.getKey(biome);
 
-                double biomeTemp = CSMath.averagePair(ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeName,
-                          ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName, CSMath.addPairs(Pair.of(0d, 0d),
-                          Pair.of(biome.getBaseTemperature(), biome.getBaseTemperature())))));
+                Triplet<Double, Double, Temperature.Units> tempConfig = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeName,
+                                                                        ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName,
+                                                                        new Triplet<>((double) biome.getBaseTemperature(), (double) biome.getBaseTemperature(), Temperature.Units.MC)));
+                Pair<Double, Double> minMax = Pair.of(tempConfig.getA(), tempConfig.getB());
+                double biomeTemp = CSMath.averagePair(minMax);
 
                 return biomeTemp >= 1.5;
             }, entity.blockPosition(), 2000, 32, 64);

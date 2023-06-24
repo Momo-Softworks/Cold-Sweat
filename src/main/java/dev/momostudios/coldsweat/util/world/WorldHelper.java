@@ -189,8 +189,11 @@ public class WorldHelper
     }
 
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
-    {
-        return level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+    {   return level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+    }
+
+    public static ChunkAccess getChunk(LevelAccessor level, ChunkPos pos)
+    {   return level.getChunkSource().getChunkNow(pos.x, pos.z);
     }
 
     public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)

@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.common.Tags;
+import oshi.util.tuples.Triplet;
 
 import java.util.List;
 import java.util.function.Function;
@@ -68,8 +69,11 @@ public class BiomeTempModifier extends TempModifier
 
                         // Get the biome's temperature, either overridden by config or calculated
                         // Start with biome override
-                        configTemp = CSMath.addPairs(ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID, Pair.of(baseTemp - biomeVariance, baseTemp + biomeVariance)),
-                                                     ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID, Pair.of(0d, 0d)));
+                        Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+                                                                           new Triplet<>(baseTemp - biomeVariance, baseTemp + biomeVariance, Temperature.Units.MC));
+                        Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+                                                                             new Triplet<>(0d, 0d, Temperature.Units.MC));
+                        configTemp = CSMath.addPairs(Pair.of(cTemp.getA(), cTemp.getB()), Pair.of(cOffset.getA(), cOffset.getB()));
 
                         // Biome temp at midnight (bottom of the sine wave)
                         double min = configTemp.getFirst();

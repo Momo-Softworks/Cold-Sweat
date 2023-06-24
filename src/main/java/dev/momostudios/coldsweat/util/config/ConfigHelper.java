@@ -10,6 +10,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
+import oshi.util.tuples.Triplet;
 
 import java.util.*;
 
@@ -112,9 +113,9 @@ public class ConfigHelper
         return map;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Double>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
+    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
     {
-        Map<ResourceLocation, Pair<Double, Double>> map = new HashMap<>();
+        Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
         for (List<?> entry : source)
         {
             try
@@ -126,10 +127,11 @@ public class ConfigHelper
 
                 double min;
                 double max;
+                Temperature.Units units;
                 // The config defines a min and max value, with optional unit conversion
                 if (entry.size() > 2)
                 {
-                    Temperature.Units units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+                    units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
                     min = CSMath.convertTemp(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
                     max = CSMath.convertTemp(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
                 }
@@ -140,10 +142,11 @@ public class ConfigHelper
                     double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
                     min = mid - variance;
                     max = mid + variance;
+                    units = Temperature.Units.MC;
                 }
 
                 // Maps the biome ID to the temperature (and variance if present)
-                map.put(ForgeRegistries.BIOMES.getKey(biome), Pair.of(min, max));
+                map.put(ForgeRegistries.BIOMES.getKey(biome), new Triplet<>(min, max, units));
             }
             catch (Exception ignored) {}
         }
