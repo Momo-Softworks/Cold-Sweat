@@ -6,5 +6,10 @@
     }
   ],
   "addition": "cold_sweat:hoglin_hide",
-  "type": "cold_sweat:hide_from_hoglin"
+  "count":
+  {
+    "min": 1,
+    "max": 1
+  },
+  "type": "cold_sweat:mob_drops"
 }
