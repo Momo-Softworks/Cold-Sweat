@@ -27,8 +27,8 @@ import java.util.*;
  */
 public class PlayerTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.CEIL, Type.FLOOR, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.CEIL, Type.FLOOR, Type.WORLD};
+    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
+    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
@@ -120,8 +120,8 @@ public class PlayerTempCap implements ITemperatureCap
         double newWorldTemp = Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, Type.CORE, getModifiers(Type.CORE));
         double newBaseTemp  = Temperature.apply(0, player, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, player, Type.CEIL, getModifiers(Type.CEIL));
-        double newMinOffset = Temperature.apply(0, player, Type.FLOOR, getModifiers(Type.FLOOR));
+        double newMaxOffset = Temperature.apply(0, player, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        double newMinOffset = Temperature.apply(0, player, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;

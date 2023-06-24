@@ -50,8 +50,8 @@ public class ArmorInsulation
             double cold = 0;
             double hot = 0;
             double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-            double minTemp = Temperature.get(player, Temperature.Type.FLOOR);
-            double maxTemp = Temperature.get(player, Temperature.Type.CEIL);
+            double minTemp = Temperature.get(player, Temperature.Type.BURNING_POINT);
+            double maxTemp = Temperature.get(player, Temperature.Type.FREEZING_POINT);
             for (ItemStack armorStack : player.getArmorSlots())
             {
                 if (armorStack.getItem() instanceof ArmorItem armorItem)
@@ -117,8 +117,8 @@ public class ArmorInsulation
             if (CompatManager.isArmorUnderwearLoaded())
             {
                 TempModifier armorUnderMod = TempModifierRegistry.getEntryFor("armorunder:lining");
-                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.CEIL, false);
-                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FLOOR, false);
+                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FREEZING_POINT, false);
+                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.BURNING_POINT, false);
             }
 
             // Award advancement for full insulation

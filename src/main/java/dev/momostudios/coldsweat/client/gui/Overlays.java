@@ -214,8 +214,8 @@ public class Overlays
                         WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
 
                         // Update max/min offset
-                        MAX_OFFSET = cap.getTemp(Temperature.Type.CEIL);
-                        MIN_OFFSET = cap.getTemp(Temperature.Type.FLOOR);
+                        MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
+                        MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
                     }
                     else
                     {

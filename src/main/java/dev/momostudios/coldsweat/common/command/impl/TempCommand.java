@@ -64,13 +64,13 @@ public class TempCommand extends BaseCommand
                                           .executes(source -> executeShowModifiers(
                                                   source.getSource(), EntityArgument.getEntity(source, "entity"), Temperature.Type.BASE))
                                   )
-                                  .then(Commands.literal(Temperature.Type.FLOOR.getID())
+                                  .then(Commands.literal(Temperature.Type.BURNING_POINT.getID())
                                           .executes(source -> executeShowModifiers(
-                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), Temperature.Type.FLOOR))
+                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), Temperature.Type.BURNING_POINT))
                                   )
-                                  .then(Commands.literal(Temperature.Type.CEIL.getID())
+                                  .then(Commands.literal(Temperature.Type.FREEZING_POINT.getID())
                                           .executes(source -> executeShowModifiers(
-                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), Temperature.Type.CEIL))
+                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), Temperature.Type.FREEZING_POINT))
                                   )
                         )
                 );

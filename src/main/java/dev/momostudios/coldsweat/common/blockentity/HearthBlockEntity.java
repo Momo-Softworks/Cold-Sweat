@@ -16,7 +16,6 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockEntityInit;
 import dev.momostudios.coldsweat.core.init.ParticleTypesInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.HearthResetMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
@@ -523,8 +522,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Get the player's temperature
         player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = cap.getTemp(Temperature.Type.FLOOR);
-            double max = cap.getTemp(Temperature.Type.CEIL);
+            double min = cap.getTemp(Temperature.Type.BURNING_POINT);
+            double max = cap.getTemp(Temperature.Type.FREEZING_POINT);
 
             // If the player is already insulated, check the input temperature reported by the HearthTempModifier
             Optional<HearthTempModifier> mod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
