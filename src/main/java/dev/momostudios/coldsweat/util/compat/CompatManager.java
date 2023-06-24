@@ -33,7 +33,7 @@ public class CompatManager
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
     private static final boolean WEATHER_LOADED = modLoaded("weather2");
-    private static final boolean WYTHERS_LOADED = modLoaded("wythers");
+    private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
 
     private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -49,7 +49,8 @@ public class CompatManager
             {   return true;
             }
             else
-            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID, minMajorVer + "." + minMinorVer + "." + minPatchVer);
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID.substring(0, 1).toUpperCase() + modID.substring(1),
+                                                                                                                minMajorVer + "." + minMinorVer + "." + minPatchVer);
                 return false;
             }
         }
