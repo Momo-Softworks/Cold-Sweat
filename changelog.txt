@@ -1227,3 +1227,24 @@ Technical Changes:
 
 Fixes:
 - Fixed chunkloading deadlocks when generating a new world
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04h
+- Added support for biomes from William Wyther's Overhauled Overworld (Pyrael on Discord)
+- Increased the rate at which the hearth drains fuel
+
+Fixes:
+- Fixed the thermolith not having a preferred mining tool
+- Fixed the thermolith not dropping anything when mined
+- Fixed the hearth not draining fuel properly
+- Fixed hearth particles still spawning when "show particles" is disabled
+- Fixed the default difficulty appearing to be "Hard" despite the settings being tuned to "Normal"
+- Fixed the "Super Easy" difficulty being switched to "Easy" in some cases
+- Fixed the hearth's fuel gauges not updating when draining fuel
+- Fixed the "Biome Temperatures" and "Biome Offsets" config options being converted to MC units when the config is loaded
+
+Technical Changes:
+- New "HeatResistance" and "ColdResistance" NBT tags can now be applied to players for easy temperature resistance
+      - Slows the rate at which the player's temperature changes, similar to armor insulation
+      - Setting either of these values to 100 will make the player completely immune to that temperature
