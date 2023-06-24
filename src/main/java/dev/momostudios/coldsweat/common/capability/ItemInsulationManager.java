@@ -5,9 +5,11 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -67,6 +69,30 @@ public class ItemInsulationManager
 
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
+
+            capOptional.ifPresent(iCap ->
+            {
+                ItemStack stack = event.getObject();
+                CompoundTag stackNBT = stack.getOrCreateTag();
+                if (stackNBT.getBoolean("insulated"))
+                {
+                    EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getSlot() : null;
+                    if (slot != null)
+                    {
+                        stackNBT.remove("insulated");
+                        iCap.addInsulationItem(
+                        switch (slot)
+                        {   case HEAD -> Items.LEATHER_HELMET.getDefaultInstance();
+                            case CHEST -> Items.LEATHER_CHESTPLATE.getDefaultInstance();
+                            case LEGS -> Items.LEATHER_LEGGINGS.getDefaultInstance();
+                            case FEET -> Items.LEATHER_BOOTS.getDefaultInstance();
+                            default -> ItemStack.EMPTY;
+                        });
+                        if (iCap instanceof ItemInsulationCap cap)
+                            cap.serializeSimple(stack);
+                    }
+                }
+            });
         }
     }
 

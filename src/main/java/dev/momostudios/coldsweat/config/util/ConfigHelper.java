@@ -63,9 +63,7 @@ public class ConfigHelper
                 });
             }
             else
-            {
-                Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID));
-
+            {   Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID));
                 if (newBlock != null) map.put(newBlock, (Number) entry.get(1));
             }
         }
@@ -85,8 +83,7 @@ public class ConfigHelper
                 optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
             }
             else
-            {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+            {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
                 if (item != Items.AIR)
                     items.add(item);
             }
