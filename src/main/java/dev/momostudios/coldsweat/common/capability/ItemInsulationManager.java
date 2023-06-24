@@ -81,7 +81,7 @@ public class ItemInsulationManager
     {
         // if the inventory screen is open
         Player player = event.player;
-        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 5 == 0
+        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 20 == 0
         && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
             player.getArmorSlots().forEach(stack ->
@@ -89,8 +89,7 @@ public class ItemInsulationManager
                 stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
                 {
                     if (iCap instanceof ItemInsulationCap cap)
-                    {
-                        cap.serializeSimple(stack);
+                    {   cap.serializeSimple(stack);
                     }
                 });
             });
