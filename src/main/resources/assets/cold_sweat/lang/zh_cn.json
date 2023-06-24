@@ -31,12 +31,13 @@
   "entity.cold_sweat.chameleon": "变色龙",
 
 
-  "modifier.cold_sweat.insulated":      "§f§l《※温度自动调节※》",
+  "modifier.cold_sweat.insulated":      "绝缘的",
 
 
-  "effect.cold_sweat.insulated":        "舒适",
-  "effect.cold_sweat.ice_resistance":   "御寒",
-  "effect.cold_sweat.grace":            "恩典",
+  "effect.cold_sweat.insulated":           "隔热材料",
+  "effect.cold_sweat.ice_resistance":      "御寒",
+  "effect.cold_sweat.ice_resistance_long": "御寒",
+  "effect.cold_sweat.grace":               "恩典",
   
 
   "item.minecraft.potion.effect.ice_resistance":             "御寒药水",

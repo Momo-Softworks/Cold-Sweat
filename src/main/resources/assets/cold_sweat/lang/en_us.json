@@ -31,12 +31,13 @@
   "entity.cold_sweat.chameleon": "Chameleon",
 
 
-  "modifier.cold_sweat.insulated":      "Insulated",
+  "modifier.cold_sweat.insulated": "Insulated",
 
 
-  "effect.cold_sweat.insulated":        "Insulated",
-  "effect.cold_sweat.ice_resistance":   "Ice Resistance",
-  "effect.cold_sweat.grace":            "Grace",
+  "effect.cold_sweat.insulated":            "Insulated",
+  "effect.cold_sweat.ice_resistance":       "Ice Resistance",
+  "effect.cold_sweat.ice_resistance_long":  "Ice Resistance",
+  "effect.cold_sweat.grace":                "Grace",
 
 
   "item.minecraft.potion.effect.ice_resistance":             "Potion of Ice Resistance",

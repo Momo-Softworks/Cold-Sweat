@@ -13,9 +13,10 @@
 
   "modifier.cold_sweat.insulated":      "Aislado",
 
-  "effect.cold_sweat.insulated":        "Aislado",
-  "effect.cold_sweat.ice_resistance":   "Resistencia al hielo",
-  "effect.cold_sweat.grace":            "Gracia",
+  "effect.cold_sweat.insulated":           "Aislado",
+  "effect.cold_sweat.ice_resistance":      "Resistencia al hielo",
+  "effect.cold_sweat.ice_resistance_long": "Resistencia al hielo",
+  "effect.cold_sweat.grace":               "Gracia",
   "item.minecraft.potion.effect.ice_resistance":             "Poción de resistencia al hielo",
   "item.minecraft.lingering_potion.effect.ice_resistance":   "Poción de resistencia al hielo persistente",
   "item.minecraft.splash_potion.effect.ice_resistance":      "Poción de resistencia al hielo arrojadiza",
