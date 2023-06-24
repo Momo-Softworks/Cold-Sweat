@@ -84,8 +84,8 @@ public class EntityTempCap implements ITemperatureCap
         Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
         Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
         Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
-        Temperature.apply(0, entity, Type.CEIL, getModifiers(Type.CEIL));
-        Temperature.apply(0, entity, Type.FLOOR, getModifiers(Type.FLOOR));
+        Temperature.apply(0, entity, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        Temperature.apply(0, entity, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
     }
 
     public void tick(LivingEntity entity)
@@ -94,8 +94,8 @@ public class EntityTempCap implements ITemperatureCap
         double newWorldTemp = Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
         double newBaseTemp  = Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, entity, Type.CEIL, getModifiers(Type.CEIL));
-        double newMinOffset = Temperature.apply(0, entity, Type.FLOOR, getModifiers(Type.FLOOR));
+        double newMaxOffset = Temperature.apply(0, entity, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        double newMinOffset = Temperature.apply(0, entity, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
@@ -123,8 +123,8 @@ public class EntityTempCap implements ITemperatureCap
         setTemp(Type.BASE, newBaseTemp);
         setTemp(Type.CORE, CSMath.clamp(newCoreTemp, -150f, 150f));
         setTemp(Type.WORLD, newWorldTemp);
-        setTemp(Type.CEIL, newMaxOffset);
-        setTemp(Type.FLOOR, newMinOffset);
+        setTemp(Type.FREEZING_POINT, newMaxOffset);
+        setTemp(Type.BURNING_POINT, newMinOffset);
 
         if (syncTimer > 0)
             syncTimer--;

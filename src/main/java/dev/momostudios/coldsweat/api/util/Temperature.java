@@ -376,8 +376,8 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #CEIL}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
-     * {@link #FLOOR}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
+     * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
+     * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * <br>
      * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
@@ -387,8 +387,8 @@ public class Temperature
     public enum Type
     {
         WORLD("world"),
-        CEIL("max"),
-        FLOOR("min"),
+        FREEZING_POINT("freezing_point"),
+        BURNING_POINT("burning_point"),
         CORE("core"),
         BASE("base"),
         BODY("body"),

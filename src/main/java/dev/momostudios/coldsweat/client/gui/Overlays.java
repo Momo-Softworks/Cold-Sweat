@@ -210,14 +210,14 @@ public class Overlays
                     PREV_WORLD_TEMP = WORLD_TEMP;
                     WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
 
-                    // Update max/min offset
-                    MAX_OFFSET = cap.getTemp(Temperature.Type.CEIL);
-                    MIN_OFFSET = cap.getTemp(Temperature.Type.FLOOR);
-                }
-                else
-                {
-                    PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertTemp(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                }
+                        // Update max/min offset
+                        MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
+                        MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
+                    }
+                    else
+                    {
+                        PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertTemp(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    }
 
 
                 /* Body Temp */

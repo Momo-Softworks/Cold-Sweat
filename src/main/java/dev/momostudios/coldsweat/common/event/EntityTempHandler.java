@@ -56,8 +56,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Mod.EventBusSubscriber
 public class EntityTempHandler
 {
-    public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.CEIL, Temperature.Type.FLOOR, Temperature.Type.WORLD};
-    public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.CEIL, Temperature.Type.FLOOR, Temperature.Type.WORLD};
+    public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
+    public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
 
     /**
      * Attach temperature capability to entities
