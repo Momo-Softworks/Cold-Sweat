@@ -180,7 +180,7 @@ public class ItemInsulationCap implements IInsulatableCap
                 }
                 else if (pair instanceof AdaptiveInsulation insul)
                 {
-                    pairTag.putDouble("Insulation", insul.getInsulation());
+                    pairTag.putDouble("Amount", insul.getInsulation());
                     pairTag.putDouble("Factor", insul.getFactor());
                     pairTag.putDouble("Speed", insul.getSpeed());
                 }
@@ -192,12 +192,15 @@ public class ItemInsulationCap implements IInsulatableCap
             insulNBT.add(entryNBT);
         }
 
-        CompoundTag nbt = new CompoundTag();
-        nbt.put("Insulation", insulNBT);
+        CompoundTag tag = new CompoundTag();
+        if (!insulNBT.isEmpty())
+            tag.put("Insulation", insulNBT);
+        else
+            tag.remove("Insulation");
 
         saveCooldown = 400;
-        savedTag = nbt;
-        return nbt;
+        savedTag = tag;
+        return tag;
     }
 
     @Override
@@ -226,9 +229,9 @@ public class ItemInsulationCap implements IInsulatableCap
                     double hot = pairTag.getDouble("Hot");
                     pairList.add(new Insulation(cold, hot));
                 }
-                else if (pairTag.contains("Insulation"))
+                else if (pairTag.contains("Amount"))
                 {
-                    double insul = pairTag.getDouble("Insulation");
+                    double insul = pairTag.getDouble("Amount");
                     double factor = pairTag.getDouble("Factor");
                     double speed = pairTag.getDouble("Speed");
                     pairList.add(new AdaptiveInsulation(insul, factor, speed));
@@ -241,10 +244,10 @@ public class ItemInsulationCap implements IInsulatableCap
         this.calculateInsulation();
     }
 
-    public void serializeSimple(ItemStack stack)
+    public CompoundTag serializeSimple(ItemStack stack)
     {
         CompoundTag tag = stack.getOrCreateTag();
-        ListTag insulation = new ListTag();
+        ListTag insulTag = new ListTag();
 
         for (List<InsulationPair> pairList : this.insulation.stream().map(Pair::getSecond).toList())
         {
@@ -262,11 +265,15 @@ public class ItemInsulationCap implements IInsulatableCap
                     compound.putDouble("Factor", insul.getFactor());
                     compound.putDouble("Speed", insul.getSpeed());
                 }
-                insulation.add(compound);
+                insulTag.add(compound);
             }
         }
+        if (!insulTag.isEmpty())
+            tag.put("Insulation", insulTag);
+        else
+            tag.remove("Insulation");
 
-        tag.put("Insulation", insulation);
+        return tag;
     }
 
     public List<InsulationPair> deserializeSimple(ItemStack stack)

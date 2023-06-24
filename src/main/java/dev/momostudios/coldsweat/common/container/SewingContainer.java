@@ -281,17 +281,13 @@ public class SewingContainer extends AbstractContainerMenu
     static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
     {
         if (iCap instanceof ItemInsulationCap cap)
-            cap.serializeSimple(stack);
-
-        // Remove "Insulated" tag if armor has no insulation left
-        if (iCap.getInsulation().isEmpty())
         {
-            stack.getOrCreateTag().remove("Insulated");
-            stack.getOrCreateTag().remove("Insulation");
-        }
-        // Add "Insulated" tag if armor has insulation
-        else
-        {   stack.getOrCreateTag().putBoolean("Insulated", true);
+            CompoundTag tag = cap.serializeSimple(stack);
+
+            // Remove "Insulation" tag if armor has no insulation left
+            if (iCap.getInsulation().isEmpty())
+            {   tag.remove("Insulation");
+            }
         }
     }
 
