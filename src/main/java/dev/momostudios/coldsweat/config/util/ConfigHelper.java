@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.config;
+package dev.momostudios.coldsweat.config.util;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;

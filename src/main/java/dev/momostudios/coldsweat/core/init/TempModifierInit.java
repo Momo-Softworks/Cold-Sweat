@@ -9,7 +9,7 @@ import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.config.ConfigHelper;
+import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
