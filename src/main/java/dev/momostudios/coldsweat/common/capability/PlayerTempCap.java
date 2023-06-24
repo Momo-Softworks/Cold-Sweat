@@ -34,13 +34,13 @@ public class PlayerTempCap implements ITemperatureCap
     boolean neverSynced = true;
 
     // Map valid temperature types to a new EnumMap
-    EnumMap<Type, Double> temperatures = Arrays.stream(VALID_MODIFIER_TYPES).collect(
+    private final EnumMap<Type, Double> temperatures = Arrays.stream(VALID_MODIFIER_TYPES).collect(
             () -> new EnumMap<>(Type.class),
             (map, type) -> map.put(type, 0.0),
             EnumMap::putAll);
 
     // Map valid modifier types to a new EnumMap
-    EnumMap<Type, List<TempModifier>> modifiers = Arrays.stream(VALID_MODIFIER_TYPES).collect(
+    private final EnumMap<Type, List<TempModifier>> modifiers = Arrays.stream(VALID_MODIFIER_TYPES).collect(
             () -> new EnumMap<>(Type.class),
             (map, type) -> map.put(type, new ArrayList<>()),
             EnumMap::putAll);
