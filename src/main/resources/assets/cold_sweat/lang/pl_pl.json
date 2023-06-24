@@ -13,9 +13,10 @@
 
   "modifier.cold_sweat.insulated":      "Ocieplony",
 
-  "effect.cold_sweat.insulated":       "Ocieplony",
-  "effect.cold_sweat.ice_resistance":  "Odporność na mróz",
-  "effect.cold_sweat.grace":           "Grace",
+  "effect.cold_sweat.insulated":            "Ocieplony",
+  "effect.cold_sweat.ice_resistance":       "Odporność na mróz",
+  "effect.cold_sweat.ice_resistance_long":  "Odporność na mróz",
+  "effect.cold_sweat.grace":                "Grace",
   "item.minecraft.potion.effect.ice_resistance": "Mikstura odporności na mróz",
   "item.minecraft.lingering_potion.effect.ice_resistance": "Trwała mikstura odporności na mróz",
   "item.minecraft.splash_potion.effect.ice_resistance": "Miotana mikstura odporności na mróz",

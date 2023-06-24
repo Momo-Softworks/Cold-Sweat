@@ -21,9 +21,11 @@ public class PotionRecipes
         event.enqueueWork(() ->
         {
             ItemStack awkward = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD);
-            ItemStack packedIce = new ItemStack(ModItems.SOUL_SPROUT);
             ItemStack iceResPotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get());
-            BrewingRecipeRegistry.addRecipe(Ingredient.of(awkward), Ingredient.of(packedIce), iceResPotion);
+            BrewingRecipeRegistry.addRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT),
+                                            PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_POTION.get()));
+            BrewingRecipeRegistry.addRecipe(Ingredient.of(iceResPotion), Ingredient.of(Items.REDSTONE),
+                                            PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_LONG_POTION.get()));
         });
     }
 }

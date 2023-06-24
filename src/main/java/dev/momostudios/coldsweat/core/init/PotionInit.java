@@ -12,5 +12,7 @@ public class PotionInit
     public static final DeferredRegister<Potion> POTIONS = DeferredRegister.create(ForgeRegistries.POTIONS, ColdSweat.MOD_ID);
 
     public static final RegistryObject<Potion> ICE_RESISTANCE_POTION = POTIONS.register("ice_resistance", () ->
+            new Potion(new MobEffectInstance(EffectInit.ICE_RESISTANCE.get(), 3600)));
+    public static final RegistryObject<Potion> ICE_RESISTANCE_LONG_POTION = POTIONS.register("ice_resistance_long", () ->
             new Potion(new MobEffectInstance(EffectInit.ICE_RESISTANCE.get(), 9600)));
 }
