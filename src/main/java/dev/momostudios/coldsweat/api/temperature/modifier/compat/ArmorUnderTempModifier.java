@@ -30,12 +30,12 @@ public class ArmorUnderTempModifier extends TempModifier
         {
             switch (type)
             {
-                case FLOOR ->
+                case FREEZING_POINT ->
                 {   totalOffset += Math.min(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
                 }
-                case CEIL ->
+                case BURNING_POINT ->
                 {   totalOffset += Math.max(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
