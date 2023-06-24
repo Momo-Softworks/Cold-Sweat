@@ -113,7 +113,7 @@ public class ChameleonEntity extends Animal
     {
         return TamableAnimal.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.15D)
+                .add(Attributes.MOVEMENT_SPEED, 0.16D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0D)
                 .add(Attributes.ATTACK_DAMAGE, 4.0D);
     }
@@ -240,13 +240,12 @@ public class ChameleonEntity extends Animal
     public float tickHeadTurn(float p_21260_, float p_21261_)
     {
         if (this.isWalking())
-        {
-            this.yBodyRot = this.getYRot();
+        {   this.yBodyRot = this.getYRot();
             this.rotateHeadIfNecessary();
+            this.rotateBodyIfNecessary();
         }
         if (Math.abs(yHeadRot - yBodyRot) > 45)
-        {
-            rotateBodyIfNecessary();
+        {   rotateBodyIfNecessary();
         }
         return p_21261_;
     }
@@ -267,7 +266,7 @@ public class ChameleonEntity extends Animal
 
         // Age
         if (!this.level.isClientSide && this.tickCount % 20 == 0)
-        {   this.setAgeSecs(this.getAgeSecs() + 1);
+        {   this.setAgeSecs(this.age / 20);
         }
 
         // Tick shedding
@@ -435,12 +434,7 @@ public class ChameleonEntity extends Animal
 
     public static boolean canSpawn(EntityType<ChameleonEntity> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, Random random)
     {
-        BlockState state = level.getBlockState(pos.below());
-        return state.is(BlockTags.ANIMALS_SPAWNABLE_ON)
-            || state.is(BlockTags.SAND)
-            || state.is(BlockTags.LEAVES)
-            || state.is(BlockTags.TERRACOTTA)
-            && level.getBrightness(LightLayer.SKY, pos) > 12;
+        return true;
     }
 
     private void rotateBodyIfNecessary()
