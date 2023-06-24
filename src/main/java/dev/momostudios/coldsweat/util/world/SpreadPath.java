@@ -53,8 +53,7 @@ public class SpreadPath
         this.frozen = true;
     }
     public void setFrozen(boolean frozen)
-    {
-        this.frozen = frozen;
+    {   this.frozen = frozen;
     }
 
     public int getX()
