@@ -215,8 +215,7 @@ public class WorldSettingsConfig
                             () -> List.of("terralith:shield", 48, 68, "F"),
                             () -> List.of("terralith:shield_clearing", 28, 80, "F"),
                             () -> List.of("terralith:steppe", 44, 78, "F"),
-                            () -> List.of("terralith:warped_mesa", 66, 84, "F")
-                            )
+                            () -> List.of("terralith:warped_mesa", 66, 84, "F"))
                     .addIf(CompatManager.isWythersLoaded(),
                             () -> List.of("wythers:ancient_copper_beech_forest", 12, 16, "C"),
                             () -> List.of("wythers:ancient_emerald_beech_forest", 12, 15, "C"),
@@ -412,8 +411,7 @@ public class WorldSettingsConfig
                     if (it instanceof List<?> list)
                     {
                         if (list.size() == 2)
-                        {
-                            ColdSweat.LOGGER.warn("Falling back to legacy code for config setting \"Biome Temperatures\". Please update to the new standard!");
+                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting \"Biome Temperatures\". Please update to the new standard!");
                         }
                         return list.get(0) instanceof String && list.get(1) instanceof Number && (list.size() < 3 || list.get(2) instanceof Number) && (list.size() < 4 || list.get(3) instanceof String);
                     }
