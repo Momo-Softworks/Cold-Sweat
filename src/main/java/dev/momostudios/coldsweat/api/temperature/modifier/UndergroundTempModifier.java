@@ -7,9 +7,8 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -17,10 +16,11 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
+import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -59,8 +59,12 @@ public class UndergroundTempModifier extends TempModifier
                 {
                     Biome biome = holder.value();
                     double baseTemp = biome.getBaseTemperature();
-                    double biomeTemp = CSMath.averagePair(ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome.getRegistryName(), Pair.of(baseTemp, baseTemp)))
-                                     + CSMath.averagePair(ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome.getRegistryName(), Pair.of(0d, 0d)));
+                    ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
+
+                    Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID, new Triplet<>(baseTemp, baseTemp, Temperature.Units.MC));
+                    Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID, new Triplet<>(0d, 0d, Temperature.Units.MC));
+                    double biomeTemp = CSMath.averagePair(Pair.of(cTemp.getA(), cTemp.getB()))
+                                     + CSMath.averagePair(Pair.of(cOffset.getA(), cOffset.getB()));
 
                     biomeTempTotal += biomeTemp;
                     caveBiomeCount++;

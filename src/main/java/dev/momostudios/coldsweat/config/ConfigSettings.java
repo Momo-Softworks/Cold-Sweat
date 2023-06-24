@@ -1,9 +1,11 @@
 package dev.momostudios.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.config.util.ValueSupplier;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -36,8 +38,8 @@ public class ConfigSettings
     public static ValueSupplier<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static ValueSupplier<Map<ResourceLocation, Pair<Double, Double>>> BIOME_TEMPS;
-    public static ValueSupplier<Map<ResourceLocation, Pair<Double, Double>>> BIOME_OFFSETS;
+    public static ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
     public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
     public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
     public static ValueSupplier<Double[]> SUMMER_TEMPS;
@@ -126,25 +128,93 @@ public class ConfigSettings
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures(), true),
-        encoder -> ConfigHelper.writeNBTPairMap(encoder, "BiomeTemps"),
-        decoder -> ConfigHelper.readNBTPairMap(decoder, "BiomeTemps"),
+        encoder ->
+        {
+            CompoundTag tag = new CompoundTag();
+            CompoundTag mapTag = new CompoundTag();
+            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : encoder.entrySet())
+            {
+                CompoundTag biomeTag = new CompoundTag();
+                biomeTag.putDouble("Min", entry.getValue().getA());
+                biomeTag.putDouble("Max", entry.getValue().getB());
+                biomeTag.putString("Units", entry.getValue().getC().toString());
+                mapTag.put(entry.getKey().toString(), biomeTag);
+            }
+            tag.put("BiomeTemps", mapTag);
+            return tag;
+        },
+        decoder ->
+        {
+            Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+            CompoundTag mapTag = decoder.getCompound("BiomeTemps");
+            for (String biomeID : mapTag.getAllKeys())
+            {
+                CompoundTag biomeTag = mapTag.getCompound(biomeID);
+                Temperature.Units units = Temperature.Units.valueOf(biomeTag.getString("Units"));
+                map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), units));
+            }
+            return map;
+        },
         saver ->
         {
             List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Pair<Double, Double>> entry : saver.entrySet())
-            {   list.add(Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : saver.entrySet())
+            {   Triplet<Double, Double, Temperature.Units> triplet = entry.getValue();
+                Temperature.Units units = triplet.getC();
+                                       // Biome ID
+                list.add(Arrays.asList(entry.getKey().toString(),
+                                       // Min temp
+                                       CSMath.convertTemp(triplet.getA(), Temperature.Units.MC, units, true),
+                                       // Max temp
+                                       CSMath.convertTemp(triplet.getB(), Temperature.Units.MC, units, true),
+                                       // Units
+                                       units.toString()));
             }
             WorldSettingsConfig.getInstance().setBiomeTemperatures(list);
         });
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets(), false),
-        encoder -> ConfigHelper.writeNBTPairMap(encoder, "BiomeOffsets"),
-        decoder -> ConfigHelper.readNBTPairMap(decoder, "BiomeOffsets"),
+        encoder ->
+        {
+            CompoundTag tag = new CompoundTag();
+            CompoundTag mapTag = new CompoundTag();
+            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : encoder.entrySet())
+            {
+                CompoundTag biomeTag = new CompoundTag();
+                biomeTag.putDouble("Min", entry.getValue().getA());
+                biomeTag.putDouble("Max", entry.getValue().getB());
+                biomeTag.putString("Units", entry.getValue().getC().toString());
+                mapTag.put(entry.getKey().toString(), biomeTag);
+            }
+            tag.put("BiomeOffsets", mapTag);
+            return tag;
+        },
+        decoder ->
+        {
+            Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+            CompoundTag mapTag = decoder.getCompound("BiomeOffsets");
+            for (String biomeID : mapTag.getAllKeys())
+            {
+                CompoundTag biomeTag = mapTag.getCompound(biomeID);
+                Temperature.Units units = Temperature.Units.valueOf(biomeTag.getString("Units"));
+                map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), units));
+            }
+            return map;
+        },
         saver ->
         {
             List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Pair<Double, Double>> entry : saver.entrySet())
-            {   list.add(Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : saver.entrySet())
+            {   Triplet<Double, Double, Temperature.Units> triplet = entry.getValue();
+                Temperature.Units units = triplet.getC();
+                                       // Biome ID
+                list.add(List.of(entry.getKey().toString(),
+                                       // Min temp
+                                       CSMath.convertTemp(triplet.getA(), Temperature.Units.MC, units, true),
+                                       // Max temp
+                                       CSMath.convertTemp(triplet.getB(), Temperature.Units.MC, units, true),
+                                       // Units
+                                       units.toString()));
             }
             WorldSettingsConfig.getInstance().setBiomeOffsets(list);
         });
