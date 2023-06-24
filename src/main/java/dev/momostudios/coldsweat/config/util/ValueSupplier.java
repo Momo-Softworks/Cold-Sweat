@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.config;
+package dev.momostudios.coldsweat.config.util;
 
 import net.minecraft.nbt.CompoundTag;
 

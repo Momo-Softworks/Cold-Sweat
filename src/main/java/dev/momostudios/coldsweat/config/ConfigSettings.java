@@ -2,8 +2,8 @@ package dev.momostudios.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.config.ConfigHelper;
-import dev.momostudios.coldsweat.util.config.ValueSupplier;
+import dev.momostudios.coldsweat.config.util.ConfigHelper;
+import dev.momostudios.coldsweat.config.util.ValueSupplier;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
