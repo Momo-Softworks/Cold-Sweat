@@ -4,6 +4,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
+import dev.momostudios.coldsweat.common.event.EntityTempHandler;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -19,6 +20,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import top.theillusivec4.curios.api.CuriosApi;
+import static dev.momostudios.coldsweat.common.event.EntityTempHandler.*;
 
 import java.util.*;
 
@@ -27,14 +29,11 @@ import java.util.*;
  */
 public class PlayerTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
-
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
 
     // Map valid temperature types to a new EnumMap
-    private final EnumMap<Type, Double> temperatures = Arrays.stream(VALID_MODIFIER_TYPES).collect(
+    private final EnumMap<Type, Double> temperatures = Arrays.stream(VALID_TEMPERATURE_TYPES).collect(
             () -> new EnumMap<>(Type.class),
             (map, type) -> map.put(type, 0.0),
             EnumMap::putAll);

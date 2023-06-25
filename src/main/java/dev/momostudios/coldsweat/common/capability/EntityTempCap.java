@@ -10,6 +10,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.LivingEntity;
+import static dev.momostudios.coldsweat.common.event.EntityTempHandler.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +22,6 @@ import java.util.List;
  */
 public class EntityTempCap implements ITemperatureCap
 {
-    static Type[] VALID_TEMPERATURE_TYPES = {Type.CORE, Type.BASE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
-    static Type[] VALID_MODIFIER_TYPES    = {Type.CORE, Type.BASE, Type.RATE, Type.FREEZING_POINT, Type.BURNING_POINT, Type.WORLD};
-
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
     int syncTimer = 0;
