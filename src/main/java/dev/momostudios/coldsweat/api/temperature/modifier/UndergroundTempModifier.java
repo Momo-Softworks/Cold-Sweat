@@ -47,7 +47,7 @@ public class UndergroundTempModifier extends TempModifier
         {
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
-            depthTable.add(Pair.of(Math.max(0d, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
+            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getGroundLevel(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
             List<Holder<Biome>> biomes =  Stream.of(level.getBiomeManager().getBiome(pos),
                                                     level.getBiomeManager().getBiome(pos.above(12)),

@@ -136,17 +136,17 @@ public class GoatFurHandler
     public static void onEntityLoaded(EntityJoinLevelEvent event)
     {
         Entity entity = event.getEntity();
-        if (entity instanceof Goat goat && !goat.level.isClientSide)
-        {   TaskScheduler.scheduleServer(() -> syncData(goat), 20);
+        if (entity instanceof Goat goat)
+        {   TaskScheduler.scheduleClient(() -> syncData(goat), 20);
         }
     }
 
     public static void syncData(Goat goat)
     {
-        goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
-        {
-            if (!goat.level.isClientSide)
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> goat), new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId(), goat.level.dimension().location().toString()));
-        });
+        if (!goat.level.isClientSide)
+        {   goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> goat), new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId(), goat.level.dimension().location().toString()));
+            });
+        }
     }
 }

@@ -14,7 +14,6 @@ import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
-import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -24,6 +23,7 @@ import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -189,10 +189,11 @@ public class EntityTempHandler
     public static void initModifiersOnEntity(EntityJoinLevelEvent event)
     {
         // Add basic TempModifiers to player
-        if (event.getEntity() instanceof Player player && !player.level.isClientSide)
+        if (event.getEntity() instanceof ServerPlayer player && !player.level.isClientSide)
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
-            TaskScheduler.scheduleServer(() ->
+            if (player.getServer() != null)
+            player.getServer().execute(() ->
             {
                 // Basic modifiers
                 Temperature.addModifiers(player, Temperature.Type.WORLD, List.of(new BiomeTempModifier(25).tickRate(10),
@@ -208,13 +209,14 @@ public class EntityTempHandler
                                         Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
                 Temperature.set(player, Temperature.Type.WORLD, Temperature.apply(0, player, Temperature.Type.WORLD, Temperature.getModifiers(player, Temperature.Type.WORLD)));
-            }, 0);
+            });
         }
         // Add basic TempModifiers to chameleons
         else if (event.getEntity() instanceof ChameleonEntity chameleon)
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
-            TaskScheduler.scheduleServer(() ->
+            if (chameleon.getServer() != null)
+            chameleon.getServer().execute(() ->
             {
                 // Basic modifiers
                 Temperature.addModifiers(chameleon, Temperature.Type.WORLD, List.of(new BiomeTempModifier(9).tickRate(40),
@@ -231,7 +233,7 @@ public class EntityTempHandler
 
                 Temperature.set(chameleon, Temperature.Type.WORLD, Temperature.apply(0, chameleon, Temperature.Type.WORLD, Temperature.getModifiers(chameleon, Temperature.Type.WORLD)));
                 chameleon.setTemperature((float) Temperature.get(chameleon, Temperature.Type.WORLD));
-            }, 0);
+            });
         }
     }
 
