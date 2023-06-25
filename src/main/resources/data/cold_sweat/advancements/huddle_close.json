@@ -20,8 +20,18 @@
       "trigger": "cold_sweat:block_affects_temperature",
       "conditions": {
         "distance": 2,
+        "total_effect": 0,
         "blocks": {
-        }
+        },
+        "temperature": [
+          {
+            "type": "world",
+            "range":
+            {
+              "below": "min_habitable"
+            }
+          }
+        ]
       }
     }
   }

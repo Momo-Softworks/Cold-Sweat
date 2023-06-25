@@ -54,17 +54,20 @@ public class PlayerTempCap implements ITemperatureCap
         if (type == Type.BODY) return getTemp(Type.CORE) + getTemp(Type.BASE);
         // Throw exception if this temperature type is not supported
         return temperatures.computeIfAbsent(type, t ->
-        {
-            throw new IllegalArgumentException("Invalid temperature type: " + t);
+        {   throw new IllegalArgumentException("Invalid temperature type: " + t);
         });
+    }
+
+    @Override
+    public EnumMap<Type, Double> getTemperatures()
+    {   return new EnumMap<>(temperatures);
     }
 
     public void setTemp(Type type, double value)
     {
         // Throw exception if this temperature type is not supported
         if (temperatures.replace(type, value) == null)
-        {
-            throw new IllegalArgumentException("Invalid temperature type: " + type);
+        {   throw new IllegalArgumentException("Invalid temperature type: " + type);
         }
     }
 
@@ -72,14 +75,12 @@ public class PlayerTempCap implements ITemperatureCap
     {
         // Throw exception if this modifier type is not supported
         return modifiers.computeIfAbsent(type, t ->
-        {
-            throw new IllegalArgumentException("Invalid modifier type: " + t);
+        {   throw new IllegalArgumentException("Invalid modifier type: " + t);
         });
     }
 
     public boolean hasModifier(Type type, Class<? extends TempModifier> mod)
-    {
-        return getModifiers(type).stream().anyMatch(mod::isInstance);
+    {   return getModifiers(type).stream().anyMatch(mod::isInstance);
     }
 
     public boolean shouldShowBodyTemp()
@@ -204,7 +205,7 @@ public class PlayerTempCap implements ITemperatureCap
             double oldTemp = getTemp(type);
             double newTemp = temps[type.ordinal()];
             if (oldTemp != newTemp)
-                ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, type, getTemp(type));
+                ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, this.getTemperatures());
 
             this.setTemp(type, newTemp);
         }

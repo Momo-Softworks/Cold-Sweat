@@ -4,12 +4,17 @@
     "temperature": {
       "trigger": "cold_sweat:temperature",
       "conditions": {
-        "type": "core",
         "temperature":
-        {
-          "above": 10,
-          "below": -10
-        },
+        [
+          {
+            "type": "core",
+            "range":
+            {
+              "above": 10,
+              "below": -10
+            }
+          }
+        ],
         "player": [
           {
             "condition": "minecraft:inverted",
