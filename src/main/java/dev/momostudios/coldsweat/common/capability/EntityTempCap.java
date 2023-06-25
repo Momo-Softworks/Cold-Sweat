@@ -46,17 +46,20 @@ public class EntityTempCap implements ITemperatureCap
         if (type == Type.BODY) return getTemp(Type.CORE) + getTemp(Type.BASE);
         // Throw exception if this temperature type is not supported
         return temperatures.computeIfAbsent(type, t ->
-        {
-            throw new IllegalArgumentException("Invalid temperature type: " + t);
+        {   throw new IllegalArgumentException("Invalid temperature type: " + t);
         });
+    }
+
+    @Override
+    public EnumMap<Type, Double> getTemperatures()
+    {   return new EnumMap<>(temperatures);
     }
 
     public void setTemp(Type type, double value)
     {
         // Throw exception if this temperature type is not supported
         if (temperatures.replace(type, value) == null)
-        {
-            throw new IllegalArgumentException("Invalid temperature type: " + type);
+        {   throw new IllegalArgumentException("Invalid temperature type: " + type);
         }
     }
 
@@ -64,8 +67,7 @@ public class EntityTempCap implements ITemperatureCap
     {
         // Throw exception if this modifier type is not supported
         return modifiers.computeIfAbsent(type, t ->
-        {
-            throw new IllegalArgumentException("Invalid modifier type: " + t);
+        {   throw new IllegalArgumentException("Invalid modifier type: " + t);
         });
     }
 

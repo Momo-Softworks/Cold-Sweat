@@ -4,11 +4,16 @@
     "temperature": {
       "trigger": "cold_sweat:temperature",
       "conditions": {
-        "type": "world",
-        "temperature": {
-          "below": "min_habitable",
-          "above": "max_habitable"
-        }
+        "temperature": [
+          {
+            "type": "world",
+            "range":
+            {
+              "below": "min_habitable",
+              "above": "max_habitable"
+            }
+          }
+        ]
       }
     },
     "has_recipe": {

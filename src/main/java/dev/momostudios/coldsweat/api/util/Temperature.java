@@ -371,6 +371,10 @@ public class Temperature
         }
     }
 
+    public static Map<Type, Double> getTemperatures(LivingEntity entity)
+    {   return getTemperatureCap(entity).map(ITemperatureCap::getTemperatures).orElse(new EnumMap<>(Type.class));
+    }
+
     /**
      * Defines all temperature stats in Cold Sweat. <br>
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
