@@ -13,9 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -39,7 +37,7 @@ public class BlockTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
-        Map<ChunkPos, LevelChunk> chunks = new HashMap<>();
+        Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
 
         Level level = entity.level;
         int range = this.getNBT().getInt("Range");
@@ -49,22 +47,26 @@ public class BlockTempModifier extends TempModifier
             this.getNBT().putInt("Range", 7);
         }
 
+        int entX = entity.blockPosition().getX();
+        int entY = entity.blockPosition().getY();
+        int entZ = entity.blockPosition().getZ();
+        BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
+
         for (int x = -range; x < range; x++)
         {
             for (int z = -range; z < range; z++)
             {
-                LevelChunk chunk = chunks.computeIfAbsent(new ChunkPos(entity.blockPosition().getX() >> 4, entity.blockPosition().getZ() >> 4),
-                                                          (chunkPos) -> (LevelChunk) level.getChunkSource().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false));
+                ChunkAccess chunk = chunks.computeIfAbsent(new ChunkPos((entX + x) >> 4, (entZ + z) >> 4),
+                                                           (chunkPos) -> WorldHelper.getChunk(level, chunkPos));
                 if (chunk == null) continue;
 
                 for (int y = -range; y < range; y++)
                 {
                     try
                     {
-                        BlockPos blockpos = entity.blockPosition().offset(x, y, z);
+                        blockpos.set(entX + x, entY + y, entZ + z);
 
-                        LevelChunkSection subchunk = WorldHelper.getChunkSection(chunk, blockpos.getY());
-                        BlockState state = subchunk.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
+                        BlockState state = WorldHelper.getBlockState(chunk, blockpos);
 
                         if (state.isAir()) continue;
 
