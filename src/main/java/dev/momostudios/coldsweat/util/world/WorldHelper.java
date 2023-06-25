@@ -57,7 +57,7 @@ public class WorldHelper
         if (pos.getY() >= mcHeight)
             return mcHeight;
 
-        LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
+        ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
         if (chunk == null) return mcHeight;
 
         for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
@@ -245,7 +245,7 @@ public class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, LevelChunk chunk, TriConsumer<LevelChunk, BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, TriConsumer<LevelChunk, BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))
