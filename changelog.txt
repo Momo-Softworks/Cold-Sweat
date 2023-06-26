@@ -1226,7 +1226,7 @@ Fixes:
     - The existing (8:00) potion is now the long-duration version (brewed with redstone)
 - Goats now drop 0-2 goat fur when killed
 - Rebalanced chameleon spawns again to make them more common in lush areas and rarer in sparse/desert-like areas
-- The player is now granted the sewing table recipe when obtain an insulation item
+- The player is now granted the sewing table recipe upon obtaining an insulation item
 
 Fixes:
 - Fixed the thermolith not having a preferred mining tool
@@ -1239,6 +1239,8 @@ Fixes:
 - Fixed the "Biome Temperatures" and "Biome Offsets" config options being converted to MC units when world-settings.toml is (re)loaded
 - Fixed "air" becoming a valid insulation item if the configs define an insulation value for an item that doesn't exist
 - Fixed block temperature not being detected across chunk borders in some cases
+- Fixed missing subtitles for chameleon eating sounds
+- Fixed some advancements triggering under the wrong conditions
 
 Technical Changes:
 - New "HeatResistance" and "ColdResistance" NBT tags can now be applied to players for easy temperature resistance
