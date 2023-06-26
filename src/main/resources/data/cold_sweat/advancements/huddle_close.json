@@ -19,7 +19,7 @@
     "requirement": {
       "trigger": "cold_sweat:block_affects_temperature",
       "conditions": {
-        "total_effect": 0,
+        "total_effect": 0.1,
         "blocks": {},
         "temperature": [
           {
