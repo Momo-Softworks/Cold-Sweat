@@ -59,6 +59,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
 public class ChameleonEntity extends Animal
@@ -100,10 +101,11 @@ public class ChameleonEntity extends Animal
     @Override
     protected void registerGoals()
     {
+
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.of(ModTags.Items.CHAMELEON_TAMING), false));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagValue(edible.associatedItems()))), false));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
