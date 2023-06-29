@@ -94,19 +94,19 @@ public class ConfigPageOne extends AbstractConfigPage
         this.addDecimalInput("max_temp", Side.LEFT, Component.translatable("cold_sweat.config.max_temperature.name"),
                 value -> ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(value, properUnits.get(), Temperature.Units.MC, true)),
                 input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
-                false, false, false, Component.translatable("cold_sweat.config.max_temperature.desc").getString());
+                true, false, false, Component.translatable("cold_sweat.config.max_temperature.desc").getString());
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, Component.translatable("cold_sweat.config.min_temperature.name"),
                 value -> ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(value, properUnits.get(), Temperature.Units.MC, true)),
                 input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
-                false, false, false, Component.translatable("cold_sweat.config.min_temperature.desc").getString());
+                true, false, false, Component.translatable("cold_sweat.config.min_temperature.desc").getString());
 
         // Rate Multiplier
         this.addDecimalInput("rate", Side.LEFT, Component.translatable("cold_sweat.config.temperature_rate.name"),
                 value -> ConfigSettings.TEMP_RATE.set(value),
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_RATE.get())),
-                false, false, false, Component.translatable("cold_sweat.config.temperature_rate.desc").getString());
+                true, false, false, Component.translatable("cold_sweat.config.temperature_rate.desc").getString());
 
         // Difficulty button
         this.addButton("difficulty", Side.RIGHT, () -> Component.translatable("cold_sweat.config.difficulty.name").getString() +
