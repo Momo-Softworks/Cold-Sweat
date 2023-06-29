@@ -682,6 +682,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 level.setBlock(blockPos, desiredState, 3);
 
             this.setChanged();
+            ColdSweatPacketHandler.syncBlockEntityData(this);
         }
     }
 
