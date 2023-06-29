@@ -29,12 +29,12 @@ public class InsulatedMinecartItem extends Item
             ItemStack itemstack = context.getItemInHand();
             if (!level.isClientSide)
             {
-                Minecart minecart = (Minecart) Minecart.createMinecart(level, blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D, Minecart.Type.RIDEABLE);
+                Minecart minecart = new Minecart(level, blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D);
                 if (itemstack.hasCustomHoverName())
-                {
-                    minecart.setCustomName(itemstack.getHoverName());
+                {   minecart.setCustomName(itemstack.getHoverName());
                 }
                 minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
+                minecart.setDisplayOffset(5);
                 level.addFreshEntity(minecart);
             }
             itemstack.shrink(1);
