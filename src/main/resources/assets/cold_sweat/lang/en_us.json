@@ -27,6 +27,15 @@
   "item.cold_sweat.goat_fur_pants":      "Goat Fur Pants",
   "item.cold_sweat.goat_fur_boots":      "Goat Fur Boots",
 
+  "item.minecraft.potion.effect.ice_resistance":                "Potion of Ice Resistance",
+  "item.minecraft.potion.effect.ice_resistance_long":           "Potion of Ice Resistance",
+  "item.minecraft.lingering_potion.effect.ice_resistance":      "Lingering Potion of Ice Resistance",
+  "item.minecraft.lingering_potion.effect.ice_resistance_long": "Lingering Potion of Ice Resistance",
+  "item.minecraft.splash_potion.effect.ice_resistance":         "Splash Potion of Ice Resistance",
+  "item.minecraft.splash_potion.effect.ice_resistance_long":    "Splash Potion of Ice Resistance",
+  "item.minecraft.tipped_arrow.effect.ice_resistance":          "Tipped Arrow of Ice Resistance",
+  "item.minecraft.tipped_arrow.effect.ice_resistance_long":     "Tipped Arrow of Ice Resistance",
+
 
   "entity.cold_sweat.chameleon": "Chameleon",
 
@@ -38,12 +47,6 @@
   "effect.cold_sweat.ice_resistance":       "Ice Resistance",
   "effect.cold_sweat.ice_resistance_long":  "Ice Resistance",
   "effect.cold_sweat.grace":                "Grace",
-
-
-  "item.minecraft.potion.effect.ice_resistance":             "Potion of Ice Resistance",
-  "item.minecraft.lingering_potion.effect.ice_resistance":   "Lingering Potion of Ice Resistance",
-  "item.minecraft.splash_potion.effect.ice_resistance":      "Splash Potion of Ice Resistance",
-  "item.minecraft.tipped_arrow.effect.ice_resistance":       "Tipped Arrow of Ice Resistance",
 
 
   "container.cold_sweat.boiler":        "Boiler",
