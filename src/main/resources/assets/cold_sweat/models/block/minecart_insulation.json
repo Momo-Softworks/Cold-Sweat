@@ -190,5 +190,6 @@
         }
       }
     }
-  ]
+  ],
+  "render_type": "cutout"
 }
