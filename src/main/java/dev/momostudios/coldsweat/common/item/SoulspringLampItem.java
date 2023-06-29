@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -68,7 +69,7 @@ public class SoulspringLampItem extends Item
                 {
                     // Drain fuel
                     if (!(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, (int) (-0.01 * CSMath.clamp(temp - max, 1, 3)));
+                        addFuel(stack, -0.01 * CSMath.clamp(temp - max, 1, 3));
 
                     // Affect nearby players
                     double radius = 5d;
@@ -123,7 +124,7 @@ public class SoulspringLampItem extends Item
         stack.getOrCreateTag().putDouble("fuel", fuel);
     }
 
-    private static void addFuel(ItemStack stack, int amount)
+    private static void addFuel(ItemStack stack, double amount)
     {
         setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
