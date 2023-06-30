@@ -22,8 +22,7 @@ public class CampfireBlockTemp extends BlockTemp
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
         if (this.hasBlock(state.getBlock()) && state.getValue(CampfireBlock.LIT))
-        {
-            return CSMath.blend(0.27, 0, distance, 0.5, 7);
+        {   return CSMath.blend(0.476, 0, distance, 0.5, 7);
         }
         return 0;
     }
