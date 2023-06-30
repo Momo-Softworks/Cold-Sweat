@@ -149,13 +149,13 @@ public class ColdSweatConfig
                          "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
                 .defineList("BlockTemps", Arrays.asList
                                 (
-                                        Arrays.asList("minecraft:soul_fire",     -0.2, 7, true, 0.8),
-                                        Arrays.asList("minecraft:fire",           0.2, 7, true, 0.8),
-                                        Arrays.asList("minecraft:magma_block",   0.15, 3, true, 0.6),
-                                        Arrays.asList("minecraft:soul_campfire", -0.2, 3, true, 0.6, "lit=true"),
-                                        Arrays.asList("minecraft:ice",           -0.1, 4, true, 0.5),
-                                        Arrays.asList("minecraft:packed_ice",    -0.2, 4, true, 1.0),
-                                        Arrays.asList("minecraft:blue_ice",      -0.3, 4, true, 1.0)
+                                        Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
+                                        Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
+                                        Arrays.asList("minecraft:magma_block",      0.5, 3, true, 0.6),
+                                        Arrays.asList("minecraft:soul_campfire", -0.476, 3, true, 0.6, "lit=true"),
+                                        Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
+                                        Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
+                                        Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
                                 ),
                         it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
         BUILDER.pop();
