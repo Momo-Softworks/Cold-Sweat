@@ -30,19 +30,25 @@ public class ItemInsulationCap implements IInsulatableCap
         {
             ItemStack stack = entry.getFirst();
             List<InsulationPair> insulValues = entry.getSecond();
+            if (insulValues.isEmpty()) continue;
 
             List<InsulationPair> newValues = new ArrayList<>();
 
             if (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
             {
-                Pair<Double, Double> insul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem());
+                Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem());
+                if (insulation == null) continue;
+
                 // Break it up into cold and hot
-                double cold = insul.getFirst();
-                double hot = insul.getSecond();
+                double cold = insulation.getFirst();
+                double hot = insulation.getSecond();
                 double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
                 cold = CSMath.shrink(cold, neutral);
                 hot  = CSMath.shrink(hot, neutral);
 
+                /*
+                 Subdivide insulation values into groups of 2 (or -2)
+                 */
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
                 {
@@ -64,16 +70,16 @@ public class ItemInsulationCap implements IInsulatableCap
                     newValues.add(new Insulation(0d, hotInsul));
                 }
             }
-            else if (ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem()))
+            else if (ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem()) && !insulValues.isEmpty())
             {
-                Pair<Double, Double> insul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem());
+                Pair<Double, Double> insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem());
                 AdaptiveInsulation adaptiveInsulation = (AdaptiveInsulation) insulValues.get(0);
 
-                double insulValue = insul.getFirst();
+                double insulValue = insulation.getFirst();
                 for (int i = 0; i < CSMath.ceil(Math.abs(insulValue) / 2); i++)
                 {
-                    double adaptInsul = CSMath.minAbs(CSMath.shrink(insulValue, i * 2), 2 * CSMath.getSign(insulValue));
-                    newValues.add(new AdaptiveInsulation(adaptInsul, adaptiveInsulation.getFactor(), adaptiveInsulation.getSpeed()));
+                    newValues.add(new AdaptiveInsulation(CSMath.minAbs(CSMath.shrink(insulValue, i * 2), 2 * CSMath.getSign(insulValue)),
+                                                         adaptiveInsulation.getFactor(), adaptiveInsulation.getSpeed()));
                 }
             }
             insulValues.clear();
