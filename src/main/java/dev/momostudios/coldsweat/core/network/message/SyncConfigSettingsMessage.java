@@ -65,9 +65,7 @@ public class SyncConfigSettingsMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            for (Map.Entry<String, CompoundTag> entry : message.configValues.entrySet())
-            {   ConfigSettings.decode(entry.getKey(), entry.getValue());
-            }
+            message.configValues.forEach(ConfigSettings::decode);
 
             if (context.getDirection().getReceptionSide().isServer())
             {   ConfigSettings.saveValues();
