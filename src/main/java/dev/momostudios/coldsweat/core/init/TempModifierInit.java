@@ -61,6 +61,7 @@ public class TempModifierInit
     @SubscribeEvent
     public static void registerBlockTemps(BlockTempRegisterEvent event)
     {
+        long startMS = System.currentTimeMillis();
         // Auto-generate BlockTemps from config
         for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockTemps())
         {
@@ -160,12 +161,14 @@ public class TempModifierInit
         event.register(new IceboxBlockTemp());
         event.register(new BoilerBlockTemp());
         event.register(new NetherPortalBlockTemp());
+        ColdSweat.LOGGER.debug("Registered BlockTemps in " + (System.currentTimeMillis() - startMS) + "ms");
     }
 
     // Register TempModifiers
     @SubscribeEvent
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
+        long startMS = System.currentTimeMillis();
         String compatPath = "dev.momostudios.coldsweat.api.temperature.modifier.compat.";
         String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
         String armorUnder = compatPath + "ArmorUnderTempModifier";
@@ -200,5 +203,6 @@ public class TempModifierInit
         {   try { event.register((TempModifier) Class.forName(weatherStorms).getConstructor().newInstance()); }
             catch (Exception ignored) {}
         }
+        ColdSweat.LOGGER.debug("Registered TempModifiers in " + (System.currentTimeMillis() - startMS) + "ms");
     }
 }
