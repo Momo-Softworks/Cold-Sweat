@@ -41,7 +41,6 @@ public class UndergroundTempModifier extends TempModifier
 
         double biomeTempTotal = 0;
         int caveBiomeCount = 0;
-        int totalBiomes = 0;
 
         for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 8))
         {
@@ -49,11 +48,9 @@ public class UndergroundTempModifier extends TempModifier
             if (chunk == null) continue;
             depthTable.add(Pair.of(Math.max(0d, WorldHelper.getGroundLevel(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
-            List<Holder<Biome>> biomes =  Stream.of(level.getBiomeManager().getBiome(pos),
-                                                    level.getBiomeManager().getBiome(pos.above(12)),
-                                                    level.getBiomeManager().getBiome(pos.below(12))).distinct().toList();
-            totalBiomes += biomes.size();
-            for (Holder<Biome> holder : biomes)
+            for (Holder<Biome> holder : List.of(level.getBiomeManager().getBiome(pos),
+                                                level.getBiomeManager().getBiome(pos.above(12)),
+                                                level.getBiomeManager().getBiome(pos.below(12))))
             {
                 if (holder.is(Tags.Biomes.IS_UNDERGROUND))
                 {
@@ -75,12 +72,11 @@ public class UndergroundTempModifier extends TempModifier
         double finalDepth = CSMath.weightedAverage(depthTable);
         int finalBiomeCount = Math.max(1, caveBiomeCount);
         double finalBiomeTempTotal = biomeTempTotal / finalBiomeCount;
-        int finalTotalBiomes = totalBiomes;
         return temp ->
         {
             double depthAvg = CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15),
                                           CSMath.blend(temp, midTemp, finalDepth, 4, 20), 1, 2);
-                return CSMath.blend(depthAvg, finalBiomeTempTotal, finalBiomeCount, 0, finalTotalBiomes);
+                return CSMath.blend(depthAvg, finalBiomeTempTotal, finalBiomeCount, 0, SAMPLES * 3);
         };
     }
 
