@@ -15,8 +15,6 @@ import java.util.function.Function;
  */
 public class ArmorUnderTempModifier extends TempModifier
 {
-    public ArmorUnderTempModifier() {}
-
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
