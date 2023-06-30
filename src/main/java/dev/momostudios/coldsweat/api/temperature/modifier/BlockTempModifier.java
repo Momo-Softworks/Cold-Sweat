@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.api.util.Temperature;
@@ -37,6 +38,7 @@ public class BlockTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         Map<BlockTemp, Double> effectAmounts = new HashMap<>();
+        Map<BlockPos, Pair<BlockTemp, Double>> triggers = new HashMap<>();
         Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
 
         Level level = entity.level;
@@ -110,13 +112,20 @@ public class BlockTempModifier extends TempModifier
                             // Dampen the effect with each block between the player and the block
                             double blockTempTotal = effectAmount + tempToAdd / (blocks.get() + 1);
                             effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
-
-                            if (entity instanceof ServerPlayer player)
-                                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, blockpos, distance, blockTempTotal);
+                            // Used to trigger advancements
+                            triggers.put(blockpos, Pair.of(be, distance));
                         }
                     }
                     catch (Exception ignored) {}
                 }
+            }
+        }
+        // Trigger advancements at every BlockPos with a BlockEffect attached to it
+        if (entity instanceof ServerPlayer player)
+        {
+            for (Map.Entry<BlockPos, Pair<BlockTemp, Double>> trigger : triggers.entrySet())
+            {   Pair<BlockTemp, Double> entry = trigger.getValue();
+                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getKey(), entry.getSecond(), effectAmounts.get(entry.getFirst()));
             }
         }
 
