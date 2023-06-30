@@ -46,7 +46,14 @@ public class BiomeTempModifier extends TempModifier
             else
             {
                 // Fallback for improper sample count
-                int samples = this.getNBT().contains("Samples") ? this.getNBT().getInt("Samples") : 25;
+                int samples;
+                if (this.getNBT().contains("Samples"))
+                {   samples = this.getNBT().getInt("Samples");
+                }
+                else
+                {   samples = 25;
+                    this.getNBT().putInt("Samples", 25);
+                }
 
                 Level level = entity.level;
 
