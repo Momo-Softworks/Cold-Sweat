@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -63,7 +64,8 @@ public class SoulStalkBlock extends Block implements IPlantable
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random rand)
+    @Override
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand)
     {
         if (level.isEmptyBlock(pos.above()))
         {
@@ -76,11 +78,10 @@ public class SoulStalkBlock extends Block implements IPlantable
             {
                 int j = state.getValue(AGE);
                 if (ForgeHooks.onCropsGrowPre(level, pos, state, true))
-                {
-                    if (j >= 8)
-                    {
-                        level.setBlockAndUpdate(pos.above(), this.defaultBlockState().setValue(SECTION, 3));
-                        level.setBlock(pos, state.setValue(AGE, 0).setValue(SECTION, rand.nextInt(2) + 1), 4);
+                {   if (j >= 8)
+                    {   level.setBlockAndUpdate(pos.above(), this.defaultBlockState().setValue(SECTION, 3));
+                        int section = rand.nextDouble() < 0.3 ? 2 : 1;
+                        level.setBlock(pos, state.setValue(AGE, 0).setValue(SECTION, section), 4);
                     }
                     else level.setBlock(pos, state.setValue(AGE, j + 1), 4);
                 }
@@ -93,10 +94,9 @@ public class SoulStalkBlock extends Block implements IPlantable
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         BlockPos pos = context.getClickedPos();
-        BlockState state = context.getLevel().getBlockState(pos.below()).is(this) ? this.defaultBlockState().setValue(SECTION, 3)
-                : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
-                : null;
-        return state;
+        return context.getLevel().getBlockState(pos.below()).is(this) ? this.defaultBlockState().setValue(SECTION, 3)
+             : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
+             : null;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class SoulStalkBlock extends Block implements IPlantable
             {   return Blocks.AIR.defaultBlockState();
             }
             else if (state.getValue(SECTION) == 3)
-            {   return state.setValue(SECTION, new Random().nextInt(2) + 1);
+            {   return state.setValue(SECTION, Math.random() < 0.33 ? 2 : 1);
             }
         }
         return state;
