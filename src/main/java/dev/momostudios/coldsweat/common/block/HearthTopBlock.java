@@ -48,8 +48,7 @@ public class HearthTopBlock extends Block
     }
 
     public HearthTopBlock(Block.Properties properties)
-    {
-        super(properties);
+    {   super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
         calculateFacingShapes(Shapes.or(
             Block.box(3, -16, 3.5, 13, 2, 12.5), // Shell
@@ -60,8 +59,7 @@ public class HearthTopBlock extends Block
     static void calculateFacingShapes(VoxelShape shape)
     {
         for (Direction direction : Direction.values())
-        {
-            SHAPES.put(direction, CSMath.rotateShape(direction, shape));
+        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
         }
     }
 
@@ -73,8 +71,7 @@ public class HearthTopBlock extends Block
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
-    {
-        return SHAPES.get(state.getValue(FACING));
+    {   return SHAPES.get(state.getValue(FACING));
     }
 
     @SuppressWarnings("deprecation")
@@ -82,8 +79,7 @@ public class HearthTopBlock extends Block
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
-        {
-            hearthBottomBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
+        {   hearthBottomBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
         }
         return InteractionResult.SUCCESS;
     }
@@ -91,11 +87,9 @@ public class HearthTopBlock extends Block
     @SuppressWarnings("deprecation")
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
-    {
-        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+    {   super.neighborChanged(state, level, pos, block, fromPos, isMoving);
         if (level.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM)
-        {
-            this.destroy(level, pos, state);
+        {   this.destroy(level, pos, state);
         }
     }
 
@@ -105,17 +99,16 @@ public class HearthTopBlock extends Block
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
-            {
-                level.destroyBlock(pos.below(), false);
+            if (level.getBlockState(pos.below()).is(ModBlocks.HEARTH_BOTTOM))
+            {   level.destroyBlock(pos.below(), false);
             }
         }
         super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter getter, BlockPos pos, BlockState state) {
-        return new ItemStack(ItemInit.HEARTH.get());
+    public ItemStack getCloneItemStack(BlockGetter getter, BlockPos pos, BlockState state)
+    {   return new ItemStack(ItemInit.HEARTH.get());
     }
 
     @SuppressWarnings("deprecation")
@@ -126,21 +119,20 @@ public class HearthTopBlock extends Block
 
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
-    {
-        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
-    public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48855_) {
-        p_48855_.add(FACING);
+    public BlockState mirror(BlockState state, Mirror mirror)
+    {   return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48855_)
+    {   p_48855_.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context)
+    {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 }

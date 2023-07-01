@@ -383,7 +383,7 @@ public class EntityTempHandler
             {
                 Entity mount = player.getVehicle();
                 // If insulated minecart
-                if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == BlockInit.MINECART_INSULATION.get())
+                if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().is(BlockInit.MINECART_INSULATION.get()))
                 {
                     Temperature.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Type.RATE, false);
                 }

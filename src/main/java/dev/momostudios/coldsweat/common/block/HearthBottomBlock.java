@@ -228,7 +228,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP)
+            if (level.getBlockState(pos.above()).is(ModBlocks.HEARTH_TOP))
             {   level.destroyBlock(pos.above(), false);
             }
 
