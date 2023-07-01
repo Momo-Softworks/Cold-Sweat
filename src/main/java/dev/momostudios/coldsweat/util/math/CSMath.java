@@ -538,4 +538,11 @@ public class CSMath
         }
         return shapeHolder[1];
     }
+
+    public static boolean withinCube(BlockPos pos1, BlockPos pos2, double maxDistance)
+    {
+        return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
+            && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
+            && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
 }

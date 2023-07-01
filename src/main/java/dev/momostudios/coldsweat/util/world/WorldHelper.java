@@ -52,13 +52,17 @@ public class WorldHelper
      */
     public static int getGroundLevel(BlockPos pos, Level level)
     {
+
         // If Minecraft's height calculation is good enough, use that
-        int mcHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
-        if (pos.getY() >= mcHeight)
-            return mcHeight;
+        int seaLevel = level.getSeaLevel();
+        if (pos.getY() >= seaLevel)
+            return seaLevel;
+
+        // If chunk isn't loaded, return sea level
+        if (!level.isLoaded(pos)) return level.getSeaLevel();
 
         ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
-        if (chunk == null) return mcHeight;
+        if (chunk == null) return seaLevel;
 
         for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
         {
@@ -66,7 +70,7 @@ public class WorldHelper
 
             // Get the subchunk
             LevelChunkSection subchunk = getChunkSection(chunk, pos2.getY());
-            if (subchunk == null) return mcHeight;
+            if (subchunk == null) return seaLevel;
 
             // If this subchunk is only air, skip it
             if (subchunk.hasOnlyAir())
@@ -83,7 +87,7 @@ public class WorldHelper
                 return y;
             }
         }
-        return mcHeight;
+        return seaLevel;
     }
 
     /**
@@ -148,7 +152,7 @@ public class WorldHelper
     {
         if (state.isAir()) return false;
         if (state.is(ModBlocks.HEARTH_BOTTOM) || state.is(ModBlocks.HEARTH_TOP)) return false;
-        VoxelShape shape = state.getBlock().getShape(state, level, pos, CollisionContext.empty());
+        VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
 
         return isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir)
             || isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir);

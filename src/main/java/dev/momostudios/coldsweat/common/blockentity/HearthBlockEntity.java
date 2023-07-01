@@ -38,6 +38,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
@@ -61,7 +62,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -75,7 +75,7 @@ import java.util.*;
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
-    ArrayList<SpreadPath> paths = new ArrayList<>();
+    List<SpreadPath> paths = new ArrayList<>();
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>();
 
@@ -91,9 +91,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     BlockPos blockPos = this.getBlockPos();
+    Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
+    int x = 0;
+    int y = 0;
+    int z = 0;
 
     int hotFuel = 0;
+    int lastHotFuel = 0;
     int coldFuel = 0;
+    int lastColdFuel = 0;
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
     boolean hasHotFuel = false;
@@ -110,11 +116,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     private LevelChunk workingChunk = null;
     private ChunkPos workingCoords = new ChunkPos(this.getBlockPos().getX() >> 4, this.getBlockPos().getZ() >> 4);
+    private boolean registeredLocation = false;
 
     boolean showParticles = true;
     int frozenPaths = 0;
     boolean spreading = true;
-    private boolean registeredLocation = false;
 
     private static final Direction[] DIRECTIONS = Direction.values();
 
@@ -138,9 +144,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     @SubscribeEvent
     public void onBlockUpdate(BlockStateChangedEvent event)
     {
-        BlockPos bpos = event.getPosition();
-        if (bpos.closerThan(blockPos, this.getMaxRange()) && pathLookup.contains(bpos))
-        {   this.sendBlockUpdate(bpos);
+        BlockPos pos = event.getPosition();
+        Level level = event.getLevel();
+        if (level.equals(this.level)
+        && CSMath.withinCube(pos, this.blockPos, this.getMaxRange()) && pathLookup.contains(pos)
+        && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
+        {   this.sendBlockUpdate(pos);
         }
     }
 
@@ -197,15 +206,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         // Register the hearth's position to the global map
         if (!this.registeredLocation)
-        {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(pos, level.dimension().location()));
+        {   levelPos = Pair.of(this.blockPos, level.dimension().location());
+            HearthSaveDataHandler.HEARTH_POSITIONS.add(levelPos);
+            this.x = pos.getX();
+            this.y = pos.getY();
+            this.z = pos.getZ();
             this.registeredLocation = true;
         }
 
         // Easy access to clientside test
         boolean isClient = level.isClientSide;
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
 
         this.ticksExisted++;
 
@@ -261,7 +271,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 {
                     showParticles = isClient
                             && Minecraft.getInstance().options.particles == ParticleStatus.ALL
-                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(pos, level.dimension().location()));
+                            && !HearthSaveDataHandler.DISABLED_HEARTHS.contains(levelPos);
                 }
 
                 // Mark as not spreading if all paths are frozen
@@ -277,7 +287,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // Size of each partition (defaults to 1/30th of the total paths)
                 int partSize = CSMath.clamp(pathCount / 30, 20, 400);
                 // Number of partitions
-                int partCount = CSMath.ceil(pathCount / (double) partSize);
+                int partCount = (int) Math.ceil(pathCount / (float) partSize);
                 // Index of the last point being worked on this tick
                 int lastIndex = partSize * ((this.ticksExisted % partCount) + 1);
                 // Index of the first point being worked on this tick
@@ -318,7 +328,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         // The origin of the path is usually the hearth's position,
                         // but if it's spreading through Create pipes then the origin is the end of the pipe
                         if (pathCount < this.maxPaths() && spreadPath.withinDistance(spreadPath.getOrigin(), this.getSpreadRange())
-                        && spreadPath.getOrigin().closerThan(pos, this.getMaxRange()))
+                        && CSMath.withinCube(spreadPath.getOrigin(), pos, this.getMaxRange()))
                         {
                             /*
                              Get the chunk at this position
@@ -330,7 +340,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                              Spreading algorithm
                              */
 
-                            BlockState fromState = WorldHelper.getBlockState(chunk, pathPos);
+                            BlockState state = WorldHelper.getBlockState(chunk, pathPos);
 
                             if (!WorldHelper.canSeeSky(chunk, level, pathPos.above(), 64))
                             {
@@ -351,8 +361,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                         SpreadPath newPath = spreadPath.spreadTo(tryPos, direction);
 
                                         // If the BlockState is a pipe, check if the new path is following the direction of the pipe
-                                        if (this.isCorrectSpreadDirectionForPipes(pathPos, fromState, newPath, direction)
-                                        && !WorldHelper.isSpreadBlocked(level, fromState, pathPos, direction, spreadPath.getDirection()))
+                                        if (this.canSpreadThroughPipes(pathPos, state, newPath, direction)
+                                        && !WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.getDirection()))
                                         {   // Add the new path to the list
                                             paths.add(newPath);
                                         }
@@ -400,12 +410,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     for (Player player : players)
                     {
                         if (player != null && pathLookup.contains(player.blockPosition()))
-                        {
-                            TempModifier modifier = Temperature.getModifier(player, Temperature.Type.WORLD, mod -> mod instanceof HearthTempModifier);
-                            if (modifier == null || modifier.getTicksExisted() >= modifier.getExpireTime() - 60)
-                            {   this.insulatePlayer(player);
-                                break;
-                            }
+                        {   this.insulatePlayer(player);
                         }
                     }
                     players.clear();
@@ -420,8 +425,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     if (shouldUseHotFuel)
                     {   this.setHotFuel(hotFuel - 1, true);
                     }
-                    if (shouldUseHotFuel || shouldUseColdFuel)
+                    if (Math.abs(coldFuel - lastColdFuel) > (int) 27.777 || Math.abs(hotFuel - lastHotFuel) > (int) 27.777)
                     {   this.updateFuelState();
+                        this.lastColdFuel = coldFuel;
+                        this.lastHotFuel = hotFuel;
                     }
 
                     shouldUseColdFuel = false;
@@ -439,18 +446,18 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         {
             Random rand = new Random();
             if (rand.nextDouble() < coldFuel / 3000d)
-            {   double d0 = x + 0.5d;
-                double d1 = y + 1.8d;
-                double d2 = z + 0.5d;
+            {   double d0 = this.x + 0.5d;
+                double d1 = this.y + 1.8d;
+                double d2 = this.z + 0.5d;
                 double d3 = (rand.nextDouble() - 0.5) / 4;
                 double d4 = (rand.nextDouble() - 0.5) / 4;
                 double d5 = (rand.nextDouble() - 0.5) / 4;
                 level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
             }
             if (rand.nextDouble() < hotFuel / 3000d)
-            {   double d0 = x + 0.5d;
-                double d1 = y + 1.8d;
-                double d2 = z + 0.5d;
+            {   double d0 = this.x + 0.5d;
+                double d1 = this.y + 1.8d;
+                double d2 = this.z + 0.5d;
                 double d3 = (rand.nextDouble() - 0.5) / 2;
                 double d4 = (rand.nextDouble() - 0.5) / 2;
                 double d5 = (rand.nextDouble() - 0.5) / 2;
@@ -480,7 +487,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 {   this.getItems().set(0, fuelStack.getContainerItem());
                 }
 
-                level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
+                level.playSound(null, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
                 effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
                 ColdSweatPacketHandler.syncBlockEntityData(this);
@@ -525,9 +532,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             double max = cap.getTemp(Temperature.Type.FREEZING_POINT);
 
             // If the player is already insulated, check the input temperature reported by the HearthTempModifier
-            Optional<HearthTempModifier> mod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
-            if (mod.isPresent())
-                temp = mod.get().getLastInput();
+            if (CSMath.withinRange(temp, ConfigSettings.MIN_TEMP.get() + min, ConfigSettings.MAX_TEMP.get() + max))
+            {   Optional<TempModifier> modifier = cap.getModifiers(Temperature.Type.WORLD).stream().filter(m -> m instanceof HearthTempModifier).findFirst();
+                if (modifier.isPresent())
+                {
+                    if (modifier.get().getExpireTime() - modifier.get().getTicksExisted() > 30)
+                        return;
+                    temp = modifier.get().getLastInput();
+                }
+            }
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel |= hotFuel > 0 && temp < ConfigSettings.MIN_TEMP.get() + min;
@@ -544,7 +557,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         });
     }
 
-    private boolean isCorrectSpreadDirectionForPipes(BlockPos bpos, BlockState fromState, SpreadPath newPath, Direction direction)
+    private boolean canSpreadThroughPipes(BlockPos bpos, BlockState fromState, SpreadPath newPath, Direction direction)
     {
         if (CREATE_LOADED)
         {
@@ -567,9 +580,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Reset cooldown
         this.rebuildCooldown = 100;
 
-        ArrayList<SpreadPath> pathCopy = new ArrayList<>(paths);
-        // Stream through paths, unfreeze them, and filter out the ones that aren't in the notify queue
-        paths.stream().peek(path -> path.setFrozen(false)).filter(path -> notifyQueue.contains(path.getPos()))
+        paths = new ArrayList<>(Arrays.asList(paths.stream().peek(path -> path.setFrozen(false)).filter(path -> notifyQueue.contains(path.getPos()))
         // Get all children of the paths
         .flatMap(path -> path.getAllChildren().stream()).peek(path ->
         {   BlockPos bpos = path.getPos();
@@ -577,8 +588,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             Arrays.stream(Direction.values()).map(bpos::relative).toList().forEach(pathLookup::remove);
         })
         // Remove updated paths and their children
-        .forEach(pathCopy::remove);
-        paths = pathCopy;
+        .toArray(SpreadPath[]::new)));
 
         // Un-freeze paths so areas can be re-checked
         frozenPaths = 0;
@@ -606,9 +616,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         else if ((chunk = loadedChunks.get(chunkPos)) == null)
         {   // If it isn't in the cache, get the chunk from the world
             loadedChunks.put(chunkPos, chunk = (LevelChunk) WorldHelper.getChunk(level, chunkPos));
-            workingCoords = chunkPos;
             workingChunk = chunk;
         }
+        workingCoords = chunkPos;
         return chunk;
     }
 
