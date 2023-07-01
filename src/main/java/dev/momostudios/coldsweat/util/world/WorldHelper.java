@@ -148,7 +148,7 @@ public class WorldHelper
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         if (state.isAir()) return false;
-        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM || state.getBlock() == ModBlocks.HEARTH_TOP) return false;
+        if (state.is(ModBlocks.HEARTH_BOTTOM) || state.is(ModBlocks.HEARTH_TOP)) return false;
         VoxelShape shape = state.getBlock().getShape(state, level, pos, CollisionContext.empty());
 
         return isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir)

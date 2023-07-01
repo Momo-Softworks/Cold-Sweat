@@ -99,7 +99,7 @@ public class HearthTopBlock extends Block
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
+            if (level.getBlockState(pos.below()).is(ModBlocks.HEARTH_BOTTOM))
             {   level.destroyBlock(pos.below(), false);
             }
         }
