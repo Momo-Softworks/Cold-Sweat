@@ -14,7 +14,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
@@ -22,7 +21,6 @@ import oshi.util.tuples.Triplet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class UndergroundTempModifier extends TempModifier
 {
@@ -46,7 +44,7 @@ public class UndergroundTempModifier extends TempModifier
         {
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
-            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getGroundLevel(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
+            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
             for (Holder<Biome> holder : List.of(level.getBiomeManager().getBiome(pos),
                                                 level.getBiomeManager().getBiome(pos.above(12)),

@@ -51,44 +51,18 @@ public class WorldHelper
      * Ignores minecraft:cave_air<br>
      * This is different from {@code level.getHeight()} because it attempts to ignore floating blocks
      */
-    public static int getGroundLevel(BlockPos pos, Level level)
+    public static int getHeight(BlockPos pos, Level level)
     {
-
         // If Minecraft's height calculation is good enough, use that
         int seaLevel = level.getSeaLevel();
-        if (pos.getY() >= seaLevel)
-            return seaLevel;
 
         // If chunk isn't loaded, return sea level
-        if (!level.isLoaded(pos)) return level.getSeaLevel();
+        if (!level.isLoaded(pos)) return seaLevel;
 
         ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
         if (chunk == null) return seaLevel;
 
-        for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
-        {
-            BlockPos pos2 = new BlockPos(pos.getX(), y, pos.getZ());
-
-            // Get the subchunk
-            LevelChunkSection subchunk = getChunkSection(chunk, pos2.getY());
-            if (subchunk == null) return seaLevel;
-
-            // If this subchunk is only air, skip it
-            if (subchunk.hasOnlyAir())
-            {
-                y += 16 - (y % 16);
-                continue;
-            }
-
-            // Get the block state from this subchunk
-            BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
-            // If this block is a surface block, return the Y
-            if (state.isAir() && state.getBlock() != Blocks.CAVE_AIR)
-            {
-                return y;
-            }
-        }
-        return seaLevel;
+        return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
     }
 
     /**
@@ -121,7 +95,7 @@ public class WorldHelper
      * @param maxDistance The maximum distance to check
      * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
      */
-    public static boolean canSeeSky(LevelChunk chunk, LevelAccessor level, BlockPos pos, int maxDistance)
+    public static boolean canSeeSky(ChunkAccess chunk, LevelAccessor level, BlockPos pos, int maxDistance)
     {
         for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
         {
@@ -250,7 +224,7 @@ public class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, TriConsumer<LevelChunk, BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, TriConsumer<ChunkAccess, BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))
@@ -283,7 +257,7 @@ public class WorldHelper
                 if (!state.isAir() && --maxHits <= 0)
                     break;
 
-                rayTracer.accept((LevelChunk) workingChunk, state, pos);
+                rayTracer.accept(workingChunk, state, pos);
             }
         }
     }
