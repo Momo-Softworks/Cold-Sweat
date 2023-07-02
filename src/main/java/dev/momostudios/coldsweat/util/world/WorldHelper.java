@@ -176,7 +176,7 @@ public class WorldHelper
     public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)
     {
         LevelChunkSection[] sections = chunk.getSections();
-        return sections[Math.min(sections.length - 1, (y >> 4) - chunk.getMinSection())];
+        return sections[CSMath.clamp((y >> 4) - chunk.getMinSection(), 0, sections.length - 1)];
     }
 
     /**
@@ -202,7 +202,7 @@ public class WorldHelper
         }
     }
 
-    public static boolean isWet(Entity entity)
+    public static boolean isInWater(Entity entity)
     {
         BlockPos pos = entity.blockPosition();
         ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
