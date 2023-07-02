@@ -202,10 +202,11 @@ public class EntityTempHandler
             if (player.getServer() != null)
             player.getServer().execute(() ->
             {
-                // Basic modifiers
-                Temperature.addModifiers(player, Temperature.Type.WORLD, List.of(new BiomeTempModifier(25).tickRate(10),
-                                                                                 new UndergroundTempModifier().tickRate(10),
-                                                                                 new BlockTempModifier(7).tickRate(4)), false);
+                // Add modifiers separately to ensure order
+                Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10), Temperature.Type.WORLD, false, Addition.AT_START);
+                Temperature.addModifier(player, new UndergroundTempModifier().tickRate(10), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+                Temperature.addModifier(player, new BlockTempModifier(7).tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                     Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
@@ -245,9 +246,9 @@ public class EntityTempHandler
             chameleon.getServer().execute(() ->
             {
                 // Basic modifiers
-                Temperature.addModifiers(chameleon, Temperature.Type.WORLD, List.of(new BiomeTempModifier(9).tickRate(40),
+                Temperature.addModifiers(chameleon, List.of(new BiomeTempModifier(9).tickRate(40),
                                                                                     new UndergroundTempModifier().tickRate(40),
-                                                                                    new BlockTempModifier(4).tickRate(20)), false);
+                                                                                    new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                     Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
