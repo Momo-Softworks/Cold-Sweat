@@ -1232,26 +1232,28 @@ Fixes:
 ------------------------------------------------------------------------------------------------------------------------
 2.2-b04h
 * Added support for biomes from William Wyther's Overhauled Overworld (Pyrael on Discord)
-- Increased the rate at which the hearth drains fuel
+- Doubled the rate at which the hearth drains fuel (a full gauge will now last ~30 real minutes)
 - Added a normal-duration (3:00) ice resistance potion
     - The existing (8:00) potion is now the long-duration version (brewed with redstone)
 - Goats now drop 0-2 goat fur when killed
 - Rebalanced chameleon spawns again to make them more common in lush areas and rarer in sparse/desert-like areas
 - The player is now granted the sewing table recipe upon obtaining an insulation item
+- The chameleon can now be tempted with any item it can eat
 
 Fixes:
+- Fixed crash when pressing "done" in the config menu before a world is loaded
 - Fixed the thermolith not having a preferred mining tool
 - Fixed the thermolith not dropping anything when mined
 - Fixed the hearth not draining fuel properly
 - Fixed hearth particles still spawning when "show particles" is disabled
 - Fixed the default difficulty appearing to be "Hard" despite the settings being tuned to "Normal"
 - Fixed the "Super Easy" difficulty being switched to "Easy" in some cases
-- Fixed the hearth's fuel gauges not updating when draining fuel
 - Fixed the "Biome Temperatures" and "Biome Offsets" config options being converted to MC units when world-settings.toml is (re)loaded
 - Fixed "air" becoming a valid insulation item if the configs define an insulation value for an item that doesn't exist
 - Fixed block temperature not being detected across chunk borders in some cases
 - Fixed missing subtitles for chameleon eating sounds
 - Fixed some advancements triggering under the wrong conditions
+- Fixed the soulspring lamp not draining fuel (1.18)
 
 Technical Changes:
 - New "HeatResistance" and "ColdResistance" NBT tags can now be applied to players for easy temperature resistance
@@ -1259,3 +1261,23 @@ Technical Changes:
       - Setting either of these values to 100 will make the player completely immune to that temperature
 * Existing armor items using the old insulation format (from pre-2.2) will now be automatically updated to the new insulation format
       ! Note: the new insulation format cannot be read by older versions, so if you downgrade Cold Sweat again all item insulation will be lost
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04i
+- Reduced the duration of ice resistance potions to 1:30 and 4:00 due to soul sprouts being easy to farm
+- Reduced the rate at which soul stalks will bear additional soul sprouts from 50% to 33%
+
+Fixes:
+- Fixed "Max Temperature", "Min Temperature", and "Rate Modifier" options appearing to be editable in the config menu even if the player is non-OP
+- Fixed the hearth's fuel gauges not updating when draining fuel
+- Fixed missing lang entries for long-duration ice resistance potions
+- Fixed bug that caused the game to stall when a chameleon is created at the edge of the loaded world
+- Fixed the soulspring lamp not draining fuel (1.19)
+- Fixed soul stalk not growing (1.19)
+- Fixed the hearth only being able to insulate one player at a time
+
+Technical Changes:
+- TempModifier registration is now done using suppliers of TempModifiers
+      - This makes for a less hacky backend way of instantiating TempModifiers, no longer requiring a default constructor
+      - If registration is done using an instance, it will be turned into a supplier of that instance
