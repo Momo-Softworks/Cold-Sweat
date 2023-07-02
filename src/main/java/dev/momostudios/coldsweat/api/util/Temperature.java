@@ -431,20 +431,10 @@ public class Temperature
         MC
     }
 
-    public static class Addition
+    public record Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
     {
         public static final Addition AT_END = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
         public static final Addition AT_START = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
-
-        private final Predicate<TempModifier> predicate;
-        private final Mode mode;
-        private final Order order;
-
-        private Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
-        {   this.mode = mode;
-            this.predicate = predicate;
-            this.order = order;
-        }
 
         public static Addition of(Mode mode, Order order, Predicate<TempModifier> predicate)
         {   return new Addition(mode, order, predicate);
