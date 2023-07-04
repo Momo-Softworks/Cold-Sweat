@@ -129,6 +129,7 @@ public class CompatManager
     {
         if (!WEATHER_LOADED) return false;
         WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+        if (weatherManager == null) return false;
         StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
         if (rainStorm == null) return false;
 
