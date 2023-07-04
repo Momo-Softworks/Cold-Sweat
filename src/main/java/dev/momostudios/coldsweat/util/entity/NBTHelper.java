@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.util.entity;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.nbt.*;
@@ -19,21 +20,21 @@ public class NBTHelper
     {
         // Write the modifier's data to a CompoundTag
         CompoundTag modifierTag = new CompoundTag();
-        modifierTag.putString("id", modifier.getID());
+        modifierTag.putString("Id", modifier.getID());
 
         // Add the modifier's arguments
-        modifierTag.put("data", modifier.getNBT());
+        modifierTag.put("ModifierData", modifier.getNBT());
 
         // Read the modifier's expiration time
         if (modifier.getExpireTime() != -1)
-            modifierTag.putInt("expireTicks", modifier.getExpireTime());
+            modifierTag.putInt("ExpireTicks", modifier.getExpireTime());
 
         // Read the modifier's tick rate
         if (modifier.getTickRate() > 1)
-            modifierTag.putInt("tickRate", modifier.getTickRate());
+            modifierTag.putInt("TickRate", modifier.getTickRate());
 
         // Read the modifier's ticks existed
-        modifierTag.putInt("ticksExisted", modifier.getTicksExisted());
+        modifierTag.putInt("TicksExisted", modifier.getTicksExisted());
 
         return modifierTag;
     }
@@ -42,24 +43,24 @@ public class NBTHelper
     public static TempModifier tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        TempModifier newModifier;
-        try
-        {
-            newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("id"));
-        } catch (Exception e) { return null; }
+        TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
+        if (newModifier == null)
+        {   ColdSweat.LOGGER.error("Tried to instantiate TempModifier \"" + modifierTag.getString("Id") + "\", but it is not registered!");
+            return null;
+        }
 
-        newModifier.setNBT(modifierTag.getCompound("data"));
+        newModifier.setNBT(modifierTag.getCompound("ModifierData"));
 
         // Set the modifier's expiration time
-        if (modifierTag.contains("expireTicks"))
-            newModifier.expires(modifierTag.getInt("expireTicks"));
+        if (modifierTag.contains("ExpireTicks"))
+            newModifier.expires(modifierTag.getInt("ExpireTicks"));
 
         // Set the modifier's tick rate
-        if (modifierTag.contains("tickRate"))
-            newModifier.tickRate(modifierTag.getInt("tickRate"));
+        if (modifierTag.contains("TickRate"))
+            newModifier.tickRate(modifierTag.getInt("TickRate"));
 
         // Set the modifier's ticks existed
-        newModifier.setTicksExisted(modifierTag.getInt("ticksExisted"));
+        newModifier.setTicksExisted(modifierTag.getInt("TicksExisted"));
 
         return newModifier;
     }
