@@ -160,6 +160,7 @@ public class TempEffectsClient
     }
 
     static ResourceLocation HAZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
+    static final ResourceLocation FREEZE_TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
 
     @SubscribeEvent
     public static void vignette(RenderGuiOverlayEvent.Pre event)
@@ -176,18 +177,20 @@ public class TempEffectsClient
             double height = event.getWindow().getHeight();
             double scale = event.getWindow().getGuiScale();
 
-            float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (tempWithImmunity < 0)
-                RenderSystem.setShaderColor(0.690f, 0.894f, 0.937f, vignetteBrightness);
-            else
+            if (tempWithImmunity > 0)
+            {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
                 RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
-
+                RenderSystem.setShaderTexture(0, HAZE_TEXTURE);
+            }
+            else
+            {   RenderSystem.setShaderColor(0.231f, 0f, 0f, opacity);
+                RenderSystem.setShaderTexture(0, FREEZE_TEXTURE);
+            }
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, HAZE_TEXTURE);
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferbuilder = tesselator.getBuilder();
             bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
