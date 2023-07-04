@@ -113,14 +113,6 @@ public class ArmorInsulation
             else
                 Temperature.addModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE, false);
 
-            // Armor underwear compat
-            if (CompatManager.isArmorUnderwearLoaded())
-            {
-                TempModifier armorUnderMod = TempModifierRegistry.getEntryFor("armorunder:lining");
-                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FREEZING_POINT, false);
-                Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.BURNING_POINT, false);
-            }
-
             // Award advancement for full insulation
             if (fullyInsulated >= 4 && player instanceof ServerPlayer serverPlayer)
             {

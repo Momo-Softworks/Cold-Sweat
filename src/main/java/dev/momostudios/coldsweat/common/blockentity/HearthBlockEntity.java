@@ -428,7 +428,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     if (shouldUseHotFuel)
                     {   this.setHotFuel(hotFuel - 1, true);
                     }
-                    if (Math.abs(coldFuel - lastColdFuel) > (int) 27.777 || Math.abs(hotFuel - lastHotFuel) > (int) 27.777)
+                    if (Math.abs(coldFuel - lastColdFuel) > 27|| Math.abs(hotFuel - lastHotFuel) > 27)
                     {   this.updateFuelState();
                         this.lastColdFuel = coldFuel;
                         this.lastHotFuel = hotFuel;
