@@ -187,7 +187,7 @@ public class TempEffectsClient
                 RenderSystem.setShaderTexture(0, HAZE_TEXTURE);
             }
             else
-            {   RenderSystem.setShaderColor(0.231f, 0f, 0f, opacity);
+            {   RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
                 RenderSystem.setShaderTexture(0, FREEZE_TEXTURE);
             }
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
