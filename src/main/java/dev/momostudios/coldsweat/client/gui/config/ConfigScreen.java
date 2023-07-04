@@ -16,6 +16,7 @@ import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ConfigScreen
@@ -36,6 +37,8 @@ public class ConfigScreen
     static List<Class<? extends AbstractConfigPage>> PAGES = Arrays.asList(ConfigPageOne.class, ConfigPageTwo.class);
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = PAGES.size() - 1;
+
+    public static final Supplier<Integer> SHIFT_AMOUNT = () -> Screen.hasShiftDown() && Screen.hasControlDown() ? 100 : Screen.hasShiftDown() ? 10 : 1;
 
     public static Screen getPage(int index, Screen parentScreen)
     {
