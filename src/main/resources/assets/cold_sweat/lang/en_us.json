@@ -120,7 +120,7 @@
   "cold_sweat.config.temp_icon_location.name":      "Temp. Icon",
   "cold_sweat.config.temp_readout_location.name":   "Temp. Readout",
   "cold_sweat.config.world_temp_location.name":     "World Temp.",
-  "cold_sweat.config.offset_shift.name":            "Hold 'SHIFT' to move by 10 pixels",
+  "cold_sweat.config.offset_shift.name":            "Hold 'SHIFT' to move by 10 pixels; 'CTRL' + 'SHIFT' to move by 100 pixels",
   "cold_sweat.config.icon_bobbing.name":            "Icon Bobbing",
   "cold_sweat.config.custom_hotbar.name":           "Custom Hotbar",
   "cold_sweat.config.animal_temperature.name":      "Animal Temperature",

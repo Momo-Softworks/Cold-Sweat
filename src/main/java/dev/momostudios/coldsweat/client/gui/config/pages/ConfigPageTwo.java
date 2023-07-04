@@ -88,23 +88,23 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
-                amount -> clientConfig.setBodyIconX(clientConfig.bodyIconX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
-                amount -> clientConfig.setBodyIconY(clientConfig.bodyIconY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                amount -> clientConfig.setBodyIconX(clientConfig.bodyIconX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> clientConfig.setBodyIconY(clientConfig.bodyIconY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 () -> { clientConfig.setBodyIconX(0); clientConfig.setBodyIconY(0); },
                 false, false, true, Component.translatable("cold_sweat.config.temp_icon_location.desc").getString(),
                            "§7"+Component.translatable("cold_sweat.config.offset_shift.name").getString());
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_readout_location.name"),
-                amount -> clientConfig.setBodyReadoutX(clientConfig.bodyReadoutX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
-                amount -> clientConfig.setBodyReadoutY(clientConfig.bodyReadoutY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                amount -> clientConfig.setBodyReadoutX(clientConfig.bodyReadoutX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> clientConfig.setBodyReadoutY(clientConfig.bodyReadoutY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 () -> { clientConfig.setBodyReadoutX(0); clientConfig.setBodyReadoutY(0); },
                 false, false, true, Component.translatable("cold_sweat.config.temp_readout_location.desc").getString(),
                            "§7"+Component.translatable("cold_sweat.config.offset_shift.name").getString());
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, Component.translatable("cold_sweat.config.world_temp_location.name"),
-                amount -> clientConfig.setWorldGaugeX(clientConfig.worldGaugeX() + amount * (Screen.hasShiftDown() ? 10 : 1)),
-                amount -> clientConfig.setWorldGaugeY(clientConfig.worldGaugeY() + amount * (Screen.hasShiftDown() ? 10 : 1)),
+                amount -> clientConfig.setWorldGaugeX(clientConfig.worldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> clientConfig.setWorldGaugeY(clientConfig.worldGaugeY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 () -> { clientConfig.setWorldGaugeX(0); clientConfig.setWorldGaugeY(0); },
                 false, false, true, Component.translatable("cold_sweat.config.world_temp_location.desc").getString(),
                            "§7"+Component.translatable("cold_sweat.config.offset_shift.name").getString());
