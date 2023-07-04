@@ -18,7 +18,7 @@ public class WaterTempModifier extends TempModifier
 
     public WaterTempModifier(double strength)
     {
-        this.getNBT().putDouble("strength", strength);
+        this.getNBT().putDouble("Strength", strength);
     }
 
     @Override
@@ -28,31 +28,31 @@ public class WaterTempModifier extends TempModifier
         double maxTemp = ConfigSettings.MAX_TEMP.get();
         double minTemp = ConfigSettings.MIN_TEMP.get();
 
-        double strength = this.getNBT().getDouble("strength");
-        double returnRate = Math.min(-0.001, -0.001 - (worldTemp / 800));
-        double addAmount = WorldHelper.isWet(entity) ? 0.01 : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? 0.0025 : returnRate;
+        double strength = this.getNBT().getDouble("Strength");
+        double returnRate = Math.min(-0.0012, -0.0012 - (worldTemp / 640));
+        double addAmount = WorldHelper.isInWater(entity) ? 0.05 : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? 0.0125 : returnRate;
         double maxStrength = CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
 
-        this.getNBT().putDouble("strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
+        this.getNBT().putDouble("Strength", CSMath.clamp(strength + addAmount, 0d, maxStrength));
 
         // If the strength is 0, this TempModifier expires
         if (strength <= 0.0)
-        {
-            this.expires(this.getTicksExisted() - 1);
+        {   this.expires(this.getTicksExisted() - 1);
         }
 
-        if (!entity.isInWater())
+        return temp ->
         {
-            if (Math.random() < Math.min(0.5, strength))
+            if (!entity.isInWater())
             {
-                double randX = entity.getBbWidth() * (Math.random() - 0.5);
-                double randY = (entity.getEyeHeight() * 0.8) * Math.random();
-                double randZ = entity.getBbWidth() * (Math.random() - 0.5);
-                entity.level.addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
+                if (Math.random() < strength * 2)
+                {   double randX = entity.getBbWidth() * (Math.random() - 0.5);
+                    double randY = (entity.getEyeHeight() * 0.8) * Math.random();
+                    double randZ = entity.getBbWidth() * (Math.random() - 0.5);
+                    entity.level.addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
+                }
             }
-        }
-
-        return temp -> temp - this.getNBT().getDouble("strength");
+            return temp - this.getNBT().getDouble("Strength");
+        };
     }
 
     @Override
