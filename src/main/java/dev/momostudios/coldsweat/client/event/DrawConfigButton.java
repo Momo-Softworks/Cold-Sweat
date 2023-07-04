@@ -1,14 +1,15 @@
 package dev.momostudios.coldsweat.client.event;
 
+import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ClientConfigAskMessage;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.OptionsScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,6 +36,15 @@ public class DrawConfigButton
             Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();
             AtomicInteger buttonX = new AtomicInteger(buttonPos.get().get(0));
             AtomicInteger buttonY = new AtomicInteger(buttonPos.get().get(1));
+            int screenWidth = event.getScreen().width;
+            int screenHeight = event.getScreen().height;
+
+            if (buttonX.get() < -1 || buttonY.get() < -1)
+            {   buttonX.set(0);
+                buttonY.set(0);
+                ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(0, 0));
+                ClientSettingsConfig.getInstance().save();
+            }
 
             // Main config button
             ImageButton mainButton = new ImageButton(event.getScreen().width / 2 - 183 + buttonX.get(), event.getScreen().height / 6 + 110 + buttonY.get(),
@@ -55,6 +65,13 @@ public class DrawConfigButton
             {
                 int buttonStartX = event.getScreen().width / 2 - 183;
                 int buttonStartY = event.getScreen().height / 6 + 110;
+                Runnable saveAndClamp = () ->
+                {   ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
+                    ClientSettingsConfig.getInstance().save();
+                    buttonX.set(CSMath.clamp(buttonX.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
+                    buttonY.set(CSMath.clamp(buttonY.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
+                    mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
+                };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
                 // Disable all other buttons
@@ -78,16 +95,13 @@ public class DrawConfigButton
 
                 if (doneButtonAtomic.get() == null) return;
                 AbstractButton doneButton = doneButtonAtomic.get();
-                Supplier<Integer> shiftAmount = () -> Screen.hasShiftDown() ? 10 : 1;
 
                 // Create "left" button
                 ImageButton leftButton = new ImageButton(doneButton.x + doneButton.getWidth() + 2, doneButton.y, 14, 20, 0, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonX.set(buttonX.get() - shiftAmount.get());
-                                         ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
-                                         ClientSettingsConfig.getInstance().save();
-                                         mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
+                                     {   buttonX.set(buttonX.get() - ConfigScreen.SHIFT_AMOUNT.get());
+                                         saveAndClamp.run();
                                      });
                 // Add left button
                 event.addListener(leftButton);
@@ -96,10 +110,8 @@ public class DrawConfigButton
                 ImageButton upButton = new ImageButton(leftButton.x + leftButton.getWidth(), leftButton.y, 20, 10, 14, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonY.set(buttonY.get() - shiftAmount.get());
-                                         ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
-                                         ClientSettingsConfig.getInstance().save();
-                                         mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
+                                     {   buttonY.set(buttonY.get() - ConfigScreen.SHIFT_AMOUNT.get());
+                                         saveAndClamp.run();
                                      });
                 // Add up button
                 event.addListener(upButton);
@@ -108,10 +120,8 @@ public class DrawConfigButton
                 ImageButton downButton = new ImageButton(upButton.x, upButton.y + upButton.getHeight(), 20, 10, 14, 10, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonY.set(buttonY.get() + shiftAmount.get());
-                                         ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
-                                         ClientSettingsConfig.getInstance().save();
-                                         mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
+                                     {   buttonY.set(buttonY.get() + ConfigScreen.SHIFT_AMOUNT.get());
+                                         saveAndClamp.run();
                                      });
                 // Add down button
                 event.addListener(downButton);
@@ -120,10 +130,8 @@ public class DrawConfigButton
                 ImageButton rightButton = new ImageButton(upButton.x + upButton.getWidth(), upButton.y, 14, 20, 34, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonX.set(buttonX.get() + shiftAmount.get());
-                                         ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
-                                         ClientSettingsConfig.getInstance().save();
-                                         mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
+                                     {   buttonX.set(buttonX.get() + ConfigScreen.SHIFT_AMOUNT.get());
+                                         saveAndClamp.run();
                                      });
                 // Add right button
                 event.addListener(rightButton);
@@ -134,9 +142,7 @@ public class DrawConfigButton
                                      button ->
                                      {   buttonX.set(0);
                                          buttonY.set(0);
-                                         ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
-                                         ClientSettingsConfig.getInstance().save();
-                                         mainButton.setPosition(buttonStartX, buttonStartY);
+                                         saveAndClamp.run();
                                      });
                 // Add reset button
                 event.addListener(resetButton);
