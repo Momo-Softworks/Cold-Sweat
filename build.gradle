@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b04h'
+version = '2.2-b04i'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -115,6 +115,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:coroutil-237749:4426517")
     runtimeOnly fg.deobf("curse.maven:tinkers-74072:4509008")
     runtimeOnly fg.deobf("curse.maven:mantle-74924:4509007")
+    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:3804257")
 
     implementation fg.deobf("curse.maven:curios-309927:4418032")
     implementation fg.deobf("curse.maven:armorunderwear-310383:4502893")
