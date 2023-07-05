@@ -1247,4 +1247,4 @@ Technical Changes:
       - Slows the rate at which the player's temperature changes, similar to armor insulation
       - Setting either of these values to 100 will make the player completely immune to that temperature
 * Existing armor items using the old insulation format (from pre-2.2) will now be automatically updated to the new insulation format
-      ! Note: the new insulation format cannot be read by older versions, so if you downgrade Cold Sweat again all item insulation will be lost
+      ! Note: this conversion cannot be reversed, so if you downgrade Cold Sweat again all item insulation will be lost

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "entries": [
-    "cold_sweat:hide_from_hoglin"
+    "cold_sweat:hide_from_hoglin",
+    "cold_sweat:piglin_barters"
   ]
 }

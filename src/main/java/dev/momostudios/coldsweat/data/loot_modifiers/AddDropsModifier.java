@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.common.loot;
+package dev.momostudios.coldsweat.data.loot_modifiers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
