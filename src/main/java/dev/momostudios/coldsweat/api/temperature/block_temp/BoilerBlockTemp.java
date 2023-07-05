@@ -19,9 +19,8 @@ public class BoilerBlockTemp extends BlockTemp
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (this.hasBlock(state.getBlock()) && state.getValue(BoilerBlock.LIT))
-        {
-            return CSMath.blend(0.27, 0, distance, 0.5, 7);
+        if (state.getValue(BoilerBlock.LIT))
+        {   return CSMath.blend(0.27, 0, distance, 0.5, 7);
         }
         return 0;
     }

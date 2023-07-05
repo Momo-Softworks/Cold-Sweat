@@ -15,6 +15,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -70,7 +71,7 @@ public class BlockTempModifier extends TempModifier
 
                         BlockState state = WorldHelper.getBlockState(chunk, blockpos);
 
-                        if (state.isAir()) continue;
+                        if (state.getMaterial() == Material.AIR) continue;
 
                         // Get the BlockTemp associated with the block
                         BlockTemp be = BlockTempRegistry.getEntryFor(state);

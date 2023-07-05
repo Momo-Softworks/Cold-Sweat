@@ -19,9 +19,8 @@ public class IceboxBlockTemp extends BlockTemp
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (this.hasBlock(state.getBlock()) && state.getValue(IceboxBlock.FROSTED))
-        {
-            return CSMath.blend(-0.27, 0, distance, 0.5, 5);
+        if (state.getValue(IceboxBlock.FROSTED))
+        {   return CSMath.blend(-0.27, 0, distance, 0.5, 5);
         }
         return 0;
     }
