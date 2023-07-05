@@ -330,18 +330,11 @@ public class EntityTempHandler
             {   MobEffectInstance effect = event.getEffectInstance();
                 // New HearthTempModifier
                 TempModifier newMod = new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
-                // Current HearthTempModifier
-                Optional<HearthTempModifier> currentMod = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
-                // If the player already has the modifier, extend its duration
-                if (currentMod.isPresent() && currentMod.get().getNBT().getInt("Strength") == newMod.getNBT().getInt("Strength"))
-                {   currentMod.get().setTicksExisted(0);
-                    currentMod.get().expires(effect.getDuration());
-                }
-                else Temperature.addOrReplaceModifier(player, newMod, Temperature.Type.WORLD);
+                Temperature.addOrReplaceModifier(player, newMod, Temperature.Type.WORLD);
             }
             // Remove TempModifier on potion effect removed
             else if (event instanceof MobEffectEvent.Remove)
-            {   Temperature.removeModifiers(player, Temperature.Type.WORLD, 1, mod -> mod instanceof HearthTempModifier);
+            {   Temperature.removeModifiers(player, Temperature.Type.WORLD, mod -> mod instanceof HearthTempModifier);
             }
         }
     }
