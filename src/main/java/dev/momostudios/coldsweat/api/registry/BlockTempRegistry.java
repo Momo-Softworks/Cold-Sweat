@@ -4,7 +4,6 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,13 +14,12 @@ import java.util.LinkedList;
 
 public class BlockTempRegistry
 {
-    public static final LinkedList<BlockTemp> BLOCK_EFFECTS = new LinkedList<>();
+    public static final LinkedList<BlockTemp> BLOCK_TEMPS = new LinkedList<>();
     public static final HashMap<Block, BlockTemp> MAPPED_BLOCKS = new HashMap<>();
     public static final BlockTemp DEFAULT_BLOCK_EFFECT = new BlockTemp() {
         @Override
         public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-        {
-            return 0;
+        {   return 0;
         }
     };
 
@@ -29,17 +27,12 @@ public class BlockTempRegistry
     {
         blockTemp.validBlocks.forEach(block ->
         {
-            if (MAPPED_BLOCKS.containsKey(block))
-            {
-                ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockTemp ({})! Skipping BlockTemp {}...",
-                        ForgeRegistries.BLOCKS.getKey(block).toString(), MAPPED_BLOCKS.get(block).getClass().getSimpleName(), blockTemp.getClass().getSimpleName());
-            }
-            else
-            {
-                MAPPED_BLOCKS.put(block, blockTemp);
+            if (MAPPED_BLOCKS.put(block, blockTemp) != null)
+            {   ColdSweat.LOGGER.error("Block \"{}\" already has a registered BlockTemp! The previous one will be overwritten.",
+                                       ForgeRegistries.BLOCKS.getKey(block).toString());
             }
         });
-        BLOCK_EFFECTS.add(blockTemp);
+        BLOCK_TEMPS.add(blockTemp);
     }
 
     public static void flush()
@@ -51,6 +44,13 @@ public class BlockTempRegistry
     {
         if (blockstate.isAir()) return DEFAULT_BLOCK_EFFECT;
 
-        return MAPPED_BLOCKS.computeIfAbsent(blockstate.getBlock(), (block) -> DEFAULT_BLOCK_EFFECT);
+        Block block = blockstate.getBlock();
+        BlockTemp blockTemp = MAPPED_BLOCKS.get(block);
+        if (blockTemp == null)
+        {   blockTemp = BLOCK_TEMPS.stream().filter(bt -> bt.hasBlock(block)).findFirst().orElse(DEFAULT_BLOCK_EFFECT);
+            MAPPED_BLOCKS.put(block, blockTemp);
+            return blockTemp;
+        }
+        return blockTemp;
     }
 }
