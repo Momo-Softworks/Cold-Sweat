@@ -2,7 +2,7 @@
 name: Crash Report
 about: Use this template if Cold Sweat makes your game crash
 title: Title (include MC/Cold Sweat version)
-labels: critical bug
+labels: crash
 assignees: MikulDev
 
 ---
