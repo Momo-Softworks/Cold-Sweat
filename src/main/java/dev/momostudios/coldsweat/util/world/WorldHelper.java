@@ -174,9 +174,7 @@ public class WorldHelper
     }
 
     public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)
-    {
-        LevelChunkSection[] sections = chunk.getSections();
-        return sections[CSMath.clamp((y >> 4) - chunk.getMinSection(), 0, sections.length - 1)];
+    {   return chunk.getSections()[chunk.getSectionIndex(y)];
     }
 
     /**
@@ -250,7 +248,7 @@ public class WorldHelper
                 if (workingChunk == null) continue;
 
                 // Get the blockstate at the current position
-                BlockState state = getChunkSection(workingChunk, pos.getY()).getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+                BlockState state = getBlockState(workingChunk, pos);
 
                 // If the block isn't air, then we hit something
                 if (!state.isAir() && --maxHits <= 0)
