@@ -547,6 +547,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     }
                     temp = modifier.get().getLastInput();
                 }
+                // This means the player is not insulated, and they are habitable without it
                 else return;
             }
 

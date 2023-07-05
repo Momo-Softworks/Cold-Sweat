@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "conditions": [
     {
       "condition": "forge:loot_table_id",
@@ -10,12 +11,11 @@
       "item": "cold_sweat:soul_sprout",
       "count":
       {
-        "min": 1,
+        "min": 2,
         "max": 5
       },
-      "weight": 8
+      "weight": 30
     }
   ],
-  "replace": false,
   "type": "cold_sweat:piglin_barters"
 }
