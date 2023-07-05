@@ -47,7 +47,7 @@ public class TempModifierRegistry
 
     /**
      * Returns a new instance of the TempModifier with the given ID.<br>
-     * If the TempModifier class does not have a default constructor (which should never happen), a generic one is given.
+     * If a TempModifier with this ID is not in the registry, this method returns null and logs an error.<br>
      */
     @Nullable
     public static TempModifier getEntryFor(String id)
