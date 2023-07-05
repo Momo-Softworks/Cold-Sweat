@@ -66,27 +66,8 @@ public class ItemInit
     public static final RegistryObject<BlockItem> SEWING_TABLE = ITEMS.register("sewing_table", () -> new BlockItem(BlockInit.SEWING_TABLE.get(), SewingTableBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(BlockInit.HEARTH_BOTTOM.get(), HearthBottomBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> THERMOLITH = ITEMS.register("thermolith", () -> new BlockItem(BlockInit.THERMOLITH.get(), ThermolithBlock.getItemProperties()));
-    public static final RegistryObject<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new ItemNameBlockItem(BlockInit.SOUL_STALK.get(),
-            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(5).saturationMod(1).alwaysEat().fast().build()))
-    {
-        @Override
-        public InteractionResult useOn(UseOnContext context)
-        {
-            InteractionResult interactionresult = super.useOn(context);
-            if (interactionresult == InteractionResult.CONSUME && context.getPlayer() instanceof ServerPlayer player)
-            {
-                // Grant the player the "A Seedy Place" advancement
-                if (player.getServer() != null)
-                {
-                    Advancement seedyPlace = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("minecraft", "husbandry/plant_seed"));
-                    if (seedyPlace != null)
-                    {   player.getAdvancements().award(seedyPlace, "nether_wart");
-                    }
-                }
-            }
-            return interactionresult;
-        }
-    });
+    public static final RegistryObject<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new SoulSproutItem(BlockInit.SOUL_STALK.get(),
+            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(5).saturationMod(1).alwaysEat().fast().build())));
 
     // Spawn Eggs
     public static final RegistryObject<ForgeSpawnEggItem> CHAMELEON_SPAWN_EGG = ITEMS.register("chameleon_spawn_egg", () ->
