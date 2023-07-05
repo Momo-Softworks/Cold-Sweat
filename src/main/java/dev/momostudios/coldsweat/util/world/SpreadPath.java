@@ -10,12 +10,12 @@ import java.util.Set;
 
 public class SpreadPath
 {
-    private final Direction direction;
-    private final BlockPos pos;
-    private final int x, y, z;
-    private boolean frozen = false;
-    private final HashSet<SpreadPath> children = new HashSet<>();
-    private BlockPos origin;
+    public final Direction direction;
+    public final BlockPos pos;
+    public final int x, y, z;
+    public boolean frozen = false;
+    public final HashSet<SpreadPath> children = new HashSet<>();
+    public BlockPos origin;
 
     public SpreadPath(BlockPos pos, Direction direction)
     {   this.direction = direction;
@@ -37,42 +37,6 @@ public class SpreadPath
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-    public BlockPos getPos()
-    {
-        return this.pos;
-    }
-
-    public boolean isFrozen()
-    {
-        return this.frozen;
-    }
-    public void freeze()
-    {
-        this.frozen = true;
-    }
-    public void setFrozen(boolean frozen)
-    {   this.frozen = frozen;
-    }
-
-    public int getX()
-    {   return x;
-    }
-    public int getY()
-    {   return y;
-    }
-    public int getZ()
-    {   return z;
-    }
-
-    public Direction getDirection()
-    {
-        return direction;
-    }
-
-    public BlockPos getOrigin()
-    {   return origin;
     }
 
     public SpreadPath setOrigin(BlockPos origin)
@@ -104,7 +68,7 @@ public class SpreadPath
 
     public SpreadPath offset(int x, int y, int z)
     {
-        return new SpreadPath(this.getX() + x, this.getY() + y, this.getZ() + z, this.direction);
+        return new SpreadPath(this.x + x, this.y + y, this.z + z, this.direction);
     }
 
     public SpreadPath offset(Direction dir)
@@ -133,7 +97,7 @@ public class SpreadPath
     public SpreadPath spreadTo(BlockPos pos, Direction dir)
     {
         SpreadPath path = new SpreadPath(pos, dir);
-        path.setOrigin(this.getOrigin());
+        path.setOrigin(this.origin);
         this.addChild(path);
         return path;
     }
@@ -151,9 +115,9 @@ public class SpreadPath
 
     public double distanceSq(double x, double y, double z)
     {
-        double d1 = this.getX() - x;
-        double d2 = this.getY() - y;
-        double d3 = this.getZ() - z;
+        double d1 = this.x - x;
+        double d2 = this.y - y;
+        double d3 = this.z - z;
         return d1 * d1 + d2 * d2 + d3 * d3;
     }
 
