@@ -1,9 +1,9 @@
-package dev.momostudios.coldsweat.core.event;
+package dev.momostudios.coldsweat.data;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.loot.AddDropsModifier;
+import dev.momostudios.coldsweat.data.loot_modifiers.AddDropsModifier;
+import dev.momostudios.coldsweat.data.loot_modifiers.AddPiglinBartersModifier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.loot.LootModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -17,6 +17,7 @@ public class LootTableModifiers
     {
         event.register(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, helper -> {
             helper.register(new ResourceLocation(ColdSweat.MOD_ID, "mob_drops"), AddDropsModifier.CODEC);
+            helper.register(new ResourceLocation(ColdSweat.MOD_ID, "piglin_barters"), AddPiglinBartersModifier.CODEC);
         });
     }
 }
