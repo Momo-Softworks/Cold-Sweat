@@ -22,6 +22,8 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
+    public static final ForgeConfigSpec.IntValue blockRange;
 
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
@@ -421,6 +423,40 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
+        BUILDER.push("Block Temperature");
+        blockTemps = BUILDER
+                .comment("Allows for adding simple BlockTemps without the use of Java mods",
+                         "Format (All temperatures are in Minecraft units):",
+                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, *<predicates>], [etc...], [etc...]]",
+                         "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
+                         "",
+                         "Arguments:",
+                         "block-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
+                         "temperature: the temperature of the block, in Minecraft units",
+                         "falloff: the block is less effective as distance increases",
+                         "max effect: the maximum temperature change this block can cause to a player (even with multiple blocks)",
+                         "predicates: the state that the block has to be in for the temperature to be applied (lit=true for a campfire, for example).",
+                         "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
+                .defineList("BlockTemps", Arrays.asList
+                                    (
+                                            Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
+                                            Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
+                                            Arrays.asList("minecraft:magma_block",      0.5, 3, true, 0.6),
+                                            Arrays.asList("minecraft:soul_campfire", -0.476, 3, true, 0.6, "lit=true"),
+                                            Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
+                                            Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
+                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
+                                    ),
+                            it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+        blockRange = BUILDER
+                .comment("The maximum range of blocks' area of effect",
+                         "Note: This will not change anything unless blocks are configured to utilize the expanded range",
+                          "This value is capped at 16 for performance reasons")
+                .defineInRange("Block Range", 7, 7, 16);
+        BUILDER.pop();
+
+
+
         /* Serene Seasons config */
         if (CompatManager.isSereneSeasonsLoaded())
         {
@@ -496,6 +532,13 @@ public class WorldSettingsConfig
     public List<? extends List<?>> dimensionTemperatures()
     {
         return dimensionTemps.get();
+    }
+
+    public List<? extends List<Object>> getBlockTemps()
+    {   return blockTemps.get();
+    }
+    public int getBlockRange()
+    {   return blockRange.get();
     }
 
     public Double[] summerTemps()

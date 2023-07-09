@@ -4,11 +4,13 @@ import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -25,14 +27,10 @@ import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
 {
-    public BlockTempModifier()
-    {
-        this(7);
-    }
+    public BlockTempModifier() {}
 
     public BlockTempModifier(int range)
-    {
-        this.getNBT().putInt("Range", range);
+    {   this.getNBT().putInt("RangeOverride", range);
     }
 
     @Override
@@ -43,12 +41,7 @@ public class BlockTempModifier extends TempModifier
         Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
 
         Level level = entity.level;
-        int range = this.getNBT().getInt("Range");
-        // Failsafe for old TempModifiers
-        if (range < 1) {
-            range = 7;
-            this.getNBT().putInt("Range", 7);
-        }
+        int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : WorldSettingsConfig.getInstance().getBlockRange();
 
         int entX = entity.blockPosition().getX();
         int entY = entity.blockPosition().getY();
