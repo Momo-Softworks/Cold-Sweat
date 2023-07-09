@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.PairCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.momostudios.coldsweat.data.codec.LootEntryCodec;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -105,7 +106,7 @@ public class AddPiglinBartersModifier extends LootModifier
             AtomicReference<ItemStack> stack = new AtomicReference<>(ItemStack.EMPTY);
             int j = context.getRandom().nextInt(totalWeight.intValue());
 
-            for(LootPoolEntry lootpoolentry : entries)
+            for (LootPoolEntry lootpoolentry : entries)
             {   j -= lootpoolentry.getWeight(context.getLuck());
                 if (j < 0)
                 {   lootpoolentry.createItemStack(stack::set, context);
@@ -127,9 +128,12 @@ public class AddPiglinBartersModifier extends LootModifier
             {
                 JsonObject additionObject = addition.getAsJsonObject();
                 Optional<CompoundTag> tag = additionObject.has("tag") ? Optional.of(CompoundTag.CODEC.parse(JsonOps.INSTANCE, additionObject.get("tag")).getOrThrow(false, s -> {})) : Optional.empty();
+                JsonObject count = GsonHelper.getAsJsonObject(additionObject, "count", new JsonObject());
+
                 additions.add(new LootEntryCodec.LootEntry(
                         new ResourceLocation(GsonHelper.getAsString(additionObject, "item")), tag,
-                        Pair.of(GsonHelper.getAsInt(additionObject, "min", 1), GsonHelper.getAsInt(additionObject, "max", 1)),
+                        // read "min" and "max" from the pair called "count"
+                        Pair.of(GsonHelper.getAsInt(count, "min", 1), GsonHelper.getAsInt(count, "max", 1)),
                         GsonHelper.getAsInt(additionObject, "weight", 1)
                 ));
             }
@@ -146,8 +150,10 @@ public class AddPiglinBartersModifier extends LootModifier
             {
                 JsonObject additionObject = new JsonObject();
                 additionObject.addProperty("item", addition.itemID().toString());
-                additionObject.addProperty("min", addition.count().getFirst());
-                additionObject.addProperty("max", addition.count().getSecond());
+                JsonObject count = new JsonObject();
+                count.addProperty("min", addition.count().getFirst());
+                count.addProperty("max", addition.count().getSecond());
+                additionObject.add("count", count);
                 additionObject.addProperty("weight", addition.weight());
                 addition.tag().ifPresent(tag -> additionObject.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).result().orElseThrow(RuntimeException::new)));
                 additions.add(additionObject);
