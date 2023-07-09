@@ -39,8 +39,7 @@ public class WaterskinItem extends Item
         BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
 
         if (blockhitresult.getType() != HitResult.Type.BLOCK)
-        {
-            return InteractionResultHolder.pass(itemstack);
+        {   return InteractionResultHolder.pass(itemstack);
         }
         else
         {
@@ -48,10 +47,9 @@ public class WaterskinItem extends Item
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());
-                filledWaterskin.getOrCreateTag().putDouble("temperature", CSMath.clamp((Temperature.apply(0, player, Temperature.Type.WORLD,
-                        new BiomeTempModifier(),
-                        new BlockTempModifier()
-                ) - (CSMath.average(ConfigSettings.MAX_TEMP.get(), ConfigSettings.MIN_TEMP.get()))) * 15, -50, 50));
+                filledWaterskin.getOrCreateTag().putDouble("temperature",
+                                                           CSMath.clamp((Temperature.getTemperatureAt(blockhitresult.getBlockPos(), level)
+                                                                        - (CSMath.average(ConfigSettings.MAX_TEMP.get(), ConfigSettings.MIN_TEMP.get()))) * 15, -50, 50));
 
                 //Replace 1 of the stack with a FilledWaterskinItem
                 if (itemstack.getCount() > 1)
