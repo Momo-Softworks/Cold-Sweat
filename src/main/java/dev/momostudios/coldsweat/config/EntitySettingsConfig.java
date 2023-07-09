@@ -17,7 +17,7 @@ public class EntitySettingsConfig
     public static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> insulatedEntities;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
     private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
@@ -31,10 +31,10 @@ public class EntitySettingsConfig
         BUILDER.push("Entity Settings");
         insulatedEntities = BUILDER
                 .comment("List of entities that will insulate the player when riding them",
-                        "Format: [\"entity_id\", insulation]",
-                        "(1 is complete insulation, 0 is no insulation)")
-                .defineList("Insulated Entities", List.of(),
-                        it -> it instanceof List list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                         "The rate at which the player's temperature changes is divided by the resistance value",
+                         "Format: [\"entity_id\", coldResistance, hotResistance]")
+                .defineList("Insulated Mounts", List.of(),
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         goatFurGrowth = BUILDER
                 .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
@@ -154,7 +154,7 @@ public class EntitySettingsConfig
      * Non-private values for use elsewhere
      */
 
-    public List<? extends List<Object>> getInsulatedEntities()
+    public List<? extends List<?>> getInsulatedEntities()
     {   return insulatedEntities.get();
     }
 
