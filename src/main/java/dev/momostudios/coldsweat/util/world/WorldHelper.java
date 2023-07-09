@@ -175,7 +175,8 @@ public class WorldHelper
     }
 
     public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)
-    {   return chunk.getSections()[chunk.getSectionIndex(y)];
+    {   LevelChunkSection[] sections = chunk.getSections();
+        return sections[CSMath.clamp(chunk.getSectionIndex(y), 0, sections.length - 1)];
     }
 
     /**
