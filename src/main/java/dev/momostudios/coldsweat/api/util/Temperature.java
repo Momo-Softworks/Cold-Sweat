@@ -104,7 +104,7 @@ public class Temperature
                                                       .addIf(CompatManager.isSereneSeasonsLoaded(),
                                                           () -> TempModifierRegistry.getEntryFor("sereneseasons:season"))
                                                       .add(new UndergroundTempModifier(),
-                                                           new BlockTempModifier(7)).build());
+                                                           new BlockTempModifier()).build());
     }
 
     /**
@@ -199,8 +199,8 @@ public class Temperature
                         Predicate<TempModifier> predicate = params.getPredicate();
                         if (predicate == null) predicate = mod -> true;
 
-                        boolean replace = params.mode == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
-                        boolean after = params.mode == Addition.Mode.AFTER;
+                        boolean replace = params.mode  == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
+                        boolean after   = params.mode  == Addition.Mode.AFTER;
                         boolean forward = params.order == Addition.Order.FIRST;
 
                         TempModifier newMod = event.getModifier();
@@ -243,8 +243,7 @@ public class Temperature
                 });
             }
             else
-            {
-                ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
+            {   ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
             }
         }
     }

@@ -51,6 +51,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -202,7 +203,7 @@ public class EntityTempHandler
                 // Add modifiers separately to ensure order
                 Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10), Temperature.Type.WORLD, false, Addition.AT_START);
                 Temperature.addModifier(player, new UndergroundTempModifier().tickRate(10), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-                Temperature.addModifier(player, new BlockTempModifier(7).tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                Temperature.addModifier(player, new BlockTempModifier().tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
@@ -378,7 +379,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void playerRiding(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END)
+        if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.tickCount % 5 == 0)
         {
             Player player = event.player;
             if (player.getVehicle() != null)
@@ -386,16 +387,19 @@ public class EntityTempHandler
                 Entity mount = player.getVehicle();
                 // If insulated minecart
                 if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().is(BlockInit.MINECART_INSULATION.get()))
-                {
-                    Temperature.addModifier(player, new MountTempModifier(1).expires(1), Temperature.Type.RATE, false);
+                {   Temperature.addModifier(player, new MountTempModifier(20, 20).expires(1), Temperature.Type.RATE, false);
                 }
                 // If insulated entity (defined in config)
                 else
                 {
-                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entityID -> entityID.get(0).equals(mount.getType().getRegistryName().toString())).findFirst().ifPresent(entityID ->
-                    {
-                        float insulationAmount = ((Number) entityID.get(1)).floatValue();
-                        Temperature.addModifier(player, new MountTempModifier(insulationAmount).expires(1), Temperature.Type.RATE, false);
+                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entry ->
+                    entry.get(0).equals(ForgeRegistries.ENTITIES.getKey(mount.getType()).toString())).findFirst()
+                    .ifPresent(entry ->
+                    {   int warming = ((Number) entry.get(1)).intValue();
+                        int cooling = entry.size() < 3
+                                    ? warming
+                                    : ((Number) entry.get(2)).intValue();
+                        Temperature.addModifier(player, new MountTempModifier(warming, cooling).expires(5), Temperature.Type.RATE, false);
                     });
                 }
             }

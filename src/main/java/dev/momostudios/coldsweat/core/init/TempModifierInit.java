@@ -7,7 +7,7 @@ import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
-import dev.momostudios.coldsweat.config.ColdSweatConfig;
+import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -63,7 +63,7 @@ public class TempModifierInit
     {
         long startMS = System.currentTimeMillis();
         // Auto-generate BlockTemps from config
-        for (List<?> effectBuilder : ColdSweatConfig.getInstance().getBlockTemps())
+        for (List<?> effectBuilder : WorldSettingsConfig.getInstance().getBlockTemps())
         {
             try
             {
