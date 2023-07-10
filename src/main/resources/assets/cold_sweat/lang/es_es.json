@@ -89,6 +89,7 @@
   "cold_sweat.config.units.name":                   "Unidades",
   "cold_sweat.config.world_temp_location.name":     "*Desplazar temp. mundial",
 
+  "cold_sweat.config.clientside_warning":           "Esto no tiene ningún efecto en el juego.",
   "cold_sweat.config.custom_hotbar.desc":           "Si usar o no el hotbar perzonalizado de cold sweat (desactívelo si está en conflicto con otros mods).",
   "cold_sweat.config.damage_scaling.desc":          "Si la dificultad de minecraft afecta o no la intensidad del daño relacionado con la temperatura.",
   "cold_sweat.config.difficulty.desc":              "Cambiar la dificultad de Cold Sweat.",

@@ -117,6 +117,7 @@
   "cold_sweat.config.camera_sway.desc":             "Покачивание камеры в разные стороны когда темп. игрока слишком высокая",
 
 
+  "cold_sweat.config.clientside_warning":           "Настройка клиента. Не влияет на геймплей.",
   "cold_sweat.config.custom_hotbar.desc":           "Будет ли использоваться изменённый интерфейс хотбара (выключите, если это мешает другим модам).",
   "cold_sweat.config.damage_scaling.desc":          "Будет ли сложность игры влиять на урон связанный с температурой.",
   "cold_sweat.config.difficulty.desc":              "Меняет сложность Cold Sweat.",

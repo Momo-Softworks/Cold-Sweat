@@ -34,7 +34,7 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
-    static final ForgeConfigSpec.BooleanValue cameraSway;
+    static final ForgeConfigSpec.BooleanValue distortionEffects;
 
 
     static 
@@ -102,9 +102,9 @@ public class ClientSettingsConfig
             .comment("Displays areas that the Hearth affecting when the F3 debug menu is open")
             .define("Hearth Debug", true);
 
-        cameraSway = BUILDER
-                .comment("When set to true, the camera will sway randomly when the player is too hot")
-                .define("Camera Sway", true);
+        distortionEffects = BUILDER
+                .comment("Enables visual distortion effects when the player is too hot or cold")
+                .define("Distortion Effects", true);
 
         SPEC = BUILDER.build();
     }
@@ -232,13 +232,13 @@ public class ClientSettingsConfig
     {   configButtonPos.set(pos);
     }
 
-    public boolean isCameraSwayEnabled()
+    public boolean areDistortionsEnabled()
     {
-        return ClientSettingsConfig.cameraSway.get();
+        return ClientSettingsConfig.distortionEffects.get();
     }
-    public void setCameraSway(boolean sway)
+    public void setDistortionsEnabled(boolean sway)
     {
-        ClientSettingsConfig.cameraSway.set(sway);
+        ClientSettingsConfig.distortionEffects.set(sway);
     }
 
 

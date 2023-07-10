@@ -98,6 +98,7 @@
   "cold_sweat.config.units.name":                   "단위",
   "cold_sweat.config.world_temp_location.name":     "*세계 온도 오프셋",
 
+  "cold_sweat.config.clientside_warning":           "클라이언트 단에서만 동작합니다. 게임플레이에 영향을 주지 않습니다.",
   "cold_sweat.config.custom_hotbar.desc":           "차가운 땀의 커스텀 핫바 양식을 사용할 지 결정합니다(만약 다른 모드와 충돌한다면 비활성화하세요).",
   "cold_sweat.config.damage_scaling.desc":          "마인크래프트의 난이도가 온도 관련 피해에 영향을 줄 지 결정합니다.",
   "cold_sweat.config.difficulty.desc":              "차가운 땀의 난이도를 변경합니다.",
