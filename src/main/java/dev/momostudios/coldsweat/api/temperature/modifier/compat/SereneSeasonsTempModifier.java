@@ -15,6 +15,8 @@ import java.util.function.Function;
  */
 public class SereneSeasonsTempModifier extends TempModifier
 {
+    public SereneSeasonsTempModifier() {}
+
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {

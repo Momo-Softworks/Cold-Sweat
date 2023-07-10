@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.event.core;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,5 +27,13 @@ public class TempModifierRegisterEvent extends Event
     public void register(TempModifier modifier)
     {
         TempModifierRegistry.register(modifier);
+    }
+
+    public void registerByClassName(String className)
+    {
+        try { this.register((TempModifier) Class.forName(className).getConstructor().newInstance()); }
+        catch (Exception e)
+        {   ColdSweat.LOGGER.error("Failed to register TempModifier by class name: \"" + className + "\"!", e);
+        }
     }
 }
