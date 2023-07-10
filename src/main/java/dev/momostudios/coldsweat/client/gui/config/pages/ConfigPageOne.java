@@ -88,7 +88,7 @@ public class ConfigPageOne extends AbstractConfigPage
         this.addDecimalInput("temp_offset", Side.LEFT, Component.translatable("cold_sweat.config.temp_offset.name"),
                 value -> clientConfig.setTempOffset(value.intValue()),
                 input -> input.setValue(String.valueOf(clientConfig.tempOffset())),
-                false, false, true, Component.translatable("cold_sweat.config.temp_offset.desc_1").getString()+"§r");
+                false, false, true, Component.translatable("cold_sweat.config.temp_offset.desc").getString()+"§r");
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, Component.translatable("cold_sweat.config.max_temperature.name"),

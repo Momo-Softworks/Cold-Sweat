@@ -1266,7 +1266,14 @@ Technical Changes:
 ------------------------------------------------------------------------------------------------------------------------
 2.2-b04i
 - Reduced the duration of ice resistance potions to 1:30 and 4:00 due to soul sprouts being easy to farm
-- Reduced the rate at which soul stalks will bear additional soul sprouts from 50% to 33%
+- Reduced the chance for soul stalks to bear additional soul sprouts from 50% to 33% per middle section block
+- The powder snow overlay now appears when the player is freezing
+- Soul sprouts now extinguish the player when eaten
+- 1-5 Soul sprouts how have a chance to result from piglin bartering
+- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block type can affect the player
+- The temperature of lava is now drastically reduced while riding a strider
+      - This is to prevent the player overheating extremely quickly while riding a strider on a lava ocean
+- Gave all insulation types distinct tooltip icons for easier reading
 
 Fixes:
 - Fixed "Max Temperature", "Min Temperature", and "Rate Modifier" options appearing to be editable in the config menu even if the player is non-OP
@@ -1278,6 +1285,23 @@ Fixes:
 - Fixed the hearth only being able to insulate one player at a time
 
 Technical Changes:
+- The "Block Temperatures" config option has been moved to world-settings.toml
+      ! This will delete existing configs in main.toml. Back them up first!
 - TempModifier registration is now done using suppliers of TempModifiers
       - This makes for a less hacky backend way of instantiating TempModifiers, no longer requiring a default constructor
       - If registration is done using an instance, it will be turned into a supplier of that instance
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04j
+- Added new song: "Modulo"
+      - Plays in-game and in the menu
+- Hoglin hide can now be obtained through piglin bartering
+- Goat fur can now has a chance to be sold by the wandering trader
+- Updated chameleon sounds to be more true to real chameleons
+- A death message will now be displayed if a tamed chameleon dies
+
+Fixes:
+- Fixed the hearth thinking it is surrounded by solid blocks in some cases
+- Fixed another bug that caused the game to stall when a chameleon is created at the edge of the loaded world
+- Fixed blocks sometimes not affecting temperature properly
