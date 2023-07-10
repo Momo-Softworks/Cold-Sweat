@@ -126,6 +126,7 @@
   "cold_sweat.config.camera_sway.desc":             "Balança e embaça a câmera aleatoriamente quando o jogador está com muito calor",
 
 
+  "cold_sweat.config.clientside_warning":           "Somente Clientside. Isso não tem efeito na jogabilidade.",
   "cold_sweat.config.custom_hotbar.desc":           "Se deve ou não usar o layout de hotbar personalizado do Cold Sweat (desabilite isso se estiver em conflito com outros mods).",
   "cold_sweat.config.damage_scaling.desc":          "Se a dificuldade do Minecraft afeta ou não a intensidade dos danos relacionados à temperatura.",
   "cold_sweat.config.difficulty.desc":              "Altere a dificuldade de Cold Sweat.",

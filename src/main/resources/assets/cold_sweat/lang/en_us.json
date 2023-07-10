@@ -115,7 +115,7 @@
   "cold_sweat.config.grace_period.name":            "Grace Period",
   "cold_sweat.config.grace_period_length.name":     "Grace Length",
   "cold_sweat.config.hearth_debug.name":            "F3 Hearth Debug",
-  "cold_sweat.config.camera_sway.name":             "Camera Sway",
+  "cold_sweat.config.distortion.name":              "Distortion Effects",
   "cold_sweat.config.config_button_pos.name":       "Reposition Config Button...",
   "cold_sweat.config.temp_icon_location.name":      "Temp. Icon",
   "cold_sweat.config.temp_readout_location.name":   "Temp. Readout",
@@ -126,7 +126,8 @@
   "cold_sweat.config.animal_temperature.name":      "Animal Temperature",
 
 
-  "cold_sweat.config.camera_sway.desc":             "Sways the camera randomly when the player is too hot.",
+  "cold_sweat.config.clientside_warning":           "Clientside only. This has no affect on gameplay.",
+  "cold_sweat.config.distortion.desc":              "Enables screen distortion, shaking, and swaying effects.",
   "cold_sweat.config.config_button_pos.desc":       "Open the options menu with controls for repositioning the config button.",
   "cold_sweat.config.custom_hotbar.desc":           "Whether or not to use Cold Sweat's custom hotbar layout (disable this if it is clashing with other mods).",
   "cold_sweat.config.damage_scaling.desc":          "Whether or not Minecraft's difficulty affects the intensity of temperature-related damage.",

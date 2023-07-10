@@ -126,6 +126,7 @@
   "cold_sweat.config.camera_sway.desc":             "当玩家太热时随机摇晃视角",
 
   
+  "cold_sweat.config.clientside_warning":           "仅仅作用于客户端。这对游戏玩法没有影响。",
   "cold_sweat.config.custom_hotbar.desc":           "是否使用Cold Sweat的自定义热栏布局(禁用这个，如果它与其他mod冲突)。",
   "cold_sweat.config.damage_scaling.desc":          "Minecraft的难度是否会影响与温度相关的伤害强度。",
   "cold_sweat.config.difficulty.desc":              "改变Cold Sweat的难度。",

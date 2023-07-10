@@ -64,7 +64,7 @@ public class TempEffectsClient
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
 
-            if (ClientSettingsConfig.getInstance().isCameraSwayEnabled())
+            if (ClientSettingsConfig.getInstance().areDistortionsEnabled())
             {
                 // Camera "shivers" when temp is < -50
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
@@ -225,7 +225,7 @@ public class TempEffectsClient
             try
             {
                 float playerTemp = (float) Overlays.BODY_TEMP;
-                if (playerTemp >= 50 && HOT_IMMUNITY < 4)
+                if (ClientSettingsConfig.getInstance().areDistortionsEnabled() && playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
                     if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
