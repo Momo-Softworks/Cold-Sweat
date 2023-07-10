@@ -190,18 +190,15 @@ public class TempModifierInit
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())
-        {   try { event.register((TempModifier) Class.forName(sereneSeasons).getConstructor().newInstance()); }
-            catch (Exception ignored) {}
+        {   event.registerByClassName(sereneSeasons);
         }
 
         if (CompatManager.isArmorUnderwearLoaded())
-        {   try { event.register((TempModifier) Class.forName(armorUnder).getConstructor().newInstance()); }
-            catch (Exception ignored) {}
+        {   event.registerByClassName(armorUnder);
         }
 
         if (CompatManager.isWeather2Loaded())
-        {   try { event.register((TempModifier) Class.forName(weatherStorms).getConstructor().newInstance()); }
-            catch (Exception ignored) {}
+        {   event.registerByClassName(weatherStorms);
         }
         ColdSweat.LOGGER.debug("Registered TempModifiers in " + (System.currentTimeMillis() - startMS) + "ms");
     }
