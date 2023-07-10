@@ -80,13 +80,13 @@ public class ConfigPageTwo extends AbstractConfigPage
                 false, false, true, new TranslatableComponent("cold_sweat.config.hearth_debug.desc").getString());
 
         // Camera Sway
-        this.addButton("camera_sway", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.camera_sway.name").getString()
-                        + ": " + (clientConfig.isCameraSwayEnabled() ? ON : OFF),
+        this.addButton("camera_sway", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.distortion.name").getString()
+                        + ": " + (clientConfig.areDistortionsEnabled() ? ON : OFF),
                 button ->
                 {
-                    clientConfig.setCameraSway(!clientConfig.isCameraSwayEnabled());
+                    clientConfig.setDistortionsEnabled(!clientConfig.areDistortionsEnabled());
                 },
-                false, false, true, new TranslatableComponent("cold_sweat.config.camera_sway.desc").getString());
+                false, false, true, new TranslatableComponent("cold_sweat.config.distortion.desc").getString());
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),

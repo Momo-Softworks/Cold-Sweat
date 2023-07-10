@@ -153,7 +153,7 @@ public abstract class AbstractConfigPage extends Screen
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
@@ -243,7 +243,7 @@ public abstract class AbstractConfigPage extends Screen
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
@@ -343,7 +343,7 @@ public abstract class AbstractConfigPage extends Screen
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.temp_offset.desc_2").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
