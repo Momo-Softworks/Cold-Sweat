@@ -22,10 +22,9 @@ public class PotionRecipes
         {
             ItemStack awkward = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD);
             ItemStack iceResPotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE.get());
-            BrewingRecipeRegistry.addRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT),
-                                            PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE.get()));
+            BrewingRecipeRegistry.addRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT), iceResPotion);
             BrewingRecipeRegistry.addRecipe(Ingredient.of(iceResPotion), Ingredient.of(Items.REDSTONE),
-                                            PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE_LONG.get()));
+                                            PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.LONG_ICE_RESISTANCE.get()));
         });
     }
 }

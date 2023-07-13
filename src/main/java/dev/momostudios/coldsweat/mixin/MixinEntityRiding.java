@@ -15,8 +15,7 @@ public class MixinEntityRiding
     private void baseTick(LivingEntity entity)
     {
         if (!(entity instanceof ChameleonEntity && entity.getVehicle() instanceof Player))
-        {
-            entity.stopRiding();
+        {   entity.stopRiding();
         }
     }
 }

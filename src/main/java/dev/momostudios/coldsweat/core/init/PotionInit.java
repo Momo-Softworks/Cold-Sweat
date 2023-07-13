@@ -13,6 +13,6 @@ public class PotionInit
 
     public static final RegistryObject<Potion> ICE_RESISTANCE = POTIONS.register("ice_resistance", () ->
             new Potion(new MobEffectInstance(EffectInit.ICE_RESISTANCE.get(), 1800)));
-    public static final RegistryObject<Potion> ICE_RESISTANCE_LONG = POTIONS.register("ice_resistance_long", () ->
+    public static final RegistryObject<Potion> LONG_ICE_RESISTANCE = POTIONS.register("long_ice_resistance", () ->
             new Potion("ice_resistance", new MobEffectInstance(EffectInit.ICE_RESISTANCE.get(), 4800)));
 }
