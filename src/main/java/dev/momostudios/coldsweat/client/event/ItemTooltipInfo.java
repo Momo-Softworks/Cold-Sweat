@@ -15,6 +15,7 @@ import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
@@ -65,7 +66,10 @@ public class ItemTooltipInfo
         Pair<Double, Double> itemInsul = null;
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
-        {   event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
+        {   if (!Screen.hasShiftDown())
+            {   event.getTooltipElements().add(1, Either.left(Component.literal("§9? §8'Shift'")));
+            }
+            event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null)

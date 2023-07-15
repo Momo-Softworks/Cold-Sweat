@@ -30,7 +30,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
 
     @Override
     public int getHeight()
-    {   return Screen.hasShiftDown() ? CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) * 16 + 14 : 10;
+    {   return Screen.hasShiftDown() ? CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) * 16 + 14 : 12;
     }
 
     @Override
@@ -39,29 +39,18 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public void renderText(Font font, int x, int y, Matrix4f matrix, MultiBufferSource.BufferSource buffer)
-    {
-        if (!Screen.hasShiftDown())
-        {
-            font.drawInBatch("§9? §8'Shift'", x + 34, y + 1, 0, false, matrix, buffer, false, 0, 15728880);
-        }
-    }
-
-    @Override
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        Map<Item, Integer> fuelItems = ConfigSettings.LAMP_FUEL_ITEMS.get();
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-        GuiComponent.blit(poseStack, x, y + 1, 0, 0, 0, 30, 8, 30, 34);
-        GuiComponent.blit(poseStack, x, y + 1, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
         if (Screen.hasShiftDown())
         {
-            GuiComponent.blit(poseStack, x + 34, y + 1, 0, 0, 24, 16, 10, 30, 34);
+            GuiComponent.blit(poseStack, x + 34, y, 0, 0, 24, 16, 10, 30, 34);
 
             int i = 0;
-            for (Item item : fuelItems.keySet())
-            {
-                itemRenderer.renderGuiItem(item.getDefaultInstance(), x + ((i * 16) % 96), y + 13 + CSMath.floor(i / 6d) * 16);
+            for (Item item : ConfigSettings.LAMP_FUEL_ITEMS.get().keySet())
+            {   itemRenderer.renderGuiItem(item.getDefaultInstance(), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }
         }
