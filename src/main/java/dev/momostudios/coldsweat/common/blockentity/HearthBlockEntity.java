@@ -339,10 +339,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                              Spreading algorithm
                              */
 
-                            BlockState state = WorldHelper.getBlockState(chunk, pathPos);
-
                             if (!WorldHelper.canSeeSky(chunk, level, pathPos.above(), 64))
                             {
+                                BlockState state = chunk.getBlockState(pathPos);
+
                                 // Try to spread in every direction from the current position
                                 for (int d = 0; d < DIRECTIONS.length; d++)
                                 {

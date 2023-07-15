@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -97,19 +98,12 @@ public class WorldHelper
      */
     public static boolean canSeeSky(ChunkAccess chunk, LevelAccessor level, BlockPos pos, int maxDistance)
     {
+        BlockPos.MutableBlockPos pos2 = pos.mutable();
         for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
         {
-            BlockPos pos2 = pos.above(i);
-            // Get the subchunk
-            LevelChunkSection subchunk = getChunkSection(chunk, pos2.getY());
+            pos2.move(0, 1, 0);
 
-            // If this subchunk is only air, skip it
-            if (subchunk.hasOnlyAir())
-            {   i += 16 - (i % 16);
-                continue;
-            }
-
-            BlockState state = subchunk.getBlockState(pos2.getX() & 15, pos2.getY() & 15, pos2.getZ() & 15);
+            BlockState state = chunk.getBlockState(pos2);
             if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
             {   return false;
             }
@@ -125,12 +119,14 @@ public class WorldHelper
 
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
-        if (state.isAir()) return false;
-        if (state.is(ModBlocks.HEARTH_BOTTOM) || state.is(ModBlocks.HEARTH_TOP)) return false;
+        if (state.isAir() || !state.getMaterial().blocksMotion() || state.is(BlockTags.LEAVES)
+        || state.is(ModBlocks.HEARTH_BOTTOM) || state.is(ModBlocks.HEARTH_TOP))
+        {   return false;
+        }
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
 
-        return isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir)
-            || isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir);
+        return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)
+            || isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir);
     }
 
     public static boolean isFullSide(VoxelShape shape, Direction dir)
@@ -174,7 +170,7 @@ public class WorldHelper
     {   return level.getChunkSource().getChunkNow(pos.x, pos.z);
     }
 
-    public static LevelChunkSection getChunkSection(@Nonnull ChunkAccess chunk, int y)
+    public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
     {   LevelChunkSection[] sections = chunk.getSections();
         return sections[CSMath.clamp(chunk.getSectionIndex(y), 0, sections.length - 1)];
     }
