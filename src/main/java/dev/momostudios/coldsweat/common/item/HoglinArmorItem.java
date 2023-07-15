@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.client.event.RegisterModels;
+import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,5 +37,10 @@ public class HoglinArmorItem extends ArmorItem
                 };
             }
         });
+    }
+
+    @Override
+    public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer)
+    {   return stack.is(ModItems.HOGLIN_HEADPIECE);
     }
 }
