@@ -15,6 +15,15 @@
         "max": 5
       },
       "weight": 30
+    },
+    {
+      "item": "cold_sweat:hoglin_hide",
+      "count":
+      {
+        "min": 1,
+        "max": 2
+      },
+      "weight": 40
     }
   ],
   "type": "cold_sweat:piglin_barters"
