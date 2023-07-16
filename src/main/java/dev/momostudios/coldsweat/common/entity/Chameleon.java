@@ -22,6 +22,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -38,10 +39,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec2;
@@ -139,6 +142,27 @@ public class Chameleon extends Animal
             return player.isCreative() || player.isInvulnerableTo(source);
         }
         return super.isInvulnerableTo(source);
+    }
+
+    @Override
+    public void die(DamageSource source)
+    {
+        Component deathMessage = this.getCombatTracker().getDeathMessage();
+        super.die(source);
+
+        if (this.dead)
+        {
+            ListTag trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
+            if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !this.getTrustedPlayers().getList("Players", 8).isEmpty())
+            {   trustedPlayers.forEach(string ->
+                {
+                    Player player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
+                    if (player != null)
+                    {   player.sendSystemMessage(deathMessage);
+                    }
+                });
+            }
+        }
     }
 
     @NotNull
