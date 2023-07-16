@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.entity.goals;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import dev.momostudios.coldsweat.common.entity.data.edible.Edible;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
@@ -26,12 +26,12 @@ import java.util.UUID;
 public class EatObjectsGoal extends Goal
 {
     List<EntityType<?>> wantedEntities;
-    ChameleonEntity entity;
+    Chameleon entity;
     Entity target;
     boolean stoppedTasks;
     Vec3 lookPos = null;
 
-    public EatObjectsGoal(ChameleonEntity chameleon, List<EntityType<?>> wantedEntities)
+    public EatObjectsGoal(Chameleon chameleon, List<EntityType<?>> wantedEntities)
     {
         this.wantedEntities = wantedEntities;
         this.entity = chameleon;

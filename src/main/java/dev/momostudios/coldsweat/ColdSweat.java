@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat;
 
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.init.*;
@@ -83,7 +83,7 @@ public class ColdSweat
     public void spawnPlacements(SpawnPlacementRegisterEvent event)
     {
         event.register(ModEntities.CHAMELEON, SpawnPlacements.Type.ON_GROUND,
-                       Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
+                       Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)

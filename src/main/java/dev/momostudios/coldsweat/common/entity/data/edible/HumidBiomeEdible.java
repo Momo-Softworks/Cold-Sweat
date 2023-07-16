@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.registries.ModTags;
@@ -24,7 +24,7 @@ public class HumidBiomeEdible extends Edible
     }
 
     @Override
-    public Result onEaten(ChameleonEntity entity, ItemEntity item)
+    public Result onEaten(Chameleon entity, ItemEntity item)
     {
         if (!entity.level.isClientSide)
         {
@@ -67,7 +67,7 @@ public class HumidBiomeEdible extends Edible
     }
 
     @Override
-    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
+    public boolean shouldEat(Chameleon entity, ItemEntity item)
     {   return true;
     }
 

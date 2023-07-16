@@ -7,7 +7,7 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.renderer.ChameleonAnimations;
 import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.client.renderer.animation.AnimationManager;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
@@ -28,14 +28,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T>
+public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "chameleon"), "main");
 
 	final Map<String, ModelPart> modelParts;
 	final ModelPart body;
-	ChameleonEntity chameleon;
+	Chameleon chameleon;
 	boolean tongueVisible = false;
 
 	public ChameleonModel(ModelPart root)

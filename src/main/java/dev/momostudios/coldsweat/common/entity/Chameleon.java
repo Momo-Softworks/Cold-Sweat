@@ -29,7 +29,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -46,8 +45,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -60,26 +57,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
-public class ChameleonEntity extends Animal
+public class Chameleon extends Animal
 {
     static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
     static
     {   GET_DATA_ITEM.setAccessible(true);
     }
 
-    static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.BOOLEAN);
-    static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.INT);
-    static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.INT);
-    static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.COMPOUND_TAG);
-    static final EntityDataAccessor<BlockPos> TRACKING_POS = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.BLOCK_POS);
-    static final EntityDataAccessor<Integer> EAT_TIMESTAMP = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.INT);
-    static final EntityDataAccessor<Float> TEMPERATURE = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.FLOAT);
-    static final EntityDataAccessor<CompoundTag> EDIBLE_COOLDOWNS = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.COMPOUND_TAG);
-    static final EntityDataAccessor<Boolean> SEARCHING = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.BOOLEAN);
-    static final EntityDataAccessor<Integer> AGE_SECS = SynchedEntityData.defineId(ChameleonEntity.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<BlockPos> TRACKING_POS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BLOCK_POS);
+    static final EntityDataAccessor<Integer> EAT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<Float> TEMPERATURE = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.FLOAT);
+    static final EntityDataAccessor<CompoundTag> EDIBLE_COOLDOWNS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<Boolean> SEARCHING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Integer> AGE_SECS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
 
     public float xRotHead = 0;
     public float yRotHead = 0;
@@ -94,16 +90,14 @@ public class ChameleonEntity extends Animal
     public float opacity = 1;
     float desiredTemp = 1f;
 
-    public ChameleonEntity(EntityType<ChameleonEntity> type, Level Level)
+    public Chameleon(EntityType<Chameleon> type, Level Level)
     {
         super(type, Level);
     }
 
     @Override
     protected void registerGoals()
-    {
-
-        this.goalSelector.addGoal(0, new FloatGoal(this));
+    {   this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
         this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagValue(edible.associatedItems()))), false));
@@ -153,8 +147,7 @@ public class ChameleonEntity extends Animal
     public InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand)
     {
         if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
-        {
-            this.startRiding(player);
+        {   this.startRiding(player);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
@@ -163,7 +156,7 @@ public class ChameleonEntity extends Animal
     @SubscribeEvent
     public static void setHeight(EntityEvent.Size event)
     {
-        if (event.getEntity() instanceof ChameleonEntity chameleon)
+        if (event.getEntity() instanceof Chameleon chameleon)
         {
             event.setNewEyeHeight(0.35F);
             if (chameleon.isBaby())
@@ -435,9 +428,8 @@ public class ChameleonEntity extends Animal
                : 0;
     }
 
-    public static boolean canSpawn(EntityType<ChameleonEntity> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
-    {
-        return true;
+    public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
+    {   return true;
     }
 
     private void rotateBodyIfNecessary()
