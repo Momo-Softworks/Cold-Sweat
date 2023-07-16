@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat;
 
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.init.*;
@@ -71,7 +71,7 @@ public class ColdSweat
         event.enqueueWork(() ->
         {
             SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChameleonEntity::canSpawn);
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn);
 
             // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);

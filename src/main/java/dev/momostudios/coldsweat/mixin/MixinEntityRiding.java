@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.mixin;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,9 +14,8 @@ public class MixinEntityRiding
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;stopRiding()V"))
     private void baseTick(LivingEntity entity)
     {
-        if (!(entity instanceof ChameleonEntity && entity.getVehicle() instanceof Player))
-        {
-            entity.stopRiding();
+        if (!(entity instanceof Chameleon && entity.getVehicle() instanceof Player))
+        {   entity.stopRiding();
         }
     }
 }

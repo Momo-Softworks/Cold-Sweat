@@ -1,9 +1,8 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -31,7 +30,7 @@ public class ChameleonEatMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (Minecraft.getInstance().level.getEntity(message.entityId) instanceof ChameleonEntity chameleon)
+            if (Minecraft.getInstance().level.getEntity(message.entityId) instanceof Chameleon chameleon)
             {   chameleon.eatAnimation();
             }
         });

@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,7 +17,7 @@ public class HealingEdible extends Edible
     }
 
     @Override
-    public Result onEaten(ChameleonEntity entity, ItemEntity item)
+    public Result onEaten(Chameleon entity, ItemEntity item)
     {
         if (!entity.level.isClientSide && item.getThrower() != null && entity.isPlayerTrusted(item.getThrower()))
         {
@@ -29,7 +29,7 @@ public class HealingEdible extends Edible
     }
 
     @Override
-    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
+    public boolean shouldEat(Chameleon entity, ItemEntity item)
     {   return entity.getHealth() < entity.getMaxHealth() || (item.getThrower() != null && !entity.isPlayerTrusted(item.getThrower()));
     }
 

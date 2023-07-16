@@ -12,7 +12,7 @@ import dev.momostudios.coldsweat.common.capability.EntityTempCap;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
@@ -56,7 +56,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
@@ -184,7 +183,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntity() instanceof ChameleonEntity) event.setEnabled(true);
+        if (event.getEntity() instanceof Chameleon) event.setEnabled(true);
     }
 
     /**
@@ -247,7 +246,7 @@ public class EntityTempHandler
             });
         }
         // Add basic TempModifiers to chameleons
-        else if (event.getEntity() instanceof ChameleonEntity chameleon)
+        else if (event.getEntity() instanceof Chameleon chameleon)
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
             if (chameleon.getServer() != null)

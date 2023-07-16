@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.core.init.EntityInit;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -12,6 +12,6 @@ public class RegisterAttributes
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event)
     {
-        event.put(EntityInit.CHAMELEON.get(), ChameleonEntity.createAttributes().build());
+        event.put(EntityInit.CHAMELEON.get(), Chameleon.createAttributes().build());
     }
 }

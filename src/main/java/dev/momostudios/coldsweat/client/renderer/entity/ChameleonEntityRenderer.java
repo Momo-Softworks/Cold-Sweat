@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.renderer.layer.ChameleonColorLayer;
 import dev.momostudios.coldsweat.client.renderer.model.entity.ChameleonModel;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRenderer<ChameleonEntity, ChameleonModel<ChameleonEntity>>
+public class ChameleonEntityRenderer<T extends Chameleon> extends MobRenderer<Chameleon, ChameleonModel<Chameleon>>
 {
     public static final ResourceLocation CHAMELEON_SHED  = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_shed.png");
     public static final ResourceLocation CHAMELEON_GREEN = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_green.png");
@@ -26,7 +26,7 @@ public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRende
     }
 
     @Override
-    public void render(ChameleonEntity entity, float p_115456_, float partialTick, PoseStack ps, MultiBufferSource buffer, int light)
+    public void render(Chameleon entity, float p_115456_, float partialTick, PoseStack ps, MultiBufferSource buffer, int light)
     {
         ps.pushPose();
         if (entity.getVehicle() instanceof Player player)
@@ -45,7 +45,7 @@ public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRende
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ChameleonEntity entity)
+    public ResourceLocation getTextureLocation(Chameleon entity)
     {
         return CHAMELEON_GREEN;
     }
