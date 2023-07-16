@@ -30,10 +30,6 @@
       {
         "name": "cold_sweat:entity/chameleon/chameleon_ambient_2",
         "stream": true
-      },
-      {
-        "name": "cold_sweat:entity/chameleon/chameleon_ambient_3",
-        "stream": true
       }
     ]
   },
