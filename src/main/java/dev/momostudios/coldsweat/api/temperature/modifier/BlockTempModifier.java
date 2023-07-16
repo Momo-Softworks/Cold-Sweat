@@ -62,7 +62,7 @@ public class BlockTempModifier extends TempModifier
                     {
                         blockpos.set(entX + x, entY + y, entZ + z);
 
-                        BlockState state = WorldHelper.getBlockState(chunk, blockpos);
+                        BlockState state = chunk.getBlockState(blockpos);
 
                         if (state.getMaterial() == Material.AIR) continue;
 

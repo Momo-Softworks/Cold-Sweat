@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
@@ -127,7 +128,7 @@ public class HearthDebugRenderer
                 vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
             };
 
-            LevelChunk workingChunk = (LevelChunk) level.getChunk(new BlockPos(0, 0, 0));
+            ChunkAccess workingChunk = null;
             float viewDistance = Minecraft.getInstance().options.renderDistance().get() * 2f;
 
             for (Map.Entry<BlockPos, Map<BlockPos, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
@@ -154,11 +155,10 @@ public class HearthDebugRenderer
                     {
                         ChunkPos chunkPos = new ChunkPos(pos);
                         if (workingChunk == null || !workingChunk.getPos().equals(chunkPos))
-                            workingChunk = (LevelChunk) level.getChunkSource().getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+                            workingChunk = WorldHelper.getChunk(level, pos);
 
-                        if (WorldHelper.getBlockState(workingChunk, pos).getShape(level, pos).equals(Shapes.block()))
-                        {
-                            LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
+                        if (workingChunk.getBlockState(pos).getShape(level, pos).equals(Shapes.block()))
+                        {   LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
                             continue;
                         }
 
