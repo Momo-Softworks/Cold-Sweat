@@ -80,8 +80,7 @@ public class WorldHelper
         for (int x = -radius; x < radius; x += interval)
         {
             for (int z = -radius; z < radius; z += interval)
-            {
-                posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
+            {   posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
             }
         }
 

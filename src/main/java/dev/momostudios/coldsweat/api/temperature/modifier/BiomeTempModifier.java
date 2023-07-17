@@ -59,6 +59,7 @@ public class BiomeTempModifier extends TempModifier
 
                 for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
+                    if (!level.isLoaded(blockPos)) continue;
                     List<Holder<Biome>> biomeList = Stream.of(level.getBiomeManager().getBiome(blockPos),
                                                               level.getBiomeManager().getBiome(blockPos.above(16)),
                                                               level.getBiomeManager().getBiome(blockPos.below(16))).distinct().toList();
