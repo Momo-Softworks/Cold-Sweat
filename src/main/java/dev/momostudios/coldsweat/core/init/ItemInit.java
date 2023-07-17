@@ -67,7 +67,7 @@ public class ItemInit
     public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(BlockInit.HEARTH_BOTTOM.get(), HearthBottomBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> THERMOLITH = ITEMS.register("thermolith", () -> new BlockItem(BlockInit.THERMOLITH.get(), ThermolithBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new SoulSproutItem(BlockInit.SOUL_STALK.get(),
-            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(5).saturationMod(1).alwaysEat().fast().build())));
+            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(4).saturationMod(1).alwaysEat().fast().build())));
 
     // Spawn Eggs
     public static final RegistryObject<ForgeSpawnEggItem> CHAMELEON_SPAWN_EGG = ITEMS.register("chameleon_spawn_egg", () ->
