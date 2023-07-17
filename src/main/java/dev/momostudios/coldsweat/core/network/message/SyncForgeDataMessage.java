@@ -46,19 +46,14 @@ public class SyncForgeDataMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isClient())
+            if (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
             {
-                Level level = null;
-                if (ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
-                {
-                    level = ClientOnlyHelper.getClientLevel();
-                }
+                Level level = ClientOnlyHelper.getClientLevel();
                 if (level != null)
                 {
                     Entity entity = level.getEntity(message.entityID);
                     if (entity != null)
-                    {
-                        entity.getPersistentData().merge(message.forgeData);
+                    {   entity.getPersistentData().merge(message.forgeData);
                     }
                 }
             }

@@ -33,10 +33,6 @@ public class TempModifierRegistry
         TEMP_MODIFIERS.put(modifier.getID(), supplier);
     }
 
-    public static void register(TempModifier modifier)
-    {   register(() -> modifier);
-    }
-
     /**
      * Clears the registry of all items. This effectively "un-registers" all TempModifiers.
      */

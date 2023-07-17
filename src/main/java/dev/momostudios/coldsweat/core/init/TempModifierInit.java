@@ -174,19 +174,19 @@ public class TempModifierInit
         String armorUnder = compatPath + "ArmorUnderTempModifier";
         String weatherStorms = compatPath + "StormTempModifier";
 
-        event.register(new BlockTempModifier());
-        event.register(new BiomeTempModifier());
-        event.register(new UndergroundTempModifier());
-        event.register(new InsulationTempModifier());
-        event.register(new MountTempModifier());
-        event.register(new WaterskinTempModifier());
-        event.register(new SoulLampTempModifier());
-        event.register(new WaterTempModifier());
-        event.register(new HearthTempModifier());
-        event.register(new FoodTempModifier());
-        event.register(new FreezingTempModifier());
-        event.register(new FireTempModifier());
-        event.register(new SoulSproutTempModifier());
+        event.register(() -> new BlockTempModifier());
+        event.register(() -> new BiomeTempModifier());
+        event.register(() -> new UndergroundTempModifier());
+        event.register(() -> new InsulationTempModifier());
+        event.register(() -> new MountTempModifier());
+        event.register(() -> new WaterskinTempModifier());
+        event.register(() -> new SoulLampTempModifier());
+        event.register(() -> new WaterTempModifier());
+        event.register(() -> new HearthTempModifier());
+        event.register(() -> new FoodTempModifier());
+        event.register(() -> new FreezingTempModifier());
+        event.register(() -> new FireTempModifier());
+        event.register(() -> new SoulSproutTempModifier());
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())

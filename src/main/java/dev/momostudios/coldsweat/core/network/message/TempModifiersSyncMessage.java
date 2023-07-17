@@ -51,8 +51,7 @@ public class TempModifiersSyncMessage
             if (entity != null)
             {
                 entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-                {
-                    cap.deserializeModifiers(message.modifiers);
+                {   cap.deserializeModifiers(message.modifiers);
                 });
             }
         });
