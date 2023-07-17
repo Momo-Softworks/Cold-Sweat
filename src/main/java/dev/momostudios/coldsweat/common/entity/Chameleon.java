@@ -159,7 +159,7 @@ public class Chameleon extends Animal
                 {
                     Player player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
                     if (player != null)
-                    {   player.sendMessage(deathMessage, Util.NIL_UUID);
+                    {   player.sendSystemMessage(deathMessage);
                     }
                 });
             }
