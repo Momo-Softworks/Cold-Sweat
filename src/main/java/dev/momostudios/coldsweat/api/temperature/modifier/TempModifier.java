@@ -21,28 +21,18 @@ import java.util.function.Function;
  */
 public abstract class TempModifier
 {
-     CompoundTag nbt = new CompoundTag();
-    int expireTicks = -1;
-    int ticksExisted = 0;
-    int tickRate = 1;
-    double lastInput = 0;
-    double lastOutput = 0;
-    Function<Double, Double> function = temp -> temp;
+    private CompoundTag nbt = new CompoundTag();
+    private int expireTicks = -1;
+    private int ticksExisted = 0;
+    private int tickRate = 1;
+    private double lastInput = 0;
+    private double lastOutput = 0;
+    private Function<Double, Double> function = temp -> temp;
 
     /**
      * Default constructor (REQUIRED for proper registration).<br>
      */
     public TempModifier() {}
-
-    public CompoundTag getNBT()
-    {
-        return nbt;
-    }
-
-    public void setNBT(CompoundTag data)
-    {
-        this.nbt = data;
-    }
 
     /**
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
@@ -60,12 +50,12 @@ public abstract class TempModifier
      * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, dev.momostudios.coldsweat.api.util.Temperature.Type)} method.
      * @param entity the entity that is being affected by the modifier.
      */
-    public double update(double temp, LivingEntity entity, Temperature.Type type)
+    public final double update(double temp, LivingEntity entity, Temperature.Type type)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
-        if (pre.isCanceled()) return temp;
+        if (pre.isCanceled()) return pre.getTemperature();
 
         this.function = this.calculate(entity, type);
 
@@ -79,7 +69,7 @@ public abstract class TempModifier
      * @param temp the Temperature to calculate with
      * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public double getResult(double temp)
+    public final double getResult(double temp)
     {
         lastInput = temp;
         return lastOutput = function.apply(temp);
@@ -90,22 +80,19 @@ public abstract class TempModifier
      * @param ticks the number of ticks this modifier will last.
      * @return this TempModifier instance (allows for in-line building).
      */
-    public TempModifier expires(int ticks)
+    public final TempModifier expires(int ticks)
     {
         expireTicks = ticks;
         return this;
     }
-    public int getExpireTime()
-    {
-        return expireTicks;
+    public final int getExpireTime()
+    {   return expireTicks;
     }
-    public int getTicksExisted()
-    {
-        return ticksExisted;
+    public final int getTicksExisted()
+    {   return ticksExisted;
     }
-    public int setTicksExisted(int ticks)
-    {
-        return ticksExisted = ticks;
+    public final int setTicksExisted(int ticks)
+    {   return ticksExisted = ticks;
     }
 
     /**
@@ -119,31 +106,37 @@ public abstract class TempModifier
      * @param ticks the number of ticks between each call to {@code getResult()}.
      * @return this TempModifier instance (allows for in-line building).
      */
-    public TempModifier tickRate(int ticks)
-    {
-        tickRate = Math.max(1, ticks);
+    public final TempModifier tickRate(int ticks)
+    {   tickRate = Math.max(1, ticks);
         return this;
     }
 
-    public int getTickRate()
-    {
-        return tickRate;
+    public final int getTickRate()
+    {   return tickRate;
     }
 
     /**
      * @return The Temperature this TempModifier was last given
      */
-    public double getLastInput()
-    {
-        return lastInput;
+    public final double getLastInput()
+    {   return lastInput;
     }
 
     /**
      * @return The Temperature this TempModifier's function last returned
      */
-    public double getLastOutput()
+    public final double getLastOutput()
+    {   return lastOutput;
+    }
+
+    public final CompoundTag getNBT()
     {
-        return lastOutput;
+        return nbt;
+    }
+
+    public void setNBT(CompoundTag data)
+    {
+        this.nbt = data;
     }
 
     /**

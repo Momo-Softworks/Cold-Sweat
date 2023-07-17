@@ -43,15 +43,13 @@ public class SyncShearableDataMessage
     public static void handle(SyncShearableDataMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
-        if (context.getDirection().getReceptionSide().isClient())
+        if (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.worldKey))
         {
             context.enqueueWork(() ->
             {
                 try
                 {
-                    Level level = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.worldKey))
-                            ? ClientOnlyHelper.getClientLevel()
-                            : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
+                    Level level = ClientOnlyHelper.getClientLevel();
                     if (level != null)
                     {   Entity entity = level.getEntity(message.entityId);
                         if (entity != null)

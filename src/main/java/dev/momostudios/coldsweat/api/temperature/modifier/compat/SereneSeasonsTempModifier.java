@@ -20,11 +20,12 @@ public class SereneSeasonsTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        if (entity.level.dimensionType().natural())
+        if (!entity.level.dimensionType().natural())
         {
             ISeasonState season = SeasonHelper.getSeasonState(entity.level);
             double startValue;
             double endValue;
+
             switch (season.getSubSeason())
             {
                 case EARLY_AUTUMN -> { startValue = ConfigSettings.AUTUMN_TEMPS.get()[0]; endValue = ConfigSettings.AUTUMN_TEMPS.get()[1]; }
@@ -42,10 +43,9 @@ public class SereneSeasonsTempModifier extends TempModifier
                 case EARLY_SUMMER -> { startValue = ConfigSettings.SUMMER_TEMPS.get()[0]; endValue = ConfigSettings.SUMMER_TEMPS.get()[1]; }
                 case MID_SUMMER   -> { startValue = ConfigSettings.SUMMER_TEMPS.get()[1]; endValue = ConfigSettings.SUMMER_TEMPS.get()[2]; }
                 case LATE_SUMMER  -> { startValue = ConfigSettings.SUMMER_TEMPS.get()[2]; endValue = ConfigSettings.AUTUMN_TEMPS.get()[0]; }
-                default ->
-                {
-                    return temp -> temp;
-                }
+
+                default -> { return temp -> temp; }
+
             }
             return temp -> temp + (float) CSMath.blend(startValue, endValue, season.getDay() % (season.getSubSeasonDuration() / season.getDayDuration()), 0, 8);
         }

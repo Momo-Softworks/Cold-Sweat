@@ -18,29 +18,25 @@ public class TemperatureSyncMessage
     boolean instant;
 
     public TemperatureSyncMessage(LivingEntity entity, CompoundTag temps, boolean instant)
-    {
-        this.entityId = entity.getId();
+    {   this.entityId = entity.getId();
         this.temps = temps;
         this.instant = instant;
     }
 
     TemperatureSyncMessage(int entityId, CompoundTag temps, boolean instant)
-    {
-        this.entityId = entityId;
+    {   this.entityId = entityId;
         this.temps = temps;
         this.instant = instant;
     }
 
     public static void encode(TemperatureSyncMessage message, FriendlyByteBuf buffer)
-    {
-        buffer.writeInt(message.entityId);
+    {   buffer.writeInt(message.entityId);
         buffer.writeNbt(message.temps);
         buffer.writeBoolean(message.instant);
     }
 
     public static TemperatureSyncMessage decode(FriendlyByteBuf buffer)
-    {
-        return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
+    {   return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
     }
 
     public static void handle(TemperatureSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -58,10 +54,8 @@ public class TemperatureSyncMessage
                     Temperature.getTemperatureCap(entity).ifPresent(cap ->
                     {
                         cap.deserializeTemps(message.temps);
-
                         if (message.instant && cap instanceof PlayerTempCap)
-                        {
-                            Overlays.setBodyTemp(cap.getTemp(Temperature.Type.BODY));
+                        {   Overlays.setBodyTemp(cap.getTemp(Temperature.Type.BODY));
                         }
                     });
                 }

@@ -115,6 +115,24 @@ public class TempModifierEvent extends Event
      */
     public static class Calculate extends TempModifierEvent
     {
+        public LivingEntity entity;
+        public TempModifier modifier;
+        public double temperature;
+
+        public Calculate(TempModifier modifier, LivingEntity entity, double temperature)
+        {
+            this.entity = entity;
+            this.modifier = modifier;
+            this.temperature = temperature;
+        }
+
+        public TempModifier getModifier() {
+            return modifier;
+        }
+        public double getTemperature() {
+            return temperature;
+        }
+
         /**
          * Fired at the beginning of {@code calculate()}, before the {@code getValue()} method is called. <br>
          * <br>
@@ -123,27 +141,13 @@ public class TempModifierEvent extends Event
          * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
          * <br>
          * This event is {@link Cancelable}. <br>
-         * Cancelling this event results in {@code getValue()} not being called (the Temperature stays unchanged). <br>
+         * Cancelling this event results in the modifier not being processed, remaining unchanged. <br>
          */
         @Cancelable
         public static class Pre extends Calculate
         {
-            public final LivingEntity entity;
-            private final TempModifier modifier;
-            private double temperature;
-
             public Pre(TempModifier modifier, LivingEntity entity, double temperature)
-            {
-                this.entity = entity;
-                this.modifier = modifier;
-                this.temperature = temperature;
-            }
-
-            public TempModifier getModifier() {
-                return modifier;
-            }
-            public double getTemperature() {
-                return temperature;
+            {   super(modifier, entity, temperature);
             }
         }
 
@@ -158,22 +162,8 @@ public class TempModifierEvent extends Event
          */
         public static class Post extends Calculate
         {
-            public final LivingEntity entity;
-            private final TempModifier modifier;
-            private double temperature;
-
             public Post(TempModifier modifier, LivingEntity entity, double temperature)
-            {
-                this.entity = entity;
-                this.modifier = modifier;
-                this.temperature = temperature;
-            }
-
-            public TempModifier getModifier() {
-                return modifier;
-            }
-            public double getTemperature() {
-                return temperature;
+            {   super(modifier, entity, temperature);
             }
         }
     }

@@ -6,6 +6,9 @@ import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
+
 /**
  * Fired when the {@link TempModifier} registry is being built ({@link TempModifierRegistry}). <br>
  * The event is fired during {@link net.minecraftforge.event.world.WorldEvent.Load}. <br>
@@ -24,14 +27,21 @@ public class TempModifierRegisterEvent extends Event
      *
      * @param modifier the {@link TempModifier} to add.
      */
-    public void register(TempModifier modifier)
+    public void register(Supplier<TempModifier> modifier)
     {
         TempModifierRegistry.register(modifier);
     }
 
     public void registerByClassName(String className)
     {
-        try { this.register((TempModifier) Class.forName(className).getConstructor().newInstance()); }
+        try
+        {
+            this.register(() ->
+            {   try
+                {   return (TempModifier) Class.forName(className).getConstructor().newInstance();
+                } catch (Exception e) { throw new RuntimeException(e); }
+            });
+        }
         catch (Exception e)
         {   ColdSweat.LOGGER.error("Failed to register TempModifier by class name: \"" + className + "\"!", e);
         }

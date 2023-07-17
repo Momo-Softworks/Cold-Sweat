@@ -16,6 +16,7 @@ import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,7 +41,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -159,7 +159,7 @@ public class Chameleon extends Animal
                 {
                     Player player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
                     if (player != null)
-                    {   player.sendSystemMessage(deathMessage);
+                    {   player.sendMessage(deathMessage, Util.NIL_UUID);
                     }
                 });
             }
