@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class ItemTooltipInfo
+public class TooltipHandler
 {
     @SubscribeEvent
     public static void addSimpleTooltips(ItemTooltipEvent event)
