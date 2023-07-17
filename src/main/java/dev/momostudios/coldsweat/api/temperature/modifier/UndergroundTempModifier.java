@@ -42,6 +42,7 @@ public class UndergroundTempModifier extends TempModifier
 
         for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 8))
         {
+            if (!level.isLoaded(pos)) continue;
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
             depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
