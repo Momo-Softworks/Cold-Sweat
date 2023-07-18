@@ -5,10 +5,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -41,7 +43,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     @Override
     public int getWidth(Font font)
     {
-        return width;
+        return ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()] * 6 + 8;
     }
 
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
@@ -49,7 +51,6 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
 
         int slots = ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()];
-        this.width = 0;
 
         List<Triplet<Double, Double, Double>> positiveInsul = new ArrayList<>();
         List<Triplet<Double, Double, Double>> negativeInsul = new ArrayList<>();
@@ -100,7 +101,6 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         // Render the bars
         poseStack.pushPose();
-        width = 0;
 
         // Positive (default) insulation bar
         int posSlots = positiveInsul.size();
