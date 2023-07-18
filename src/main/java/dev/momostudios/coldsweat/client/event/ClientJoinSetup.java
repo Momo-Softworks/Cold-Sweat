@@ -17,6 +17,6 @@ public class ClientJoinSetup
         // Get configs
         ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries
-        TempModifierInit.rebuildRegistries();
+        TempModifierInit.buildRegistries();
     }
 }
