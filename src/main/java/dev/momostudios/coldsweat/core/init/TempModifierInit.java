@@ -19,25 +19,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber
 public class TempModifierInit
 {
-    // Trigger registry events
     @SubscribeEvent
-    public static void registerServer(ServerStartedEvent event)
-    {
-        rebuildRegistries();
+    public static void onModLoad(ServerStartedEvent event)
+    {   buildRegistries();
     }
 
-    public static void rebuildRegistries()
+    // Trigger registry events
+    public static void buildRegistries()
     {
         TempModifierRegistry.flush();
         BlockTempRegistry.flush();
@@ -89,7 +89,7 @@ public class TempModifierInit
                 Block[] effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toArray(Block[]::new);
 
                 // Get block predicate
-                List<Predicate<BlockState>> blockPredicates = new ArrayList<>();
+                Map<String, Predicate<BlockState>> blockPredicates = new HashMap<>();
                 if (effectBuilder.size() == 6 && effectBuilder.get(5) instanceof String)
                 {
                     // Separate comma-delineated predicates
@@ -111,7 +111,7 @@ public class TempModifierInit
                             property.getValue(value).ifPresent(propertyValue ->
                             {
                                 // Add a new predicate to the list
-                                blockPredicates.add(state ->
+                                blockPredicates.put(predicate, state ->
                                 {   // If the value matches, this predicate returns true
                                     return state.getValue(property).equals(propertyValue);
                                 });
@@ -120,15 +120,16 @@ public class TempModifierInit
                     }
                 }
 
-                event.register(new BlockTemp(effectBlocks)
+                event.register(new BlockTempConfig(blockPredicates, effectBlocks)
                 {
                     @Override
                     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                     {
                         // Check the list of predicates first
-                        if (!blockPredicates.isEmpty() && !blockPredicates.stream().allMatch(predicate -> predicate.test(state))) return 0;
-
-                        return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
+                        if (blockPredicates.isEmpty() || this.testPredicates(state))
+                        {   return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
+                        }
+                        return  0;
                     }
 
                     @Override
