@@ -118,7 +118,7 @@ public class WorldHelper
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         if (state.isAir() || !state.getMaterial().blocksMotion() || state.is(BlockTags.LEAVES)
-        || state.is(ModBlocks.HEARTH_BOTTOM) || state.is(ModBlocks.HEARTH_TOP))
+        || state.getBlock() == ModBlocks.HEARTH_BOTTOM || state.getBlock() == ModBlocks.HEARTH_TOP)
         {   return false;
         }
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
@@ -142,22 +142,6 @@ public class WorldHelper
         }
 
         return area[0] >= 1;
-    }
-
-    public static BlockState getBlockState(ChunkAccess chunk, BlockPos blockpos)
-    {
-        if (chunk == null) return Blocks.AIR.defaultBlockState();
-
-        int x = blockpos.getX();
-        int y = blockpos.getY();
-        int z = blockpos.getZ();
-
-        try
-        {   return getChunkSection(chunk, y).getStates().get(x & 15, y & 15, z & 15);
-        }
-        catch (Exception e)
-        {   return chunk.getBlockState(blockpos);
-        }
     }
 
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
@@ -200,7 +184,7 @@ public class WorldHelper
     {
         BlockPos pos = entity.blockPosition();
         ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
-        return entity.isInWater() || WorldHelper.getBlockState(chunk, pos).is(Blocks.BUBBLE_COLUMN);
+        return entity.isInWater() || chunk.getBlockState(pos).is(Blocks.BUBBLE_COLUMN);
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
@@ -224,7 +208,7 @@ public class WorldHelper
         {
             Vec3 ray = to.subtract(from);
             Vec3 normalRay = ray.normalize();
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos pos = new BlockPos(from).mutable();
             ChunkAccess workingChunk = chunk;
 
             // Iterate over every block-long segment of the ray
@@ -239,15 +223,15 @@ public class WorldHelper
 
                 // Set new workingChunk if the ray travels outside the current one
                 if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
-                    workingChunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+                    workingChunk = getChunk(level, pos);
 
                 if (workingChunk == null) continue;
 
                 // Get the blockstate at the current position
-                BlockState state = getBlockState(workingChunk, pos);
+                BlockState state = workingChunk.getBlockState(pos);
 
                 // If the block isn't air, then we hit something
-                if (!state.isAir() && --maxHits <= 0)
+                if (!state.isAir() && state.getMaterial().blocksMotion() && --maxHits <= 0)
                     break;
 
                 rayTracer.accept(workingChunk, state, pos);

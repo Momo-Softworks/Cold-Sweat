@@ -92,64 +92,58 @@ public class TempModifierInit
                 List<Predicate<BlockState>> blockPredicates = new ArrayList<>();
                 if (effectBuilder.size() == 6 && effectBuilder.get(5) instanceof String)
                 {
+                    // Separate comma-delineated predicates
                     String[] predicateList = ((String) effectBuilder.get(5)).split(",");
 
+                    // Iterate predicates
                     for (String predicate : predicateList)
                     {
-                        // Split into name-value pairs separated by "="
+                        // Split predicate into key-value pairs separated by "="
                         String[] pair = predicate.split("=");
+                        String key = pair[0];
+                        String value = pair[1];
+
                         // Get the property with the given name
-                        Property<?> property = effectBlocks[0].getStateDefinition().getProperty(pair[0]);
+                        Property<?> property = effectBlocks[0].getStateDefinition().getProperty(key);
                         if (property != null)
                         {
-                            // Parse the desired values that the user configured
-                            String rawValue = pair[1];
-                            Object value = property.getValueClass().equals(Boolean.class)
-                                    ? Boolean.parseBoolean(rawValue)
-                                    : property.getValueClass().equals(Integer.class)
-                                    ? Integer.parseInt(rawValue)
-                                    : property.getValueClass().equals(String.class)
-                                    ? rawValue
-                                    : null;
-
-                            // Add a new predicate to the list
-                            blockPredicates.add(state ->
+                            // Parse the desired value for this property
+                            property.getValue(value).ifPresent(propertyValue ->
                             {
-                                // If the value is valid and matches, return true
-                                return value != null && state.getValue(property).equals(value);
+                                // Add a new predicate to the list
+                                blockPredicates.add(state ->
+                                {   // If the value matches, this predicate returns true
+                                    return state.getValue(property).equals(propertyValue);
+                                });
                             });
                         }
                     }
                 }
 
-                event.register(
-                        new BlockTemp(effectBlocks)
-                        {
-                            @Override
-                            public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                            {
-                                // Check the list of predicates first
-                                if (!blockPredicates.isEmpty() && !blockPredicates.stream().allMatch(pred -> pred.test(state))) return 0;
+                event.register(new BlockTemp(effectBlocks)
+                {
+                    @Override
+                    public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
+                    {
+                        // Check the list of predicates first
+                        if (!blockPredicates.isEmpty() && !blockPredicates.stream().allMatch(predicate -> predicate.test(state))) return 0;
 
-                                return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
-                            }
+                        return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
+                    }
 
-                            @Override
-                            public double maxEffect()
-                            {
-                                return maxEffect;
-                            }
+                    @Override
+                    public double maxEffect()
+                    {   return maxEffect;
+                    }
 
-                            @Override
-                            public double minEffect()
-                            {
-                                return minEffect;
-                            }
-                        });
+                    @Override
+                    public double minEffect()
+                    {   return minEffect;
+                    }
+                });
             }
             catch (Exception e)
-            {
-                ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
+            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
                 e.printStackTrace();
                 break;
             }
@@ -174,19 +168,19 @@ public class TempModifierInit
         String armorUnder = compatPath + "ArmorUnderTempModifier";
         String weatherStorms = compatPath + "StormTempModifier";
 
-        event.register(() -> new BlockTempModifier());
-        event.register(() -> new BiomeTempModifier());
-        event.register(() -> new UndergroundTempModifier());
-        event.register(() -> new InsulationTempModifier());
-        event.register(() -> new MountTempModifier());
-        event.register(() -> new WaterskinTempModifier());
-        event.register(() -> new SoulLampTempModifier());
-        event.register(() -> new WaterTempModifier());
-        event.register(() -> new HearthTempModifier());
-        event.register(() -> new FoodTempModifier());
-        event.register(() -> new FreezingTempModifier());
-        event.register(() -> new FireTempModifier());
-        event.register(() -> new SoulSproutTempModifier());
+        event.register(BlockTempModifier::new);
+        event.register(BiomeTempModifier::new);
+        event.register(UndergroundTempModifier::new);
+        event.register(InsulationTempModifier::new);
+        event.register(MountTempModifier::new);
+        event.register(WaterskinTempModifier::new);
+        event.register(SoulLampTempModifier::new);
+        event.register(WaterTempModifier::new);
+        event.register(HearthTempModifier::new);
+        event.register(FoodTempModifier::new);
+        event.register(FreezingTempModifier::new);
+        event.register(FireTempModifier::new);
+        event.register(SoulSproutTempModifier::new);
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())
