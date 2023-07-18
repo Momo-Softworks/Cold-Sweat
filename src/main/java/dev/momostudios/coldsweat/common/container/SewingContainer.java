@@ -29,6 +29,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.Wearable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
@@ -130,7 +131,7 @@ public class SewingContainer extends AbstractContainerMenu
             public boolean mayPlace(ItemStack stack)
             {
                 Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
-                return stack.getItem() instanceof ArmorItem
+                return stack.getItem() instanceof Wearable
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
             @Override
@@ -293,16 +294,16 @@ public class SewingContainer extends AbstractContainerMenu
 
     private void testForRecipe()
     {
-        ItemStack armorItem = this.getItem(0);
+        ItemStack wearableItem = this.getItem(0);
         ItemStack insulatorItem = this.getItem(1);
 
         // Is the first item armor, and the second item an insulator
-        if (armorItem.getItem() instanceof ArmorItem)
+        if (wearableItem.getItem() instanceof Wearable)
         {
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                armorItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+                wearableItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
                 {
                     if (cap.getInsulation().size() > 0)
                     {
@@ -312,10 +313,10 @@ public class SewingContainer extends AbstractContainerMenu
             }
             // Item is for insulation
             else if ((ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()) || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()))
-            && (!(insulatorItem.getItem() instanceof ArmorItem)
-            || LivingEntity.getEquipmentSlotForItem(armorItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
+            && (!(insulatorItem.getItem() instanceof Wearable)
+            || LivingEntity.getEquipmentSlotForItem(wearableItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
-                ItemStack processed = armorItem.copy();
+                ItemStack processed = wearableItem.copy();
                 IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
@@ -336,7 +337,7 @@ public class SewingContainer extends AbstractContainerMenu
                         else negInsul.getAndIncrement();
                     }
                 });
-                if (posInsul.get() > ArmorInsulation.getInsulationSlots(armorItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(armorItem))
+                if (posInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem))
                 {
                     return;
                 }
@@ -349,7 +350,7 @@ public class SewingContainer extends AbstractContainerMenu
                     Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
                     if (ench == null) return false;
 
-                    if (ench.canApplyAtEnchantingTable(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+                    if (ench.canApplyAtEnchantingTable(wearableItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
                     {
                         processed.enchant(ench, enchantTag.getInt("lvl"));
                         return true;
@@ -430,7 +431,7 @@ public class SewingContainer extends AbstractContainerMenu
                     }
                     else return ItemStack.EMPTY;
                 }
-                else if (slotItem.getItem() instanceof ArmorItem)
+                else if (slotItem.getItem() instanceof Wearable)
                 {
                     if (!this.moveItemStackTo(slotItem, 0, 1, false))
                     {

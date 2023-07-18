@@ -8,9 +8,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -31,9 +29,10 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
-        if (event.getObject().getItem() instanceof ArmorItem
-        && !ConfigSettings.INSULATION_ITEMS.get().containsKey(event.getObject().getItem())
-        && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(event.getObject().getItem()))
+        Item item = event.getObject().getItem();
+        if (item instanceof Wearable
+        && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item)
+        && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item))
         {
             // Make a new capability instance to attach to the item
             IInsulatableCap itemInsulationCap = new ItemInsulationCap();
