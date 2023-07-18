@@ -36,8 +36,10 @@ public class BiomeTempModifier extends TempModifier
     {
         try
         {
+            Level level = entity.level;
             double worldTemp = 0;
-            ResourceLocation dimensionID = entity.level.dimension().location();
+            ResourceLocation dimensionID = level.dimension().location();
+
             Number dimensionOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
 
             if (dimensionOverride != null)
@@ -55,7 +57,6 @@ public class BiomeTempModifier extends TempModifier
                     this.getNBT().putInt("Samples", 25);
                 }
 
-                Level level = entity.level;
 
                 for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {

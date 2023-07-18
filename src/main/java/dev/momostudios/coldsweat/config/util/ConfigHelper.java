@@ -1,8 +1,10 @@
 package dev.momostudios.coldsweat.config.util;
 
 import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -12,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
@@ -129,25 +132,24 @@ public class ConfigHelper
         {
             try
             {
-                String biomeID = (String) entry.get(0);
+                ResourceLocation biomeID = new ResourceLocation((String) entry.get(0));
 
-                Biome biome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID));
-                if (biome == null) continue;
+                Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
+                if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biomeID);
+                if (biome == null) throw new Exception("Biome not found: " + biomeID);
 
                 double min;
                 double max;
                 Temperature.Units units;
                 // The config defines a min and max value, with optional unit conversion
                 if (entry.size() > 2)
-                {
-                    units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+                {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
                     min = CSMath.convertTemp(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
                     max = CSMath.convertTemp(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
                 }
                 // The config only defines a mid-temperature
                 else
-                {
-                    double mid = ((Number) entry.get(1)).doubleValue();
+                {   double mid = ((Number) entry.get(1)).doubleValue();
                     double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
                     min = mid - variance;
                     max = mid + variance;
@@ -155,9 +157,11 @@ public class ConfigHelper
                 }
 
                 // Maps the biome ID to the temperature (and variance if present)
-                map.put(biome.getRegistryName(), new Triplet<>(min, max, units));
+                map.put(biomeID, new Triplet<>(min, max, units));
             }
-            catch (Exception ignored) {}
+            catch (Exception e)
+            {   ColdSweat.LOGGER.error("Error parsing biome temperature config entry: " + entry.toString());
+            }
         }
         return map;
     }

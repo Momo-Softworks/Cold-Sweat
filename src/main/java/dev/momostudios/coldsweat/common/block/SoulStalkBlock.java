@@ -69,18 +69,17 @@ public class SoulStalkBlock extends Block implements IPlantable
         {
             // Get the height of the plant
             int i;
-            for(i = 1; level.getBlockState(pos.below(i)).is(this); ++i)
+            for(i = 1; level.getBlockState(pos.below(i)).getBlock() == this; ++i)
             {}
 
             if (i < 6 && rand.nextDouble() < 0.05 + CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), Temperature.getTemperatureAt(pos.below(i - 1), level), 0, 0.95))
             {
                 int j = state.getValue(AGE);
                 if (ForgeHooks.onCropsGrowPre(level, pos, state, true))
-                {
-                    if (j >= 8)
-                    {
-                        level.setBlockAndUpdate(pos.above(), this.defaultBlockState().setValue(SECTION, 3));
-                        level.setBlock(pos, state.setValue(AGE, 0).setValue(SECTION, rand.nextInt(2) + 1), 4);
+                {   if (j >= 8)
+                    {   level.setBlockAndUpdate(pos.above(), this.defaultBlockState().setValue(SECTION, 3));
+                        int section = rand.nextDouble() < 0.3 ? 2 : 1;
+                        level.setBlock(pos, state.setValue(AGE, 0).setValue(SECTION, section), 4);
                     }
                     else level.setBlock(pos, state.setValue(AGE, j + 1), 4);
                 }
@@ -93,10 +92,9 @@ public class SoulStalkBlock extends Block implements IPlantable
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         BlockPos pos = context.getClickedPos();
-        BlockState state = context.getLevel().getBlockState(pos.below()).is(this) ? this.defaultBlockState().setValue(SECTION, 3)
-                : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
-                : null;
-        return state;
+        return context.getLevel().getBlockState(pos.below()).getBlock() == this ? this.defaultBlockState().setValue(SECTION, 3)
+             : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
+             : null;
     }
 
     @Override
@@ -120,11 +118,11 @@ public class SoulStalkBlock extends Block implements IPlantable
 
         if (direction == Direction.UP)
         {
-            if (!otherState.is(this))
+            if (otherState.getBlock() != this)
             {   return Blocks.AIR.defaultBlockState();
             }
             else if (state.getValue(SECTION) == 3)
-            {   return state.setValue(SECTION, new Random().nextInt(2) + 1);
+            {   return state.setValue(SECTION, Math.random() < 0.33 ? 2 : 1);
             }
         }
         return state;
@@ -149,7 +147,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
     {
         BlockState below = level.getBlockState(pos.below());
-        return below.is(BlockTags.SOUL_FIRE_BASE_BLOCKS) || below.is(this);
+        return below.is(BlockTags.SOUL_FIRE_BASE_BLOCKS) || below.getBlock() == this;
     }
 
     @SuppressWarnings("deprecation")

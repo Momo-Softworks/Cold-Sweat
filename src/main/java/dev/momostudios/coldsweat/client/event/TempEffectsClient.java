@@ -138,21 +138,23 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void renderFog(EntityViewRenderEvent event)
     {
+        if (!(event instanceof EntityViewRenderEvent.RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
+
         Player player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
-            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
+            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
             {
-                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), 4f, tempWithImmunity, 50f, 100f));
-                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), 0f, tempWithImmunity, 50f, 100f));
+                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
+                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
                 fog.setCanceled(true);
             }
-            else if (event instanceof EntityViewRenderEvent.FogColors fogColor)
-            {
-                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithImmunity, 50, 90));
-                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithImmunity, 50, 90));
-                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithImmunity, 50, 90));
+            else
+            {   EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
+                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, immunityModifier, 50, 90));
+                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, immunityModifier, 50, 90));
+                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, immunityModifier, 50, 90));
             }
         }
     }

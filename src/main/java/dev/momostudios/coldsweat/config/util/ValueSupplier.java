@@ -21,14 +21,11 @@ public class ValueSupplier<T>
     private boolean synced = false;
 
     public ValueSupplier(Supplier<T> valueCreator)
-    {
-        this.valueCreator = valueCreator;
-        this.value = valueCreator.get();
+    {   this.valueCreator = valueCreator;
     }
 
     public static <V> ValueSupplier<V> of(Supplier<V> valueCreator)
-    {
-        return new ValueSupplier<>(valueCreator);
+    {   return new ValueSupplier<>(valueCreator);
     }
 
     public static <V> ValueSupplier<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
@@ -42,7 +39,11 @@ public class ValueSupplier<T>
     }
 
     public T get()
-    {   return value;
+    {
+        if (this.value == null)
+        {   this.load();
+        }
+        return value;
     }
 
     public void set(T value)
