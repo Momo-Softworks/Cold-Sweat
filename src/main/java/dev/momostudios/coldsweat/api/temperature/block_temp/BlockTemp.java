@@ -6,12 +6,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 public abstract class BlockTemp
 {
-    public HashSet<Block> validBlocks = new HashSet<>();
+    private final HashSet<Block> validBlocks;
 
     /**
      * @param state is the {@link BlockState} of the block
@@ -23,13 +26,15 @@ public abstract class BlockTemp
     public abstract double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
     public BlockTemp(Block... blocks)
-    {
-        validBlocks.addAll(List.of(blocks));
+    {   validBlocks = new HashSet<>(Set.of(blocks));
     }
 
     public boolean hasBlock(Block block)
-    {
-        return validBlocks.contains(block);
+    {   return validBlocks.contains(block);
+    }
+
+    public Set<Block> getAffectedBlocks()
+    {   return validBlocks;
     }
 
     /**

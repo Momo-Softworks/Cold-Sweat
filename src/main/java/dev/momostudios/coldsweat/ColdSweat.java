@@ -29,7 +29,7 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 @Mod(ColdSweat.MOD_ID)
 public class ColdSweat
 {
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getFormatterLogger("Cold Sweat");
     public static final boolean REMAP_MIXINS = false;
 
     public static final String MOD_ID = "cold_sweat";
@@ -68,6 +68,7 @@ public class ColdSweat
 
     public void commonSetup(final FMLCommonSetupEvent event)
     {
+        // Setup packets
         ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
         {   // Register advancement triggers
