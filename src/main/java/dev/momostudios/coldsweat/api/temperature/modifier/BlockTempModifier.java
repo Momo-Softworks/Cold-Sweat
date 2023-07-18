@@ -10,7 +10,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.IntTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -21,8 +20,8 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
@@ -36,7 +35,7 @@ public class BlockTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        Map<BlockTemp, Double> effectAmounts = new HashMap<>();
+        Map<BlockTemp, Double> affectMap = new HashMap<>();
         Map<BlockPos, Pair<BlockTemp, Double>> triggers = new HashMap<>();
         Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
 
@@ -67,15 +66,26 @@ public class BlockTempModifier extends TempModifier
                         if (state.getMaterial() == Material.AIR) continue;
 
                         // Get the BlockTemp associated with the block
-                        BlockTemp be = BlockTempRegistry.getEntryFor(state);
+                        List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
 
-                        if (be == null || be.equals(BlockTempRegistry.DEFAULT_BLOCK_EFFECT)) continue;
+                        if (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_EFFECT)) continue;
 
                         // Get the amount that this block has affected the player so far
-                        double effectAmount = effectAmounts.getOrDefault(be, 0.0);
 
-                        // Is totalTemp within the bounds of the BlockTemp's min/max allowed temps?
-                        if (CSMath.withinRange(effectAmount, be.minEffect(), be.maxEffect()))
+                        // Is totalTemp within the bounds of any BlockTemp's min/max range?
+                        boolean isInRange = affectMap.isEmpty();
+                        if (!isInRange)
+                        {   for (Map.Entry<BlockTemp, Double> entry : affectMap.entrySet())
+                            {   BlockTemp key = entry.getKey();
+                                Double value = entry.getValue();
+
+                                if (blockTemps.contains(key) && CSMath.withinRange(value, key.minEffect(), key.maxEffect()))
+                                {   isInRange = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (isInRange)
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vec3 pos = Vec3.atCenterOf(blockpos);
@@ -86,28 +96,34 @@ public class BlockTempModifier extends TempModifier
                                                           CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
                                                           CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
 
-                            // Get the temperature of the block given the player's distance
-                            double distance = CSMath.getDistance(playerClosest, pos);
-                            double tempToAdd = be.getTemperature(level, entity, state, blockpos, distance);
-
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
-                            AtomicInteger blocks = new AtomicInteger();
+                            int[] blocks = new int[1];
                             Vec3 ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
+
                             WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk,
                             (rayChunk, rayState, bpos) ->
-                            {
-                                if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
-                                    blocks.getAndIncrement();
+                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
+                                {   blocks[0]++;
+                                }
                             }, 3);
 
-                            // Store this block type's total effect on the player
-                            // Dampen the effect with each block between the player and the block
-                            double blockTempTotal = effectAmount + tempToAdd / (blocks.get() + 1);
-                            effectAmounts.put(be, CSMath.clamp(blockTempTotal, be.minEffect(), be.maxEffect()));
-                            // Used to trigger advancements
-                            triggers.put(blockpos, Pair.of(be, distance));
+                            // Get the temperature of the block given the player's distance
+                            double distance = CSMath.getDistance(playerClosest, pos);
+
+                            for (int i = 0; i < blockTemps.size(); i++)
+                            {
+                                BlockTemp blockTemp = blockTemps.get(i);
+                                double tempToAdd = blockTemp.getTemperature(level, entity, state, blockpos, distance);
+
+                                // Store this block type's total effect on the player
+                                // Dampen the effect with each block between the player and the block
+                                double blockTempTotal = affectMap.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
+                                affectMap.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                // Used to trigger advancements
+                                triggers.put(blockpos, Pair.of(blockTemp, distance));
+                            }
                         }
                     }
                     catch (Exception ignored) {}
@@ -119,7 +135,7 @@ public class BlockTempModifier extends TempModifier
         {
             for (Map.Entry<BlockPos, Pair<BlockTemp, Double>> trigger : triggers.entrySet())
             {   Pair<BlockTemp, Double> entry = trigger.getValue();
-                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getKey(), entry.getSecond(), effectAmounts.get(entry.getFirst()));
+                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getKey(), entry.getSecond(), affectMap.get(entry.getFirst()));
             }
         }
 
@@ -127,7 +143,7 @@ public class BlockTempModifier extends TempModifier
         // Add the effects of all the blocks together and return the result
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> effect : effectAmounts.entrySet())
+            for (Map.Entry<BlockTemp, Double> effect : affectMap.entrySet())
             {
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();

@@ -22,7 +22,7 @@ public class MixinSoulCampfire
     at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, CallbackInfo ci)
     {
-        if (state.is(Blocks.SOUL_CAMPFIRE) && ColdSweatConfig.getInstance().isSoulFireCold()
+        if (state.getBlock() == Blocks.SOUL_CAMPFIRE && ColdSweatConfig.getInstance().isSoulFireCold()
         && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
         {
             entity.setIsInPowderSnow(true);

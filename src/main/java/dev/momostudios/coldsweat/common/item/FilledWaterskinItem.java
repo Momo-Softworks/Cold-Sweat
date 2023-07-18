@@ -51,6 +51,8 @@ public class FilledWaterskinItem extends Item
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
             double itemTemp = stack.getOrCreateTag().getDouble("temperature");
 
+            if (chunk == null) return stack;
+
             // Play sound
             level.playLocalSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
                     SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
@@ -102,7 +104,7 @@ public class FilledWaterskinItem extends Item
 
                         // If there's ground, stop
                         BlockPos pos = new BlockPos(movedBox.minX, movedBox.minY, movedBox.minZ);
-                        if (WorldHelper.isSpreadBlocked(level, WorldHelper.getBlockState(chunk, pos), pos, Direction.DOWN, Direction.DOWN))
+                        if (WorldHelper.isSpreadBlocked(level, chunk.getBlockState(pos), pos, Direction.DOWN, Direction.DOWN))
                         {
                             MinecraftForge.EVENT_BUS.unregister(this);
                             return;
