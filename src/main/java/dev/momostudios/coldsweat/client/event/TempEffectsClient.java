@@ -146,8 +146,8 @@ public class TempEffectsClient
             float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof ViewportEvent.RenderFog fog)
             {
-                fog.setFarPlaneDistance(CSMath.blendLog(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
-                fog.setNearPlaneDistance(CSMath.blendLog(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
+                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
+                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
                 fog.setCanceled(true);
             }
             else

@@ -78,7 +78,7 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
         // Load configs to memory
-        ConfigSettings.SYNCED_SETTINGS.forEach((key, value) -> value.load());
+        ConfigSettings.load();
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)

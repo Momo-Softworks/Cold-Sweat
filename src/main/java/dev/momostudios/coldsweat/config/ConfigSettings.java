@@ -26,52 +26,52 @@ public class ConfigSettings
     public static final Map<String, ValueSupplier<?>> SYNCED_SETTINGS = new HashMap<>();
 
     // Settings visible in the config screen
-    public static ValueSupplier<Integer> DIFFICULTY;
-    public static ValueSupplier<Double> MAX_TEMP;
-    public static ValueSupplier<Double> MIN_TEMP;
-    public static ValueSupplier<Double> TEMP_RATE;
-    public static ValueSupplier<Boolean> FIRE_RESISTANCE_ENABLED;
-    public static ValueSupplier<Boolean> ICE_RESISTANCE_ENABLED;
-    public static ValueSupplier<Boolean> DAMAGE_SCALING;
-    public static ValueSupplier<Boolean> REQUIRE_THERMOMETER;
-    public static ValueSupplier<Integer> GRACE_LENGTH;
-    public static ValueSupplier<Boolean> GRACE_ENABLED;
+    public static final ValueSupplier<Integer> DIFFICULTY;
+    public static final ValueSupplier<Double> MAX_TEMP;
+    public static final ValueSupplier<Double> MIN_TEMP;
+    public static final ValueSupplier<Double> TEMP_RATE;
+    public static final ValueSupplier<Boolean> FIRE_RESISTANCE_ENABLED;
+    public static final ValueSupplier<Boolean> ICE_RESISTANCE_ENABLED;
+    public static final ValueSupplier<Boolean> DAMAGE_SCALING;
+    public static final ValueSupplier<Boolean> REQUIRE_THERMOMETER;
+    public static final ValueSupplier<Integer> GRACE_LENGTH;
+    public static final ValueSupplier<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
-    public static ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
-    public static ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
-    public static ValueSupplier<Double[]> SUMMER_TEMPS;
-    public static ValueSupplier<Double[]> AUTUMN_TEMPS;
-    public static ValueSupplier<Double[]> WINTER_TEMPS;
-    public static ValueSupplier<Double[]> SPRING_TEMPS;
+    public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
+    public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static final ValueSupplier<Double[]> SUMMER_TEMPS;
+    public static final ValueSupplier<Double[]> AUTUMN_TEMPS;
+    public static final ValueSupplier<Double[]> WINTER_TEMPS;
+    public static final ValueSupplier<Double[]> SPRING_TEMPS;
 
     // Item settings
-    public static ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
-    public static ValueSupplier<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
-    public static ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
-    public static ValueSupplier<Integer[]> INSULATION_SLOTS;
+    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
+    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static final ValueSupplier<Integer[]> INSULATION_SLOTS;
 
-    public static ValueSupplier<Map<Item, Double>> TEMPERATURE_FOODS;
+    public static final ValueSupplier<Map<Item, Double>> TEMPERATURE_FOODS;
 
-    public static ValueSupplier<Integer> WATERSKIN_STRENGTH;
+    public static final ValueSupplier<Integer> WATERSKIN_STRENGTH;
 
-    public static ValueSupplier<Map<Item, Integer>> LAMP_FUEL_ITEMS;
+    public static final ValueSupplier<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
-    public static ValueSupplier<List<ResourceLocation>> LAMP_DIMENSIONS;
+    public static final ValueSupplier<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static ValueSupplier<Map<Item, Double>> BOILER_FUEL;
-    public static ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
-    public static ValueSupplier<Map<Item, Double>> HEARTH_FUEL;
-    public static ValueSupplier<Boolean> HEARTH_POTIONS_ENABLED;
-    public static ValueSupplier<List<ResourceLocation>> BLACKLISTED_POTIONS;
+    public static final ValueSupplier<Map<Item, Double>> BOILER_FUEL;
+    public static final ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
+    public static final ValueSupplier<Map<Item, Double>> HEARTH_FUEL;
+    public static final ValueSupplier<Boolean> HEARTH_POTIONS_ENABLED;
+    public static final ValueSupplier<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
-    public static ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
+    public static final ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
 
     // Entity Settings
-    public static ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
-    public static ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
+    public static final ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
+    public static final ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -127,134 +127,26 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
-        BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures(), true),
-        encoder ->
-        {
-            CompoundTag tag = new CompoundTag();
-            CompoundTag mapTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : encoder.entrySet())
-            {
-                CompoundTag biomeTag = new CompoundTag();
-                biomeTag.putDouble("Min", entry.getValue().getA());
-                biomeTag.putDouble("Max", entry.getValue().getB());
-                biomeTag.putString("Units", entry.getValue().getC().toString());
-                mapTag.put(entry.getKey().toString(), biomeTag);
-            }
-            tag.put("BiomeTemps", mapTag);
-            return tag;
-        },
-        decoder ->
-        {
-            Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
-            CompoundTag mapTag = decoder.getCompound("BiomeTemps");
-            for (String biomeID : mapTag.getAllKeys())
-            {
-                CompoundTag biomeTag = mapTag.getCompound(biomeID);
-                Temperature.Units units = Temperature.Units.valueOf(biomeTag.getString("Units"));
-                map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), units));
-            }
-            return map;
-        },
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : saver.entrySet())
-            {   Triplet<Double, Double, Temperature.Units> triplet = entry.getValue();
-                Temperature.Units units = triplet.getC();
-                                       // Biome ID
-                list.add(Arrays.asList(entry.getKey().toString(),
-                                       // Min temp
-                                       CSMath.convertTemp(triplet.getA(), Temperature.Units.MC, units, true),
-                                       // Max temp
-                                       CSMath.convertTemp(triplet.getB(), Temperature.Units.MC, units, true),
-                                       // Units
-                                       units.toString()));
-            }
-            WorldSettingsConfig.getInstance().setBiomeTemperatures(list);
-        });
+        BIOME_TEMPS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures(), true));
 
-        BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets(), false),
-        encoder ->
-        {
-            CompoundTag tag = new CompoundTag();
-            CompoundTag mapTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : encoder.entrySet())
-            {
-                CompoundTag biomeTag = new CompoundTag();
-                biomeTag.putDouble("Min", entry.getValue().getA());
-                biomeTag.putDouble("Max", entry.getValue().getB());
-                biomeTag.putString("Units", entry.getValue().getC().toString());
-                mapTag.put(entry.getKey().toString(), biomeTag);
-            }
-            tag.put("BiomeOffsets", mapTag);
-            return tag;
-        },
-        decoder ->
-        {
-            Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
-            CompoundTag mapTag = decoder.getCompound("BiomeOffsets");
-            for (String biomeID : mapTag.getAllKeys())
-            {
-                CompoundTag biomeTag = mapTag.getCompound(biomeID);
-                Temperature.Units units = Temperature.Units.valueOf(biomeTag.getString("Units"));
-                map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), units));
-            }
-            return map;
-        },
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : saver.entrySet())
-            {   Triplet<Double, Double, Temperature.Units> triplet = entry.getValue();
-                Temperature.Units units = triplet.getC();
-                                       // Biome ID
-                list.add(List.of(entry.getKey().toString(),
-                                       // Min temp
-                                       CSMath.convertTemp(triplet.getA(), Temperature.Units.MC, units, true),
-                                       // Max temp
-                                       CSMath.convertTemp(triplet.getB(), Temperature.Units.MC, units, true),
-                                       // Units
-                                       units.toString()));
-            }
-            WorldSettingsConfig.getInstance().setBiomeOffsets(list);
-        });
+        BIOME_OFFSETS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets(), false));
 
-        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () ->
-        {
-            Map<ResourceLocation, Double> map = new HashMap<>();
+        DIMENSION_TEMPS = ValueSupplier.of(() ->
+        {   Map<ResourceLocation, Double> map = new HashMap<>();
+
             for (List<?> entry : WorldSettingsConfig.getInstance().dimensionTemperatures())
             {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
             }
             return map;
-        },
-        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionTemps"),
-        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionTemps"),
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Double> entry : saver.entrySet())
-            {   list.add(Arrays.asList(entry.getKey().toString(), entry.getValue()));
-            }
-            WorldSettingsConfig.getInstance().setDimensionTemperatures(list);
         });
 
-        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () ->
-        {
-            Map<ResourceLocation, Double> map = new HashMap<>();
+        DIMENSION_OFFSETS = ValueSupplier.of(() ->
+        {   Map<ResourceLocation, Double> map = new HashMap<>();
+
             for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())
             {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
             }
             return map;
-        },
-        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionOffsets"),
-        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionOffsets"),
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<ResourceLocation, Double> entry : saver.entrySet())
-            {   list.add(Arrays.asList(entry.getKey().toString(), entry.getValue()));
-            }
-            WorldSettingsConfig.getInstance().setDimensionOffsets(list);
         });
 
         BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
@@ -466,11 +358,16 @@ public class ConfigSettings
         });
 
         if (CompatManager.isSereneSeasonsLoaded())
-        {
-            SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().summerTemps());
+        {   SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().summerTemps());
             AUTUMN_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
             WINTER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().winterTemps());
             SPRING_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().springTemps());
+        }
+        else
+        {   SUMMER_TEMPS = ValueSupplier.of(() -> new Double[3]);
+            AUTUMN_TEMPS = ValueSupplier.of(() -> new Double[3]);
+            WINTER_TEMPS = ValueSupplier.of(() -> new Double[3]);
+            SPRING_TEMPS = ValueSupplier.of(() -> new Double[3]);
         }
     }
 
@@ -508,5 +405,10 @@ public class ConfigSettings
             if (value.isSynced())
                 value.save();
         });
+    }
+
+    public static void load()
+    {
+        SYNCED_SETTINGS.values().forEach(ValueSupplier::load);
     }
 }

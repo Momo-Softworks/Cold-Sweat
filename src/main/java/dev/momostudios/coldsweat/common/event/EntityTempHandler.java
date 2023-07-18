@@ -17,6 +17,7 @@ import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -375,7 +376,7 @@ public class EntityTempHandler
             {
                 Entity mount = player.getVehicle();
                 // If insulated minecart
-                if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().is(BlockInit.MINECART_INSULATION.get()))
+                if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
                 {   Temperature.addModifier(player, new MountTempModifier(20, 20).expires(1), Temperature.Type.RATE, false);
                 }
                 // If insulated entity (defined in config)

@@ -184,8 +184,9 @@ public class WorldHelper
     public static boolean isInWater(Entity entity)
     {
         BlockPos pos = entity.blockPosition();
-        ChunkAccess chunk = entity.level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
-        return entity.isInWater() || chunk.getBlockState(pos).is(Blocks.BUBBLE_COLUMN);
+        ChunkAccess chunk = WorldHelper.getChunk(entity.level, pos);
+        if (chunk == null) return false;
+        return entity.isInWater() || chunk.getBlockState(pos).getBlock() == Blocks.BUBBLE_COLUMN;
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)

@@ -5,14 +5,21 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import oshi.util.tuples.Triplet;
 
 import java.util.List;
@@ -36,8 +43,10 @@ public class BiomeTempModifier extends TempModifier
     {
         try
         {
+            Level level = entity.level;
             double worldTemp = 0;
-            ResourceLocation dimensionID = entity.level.dimension().location();
+            ResourceLocation dimensionID = level.dimension().location();
+
             Number dimensionOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
 
             if (dimensionOverride != null)
@@ -55,7 +64,6 @@ public class BiomeTempModifier extends TempModifier
                     this.getNBT().putInt("Samples", 25);
                 }
 
-                Level level = entity.level;
 
                 for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
