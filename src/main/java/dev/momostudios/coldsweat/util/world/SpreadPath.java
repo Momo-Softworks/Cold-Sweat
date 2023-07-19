@@ -62,8 +62,7 @@ public class SpreadPath
     }
 
     public void clearChildren()
-    {
-        this.children.clear();
+    {   this.children.clear();
     }
 
     public SpreadPath offset(int x, int y, int z)

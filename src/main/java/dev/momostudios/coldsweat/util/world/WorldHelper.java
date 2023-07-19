@@ -97,14 +97,14 @@ public class WorldHelper
     public static boolean canSeeSky(ChunkAccess chunk, LevelAccessor level, BlockPos pos, int maxDistance)
     {
         BlockPos.MutableBlockPos pos2 = pos.mutable();
-        for (int i = 0; i < Math.min(maxDistance, level.getHeight() - pos.getY()); i++)
+        for (int i = 0; i < Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY()); i++)
         {
-            pos2.move(0, 1, 0);
-
-            BlockState state = chunk.getBlockState(pos2);
+            BlockState state = level.getBlockState(pos2);
             if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
             {   return false;
             }
+
+            pos2.move(0, 1, 0);
         }
         return true;
     }
@@ -121,24 +121,26 @@ public class WorldHelper
         || state.getBlock() == ModBlocks.HEARTH_BOTTOM || state.getBlock() == ModBlocks.HEARTH_TOP)
         {   return false;
         }
+        if (state.isCollisionShapeFullBlock(level, pos)) return true;
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
 
+               // Should it have spread here in the first place?
         return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)
+               // Can it spread out?
             || isFullSide(CSMath.flattenShape(toDir.getAxis(), shape), toDir);
     }
 
     public static boolean isFullSide(VoxelShape shape, Direction dir)
     {
         if (shape.isEmpty()) return false;
-        if (shape.equals(Shapes.block())) return true;
 
         // Return true if the 2D x/y area of the shape is >= 1
         double[] area = new double[1];
         switch (dir.getAxis())
         {
-            case X -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (y2 - y1) * (z2 - z1));
-            case Y -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (z2 - z1));
-            case Z -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += (x2 - x1) * (y2 - y1));
+            case X -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += Math.abs(y2 - y1) * Math.abs(z2 - z1));
+            case Y -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += Math.abs(x2 - x1) * Math.abs(z2 - z1));
+            case Z -> shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> area[0] += Math.abs(x2 - x1) * Math.abs(y2 - y1));
         }
 
         return area[0] >= 1;
