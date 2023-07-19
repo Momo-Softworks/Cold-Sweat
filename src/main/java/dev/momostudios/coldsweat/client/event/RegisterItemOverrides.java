@@ -62,7 +62,7 @@ public class RegisterItemOverrides
                     {
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
-                            boolean celsius = ClientSettingsConfig.getInstance().celsius();
+                            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
                             String tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
                                 case 0 -> "§f";
@@ -72,7 +72,7 @@ public class RegisterItemOverrides
                                 case -4 -> "§9";
                                 default -> "§r";
                             };
-                            int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().tempOffset();
+                            int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
                             frame.getItem().setHoverName(new TextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
                         }
                     }

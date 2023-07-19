@@ -515,22 +515,20 @@ public class WorldSettingsConfig
     /*
      * Non-private values for use elsewhere
      */
-    public List<? extends List<?>> biomeOffsets()
+    public List<? extends List<?>> getBiomeTempOffsets()
     {
         return biomeOffsets.get();
     }
-    public List<? extends List<?>> biomeTemperatures()
+    public List<? extends List<?>> getBiomeTemperatures()
     {
         return biomeTemps.get();
     }
 
-    public List<? extends List<?>> dimensionOffsets()
-    {
-        return dimensionOffsets.get();
+    public List<? extends List<?>> getDimensionTempOffsets()
+    {   return dimensionOffsets.get();
     }
-    public List<? extends List<?>> dimensionTemperatures()
-    {
-        return dimensionTemps.get();
+    public List<? extends List<?>> getDimensionTemperatures()
+    {   return dimensionTemps.get();
     }
 
     public List<? extends List<Object>> getBlockTemps()
@@ -540,33 +538,16 @@ public class WorldSettingsConfig
     {   return blockRange.get();
     }
 
-    public Double[] summerTemps()
-    {
-        return summerTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    public Double[] getSummerTemps()
+    {   return summerTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
-    public Double[] autumnTemps()
-    {
-        return autumnTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    public Double[] getAutumnTemps()
+    {   return autumnTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
-    public Double[] winterTemps()
-    {
-        return winterTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    public Double[] getWinterTemps()
+    {   return winterTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
-    public Double[] springTemps()
-    {
-        return springTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
-    }
-
-    public void setBiomeOffsets(List<? extends List<?>> list) {
-        biomeOffsets.set(list);
-    }
-    public void setDimensionOffsets(List<? extends List<?>> list) {
-        dimensionOffsets.set(list);
-    }
-    public void setBiomeTemperatures(List<? extends List<?>> list) {
-        biomeTemps.set(list);
-    }
-    public void setDimensionTemperatures(List<? extends List<?>> list) {
-        dimensionTemps.set(list);
+    public Double[] getSpringTemps()
+    {   return springTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
 }

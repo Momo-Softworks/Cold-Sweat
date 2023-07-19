@@ -14,7 +14,6 @@ import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.world.SpreadPath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -31,8 +30,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -56,7 +53,7 @@ public class HearthDebugRenderer
     public static void onLevelRendered(RenderLevelStageEvent event)
     {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES
-        && Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().hearthDebug())
+        && Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
         {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -196,7 +193,7 @@ public class HearthDebugRenderer
         ClientLevel level = Minecraft.getInstance().level;
         if (event.phase == TickEvent.Phase.END && level != null
         && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
-        && ClientSettingsConfig.getInstance().hearthDebug())
+        && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {

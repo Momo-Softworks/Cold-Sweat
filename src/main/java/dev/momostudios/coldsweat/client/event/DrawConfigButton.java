@@ -30,7 +30,7 @@ public class DrawConfigButton
     @SubscribeEvent
     public static void eventHandler(ScreenEvent.InitScreenEvent event)
     {
-        if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isButtonShowing())
+        if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
         {
             // The offset from the config
             Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();

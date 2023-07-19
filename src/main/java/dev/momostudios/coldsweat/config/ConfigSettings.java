@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.config.util.ValueSupplier;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -127,14 +126,14 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
-        BIOME_TEMPS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeTemperatures(), true));
+        BIOME_TEMPS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true));
 
-        BIOME_OFFSETS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().biomeOffsets(), false));
+        BIOME_OFFSETS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false));
 
         DIMENSION_TEMPS = ValueSupplier.of(() ->
         {   Map<ResourceLocation, Double> map = new HashMap<>();
 
-            for (List<?> entry : WorldSettingsConfig.getInstance().dimensionTemperatures())
+            for (List<?> entry : WorldSettingsConfig.getInstance().getDimensionTemperatures())
             {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
             }
             return map;
@@ -143,15 +142,15 @@ public class ConfigSettings
         DIMENSION_OFFSETS = ValueSupplier.of(() ->
         {   Map<ResourceLocation, Double> map = new HashMap<>();
 
-            for (List<?> entry : WorldSettingsConfig.getInstance().dimensionOffsets())
+            for (List<?> entry : WorldSettingsConfig.getInstance().getDimensionTempOffsets())
             {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
             }
             return map;
         });
 
-        BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().boilerItems()));
-        HEARTH_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().hearthItems()));
-        ICEBOX_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().iceboxItems()));
+        BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
+        HEARTH_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getHearthFuelItems()));
+        ICEBOX_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
 
         HEARTH_POTIONS_ENABLED = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         BLACKLISTED_POTIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
@@ -159,7 +158,7 @@ public class ConfigSettings
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
         {
             Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().insulatingItems())
+            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulationItems())
             {
                 String itemID = (String) entry.get(0);
                 for (Item item : ConfigHelper.getItems(itemID))
@@ -179,13 +178,13 @@ public class ConfigSettings
                 {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
                 }
             }
-            ItemSettingsConfig.getInstance().setInsulatingItems(list);
+            ItemSettingsConfig.getInstance().setInsulationItems(list);
         });
 
         ADAPTIVE_INSULATION_ITEMS = addSyncedSetting("adaptive_insulation_items", () ->
         {
             Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().adaptiveInsulatingItems())
+            for (List<?> entry : ItemSettingsConfig.getInstance().getAdaptiveInsulationItems())
             {
                 String itemID = (String) entry.get(0);
                 for (Item item : ConfigHelper.getItems(itemID))
@@ -206,13 +205,13 @@ public class ConfigSettings
                 {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
                 }
             }
-            ItemSettingsConfig.getInstance().setAdaptiveInsulatingItems(list);
+            ItemSettingsConfig.getInstance().setAdaptiveInsulationItems(list);
         });
 
         INSULATING_ARMORS = addSyncedSetting("insulating_armors", () ->
         {
             Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().insulatingArmor())
+            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulatingArmorItems())
             {
                 String itemID = (String) entry.get(0);
                 for (Item item : ConfigHelper.getItems(itemID))
@@ -232,11 +231,11 @@ public class ConfigSettings
                 {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
                 }
             }
-            ItemSettingsConfig.getInstance().setInsulatingArmor(list);
+            ItemSettingsConfig.getInstance().setInsulatingArmorItems(list);
         });
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
         {
-            List<? extends Number> list = ItemSettingsConfig.getInstance().insulationSlots();
+            List<? extends Number> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
             return new Integer[] { list.get(0).intValue(), list.get(1).intValue(), list.get(2).intValue(), list.get(3).intValue() };
         },
         encoder ->
@@ -254,17 +253,17 @@ public class ConfigSettings
         },
         saver ->
         {
-            ItemSettingsConfig.getInstance().setInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
+            ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
         });
 
-        TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().temperatureFoods()));
+        TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getFoodTemperatures()));
 
-        WATERSKIN_STRENGTH = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().waterskinStrength());
+        WATERSKIN_STRENGTH = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
         LAMP_FUEL_ITEMS = addSyncedSetting("lamp_fuel_items", () ->
         {
             Map<Item, Integer> list = new HashMap<>();
-            for (List<?> item : ItemSettingsConfig.getInstance().soulLampItems())
+            for (List<?> item : ItemSettingsConfig.getInstance().getSoulLampFuelItems())
             {
                 ConfigHelper.getItems((String) item.get(0)).forEach(i -> list.put(i, (Integer) item.get(1)));
             }
@@ -303,10 +302,10 @@ public class ConfigSettings
                 {   list.add(Arrays.asList(itemID.toString(), entry.getValue()));
                 }
             }
-            ItemSettingsConfig.getInstance().setSoulLampItems(list);
+            ItemSettingsConfig.getInstance().setSoulLampFuelItems(list);
         });
 
-        LAMP_DIMENSIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().soulLampDimensions().stream().map(ResourceLocation::new).toList());
+        LAMP_DIMENSIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
 
         GOAT_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
         {
@@ -358,10 +357,10 @@ public class ConfigSettings
         });
 
         if (CompatManager.isSereneSeasonsLoaded())
-        {   SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().summerTemps());
-            AUTUMN_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().autumnTemps());
-            WINTER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().winterTemps());
-            SPRING_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().springTemps());
+        {   SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getSummerTemps());
+            AUTUMN_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getAutumnTemps());
+            WINTER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getWinterTemps());
+            SPRING_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getSpringTemps());
         }
         else
         {   SUMMER_TEMPS = ValueSupplier.of(() -> new Double[3]);
