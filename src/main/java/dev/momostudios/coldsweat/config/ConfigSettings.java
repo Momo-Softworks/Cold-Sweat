@@ -51,6 +51,7 @@ public class ConfigSettings
     public static final ValueSupplier<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
     public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
     public static final ValueSupplier<Integer[]> INSULATION_SLOTS;
+    public static final ValueSupplier<List<ResourceLocation>> INSULATION_BLACKLIST;
 
     public static final ValueSupplier<Map<Item, Double>> TEMPERATURE_FOODS;
 
@@ -223,8 +224,7 @@ public class ConfigSettings
         encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulatingArmors"),
         decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulatingArmors"),
         saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
+        {   List<List<?>> list = new ArrayList<>();
             for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
             {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
                 if (itemID != null)
@@ -233,14 +233,14 @@ public class ConfigSettings
             }
             ItemSettingsConfig.getInstance().setInsulatingArmorItems(list);
         });
+
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
         {
             List<? extends Number> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
             return new Integer[] { list.get(0).intValue(), list.get(1).intValue(), list.get(2).intValue(), list.get(3).intValue() };
         },
         encoder ->
-        {
-            CompoundTag tag = new CompoundTag();
+        {   CompoundTag tag = new CompoundTag();
             tag.putInt("Head", encoder[0]);
             tag.putInt("Chest", encoder[1]);
             tag.putInt("Legs", encoder[2]);
@@ -248,13 +248,13 @@ public class ConfigSettings
             return tag;
         },
         decoder ->
-        {
-            return new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") };
+        {   return new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") };
         },
         saver ->
-        {
-            ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
+        {   ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
         });
+
+        INSULATION_BLACKLIST = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).toList());
 
         TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getFoodTemperatures()));
 

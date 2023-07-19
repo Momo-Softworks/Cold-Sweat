@@ -26,6 +26,7 @@ public final class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> adaptiveInsulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
     private static final ForgeConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
@@ -191,6 +192,12 @@ public final class ItemSettingsConfig
                 .defineList("Insulation Slots", List.of(4, 6, 5, 4),
                         it -> it instanceof Number);
 
+        insulationBlacklist = BUILDER
+                .comment("Defines wearable items that cannot be insulated",
+                        "Format: [\"item_id\", \"item_id\", ...etc]")
+                .defineList("Insulation Blacklist", List.of(),
+                        it -> it instanceof String);
+
         BUILDER.pop();
 
         /*
@@ -267,6 +274,10 @@ public final class ItemSettingsConfig
     public List<? extends Number> getArmorInsulationSlots()
     {
         return insulationSlots.get();
+    }
+
+    public List<? extends String> getInsulationBlacklist()
+    {   return insulationBlacklist.get();
     }
 
     public List<? extends List<?>> getSoulLampFuelItems()
@@ -358,5 +369,9 @@ public final class ItemSettingsConfig
 
     public void setPotionBlacklist(List<String> saver)
     {   blacklistedPotions.set(saver);
+    }
+
+    public void setInsulationBlacklist(List<String> blacklist)
+    {   insulationBlacklist.set(blacklist);
     }
 }
