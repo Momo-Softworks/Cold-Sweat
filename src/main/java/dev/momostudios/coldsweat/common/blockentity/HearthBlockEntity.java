@@ -70,7 +70,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
@@ -391,7 +390,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         if (isClient && showParticles)
                         {
                             Random rand = new Random();
-                            if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().hearthDebug()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
+                            if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
                             {   float xr = rand.nextFloat();
                                 float yr = rand.nextFloat();
                                 float zr = rand.nextFloat();

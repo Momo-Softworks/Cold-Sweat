@@ -33,7 +33,7 @@ public class MixinXPBar
     public void renderExperienceBar1(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbar())
+        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
         {
             poseStack.translate(0.0D, 4.0D, 0.0D);
         }
@@ -54,7 +54,7 @@ public class MixinXPBar
     public void renderExperienceBar2(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbar())
+        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
         {
             poseStack.translate(0.0D, -4.0D, 0.0D);
         }
@@ -72,7 +72,7 @@ public class MixinXPBar
                 ), remap = ColdSweat.REMAP_MIXINS)
         public void renderItemNamePre(PoseStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbar())
+            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
             {
                 matrixStack.translate(0, -4, 0);
             }
@@ -87,7 +87,7 @@ public class MixinXPBar
                 ), remap = ColdSweat.REMAP_MIXINS)
         public void renderItemNamePost(PoseStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbar())
+            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
             {
                 matrixStack.translate(0, 4, 0);
             }

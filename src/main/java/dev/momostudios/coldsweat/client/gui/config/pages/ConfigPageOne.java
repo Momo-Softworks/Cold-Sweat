@@ -59,18 +59,18 @@ public class ConfigPageOne extends AbstractConfigPage
 
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
-        Supplier<Temperature.Units> properUnits = () -> clientConfig.celsius() ? Temperature.Units.C : Temperature.Units.F;
+        Supplier<Temperature.Units> properUnits = () -> clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 
         // The options
 
         // Celsius
         this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").getString() + ": " +
-                (clientConfig.celsius() ? Component.translatable("cold_sweat.config.celsius.name").getString() :
-                Component.translatable("cold_sweat.config.fahrenheit.name").getString()), button ->
+                (clientConfig.isCelsius() ? Component.translatable("cold_sweat.config.celsius.name").getString() :
+                 Component.translatable("cold_sweat.config.fahrenheit.name").getString()), button ->
         {
             Player player = Minecraft.getInstance().player;
 
-            clientConfig.setCelsius(!clientConfig.celsius());
+            clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
                 Overlays.WORLD_TEMP = CSMath.convertTemp(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits.get(), true);
@@ -87,7 +87,7 @@ public class ConfigPageOne extends AbstractConfigPage
         // Temp Offset
         this.addDecimalInput("temp_offset", Side.LEFT, Component.translatable("cold_sweat.config.temp_offset.name"),
                 value -> clientConfig.setTempOffset(value.intValue()),
-                input -> input.setValue(String.valueOf(clientConfig.tempOffset())),
+                input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
                 false, false, true, Component.translatable("cold_sweat.config.temp_offset.desc").getString()+"§r");
 
         // Max Temperature

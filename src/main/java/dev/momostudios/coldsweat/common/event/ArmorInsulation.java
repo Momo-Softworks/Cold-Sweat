@@ -2,9 +2,7 @@ package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.temperature.modifier.InsulationTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
@@ -13,7 +11,6 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
-import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -155,7 +152,7 @@ public class ArmorInsulation
 
     public static int getInsulationSlots(ItemStack item)
     {
-        List<? extends Number> slots = ItemSettingsConfig.getInstance().insulationSlots();
+        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
         return switch (LivingEntity.getEquipmentSlotForItem(item))
         {
             case HEAD  -> slots.get(0).intValue();

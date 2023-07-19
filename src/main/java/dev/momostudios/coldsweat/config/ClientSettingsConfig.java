@@ -136,44 +136,44 @@ public class ClientSettingsConfig
      * Non-private values for use elsewhere
      */
 
-    public boolean celsius() {
+    public boolean isCelsius() {
         return celsius.get();
     }
 
-    public int tempOffset() {
+    public int getTempOffset() {
         return tempOffset.get();
     }
 
-    public int bodyIconX() {
+    public int getBodyIconX() {
         return bodyIconX.get();
     }
-    public int bodyIconY() {
+    public int getBodyIconY() {
         return bodyIconY.get();
     }
 
-    public int bodyReadoutX() {
+    public int getBodyReadoutX() {
         return bodyReadoutX.get();
     }
-    public int bodyReadoutY() {
+    public int getBodyReadoutY() {
         return bodyReadoutY.get();
     }
 
-    public int worldGaugeX() {
+    public int getWorldGaugeX() {
         return worldGaugeX.get();
     }
-    public int worldGaugeY() {
+    public int getWorldGaugeY() {
         return worldGaugeY.get();
     }
 
-    public boolean customHotbar() {
+    public boolean customHotbarEnabled() {
         return customHotbarLayout.get();
     }
 
-    public boolean iconBobbing() {
+    public boolean isIconBobbingEnabled() {
         return iconBobbing.get();
     }
 
-    public boolean hearthDebug() {
+    public boolean isHearthDebugEnabled() {
         return hearthDebug.get();
     }
 
@@ -222,7 +222,7 @@ public class ClientSettingsConfig
         hearthDebug.set(enabled);
     }
 
-    public boolean isButtonShowing()
+    public boolean isConfigButtonEnabled()
     {   return showConfigButton.get();
     }
     public List<? extends Integer> getConfigButtonPos()

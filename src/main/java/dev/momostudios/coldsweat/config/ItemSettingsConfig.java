@@ -121,7 +121,7 @@ public final class ItemSettingsConfig
         BUILDER.pop();
 
         /*
-         Insulator Items
+         Insulation
          */
         BUILDER.push("Insulation");
         insulatingItems = BUILDER
@@ -234,57 +234,57 @@ public final class ItemSettingsConfig
         return INSTANCE;
     }
 
-    public List<? extends List<?>> boilerItems()
+    public List<? extends List<?>> getBoilerFuelItems()
     {
         return boilerItems.get();
     }
 
-    public List<? extends List<?>> iceboxItems()
+    public List<? extends List<?>> getIceboxFuelItems()
     {
         return iceboxItems.get();
     }
 
-    public List<? extends List<?>> hearthItems()
+    public List<? extends List<?>> getHearthFuelItems()
     {
         return hearthItems.get();
     }
 
-    public List<? extends List<?>> insulatingItems()
+    public List<? extends List<?>> getInsulationItems()
     {
         return insulatingItems.get();
     }
 
-    public List<? extends List<?>> adaptiveInsulatingItems()
+    public List<? extends List<?>> getAdaptiveInsulationItems()
     {
         return adaptiveInsulatingItems.get();
     }
 
-    public List<? extends List<?>> insulatingArmor()
+    public List<? extends List<?>> getInsulatingArmorItems()
     {
         return insulatingArmor.get();
     }
 
-    public List<? extends Number> insulationSlots()
+    public List<? extends Number> getArmorInsulationSlots()
     {
         return insulationSlots.get();
     }
 
-    public List<? extends List<?>> soulLampItems()
+    public List<? extends List<?>> getSoulLampFuelItems()
     {
         return soulLampItems.get();
     }
 
-    public List<? extends List<?>> temperatureFoods()
+    public List<? extends List<?>> getFoodTemperatures()
     {
         return temperatureFoods.get();
     }
 
-    public List<? extends String> soulLampDimensions()
+    public List<? extends String> getValidSoulLampDimensions()
     {
         return soulLampDimensions.get();
     }
 
-    public int waterskinStrength()
+    public int getWaterskinStrength()
     {
         return waterskinStrength.get();
     }
@@ -297,52 +297,52 @@ public final class ItemSettingsConfig
     {   return (List<String>) blacklistedPotions.get();
     }
 
-    public void setBoilerItems(List<? extends List<?>> itemMap)
+    public void setBoilerFuelItems(List<? extends List<?>> itemMap)
     {
         boilerItems.set(itemMap);
     }
 
-    public void setIceboxItems(List<? extends List<?>> itemMap)
+    public void setIceboxFuelItems(List<? extends List<?>> itemMap)
     {
         iceboxItems.set(itemMap);
     }
 
-    public void setHearthItems(List<? extends List<?>> itemMap)
+    public void setHearthFuelItems(List<? extends List<?>> itemMap)
     {
         hearthItems.set(itemMap);
     }
 
-    public void setInsulatingItems(List<? extends List<?>> items)
+    public void setInsulationItems(List<? extends List<?>> items)
     {
         insulatingItems.set(items);
     }
 
-    public void setAdaptiveInsulatingItems(List<? extends List<?>> items)
+    public void setAdaptiveInsulationItems(List<? extends List<?>> items)
     {
         adaptiveInsulatingItems.set(items);
     }
 
-    public void setInsulatingArmor(List<? extends List<?>> itemMap)
+    public void setInsulatingArmorItems(List<? extends List<?>> itemMap)
     {
         insulatingArmor.set(itemMap);
     }
 
-    public void setInsulationSlots(List<? extends Number> slots)
+    public void setArmorInsulationSlots(List<? extends Number> slots)
     {
         insulationSlots.set(slots);
     }
 
-    public void setSoulLampItems(List<? extends List<?>> items)
+    public void setSoulLampFuelItems(List<? extends List<?>> items)
     {
         soulLampItems.set(items);
     }
 
-    public void setTemperatureFoods(List<? extends List<?>> itemMap)
+    public void setFoodTemperatures(List<? extends List<?>> itemMap)
     {
         temperatureFoods.set(itemMap);
     }
 
-    public void setSoulLampDimensions(List<? extends String> items)
+    public void setValidSoulLampDimensions(List<? extends String> items)
     {
         soulLampDimensions.set(items);
     }

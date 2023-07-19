@@ -17,7 +17,6 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Wearable;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,13 +37,13 @@ public class TooltipHandler
         ItemStack stack = event.getItemStack();
         if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getEntity() != null)
         {
-            boolean celsius = ClientSettingsConfig.getInstance().celsius();
+            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
             double temp = stack.getOrCreateTag().getDouble("temperature");
             String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
             String tempUnits = celsius ? "C" : "F";
             temp = temp / 2 + 95;
             if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
-            temp += ClientSettingsConfig.getInstance().tempOffset() / 2.0;
+            temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
             event.getToolTip().add(1, Component.literal("§7" + Component.translatable(
                     "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));

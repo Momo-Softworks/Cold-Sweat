@@ -60,7 +60,7 @@ public class Overlays
                 double max = ConfigSettings.MAX_TEMP.get();
 
                 // Get player world temperature
-                double temp = CSMath.convertTemp(WORLD_TEMP, CLIENT_CONFIG.celsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                double temp = CSMath.convertTemp(WORLD_TEMP, CLIENT_CONFIG.isCelsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
@@ -88,19 +88,19 @@ public class Overlays
                 RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
 
                 // Render frame
-                GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.worldGaugeX(), height - 19 + CLIENT_CONFIG.worldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
+                GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
                 RenderSystem.disableBlend();
 
                 // Sets the text bobbing offset (or none if disabled)
-                int bob = CLIENT_CONFIG.iconBobbing() && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
+                int bob = CLIENT_CONFIG.isIconBobbingEnabled() && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
-                Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.tempOffset()) + "",
-                        /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.tempOffset()).length() * -3) + CLIENT_CONFIG.worldGaugeX(),
-                        /* Y */ height - 15 - bob + CLIENT_CONFIG.worldGaugeY(), color);
+                Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.getTempOffset()) + "",
+                        /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
+                        /* Y */ height - 15 - bob + CLIENT_CONFIG.getWorldGaugeY(), color);
                 poseStack.popPose();
             }
         });
@@ -140,8 +140,8 @@ public class Overlays
 
                 int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
                 int threatOffset =
-                        !CLIENT_CONFIG.iconBobbing() ? 0
-                        : bobLevel == 2 ? ICON_BOB
+                        !CLIENT_CONFIG.isIconBobbingEnabled() ? 0
+                                                              : bobLevel == 2 ? ICON_BOB
                         : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
                         : 0;
 
@@ -151,13 +151,13 @@ public class Overlays
                 RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
                 if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
                 {
-                    GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                    GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
                 }
                 // Render new icon on top of old icon (if blending)
                 // Otherwise this is just the regular icon
-                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.bodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.bodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+                GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
                 RenderSystem.setShaderColor(1, 1, 1, 1);
 
                 // Render Readout
@@ -166,8 +166,8 @@ public class Overlays
                 int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
                 String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.bodyReadoutX();
-                float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.bodyReadoutY();
+                float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX();
+                float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY();
 
                 // Draw the outline
                 font.draw(poseStack, s, x + 1, y, colorBG);
@@ -200,7 +200,7 @@ public class Overlays
 
                     /* World Temp */
 
-                    boolean celsius = CLIENT_CONFIG.celsius();
+                    boolean celsius = CLIENT_CONFIG.isCelsius();
                     if (SHOW_WORLD_TEMP)
                     {
 
