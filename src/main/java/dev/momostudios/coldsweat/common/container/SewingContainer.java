@@ -131,7 +131,7 @@ public class SewingContainer extends AbstractContainerMenu
             public boolean mayPlace(ItemStack stack)
             {
                 Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
-                return stack.getItem() instanceof Wearable
+                return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
             @Override
@@ -422,44 +422,35 @@ public class SewingContainer extends AbstractContainerMenu
             }
             else
             {
-                Pair<Double, Double> itemValue = ArmorInsulation.getItemInsulation(slotItem);
-                if (itemValue.getFirst() != 0 || itemValue.getSecond() != 0 || slotItem.getItem() instanceof ShearsItem)
+                // Item is valid insulation
+                if (this.slots.get(1).mayPlace(slotItem))
                 {
                     if (this.moveItemStackTo(slotItem, 1, 2, false))
-                    {
-                        slot.onQuickCraft(slotItem, newStack);
+                    {   slot.onQuickCraft(slotItem, newStack);
                     }
                     else return ItemStack.EMPTY;
                 }
-                else if (slotItem.getItem() instanceof Wearable)
+                // Item is valid wearable
+                else if (this.slots.get(0).mayPlace(slotItem))
                 {
                     if (!this.moveItemStackTo(slotItem, 0, 1, false))
-                    {
-                        slot.onQuickCraft(slotItem, newStack);
+                    {   slot.onQuickCraft(slotItem, newStack);
                     }
                     else return ItemStack.EMPTY;
                 }
-                else if (index == 2)
-                {
-                    if (!this.moveItemStackTo(slotItem, 3, 39, false))
-                    {
-                        slot.onQuickCraft(slotItem, newStack);
-                    }
-                    else return ItemStack.EMPTY;
-                }
+                // Item is in hotbar
                 else if (CSMath.withinRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(slotItem, 3, 29, false))
-                    {
-                        slot.onQuickCraft(slotItem, newStack);
+                    {   slot.onQuickCraft(slotItem, newStack);
                     }
                     else return ItemStack.EMPTY;
                 }
+                // Item is in inventory
                 else if (CSMath.withinRange(index, 3, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(slotItem, slots.size() - 9, slots.size(), false))
-                    {
-                        slot.onQuickCraft(slotItem, newStack);
+                    {   slot.onQuickCraft(slotItem, newStack);
                     }
                     else return ItemStack.EMPTY;
                 }
@@ -467,8 +458,7 @@ public class SewingContainer extends AbstractContainerMenu
             }
 
             if (slotItem.isEmpty())
-            {
-                slot.set(ItemStack.EMPTY);
+            {   slot.set(ItemStack.EMPTY);
             }
             else slot.setChanged();
         }
