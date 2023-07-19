@@ -146,7 +146,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         BlockPos pos = event.getPosition();
         Level level = event.getLevel();
-        if (level.equals(this.level)
+        if (level == this.level
         && CSMath.withinCube(pos, this.pos, this.getMaxRange()) && pathLookup.contains(pos)
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {   this.sendBlockUpdate(pos);
@@ -211,7 +211,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             this.registeredLocation = true;
         }
 
-        // Easy access to clientside test
+        // Easy access to clientside testList::stream
         boolean isClient = level.isClientSide;
 
         this.ticksExisted++;
@@ -338,10 +338,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                              Spreading algorithm
                              */
 
+                            BlockState state = level.getBlockState(pathPos);
                             if (!WorldHelper.canSeeSky(chunk, level, pathPos.above(), 64))
                             {
-                                BlockState state = chunk.getBlockState(pathPos);
-
                                 // Try to spread in every direction from the current position
                                 for (int d = 0; d < DIRECTIONS.length; d++)
                                 {
@@ -360,8 +359,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                         SpreadPath newPath = spreadPath.spreadTo(tryPos, direction);
 
                                         // If the BlockState is a pipe, check if the new path is following the direction of the pipe
-                                        if (this.canSpreadThroughPipes(pathPos, state, newPath, direction)
-                                        && !WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction))
+                                        if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction))
                                         {   // Add the new path to the list
                                             paths.add(newPath);
                                         }
@@ -389,6 +387,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                         // Air Particles
                         if (isClient && showParticles)
                         {
+                            level.addParticle(ParticleTypes.FLAME, false, spX + 0.5f, spY + 0.5f, spZ + 0.5f, 0, 0, 0);
                             Random rand = new Random();
                             if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
                             {   float xr = rand.nextFloat();
@@ -489,6 +488,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                 level.playSound(null, this.pos.getX(), this.pos.getY(), this.pos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
+                // Convert to NBT and back again to create new instances of the effects (otherwise we would be ticking down the global instances)
                 effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
                 ColdSweatPacketHandler.syncBlockEntityData(this);
             }
@@ -584,16 +584,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         // Reset cooldown
         this.rebuildCooldown = 100;
-
-        paths = new ArrayList<>(Arrays.asList(paths.stream().peek(path -> path.frozen = false).filter(path -> notifyQueue.contains(path.pos))
-        // Get all children of the paths
-        .flatMap(path -> path.getAllChildren().stream()).peek(path ->
-        {   BlockPos bpos = path.pos;
-            // Remove paths from lookup table as well
-            Arrays.stream(Direction.values()).map(bpos::relative).toList().forEach(pathLookup::remove);
-        })
-        // Remove updated paths and their children
-        .toArray(SpreadPath[]::new)));
+        paths.removeAll(paths.stream().peek(path -> path.frozen = false)
+                                      .filter(path -> notifyQueue.contains(path.pos))
+                                      .map(SpreadPath::getAllChildren)
+                                      .flatMap(Collection::stream).toList());
+        paths.removeAll(paths.stream().filter(path -> notifyQueue.contains(path.pos)).toList());
+        pathLookup.retainAll(paths.stream().map(path -> path.pos).toList());
 
         // Un-freeze paths so areas can be re-checked
         frozenPaths = 0;
@@ -796,33 +792,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public void sendResetPacket()
     {   if (level instanceof ServerLevel)
         {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() ->
-                                 (LevelChunk) level.getChunkSource().getChunk(this.pos.getX() >> 4, this.pos.getZ() >> 4, ChunkStatus.FULL, true)),
-                                 new HearthResetMessage(this.pos, notifyQueue));
+                                 (LevelChunk) WorldHelper.getChunk(level, pos)), new HearthResetMessage(this.pos, notifyQueue));
         }
     }
 
     public boolean sendBlockUpdate(BlockPos pos)
-    {
-        if (notifyQueue.contains(pos))
-            return false;
-
-        if (pathLookup.contains(pos))
-        {   notifyQueue.add(pos);
-            return true;
-        }
-        for (int i = 0; i < DIRECTIONS.length; i++)
-        {
-            Direction dir = DIRECTIONS[i];
-            if (pathLookup.contains(pos.relative(dir)))
-            {   notifyQueue.add(pos);
-                return true;
-            }
-        }
-        return false;
+    {   return notifyQueue.add(pos);
     }
 
     public void forceUpdate(BlockPos pos)
-    {   this.forceRebuild |= sendBlockUpdate(pos);
+    {   this.forceRebuild = true;
+        this.sendBlockUpdate(pos);
     }
 
     @Override
