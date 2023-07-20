@@ -13,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +20,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -31,12 +32,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.PacketDistributor;
 import org.apache.logging.log4j.util.TriConsumer;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -94,12 +93,14 @@ public class WorldHelper
      * @param maxDistance The maximum distance to check
      * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
      */
-    public static boolean canSeeSky(ChunkAccess chunk, LevelAccessor level, BlockPos pos, int maxDistance)
+    public static boolean canSeeSky(LevelAccessor level, BlockPos pos, int maxDistance)
     {
         BlockPos.MutableBlockPos pos2 = pos.mutable();
-        for (int i = 0; i < Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY()); i++)
+        int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
+        ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+        for (int i = 0; i < iterations; i++)
         {
-            BlockState state = level.getBlockState(pos2);
+            BlockState state = chunk.getBlockState(pos2);
             if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
             {   return false;
             }
@@ -109,20 +110,15 @@ public class WorldHelper
         return true;
     }
 
-    public static boolean canSeeSky(LevelAccessor level, BlockPos pos, int maxDistance)
-    {
-        LevelChunk chunk = (LevelChunk) level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
-        return chunk == null || canSeeSky(chunk, level, pos, maxDistance);
-    }
-
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
-        if (state.isAir() || !state.getMaterial().blocksMotion() || state.is(BlockTags.LEAVES)
-        || state.getBlock() == ModBlocks.HEARTH_BOTTOM || state.getBlock() == ModBlocks.HEARTH_TOP)
+        Block block = state.getBlock();
+        if (state.isAir() || !state.getMaterial().blocksMotion() || block instanceof LeavesBlock
+        || block == ModBlocks.HEARTH_BOTTOM || block == ModBlocks.HEARTH_TOP)
         {   return false;
         }
-        if (state.isCollisionShapeFullBlock(level, pos)) return true;
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
+        if (Block.isShapeFullBlock(shape)) return true;
 
                // Should it have spread here in the first place?
         return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)
@@ -147,11 +143,11 @@ public class WorldHelper
     }
 
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
-    {   return level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+    {   return level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, true);
     }
 
     public static ChunkAccess getChunk(LevelAccessor level, ChunkPos pos)
-    {   return level.getChunkSource().getChunkNow(pos.x, pos.z);
+    {   return level.getChunk(pos.x, pos.z);
     }
 
     public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)

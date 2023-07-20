@@ -14,24 +14,21 @@ import java.util.function.Supplier;
 public class HearthResetMessage
 {
     BlockPos blockPos;
-    Collection<BlockPos> updates;
     public HearthResetMessage() {
     }
 
-    public HearthResetMessage(BlockPos blockPos, Collection<BlockPos> updates) {
+    public HearthResetMessage(BlockPos blockPos) {
         this.blockPos = blockPos;
-        this.updates = updates;
     }
 
     public static void encode(HearthResetMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeBlockPos(message.blockPos);
-        buffer.writeCollection(message.updates, FriendlyByteBuf::writeBlockPos);
     }
 
     public static HearthResetMessage decode(FriendlyByteBuf buffer)
     {
-        return new HearthResetMessage(buffer.readBlockPos(), buffer.readCollection(ArrayList::new, FriendlyByteBuf::readBlockPos));
+        return new HearthResetMessage(buffer.readBlockPos());
     }
 
     public static void handle(HearthResetMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -43,11 +40,7 @@ public class HearthResetMessage
             {
                 BlockEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
                 if (te instanceof HearthBlockEntity hearth)
-                {
-                    for (BlockPos pos : message.updates)
-                    {
-                        hearth.forceUpdate(pos);
-                    }
+                {   hearth.forceUpdate();
                 }
             });
         }

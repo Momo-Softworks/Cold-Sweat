@@ -5,16 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class SpreadPath
 {
     public final Direction direction;
     public final BlockPos pos;
     public final int x, y, z;
     public boolean frozen = false;
-    public final HashSet<SpreadPath> children = new HashSet<>();
     public BlockPos origin;
 
     public SpreadPath(BlockPos pos, Direction direction)
@@ -42,27 +38,6 @@ public class SpreadPath
     public SpreadPath setOrigin(BlockPos origin)
     {   this.origin = origin;
         return this;
-    }
-
-    public Set<SpreadPath> getAllChildren()
-    {
-        Set<SpreadPath> allChildren = new HashSet<>();
-        for (SpreadPath child : children)
-        {
-            allChildren.add(child);
-            allChildren.addAll(child.getAllChildren());
-        }
-        return allChildren;
-    }
-
-    public SpreadPath addChild(SpreadPath child)
-    {
-        this.children.add(child);
-        return this;
-    }
-
-    public void clearChildren()
-    {   this.children.clear();
     }
 
     public SpreadPath offset(int x, int y, int z)
@@ -97,13 +72,6 @@ public class SpreadPath
     {
         SpreadPath path = new SpreadPath(pos, dir);
         path.setOrigin(this.origin);
-        this.addChild(path);
-        return path;
-    }
-
-    public SpreadPath spreadTo(SpreadPath path)
-    {
-        this.addChild(path);
         return path;
     }
 
