@@ -18,12 +18,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -32,7 +29,7 @@ import java.util.function.Predicate;
 public class TempModifierInit
 {
     @SubscribeEvent
-    public static void onModLoad(ServerStartedEvent event)
+    public static void onServerStart(ServerStartingEvent event)
     {   buildRegistries();
     }
 
