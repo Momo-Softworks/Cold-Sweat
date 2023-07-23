@@ -69,7 +69,7 @@ public class SoulspringLampItem extends Item
                 {
                     // Drain fuel
                     if (!(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.01 * CSMath.clamp(temp - max, 1, 3));
+                        addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
 
                     // Affect nearby players
                     double radius = 5d;
