@@ -1,5 +1,4 @@
 {
-	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
 		"0": "cold_sweat:blocks/soul_stalk_bud",
@@ -89,7 +88,7 @@
 			}
 		},
 		{
-			"name": "cross_1",
+			"name": "cross_2",
 			"from": [-2, 0, 8],
 			"to": [18, 10, 8],
 			"rotation": {"angle": -45, "axis": "y", "origin": [8, 2, 8]},

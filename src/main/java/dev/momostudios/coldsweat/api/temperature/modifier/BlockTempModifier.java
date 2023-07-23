@@ -72,7 +72,7 @@ public class BlockTempModifier extends TempModifier
                         // Get the BlockTemp associated with the block
                         List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
 
-                        if (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP)) continue;
+                        if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
 
                         // Get the amount that this block has affected the player so far
 
