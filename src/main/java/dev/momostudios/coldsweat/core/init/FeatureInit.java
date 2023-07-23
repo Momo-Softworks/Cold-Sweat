@@ -6,6 +6,7 @@ import dev.momostudios.coldsweat.common.world.feature.SoulStalkFeature;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -46,7 +47,7 @@ public class FeatureInit
         {
             PLACED_FEATURES = DeferredRegister.create(Registry.PLACED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
 
-            SOUL_STALK_PLACEMENT = register("soul_stalk_placement", ConfiguredFeatureInit.SOUL_STALK_CONFIGURATION, List.of(RarityFilter.onAverageOnceEvery(3),
+            SOUL_STALK_PLACEMENT = register("soul_stalk_placement", ConfiguredFeatureInit.SOUL_STALK_CONFIGURATION, List.of(RarityFilter.onAverageOnceEvery(5),
                                                                                                                                   InSquarePlacement.spread(), PlacementUtils.RANGE_10_10,
                                                                                                                                   BiomeFilter.biome(), CountPlacement.of(2)));
         }
@@ -67,7 +68,7 @@ public class FeatureInit
             CONFIGURED_FEATURES = DeferredRegister.create(Registry.CONFIGURED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
 
             SOUL_STALK_CONFIGURATION = register("soul_stalk_configuration", () -> new ConfiguredFeature<>(Feature.RANDOM_PATCH,
-                                                new RandomPatchConfiguration(32, 10, 5, PlacementUtils.onlyWhenEmpty(FeatureInit.SOUL_STALK_FEATURE.get(), NoneFeatureConfiguration.INSTANCE))));
+                                                new RandomPatchConfiguration(8, 10, 5, PlacementUtils.filtered(FeatureInit.SOUL_STALK_FEATURE.get(), NoneFeatureConfiguration.INSTANCE, BlockPredicate.not(BlockPredicate.solid())))));
         }
     }
 }

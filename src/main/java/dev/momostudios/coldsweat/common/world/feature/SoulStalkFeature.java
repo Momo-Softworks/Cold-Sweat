@@ -29,6 +29,19 @@ public class SoulStalkFeature extends Feature<NoneFeatureConfiguration>
     {
         WorldGenLevel level = placement.level();
         BlockPos.MutableBlockPos pos = placement.origin().mutable();
+        // Get ground level
+        int startY = pos.getY();
+        int minHeight = level.getMinBuildHeight();
+        int maxHeight = level.getMaxBuildHeight();
+        for (int i = -10; i < 10; i++)
+        {   pos.setY(startY + i);
+            if (pos.getY() < minHeight) continue;
+            if (pos.getY() > maxHeight) break;
+            if (level.getBlockState(pos).isAir())
+            {   break;
+            }
+        }
+        // Place the soul stalk
         if (level.getBlockState(pos.below()).is(BlockTags.SOUL_FIRE_BASE_BLOCKS) && isAirOrLeaves(level, pos) && isAirOrLeaves(level, pos.above()))
         {
             level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
