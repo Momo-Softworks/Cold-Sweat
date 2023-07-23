@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.util.entity;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.nbt.*;
@@ -9,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class NBTHelper
@@ -39,30 +38,29 @@ public class NBTHelper
         return modifierTag;
     }
 
-    @Nullable
-    public static TempModifier tagToModifier(CompoundTag modifierTag)
+    public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        TempModifier newModifier = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
-        if (newModifier == null)
-        {   ColdSweat.LOGGER.error("Tried to instantiate TempModifier \"" + modifierTag.getString("Id") + "\", but it is not registered!");
-            return null;
-        }
+        Optional<TempModifier> optional = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
+        optional.ifPresent(modifier ->
+        {
+            modifier.setNBT(modifierTag.getCompound("ModifierData"));
 
-        newModifier.setNBT(modifierTag.getCompound("ModifierData"));
+            // Set the modifier's expiration time
+            if (modifierTag.contains("ExpireTicks"))
+            {   modifier.expires(modifierTag.getInt("ExpireTicks"));
+            }
 
-        // Set the modifier's expiration time
-        if (modifierTag.contains("ExpireTicks"))
-            newModifier.expires(modifierTag.getInt("ExpireTicks"));
+            // Set the modifier's tick rate
+            if (modifierTag.contains("TickRate"))
+            {   modifier.tickRate(modifierTag.getInt("TickRate"));
+            }
 
-        // Set the modifier's tick rate
-        if (modifierTag.contains("TickRate"))
-            newModifier.tickRate(modifierTag.getInt("TickRate"));
+            // Set the modifier's ticks existed
+            modifier.setTicksExisted(modifierTag.getInt("TicksExisted"));
+        });
 
-        // Set the modifier's ticks existed
-        newModifier.setTicksExisted(modifierTag.getInt("TicksExisted"));
-
-        return newModifier;
+        return optional;
     }
 
     public static void incrementTag(Object owner, String key, int amount)

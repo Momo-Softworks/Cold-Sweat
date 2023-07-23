@@ -14,7 +14,6 @@ import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
-import dev.momostudios.coldsweat.core.init.BlockInit;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
@@ -207,12 +206,16 @@ public class EntityTempHandler
 
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
-                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
-                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                {
+                    TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
+                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                }
                 // Weather2 Compat
                 if (CompatManager.isWeather2Loaded())
-                    Temperature.addModifier(player, TempModifierRegistry.getEntryFor("weather2:storm").tickRate(60), Temperature.Type.WORLD, false,
-                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                {
+                    TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
+                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                }
 
                 // Armor underwear compat
                 if (CompatManager.isArmorUnderwearLoaded())
@@ -247,27 +250,30 @@ public class EntityTempHandler
             });
         }
         // Add basic TempModifiers to chameleons
-        else if (event.getEntity() instanceof Chameleon chameleon)
+        else if (event.getEntity() instanceof LivingEntity entity && EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
-            if (chameleon.getServer() != null)
-            chameleon.getServer().execute(() ->
+            if (entity.getServer() != null)
+            entity.getServer().execute(() ->
             {
                 // Basic modifiers
-                Temperature.addModifiers(chameleon, List.of(new BiomeTempModifier(9).tickRate(40),
+                Temperature.addModifiers(entity, List.of(new BiomeTempModifier(9).tickRate(40),
                                                                                     new UndergroundTempModifier().tickRate(40),
                                                                                     new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
-                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("sereneseasons:season").tickRate(60), Temperature.Type.WORLD, false,
-                                        Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                {
+                    TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
+                                                                                                                      Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                }
                 // Weather2 Compat
                 if (CompatManager.isWeather2Loaded())
-                    Temperature.addModifier(chameleon, TempModifierRegistry.getEntryFor("weather2:storm").tickRate(60), Temperature.Type.WORLD, false,
-                                            Addition.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                {
+                    TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
+                                                                                                                Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                }
 
-                Temperature.set(chameleon, Temperature.Type.WORLD, Temperature.apply(0, chameleon, Temperature.Type.WORLD, Temperature.getModifiers(chameleon, Temperature.Type.WORLD)));
-                chameleon.setTemperature((float) Temperature.get(chameleon, Temperature.Type.WORLD));
+                Temperature.set(entity, Temperature.Type.WORLD, Temperature.apply(0, entity, Temperature.Type.WORLD, Temperature.getModifiers(entity, Temperature.Type.WORLD)));
             });
         }
     }
@@ -415,7 +421,7 @@ public class EntityTempHandler
         if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
         {
             // If food item defined in config
-            float foodTemp = ConfigSettings.TEMPERATURE_FOODS.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
+            float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
             }
