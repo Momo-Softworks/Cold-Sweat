@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.momostudios.coldsweat.config.ConfigSettings.Difficulty.*;
+
 public class ConfigPageDifficulty extends Screen
 {
     private static final String BLUE = ChatFormatting.BLUE.toString();
@@ -31,34 +33,10 @@ public class ConfigPageDifficulty extends Screen
     private static final String BOLD = ChatFormatting.BOLD.toString();
     private static final String U_LINE = ChatFormatting.UNDERLINE.toString();
 
-    private static final List<Component> SUPER_EASY_DESCRIPTION = List.of(
-                    Component.translatable("cold_sweat.config.difficulty.description.min_temp", temperatureString(40, BLUE)),
-                    Component.translatable("cold_sweat.config.difficulty.description.max_temp", temperatureString(120, RED)),
-                    Component.translatable("cold_sweat.config.difficulty.description.rate.decrease", YEL +"50%"+ CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
-    private static final List<Component> EASY_DESCRIPTION = List.of(
-                    Component.translatable("cold_sweat.config.difficulty.description.min_temp", temperatureString(45, BLUE)),
-                    Component.translatable("cold_sweat.config.difficulty.description.max_temp", temperatureString(110, RED)),
-                    Component.translatable("cold_sweat.config.difficulty.description.rate.decrease", YEL +"25%"+ CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.world_temp_on", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.scaling_off", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
-    private static final List<Component> NORMAL_DESCRIPTION = List.of(
-                    Component.translatable("cold_sweat.config.difficulty.description.min_temp", temperatureString(50, BLUE)),
-                    Component.translatable("cold_sweat.config.difficulty.description.max_temp", temperatureString(100, RED)),
-                    Component.translatable("cold_sweat.config.difficulty.description.rate.decrease", YEL +"10%"+ CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.world_temp_off", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.scaling_on", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
-    private static final List<Component> HARD_DESCRIPTION = List.of(
-                    Component.translatable("cold_sweat.config.difficulty.description.min_temp", temperatureString(55, BLUE)),
-                    Component.translatable("cold_sweat.config.difficulty.description.max_temp", temperatureString(90, RED)),
-                    Component.translatable("cold_sweat.config.difficulty.description.rate.normal"),
-                    Component.translatable("cold_sweat.config.difficulty.description.world_temp_off", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.scaling_on", BOLD + U_LINE, CLEAR),
-                    Component.translatable("cold_sweat.config.difficulty.description.potions_on", BOLD + U_LINE, CLEAR));
+    private static final List<Component> SUPER_EASY_DESCRIPTION = generateDescription(SUPER_EASY);
+    private static final List<Component> EASY_DESCRIPTION = generateDescription(EASY);
+    private static final List<Component> NORMAL_DESCRIPTION = generateDescription(NORMAL);
+    private static final List<Component> HARD_DESCRIPTION = generateDescription(HARD);
     private static final List<Component> CUSTOM_DESCRIPTION = Collections.singletonList(
                     Component.translatable("cold_sweat.config.difficulty.description.custom"));
 
@@ -75,37 +53,63 @@ public class ConfigPageDifficulty extends Screen
     public static List<Component> getListFor(int difficulty)
     {
         return switch (difficulty)
-        {
-            case 0  -> SUPER_EASY_DESCRIPTION;
+        {   case 0  -> SUPER_EASY_DESCRIPTION;
             case 1  -> EASY_DESCRIPTION;
             case 2  -> NORMAL_DESCRIPTION;
             case 3  -> HARD_DESCRIPTION;
-            default  -> CUSTOM_DESCRIPTION;
+            default -> CUSTOM_DESCRIPTION;
         };
     }
 
-    private static String temperatureString(double temp, String color)
+    private static List<Component> generateDescription(ConfigSettings.Difficulty difficulty)
+    {
+        return List.of(
+                Component.translatable("cold_sweat.config.difficulty.description.min_temp", getTemperatureString(difficulty.getSetting("min_temp"), BLUE)),
+                Component.translatable("cold_sweat.config.difficulty.description.max_temp", getTemperatureString(difficulty.getSetting("max_temp"), RED)),
+                getRateComponent(difficulty),
+                Component.translatable("cold_sweat.config.difficulty.description.world_temp_" + (difficulty.getSetting("require_thermometer") ? "off" : "on"), BOLD + U_LINE, CLEAR),
+                Component.translatable("cold_sweat.config.difficulty.description.scaling_" + (difficulty.getSetting("damage_scaling") ? "on" : "off"), BOLD + U_LINE, CLEAR),
+                Component.translatable("cold_sweat.config.difficulty.description.potions_" + (difficulty.getSetting("ice_resistance_enabled") ? "on" : "off"), BOLD + U_LINE, CLEAR));
+    }
+
+    private static String getTemperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + temp + CLEAR + " °F / " + color + df.format(CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true)) + CLEAR + " °C";
+        return color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
+             + color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
     }
 
-    public static int difficultyColor(int difficulty)
+    private static Component getRateComponent(ConfigSettings.Difficulty difficulty)
     {
-        return  difficulty == 0 ? 16777215 :
-                difficulty == 1 ? 16768882 :
-                difficulty == 2 ? 16755024 :
-                difficulty == 3 ? 16731202 :
-                difficulty == 4 ? 10631158 : 16777215;
+        double rate = difficulty.getSetting("temp_rate");
+        String key = rate < 1  ? "cold_sweat.config.difficulty.description.rate.decrease"
+                   : rate == 1 ? "cold_sweat.config.difficulty.description.rate.normal"
+                   : "cold_sweat.config.difficulty.description.rate.increase";
+
+        return rate == 1 ? Component.translatable(key)
+                         : Component.translatable(key, YEL + (Math.abs(1 - rate) * 100) + "%" + CLEAR);
     }
 
-    public static String difficultyName(int difficulty)
+    public static int getDifficultyColor(int difficulty)
     {
-        return  difficulty == 0 ? Component.translatable("cold_sweat.config.difficulty.super_easy.name").getString() :
-                difficulty == 1 ? Component.translatable("cold_sweat.config.difficulty.easy.name").getString() :
-                difficulty == 2 ? Component.translatable("cold_sweat.config.difficulty.normal.name").getString() :
-                difficulty == 3 ? Component.translatable("cold_sweat.config.difficulty.hard.name").getString() :
-                difficulty == 4 ? Component.translatable("cold_sweat.config.difficulty.custom.name").getString() : "";
+        return switch (difficulty)
+        {   case 0  -> 16777215;
+            case 1  -> 16768882;
+            case 2  -> 16755024;
+            case 3  -> 16731202;
+            default -> 10631158;
+        };
+    }
+
+    public static String getDifficultyName(int difficulty)
+    {
+        return switch (difficulty)
+        {   case 0  -> Component.translatable("cold_sweat.config.difficulty.super_easy.name").getString();
+            case 1  -> Component.translatable("cold_sweat.config.difficulty.easy.name").getString();
+            case 2  -> Component.translatable("cold_sweat.config.difficulty.normal.name").getString();
+            case 3  -> Component.translatable("cold_sweat.config.difficulty.hard.name").getString();
+            default -> Component.translatable("cold_sweat.config.difficulty.custom.name").getString();
+        };
     }
 
     public int index()
@@ -180,9 +184,9 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
-        String difficultyName = difficultyName(difficulty);
+        String difficultyName = getDifficultyName(difficulty);
         this.font.drawShadow(poseStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
-                             this.height / 2.0f - 84, difficultyColor(difficulty));
+                             this.height / 2.0f - 84, getDifficultyColor(difficulty));
 
         // Render Button(s)
         super.render(poseStack, mouseX, mouseY, partialTicks);
@@ -193,54 +197,17 @@ public class ConfigPageDifficulty extends Screen
     {
         super.onClose();
         switch (ConfigSettings.DIFFICULTY.get())
-                {
-                    // Super Easy
-                    case 0 ->
-                    {
-                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.TEMP_RATE.set(0.5);
-                        ConfigSettings.REQUIRE_THERMOMETER.set(false);
-                        ConfigSettings.DAMAGE_SCALING.set(false);
-                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-                    }
-                    // Easy
-                    case 1 ->
-                    {
-                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.TEMP_RATE.set(0.75);
-                        ConfigSettings.REQUIRE_THERMOMETER.set(false);
-                        ConfigSettings.DAMAGE_SCALING.set(false);
-                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-                    }
-                    // Normal
-                    case 2 ->
-                    {
-                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.TEMP_RATE.set(1.0);
-                        ConfigSettings.REQUIRE_THERMOMETER.set(true);
-                        ConfigSettings.DAMAGE_SCALING.set(true);
-                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(true);
-                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(true);
-                    }
-                    // Hard
-                    case 3 ->
-                    {
-                        ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true));
-                        ConfigSettings.TEMP_RATE.set(1.5);
-                        ConfigSettings.REQUIRE_THERMOMETER.set(true);
-                        ConfigSettings.DAMAGE_SCALING.set(true);
-                        ConfigSettings.FIRE_RESISTANCE_ENABLED.set(false);
-                        ConfigSettings.ICE_RESISTANCE_ENABLED.set(false);
-                    }
-                }
-                ConfigScreen.saveConfig();
-                ConfigScreen.MC.setScreen(parentScreen);
+        {   // Super Easy
+            case 0 -> SUPER_EASY.load();
+            // Easy
+            case 1 -> EASY.load();
+            // Normal
+            case 2 -> NORMAL.load();
+            // Hard
+            case 3 -> ConfigSettings.Difficulty.HARD.load();
+        }
+        ConfigScreen.saveConfig();
+        ConfigScreen.MC.setScreen(parentScreen);
     }
 
     boolean isMouseOverSlider(double mouseX, double mouseY)

@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 /**
  * Contains a value that updates as needed (usually when a player interacts with the config screen). <br>
- * If added to {@link ConfigSettings#SYNCED_SETTINGS}, it will be synced to the client.
+ * If added to {@link ConfigSettings#CONFIG_SETTINGS}, it will be synced to the client.
  */
 public class ValueSupplier<T>
 {

@@ -19,8 +19,6 @@ public class ListBuilder<T>
         this.elements.add(element);
     }
 
-    private ListBuilder() {}
-
     @SafeVarargs
     public static <E> ListBuilder<E> begin(E... elements)
     {
@@ -32,11 +30,6 @@ public class ListBuilder<T>
         return new ListBuilder<>(element);
     }
 
-    public static <E> ListBuilder<E> begin()
-    {
-        return new ListBuilder<>();
-    }
-
     /**
      * Adds an element to the list if the condition is true.
      * The objects are not created if the condition is false.
@@ -46,8 +39,7 @@ public class ListBuilder<T>
      */
     @SafeVarargs
     public final ListBuilder<T> addIf(boolean condition, Supplier<T>... elements)
-    {
-        if (condition) this.elements.addAll(Arrays.stream(elements).map(Supplier::get).toList());
+    {   if (condition) this.elements.addAll(Arrays.stream(elements).map(Supplier::get).toList());
         return this;
     }
 
@@ -59,21 +51,18 @@ public class ListBuilder<T>
      * @return The ListBuilder instance.
      */
     public final ListBuilder<T> addIf(boolean condition, Supplier<T> element)
-    {
-        if (condition) this.elements.add(element.get());
+    {   if (condition) this.elements.add(element.get());
         return this;
     }
 
     @SafeVarargs
     public final ListBuilder<T> add(T... elements)
-    {
-        this.elements.addAll(Arrays.asList(elements));
+    {   this.elements.addAll(Arrays.asList(elements));
         return this;
     }
 
     public ListBuilder<T> add(T element)
-    {
-        this.elements.add(element);
+    {   this.elements.add(element);
         return this;
     }
 

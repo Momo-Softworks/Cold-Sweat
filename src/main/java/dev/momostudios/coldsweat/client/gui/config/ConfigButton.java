@@ -29,7 +29,7 @@ public class ConfigButton extends Button
             {
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
                         Component.literal(Component.translatable("cold_sweat.config.difficulty.name").getString() +
-                                " (" + ConfigPageDifficulty.difficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
+                                " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
             }
         }
 
