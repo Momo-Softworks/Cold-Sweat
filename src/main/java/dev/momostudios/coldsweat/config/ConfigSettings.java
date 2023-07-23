@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.config.util.ValueSupplier;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -22,7 +23,9 @@ import java.util.function.Supplier;
  */
 public class ConfigSettings
 {
-    public static final Map<String, ValueSupplier<?>> SYNCED_SETTINGS = new HashMap<>();
+    public static final Map<String, ValueSupplier<?>> CONFIG_SETTINGS = new HashMap<>();
+
+    public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
     // Settings visible in the config screen
     public static final ValueSupplier<Integer> DIFFICULTY;
@@ -53,7 +56,9 @@ public class ConfigSettings
     public static final ValueSupplier<Integer[]> INSULATION_SLOTS;
     public static final ValueSupplier<List<ResourceLocation>> INSULATION_BLACKLIST;
 
-    public static final ValueSupplier<Map<Item, Double>> TEMPERATURE_FOODS;
+    public static final ValueSupplier<Boolean> CHECK_SLEEP_CONDITIONS;
+
+    public static final ValueSupplier<Map<Item, Double>> FOOD_TEMPERATURES;
 
     public static final ValueSupplier<Integer> WATERSKIN_STRENGTH;
 
@@ -127,9 +132,9 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
-        BIOME_TEMPS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true));
+        BIOME_TEMPS = addSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true));
 
-        BIOME_OFFSETS = ValueSupplier.of(() -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false));
+        BIOME_OFFSETS = addSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false));
 
         DIMENSION_TEMPS = ValueSupplier.of(() ->
         {   Map<ResourceLocation, Double> map = new HashMap<>();
@@ -149,12 +154,12 @@ public class ConfigSettings
             return map;
         });
 
-        BOILER_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
-        HEARTH_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getHearthFuelItems()));
-        ICEBOX_FUEL = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
+        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
+        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
+        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getHearthFuelItems()));
 
-        HEARTH_POTIONS_ENABLED = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().arePotionsEnabled());
-        BLACKLISTED_POTIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
+        HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
+        BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
         {
@@ -254,11 +259,13 @@ public class ConfigSettings
         {   ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
         });
 
-        INSULATION_BLACKLIST = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).toList());
+        INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).toList());
 
-        TEMPERATURE_FOODS = ValueSupplier.of(() -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getFoodTemperatures()));
+        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> ColdSweatConfig.getInstance().isSleepChecked());
 
-        WATERSKIN_STRENGTH = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getWaterskinStrength());
+        FOOD_TEMPERATURES = addSetting("food_temperatures", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getFoodTemperatures()));
+
+        WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
         LAMP_FUEL_ITEMS = addSyncedSetting("lamp_fuel_items", () ->
         {
@@ -305,7 +312,7 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setSoulLampFuelItems(list);
         });
 
-        LAMP_DIMENSIONS = ValueSupplier.of(() -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
+        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
 
         GOAT_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
         {
@@ -336,7 +343,7 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
-        CHAMELEON_BIOMES = ValueSupplier.of(() ->
+        CHAMELEON_BIOMES = addSetting("chameleon_spawn_biomes", () ->
         {
             Map<ResourceLocation, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
@@ -346,7 +353,7 @@ public class ConfigSettings
             return map;
         });
 
-        GOAT_BIOMES = ValueSupplier.of(() ->
+        GOAT_BIOMES = addSetting("goat_spawn_biomes", () ->
         {
             Map<ResourceLocation, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
@@ -356,58 +363,116 @@ public class ConfigSettings
             return map;
         });
 
-        if (CompatManager.isSereneSeasonsLoaded())
-        {   SUMMER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getSummerTemps());
-            AUTUMN_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getAutumnTemps());
-            WINTER_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getWinterTemps());
-            SPRING_TEMPS = ValueSupplier.of(() -> WorldSettingsConfig.getInstance().getSpringTemps());
+        boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
+        SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
+        AUTUMN_TEMPS = addSetting("autumn_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getAutumnTemps() : () -> new Double[3]);
+        WINTER_TEMPS = addSetting("winter_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getWinterTemps() : () -> new Double[3]);
+        SPRING_TEMPS = addSetting("spring_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSpringTemps() : () -> new Double[3]);
+    }
+
+    public enum Difficulty
+    {
+        SUPER_EASY(Map.of(
+            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true)),
+            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true)),
+            "temp_rate", ValueSupplier.of(() -> 0.5),
+            "require_thermometer", ValueSupplier.of(() -> false),
+            "fire_resistance_enabled", ValueSupplier.of(() -> true),
+            "ice_resistance_enabled", ValueSupplier.of(() -> true),
+            "damage_scaling", ValueSupplier.of(() -> false)
+        )),
+
+        EASY(Map.of(
+            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true)),
+            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true)),
+            "temp_rate", ValueSupplier.of(() -> 0.75),
+            "require_thermometer", ValueSupplier.of(() -> false),
+            "fire_resistance_enabled", ValueSupplier.of(() -> true),
+            "ice_resistance_enabled", ValueSupplier.of(() -> true),
+            "damage_scaling", ValueSupplier.of(() -> false)
+        )),
+
+        NORMAL(Map.of(
+            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true)),
+            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(95, Temperature.Units.F, Temperature.Units.MC, true)),
+            "temp_rate", ValueSupplier.of(() -> 1.0),
+            "require_thermometer", ValueSupplier.of(() -> true),
+            "fire_resistance_enabled", ValueSupplier.of(() -> true),
+            "ice_resistance_enabled", ValueSupplier.of(() -> true),
+            "damage_scaling", ValueSupplier.of(() -> true)
+        )),
+
+        HARD(Map.of(
+            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true)),
+            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(85, Temperature.Units.F, Temperature.Units.MC, true)),
+            "temp_rate", ValueSupplier.of(() -> 1.5),
+            "require_thermometer", ValueSupplier.of(() -> true),
+            "fire_resistance_enabled", ValueSupplier.of(() -> false),
+            "ice_resistance_enabled", ValueSupplier.of(() -> false),
+            "damage_scaling", ValueSupplier.of(() -> true)
+        )),
+
+        CUSTOM(Map.of());
+
+        private final Map<String, ValueSupplier<?>> settings;
+        Difficulty(Map<String, ValueSupplier<?>> settings)
+        {   this.settings = settings;
         }
-        else
-        {   SUMMER_TEMPS = ValueSupplier.of(() -> new Double[3]);
-            AUTUMN_TEMPS = ValueSupplier.of(() -> new Double[3]);
-            WINTER_TEMPS = ValueSupplier.of(() -> new Double[3]);
-            SPRING_TEMPS = ValueSupplier.of(() -> new Double[3]);
+
+        public <T> T getSetting(String id)
+        {   return (T) settings.get(id).get();
+        }
+
+        public <T> T getOrDefault(String id, T defaultValue)
+        {   return (T) settings.getOrDefault(id, ValueSupplier.of(() -> defaultValue)).get();
+        }
+
+        public void load()
+        {   CONFIG_SETTINGS.putAll(settings);
         }
     }
 
     public static <T> ValueSupplier<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
-    {
-        ValueSupplier<T> loader = ValueSupplier.synced(supplier, writer, reader, saver);
-        SYNCED_SETTINGS.put(id, loader);
+    {   ValueSupplier<T> loader = ValueSupplier.synced(supplier, writer, reader, saver);
+        CONFIG_SETTINGS.put(id, loader);
+        return loader;
+    }
+
+    public static <T> ValueSupplier<T> addSetting(String id, Supplier<T> supplier)
+    {   ValueSupplier<T> loader = ValueSupplier.of(supplier);
+        CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
 
     public static Map<String, CompoundTag> encode()
     {
         Map<String, CompoundTag> map = new HashMap<>();
-        SYNCED_SETTINGS.forEach((key, value) ->
-        {
-            if (value.isSynced())
-                map.put(key, value.encode());
+        CONFIG_SETTINGS.forEach((key, value) ->
+        {   if (value.isSynced())
+            {   map.put(key, value.encode());
+            }
         });
         return map;
     }
 
     public static void decode(String key, CompoundTag tag)
     {
-        SYNCED_SETTINGS.computeIfPresent(key, (k, value) ->
-        {
-            value.decode(tag);
+        CONFIG_SETTINGS.computeIfPresent(key, (k, value) ->
+        {   value.decode(tag);
             return value;
         });
     }
 
     public static void saveValues()
     {
-        SYNCED_SETTINGS.values().forEach(value ->
-        {
-            if (value.isSynced())
-                value.save();
+        CONFIG_SETTINGS.values().forEach(value ->
+        {   if (value.isSynced())
+            {   value.save();
+            }
         });
     }
 
     public static void load()
-    {
-        SYNCED_SETTINGS.values().forEach(ValueSupplier::load);
+    {   CONFIG_SETTINGS.values().forEach(ValueSupplier::load);
     }
 }

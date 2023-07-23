@@ -10,50 +10,50 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 
 public class ColdSweatConfig
 {
     private static final ForgeConfigSpec SPEC;
-    private static final ColdSweatConfig CONFIG_REFERENCE = new ColdSweatConfig();
+    private static final ColdSweatConfig INSTANCE = new ColdSweatConfig();
     public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.IntValue difficulty;
+    public static final ForgeConfigSpec.ConfigValue<Integer> difficulty;
 
-    private static final ForgeConfigSpec.DoubleValue maxHabitable;
-    private static final ForgeConfigSpec.DoubleValue minHabitable;
-    private static final ForgeConfigSpec.DoubleValue rateMultiplier;
+    public static final ForgeConfigSpec.ConfigValue<Double> maxHabitable;
+    public static final ForgeConfigSpec.ConfigValue<Double> minHabitable;
+    public static final ForgeConfigSpec.ConfigValue<Double> rateMultiplier;
 
-    private static final ForgeConfigSpec.BooleanValue fireResistanceEffect;
-    private static final ForgeConfigSpec.BooleanValue iceResistanceEffect;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> fireResistanceEffect;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> iceResistanceEffect;
 
-    private static final ForgeConfigSpec.BooleanValue damageScaling;
-    private static final ForgeConfigSpec.BooleanValue requireThermometer;
-    private static final ForgeConfigSpec.BooleanValue checkSleep;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> damageScaling;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> requireThermometer;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> checkSleep;
 
-    private static final ForgeConfigSpec.IntValue gracePeriodLength;
-    private static final ForgeConfigSpec.BooleanValue gracePeriodEnabled;
+    public static final ForgeConfigSpec.ConfigValue<Integer> gracePeriodLength;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
 
-    private static final ForgeConfigSpec.DoubleValue hearthEffect;
+    public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
 
-    private static final ForgeConfigSpec.BooleanValue coldSoulFire;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
 
-    private static final ForgeConfigSpec.BooleanValue heatstrokeFog;
-    private static final ForgeConfigSpec.BooleanValue freezingHearts;
-    private static final ForgeConfigSpec.BooleanValue coldKnockback;
-    private static final ForgeConfigSpec.BooleanValue coldMining;
-    private static final ForgeConfigSpec.BooleanValue coldMovement;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> heatstrokeFog;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> freezingHearts;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> coldKnockback;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> coldMining;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> coldMovement;
 
     static 
     {
+        ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
+
         /*
          Difficulty
          */
         difficulty = BUILDER
                 .comment("Overrides all other config options for easy difficulty management",
                         "This value is changed by the in-game config. It does nothing otherwise.")
-                .defineInRange("Difficulty", 2, 0, 4);
+                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         /*
          Potion effects affecting the player's temperature
@@ -61,13 +61,13 @@ public class ColdSweatConfig
         BUILDER.push("Item settings");
         fireResistanceEffect = BUILDER
                 .comment("Fire Resistance blocks all hot temperatures")
-                .define("Fire Resistance Immunity", true);
+                .define("Fire Resistance Immunity", defaultDiff.getOrDefault("fire_resistance_enabled", true));
         iceResistanceEffect = BUILDER
                 .comment("Ice Resistance blocks all cold temperatures")
-                .define("Ice Resistance Immunity", true);
+                .define("Ice Resistance Immunity", defaultDiff.getOrDefault("ice_resistance_enabled", true));
         requireThermometer = BUILDER
             .comment("Thermometer item is required to see world temperature")
-            .define("Require Thermometer", true);
+            .define("Require Thermometer", defaultDiff.getOrDefault("require_thermometer", true));
         BUILDER.pop();
 
         /*
@@ -76,10 +76,10 @@ public class ColdSweatConfig
         BUILDER.push("Misc temperature-related things");
         damageScaling = BUILDER
             .comment("Sets whether damage scales with difficulty")
-            .define("Damage Scaling", true);
+            .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
         checkSleep = BUILDER
             .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
-            .define("Prevent Sleep When in Danger", true);
+            .define("Prevent Sleep When in Danger", defaultDiff.getOrDefault("check_sleep_conditions", true));
         BUILDER.pop();
 
         /*
@@ -87,14 +87,16 @@ public class ColdSweatConfig
          */
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
-                .comment("Minimum habitable temperature (default: " + CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true) + ")")
-                .defineInRange("Minimum Habitable Temperature", CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Defines the minimum habitable temperature")
+                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true)),
+                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
-                .comment("Maximum habitable temperature (default: " + CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true) + ")")
-                .defineInRange("Maximum Habitable Temperature", CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                .comment("Defines the maximum habitable temperature")
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true)),
+                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
-                .defineInRange("Rate Multiplier", 1.0, 0, Double.POSITIVE_INFINITY);
+                .defineInRange("Rate Multiplier", defaultDiff.<Double>getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
         BUILDER.pop();
 
 
@@ -102,22 +104,22 @@ public class ColdSweatConfig
             BUILDER.push("Hot");
             heatstrokeFog = BUILDER
                 .comment("When set to true, the player's view distance will decrease when they are too hot")
-                .define("Heatstroke Fog", true);
+                .define("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", true));
             BUILDER.pop();
 
             BUILDER.push("Cold");
             freezingHearts = BUILDER
                 .comment("When set to true, some of the player's hearts will freeze when they are too cold, preventing regeneration")
-                .define("Freezing Hearts", true);
+                .define("Freezing Hearts", defaultDiff.getOrDefault("freezing_hearts", true));
             coldKnockback = BUILDER
                 .comment("When set to true, the player's attack knockback will be reduced when they are too cold")
-                .define("Cold Knockback Reduction", true);
+                .define("Cold Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", true));
             coldMovement = BUILDER
                 .comment("When set to true, the player's movement speed will be reduced when they are too cold")
-                .define("Cold Slowness", true);
+                .define("Cold Slowness", defaultDiff.getOrDefault("cold_slowness", true));
             coldMining = BUILDER
                 .comment("When set to true, the player's mining speed will be reduced when they are too cold")
-                .define("Cold Mining Fatigue", true);
+                .define("Cold Mining Fatigue", defaultDiff.getOrDefault("cold_break_speed", true));
             BUILDER.pop();
         BUILDER.pop();
 
@@ -125,16 +127,16 @@ public class ColdSweatConfig
         BUILDER.push("Grace Period Details");
                 gracePeriodLength = BUILDER
                 .comment("Grace period length in ticks (default: 6000)")
-                .defineInRange("Grace Period Length", 6000, 0, Integer.MAX_VALUE);
+                .defineInRange("Grace Period Length", defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE);
                 gracePeriodEnabled = BUILDER
                 .comment("Enables the grace period (default: true)")
-                .define("Grace Period Enabled", true);
+                .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
         BUILDER.pop();
 
         BUILDER.push("Hearth");
             hearthEffect = BUILDER
                     .comment("How strong the hearth is (default: 0.5)")
-                    .defineInRange("Hearth Strength", 0.5, 0, 1.0);
+                    .defineInRange("Hearth Strength", defaultDiff.getOrDefault("hearth_strength", 0.5), 0, 1.0);
         BUILDER.pop();
 
         BUILDER.push("Cold Soul Fire");
@@ -167,14 +169,14 @@ public class ColdSweatConfig
 
     public static ColdSweatConfig getInstance()
     {
-        return CONFIG_REFERENCE;
+        return INSTANCE;
     }
 
     /*
      * Non-private values for use elsewhere
      */
 
-    public int getDifficulty() {
+    public int   getDifficulty() {
         return difficulty.get();
     }
 
