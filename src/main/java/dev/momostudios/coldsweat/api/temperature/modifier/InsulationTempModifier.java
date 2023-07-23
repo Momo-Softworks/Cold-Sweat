@@ -26,9 +26,9 @@ public class InsulationTempModifier extends TempModifier
         return temp ->
         {
             if (temp > 0)
-            {   return hot >= 0 ? temp / (1 + hot) : temp * (1 - hot);
+            {   return hot >= 0 ? temp / (1 + hot * 2) : temp * (1 - hot * 2);
             }
-            else return cold >= 0 ? temp / (1 + cold) : temp * (1 - cold);
+            else return cold >= 0 ? temp / (1 + cold * 2) : temp * (1 - cold * 2);
         };
     }
 
