@@ -313,13 +313,9 @@ public class PlayerTempCap implements ITemperatureCap
             // For each modifier in the list
             modifiers.forEach(modNBT ->
             {
-                TempModifier modifier = NBTHelper.tagToModifier((CompoundTag) modNBT);
-
-                // Add the modifier to the player's temperature
-                if (modifier != null)
-                    getModifiers(type).add(modifier);
-                else
-                    ColdSweat.LOGGER.error("Failed to load modifier \"{}\" of type {}", ((CompoundTag) modNBT).getString("id"), type);
+                NBTHelper.tagToModifier((CompoundTag) modNBT).ifPresent(modifier ->
+                {   getModifiers(type).add(modifier);
+                });
             });
         }
     }

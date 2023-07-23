@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TempModifierRegistry
@@ -14,8 +14,7 @@ public class TempModifierRegistry
     static Map<String, Supplier<TempModifier>> TEMP_MODIFIERS = new HashMap<>();
 
     public static ImmutableMap<String, Supplier<TempModifier>> getEntries()
-    {
-        return ImmutableMap.copyOf(TEMP_MODIFIERS);
+    {   return ImmutableMap.copyOf(TEMP_MODIFIERS);
     }
 
     public static void register(Supplier<TempModifier> supplier)
@@ -45,12 +44,15 @@ public class TempModifierRegistry
      * Returns a new instance of the TempModifier with the given ID.<br>
      * If a TempModifier with this ID is not in the registry, this method returns null and logs an error.<br>
      */
-    @Nullable
-    public static TempModifier getEntryFor(String id)
+    public static Optional<TempModifier> getEntryFor(String id)
     {
-        return TEMP_MODIFIERS.getOrDefault(id, () ->
+        Supplier<TempModifier> mod = TEMP_MODIFIERS.get(id);
+        if (mod != null)
+        {   return Optional.of(mod.get());
+        }
+        else
         {   ColdSweat.LOGGER.error("Tried to instantiate TempModifier \"" + id + "\", but it is not registered!");
-            return null;
-        }).get();
+            return Optional.empty();
+        }
     }
 }
