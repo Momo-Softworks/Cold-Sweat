@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: Title (include MC/Cold Sweat version)
-labels: bug, crash
+labels: bug
 assignees: MikulDev
 
 ---
