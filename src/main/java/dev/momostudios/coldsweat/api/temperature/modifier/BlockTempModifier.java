@@ -16,6 +16,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 
@@ -46,6 +47,7 @@ public class BlockTempModifier extends TempModifier
         int entY = entity.blockPosition().getY();
         int entZ = entity.blockPosition().getZ();
         BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
+        int minBuildHeight = level.getMinBuildHeight();
 
         for (int x = -range; x < range; x++)
         {
@@ -54,6 +56,7 @@ public class BlockTempModifier extends TempModifier
                 ChunkAccess chunk = chunks.computeIfAbsent(new ChunkPos((entX + x) >> 4, (entZ + z) >> 4),
                                                            (chunkPos) -> WorldHelper.getChunk(level, chunkPos));
                 if (chunk == null) continue;
+                LevelChunkSection[] sections = chunk.getSections();
 
                 for (int y = -range; y < range; y++)
                 {
@@ -61,7 +64,8 @@ public class BlockTempModifier extends TempModifier
                     {
                         blockpos.set(entX + x, entY + y, entZ + z);
 
-                        BlockState state = chunk.getBlockState(blockpos);
+                        LevelChunkSection section = sections[CSMath.clamp((blockpos.getY() >> 4) - (minBuildHeight >> 4), 0, sections.length - 1)];
+                        BlockState state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
 
                         if (state.getMaterial() == Material.AIR) continue;
 
