@@ -58,16 +58,11 @@ public class ConfigScreen
     {
         if (Minecraft.getInstance().player != null)
         {
-            if (Minecraft.getInstance().player.getPermissionLevel() >= 2)
-            {
-                if (!MC.isLocalServer())
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
-                else
-                    ConfigSettings.saveValues();
-            }
+            if (!MC.isLocalServer())
+                ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
+            else ConfigSettings.saveValues();
         }
-        else
-            ConfigSettings.saveValues();
+        else ConfigSettings.saveValues();
     }
 
     @SubscribeEvent
