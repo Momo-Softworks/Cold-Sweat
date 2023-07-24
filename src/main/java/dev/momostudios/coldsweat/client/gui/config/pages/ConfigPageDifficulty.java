@@ -206,7 +206,7 @@ public class ConfigPageDifficulty extends Screen
             // Normal
             case 2 -> NORMAL.load();
             // Hard
-            case 3 -> ConfigSettings.Difficulty.HARD.load();
+            case 3 -> HARD.load();
         }
         ConfigScreen.saveConfig();
         ConfigScreen.MC.setScreen(parentScreen);

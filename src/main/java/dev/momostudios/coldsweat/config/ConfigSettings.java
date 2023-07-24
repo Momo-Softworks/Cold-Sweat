@@ -373,49 +373,49 @@ public class ConfigSettings
     public enum Difficulty
     {
         SUPER_EASY(Map.of(
-            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true)),
-            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true)),
-            "temp_rate", ValueSupplier.of(() -> 0.5),
-            "require_thermometer", ValueSupplier.of(() -> false),
-            "fire_resistance_enabled", ValueSupplier.of(() -> true),
-            "ice_resistance_enabled", ValueSupplier.of(() -> true),
-            "damage_scaling", ValueSupplier.of(() -> false)
+            "min_temp", () -> CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true),
+            "temp_rate", () -> 0.5,
+            "require_thermometer", () -> false,
+            "fire_resistance_enabled", () -> true,
+            "ice_resistance_enabled", () -> true,
+            "damage_scaling", () -> false
         )),
 
         EASY(Map.of(
-            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true)),
-            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true)),
-            "temp_rate", ValueSupplier.of(() -> 0.75),
-            "require_thermometer", ValueSupplier.of(() -> false),
-            "fire_resistance_enabled", ValueSupplier.of(() -> true),
-            "ice_resistance_enabled", ValueSupplier.of(() -> true),
-            "damage_scaling", ValueSupplier.of(() -> false)
+            "min_temp", () -> CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true),
+            "temp_rate", () -> 0.75,
+            "require_thermometer", () -> false,
+            "fire_resistance_enabled", () -> true,
+            "ice_resistance_enabled", () -> true,
+            "damage_scaling", () -> false
         )),
 
         NORMAL(Map.of(
-            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true)),
-            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(95, Temperature.Units.F, Temperature.Units.MC, true)),
-            "temp_rate", ValueSupplier.of(() -> 1.0),
-            "require_thermometer", ValueSupplier.of(() -> true),
-            "fire_resistance_enabled", ValueSupplier.of(() -> true),
-            "ice_resistance_enabled", ValueSupplier.of(() -> true),
-            "damage_scaling", ValueSupplier.of(() -> true)
+            "min_temp", () -> CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true),
+            "temp_rate", () -> 1.0,
+            "require_thermometer", () -> true,
+            "fire_resistance_enabled", () -> true,
+            "ice_resistance_enabled", () -> true,
+            "damage_scaling", () -> true
         )),
 
         HARD(Map.of(
-            "min_temp", ValueSupplier.of(() -> CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true)),
-            "max_temp", ValueSupplier.of(() -> CSMath.convertTemp(85, Temperature.Units.F, Temperature.Units.MC, true)),
-            "temp_rate", ValueSupplier.of(() -> 1.5),
-            "require_thermometer", ValueSupplier.of(() -> true),
-            "fire_resistance_enabled", ValueSupplier.of(() -> false),
-            "ice_resistance_enabled", ValueSupplier.of(() -> false),
-            "damage_scaling", ValueSupplier.of(() -> true)
+            "min_temp", () -> CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true),
+            "temp_rate", () -> 1.5,
+            "require_thermometer", () -> true,
+            "fire_resistance_enabled", () -> false,
+            "ice_resistance_enabled", () -> false,
+            "damage_scaling", () -> true
         )),
 
         CUSTOM(Map.of());
 
-        private final Map<String, ValueSupplier<?>> settings;
-        Difficulty(Map<String, ValueSupplier<?>> settings)
+        private final Map<String, Supplier<?>> settings;
+        Difficulty(Map<String, Supplier<?>> settings)
         {   this.settings = settings;
         }
 
@@ -424,11 +424,11 @@ public class ConfigSettings
         }
 
         public <T> T getOrDefault(String id, T defaultValue)
-        {   return (T) settings.getOrDefault(id, ValueSupplier.of(() -> defaultValue)).get();
+        {   return (T) settings.getOrDefault(id, () -> defaultValue).get();
         }
 
         public void load()
-        {   CONFIG_SETTINGS.putAll(settings);
+        {   settings.forEach((id, loader) -> CONFIG_SETTINGS.get(id).set(loader.get()));
         }
     }
 

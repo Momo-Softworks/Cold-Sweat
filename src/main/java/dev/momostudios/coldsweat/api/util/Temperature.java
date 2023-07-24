@@ -102,7 +102,7 @@ public class Temperature
         dummy.setPos(CSMath.getCenterPos(pos));
         return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
                                                       .addIf(CompatManager.isSereneSeasonsLoaded(),
-                                                          () -> TempModifierRegistry.getEntryFor("sereneseasons:season"))
+                                                          () -> TempModifierRegistry.getEntryFor("sereneseasons:season").orElse(null))
                                                       .add(new UndergroundTempModifier(),
                                                            new BlockTempModifier()).build());
     }

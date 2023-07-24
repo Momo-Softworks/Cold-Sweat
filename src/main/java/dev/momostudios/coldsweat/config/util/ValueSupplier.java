@@ -46,8 +46,11 @@ public class ValueSupplier<T>
         return value;
     }
 
-    public void set(T value)
-    {   this.value = value;
+    public void set(Object value)
+    {   try
+        {   this.value = (T) value;
+        }
+        catch (Exception e) { throw new RuntimeException("Failed to set value of type " + value.getClass() + " to " + value); }
     }
 
     public void load()

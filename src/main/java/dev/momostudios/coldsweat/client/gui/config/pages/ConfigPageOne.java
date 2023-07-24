@@ -60,9 +60,11 @@ public class ConfigPageOne extends AbstractConfigPage
 
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
-        Supplier<Temperature.Units> properUnits = () -> clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
+        Temperature.Units properUnits = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 
-        // The options
+        /*
+         The Options
+        */
 
         // Celsius
         this.addButton("units", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.units.name").getString() + ": " +
@@ -74,14 +76,14 @@ public class ConfigPageOne extends AbstractConfigPage
             clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.WORLD_TEMP = CSMath.convertTemp(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits.get(), true);
+                Overlays.WORLD_TEMP = CSMath.convertTemp(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits, true);
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))));
+                    CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits, true))));
 
             ((EditBox) this.widgetBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))));
+                    CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits, true))));
         }, false, false, true, new TranslatableComponent("cold_sweat.config.units.desc").getString());
 
 
@@ -93,14 +95,14 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.max_temperature.name"),
-                value -> ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(value, properUnits.get(), Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
+                value -> ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(value, properUnits, Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits, true))),
                 true, false, false, new TranslatableComponent("cold_sweat.config.max_temperature.desc").getString());
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.min_temperature.name"),
-                value -> ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(value, properUnits.get(), Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
+                value -> ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(value, properUnits, Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits, true))),
                 true, false, false, new TranslatableComponent("cold_sweat.config.min_temperature.desc").getString());
 
         // Rate Multiplier
