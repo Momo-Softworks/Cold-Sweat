@@ -1297,7 +1297,7 @@ Technical Changes:
 - Added new song: "Modulo"
       - Plays in-game and in the menu
 - Hoglin hide can now be obtained through piglin bartering
-- Goat fur can now has a chance to be sold by the wandering trader
+- Goat fur now has a chance to be sold by the wandering trader
 - Updated chameleon sounds to be more true to real chameleons
 - A death message will now be displayed if a tamed chameleon dies
 
@@ -1305,3 +1305,28 @@ Fixes:
 - Fixed the hearth thinking it is surrounded by solid blocks in some cases
 - Fixed another bug that caused the game to stall when a chameleon is created at the edge of the loaded world
 - Fixed blocks sometimes not affecting temperature properly
+- Fixed issue that caused players' temperatures to be "shared" on a server in some cases
+
+Technical Changes:
+- TempModifier registration using instances is no longer allowed. A supplier must be used
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04k
+- All wearable items can now have insulation, instead of just armor
+- Added new config option in item-settings.toml to "blacklist" items from allowing insulation
+- Doubled the effectiveness of all armor insulation
+- Halved the rate at which the soulspring lamp consumes fuel
+
+Fixes:
+- Fixed some block state predicates not working for BlockTemp configurations
+- Fixed only one BlockTemp being allowed per block, even if they have different predicates
+- Fixed "invalid player data" message when the player joins the world while in water
+- Fixed biome-related config options not working for biomes added via datapacks
+- Fixed the "Dimension Offsets" config setting not working
+- Fixed the hearth sometimes not calculating area-of-effect properly, especially when a block is placed/broken
+- Increased the reliability of soul stalk generation
+
+Technical Changes:
+- Block updates now reset the hearth's entire AOE (the selective "smart" method of updating the AOE was too unreliable)
+      - Sped up hearth "spread" calculations by 5x to account for sections of the AOE being unnecessarily cleared
