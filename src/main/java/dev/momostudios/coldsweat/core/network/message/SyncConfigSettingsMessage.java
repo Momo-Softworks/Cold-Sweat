@@ -68,13 +68,18 @@ public class SyncConfigSettingsMessage
             message.configValues.forEach(ConfigSettings::decode);
 
             if (context.getDirection().getReceptionSide().isServer())
-            {   ConfigSettings.saveValues();
-                ColdSweatConfig.getInstance().save();
+            {
+                if (context.getSender() != null && context.getSender().hasPermissions(2))
+                {   message.configValues.forEach(ConfigSettings::decode);
+                    ConfigSettings.saveValues();
+                    ColdSweatConfig.getInstance().save();
+                }
 
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(message.menuOpener));
             }
             else if (context.getDirection().getReceptionSide().isClient())
             {
+                message.configValues.forEach(ConfigSettings::decode);
                 if (!message.menuOpener.equals(EMPTY_UUID))
                 {   ClientOnlyHelper.openConfigScreen();
                 }
