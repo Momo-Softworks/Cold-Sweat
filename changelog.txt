@@ -1183,20 +1183,17 @@ Fixes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.2-b04f
+2.2-b04e
+- Updated Create compatibility to 5.1b
 - Increased chameleon spawn rates in jungle biomes due to thick vegetation
-- Added settings to blacklist or outright disable potions from being used in the hearth
-- Milk can now be used to clear all effects from the hearth
 
 Fixes:
-- Fixed the hearth not "un-filling" the proper areas when a block is placed in some cases
-- Fixed tooltips showing insulation info when the insulation configs contain an item that doesn't exist
-- Soul stalk now only drops sticks from "middle" blocks
-      - Prevents a duplication glitch with placing/breaking a soul stalk
-      - Now only drops 0-2 sticks instead of 1-3
+- Fixed temperature-related UI elements not rendering
+- Fixed crash when opening the sewing table menu
+- Fixed goats not being able to spawn
+- Fixed the boiler not spawning particles when lit
 
 Technical Changes:
-- Added config options to blacklist or completely disable potions from being used in the hearth
 - Added #boiler_valid and #icebox_valid tags
       - These tags now determine what items can be placed into the top slots of the icebox & boiler
 - Added tags for items that the chameleon can eat:
@@ -1204,11 +1201,25 @@ Technical Changes:
       - #chameleon/find_cold_biomes: The chameleon will locate the nearest cold biome
       - #chameleon/find_humid_biomes: The chameleon will locate the nearest humid biome
       - #chameleon/taming: Item used to tame a chameleon
-- Added #soulspring_lamp_valid to define dimensions that the soulspring lamp will activate in
-- Updated the supported version of Create to 5.1
+- Added #soulspring_lamp_valid tag to define dimensions that the soulspring lamp will activate in
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04f
+- Milk can now be used to clear all effects from the hearth
+
+Fixes:
+- Fixed servers not being able to load
+- Fixed tooltips showing insulation info when the insulation configs contain an item that doesn't exist
+- Fixed the hearth not "un-filling" the proper areas when a block is placed in some cases
+- Soul stalk now only drops sticks from "middle" blocks
+      - Prevents a duplication glitch with placing/breaking a soul stalk
+      - Now only drops 0-2 sticks instead of 1-3
+
+Technical Changes:
+- Added config options to blacklist or completely disable potions from being used in the hearth
 - Mods that have compat but are an unsupported version will now cause the compat to disable itself instead of causing issues
       - For example, now that the minimum version of Create is 5.1, Cold Sweat will disable its Create compat if Create is below 5.1
-- Temperature.getModifier() now returns an Optional<T extends TempModifier> instead of potential null
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -1221,30 +1232,101 @@ Fixes:
 ------------------------------------------------------------------------------------------------------------------------
 2.2-b04h
 * Added support for biomes from William Wyther's Overhauled Overworld (Pyrael on Discord)
-- Increased the rate at which the hearth drains fuel
+- Doubled the rate at which the hearth drains fuel (a full gauge will now last ~30 real minutes)
 - Added a normal-duration (3:00) ice resistance potion
     - The existing (8:00) potion is now the long-duration version (brewed with redstone)
 - Goats now drop 0-2 goat fur when killed
 - Rebalanced chameleon spawns again to make them more common in lush areas and rarer in sparse/desert-like areas
 - The player is now granted the sewing table recipe upon obtaining an insulation item
+- The chameleon can now be tempted with any item it can eat
 
 Fixes:
+- Fixed crash when pressing "done" in the config menu before a world is loaded
 - Fixed the thermolith not having a preferred mining tool
 - Fixed the thermolith not dropping anything when mined
 - Fixed the hearth not draining fuel properly
 - Fixed hearth particles still spawning when "show particles" is disabled
 - Fixed the default difficulty appearing to be "Hard" despite the settings being tuned to "Normal"
 - Fixed the "Super Easy" difficulty being switched to "Easy" in some cases
-- Fixed the hearth's fuel gauges not updating when draining fuel
 - Fixed the "Biome Temperatures" and "Biome Offsets" config options being converted to MC units when world-settings.toml is (re)loaded
 - Fixed "air" becoming a valid insulation item if the configs define an insulation value for an item that doesn't exist
 - Fixed block temperature not being detected across chunk borders in some cases
 - Fixed missing subtitles for chameleon eating sounds
 - Fixed some advancements triggering under the wrong conditions
+- Fixed the soulspring lamp not draining fuel (1.18)
 
 Technical Changes:
 - New "HeatResistance" and "ColdResistance" NBT tags can now be applied to players for easy temperature resistance
       - Slows the rate at which the player's temperature changes, similar to armor insulation
       - Setting either of these values to 100 will make the player completely immune to that temperature
 * Existing armor items using the old insulation format (from pre-2.2) will now be automatically updated to the new insulation format
-      ! Note: this conversion cannot be reversed, so if you downgrade Cold Sweat again all item insulation will be lost
+      ! Note: the new insulation format cannot be read by older versions, so if you downgrade Cold Sweat again all item insulation will be lost
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04i
+- Reduced the duration of ice resistance potions to 1:30 and 4:00 due to soul sprouts being easy to farm
+- Reduced the chance for soul stalks to bear additional soul sprouts from 50% to 33% per middle section block
+- The powder snow overlay now appears when the player is freezing
+- Soul sprouts now extinguish the player when eaten
+- 1-5 Soul sprouts how have a chance to result from piglin bartering
+- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block type can affect the player
+- The temperature of lava is now drastically reduced while riding a strider
+      - This is to prevent the player overheating extremely quickly while riding a strider on a lava ocean
+- Gave all insulation types distinct tooltip icons for easier reading
+
+Fixes:
+- Fixed "Max Temperature", "Min Temperature", and "Rate Modifier" options appearing to be editable in the config menu even if the player is non-OP
+- Fixed the hearth's fuel gauges not updating when draining fuel
+- Fixed missing lang entries for long-duration ice resistance potions
+- Fixed bug that caused the game to stall when a chameleon is created at the edge of the loaded world
+- Fixed the soulspring lamp not draining fuel (1.19)
+- Fixed soul stalk not growing (1.19)
+- Fixed the hearth only being able to insulate one player at a time
+
+Technical Changes:
+- The "Block Temperatures" config option has been moved to world-settings.toml
+      ! This will delete existing configs in main.toml. Back them up first!
+- TempModifier registration is now done using suppliers of TempModifiers
+      - This makes for a less hacky backend way of instantiating TempModifiers, no longer requiring a default constructor
+      - If registration is done using an instance, it will be turned into a supplier of that instance
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04j
+- Added new song: "Modulo"
+      - Plays in-game and in the menu
+- Hoglin hide can now be obtained through piglin bartering
+- Goat fur now has a chance to be sold by the wandering trader
+- Updated chameleon sounds to be more true to real chameleons
+- A death message will now be displayed if a tamed chameleon dies
+
+Fixes:
+- Fixed the hearth thinking it is surrounded by solid blocks in some cases
+- Fixed another bug that caused the game to stall when a chameleon is created at the edge of the loaded world
+- Fixed blocks sometimes not affecting temperature properly
+- Fixed issue that caused players' temperatures to be "shared" on a server in some cases
+
+Technical Changes:
+- TempModifier registration using instances is no longer allowed. A supplier must be used
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b04k
+- All wearable items can now have insulation, instead of just armor
+- Added new config option in item-settings.toml to "blacklist" items from allowing insulation
+- Doubled the effectiveness of all armor insulation
+- Halved the rate at which the soulspring lamp consumes fuel
+
+Fixes:
+- Fixed some block state predicates not working for BlockTemp configurations
+- Fixed only one BlockTemp being allowed per block, even if they have different predicates
+- Fixed "invalid player data" message when the player joins the world while in water
+- Fixed biome-related config options not working for biomes added via datapacks
+- Fixed the "Dimension Offsets" config setting not working
+- Fixed the hearth sometimes not calculating area-of-effect properly, especially when a block is placed/broken
+- Increased the reliability of soul stalk generation
+
+Technical Changes:
+- Block updates now reset the hearth's entire AOE (the selective "smart" method of updating the AOE was too unreliable)
+      - Sped up hearth "spread" calculations by 5x to account for sections of the AOE being unnecessarily cleared
