@@ -98,7 +98,7 @@ public class Overlays
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
-                Minecraft.getInstance().font.draw(poseStack, "" + (blendedTemp + CLIENT_CONFIG.getTempOffset()) + "",
+                Minecraft.getInstance().font.draw(poseStack, (blendedTemp + CLIENT_CONFIG.getTempOffset())+"",
                         /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
                         /* Y */ height - 15 - bob + CLIENT_CONFIG.getWorldGaugeY(), color);
                 poseStack.popPose();
@@ -200,15 +200,12 @@ public class Overlays
 
                     /* World Temp */
 
+                    // Get temperature in actual degrees
                     boolean celsius = CLIENT_CONFIG.isCelsius();
+                    double worldTemp = cap.getTemp(Temperature.Type.WORLD);
+                    double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                     if (SHOW_WORLD_TEMP)
-                    {
-
-                        // Get temperature in actual degrees
-                        double worldTemp = cap.getTemp(Temperature.Type.WORLD);
-                        double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-
-                        // Calculate the blended world temp for this tick
+                    {   // Calculate the blended world temp for this tick
                         double diff = realTemp - WORLD_TEMP;
                         PREV_WORLD_TEMP = WORLD_TEMP;
                         WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
@@ -218,8 +215,7 @@ public class Overlays
                         MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
                     }
                     else
-                    {
-                        PREV_WORLD_TEMP = WORLD_TEMP = CSMath.convertTemp(cap.getTemp(Temperature.Type.WORLD), Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    {   PREV_WORLD_TEMP = WORLD_TEMP = realTemp;
                     }
 
 

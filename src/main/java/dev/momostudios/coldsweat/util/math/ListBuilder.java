@@ -47,11 +47,16 @@ public class ListBuilder<T>
      * Adds an element to the list if the condition is true.
      * The object is not created if the condition is false.
      * @param condition The condition to check.
-     * @param element The element to add.
+     * @param supplier The element to add.
      * @return The ListBuilder instance.
      */
-    public final ListBuilder<T> addIf(boolean condition, Supplier<T> element)
-    {   if (condition) this.elements.add(element.get());
+    public final ListBuilder<T> addIf(boolean condition, Supplier<T> supplier)
+    {   if (condition)
+        {   T element = supplier.get();
+            if (element != null)
+            {   this.elements.add(element);
+            }
+        }
         return this;
     }
 
