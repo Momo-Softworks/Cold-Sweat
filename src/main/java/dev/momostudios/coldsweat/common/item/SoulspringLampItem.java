@@ -163,7 +163,7 @@ public class SoulspringLampItem extends Item
                 target.getPersistentData().putBoolean("SoulSucked", true);
 
                 // Add fuel
-                addFuel(stack, (int) Math.min(8, target.getMaxHealth()));
+                addFuel(stack, (int) Math.min(8, target.getMaxHealth() / 2));
                 float extraDamage = Math.max(0, 8 - event.getAmount());
                 if (extraDamage > 0)
                     target.hurt(new EntityDamageSource(DamageSource.MAGIC.msgId, attacker), extraDamage);
