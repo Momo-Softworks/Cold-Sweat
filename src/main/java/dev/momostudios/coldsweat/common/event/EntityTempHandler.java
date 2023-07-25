@@ -220,11 +220,10 @@ public class EntityTempHandler
                 // Armor underwear compat
                 if (CompatManager.isArmorUnderwearLoaded())
                 {
-                    TempModifier armorUnderMod = TempModifierRegistry.getEntryFor("armorunder:lining");
-                    if (armorUnderMod != null)
+                    TempModifierRegistry.getEntryFor("armorunder:lining").ifPresent(armorUnderMod ->
                     {   Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.FREEZING_POINT, false);
                         Temperature.addModifier(player, armorUnderMod.tickRate(20), Temperature.Type.BURNING_POINT, false);
-                    }
+                    });
                 }
 
                 Temperature.set(player, Temperature.Type.WORLD, Temperature.apply(0, player, Temperature.Type.WORLD, Temperature.getModifiers(player, Temperature.Type.WORLD)));
