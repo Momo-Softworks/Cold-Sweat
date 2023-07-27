@@ -2,8 +2,8 @@ package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
 import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModTags;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +39,7 @@ public class BoilerContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModTags.Items.BOILER_VALID);
+                {   return stack.is(ModItemTags.BOILER_VALID);
                 }
             });
         }
@@ -109,7 +109,7 @@ public class BoilerContainer extends AbstractContainerMenu
             }
             else
             {
-                if (itemstack.is(ModTags.Items.BOILER_VALID))
+                if (itemstack.is(ModItemTags.BOILER_VALID))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {

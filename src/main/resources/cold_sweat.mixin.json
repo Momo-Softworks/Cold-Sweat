@@ -4,18 +4,19 @@
   "package": "dev.momostudios.coldsweat.mixin",
   "minVersion": "0.8.5",
   "client": [
-    "MixinInventoryOpenClient",
     "MixinEffectsScreen",
     "MixinGoatModel",
     "MixinHeartRender",
     "MixinHumanoidModel",
+    "MixinInventoryOpenClient",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
-    "MixinInventoryOpenServer",
     "MixinBlockUpdate",
+    "MixinCampfire",
     "MixinEntityRiding",
+    "MixinInventoryOpenServer",
     "MixinMinecart",
     "MixinPickEntity",
     "MixinSoulCampfire",
