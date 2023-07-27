@@ -6,16 +6,15 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.data.tags.ModDimensionTags;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
-import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -63,7 +62,7 @@ public class SoulspringLampItem extends Item
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && (level.dimensionTypeRegistration().is(ModTags.Dimensions.SOUL_LAMP_VALID) || ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
+                && (level.dimensionTypeRegistration().is(ModDimensionTags.SOUL_LAMP_VALID) || ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {

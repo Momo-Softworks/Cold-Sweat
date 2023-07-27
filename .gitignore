@@ -118,4 +118,4 @@ run/
 !gradle-wrapper.jar
 /src/generated/resources/data/cold_sweat/forge/biome_modifier/entity_spawns.json
 /src/generated/resources/data/cold_sweat/forge/biome_modifier/soul_stalk.json
-/libs
+/!libs

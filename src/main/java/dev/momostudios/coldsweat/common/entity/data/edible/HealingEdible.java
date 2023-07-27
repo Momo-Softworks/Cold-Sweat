@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
 import dev.momostudios.coldsweat.common.entity.Chameleon;
-import dev.momostudios.coldsweat.util.registries.ModTags;
+import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.TagKey;
@@ -35,6 +35,6 @@ public class HealingEdible extends Edible
 
     @Override
     public TagKey<Item> associatedItems()
-    {   return ModTags.Items.CHAMELEON_TAMING;
+    {   return ModItemTags.CHAMELEON_TAMING;
     }
 }

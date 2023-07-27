@@ -5,9 +5,9 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
-import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -90,6 +90,6 @@ public class ColdBiomeEdible extends Edible
 
     @Override
     public TagKey<Item> associatedItems()
-    {   return ModTags.Items.CHAMELEON_COLD;
+    {   return ModItemTags.CHAMELEON_COLD;
     }
 }

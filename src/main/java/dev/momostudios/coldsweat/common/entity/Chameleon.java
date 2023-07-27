@@ -11,12 +11,11 @@ import dev.momostudios.coldsweat.core.init.EntityInit;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.ChameleonEatMessage;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
-import dev.momostudios.coldsweat.util.registries.ModTags;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -646,7 +645,7 @@ public class Chameleon extends Animal
 
     public boolean isTamingItem(ItemStack item)
     {
-        return item.is(ModTags.Items.CHAMELEON_TAMING);
+        return item.is(ModItemTags.CHAMELEON_TAMING);
     }
 
 

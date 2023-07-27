@@ -335,7 +335,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                             Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
                             Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
                             boolean canSeeSky;
-                            if (seeSkyState == null || (seeSkyState.getFirst() < spY && !seeSkyState.getSecond()))
+                            if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
                             {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
                             }
                             else

@@ -1,11 +1,9 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.common.item.FilledWaterskinItem;
 import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
 import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
-import dev.momostudios.coldsweat.util.registries.ModTags;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +39,7 @@ public class IceboxContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModTags.Items.ICEBOX_VALID);
+                {   return stack.is(ModItemTags.ICEBOX_VALID);
                 }
             });
         }
@@ -112,7 +110,7 @@ public class IceboxContainer extends AbstractContainerMenu
             }
             else
             {
-                if (itemstack.is(ModTags.Items.ICEBOX_VALID))
+                if (itemstack.is(ModItemTags.ICEBOX_VALID))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {
