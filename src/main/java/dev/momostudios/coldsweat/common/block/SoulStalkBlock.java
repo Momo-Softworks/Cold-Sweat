@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.common.block;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.data.tags.ModBlockTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -90,8 +91,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context)
-    {
-        BlockPos pos = context.getClickedPos();
+    {   BlockPos pos = context.getClickedPos();
         return context.getLevel().getBlockState(pos.below()).getBlock() == this ? this.defaultBlockState().setValue(SECTION, 3)
              : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
              : null;
@@ -100,7 +100,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
-        if (level.getBlockState(pos.below()).is(BlockTags.SOUL_FIRE_BASE_BLOCKS))
+        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
         {
             if (level.getBlockState(pos.above()).isAir())
             {   level.setBlock(pos.above(), ModBlocks.SOUL_STALK.defaultBlockState().setValue(SECTION, 3), 3);
@@ -112,8 +112,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor ilevel, BlockPos pos, BlockPos otherPos)
     {
         if (!this.canSurvive(state, ilevel, pos))
-        {
-            return Blocks.AIR.defaultBlockState();
+        {   return Blocks.AIR.defaultBlockState();
         }
 
         if (direction == Direction.UP)
@@ -145,9 +144,8 @@ public class SoulStalkBlock extends Block implements IPlantable
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
-    {
-        BlockState below = level.getBlockState(pos.below());
-        return below.is(BlockTags.SOUL_FIRE_BASE_BLOCKS) || below.getBlock() == this;
+    {   BlockState below = level.getBlockState(pos.below());
+        return below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) || below.getBlock() == this;
     }
 
     @SuppressWarnings("deprecation")
@@ -155,13 +153,16 @@ public class SoulStalkBlock extends Block implements IPlantable
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
     {   List<ItemStack> drops = super.getDrops(state, builder);
         if (!drops.isEmpty())
-            return drops;
+        {   return drops;
+        }
 
         int section = state.getValue(SECTION);
         if (section == 2 || section == 3)
-            drops.add(new ItemStack(ModItems.SOUL_SPROUT, 1));
+        {   drops.add(new ItemStack(ModItems.SOUL_SPROUT, 1));
+        }
         if (section != 0 && section != 3)
-            drops.add(new ItemStack(Items.STICK, new Random().nextInt(3)));
+        {   drops.add(new ItemStack(Items.STICK, new Random().nextInt(3)));
+        }
         return drops;
     }
 }
