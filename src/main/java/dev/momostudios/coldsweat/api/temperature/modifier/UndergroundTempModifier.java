@@ -7,8 +7,10 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -29,7 +31,7 @@ public class UndergroundTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
+        boolean hasCeiling = entity.level.dimensionType().hasCeiling();
 
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
         BlockPos playerPos = entity.blockPosition();
@@ -45,18 +47,18 @@ public class UndergroundTempModifier extends TempModifier
             if (!level.isLoaded(pos)) continue;
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
-            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
+            if (!hasCeiling) depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
             for (Holder<Biome> holder : List.of(level.getBiomeManager().getBiome(pos),
                                                 level.getBiomeManager().getBiome(pos.above(12)),
                                                 level.getBiomeManager().getBiome(pos.below(12))))
             {
-                if (holder.is(Tags.Biomes.IS_UNDERGROUND))
+                if (holder.is(Tags.Biomes.IS_UNDERGROUND) || hasCeiling)
                 {
                     Biome biome = holder.value();
                     double baseTemp = biome.getBaseTemperature();
-                    ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-                    
+                    ResourceLocation biomeID = holder.unwrapKey().get().location();
+
                     Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID, new Triplet<>(baseTemp, baseTemp, Temperature.Units.MC));
                     Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID, new Triplet<>(0d, 0d, Temperature.Units.MC));
                     double biomeTemp = CSMath.averagePair(Pair.of(cTemp.getA(), cTemp.getB()))
