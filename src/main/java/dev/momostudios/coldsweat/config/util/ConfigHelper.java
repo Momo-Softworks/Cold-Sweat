@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -135,10 +136,7 @@ public class ConfigHelper
             try
             {
                 ResourceLocation biomeID = new ResourceLocation((String) entry.get(0));
-
-                Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-                if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biomeID);
-                if (biome == null) throw new Exception("Biome not found: " + biomeID);
+                Biome biome = WorldHelper.getBiome(biomeID);
 
                 double min;
                 double max;
