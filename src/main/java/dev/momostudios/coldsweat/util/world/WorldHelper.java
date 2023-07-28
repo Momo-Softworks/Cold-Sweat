@@ -10,7 +10,9 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -34,6 +36,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
@@ -62,6 +66,20 @@ public class WorldHelper
         if (chunk == null) return seaLevel;
 
         return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
+    }
+
+    public static ResourceLocation getBiomeID(Biome biome)
+    {
+        ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
+        if (biomeID == null) biomeID = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(biome);
+        return biomeID;
+    }
+
+    public static Biome getBiome(ResourceLocation biomeID)
+    {
+        Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
+        if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biomeID);
+        return biome;
     }
 
     /**
