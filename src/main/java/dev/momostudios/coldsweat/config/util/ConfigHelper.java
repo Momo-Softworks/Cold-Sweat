@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -15,7 +14,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
