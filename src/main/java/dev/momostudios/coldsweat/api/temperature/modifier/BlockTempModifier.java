@@ -55,7 +55,6 @@ public class BlockTempModifier extends TempModifier
             {
                 ChunkAccess chunk = chunks.computeIfAbsent(new ChunkPos((entX + x) >> 4, (entZ + z) >> 4),
                                                            (chunkPos) -> WorldHelper.getChunk(level, chunkPos));
-                if (chunk == null) continue;
                 LevelChunkSection[] sections = chunk.getSections();
 
                 for (int y = -range; y < range; y++)
@@ -77,19 +76,19 @@ public class BlockTempModifier extends TempModifier
                         // Get the amount that this block has affected the player so far
 
                         // Is totalTemp within the bounds of any BlockTemp's min/max range?
-                        boolean isInRange = affectMap.isEmpty();
-                        if (!isInRange)
+                        boolean isInTempRange = affectMap.isEmpty();
+                        if (!isInTempRange)
                         {   for (Map.Entry<BlockTemp, Double> entry : affectMap.entrySet())
                             {   BlockTemp key = entry.getKey();
                                 Double value = entry.getValue();
 
-                                if (blockTemps.contains(key) && CSMath.withinRange(value, key.minEffect(), key.maxEffect()))
-                                {   isInRange = true;
+                                if (!blockTemps.contains(key) || CSMath.withinRange(value, key.minEffect(), key.maxEffect()))
+                                {   isInTempRange = true;
                                     break;
                                 }
                             }
                         }
-                        if (isInRange)
+                        if (isInTempRange)
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vec3 pos = Vec3.atCenterOf(blockpos);
