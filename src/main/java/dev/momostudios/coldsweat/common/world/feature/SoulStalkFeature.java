@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.world.feature;
 
 import com.mojang.serialization.Codec;
 import dev.momostudios.coldsweat.common.block.SoulStalkBlock;
+import dev.momostudios.coldsweat.data.tags.ModBlockTags;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
@@ -42,7 +43,7 @@ public class SoulStalkFeature extends Feature<NoneFeatureConfiguration>
             }
         }
         // Place the soul stalk
-        if (level.getBlockState(pos.below()).is(BlockTags.SOUL_FIRE_BASE_BLOCKS) && isAirOrLeaves(level, pos) && isAirOrLeaves(level, pos.above()))
+        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && isAirOrLeaves(level, pos) && isAirOrLeaves(level, pos.above()))
         {
             level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
             int height = new Random().nextInt(5) + 2;
