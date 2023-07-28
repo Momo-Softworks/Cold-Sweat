@@ -34,14 +34,13 @@ public class BiomeTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
-
         try
         {
             Level level = entity.level;
             double worldTemp = 0;
             ResourceLocation dimensionID = level.dimension().location();
 
+            worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
             Number dimensionOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
 
             if (dimensionOverride != null)
@@ -108,14 +107,12 @@ public class BiomeTempModifier extends TempModifier
                         else worldTemp += CSMath.average(max, min) / divisor;
                     }
                 }
-
-                worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
             }
             double finalWorldTemp = worldTemp;
             return temp -> temp + finalWorldTemp;
         }
         catch (Exception e)
-        {   return (temp) -> temp;
+        {   return temp -> temp;
         }
     }
 

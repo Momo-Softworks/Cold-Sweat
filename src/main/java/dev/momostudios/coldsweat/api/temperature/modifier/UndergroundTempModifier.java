@@ -29,7 +29,7 @@ public class UndergroundTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        boolean hasCeiling = entity.level.dimensionType().hasCeiling();
+        if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
 
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
         BlockPos playerPos = entity.blockPosition();
@@ -45,13 +45,13 @@ public class UndergroundTempModifier extends TempModifier
             if (!level.isLoaded(pos)) continue;
             ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
             if (chunk == null) continue;
-            if (!hasCeiling) depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
+            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
             for (Holder<Biome> holder : List.of(level.getBiomeManager().getBiome(pos),
                                                 level.getBiomeManager().getBiome(pos.above(12)),
                                                 level.getBiomeManager().getBiome(pos.below(12))))
             {
-                if (holder.is(Tags.Biomes.IS_UNDERGROUND) || hasCeiling)
+                if (holder.is(Tags.Biomes.IS_UNDERGROUND))
                 {
                     Biome biome = holder.value();
                     double baseTemp = biome.getBaseTemperature();
