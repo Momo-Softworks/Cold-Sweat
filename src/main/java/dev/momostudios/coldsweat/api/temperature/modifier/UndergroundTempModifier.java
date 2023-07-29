@@ -6,21 +6,18 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.common.Tags;
-import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class UndergroundTempModifier extends TempModifier
 {
@@ -37,19 +34,21 @@ public class UndergroundTempModifier extends TempModifier
 
         List<Pair<Double, Double>> depthTable = new ArrayList<>();
 
-        double biomeTempTotal = 0;
-        int caveBiomeCount = 0;
+        double[] biomeTempTotal = new double[1];
+        int[] caveBiomeCount = new int[1];
 
         for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 8))
         {
-            if (!level.isLoaded(pos)) continue;
-            ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.SURFACE, false);
-            if (chunk == null) continue;
             depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
 
-            for (Holder<Biome> holder : List.of(level.getBiomeManager().getBiome(pos),
-                                                level.getBiomeManager().getBiome(pos.above(12)),
-                                                level.getBiomeManager().getBiome(pos.below(12))))
+            if (WorldHelper.getHeight(pos, level) <= entity.getY()) continue;
+
+            Stream.of(level.getBiomeManager().getBiome(pos),
+                      level.getBiomeManager().getBiome(pos.above(8)),
+                      level.getBiomeManager().getBiome(pos.above(16)),
+                      level.getBiomeManager().getBiome(pos.below(8)),
+                      level.getBiomeManager().getBiome(pos.below(16))).distinct()
+            .forEach(holder ->
             {
                 if (holder.is(Tags.Biomes.IS_UNDERGROUND))
                 {
@@ -62,15 +61,15 @@ public class UndergroundTempModifier extends TempModifier
                     double biomeTemp = CSMath.averagePair(Pair.of(cTemp.getA(), cTemp.getB()))
                                      + CSMath.averagePair(Pair.of(cOffset.getA(), cOffset.getB()));
 
-                    biomeTempTotal += biomeTemp;
-                    caveBiomeCount++;
+                    biomeTempTotal[0] += biomeTemp;
+                    caveBiomeCount[0]++;
                 }
-            }
+            });
         }
 
         double finalDepth = CSMath.weightedAverage(depthTable);
-        int finalBiomeCount = Math.max(1, caveBiomeCount);
-        double finalBiomeTempTotal = biomeTempTotal / finalBiomeCount;
+        int finalBiomeCount = Math.max(1, caveBiomeCount[0]);
+        double finalBiomeTempTotal = biomeTempTotal[0] / finalBiomeCount;
         return temp ->
         {
             double depthAvg = CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15),
