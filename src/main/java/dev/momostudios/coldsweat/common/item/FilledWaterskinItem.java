@@ -48,7 +48,7 @@ public class FilledWaterskinItem extends Item
         {
             BlockPos pos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
             Level level = source.getLevel();
-            ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
+            ChunkAccess chunk = WorldHelper.getChunk(level, pos);
             double itemTemp = stack.getOrCreateTag().getDouble("temperature");
 
             if (chunk == null) return stack;
