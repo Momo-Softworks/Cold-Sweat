@@ -43,6 +43,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -163,12 +164,20 @@ public class WorldHelper
         return area[0] >= 1;
     }
 
+    @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
-    {   return level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, true);
+    {   int chunkX = pos.getX() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+        if (level.getChunkSource().hasChunk(chunkX, chunkZ))
+            return level.getChunkSource().getChunk(chunkX, chunkZ, true);
+        return null;
     }
 
+    @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, ChunkPos pos)
-    {   return level.getChunkSource().getChunk(pos.x, pos.z, true);
+    {   if (level.getChunkSource().hasChunk(pos.x, pos.z))
+            return level.getChunkSource().getChunk(pos.x, pos.z, true);
+        return null;
     }
 
     public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
