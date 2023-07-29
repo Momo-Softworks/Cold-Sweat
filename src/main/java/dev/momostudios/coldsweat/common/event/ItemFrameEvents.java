@@ -4,9 +4,11 @@ import dev.momostudios.coldsweat.api.event.common.EntityPickEvent;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,14 +45,14 @@ public class ItemFrameEvents
     }
 
     @SubscribeEvent
-    public static void onItemFrameLoaded(EntityJoinLevelEvent event)
+    public static void onItemFrameLoaded(PlayerEvent.StartTracking event)
     {
-        if (event.getEntity() instanceof ItemFrame frame && frame.getItem().getItem() == ModItems.THERMOMETER && !frame.level.isClientSide)
+        if (event.getTarget() instanceof ItemFrame frame && event.getEntity() instanceof ServerPlayer player
+        && frame.getItem().getItem() == ModItems.THERMOMETER && !frame.level.isClientSide)
         {
             if (frame.getPersistentData().contains("ItemName"))
-            {
-                // Sync the item name to the client
-                WorldHelper.syncEntityForgeData(frame);
+            {   // Sync the item name to the client
+                WorldHelper.syncEntityForgeData(frame, player);
             }
         }
     }

@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.util.world;
 
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
+import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
 import dev.momostudios.coldsweat.core.network.message.PlaySoundMessage;
 import dev.momostudios.coldsweat.core.network.message.SyncForgeDataMessage;
@@ -13,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -25,6 +27,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -337,8 +340,20 @@ public class WorldHelper
         return item;
     }
 
-    public static void syncEntityForgeData(Entity entity)
+    public static void syncEntityForgeData(Entity entity, ServerPlayer destination)
     {
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new SyncForgeDataMessage(entity));
+        ColdSweatPacketHandler.INSTANCE.send(destination != null ? PacketDistributor.PLAYER.with(() -> destination)
+                                                                 : PacketDistributor.TRACKING_ENTITY.with(() -> entity),
+                                             new SyncForgeDataMessage(entity));
+    }
+
+    public static void syncBlockEntityData(BlockEntity be)
+    {
+        if (be.getLevel() == null || be.getLevel().isClientSide) return;
+
+        ChunkAccess ichunk = getChunk(be.getLevel(), be.getBlockPos());
+        if (ichunk instanceof LevelChunk chunk)
+        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), new BlockDataUpdateMessage(be));
+        }
     }
 }

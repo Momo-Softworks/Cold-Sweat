@@ -10,6 +10,7 @@ import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -97,7 +99,7 @@ public class GoatFurHandler
                 // Set sheared
                 cap.setSheared(true);
                 cap.setLastSheared(goat.tickCount);
-                syncData(goat);
+                syncData(goat, null);
                 event.setResult(PlayerInteractEvent.Result.ALLOW);
             });
         }
@@ -126,26 +128,27 @@ public class GoatFurHandler
                     WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
                     // Set not sheared
                     cap.setSheared(false);
-                    syncData(goat);
+                    syncData(goat, null);
                 }
             });
         }
     }
 
     @SubscribeEvent
-    public static void onEntityLoaded(EntityJoinLevelEvent event)
+    public static void onEntityLoaded(PlayerEvent.StartTracking event)
     {
-        Entity entity = event.getEntity();
-        if (entity instanceof Goat goat)
-        {   TaskScheduler.scheduleClient(() -> syncData(goat), 20);
+        if (event.getEntity() instanceof ServerPlayer player && event.getTarget() instanceof Goat goat)
+        {   syncData(goat, player);
         }
     }
 
-    public static void syncData(Goat goat)
+    public static void syncData(Goat goat, ServerPlayer player)
     {
         if (!goat.level.isClientSide)
         {   goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
-            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> goat), new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId(), goat.level.dimension().location().toString()));
+            {   ColdSweatPacketHandler.INSTANCE.send(player != null ? PacketDistributor.PLAYER.with(() -> player)
+                                                                    : PacketDistributor.TRACKING_ENTITY.with(() -> goat),
+                                                     new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId()));
             });
         }
     }
