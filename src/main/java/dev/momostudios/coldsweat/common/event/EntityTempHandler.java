@@ -243,9 +243,7 @@ public class EntityTempHandler
                         }
                     }
                 }
-
-                public void dataChanged(AbstractContainerMenu p_143462_, int p_143463_, int p_143464_)
-                {}
+                public void dataChanged(AbstractContainerMenu p_143462_, int p_143463_, int p_143464_) {}
             });
         }
         // Add basic TempModifiers to chameleons

@@ -52,7 +52,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PipeBlock;
@@ -497,14 +496,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 effects.clear();
                 // Convert to NBT and back again to create new instances of the effects (otherwise we would be ticking down the global instances)
                 effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
-                ColdSweatPacketHandler.syncBlockEntityData(this);
+                WorldHelper.syncBlockEntityData(this);
             }
             else if (fuelStack.is(Items.MILK_BUCKET) && !effects.isEmpty())
             {
                 this.getItems().set(0, fuelStack.getContainerItem());
                 level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.WITCH_DRINK, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
-                ColdSweatPacketHandler.syncBlockEntityData(this);
+                WorldHelper.syncBlockEntityData(this);
             }
             // Normal fuel items
             else
@@ -686,7 +685,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 level.setBlock(this.getBlockPos(), desiredState, 3);
 
             this.setChanged();
-            ColdSweatPacketHandler.syncBlockEntityData(this);
+            WorldHelper.syncBlockEntityData(this);
         }
     }
 

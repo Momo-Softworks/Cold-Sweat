@@ -2,13 +2,8 @@ package dev.momostudios.coldsweat.core.network;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.core.network.message.*;
-import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ColdSweatPacketHandler
@@ -35,15 +30,5 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(9, SyncShearableDataMessage.class, SyncShearableDataMessage::encode, SyncShearableDataMessage::decode, SyncShearableDataMessage::handle);
         INSTANCE.registerMessage(10, ChameleonEatMessage.class, ChameleonEatMessage::encode, ChameleonEatMessage::decode, ChameleonEatMessage::handle);
         INSTANCE.registerMessage(11, SyncForgeDataMessage.class, SyncForgeDataMessage::encode, SyncForgeDataMessage::decode, SyncForgeDataMessage::handle);
-    }
-
-    public static void syncBlockEntityData(BlockEntity be)
-    {
-        if (be.getLevel() == null || be.getLevel().isClientSide) return;
-
-        ChunkAccess ichunk = WorldHelper.getChunk(be.getLevel(), be.getBlockPos());
-        if (ichunk instanceof LevelChunk chunk)
-        {   INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), new BlockDataUpdateMessage(be));
-        }
     }
 }
