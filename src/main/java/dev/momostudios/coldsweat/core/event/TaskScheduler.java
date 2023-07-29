@@ -21,6 +21,7 @@ public class TaskScheduler
             ConcurrentLinkedQueue<QueueEntry> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
 
             // Iterate through all active tasks
+            if (!schedule.isEmpty())
             schedule.removeIf(entry ->
             {
                 int ticks = entry.time;
