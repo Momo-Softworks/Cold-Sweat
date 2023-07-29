@@ -153,6 +153,7 @@ public class HearthDebugRenderer
                         ChunkPos chunkPos = new ChunkPos(pos);
                         if (workingChunk == null || !workingChunk.getPos().equals(chunkPos))
                             workingChunk = WorldHelper.getChunk(level, pos);
+                        if (workingChunk == null) continue;
 
                         if (workingChunk.getBlockState(pos).getShape(level, pos).equals(Shapes.block()))
                         {   LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
