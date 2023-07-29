@@ -66,7 +66,7 @@ public class WorldHelper
         // If chunk isn't loaded, return sea level
         if (!level.isLoaded(pos)) return seaLevel;
 
-        ChunkAccess chunk = level.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.HEIGHTMAPS, false);
+        ChunkAccess chunk = getChunk(level, pos);
         if (chunk == null) return seaLevel;
 
         return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
@@ -119,7 +119,7 @@ public class WorldHelper
     {
         BlockPos.MutableBlockPos pos2 = pos.mutable();
         int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
-        ChunkAccess chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+        ChunkAccess chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         for (int i = 0; i < iterations; i++)
         {
             BlockState state = chunk.getBlockState(pos2);
@@ -166,18 +166,18 @@ public class WorldHelper
 
     @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
-    {   int chunkX = pos.getX() >> 4;
-        int chunkZ = pos.getZ() >> 4;
-        if (level.getChunkSource().hasChunk(chunkX, chunkZ))
-            return level.getChunkSource().getChunk(chunkX, chunkZ, true);
-        return null;
+    {
+        return getChunk(level, pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, ChunkPos pos)
-    {   if (level.getChunkSource().hasChunk(pos.x, pos.z))
-            return level.getChunkSource().getChunk(pos.x, pos.z, true);
-        return null;
+    {   return getChunk(level, pos.x, pos.z);
+    }
+
+    @Nullable
+    public static ChunkAccess getChunk(LevelAccessor level, int chunkX, int chunkZ)
+    {   return level.getChunkSource().getChunkNow(chunkX, chunkZ);
     }
 
     public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
@@ -301,11 +301,10 @@ public class WorldHelper
         {
             ParticleBatchMessage particles = new ParticleBatchMessage();
             particles.addParticle(particle, new ParticleBatchMessage.ParticlePlacement(x, y, z, xSpeed, ySpeed, zSpeed));
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) level.getChunk((int) x >> 4, (int) z >> 4, ChunkStatus.FULL)), particles);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) getChunk(level, (int) x >> 4, (int) z >> 4)), particles);
         }
         else
-        {
-            level.addParticle(particle, x, y, z, xSpeed, ySpeed, zSpeed);
+        {   level.addParticle(particle, x, y, z, xSpeed, ySpeed, zSpeed);
         }
     }
 
@@ -324,7 +323,7 @@ public class WorldHelper
                         y + ySpread - rand.nextDouble() * (ySpread * 2),
                         z + zSpread - rand.nextDouble() * (zSpread * 2), vec.x, vec.y, vec.z));
             }
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) level.getChunk((int) x >> 4, (int) z >> 4, ChunkStatus.FULL)), particles);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) getChunk(level, (int) x >> 4, (int) z >> 4)), particles);
         }
         else
         {
