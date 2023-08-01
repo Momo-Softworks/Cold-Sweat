@@ -44,6 +44,7 @@ public class ConfigSettings
     public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
     public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
     public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static final ValueSupplier<Boolean> COLD_SOUL_FIRE;
     public static final ValueSupplier<Double[]> SUMMER_TEMPS;
     public static final ValueSupplier<Double[]> AUTUMN_TEMPS;
     public static final ValueSupplier<Double[]> WINTER_TEMPS;
@@ -72,9 +73,8 @@ public class ConfigSettings
     public static final ValueSupplier<Boolean> HEARTH_POTIONS_ENABLED;
     public static final ValueSupplier<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
-    public static final ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
-
     // Entity Settings
+    public static final ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
     public static final ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
 
@@ -362,6 +362,8 @@ public class ConfigSettings
             }
             return map;
         });
+
+        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
