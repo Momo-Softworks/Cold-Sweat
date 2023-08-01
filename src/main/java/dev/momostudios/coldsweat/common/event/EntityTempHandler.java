@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -415,7 +416,9 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntityLiving() instanceof Player player && event.getItem().isEdible() && !event.getEntityLiving().level.isClientSide)
+        if (event.getEntity() instanceof Player player
+        && (event.getItem().getUseAnimation() == UseAnim.DRINK || event.getItem().getUseAnimation() == UseAnim.EAT)
+        && !event.getEntity().level.isClientSide)
         {
             // If food item defined in config
             float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
