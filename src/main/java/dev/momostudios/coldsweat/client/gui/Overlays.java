@@ -66,8 +66,7 @@ public class Overlays
 
                 // Set text color
                 int color = switch (severity)
-                {
-                    case  2, 3 -> 16297781;
+                {   case  2, 3 -> 16297781;
                     case  4    -> 16728089;
                     case -2,-3 -> 8443135;
                     case -4    -> 4236031;
@@ -116,33 +115,30 @@ public class Overlays
 
                 // Get text color
                 int color = switch (BODY_TEMP_SEVERITY)
-                        {
-                            case  7, -7 -> 16777215;
-                            case  6 -> 16777132;
-                            case  5 -> 16767856;
-                            case  4 -> 16759634;
-                            case  3 -> 16751174;
-                            case -3 -> 6078975;
-                            case -4 -> 7528447;
-                            case -5 -> 8713471;
-                            case -6 -> 11599871;
-                            default -> BLEND_BODY_TEMP > 0 ? 16744509
-                                    : BLEND_BODY_TEMP < 0 ? 4233468
-                                    : 11513775;
-                        };
+                {   case  7, -7 -> 16777215;
+                    case  6 -> 16777132;
+                    case  5 -> 16767856;
+                    case  4 -> 16759634;
+                    case  3 -> 16751174;
+                    case -3 -> 6078975;
+                    case -4 -> 7528447;
+                    case -5 -> 8713471;
+                    case -6 -> 11599871;
+                    default -> BLEND_BODY_TEMP > 0 ? 16744509
+                             : BLEND_BODY_TEMP < 0 ? 4233468
+                             : 11513775;
+                };
 
                 // Get the outer border color when readout is > 100
-                int colorBG =
-                        BLEND_BODY_TEMP < 0 ? 1122643 :
-                        BLEND_BODY_TEMP > 0 ? 5376516 :
-                        0;
+                int colorBG = BLEND_BODY_TEMP < 0 ? 1122643
+                            : BLEND_BODY_TEMP > 0 ? 5376516
+                            : 0;
 
                 int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
-                int threatOffset =
-                        !CLIENT_CONFIG.isIconBobbingEnabled() ? 0
-                                                              : bobLevel == 2 ? ICON_BOB
-                        : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                        : 0;
+                int threatOffset = !CLIENT_CONFIG.isIconBobbingEnabled() ? 0
+                                 : bobLevel == 2 ? ICON_BOB
+                                 : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                 : 0;
 
                 RenderSystem.defaultBlendFunc();
 
@@ -197,23 +193,23 @@ public class Overlays
 
                 /* World Temp */
 
-                    // Get temperature in actual degrees
-                    boolean celsius = CLIENT_CONFIG.isCelsius();
-                    double worldTemp = cap.getTemp(Temperature.Type.WORLD);
-                    double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                    if (SHOW_WORLD_TEMP)
-                    {   // Calculate the blended world temp for this tick
-                        double diff = realTemp - WORLD_TEMP;
-                        PREV_WORLD_TEMP = WORLD_TEMP;
-                        WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
+                // Get temperature in actual degrees
+                boolean celsius = CLIENT_CONFIG.isCelsius();
+                double worldTemp = cap.getTemp(Temperature.Type.WORLD);
+                double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                if (SHOW_WORLD_TEMP)
+                {   // Calculate the blended world temp for this tick
+                    double diff = realTemp - WORLD_TEMP;
+                    PREV_WORLD_TEMP = WORLD_TEMP;
+                    WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
 
-                        // Update max/min offset
-                        MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
-                        MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
-                    }
-                    else
-                    {   PREV_WORLD_TEMP = WORLD_TEMP = realTemp;
-                    }
+                    // Update max/min offset
+                    MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
+                    MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
+                }
+                else
+                {   PREV_WORLD_TEMP = WORLD_TEMP = realTemp;
+                }
 
 
                 /* Body Temp */
@@ -248,9 +244,7 @@ public class Overlays
     }
 
     public static int getWorldSeverity(double temp, double min, double max, double offsMin, double offsMax)
-    {
-        double mid = (max + min) / 2;
-        return (int) (temp < mid ? CSMath.blend(-4, 0, temp, min + offsMin, mid) : CSMath.blend(0, 4, temp, mid, max + offsMax));
+    {   return (int) CSMath.blend(-4, 4, temp, min + offsMin, max + offsMax);
     }
 
     static int getBodySeverity(int temp)
@@ -258,14 +252,12 @@ public class Overlays
         int sign = CSMath.getSign(temp);
         int absTemp = Math.abs(temp);
 
-        return
-          absTemp < 100 ? (int) Math.floor(CSMath.blend(0, 3, absTemp, 0, 100)) * sign
-        : (int) CSMath.blend(3, 7, absTemp, 100, 150) * sign;
+        return absTemp < 100 ? (int) Math.floor(CSMath.blend(0, 3, absTemp, 0, 100)) * sign
+                             : (int) CSMath.blend(3, 7, absTemp, 100, 150) * sign;
     }
 
     public static void setBodyTemp(double temp)
-    {
-        BODY_TEMP = temp;
+    {   BODY_TEMP = temp;
         PREV_BODY_TEMP = temp;
         BLEND_BODY_TEMP = (int) temp;
     }
