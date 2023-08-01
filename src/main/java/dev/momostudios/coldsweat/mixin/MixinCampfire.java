@@ -20,22 +20,22 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class MixinCampfire
 {
     @Inject(method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
-               at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;get(I)Ljava/lang/Object;"), locals = LocalCapture.CAPTURE_FAILHARD)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;get(I)Ljava/lang/Object;"), locals = LocalCapture.CAPTURE_FAILHARD)
     private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci,
-                                   boolean flag, int i)
+                                   boolean hasItems, int index)
     {
         double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
         double tempRate = ConfigSettings.TEMP_RATE.get();
-        ItemStack stack = blockEntity.getItems().get(i);
-        if (stack.is(ModItems.FILLED_WATERSKIN))
+        ItemStack stack = blockEntity.getItems().get(index);
+        if (stack.is(ModItems.FILLED_WATERSKIN) && (level.getGameTime() & 4) == 0)
         {
             CompoundTag tag = stack.getOrCreateTag();
             double temperature = tag.getDouble("temperature");
             if (state.is(ModBlockTags.SOUL_CAMPFIRES) && tag.getDouble("temperature") > -waterskinStrength * 0.6)
-            {   tag.putDouble("temperature", temperature - tempRate * 0.025);
+            {   tag.putDouble("temperature", temperature + tempRate * 0.1 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
             }
             else if (state.is(ModBlockTags.CAMPFIRES) && tag.getDouble("temperature") < waterskinStrength * 0.6)
-            {   tag.putDouble("temperature", temperature + tempRate * 0.025);
+            {   tag.putDouble("temperature", temperature + tempRate * 0.1);
             }
         }
     }
@@ -50,7 +50,7 @@ public class MixinCampfire
             double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
             CompoundTag tag = result.getOrCreateTag();
             if (state.is(ModBlockTags.SOUL_CAMPFIRES))
-            {   tag.putDouble("temperature", -waterskinStrength * 0.6);
+            {   tag.putDouble("temperature", waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
             }
             else if (state.is(ModBlockTags.CAMPFIRES))
             {   tag.putDouble("temperature", waterskinStrength * 0.6);
