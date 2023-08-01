@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -282,14 +283,14 @@ public class EntityTempHandler
                 if (WorldHelper.isInWater(player) || (player.tickCount % 40 == 0 && WorldHelper.isRainingAt(player.level, player.blockPosition())))
                     Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Type.WORLD, false);
 
-                if (player.getTicksFrozen() > 0)
+                if (player.isFreezing())
                     Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
 
                 if (player.isOnFire())
                     Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
             }
 
-            if (player.getTicksFrozen() > 0)
+            if (player.isFreezing() && player.getTicksFrozen() > 0)
             {
                 AtomicReference<Double> insulation = new AtomicReference<>((double) 0);
                 boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get();
