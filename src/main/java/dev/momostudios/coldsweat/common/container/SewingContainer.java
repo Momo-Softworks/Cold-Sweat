@@ -249,17 +249,19 @@ public class SewingContainer extends AbstractContainerMenu
             // If insulation is being removed
             if (this.getItem(1).getItem() instanceof ShearsItem)
             {
-                // Damage shears
-                if (!player.isCreative())
-                {   input2.hurt(1, player.getRandom(), null);
+                if (!cap.getInsulation().isEmpty())
+                {   // Damage shears
+                    if (!player.isCreative())
+                    {   input2.hurt(1, player.getRandom(), null);
+                    }
+
+                    // Remove the last insulation item added
+                    cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
+                    // Play shear sound
+                    player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+
+                    serializeInsulation(input1, cap);
                 }
-
-                // Remove the last insulation item added
-                cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
-                // Play shear sound
-                player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
-
-                serializeInsulation(input1, cap);
             }
             // If insulation is being added
             else
