@@ -53,8 +53,9 @@ public class BlockTempModifier extends TempModifier
         {
             for (int z = -range; z < range; z++)
             {
-                ChunkAccess chunk = chunks.computeIfAbsent(new ChunkPos((entX + x) >> 4, (entZ + z) >> 4),
-                                                           (chunkPos) -> WorldHelper.getChunk(level, chunkPos));
+                ChunkPos chunkPos = new ChunkPos((entX + x) >> 4, (entZ + z) >> 4);
+                ChunkAccess chunk = chunks.get(chunkPos);
+                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, chunkPos));
                 if (chunk == null) continue;
                 LevelChunkSection[] sections = chunk.getSections();
 
