@@ -90,7 +90,7 @@ public class WorldSettingsConfig
         biomeTemps = BUILDER
             .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets (in Minecraft units).")
             .defineList("Biome Temperatures", ListBuilder.begin(
-                            List.of("minecraft:soul_sand_valley", 33, 33, "F"),
+                            List.of("minecraft:soul_sand_valley", 53, 53, "F"),
                             List.of("minecraft:old_growth_birch_forest", 58, 72, "F"),
                             List.of("minecraft:river", 60, 70, "F"),
                             List.of("minecraft:swamp", 72, 84, "F"),
