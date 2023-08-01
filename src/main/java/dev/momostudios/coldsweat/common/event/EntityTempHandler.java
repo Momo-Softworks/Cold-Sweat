@@ -406,7 +406,9 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntity() instanceof Player player && event.getItem().isEdible() && !event.getEntity().level.isClientSide)
+        if (event.getEntity() instanceof Player player
+        && (event.getItem().getUseAnimation() == UseAnim.DRINK || event.getItem().getUseAnimation() == UseAnim.EAT)
+        && !event.getEntity().level.isClientSide)
         {
             // If food item defined in config
             float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
