@@ -370,10 +370,7 @@ public class ConfigSettings
 
         COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
 
-        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ColdSweatConfig.getInstance().getHearthSpreadWhitelist()
-                                                           .stream().map(ResourceLocation::new)
-                                                           .map(ForgeRegistries.BLOCKS::getValue)
-                                                           .toList(),
+        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(ColdSweatConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
         encoder ->
         {
             CompoundTag tag = new CompoundTag();
@@ -394,10 +391,7 @@ public class ConfigSettings
         },
         saver -> ColdSweatConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ColdSweatConfig.getInstance().getHearthSpreadBlacklist()
-                                                           .stream().map(ResourceLocation::new)
-                                                           .map(ForgeRegistries.BLOCKS::getValue)
-                                                           .toList(),
+        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(ColdSweatConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
         encoder ->
         {
             CompoundTag tag = new CompoundTag();
