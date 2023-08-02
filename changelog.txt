@@ -1330,3 +1330,27 @@ Fixes:
 Technical Changes:
 - Block updates now reset the hearth's entire AOE (the selective "smart" method of updating the AOE was too unreliable)
       - Sped up hearth "spread" calculations by 5x to account for sections of the AOE being unnecessarily cleared
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05a
+* Added a new "vague" temperature gauge
+      - Gives a rough idea of the world's temperature if the player doesn't have a thermometer
+      - When the player gets a thermometer, this will be replaced by the normal (exact) temperature gauge
+      - If "Require Thermometer" is turned off, the exact gauge will always be shown
+- Waterskins can now be heated at campfires and cooled at soul campfires
+
+Fixes:
+- Fixed block temperatures not being detected in some cases
+- Fixed chameleons attempting to access unloaded chunks when detecting temperature, causing the world to freeze
+- Fixed unnecessary overhead from the Task Scheduler
+- Fixed entity update packets being sent to all tracking players instead of just the player who needs the data
+- Fixed temperature configs for drinkable food items not working
+- Fixed armor with no insulation sometimes being shear-able if the server is lagging, causing the game to crash when attempted
+- Fixed insulation only being applied to the player from the first piece of armor equipped
+
+Technical Changes:
+- Configs are now reloaded when the server finishes starting, to ensure that all needed sources are loaded (such as datapacks)
+- Adjusted the formula for armor insulation to make increasing insulation have a more linear effect
+      - "Diminishing returns" have been drastically smoothed out
+- The rate increase caused by negative insulation is now uncapped, and increases linearly
