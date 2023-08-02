@@ -120,11 +120,15 @@ public class WorldHelper
     {
         BlockPos.MutableBlockPos pos2 = pos.mutable();
         int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
-        ChunkAccess chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        ChunkAccess chunk = getChunk(level, pos);
+        if (chunk == null) return true;
         for (int i = 0; i < iterations; i++)
         {
             BlockState state = chunk.getBlockState(pos2);
-            if (isSpreadBlocked(level, state, pos2, Direction.UP, Direction.UP))
+            VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
+            if (Block.isShapeFullBlock(shape)) return false;
+
+            if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
             {   return false;
             }
 
@@ -169,8 +173,7 @@ public class WorldHelper
 
     @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
-    {
-        return getChunk(level, pos.getX() >> 4, pos.getZ() >> 4);
+    {   return getChunk(level, pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     @Nullable
@@ -221,8 +224,8 @@ public class WorldHelper
 
     public static boolean isRainingAt(Level level, BlockPos pos)
     {
-        Biome biome = level.getBiome(pos).value();
-        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos, 256)
+        Biome biome = level.getBiomeManager().getBiome(pos).value();
+        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
             || CompatManager.isWeather2RainingAt(level, pos);
     }
 
