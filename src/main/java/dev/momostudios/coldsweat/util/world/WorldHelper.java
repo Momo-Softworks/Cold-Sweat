@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.util.world;
 
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.core.network.message.ParticleBatchMessage;
@@ -135,10 +136,12 @@ public class WorldHelper
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         Block block = state.getBlock();
-        if (state.isAir() || !state.getMaterial().blocksMotion() || block instanceof LeavesBlock
+        if (state.isAir() || !state.getMaterial().blocksMotion() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block)
         || block == ModBlocks.HEARTH_BOTTOM || block == ModBlocks.HEARTH_TOP)
         {   return false;
         }
+        if (ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().contains(block)) return true;
+
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
         if (Block.isShapeFullBlock(shape)) return true;
 
