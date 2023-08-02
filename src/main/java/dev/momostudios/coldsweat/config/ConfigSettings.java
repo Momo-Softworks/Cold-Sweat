@@ -9,6 +9,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
 
@@ -44,11 +45,15 @@ public class ConfigSettings
     public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
     public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
     public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
-    public static final ValueSupplier<Boolean> COLD_SOUL_FIRE;
     public static final ValueSupplier<Double[]> SUMMER_TEMPS;
     public static final ValueSupplier<Double[]> AUTUMN_TEMPS;
     public static final ValueSupplier<Double[]> WINTER_TEMPS;
     public static final ValueSupplier<Double[]> SPRING_TEMPS;
+
+    // Block settings
+    public static final ValueSupplier<Boolean> COLD_SOUL_FIRE;
+    public static final ValueSupplier<List<Block>> HEARTH_SPREAD_WHITELIST;
+    public static final ValueSupplier<List<Block>> HEARTH_SPREAD_BLACKLIST;
 
     // Item settings
     public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
@@ -364,6 +369,54 @@ public class ConfigSettings
         });
 
         COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
+
+        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ColdSweatConfig.getInstance().getHearthSpreadWhitelist()
+                                                           .stream().map(ResourceLocation::new)
+                                                           .map(ForgeRegistries.BLOCKS::getValue)
+                                                           .toList(),
+        encoder ->
+        {
+            CompoundTag tag = new CompoundTag();
+            ListTag list = new ListTag();
+            for (Block entry : encoder)
+            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
+            }
+            tag.put("HearthWhitelist", list);
+            return tag;
+        },
+        decoder ->
+        {
+            List<Block> list = new ArrayList<>();
+            for (Tag entry : decoder.getList("HearthWhitelist", 8))
+            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
+            }
+            return list;
+        },
+        saver -> ColdSweatConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
+
+        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ColdSweatConfig.getInstance().getHearthSpreadBlacklist()
+                                                           .stream().map(ResourceLocation::new)
+                                                           .map(ForgeRegistries.BLOCKS::getValue)
+                                                           .toList(),
+        encoder ->
+        {
+            CompoundTag tag = new CompoundTag();
+            ListTag list = new ListTag();
+            for (Block entry : encoder)
+            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
+            }
+            tag.put("HearthBlacklist", list);
+            return tag;
+        },
+        decoder ->
+        {
+            List<Block> list = new ArrayList<>();
+            for (Tag entry : decoder.getList("HearthBlacklist", 8))
+            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
+            }
+            return list;
+        },
+        saver -> ColdSweatConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
