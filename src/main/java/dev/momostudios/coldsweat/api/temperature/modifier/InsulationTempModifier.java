@@ -1,6 +1,9 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
@@ -21,14 +24,12 @@ public class InsulationTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        double cold = this.getNBT().getDouble("cold") / 8d;
-        double hot = this.getNBT().getDouble("hot") / 8d;
+        double cold = this.getNBT().getDouble("cold");
+        double hot = this.getNBT().getDouble("hot");
         return temp ->
         {
-            if (temp > 0)
-            {   return hot >= 0 ? temp / (1 + hot * 2) : temp * (1 - hot * 2);
-            }
-            else return cold >= 0 ? temp / (1 + cold * 2) : temp * (1 - cold * 2);
+            double insulation = temp > 0 ? hot : cold;
+            return temp * (insulation >= 0 ? Math.pow(0.1, insulation / 60) : -(insulation / 20) + 1);
         };
     }
 
