@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.common.capability;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
@@ -88,7 +87,7 @@ public class PlayerTempCap implements ITemperatureCap
         return showBodyTemp;
     }
 
-    public boolean shouldShowWorldTemp()
+    public boolean showAdvancedWorldTemp()
     {
         return showWorldTemp;
     }
@@ -168,7 +167,7 @@ public class PlayerTempCap implements ITemperatureCap
         || ((int) syncedValues[1] != (int) newBaseTemp) && showBodyTemp)
         || (Math.abs(syncedValues[2] - newWorldTemp) >= 0.02
         ||  Math.abs(syncedValues[3] - newMaxOffset) >= 0.02
-        ||  Math.abs(syncedValues[4] - newMinOffset) >= 0.02) && showWorldTemp))
+        ||  Math.abs(syncedValues[4] - newMinOffset) >= 0.02)))
         {
             Temperature.updateTemperature(player, this, false);
             syncedValues = new double[] { newCoreTemp, newBaseTemp, newWorldTemp, newMaxOffset, newMinOffset };

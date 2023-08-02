@@ -29,7 +29,7 @@ public class Overlays
 
     // Stuff for world temperature
     public static double WORLD_TEMP = 0;
-    static boolean SHOW_WORLD_TEMP = false;
+    static boolean ADVANCED_WORLD_TEMP = false;
     static double PREV_WORLD_TEMP = 0;
     static double MAX_OFFSET = 0;
     static double MIN_OFFSET = 0;
@@ -49,12 +49,11 @@ public class Overlays
     {
         OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "world_temp", (gui, poseStack, partialTick, width, height) ->
         {
-            gui.setupOverlayRenderState(true, false);
-
             LocalPlayer player = Minecraft.getInstance().player;
-
-            if (player != null && SHOW_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
+            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
             {
+                gui.setupOverlayRenderState(true, false);
+
                 double min = ConfigSettings.MIN_TEMP.get();
                 double max = ConfigSettings.MAX_TEMP.get();
 
@@ -86,7 +85,7 @@ public class Overlays
                 RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
 
                 // Render frame
-                GuiComponent.blit(poseStack, (width / 2) + 94 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
+                GuiComponent.blit(poseStack, (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
                 RenderSystem.disableBlend();
 
@@ -97,7 +96,7 @@ public class Overlays
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
                 Minecraft.getInstance().font.draw(poseStack, (blendedTemp + CLIENT_CONFIG.getTempOffset())+"",
-                        /* X */ width / 2f + 107 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
+                        /* X */ width / 2f + 105 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
                         /* Y */ height - 15 - bob + CLIENT_CONFIG.getWorldGaugeY(), color);
                 poseStack.popPose();
             }
@@ -174,6 +173,40 @@ public class Overlays
                 font.draw(poseStack, s, x, y, color);
             }
         });
+
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "vague_temp", (gui, poseStack, partialTick, width, height) ->
+        {
+            Minecraft mc = Minecraft.getInstance();
+            Player player = mc.player;
+            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR && !mc.options.hideGui)
+            {
+                gui.setupOverlayRenderState(true, false);
+
+                double min = ConfigSettings.MIN_TEMP.get();
+                double max = ConfigSettings.MAX_TEMP.get();
+
+                // Get player world temperature
+                double temp = CSMath.convertTemp(WORLD_TEMP, CLIENT_CONFIG.isCelsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                // Get the temperature severity
+                int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
+                int renderOffset = CSMath.clamp(severity, -1, 1) * 3;
+
+                poseStack.pushPose();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+                // Set gauge texture
+                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png"));
+
+                // Render frame
+                GuiComponent.blit(poseStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
+
+                RenderSystem.disableBlend();
+                poseStack.popPose();
+            }
+        });
     }
 
     // Handle temperature blending and transitions
@@ -187,8 +220,8 @@ public class Overlays
             {
                 if (!(icap instanceof PlayerTempCap cap)) return;
 
-                cap.calculateVisibility(player);
-                SHOW_WORLD_TEMP = cap.shouldShowWorldTemp();
+                    cap.calculateVisibility(player);
+                    ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
 
 
                 /* World Temp */
@@ -197,19 +230,14 @@ public class Overlays
                 boolean celsius = CLIENT_CONFIG.isCelsius();
                 double worldTemp = cap.getTemp(Temperature.Type.WORLD);
                 double realTemp = CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                if (SHOW_WORLD_TEMP)
-                {   // Calculate the blended world temp for this tick
-                    double diff = realTemp - WORLD_TEMP;
-                    PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
+                // Calculate the blended world temp for this tick
+                double diff = realTemp - WORLD_TEMP;
+                PREV_WORLD_TEMP = WORLD_TEMP;
+                WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
 
-                    // Update max/min offset
-                    MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
-                    MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
-                }
-                else
-                {   PREV_WORLD_TEMP = WORLD_TEMP = realTemp;
-                }
+                // Update max/min offset
+                MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
+                MIN_OFFSET = cap.getTemp(Temperature.Type.BURNING_POINT);
 
 
                 /* Body Temp */
