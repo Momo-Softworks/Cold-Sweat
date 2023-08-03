@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.core.event;
+package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +13,7 @@ public class AddWanderingTrades
 {
     @SubscribeEvent
     public static void addWanderingTrades(WandererTradesEvent event)
-    {   event.getRareTrades().add(new BasicItemListing(new ItemStack(Items.EMERALD, 2), new ItemStack(ModItems.GOAT_FUR, 1), 99999999, 15, 1));
+    {   event.getRareTrades().add(new BasicItemListing(new ItemStack(Items.EMERALD, 4), new ItemStack(ModItems.GOAT_FUR, 1), 99999999, 15, 1));
+        event.getRareTrades().add(new BasicItemListing(new ItemStack(Items.EMERALD, 4), new ItemStack(ModItems.HOGLIN_HIDE, 1), 99999999, 15, 1));
     }
 }
