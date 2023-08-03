@@ -47,7 +47,8 @@ public class RegisterItemOverrides
                     double maxTemp = ConfigSettings.MAX_TEMP.get();
 
                     double worldTemp;
-                    if ((entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
+                    if (!entity.getPersistentData().contains("WorldTempTimestamp")
+                    || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
                         worldTemp = entity instanceof LivingEntity living
                                 ? Temperature.getTemperatureCap(living).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
