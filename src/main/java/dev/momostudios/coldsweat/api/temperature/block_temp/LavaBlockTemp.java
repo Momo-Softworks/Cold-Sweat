@@ -19,7 +19,7 @@ public class LavaBlockTemp extends BlockTemp
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {   FluidState fluidState = state.getFluidState();
-        double temp = (fluidState.getOwnHeight()) / (entity.getVehicle() instanceof Strider ? 50d : 3d);
+        double temp = (fluidState.getAmount()/7f) / (entity.getVehicle() instanceof Strider ? 50d : 3d);
         return CSMath.blend(temp, 0, distance, 0.5, 7);
     }
 

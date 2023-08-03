@@ -42,12 +42,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public class WorldHelper
@@ -236,7 +237,7 @@ public class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, TriConsumer<ChunkAccess, BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, Map<BlockPos, BlockState> stateCache, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))
@@ -256,20 +257,25 @@ public class WorldHelper
                 if (new BlockPos(vec).equals(pos)) continue;
                 pos.set(vec.x, vec.y, vec.z);
 
-                // Set new workingChunk if the ray travels outside the current one
-                if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
-                    workingChunk = getChunk(level, pos);
-
-                if (workingChunk == null) continue;
-
                 // Get the blockstate at the current position
-                BlockState state = workingChunk.getBlockState(pos);
+                BlockState state = stateCache.get(pos);
+
+                if (state == null)
+                {   // Set new workingChunk if the ray travels outside the current one
+                    if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
+                        workingChunk = getChunk(level, pos);
+
+                    if (workingChunk == null) continue;
+                    state = workingChunk.getBlockState(pos);
+                    stateCache.put(pos.immutable(), state);
+                }
+
 
                 // If the block isn't air, then we hit something
                 if (!state.isAir() && state.getMaterial().blocksMotion() && --maxHits <= 0)
                     break;
 
-                rayTracer.accept(workingChunk, state, pos);
+                rayTracer.accept(state, pos);
             }
         }
     }
