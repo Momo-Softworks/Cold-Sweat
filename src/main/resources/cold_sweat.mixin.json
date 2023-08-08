@@ -9,6 +9,7 @@
     "MixinHeartRender",
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
+    "MixinTooltip",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
   ],

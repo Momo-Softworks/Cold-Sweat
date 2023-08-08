@@ -43,7 +43,7 @@ public class InsulatorTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
     {
-        x += 12;
+        x += 11;
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
         neutral = (cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0) * 2;

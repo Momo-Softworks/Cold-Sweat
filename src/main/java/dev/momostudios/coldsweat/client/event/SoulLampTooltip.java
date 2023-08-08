@@ -33,7 +33,7 @@ public class SoulLampTooltip
             PlayerEntity player = Minecraft.getInstance().player;
 
             if (player != null && inventoryScreen.getSlotUnderMouse() != null
-                    && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
+            && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
             {
                 float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
                 ItemStack carriedStack = player.inventory.getCarried();
@@ -56,19 +56,19 @@ public class SoulLampTooltip
 
                     // Render background
                     Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 24, 30);
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 34, 30);
 
                     // Render ghost overlay
                     RenderSystem.enableBlend();
                     RenderSystem.color4f(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 24, 30);
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 34, 30);
                     RenderSystem.disableBlend();
 
                     // Render current fuel
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 24, 30);
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 34, 30);
                 }
-                else if (carriedStack.isEmpty())
+                /*else if (carriedStack.isEmpty())
                 {
                     int mouseX = event.getMouseX();
                     int mouseY = event.getMouseY();
@@ -79,9 +79,9 @@ public class SoulLampTooltip
                     }
 
                     Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 0, 30, 8, 24, 30);
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 16, (int) (fuel / 2.1333f), 8, 24, 30);
-                }
+                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 0, 30, 8, 30, 24);
+                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 24);
+                }*/
             }
         }
     }
