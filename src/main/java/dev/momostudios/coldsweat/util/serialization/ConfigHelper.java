@@ -1,10 +1,9 @@
-package dev.momostudios.coldsweat.config.util;
+package dev.momostudios.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.serialization.Triplet;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -164,7 +163,7 @@ public class ConfigHelper
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
-    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).collect(Collectors.toList());
+    {   return ids.stream().map(id -> WorldHelper.getBiome(new ResourceLocation(id))).collect(Collectors.toList());
     }
 
     public static CompoundNBT writeNBTBoolean(boolean value, String key)
