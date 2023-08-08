@@ -1,14 +1,14 @@
 package dev.momostudios.coldsweat.common.effect;
 
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectType;
 
 import javax.annotation.Nonnull;
 
-public class IceResistanceEffect extends MobEffect
+public class IceResistanceEffect extends Effect
 {
     public IceResistanceEffect() {
-        super(MobEffectCategory.BENEFICIAL, 8109800);
+        super(EffectType.BENEFICIAL, 8109800);
     }
 
     @Nonnull

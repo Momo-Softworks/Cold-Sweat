@@ -6,21 +6,25 @@ import com.google.gson.JsonObject;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.advancements.critereon.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.advancements.ICriterionTrigger;
+import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
+import net.minecraft.advancements.criterion.CriterionInstance;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.loot.ConditionArrayParser;
+import net.minecraft.loot.ConditionArraySerializer;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TemperatureChangedTrigger extends SimpleCriterionTrigger<TemperatureChangedTrigger.Instance>
+public class TemperatureChangedTrigger extends AbstractCriterionTrigger<TemperatureChangedTrigger.Instance>
 {
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
+    protected Instance createInstance(JsonObject json, EntityPredicate.AndPredicate player, ConditionArrayParser context)
     {
         JsonArray tempList = json.get("temperature").getAsJsonArray();
         List<TriggerHelper.TempCondition> conditions = new ArrayList<>();
@@ -45,16 +49,16 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
         return ID;
     }
 
-    public void trigger(ServerPlayer player, Map<Temperature.Type, Double> temps)
+    public void trigger(ServerPlayerEntity player, Map<Temperature.Type, Double> temps)
     {
         this.trigger(player, triggerInstance -> triggerInstance.matches(temps));
     }
 
-    public static class Instance extends AbstractCriterionTriggerInstance
+    public static class Instance extends CriterionInstance
     {
         List<TriggerHelper.TempCondition> conditions;
 
-        public Instance(EntityPredicate.Composite player, List<TriggerHelper.TempCondition> conditions)
+        public Instance(EntityPredicate.AndPredicate player, List<TriggerHelper.TempCondition> conditions)
         {
             super(ID, player);
             this.conditions = conditions;
@@ -73,7 +77,7 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
         }
 
         @Override
-        public JsonObject serializeToJson(SerializationContext context)
+        public JsonObject serializeToJson(ConditionArraySerializer context)
         {
             JsonObject obj = super.serializeToJson(context);
             obj.add("temperature", TriggerHelper.serializeConditions(this.conditions));

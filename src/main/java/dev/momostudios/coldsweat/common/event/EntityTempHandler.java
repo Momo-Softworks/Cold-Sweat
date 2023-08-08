@@ -12,7 +12,7 @@ import dev.momostudios.coldsweat.common.capability.EntityTempCap;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -20,22 +20,22 @@ import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.ResultSlot;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.minecart.MinecartEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.UseAction;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -44,7 +44,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
@@ -56,8 +55,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 
 @Mod.EventBusSubscriber
 public class EntityTempHandler
@@ -71,10 +69,11 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
-        if (event.getObject() instanceof LivingEntity entity)
+        if (event.getObject() instanceof LivingEntity)
         {
+            LivingEntity entity = (LivingEntity) event.getObject();
             // Players always get the capability
-            if (!(entity instanceof Player))
+            if (!(entity instanceof PlayerEntity))
             {
                 EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
                 MinecraftForge.EVENT_BUS.post(enableEvent);
@@ -83,12 +82,12 @@ public class EntityTempHandler
             }
 
             // Make a new capability instance to attach to the entity
-            ITemperatureCap tempCap = entity instanceof Player ? new PlayerTempCap() : new EntityTempCap();
+            ITemperatureCap tempCap = entity instanceof PlayerEntity ? new PlayerTempCap() : new EntityTempCap();
             // Optional that holds the capability instance
             LazyOptional<ITemperatureCap> capOptional = LazyOptional.of(() -> tempCap);
 
             // Capability provider
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
+            ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
             {
                 @Nonnull
                 @Override
@@ -103,13 +102,13 @@ public class EntityTempHandler
                 }
 
                 @Override
-                public CompoundTag serializeNBT()
+                public CompoundNBT serializeNBT()
                 {
                     return tempCap.serializeNBT();
                 }
 
                 @Override
-                public void deserializeNBT(CompoundTag nbt)
+                public void deserializeNBT(CompoundNBT nbt)
                 {
                     tempCap.deserializeNBT(nbt);
                 }
@@ -127,7 +126,7 @@ public class EntityTempHandler
     public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
     {
         LivingEntity entity = event.getEntityLiving();
-        if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
+        if (!(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
 
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
         {
@@ -150,7 +149,7 @@ public class EntityTempHandler
                 });
             }
 
-            if (entity instanceof Player && entity.tickCount % 60 == 0)
+            if (entity instanceof PlayerEntity && entity.tickCount % 60 == 0)
             {   Temperature.updateModifiers(entity, cap);
             }
         });
@@ -165,16 +164,12 @@ public class EntityTempHandler
         if (!event.isWasDeath() && !event.getPlayer().level.isClientSide)
         {
             // Get the old player's capability
-            Player oldPlayer = event.getOriginal();
-            oldPlayer.reviveCaps();
+            PlayerEntity oldPlayer = event.getOriginal();
 
             // Copy the capability to the new player
             event.getPlayer().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-            {
-               oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
+            {   oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
             });
-
-            oldPlayer.invalidateCaps();
         }
     }
 
@@ -184,7 +179,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntity() instanceof Chameleon) event.setEnabled(true);
+        if (event.getEntity() instanceof ChameleonEntity) event.setEnabled(true);
     }
 
     /**
@@ -194,8 +189,9 @@ public class EntityTempHandler
     public static void initModifiersOnEntity(EntityJoinWorldEvent event)
     {
         // Add basic TempModifiers to player
-        if (event.getEntity() instanceof ServerPlayer player && !player.level.isClientSide)
+        if (event.getEntity() instanceof ServerPlayerEntity && !event.getEntity().level.isClientSide)
         {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getEntity();
             // Sometimes the entity isn't fully initialized, so wait until next tick
             if (player.getServer() != null)
             player.getServer().execute(() ->
@@ -231,33 +227,35 @@ public class EntityTempHandler
             });
 
             // Add listener for granting the sewing table recipe when the player gets an insulation item
-            player.containerMenu.addSlotListener(new ContainerListener()
+            player.containerMenu.addSlotListener(new IContainerListener()
             {
-                public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack)
+                public void slotChanged(Container menu, int slotIndex, ItemStack stack)
                 {   Slot slot = menu.getSlot(slotIndex);
-                    if (!(slot instanceof ResultSlot))
+                    if (!(slot instanceof CraftingResultSlot))
                     {
-                        if (slot.container == player.getInventory()
+                        if (slot.container == player.inventory
                         && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
                         || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem())))
                         {   player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
                         }
                     }
                 }
-                public void dataChanged(AbstractContainerMenu p_143462_, int p_143463_, int p_143464_) {}
+                public void setContainerData(Container p_143462_, int p_143463_, int p_143464_) {}
+                public void refreshContainer(Container var1, NonNullList<ItemStack> var2) {}
             });
         }
         // Add basic TempModifiers to chameleons
-        else if (event.getEntity() instanceof LivingEntity entity && EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))
+        else if (event.getEntity() instanceof LivingEntity && EnableTemperatureEvent.ENABLED_ENTITIES.contains(event.getEntity().getType()))
         {
+            LivingEntity entity = (LivingEntity) event.getEntity();
             // Sometimes the entity isn't fully initialized, so wait until next tick
             if (entity.getServer() != null)
             entity.getServer().execute(() ->
             {
                 // Basic modifiers
-                Temperature.addModifiers(entity, List.of(new BiomeTempModifier(9).tickRate(40),
-                                                                                    new UndergroundTempModifier().tickRate(40),
-                                                                                    new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
+                Temperature.addModifiers(entity, Arrays.asList(new BiomeTempModifier(9).tickRate(40),
+                                                               new UndergroundTempModifier().tickRate(40),
+                                                               new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                 {
@@ -282,7 +280,7 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        Player player = event.player;
+        PlayerEntity player = event.player;
 
         // Water / Rain
         if (!player.level.isClientSide && event.phase == TickEvent.Phase.START)
@@ -292,41 +290,9 @@ public class EntityTempHandler
                 if (WorldHelper.isInWater(player) || (player.tickCount % 40 == 0 && WorldHelper.isRainingAt(player.level, player.blockPosition())))
                     Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Type.WORLD, false);
 
-                if (player.isFreezing())
-                    Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
-
                 if (player.isOnFire())
                     Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
             }
-
-            if (player.isFreezing() && player.getTicksFrozen() > 0)
-            {
-                AtomicReference<Double> insulation = new AtomicReference<>((double) 0);
-                boolean hasIcePotion = player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get();
-
-                if (!hasIcePotion)
-                {
-                    Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class).ifPresent(insulModifier ->
-                    {
-                        insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDouble("Hot") + insulModifier.getNBT().getDouble("Cold")));
-                    });
-                }
-
-                if (!(hasIcePotion || insulation.get() > 0) && (player.tickCount % Math.max(1, 37 - insulation.get())) == 0)
-                {   player.setTicksFrozen(player.getTicksFrozen() - 1);
-                }
-            }
-        }
-    }
-
-    /**
-     * Cancel freezing damage when the player has the Ice Resistance effect
-     */
-    @SubscribeEvent
-    public static void cancelFreezingDamage(LivingAttackEvent event)
-    {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntityLiving().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
-        {   event.setCanceled(true);
         }
     }
 
@@ -336,12 +302,13 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onInsulationUpdate(PotionEvent event)
     {
-        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getPotionEffect() != null
+        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof PlayerEntity && event.getPotionEffect() != null
         && event.getPotionEffect().getEffect() == ModEffects.INSULATION)
         {
+            PlayerEntity player = (PlayerEntity) event.getEntityLiving();
             // Add TempModifier on potion effect added
             if (event instanceof PotionEvent.PotionAddedEvent)
-            {   MobEffectInstance effect = event.getPotionEffect();
+            {   EffectInstance effect = event.getPotionEffect();
                 // New HearthTempModifier
                 TempModifier newMod = new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
                 Temperature.addOrReplaceModifier(player, newMod, Temperature.Type.WORLD);
@@ -385,12 +352,12 @@ public class EntityTempHandler
     {
         if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.tickCount % 5 == 0)
         {
-            Player player = event.player;
+            PlayerEntity player = event.player;
             if (player.getVehicle() != null)
             {
                 Entity mount = player.getVehicle();
                 // If insulated minecart
-                if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
+                if (mount instanceof MinecartEntity && ((MinecartEntity) mount).getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
                 {   Temperature.addModifier(player, new MountTempModifier(20, 20).expires(1), Temperature.Type.RATE, false);
                 }
                 // If insulated entity (defined in config)
@@ -416,10 +383,11 @@ public class EntityTempHandler
     @SubscribeEvent
     public static void onEatFood(LivingEntityUseItemEvent.Finish event)
     {
-        if (event.getEntity() instanceof Player player
-        && (event.getItem().getUseAnimation() == UseAnim.DRINK || event.getItem().getUseAnimation() == UseAnim.EAT)
+        if (event.getEntity() instanceof PlayerEntity
+        && (event.getItem().getUseAnimation() == UseAction.DRINK || event.getItem().getUseAnimation() == UseAction.EAT)
         && !event.getEntity().level.isClientSide)
         {
+            PlayerEntity player = (PlayerEntity) event.getEntity();
             // If food item defined in config
             float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
             if (foodTemp != 0)

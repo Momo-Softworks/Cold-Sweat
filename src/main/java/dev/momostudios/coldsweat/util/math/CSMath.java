@@ -1,21 +1,20 @@
 package dev.momostudios.coldsweat.util.math;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3d;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class CSMath
@@ -32,27 +31,28 @@ public class CSMath
      */
     public static double convertTemp(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
     {
-        return switch (from)
+        switch (from)
         {
-            case C -> switch (to)
+            case C : switch (to)
             {
-                case C -> value;
-                case F -> value * 1.8 + 32d;
-                case MC -> value / 23.333333333d;
-            };
-            case F -> switch (to)
+                case C  : return value;
+                case F  : return value * 1.8 + 32d;
+                case MC : return value / 23.333333333d;
+            }
+            case F : switch (to)
             {
-                case C -> (value - 32) / 1.8;
-                case F -> value;
-                case MC -> (value - (absolute ? 32d : 0d)) / 42d;
-            };
-            case MC -> switch (to)
+                case C  : return (value - 32) / 1.8;
+                case F  : return value;
+                case MC : return (value - (absolute ? 32d : 0d)) / 42d;
+            }
+            case MC : switch (to)
             {
-                case C -> value * 23.333333333d;
-                case F -> value * 42d + (absolute ? 32d : 0d);
-                case MC -> value;
-            };
-        };
+                case C  : return value * 23.333333333d;
+                case F  : return value * 42d + (absolute ? 32d : 0d);
+                case MC : return value;
+            }
+        }
+        return value;
     }
 
     public static float toRadians(float input) {
@@ -233,7 +233,7 @@ public class CSMath
         return new Pair<>(pair1.getFirst().doubleValue() + pair2.getFirst().doubleValue(), pair1.getSecond().doubleValue() + pair2.getSecond().doubleValue());
     }
 
-    public static double getDistance(Entity entity, Vec3 pos)
+    public static double getDistance(Entity entity, Vector3d pos)
     {
         return getDistance(entity, pos.x, pos.y, pos.z);
     }
@@ -251,7 +251,7 @@ public class CSMath
         return Math.sqrt(getDistanceSqr(x1, y1, z1, x2, y2, z2));
     }
 
-    public static double getDistance(Vec3 pos1, Vec3 pos2)
+    public static double getDistance(Vector3d pos1, Vector3d pos2)
     {
         return getDistance(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
     }
@@ -261,7 +261,7 @@ public class CSMath
         return getDistance(entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), x, y, z);
     }
 
-    public static double getDistance(Vec3i pos1, Vec3i pos2)
+    public static double getDistance(Vector3i pos1, Vector3i pos2)
     {
         return Math.sqrt(pos1.distSqr(pos2));
     }
@@ -308,9 +308,9 @@ public class CSMath
         return sum / Math.max(1, weightSum);
     }
 
-    public static Vec3 vectorToVec(Vector3d vec)
+    public static Vector3d vectorToVec(Vector3d vec)
     {
-        return new Vec3(vec.x, vec.y, vec.z);
+        return new Vector3d(vec.x, vec.y, vec.z);
     }
 
     /**
@@ -336,9 +336,9 @@ public class CSMath
         return direction;
     }
 
-    public static Direction getDirectionFrom(Vec3 vec3)
+    public static Direction getDirectionFrom(Vector3d Vector3d)
     {
-        return getDirectionFrom(vec3.x, vec3.y, vec3.z);
+        return getDirectionFrom(Vector3d.x, Vector3d.y, Vector3d.z);
     }
 
     public static Direction getDirectionFrom(BlockPos from, BlockPos to)
@@ -489,11 +489,11 @@ public class CSMath
     }
 
     /**
-     * @return A Vec3 at the center of the given BlockPos.
+     * @return A Vector3d at the center of the given BlockPos.
      */
-    public static Vec3 getCenterPos(BlockPos pos)
+    public static Vector3d getCenterPos(BlockPos pos)
     {
-        return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+        return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
     /**
@@ -505,15 +505,15 @@ public class CSMath
     public static VoxelShape rotateShape(Direction to, VoxelShape shape)
     {
         // shapeHolder[0] is the old shape, shapeHolder[1] is the new shape
-        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty() };
+        VoxelShape[] shapeHolder = new VoxelShape[] {shape, VoxelShapes.empty() };
 
         int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
         for (int i = 0; i < times; i++)
         {
-            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> shapeHolder[1] = Shapes.or(shapeHolder[1],
-                Shapes.create(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+            shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> shapeHolder[1] = VoxelShapes.or(shapeHolder[1],
+                 VoxelShapes.create(new AxisAlignedBB(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX))));
             shapeHolder[0] = shapeHolder[1];
-            shapeHolder[1] = Shapes.empty();
+            shapeHolder[1] = VoxelShapes.empty();
         }
 
         return shapeHolder[0];
@@ -529,18 +529,23 @@ public class CSMath
     {
         // Flatten the shape into a 2D projection
         // shapeHolder[0] is the old shape, shapeHolder[1] is the new shape
-        VoxelShape[] shapeHolder = new VoxelShape[] {shape, Shapes.empty()};
+        VoxelShape[] shapeHolder = new VoxelShape[] {shape, VoxelShapes.empty()};
         switch (axis)
         {
-            case X ->
+            case X :
             shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(0, minY, minZ, 1, maxY, maxZ)));
-            case Y ->
+                    shapeHolder[1] = VoxelShapes.or(shapeHolder[1], VoxelShapes.box(0, minY, minZ, 1, maxY, maxZ)));
+            break;
+
+            case Y :
             shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, 0, minZ, maxX, 1, maxZ)));
-            case Z ->
+                    shapeHolder[1] = VoxelShapes.or(shapeHolder[1], VoxelShapes.box(minX, 0, minZ, maxX, 1, maxZ)));
+            break;
+
+            case Z :
             shapeHolder[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                    shapeHolder[1] = Shapes.or(shapeHolder[1], Shapes.box(minX, minY, 0, maxX, maxY, 1)));
+                    shapeHolder[1] = VoxelShapes.or(shapeHolder[1], VoxelShapes.box(minX, minY, 0, maxX, maxY, 1)));
+            break;
         }
         return shapeHolder[1];
     }
@@ -550,5 +555,54 @@ public class CSMath
         return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
             && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
             && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    public static <K, V> Map<K, V> mapOf()
+    {   return new MapN<>();
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k, V v)
+    {   return new MapN<>(k, v);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2)
+    {   return new MapN<>(k1, v1, k2, v2);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+                                         K k6, V v6)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+                                         K k6, V v6, K k7, V v7)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+                                         K k6, V v6, K k7, V v7, K k8, V v8)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+                                         K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9);
+    }
+
+    public static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+                                         K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10)
+    {   return new MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10);
     }
 }

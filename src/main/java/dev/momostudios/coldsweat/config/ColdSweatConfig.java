@@ -2,17 +2,16 @@ package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -147,14 +146,14 @@ public class ColdSweatConfig
             hearthSpreadWhitelist = BUILDER
                     .comment("List of blocks that the hearth can spread through",
                              "Use this list if the hearth isn't spreading through particular blocks that it should")
-                    .defineList("Hearth Spread Whitelist", List.of(
+                    .defineList("Hearth Spread Whitelist", Arrays.asList(
                             "minecraft:iron_bars",
                             "#minecraft:leaves"
                     ), o -> o instanceof String);
             hearthSpreadBlacklist = BUILDER
                     .comment("List of blocks that the hearth cannot spread through",
                              "Use this list if the hearth is spreading through particular blocks that it shouldn't")
-                    .defineList("Hearth Spread Blacklist", List.of(
+                    .defineList("Hearth Spread Blacklist", Arrays.asList(
                     ), o -> o instanceof String);
         BUILDER.pop();
 
@@ -355,11 +354,11 @@ public class ColdSweatConfig
 
     public void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
     {
-        hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).toList());
+        hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
     }
     public void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
     {
-        hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).toList());
+        hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
     }
 
     public void save() {

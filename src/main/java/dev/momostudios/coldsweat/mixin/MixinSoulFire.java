@@ -3,29 +3,36 @@ package dev.momostudios.coldsweat.mixin;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.SoulFireBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import dev.momostudios.coldsweat.util.registries.ModDamageSources;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoulFireBlock;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BaseFireBlock.class)
+@Mixin(AbstractFireBlock.class)
 public class MixinSoulFire
 {
-    @Inject(method = "entityInside(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V",
+    @Final
+    @Shadow
+    private float fireDamage;
+
+    @Inject(method = "entityInside(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V",
     at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, CallbackInfo ci)
+    public void entityInside(BlockState state, World level, BlockPos pos, Entity entity, CallbackInfo ci)
     {
         if (state.getBlock() instanceof SoulFireBlock && ColdSweatConfig.getInstance().isSoulFireCold()
         && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
         {
-            entity.setIsInPowderSnow(true);
+            entity.hurt(ModDamageSources.COLD, this.fireDamage);
             entity.clearFire();
             ci.cancel();
         }

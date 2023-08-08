@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.util.world;
 
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3i;
 
 public class SpreadPath
 {
@@ -75,7 +75,7 @@ public class SpreadPath
         return path;
     }
 
-    public boolean withinDistance(Vec3i vector, double distance)
+    public boolean withinDistance(Vector3i vector, double distance)
     {
         return distanceSq(vector.getX(), vector.getY(), vector.getZ()) < distance * distance;
     }

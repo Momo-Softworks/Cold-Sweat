@@ -1,33 +1,31 @@
 package dev.momostudios.coldsweat.common.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.BlockHitResult;
 import dev.momostudios.coldsweat.common.container.SewingContainer;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.minecraftforge.network.NetworkHooks;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
-import java.util.Collections;
 import java.util.List;
 
-public class SewingTableBlock extends Block implements MenuProvider
+public class SewingTableBlock extends Block implements INamedContainerProvider
 {
     public static Properties getProperties()
     {
@@ -50,14 +48,14 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        if (worldIn.isClientSide)
-        {   return InteractionResult.SUCCESS;
+        if (world.isClientSide)
+        {   return ActionResultType.SUCCESS;
         }
         else
-        {   NetworkHooks.openGui((ServerPlayer)player, this, pos);
-            return InteractionResult.CONSUME;
+        {   NetworkHooks.openGui((ServerPlayerEntity) player, this, pos);
+            return ActionResultType.CONSUME;
         }
     }
 
@@ -72,20 +70,17 @@ public class SewingTableBlock extends Block implements MenuProvider
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
         return this.defaultBlockState();
     }
 
     @Override
-    public Component getDisplayName()
-    {
-        return null;
+    public ITextComponent getDisplayName()
+    {   return null;
     }
 
-    @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int windowID, Inventory inv, Player player)
-    {
-        return new SewingContainer(windowID, inv);
+    public Container createMenu(int windowID, PlayerInventory inv, PlayerEntity player)
+    {   return new SewingContainer(windowID, inv);
     }
 }

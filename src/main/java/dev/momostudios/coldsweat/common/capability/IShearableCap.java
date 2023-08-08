@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.capability;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.CompoundNBT;
 
 public interface IShearableCap
 {
@@ -9,7 +9,7 @@ public interface IShearableCap
     int lastSheared();
     void setLastSheared(int lastSheared);
 
-    CompoundTag serializeNBT();
+    CompoundNBT serializeNBT();
 
-    void deserializeNBT(CompoundTag nbt);
+    void deserializeNBT(CompoundNBT nbt);
 }

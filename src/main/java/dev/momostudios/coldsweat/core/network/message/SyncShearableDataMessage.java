@@ -2,10 +2,10 @@ package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -21,13 +21,13 @@ public class SyncShearableDataMessage
         this.entityId = entityId;
     }
 
-    public static void encode(SyncShearableDataMessage msg, FriendlyByteBuf buffer)
+    public static void encode(SyncShearableDataMessage msg, PacketBuffer buffer)
     {   buffer.writeBoolean(msg.isSheared);
         buffer.writeInt(msg.lastSheared);
         buffer.writeInt(msg.entityId);
     }
 
-    public static SyncShearableDataMessage decode(FriendlyByteBuf buffer)
+    public static SyncShearableDataMessage decode(PacketBuffer buffer)
     {   return new SyncShearableDataMessage(buffer.readBoolean(), buffer.readInt(), buffer.readInt());
     }
 
@@ -40,9 +40,9 @@ public class SyncShearableDataMessage
             {
                 try
                 {
-                    Level level = ClientOnlyHelper.getClientLevel();
-                    if (level != null)
-                    {   Entity entity = level.getEntity(message.entityId);
+                    World world = ClientOnlyHelper.getClientWorld();
+                    if (world != null)
+                    {   Entity entity = world.getEntity(message.entityId);
                         if (entity != null)
                         {
                             entity.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->

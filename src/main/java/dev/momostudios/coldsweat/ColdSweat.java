@@ -1,26 +1,23 @@
 package dev.momostudios.coldsweat;
 
-import dev.momostudios.coldsweat.client.gui.Overlays;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.api.event.core.EdiblesRegisterEvent;
+import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.init.*;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
+import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,14 +40,13 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
-        bus.addListener(this::registerCaps);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         BlockInit.BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
         EntityInit.ENTITY_TYPES.register(bus);
-        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
-        MenuInit.MENU_TYPES.register(bus);
+        TileEntityInit.BLOCK_ENTITY_TYPES.register(bus);
+        ContainerInit.MENU_TYPES.register(bus);
         EffectInit.EFFECTS.register(bus);
         ParticleTypesInit.PARTICLES.register(bus);
         PotionInit.POTIONS.register(bus);
@@ -71,9 +67,6 @@ public class ColdSweat
         ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
         {
-            SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn);
-
             // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
@@ -86,16 +79,7 @@ public class ColdSweat
 
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        // Fix hearth transparency
-        ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(BlockInit.SOUL_STALK.get(), RenderType.cutoutMipped());
-        // Register GUI elements
-        Overlays.registerOverlays();
-    }
-
-    public void registerCaps(RegisterCapabilitiesEvent event)
-    {
-        event.register(ITemperatureCap.class);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.CHAMELEON, ChameleonEntityRenderer::new);
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)

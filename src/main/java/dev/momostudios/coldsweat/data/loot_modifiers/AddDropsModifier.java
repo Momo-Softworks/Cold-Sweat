@@ -2,16 +2,15 @@ package dev.momostudios.coldsweat.data.loot_modifiers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import dev.momostudios.coldsweat.util.serialization.JsonHelper;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -21,14 +20,13 @@ public class AddDropsModifier extends LootModifier
     private final Item addition;
     private final Pair<Integer, Integer> count;
 
-    protected AddDropsModifier(LootItemCondition[] conditionsIn, final Item addition, final Pair<Integer, Integer> count)
+    protected AddDropsModifier(ILootCondition[] conditionsIn, final Item addition, final Pair<Integer, Integer> count)
     {
         super(conditionsIn);
         this.addition = addition;
         this.count = count;
     }
 
-    @NotNull
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
@@ -42,12 +40,12 @@ public class AddDropsModifier extends LootModifier
     public static class Serializer extends GlobalLootModifierSerializer<AddDropsModifier>
     {
         @Override
-        public AddDropsModifier read(@Nonnull ResourceLocation location, JsonObject object, LootItemCondition[] conditionsIn)
+        public AddDropsModifier read(@Nonnull ResourceLocation location, JsonObject object, ILootCondition[] conditionsIn)
         {
-            JsonObject countTable = GsonHelper.getAsJsonObject(object, "count");
+            JsonObject countTable = JsonHelper.getAsJsonObject(object, "count");
             return new AddDropsModifier(conditionsIn,
-                                        ForgeRegistries.ITEMS.getValue(new ResourceLocation(GsonHelper.getAsString(object, "addition"))),
-                                        Pair.of(GsonHelper.getAsInt(countTable, "min"), GsonHelper.getAsInt(countTable, "max")));
+                                        ForgeRegistries.ITEMS.getValue(new ResourceLocation(JsonHelper.getAsString(object, "addition"))),
+                                        Pair.of(JsonHelper.getAsInt(countTable, "min"), JsonHelper.getAsInt(countTable, "max")));
         }
 
         @Override

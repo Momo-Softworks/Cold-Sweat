@@ -2,23 +2,22 @@ package dev.momostudios.coldsweat.common.entity.data.edible;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.data.tags.ModItemTags;
+import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.serialization.Triplet;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biome;
-import oshi.util.tuples.Triplet;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.Item;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.tags.ITag;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
 
 public class ColdBiomeEdible extends Edible
 {
@@ -29,35 +28,36 @@ public class ColdBiomeEdible extends Edible
     }
 
     @Override
-    public Result onEaten(Chameleon entity, ItemEntity item)
+    public Result onEaten(ChameleonEntity entity, ItemEntity item)
     {
         if (!entity.level.isClientSide)
         {
             // Flag for searching
             entity.setSearching(true);
 
-            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(holder ->
+            BlockPos pos = entity.blockPosition();
+            BlockPos biomePos = ((ServerWorld) entity.level).getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), 2000,
+            biome ->
             {
-                Biome biome = holder.value();
                 ResourceLocation biomeName = biome.getRegistryName();
 
                 Triplet<Double, Double, Temperature.Units> tempConfig = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeName,
-                                                                                                                      ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName,
+                                                                        ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName,
                                                                         new Triplet<>((double) biome.getBaseTemperature(), (double) biome.getBaseTemperature(), Temperature.Units.MC)));
-                Pair<Double, Double> minMax = Pair.of(tempConfig.getA(), tempConfig.getB());
+                Pair<Double, Double> minMax = Pair.of(tempConfig.getFirst(), tempConfig.getSecond());
                 double biomeTemp = CSMath.averagePair(minMax);
 
                 return biomeTemp <= 0.2;
-            }, entity.blockPosition(), 2000, 8);
+            }, entity.getRandom());
 
-            if (biomePair != null)
+            if (biomePos != null)
             {
                 TaskScheduler.scheduleServer(() ->
                 {
                     // Set the chameleon to track this position
-                    entity.setTrackingPos(biomePair.getFirst());
+                    entity.setTrackingPos(biomePos);
 
-                    WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
+                    WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, EntityHelper.getVoicePitch(entity));
                     WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
                     // Stop searching
@@ -83,12 +83,12 @@ public class ColdBiomeEdible extends Edible
     }
 
     @Override
-    public boolean shouldEat(Chameleon entity, ItemEntity item)
+    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
     {   return true;
     }
 
     @Override
-    public TagKey<Item> associatedItems()
+    public ITag.INamedTag<Item> associatedItems()
     {   return ModItemTags.CHAMELEON_COLD;
     }
 }

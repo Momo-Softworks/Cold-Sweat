@@ -1,20 +1,20 @@
 package dev.momostudios.coldsweat.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.BoilerContainer;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 
-public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
+public class BoilerScreen extends ContainerScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
 
-    public BoilerScreen(BoilerContainer screenContainer, Inventory inv, Component titleIn)
+    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;
@@ -26,7 +26,7 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
     {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -35,10 +35,10 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        RenderSystem.setShaderTexture(0, BOILER_GUI);
+        RenderSystem.color4f(1f, 1f, 1f, 1f);
+        Minecraft.getInstance().textureManager.bind(BOILER_GUI);
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
         this.blit(matrixStack, x, y, 0, 0, this.imageWidth, this.imageHeight);

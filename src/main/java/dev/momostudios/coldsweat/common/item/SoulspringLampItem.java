@@ -1,37 +1,37 @@
 package dev.momostudios.coldsweat.common.item;
 
+import dev.momostudios.coldsweat.api.event.common.ItemSwappedInInventoryEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.data.tags.ModDimensionTags;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.entity.CreatureAttribute;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Rarity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -46,10 +46,11 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof Player player && !level.isClientSide && player.tickCount % 5 == 0)
+        if (entity instanceof PlayerEntity && !world.isClientSide && entity.tickCount % 5 == 0)
         {
+            PlayerEntity player = (PlayerEntity) entity;
             boolean shouldBeOn = false;
             try
             {
@@ -62,7 +63,7 @@ public class SoulspringLampItem extends Item
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && (level.dimensionTypeRegistration().is(ModDimensionTags.SOUL_LAMP_VALID) || ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
+                && (ConfigSettings.LAMP_DIMENSIONS.get().contains(world.dimension().location()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
@@ -72,18 +73,18 @@ public class SoulspringLampItem extends Item
 
                     // Affect nearby players
                     double radius = 5d;
-                    AABB bb = new AABB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
-                                       player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
+                    AxisAlignedBB bb = new AxisAlignedBB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
+                                                player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
 
-                    for (Player entity : level.getEntitiesOfClass(Player.class, bb))
+                    for (PlayerEntity playerEnt : world.getEntitiesOfClass(PlayerEntity.class, bb))
                     {
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(playerEnt, Temperature.Type.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        {   Temperature.addOrReplaceModifier(playerEnt, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
                         }
                     }
                     shouldBeOn = true;
@@ -91,7 +92,7 @@ public class SoulspringLampItem extends Item
             }
             finally
             {
-                CompoundTag itemTag = stack.getOrCreateTag();
+                CompoundNBT itemTag = stack.getOrCreateTag();
                 // If the conditions are not met, turn off the lamp
                 if (itemTag.getInt("stateChangeTimer") <= 0
                 && itemTag.getBoolean("isOn") != shouldBeOn)
@@ -102,7 +103,7 @@ public class SoulspringLampItem extends Item
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entity.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
                 else
                 {   // Decrement the state change timer
@@ -147,8 +148,9 @@ public class SoulspringLampItem extends Item
     @SubscribeEvent
     public static void onEntityHit(LivingAttackEvent event)
     {
-        if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntityLiving() instanceof Player))
+        if (event.getSource().getEntity() instanceof PlayerEntity && !(event.getEntityLiving() instanceof PlayerEntity))
         {
+            PlayerEntity attacker = (PlayerEntity) event.getSource().getEntity();
             ItemStack stack = attacker.getMainHandItem();
             if (!(stack.getItem() instanceof SoulspringLampItem)) return;
 
@@ -156,7 +158,7 @@ public class SoulspringLampItem extends Item
 
             // If fuel < 64 and target NOT player
             if (getFuel(stack) < 64
-            && target.getMobType() != MobType.UNDEAD
+            && target.getMobType() != CreatureAttribute.UNDEAD
             && !target.getPersistentData().getBoolean("SoulSucked"))
             {
                 target.getPersistentData().putBoolean("SoulSucked", true);
@@ -172,7 +174,7 @@ public class SoulspringLampItem extends Item
                 {
                     int particleCount = (int) CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50);
                     WorldHelper.spawnParticleBatch(attacker.level, ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
-                        target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
+                                                   target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
                 }
                 // Play soul stealing sound
                 if (attacker.level.isClientSide)
@@ -182,12 +184,12 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player) {
+    public boolean canAttackBlock(BlockState state, World world, BlockPos blockPos, PlayerEntity player) {
         return !player.isCreative();
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
+    public void fillItemCategory(ItemGroup tab, NonNullList<ItemStack> itemList)
     {
         if (this.allowdedIn(tab))
         {
@@ -198,20 +200,22 @@ public class SoulspringLampItem extends Item
         }
     }
 
-    @Override
-    public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack fuelStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
+    @SubscribeEvent
+    public static void onItemClickedInGUI(ItemSwappedInInventoryEvent event)
     {
+        ItemStack thisStack = event.getSlotItem();
+        ItemStack fuelStack = event.getHeldItem();
+        PlayerEntity player = event.getPlayer();
         if (ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(fuelStack.getItem()) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
             addFuel(thisStack, fuelStack);
             fuelStack.shrink((64 - (int) currentFuel) / getFuelForStack(fuelStack));
 
-            if (player instanceof ServerPlayer serverPlayer)
-                ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
-
-            return true;
+            if (player instanceof ServerPlayerEntity)
+            {   ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(((ServerPlayerEntity) player), fuelStack, thisStack);
+            }
+            event.setCanceled(true);
         }
-        return false;
     }
 }

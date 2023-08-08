@@ -15,15 +15,16 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -38,7 +39,7 @@ public class ArmorInsulation
     @SubscribeEvent
     public static void addArmorModifiers(TickEvent.PlayerTickEvent event)
     {
-        Player player = event.player;
+        PlayerEntity player = event.player;
         if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
         {
             Map<Item, Pair<Double, Double>> insulatingArmors = ConfigSettings.INSULATING_ARMORS.get();
@@ -51,8 +52,9 @@ public class ArmorInsulation
             double maxTemp = Temperature.get(player, Temperature.Type.FREEZING_POINT);
             for (ItemStack armorStack : player.getArmorSlots())
             {
-                if (armorStack.getItem() instanceof ArmorItem armorItem)
+                if (armorStack.getItem() instanceof ArmorItem)
                 {
+                    ArmorItem armorItem = (ArmorItem) armorStack.getItem();
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
                     Pair<Double, Double> insulationValue = insulatingArmors.get(armorStack.getItem());
@@ -66,8 +68,9 @@ public class ArmorInsulation
                         LazyOptional<IInsulatableCap> iCap = armorStack.getCapability(ModCapabilities.ITEM_INSULATION);
                         List<InsulationPair> insulation = iCap.map(cap ->
                         {
-                            if (cap instanceof ItemInsulationCap cap1)
-                            {   cap1.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+                            if (cap instanceof ItemInsulationCap)
+                            {   ItemInsulationCap cap1 = (ItemInsulationCap) cap;
+                                cap1.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
                                 return cap1.getInsulationValues();
                             }
                             return new ArrayList<InsulationPair>();
@@ -76,13 +79,13 @@ public class ArmorInsulation
                         // Get the armor's insulation values
                         for (InsulationPair value : insulation)
                         {
-                            if (value instanceof Insulation insul)
-                            {
+                            if (value instanceof Insulation)
+                            {   Insulation insul = (Insulation) value;
                                 cold += insul.getCold();
                                 hot += insul.getHot();
                             }
-                            else if (value instanceof AdaptiveInsulation insul)
-                            {
+                            else if (value instanceof AdaptiveInsulation)
+                            {   AdaptiveInsulation insul = (AdaptiveInsulation) value;
                                 cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
                                 hot += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
                             }
@@ -107,8 +110,9 @@ public class ArmorInsulation
                 Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
 
             // Award advancement for full insulation
-            if (fullyInsulated >= 4 && player instanceof ServerPlayer serverPlayer)
+            if (fullyInsulated >= 4 && player instanceof ServerPlayerEntity)
             {
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
                 if (serverPlayer.getServer() != null)
                 {
                     Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));
@@ -127,7 +131,7 @@ public class ArmorInsulation
     public static void onDamageTaken(LivingAttackEvent event)
     {
         DamageSource source = event.getSource();
-        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlotType.FEET).getItem() == ModItems.HOGLIN_HOOVES)
         {   event.setCanceled(true);
         }
     }
@@ -149,13 +153,14 @@ public class ArmorInsulation
     public static int getInsulationSlots(ItemStack item)
     {
         List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
-        return switch (LivingEntity.getEquipmentSlotForItem(item))
-        {
-            case HEAD  -> slots.get(0).intValue();
-            case CHEST -> slots.get(1).intValue();
-            case LEGS  -> slots.get(2).intValue();
-            case FEET  -> slots.get(3).intValue();
-            default -> 0;
-        };
+        EquipmentSlotType slot = MobEntity.getEquipmentSlotForItem(item);
+
+        switch (slot)
+        {   case HEAD  : return slots.get(0).intValue();
+            case CHEST : return slots.get(1).intValue();
+            case LEGS  : return slots.get(2).intValue();
+            case FEET  : return slots.get(3).intValue();
+            default : return 0;
+        }
     }
 }

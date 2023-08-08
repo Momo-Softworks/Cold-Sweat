@@ -5,12 +5,12 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModDamageSources;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -19,10 +19,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.jwaresoftware.mcmods.lib.api.combat.Armory;
-import weather2.ServerTickHandler;
-import weather2.weathersystem.WeatherManagerServer;
-import weather2.weathersystem.storm.StormObject;
+import org.jwaresoftware.mcmods.lib.Armory;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -117,24 +114,25 @@ public class CompatManager
     }
     public static boolean hasOllieLiner(ItemStack stack)
     {
-        return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIBURN_SHIELD);
+        return false;//ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIBURN_SHIELD);
     }
 
-    public static boolean isWerewolf(Player player)
+    public static boolean isWerewolf(PlayerEntity player)
     {
         return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
-    public static boolean isWeather2RainingAt(Level level, BlockPos pos)
+    public static boolean isWeather2RainingAt(World world, BlockPos pos)
     {
-        if (!WEATHER_LOADED) return false;
-        WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+        /*if (!WEATHER_LOADED) return false;
+        WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(world.dimension());
         if (weatherManager == null) return false;
-        StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
+        StormObject rainStorm = weatherManager.getClosestStormAny(new Vector3d(pos.getX(), pos.getY(), pos.getZ()), 250);
         if (rainStorm == null) return false;
 
-        return WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
-            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();
+        return WorldHelper.canSeeSky(world, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
+            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();*/
+        return false;
     }
 
     @SubscribeEvent
@@ -165,8 +163,10 @@ public class CompatManager
                     return;
                 }
                 // Dampen the damage as the number of liners increases
-                if (event instanceof LivingDamageEvent damageEvent)
+                if (event instanceof LivingDamageEvent)
+                {   LivingDamageEvent damageEvent = (LivingDamageEvent) event;
                     damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
+                }
             }
         }
     }

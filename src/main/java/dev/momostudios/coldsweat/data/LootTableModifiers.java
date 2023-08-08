@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.data;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.data.loot_modifiers.AddDropsModifier;
 import dev.momostudios.coldsweat.data.loot_modifiers.AddPiglinBartersModifier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

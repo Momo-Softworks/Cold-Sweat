@@ -10,18 +10,19 @@ import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public class TempCommand extends BaseCommand
 {
@@ -30,7 +31,7 @@ public class TempCommand extends BaseCommand
     }
 
     @Override
-    public LiteralArgumentBuilder<CommandSourceStack> setExecution()
+    public LiteralArgumentBuilder<CommandSource> setExecution()
     {
         return builder
                 .then(Commands.literal("set")
@@ -77,17 +78,17 @@ public class TempCommand extends BaseCommand
                 );
     }
 
-    private int executeSetPlayerTemp(CommandSourceStack source, Collection<? extends Entity> entities, int temp)
+    private int executeSetPlayerTemp(CommandSource source, Collection<? extends Entity> entities, int temp)
     {
-        if (entities.stream().anyMatch(entity -> !(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
+        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
         {
-            source.sendFailure(new TranslatableComponent("commands.cold_sweat.temperature.invalid"));
+            source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;
         }
         // Set the temperature for all affected targets
         for (Entity entity : entities)
         {
-            Capability<ITemperatureCap> iCap = entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
+            Capability<ITemperatureCap> iCap = entity instanceof PlayerEntity ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
             if (iCap == null) continue;
             entity.getCapability(iCap).ifPresent(cap ->
             {
@@ -100,41 +101,41 @@ public class TempCommand extends BaseCommand
         if (entities.size() == 1)
         {
             Entity target = entities.iterator().next();
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
+            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
         }
         else
         {
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
+            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeGetPlayerTemp(CommandSourceStack source, Collection<? extends Entity> entities)
+    private int executeGetPlayerTemp(CommandSource source, Collection<? extends Entity> entities)
     {
-        if (entities.stream().anyMatch(entity -> !(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
+        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
         {
-            source.sendFailure(new TranslatableComponent("commands.cold_sweat.temperature.invalid"));
+            source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;
         }
-        for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
+        for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).collect(Collectors.toList()))
         {
             //Compose & send message
             int bodyTemp = (int) Temperature.get((LivingEntity) target, Temperature.Type.BODY);
-            source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
+            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeShowModifiers(CommandSourceStack source, Entity entity, Temperature.Type type)
+    private int executeShowModifiers(CommandSource source, Entity entity, Temperature.Type type)
     {
-        if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType())))
+        if (!(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType())))
         {
-            source.sendFailure(new TranslatableComponent("commands.cold_sweat.temperature.invalid"));
+            source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(new TextComponent("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
+            source.sendSuccess(new StringTextComponent("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
         }
         return Command.SINGLE_SUCCESS;
     }

@@ -1,40 +1,38 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class TempModifiersSyncMessage
 {
     int entityId;
-    CompoundTag modifiers;
+    CompoundNBT modifiers;
 
-    public TempModifiersSyncMessage(LivingEntity entity, CompoundTag modifiers)
+    public TempModifiersSyncMessage(LivingEntity entity, CompoundNBT modifiers)
     {
         this.entityId = entity.getId();
         this.modifiers = modifiers;
     }
 
-    TempModifiersSyncMessage(int entityId, CompoundTag modifiers)
+    TempModifiersSyncMessage(int entityId, CompoundNBT modifiers)
     {
         this.entityId = entityId;
         this.modifiers = modifiers;
     }
 
-    public static void encode(TempModifiersSyncMessage message, FriendlyByteBuf buffer)
+    public static void encode(TempModifiersSyncMessage message, PacketBuffer buffer)
     {
         buffer.writeInt(message.entityId);
         buffer.writeNbt(message.modifiers);
     }
 
-    public static TempModifiersSyncMessage decode(FriendlyByteBuf buffer)
+    public static TempModifiersSyncMessage decode(PacketBuffer buffer)
     {
         return new TempModifiersSyncMessage(buffer.readInt(), buffer.readNbt());
     }

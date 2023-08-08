@@ -8,17 +8,17 @@ import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.IChunk;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,17 +38,16 @@ public class BlockTempModifier extends TempModifier
     {
         Map<BlockTemp, Double> affectMap = new HashMap<>();
         Map<BlockPos, Pair<BlockTemp, Double>> triggers = new HashMap<>();
-        Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
+        Map<ChunkPos, IChunk> chunks = new HashMap<>();
         Map<BlockPos, BlockState> stateCache = new HashMap<>();
 
-        Level level = entity.level;
+        World world = entity.level;
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : WorldSettingsConfig.getInstance().getBlockRange();
 
         int entX = entity.blockPosition().getX();
         int entY = entity.blockPosition().getY();
         int entZ = entity.blockPosition().getZ();
-        BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
-        int minBuildHeight = level.getMinBuildHeight();
+        BlockPos.Mutable blockpos = new BlockPos.Mutable();
 
         boolean shouldTickAdvancements = this.getTicksExisted() % 20 == 0;
 
@@ -57,10 +56,10 @@ public class BlockTempModifier extends TempModifier
             for (int z = -range; z < range; z++)
             {
                 ChunkPos chunkPos = new ChunkPos((entX + x) >> 4, (entZ + z) >> 4);
-                ChunkAccess chunk = chunks.get(chunkPos);
-                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, chunkPos));
+                IChunk chunk = chunks.get(chunkPos);
+                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(world, chunkPos));
                 if (chunk == null) continue;
-                LevelChunkSection[] sections = chunk.getSections();
+                ChunkSection[] sections = chunk.getSections();
 
                 for (int y = -range; y < range; y++)
                 {
@@ -70,7 +69,7 @@ public class BlockTempModifier extends TempModifier
 
                         BlockState state = stateCache.get(blockpos);
                         if (state == null)
-                        {   LevelChunkSection section = sections[CSMath.clamp((blockpos.getY() >> 4) - (minBuildHeight >> 4), 0, sections.length - 1)];
+                        {   ChunkSection section = WorldHelper.getChunkSection(chunk, blockpos.getY());
                             state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
                             stateCache.put(blockpos.immutable(), state);
                         }
@@ -100,23 +99,23 @@ public class BlockTempModifier extends TempModifier
                         if (isInTempRange)
                         {
                             // Get Vector positions of the centers of the source block and player
-                            Vec3 pos = Vec3.atCenterOf(blockpos);
+                            Vector3d pos = Vector3d.atCenterOf(blockpos);
 
                             // Gets the closest point in the player's BB to the block
                             double playerRadius = entity.getBbWidth() / 2;
-                            Vec3 playerClosest = new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
-                                                          CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
-                                                          CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
+                            Vector3d playerClosest = new Vector3d(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
+                                                                  CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
+                                                                  CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
 
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
                             int[] blocks = new int[1];
-                            Vec3 ray = pos.subtract(playerClosest);
+                            Vector3d ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
 
-                            WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk, stateCache,
+                            WorldHelper.forBlocksInRay(playerClosest, pos, world, chunk, stateCache,
                             (rayState, bpos) ->
-                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
+                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(world, rayState, bpos, direction, direction))
                                 {   blocks[0]++;
                                 }
                             }, 3);
@@ -127,7 +126,7 @@ public class BlockTempModifier extends TempModifier
                             for (int i = 0; i < blockTemps.size(); i++)
                             {
                                 BlockTemp blockTemp = blockTemps.get(i);
-                                double tempToAdd = blockTemp.getTemperature(level, entity, state, blockpos, distance);
+                                double tempToAdd = blockTemp.getTemperature(world, entity, state, blockpos, distance);
 
                                 // Store this block type's total effect on the player
                                 // Dampen the effect with each block between the player and the block
@@ -145,11 +144,11 @@ public class BlockTempModifier extends TempModifier
             }
         }
         // Trigger advancements at every BlockPos with a BlockEffect attached to it
-        if (entity instanceof ServerPlayer player && shouldTickAdvancements)
+        if (entity instanceof ServerPlayerEntity && shouldTickAdvancements)
         {
             for (Map.Entry<BlockPos, Pair<BlockTemp, Double>> trigger : triggers.entrySet())
             {   Pair<BlockTemp, Double> entry = trigger.getValue();
-                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getKey(), entry.getSecond(), affectMap.get(entry.getFirst()));
+                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getKey(), entry.getSecond(), affectMap.get(entry.getFirst()));
             }
         }
 

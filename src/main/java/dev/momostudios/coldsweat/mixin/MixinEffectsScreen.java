@@ -1,27 +1,27 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.common.container.HearthContainer;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.DisplayEffectsScreen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.potion.EffectInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Collection;
 
-@Mixin(EffectRenderingInventoryScreen.class)
+@Mixin(DisplayEffectsScreen.class)
 public class MixinEffectsScreen
 {
-    AbstractContainerScreen screen = (AbstractContainerScreen) (Object) this;
+    ContainerScreen screen = (ContainerScreen) (Object) this;
 
-    @Redirect(method = "renderEffects(Lcom/mojang/blaze3d/vertex/PoseStack;II)V",
-              at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getActiveEffects()Ljava/util/Collection;"))
-    private Collection<MobEffectInstance> getEffects(LocalPlayer instance)
+    @Redirect(method = "renderEffects(Lcom/mojang/blaze3d/matrix/MatrixStack;)V",
+              at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/player/ClientPlayerEntity;getActiveEffects()Ljava/util/Collection;"))
+    private Collection<EffectInstance> getEffects(ClientPlayerEntity instance)
     {
-        if (screen.getMenu() instanceof HearthContainer container)
-        {   return container.te.getEffects();
+        if (screen.getMenu() instanceof HearthContainer)
+        {   return ((HearthContainer) screen.getMenu()).te.getEffects();
         }
         else return instance.getActiveEffects();
     }

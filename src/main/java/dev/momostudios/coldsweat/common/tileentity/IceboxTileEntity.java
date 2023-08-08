@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.common.blockentity;
+package dev.momostudios.coldsweat.common.tileentity;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.IceboxBlock;
@@ -9,40 +9,38 @@ import dev.momostudios.coldsweat.core.network.message.BlockDataUpdateMessage;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
-import net.minecraftforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
-public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer
+public class IceboxTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -55,68 +53,60 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 
-    List<ServerPlayer> usingPlayers = new ArrayList<>();
+    List<ServerPlayerEntity> usingPlayers = new ArrayList<>();
     public int ticksExisted;
     int fuel;
 
-    public IceboxBlockEntity(BlockPos pos, BlockState state)
-    {
-        super(ModBlockEntities.ICEBOX, pos, state);
+    public IceboxTileEntity()
+    {   super(ModBlockEntities.ICEBOX);
     }
 
     @Nonnull
     @Override
-    public CompoundTag getUpdateTag()
-    {
-        CompoundTag tag = super.getUpdateTag();
+    public CompoundNBT getUpdateTag()
+    {   CompoundNBT tag = super.getUpdateTag();
         tag.putInt("fuel", this.getFuel());
         return tag;
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag)
-    {
-        this.setFuel(tag.getInt("fuel"));
+    public void handleUpdateTag(BlockState state, CompoundNBT tag)
+    {   this.setFuel(tag.getInt("fuel"));
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
     {
-        handleUpdateTag(pkt.getTag());
+        handleUpdateTag(null, pkt.getTag());
     }
 
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket()
-    {
-        return ClientboundBlockEntityDataPacket.create(this);
+    public SUpdateTileEntityPacket getUpdatePacket()
+    {   return new SUpdateTileEntityPacket(this.worldPosition, 0, this.getUpdateTag());
     }
 
     private void sendUpdatePacket()
     {
         // Remove the players that aren't interacting with this block anymore
-        usingPlayers.removeIf(player -> !(player.containerMenu instanceof IceboxContainer iceboxContainer && iceboxContainer.te == this));
+        usingPlayers.removeIf(player -> !(player.containerMenu instanceof IceboxContainer && ((IceboxContainer) player.containerMenu).te == this));
 
         // Send data to all players with this block's menu open
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).toList()),
+        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).collect(Collectors.toList())),
                                              new BlockDataUpdateMessage(this));
     }
 
     @Override
-    protected Component getDefaultName() {
-        return new TranslatableComponent("container." + ColdSweat.MOD_ID + ".icebox");
+    protected ITextComponent getDefaultName() {
+        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".icebox");
     }
 
-    public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
-    {
-        if (te instanceof IceboxBlockEntity iceboxTE)
-        {
-            iceboxTE.tick(level, state, pos);
-        }
-    }
-
-    public void tick(Level level, BlockState state, BlockPos pos)
+    @Override
+    public void tick()
     {
         ticksExisted++;
+
+        BlockPos pos = this.getBlockPos();
+        BlockState state = this.getBlockState();
 
         if (!level.isClientSide)
         {
@@ -206,30 +196,30 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
-    {
-        // Track the players using this block
-        if (playerInv.player instanceof ServerPlayer serverPlayer)
-        {   usingPlayers.add(serverPlayer);
+    protected Container createMenu(int id, PlayerInventory playerInv)
+    {   // Track the players using this block
+        if (playerInv.player instanceof ServerPlayerEntity)
+        {   usingPlayers.add((ServerPlayerEntity) playerInv.player);
         }
         return new IceboxContainer(id, playerInv, this);
     }
 
     @Override
-    public void load(CompoundTag tag)
+    public void load(BlockState state, CompoundNBT tag)
     {
-        super.load(tag);
+        super.load(state, tag);
         this.setFuel(tag.getInt("fuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, this.items);
+        ItemStackHelper.loadAllItems(tag, this.items);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag)
+    public CompoundNBT save(CompoundNBT tag)
     {
-        super.saveAdditional(tag);
+        super.save(tag);
         tag.putInt("fuel", this.getFuel());
-        ContainerHelper.saveAllItems(tag, this.items);
+        ItemStackHelper.saveAllItems(tag, this.items);
+        return tag;
     }
 
     @Override
@@ -259,25 +249,22 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     @Override
     public ItemStack removeItem(int slot, int count)
     {
-        ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
+        ItemStack itemstack = ItemStackHelper.removeItem(items, slot, count);
 
         if (!itemstack.isEmpty())
-        {
-            this.setChanged();
+        {   this.setChanged();
         }
         return itemstack;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int slot)
-    {
-        return ContainerHelper.removeItem(items, slot, items.get(slot).getCount());
+    {   return ItemStackHelper.removeItem(items, slot, items.get(slot).getCount());
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
-        return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
+    public boolean stillValid(PlayerEntity player)
+    {   return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
     }
 
     @Override
@@ -287,17 +274,27 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
+    protected NonNullList<ItemStack> getItems()
+    {   return items;
+    }
+
+    @Override
+    protected void setItems(NonNullList<ItemStack> items)
+    {   this.items = items;
+    }
+
+    @Override
     public int[] getSlotsForFace(Direction dir)
     {
         return dir.getAxis() == Direction.Axis.Y ? WATERSKIN_SLOTS : FUEL_SLOT;
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction)
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction direction)
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItems.WATERSKIN) || stack.is(ModItems.FILLED_WATERSKIN);
+        else return stack.getItem() == ModItems.WATERSKIN || stack.getItem() == ModItems.FILLED_WATERSKIN;
     }
 
     @Override
@@ -307,7 +304,7 @@ public class IceboxBlockEntity extends BaseContainerBlockEntity implements MenuP
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
         if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             if (facing == Direction.UP)
                 return slotHandlers[0].cast();

@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,14 +25,14 @@ public class HearthSaveDataHandler
         event.getPlayer().getPersistentData().put("disabledHearths", serializeDisabledHearths());
     }
 
-    public static CompoundTag serializeDisabledHearths()
+    public static CompoundNBT serializeDisabledHearths()
     {
-        CompoundTag disabledHearths = new CompoundTag();
+        CompoundNBT disabledHearths = new CompoundNBT();
 
         int i = 0;
         for (Pair<BlockPos, ResourceLocation> pair : DISABLED_HEARTHS)
         {
-            CompoundTag hearthData = new CompoundTag();
+            CompoundNBT hearthData = new CompoundNBT();
             hearthData.putLong("pos", pair.getFirst().asLong());
             hearthData.putString("level", pair.getSecond().toString());
             disabledHearths.put(String.valueOf(i), hearthData);
@@ -50,12 +50,12 @@ public class HearthSaveDataHandler
         deserializeDisabledHearths(event.getPlayer().getPersistentData().getCompound("disabledHearths"));
     }
 
-    public static void deserializeDisabledHearths(CompoundTag disabledHearths)
+    public static void deserializeDisabledHearths(CompoundNBT disabledHearths)
     {
         DISABLED_HEARTHS.clear();
         for (String key : disabledHearths.getAllKeys())
         {
-            CompoundTag hearthData = disabledHearths.getCompound(key);
+            CompoundNBT hearthData = disabledHearths.getCompound(key);
             DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("pos")), new ResourceLocation(hearthData.getString("level"))));
         }
     }

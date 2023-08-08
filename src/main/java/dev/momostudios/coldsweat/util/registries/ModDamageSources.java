@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat.util.registries;
 
-import net.minecraft.world.damagesource.DamageSource;
+
+import net.minecraft.util.DamageSource;
 
 public class ModDamageSources
 {

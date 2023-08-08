@@ -1,26 +1,24 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
-import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.World;
 
 public class WaterskinItem extends Item
 {
@@ -30,16 +28,16 @@ public class WaterskinItem extends Item
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
+    public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand)
     {
-        InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
+        ActionResult<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
-        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        BlockRayTraceResult blockhitresult = getPlayerPOVHitResult(level, player, RayTraceContext.FluidMode.SOURCE_ONLY);
         BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
 
-        if (blockhitresult.getType() != HitResult.Type.BLOCK)
-        {   return InteractionResultHolder.pass(itemstack);
+        if (blockhitresult.getType() != RayTraceResult.Type.BLOCK)
+        {   return ActionResult.pass(itemstack);
         }
         else
         {
@@ -70,7 +68,7 @@ public class WaterskinItem extends Item
                     player.setItemInHand(hand, filledWaterskin);
                 }
                 //Play filling sound
-                level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
+                level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundCategory.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
                 player.swing(hand);
 
                 player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);

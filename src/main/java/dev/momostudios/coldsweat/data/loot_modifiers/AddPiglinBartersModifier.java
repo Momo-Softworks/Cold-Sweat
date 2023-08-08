@@ -4,30 +4,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.PairCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.momostudios.coldsweat.data.codec.LootEntryCodec;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import dev.momostudios.coldsweat.util.serialization.JsonHelper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.*;
+import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -42,7 +34,7 @@ public class AddPiglinBartersModifier extends LootModifier
     private final List<LootEntryCodec.LootEntry> additions;
     private final boolean replace;
 
-    protected AddPiglinBartersModifier(LootItemCondition[] conditionsIn, List<LootEntryCodec.LootEntry> additions, boolean replace)
+    protected AddPiglinBartersModifier(ILootCondition[] conditionsIn, List<LootEntryCodec.LootEntry> additions, boolean replace)
     {
         super(conditionsIn);
         this.additions = additions;
@@ -54,26 +46,25 @@ public class AddPiglinBartersModifier extends LootModifier
     static Field ENTRIES;
     static
     {
-        POOLS = ObfuscationReflectionHelper.findField(LootTable.class, "f_79109_");
-        ENTRIES = ObfuscationReflectionHelper.findField(LootPool.class, "f_79023_");
+        POOLS = ObfuscationReflectionHelper.findField(LootTable.class, "field_186466_c");
+        ENTRIES = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");
         POOLS.setAccessible(true);
         ENTRIES.setAccessible(true);
     }
 
-    @NotNull
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
         try
         {
-            List<LootPoolEntry> entries = new ArrayList<>();
+            List<ILootGenerator> entries = new ArrayList<>();
             MutableInt totalWeight = new MutableInt();
             if (!replace)
             {
                 // Build vanilla items
                 for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLootTable(PIGLIN_BARTER_LOCATION))))
                 {
-                    for (LootPoolEntryContainer container : ((LootPoolEntryContainer[]) ENTRIES.get(pool)))
+                    for (LootEntry container : ((LootEntry[]) ENTRIES.get(pool)))
                     {
                         container.expand(context, entry ->
                         {   entries.add(entry);
@@ -86,27 +77,29 @@ public class AddPiglinBartersModifier extends LootModifier
             // Build added items
             for (LootEntryCodec.LootEntry addition : additions)
             {
-                Item item = ForgeRegistries.ITEMS.getValue(addition.itemID());
+                Item item = ForgeRegistries.ITEMS.getValue(addition.getItemID());
                 if (item == null) continue;
-                entries.add(new LootPoolEntry()
+                entries.add(new ILootGenerator()
                 {
                     @Override
                     public int getWeight(float luck)
-                    {   return CSMath.floor(addition.weight() * (1 + context.getLuck()));
+                    {   return CSMath.floor(addition.getWeight() * (1 + context.getLuck()));
                     }
 
                     @Override
                     public void createItemStack(Consumer<ItemStack> consumer, LootContext context1)
-                    {   consumer.accept(new ItemStack(item, context.getRandom().nextInt(addition.count().getFirst(), addition.count().getSecond() + 1)));
+                    {   int minCount = addition.getCount().getFirst();
+                        int maxCount = addition.getCount().getSecond();
+                        consumer.accept(new ItemStack(item, context.getRandom().nextInt(maxCount + 1 - minCount) + minCount));
                     }
                 });
-                totalWeight.add(addition.weight());
+                totalWeight.add(addition.getWeight());
             }
 
             AtomicReference<ItemStack> stack = new AtomicReference<>(ItemStack.EMPTY);
             int j = context.getRandom().nextInt(totalWeight.intValue());
 
-            for (LootPoolEntry lootpoolentry : entries)
+            for (ILootGenerator lootpoolentry : entries)
             {   j -= lootpoolentry.getWeight(context.getLuck());
                 if (j < 0)
                 {   lootpoolentry.createItemStack(stack::set, context);
@@ -121,23 +114,22 @@ public class AddPiglinBartersModifier extends LootModifier
     public static class Serializer extends GlobalLootModifierSerializer<AddPiglinBartersModifier>
     {
         @Override
-        public AddPiglinBartersModifier read(@Nonnull ResourceLocation location, JsonObject object, LootItemCondition[] conditionsIn)
+        public AddPiglinBartersModifier read(@Nonnull ResourceLocation location, JsonObject object, ILootCondition[] conditionsIn)
         {
             List<LootEntryCodec.LootEntry> additions = new ArrayList<>();
-            for (JsonElement addition : GsonHelper.getAsJsonArray(object, "additions", new JsonArray()))
+            for (JsonElement addition : JsonHelper.getAsJsonArray(object, "additions", new JsonArray()))
             {
                 JsonObject additionObject = addition.getAsJsonObject();
-                Optional<CompoundTag> tag = additionObject.has("tag") ? Optional.of(CompoundTag.CODEC.parse(JsonOps.INSTANCE, additionObject.get("tag")).getOrThrow(false, s -> {})) : Optional.empty();
-                JsonObject count = GsonHelper.getAsJsonObject(additionObject, "count", new JsonObject());
+                Optional<CompoundNBT> tag = additionObject.has("tag") ? Optional.of(CompoundNBT.CODEC.parse(JsonOps.INSTANCE, additionObject.get("tag")).getOrThrow(false, s -> {})) : Optional.empty();
+                JsonObject count = JsonHelper.getAsJsonObject(additionObject, "count", new JsonObject());
 
                 additions.add(new LootEntryCodec.LootEntry(
-                        new ResourceLocation(GsonHelper.getAsString(additionObject, "item")), tag,
-                        // read "min" and "max" from the pair called "count"
-                        Pair.of(GsonHelper.getAsInt(count, "min", 1), GsonHelper.getAsInt(count, "max", 1)),
-                        GsonHelper.getAsInt(additionObject, "weight", 1)
+                        new ResourceLocation(JsonHelper.getAsString(additionObject, "item")), tag,
+                        Pair.of(JsonHelper.getAsInt(count, "min", 1), JsonHelper.getAsInt(count, "max", 1)),
+                        JsonHelper.getAsInt(additionObject, "weight", 1)
                 ));
             }
-            return new AddPiglinBartersModifier(conditionsIn, additions, GsonHelper.getAsBoolean(object, "replace", false));
+            return new AddPiglinBartersModifier(conditionsIn, additions, JsonHelper.getAsBoolean(object, "replace", false));
         }
 
         @Override
@@ -149,13 +141,13 @@ public class AddPiglinBartersModifier extends LootModifier
             for (LootEntryCodec.LootEntry addition : instance.additions)
             {
                 JsonObject additionObject = new JsonObject();
-                additionObject.addProperty("item", addition.itemID().toString());
+                additionObject.addProperty("item", addition.getItemID().toString());
                 JsonObject count = new JsonObject();
-                count.addProperty("min", addition.count().getFirst());
-                count.addProperty("max", addition.count().getSecond());
+                count.addProperty("min", addition.getCount().getFirst());
+                count.addProperty("max", addition.getCount().getSecond());
                 additionObject.add("count", count);
-                additionObject.addProperty("weight", addition.weight());
-                addition.tag().ifPresent(tag -> additionObject.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).result().orElseThrow(RuntimeException::new)));
+                additionObject.addProperty("weight", addition.getWeight());
+                addition.getTag().ifPresent(tag -> additionObject.add("nbt", CompoundNBT.CODEC.encodeStart(JsonOps.INSTANCE, tag).result().orElseThrow(RuntimeException::new)));
                 additions.add(additionObject);
             }
             object.add("additions", additions);

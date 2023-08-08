@@ -4,60 +4,53 @@ import com.mojang.serialization.Codec;
 import dev.momostudios.coldsweat.common.block.SoulStalkBlock;
 import dev.momostudios.coldsweat.data.tags.ModBlockTags;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
-import net.minecraft.core.BlockPos;
-import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ISeedReader;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.NoFeatureConfig;
 
 import java.util.Random;
 
-public class SoulStalkFeature extends Feature<NoneFeatureConfiguration>
+public class SoulStalkFeature extends Feature<NoFeatureConfig>
 {
-    public SoulStalkFeature(Codec<NoneFeatureConfiguration> config)
-    {
-        super(config);
+    public SoulStalkFeature(Codec<NoFeatureConfig> config)
+    {   super(config);
     }
 
-    public boolean isAirOrLeaves(WorldGenLevel level, BlockPos pos)
-    {
-        return level.getBlockState(pos).isAir() || level.getBlockState(pos).is(BlockTags.LEAVES);
+    public boolean isAirOrLeaves(IWorld world, BlockPos pos)
+    {   return world.getBlockState(pos).isAir() || world.getBlockState(pos).is(BlockTags.LEAVES);
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> placement)
+    public boolean place(ISeedReader world, ChunkGenerator chunkGenerator, Random rand, BlockPos blockPos, NoFeatureConfig config)
     {
-        WorldGenLevel level = placement.level();
-        BlockPos.MutableBlockPos pos = placement.origin().mutable();
+        BlockPos.Mutable pos = blockPos.mutable();
         // Get ground level
         int startY = pos.getY();
-        int minHeight = level.getMinBuildHeight();
-        int maxHeight = level.getMaxBuildHeight();
+        int minHeight = 0;
+        int maxHeight = world.getMaxBuildHeight();
         for (int i = -10; i < 10; i++)
         {   pos.setY(startY + i);
             if (pos.getY() < minHeight) continue;
             if (pos.getY() > maxHeight) break;
-            if (level.getBlockState(pos).isAir())
+            if (world.getBlockState(pos).isAir())
             {   break;
             }
         }
         // Place the soul stalk
-        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && isAirOrLeaves(level, pos) && isAirOrLeaves(level, pos.above()))
+        if (world.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && isAirOrLeaves(world, pos) && isAirOrLeaves(world, pos.above()))
         {
-            level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
+            world.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
             int height = new Random().nextInt(5) + 2;
-            for (int i = 0; i < height && isAirOrLeaves(level, pos.above()); i++)
+            for (int i = 0; i < height && isAirOrLeaves(world, pos.above()); i++)
             {
                 pos.move(0, 1, 0);
-                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, new Random().nextInt(2) + 1), 2);
+                world.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, new Random().nextInt(2) + 1), 2);
             }
-            level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
+            world.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
             return true;
         }
 

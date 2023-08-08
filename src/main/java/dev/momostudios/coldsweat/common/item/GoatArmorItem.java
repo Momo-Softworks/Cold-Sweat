@@ -1,28 +1,16 @@
 package dev.momostudios.coldsweat.common.item;
 
-import dev.momostudios.coldsweat.client.event.RegisterModels;
-import dev.momostudios.coldsweat.client.renderer.model.armor.GoatParkaModel;
-import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemRenderProperties;
-
-import java.util.function.Consumer;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.IArmorMaterial;
 
 public class GoatArmorItem extends ArmorItem
 {
-    public GoatArmorItem(ArmorMaterial material, EquipmentSlot slot, Properties properties)
+    public GoatArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
     {   super(material, slot, properties);
     }
 
-    @Override
+    /*@Override
     public void initializeClient(Consumer<IItemRenderProperties> consumer)
     {
         consumer.accept(new IItemRenderProperties()
@@ -54,11 +42,5 @@ public class GoatArmorItem extends ArmorItem
                 };
             }
         });
-    }
-
-    @Override
-    public boolean canWalkOnPowderedSnow(ItemStack stack, LivingEntity wearer)
-    {
-        return stack.is(ModItems.GOAT_FUR_BOOTS);
-    }
+    }*/
 }

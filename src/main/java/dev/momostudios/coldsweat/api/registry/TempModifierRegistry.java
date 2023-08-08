@@ -22,10 +22,7 @@ public class TempModifierRegistry
         TempModifier modifier = supplier.get();
         if (TEMP_MODIFIERS.containsKey(modifier.getID()))
         {
-            ColdSweat.LOGGER.error("""
-                                   Found duplicate TempModifier entries:
-                                   {} ({})
-                                   {} ({})""", modifier.getClass().getName(), modifier.getID(),
+            ColdSweat.LOGGER.error(" Found duplicate TempModifier entries: {} ({}) {} ({})", modifier.getClass().getName(), modifier.getID(),
                                    TEMP_MODIFIERS.get(modifier.getID()).getClass().getName(), modifier.getID());
             throw new RuntimeException("A TempModifier with the ID \"" + modifier.getID() + "\" already exists!");
         }

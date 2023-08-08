@@ -1,9 +1,10 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -16,11 +17,11 @@ public class ChameleonEatMessage
         this.entityId = entityId;
     }
 
-    public static void encode(ChameleonEatMessage message, FriendlyByteBuf buffer) {
+    public static void encode(ChameleonEatMessage message, PacketBuffer buffer) {
         buffer.writeInt(message.entityId);
     }
 
-    public static ChameleonEatMessage decode(FriendlyByteBuf buffer)
+    public static ChameleonEatMessage decode(PacketBuffer buffer)
     {
         return new ChameleonEatMessage(buffer.readInt());
     }
@@ -30,8 +31,9 @@ public class ChameleonEatMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (Minecraft.getInstance().level.getEntity(message.entityId) instanceof Chameleon chameleon)
-            {   chameleon.eatAnimation();
+            Entity entity = Minecraft.getInstance().level.getEntity(message.entityId);
+            if (entity instanceof ChameleonEntity)
+            {   ((ChameleonEntity) entity).eatAnimation();
             }
         });
         context.setPacketHandled(true);

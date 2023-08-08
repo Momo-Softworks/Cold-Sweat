@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.core.init.ItemInit;
-import net.minecraft.world.item.Item;
+import net.minecraft.item.Item;
 
 public class ModItems
 {
@@ -10,7 +10,7 @@ public class ModItems
     public static final Item MINECART_INSULATION = ItemInit.MINECART_INSULATION.get();
     public static final Item SOULSPRING_LAMP = ItemInit.SOULSPRING_LAMP.get();
     public static final Item THERMOMETER = ItemInit.THERMOMETER.get();
-    public static final Item GOAT_FUR = ItemInit.GOAT_FUR.get();
+    public static final Item LLAMA_FUR = ItemInit.GOAT_FUR.get();
     public static final Item HOGLIN_HIDE = ItemInit.HOGLIN_HIDE.get();
     public static final Item BOILER = ItemInit.BOILER.get();
     public static final Item ICEBOX = ItemInit.ICEBOX.get();

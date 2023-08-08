@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.capability;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.CompoundNBT;
 
 public class GoatFurCap implements IShearableCap
 {
@@ -32,16 +32,16 @@ public class GoatFurCap implements IShearableCap
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public CompoundNBT serializeNBT()
     {
-        CompoundTag nbt = new CompoundTag();
+        CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("Sheared", sheared);
         nbt.putInt("LastSheared", lastSheared);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         sheared = nbt.getBoolean("Sheared");
         lastSheared = nbt.getInt("LastSheared");

@@ -1,12 +1,14 @@
 package dev.momostudios.coldsweat.api.temperature.block_temp;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +25,10 @@ public abstract class BlockTemp
      * @return the temperature of the block. This is ADDED to the world temperature.
      * Temperature is on the Minecraft scale, in which 0 is a snow biome and 2 is a desert (see {@link LavaBlockTemp} for an example)
      */
-    public abstract double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance);
+    public abstract double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
     public BlockTemp(Block... blocks)
-    {   validBlocks = new HashSet<>(Set.of(blocks));
+    {   validBlocks = new HashSet<>(Arrays.asList(blocks));
     }
 
     public boolean hasBlock(Block block)

@@ -1,20 +1,20 @@
 package dev.momostudios.coldsweat.common.entity.goals;
 
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.EnumSet;
 
 public class LazyLookGoal extends Goal
 {
-    private final Mob mob;
+    private final MobEntity mob;
 
     private double relX;
     private double relZ;
     private int lookTime;
 
-    public LazyLookGoal(Mob mob) {
+    public LazyLookGoal(MobEntity mob) {
         this.mob = mob;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
@@ -38,17 +38,13 @@ public class LazyLookGoal extends Goal
         this.lookTime = 20 + this.mob.getRandom().nextInt(20);
     }
 
-    public boolean requiresUpdateEveryTick()
-    {
-        return true;
-    }
-
     public void tick()
     {
         --this.lookTime;
         // get the angle between the mob's current rotation and the position (relX, relZ)
-        if (!(this.mob.getVehicle() instanceof Player))
-            this.mob.getLookControl().setLookAt(this.mob.getX() + this.relX, this.mob.getEyeY(), this.mob.getZ() + this.relZ);
+        if (!(this.mob.getVehicle() instanceof PlayerEntity))
+        {   this.mob.getLookControl().setLookAt(this.mob.getX() + this.relX, this.mob.getEyeY(), this.mob.getZ() + this.relZ);
+        }
     }
 }
 

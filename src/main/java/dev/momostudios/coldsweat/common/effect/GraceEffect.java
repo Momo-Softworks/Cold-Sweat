@@ -1,15 +1,15 @@
 package dev.momostudios.coldsweat.common.effect;
 
-import net.minecraft.client.renderer.EffectInstance;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.EffectType;
 
 import javax.annotation.Nonnull;
 
-public class GraceEffect extends MobEffect
+public class GraceEffect extends Effect
 {
     public GraceEffect() {
-        super(MobEffectCategory.BENEFICIAL, 7355178);
+        super(EffectType.BENEFICIAL, 7355178);
     }
 
     @Nonnull

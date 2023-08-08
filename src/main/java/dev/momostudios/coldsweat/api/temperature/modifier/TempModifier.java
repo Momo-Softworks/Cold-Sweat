@@ -4,8 +4,8 @@ import dev.momostudios.coldsweat.api.event.common.TempModifierEvent;
 import dev.momostudios.coldsweat.api.event.core.TempModifierRegisterEvent;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.core.init.TempModifierInit;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.function.Function;
@@ -21,7 +21,7 @@ import java.util.function.Function;
  */
 public abstract class TempModifier
 {
-    private CompoundTag nbt = new CompoundTag();
+    private CompoundNBT nbt = new CompoundNBT();
     private int expireTicks = -1;
     private int ticksExisted = 0;
     private int tickRate = 1;
@@ -96,7 +96,7 @@ public abstract class TempModifier
     }
 
     /**
-     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity)} at a specified interval.<br>
+     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, dev.momostudios.coldsweat.api.util.Temperature.Type)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
      * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
@@ -129,12 +129,12 @@ public abstract class TempModifier
     {   return lastOutput;
     }
 
-    public final CompoundTag getNBT()
+    public final CompoundNBT getNBT()
     {
         return nbt;
     }
 
-    public void setNBT(CompoundTag data)
+    public void setNBT(CompoundNBT data)
     {
         this.nbt = data;
     }

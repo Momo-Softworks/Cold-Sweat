@@ -1,26 +1,26 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
-import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.common.tileentity.IceboxTileEntity;
+import dev.momostudios.coldsweat.core.init.ContainerInit;
 import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 
 import java.util.Objects;
 
-public class IceboxContainer extends AbstractContainerMenu
+public class IceboxContainer extends Container
 {
-    public final IceboxBlockEntity te;
+    public final IceboxTileEntity te;
 
-    public IceboxContainer(final int windowId, final Inventory playerInv, final IceboxBlockEntity te)
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te)
     {
-        super(MenuInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
+        super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Fuel slot
@@ -39,7 +39,7 @@ public class IceboxContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModItemTags.ICEBOX_VALID);
+                {   return ModItemTags.ICEBOX_VALID.contains(stack.getItem());
                 }
             });
         }
@@ -60,7 +60,7 @@ public class IceboxContainer extends AbstractContainerMenu
         }
     }
 
-    public IceboxContainer(final int windowId, final Inventory playerInv, final FriendlyByteBuf data)
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
     {
         this(windowId, playerInv, getTileEntity(playerInv, data));
     }
@@ -71,26 +71,26 @@ public class IceboxContainer extends AbstractContainerMenu
     }
 
 
-    private static IceboxBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
+    private static IceboxTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof IceboxBlockEntity)
+        final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        if (te instanceof IceboxTileEntity)
         {
-            return (IceboxBlockEntity) te;
+            return (IceboxTileEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean stillValid(Player playerIn)
+    public boolean stillValid(PlayerEntity playerIn)
     {
         return playerIn.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
+    public ItemStack quickMoveStack(PlayerEntity player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
@@ -102,43 +102,38 @@ public class IceboxContainer extends AbstractContainerMenu
             if (CSMath.withinRange(index, 0, 9))
             {
                 if (!this.moveItemStackTo(itemstack1, 10, 46, true))
-                {
-                    return ItemStack.EMPTY;
+                {   return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
             }
             else
             {
-                if (itemstack.is(ModItemTags.ICEBOX_VALID))
+                if (ModItemTags.ICEBOX_VALID.contains(itemstack.getItem()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (this.te.getItemFuel(itemstack) > 0)
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.withinRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 10, 36, false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.withinRange(index, 10, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -146,12 +141,10 @@ public class IceboxContainer extends AbstractContainerMenu
             }
 
             if (itemstack1.isEmpty())
-            {
-                slot.set(ItemStack.EMPTY);
+            {   slot.set(ItemStack.EMPTY);
             }
             else
-            {
-                slot.setChanged();
+            {   slot.setChanged();
             }
 
             slot.onTake(player, itemstack1);

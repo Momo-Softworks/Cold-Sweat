@@ -19,15 +19,15 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b04k'
+version = '2.2-b05b'
 
 java {
     archivesBaseName = 'ColdSweat'
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.16.5'
     accessTransformer = file("src/main/resources/META-INF/coldsweat_at.cfg")
     runs {
         client {
@@ -99,34 +99,31 @@ repositories {
 
 dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.4'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    runtimeOnly fg.deobf("curse.maven:spark-361579:4505375")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3940240")
-    //runtimeOnly fg.deobf("curse.maven:panorama-440465:3855307")
-    runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4367068")
-    //runtimeOnly fg.deobf("curse.maven:environmental-388992:4381294")
-    runtimeOnly fg.deobf("curse.maven:blueprint-382216:3991478")
-    runtimeOnly fg.deobf("curse.maven:byg-247560:4036050")
-    runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
-    runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
-    runtimeOnly fg.deobf("curse.maven:seasons-291874:3693807")
-    runtimeOnly fg.deobf("curse.maven:coroutil-237749:4426517")
-    runtimeOnly fg.deobf("curse.maven:tinkers-74072:4509008")
-    runtimeOnly fg.deobf("curse.maven:mantle-74924:4509007")
-    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:3804257")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
+    runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
+    runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
+    runtimeOnly fg.deobf("curse.maven:oh-the-biomes-youll-go-247560:4024011")
+    runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:3913914")
+    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
+    runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
+    runtimeOnly fg.deobf("curse.maven:tinkers-construct-74072:3695126")
+    runtimeOnly fg.deobf("curse.maven:mantle-74924:3631982")
+    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
 
-    implementation fg.deobf("curse.maven:curios-309927:4418032")
-    implementation fg.deobf("curse.maven:armorunderwear-310383:4502893")
-    implementation fg.deobf("curse.maven:carrots-311327:4382778")
-    implementation fg.deobf("curse.maven:create-328085:4550986")
+    implementation fg.deobf("curse.maven:curios-309927:4419403")
+    implementation fg.deobf("curse.maven:armor-underwear-mod-310383:3232088")
+    implementation fg.deobf("curse.maven:carrots-lib-311327:3231845")
+    implementation fg.deobf("curse.maven:create-328085:3536025")
 
-    compileOnly fg.deobf("curse.maven:storms-237746:4426524")
-    compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
-    compileOnly fg.deobf("curse.maven:sereneapi-291874:3693809")
-    compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
-    compileOnly fg.deobf("curse.maven:werewolves-417851:4050257")
+    compileOnly fg.deobf("curse.maven:better-weather-400714:3420517")
+    implementation fg.deobf("curse.maven:flywheel-486392:3535459")
+    compileOnly fg.deobf("curse.maven:serene-api-291874:4537669")
+    compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
+    compileOnly fg.deobf("curse.maven:werewolves-417851:4662189")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

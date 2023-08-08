@@ -1,15 +1,14 @@
 package dev.momostudios.coldsweat.common.capability;
 
-import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,10 +188,10 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public CompoundNBT serializeNBT()
     {
         // Save the player's temperatures
-        CompoundTag nbt = this.serializeTemps();
+        CompoundNBT nbt = this.serializeTemps();
 
         // Save the player's modifiers
         nbt.merge(this.serializeModifiers());
@@ -200,9 +199,9 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundTag serializeTemps()
+    public CompoundNBT serializeTemps()
     {
-        CompoundTag nbt = new CompoundTag();
+        CompoundNBT nbt = new CompoundNBT();
 
         // Save the player's temperature data
         for (Type type : VALID_TEMPERATURE_TYPES)
@@ -213,14 +212,14 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundTag serializeModifiers()
+    public CompoundNBT serializeModifiers()
     {
-        CompoundTag nbt = new CompoundTag();
+        CompoundNBT nbt = new CompoundNBT();
 
         // Save the player's modifiers
         for (Type type : VALID_MODIFIER_TYPES)
         {
-            ListTag modifiers = new ListTag();
+            ListNBT modifiers = new ListNBT();
             for (TempModifier modifier : this.getModifiers(type))
             {
                 modifiers.add(NBTHelper.modifierToTag(modifier));
@@ -233,7 +232,7 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt)
+    public void deserializeNBT(CompoundNBT nbt)
     {
         // Load the player's temperatures
         deserializeTemps(nbt);
@@ -243,7 +242,7 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeTemps(CompoundTag nbt)
+    public void deserializeTemps(CompoundNBT nbt)
     {
         for (Type type : VALID_TEMPERATURE_TYPES)
         {
@@ -252,19 +251,19 @@ public class EntityTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeModifiers(CompoundTag nbt)
+    public void deserializeModifiers(CompoundNBT nbt)
     {
         for (Type type : VALID_MODIFIER_TYPES)
         {
             getModifiers(type).clear();
 
             // Get the list of modifiers from the player's persistent data
-            ListTag modifiers = nbt.getList(NBTHelper.getModifierTag(type), 10);
+            ListNBT modifiers = nbt.getList(NBTHelper.getModifierTag(type), 10);
 
             // For each modifier in the list
             modifiers.forEach(modNBT ->
             {
-                NBTHelper.tagToModifier((CompoundTag) modNBT).ifPresent(modifier ->
+                NBTHelper.tagToModifier((CompoundNBT) modNBT).ifPresent(modifier ->
                 {   getModifiers(type).add(modifier);
                 });
             });

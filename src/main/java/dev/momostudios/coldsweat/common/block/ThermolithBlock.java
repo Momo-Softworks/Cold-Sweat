@@ -1,42 +1,42 @@
 package dev.momostudios.coldsweat.common.block;
 
-import com.mojang.math.Vector3f;
-import dev.momostudios.coldsweat.common.blockentity.ThermolithBlockEntity;
+import dev.momostudios.coldsweat.common.tileentity.ThermolithTileEntity;
+import dev.momostudios.coldsweat.core.init.TileEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.particles.RedstoneParticleData;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.ToIntFunction;
 import java.util.Random;
+import java.util.function.ToIntFunction;
 
-public class ThermolithBlock extends Block implements EntityBlock
+public class ThermolithBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -46,7 +46,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(POWERED, false));
-        calculateFacingShapes(Shapes.or(
+        calculateFacingShapes(VoxelShapes.or(
                 Block.box(4, 0, 5, 12, 16, 16),
                 Block.box(6, 0, 0, 10, 6, 5)));
     }
@@ -57,7 +57,6 @@ public class ThermolithBlock extends Block implements EntityBlock
                 .of(Material.STONE)
                 .sound(SoundType.GILDED_BLACKSTONE)
                 .strength(2f)
-                .explosionResistance(10f)
                 .noOcclusion()
                 .dynamicShape()
                 .lightLevel(getLightValueLit(5))
@@ -89,7 +88,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
+    public VoxelShape getShape(BlockState state, IBlockReader getter, BlockPos pos, ISelectionContext context)
     {   return SHAPES.get(state.getValue(FACING));
     }
 
@@ -103,46 +102,37 @@ public class ThermolithBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
     {   builder.add(FACING, POWERED);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context)
+    public BlockState getStateForPlacement(BlockItemUseContext context)
     {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(POWERED, false);
     }
 
-    @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {   return new ThermolithBlockEntity(pos, state);
-    }
-
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == ModBlockEntities.THERMOLITH ? ThermolithBlockEntity::tick : null;
+    public ThermolithTileEntity createTileEntity(BlockState state, IBlockReader world)
+    {   return TileEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
     }
 
     @Override
-    public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+    public int getSignal(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
     {
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (direction == state.getValue(FACING).getOpposite() && blockEntity instanceof ThermolithBlockEntity thermolith)
-        {
-            return thermolith.getSignal();
+        TileEntity blockEntity = level.getBlockEntity(pos);
+        if (direction == state.getValue(FACING).getOpposite() && blockEntity instanceof ThermolithTileEntity)
+        {   return ((ThermolithTileEntity) blockEntity).getSignal();
         }
         return 0;
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction)
-    {
-        return direction == state.getValue(FACING).getOpposite();
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    {   return direction == state.getValue(FACING).getOpposite();
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random)
+    public void animateTick(BlockState state, World world, BlockPos pos, Random random)
     {
         if (state.getValue(POWERED))
         {
@@ -156,13 +146,14 @@ public class ThermolithBlock extends Block implements EntityBlock
             // nextInt ensures particles don't spawn inside the block
             double pX = xAxis ? random.nextInt(2) * 0.8 + offset: 0.5;
             double pZ = xAxis ? 0.5 : random.nextInt(2) * 0.8 + offset;
-            level.addParticle(new DustParticleOptions(new Vector3f(Vec3.fromRGB24(4895036)), random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
+            Vector3f particleColor = new Vector3f(Vector3d.fromRGB24(4895036));
+            world.addParticle(new RedstoneParticleData(particleColor.x(), particleColor.y(), particleColor.z(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
 
             if (random.nextDouble() < 0.5)
             {
                 float rX = xAxis ? (float) (Math.random()) * 0.8f + offset : 0.5f;
                 float rZ = xAxis ? 0.5f : (float) (Math.random()) * 0.8f + offset;
-                level.addParticle(new DustParticleOptions(new Vector3f(Vec3.fromRGB24(4895036)), random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
+                world.addParticle(new RedstoneParticleData(particleColor.x(), particleColor.y(), particleColor.z(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
             }
         }
     }

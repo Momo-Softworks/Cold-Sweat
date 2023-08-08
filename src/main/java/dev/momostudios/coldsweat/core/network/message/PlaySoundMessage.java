@@ -2,12 +2,12 @@ package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.charset.StandardCharsets;
@@ -17,34 +17,34 @@ public class PlaySoundMessage
 {
     String sound;
     int soundChars;
-    SoundSource source;
+    SoundCategory category;
     float volume;
     float pitch;
     int entityID;
 
-    public PlaySoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
+    public PlaySoundMessage(String sound, SoundCategory category, float volume, float pitch, int entityID)
     {
         this.sound = sound;
-        this.source = source;
+        this.category = category;
         soundChars = sound.length();
         this.volume = volume;
         this.pitch = pitch;
         this.entityID = entityID;
     }
 
-    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer) {
+    public static void encode(PlaySoundMessage message, PacketBuffer buffer) {
         buffer.writeInt(message.soundChars);
         buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
-        buffer.writeEnum(message.source);
+        buffer.writeEnum(message.category);
         buffer.writeFloat(message.volume);
         buffer.writeFloat(message.pitch);
         buffer.writeInt(message.entityID);
     }
 
-    public static PlaySoundMessage decode(FriendlyByteBuf buffer)
+    public static PlaySoundMessage decode(PacketBuffer buffer)
     {
         int soundChars = buffer.readInt();
-        return new PlaySoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
+        return new PlaySoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundCategory.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
     }
 
     public static void handle(PlaySoundMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -59,7 +59,7 @@ public class PlaySoundMessage
 
                 if (entity != null && sound != null)
                 {
-                    ClientOnlyHelper.playEntitySound(sound, message.source, message.volume, message.pitch, entity);
+                    ClientOnlyHelper.playEntitySound(sound, message.category, message.volume, message.pitch, entity);
                 }
             }
         });

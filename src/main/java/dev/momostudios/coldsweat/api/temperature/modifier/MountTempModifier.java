@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.entity.LivingEntity;
 
 import java.util.function.Function;
 

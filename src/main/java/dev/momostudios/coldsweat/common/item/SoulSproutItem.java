@@ -1,28 +1,29 @@
 package dev.momostudios.coldsweat.common.item;
 
 import net.minecraft.advancements.Advancement;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemNameBlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.BlockNamedItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 
-public class SoulSproutItem extends ItemNameBlockItem
+public class SoulSproutItem extends BlockNamedItem
 {
     public SoulSproutItem(Block block, Properties properties)
     {   super(block, properties);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context)
+    public ActionResultType useOn(ItemUseContext context)
     {
-        InteractionResult interactionresult = super.useOn(context);
-        if (interactionresult == InteractionResult.CONSUME && context.getPlayer() instanceof ServerPlayer player)
+        ActionResultType interactionresult = super.useOn(context);
+        if (interactionresult == ActionResultType.CONSUME && context.getPlayer() instanceof ServerPlayerEntity)
         {
+            ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
             // Grant the player the "A Seedy Place" advancement
             if (player.getServer() != null)
             {   Advancement seedyPlace = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("minecraft", "husbandry/plant_seed"));
@@ -35,8 +36,8 @@ public class SoulSproutItem extends ItemNameBlockItem
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
+    public ItemStack finishUsingItem(ItemStack stack, World world, LivingEntity entity)
     {   entity.clearFire();
-        return super.finishUsingItem(stack, level, entity);
+        return super.finishUsingItem(stack, world, entity);
     }
 }

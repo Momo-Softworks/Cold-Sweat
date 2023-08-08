@@ -2,39 +2,34 @@ package dev.momostudios.coldsweat.client.event;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
-import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.culling.ClippingHelper;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.*;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -50,30 +45,27 @@ public class HearthDebugRenderer
     public static Map<BlockPos, Map<BlockPos, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
-    public static void onLevelRendered(RenderLevelStageEvent event)
+    public static void onLevelRendered(RenderWorldLastEvent event)
     {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES
-        && Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
+        if (Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
         {
-            Player player = Minecraft.getInstance().player;
+            PlayerEntity player = Minecraft.getInstance().player;
             if (player == null) return;
 
-            Frustum frustum = event.getFrustum();
-            PoseStack ps = event.getPoseStack();
-            Vec3 camPos = event.getCamera().getPosition();
-            Level level = player.level;
+            MatrixStack ms = event.getMatrixStack();
+            Vector3d camPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            World world = player.level;
 
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
-            MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-            VertexConsumer vertexes = buffer.getBuffer(RenderType.LINES);
+            IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+            IVertexBuilder vertexes = buffer.getBuffer(RenderType.LINES);
 
-            ps.pushPose();
-            ps.translate(-camPos.x, -camPos.y, -camPos.z);
-            Matrix4f matrix4f = ps.last().pose();
-            Matrix3f matrix3f = ps.last().normal();
+            ms.pushPose();
+            ms.translate(-camPos.x, -camPos.y, -camPos.z);
+            Matrix4f matrix4f = ms.last().pose();
+            Matrix3f matrix3f = ms.last().normal();
 
             // Points to draw lines
             BiConsumer<Vector3f, Vector4f> nw = (pos, color) -> {
@@ -125,12 +117,12 @@ public class HearthDebugRenderer
                 vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
             };
 
-            ChunkAccess workingChunk = null;
+            IChunk workingChunk = null;
             float viewDistance = Minecraft.getInstance().options.renderDistance * 2f;
 
             for (Map.Entry<BlockPos, Map<BlockPos, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {
-                if (HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
+                if (HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), world.dimension().location().toString()))) continue;
 
                 Map<BlockPos, Collection<Direction>> points = entry.getValue();
                 for (Map.Entry<BlockPos, Collection<Direction>> pair : points.entrySet())
@@ -148,15 +140,15 @@ public class HearthDebugRenderer
 
                     float renderAlpha = CSMath.blend(1f, 0f, (float) CSMath.getDistance(player, x + 0.5f, y + 0.5f, z + 0.5f), 5, viewDistance);
 
-                    if (renderAlpha > 0.01f && frustum.isVisible(new AABB(pos)))
+                    if (renderAlpha > 0.01f && new ClippingHelper(matrix4f, event.getProjectionMatrix()).isVisible(new AxisAlignedBB(pos)))
                     {
                         ChunkPos chunkPos = new ChunkPos(pos);
                         if (workingChunk == null || !workingChunk.getPos().equals(chunkPos))
-                            workingChunk = WorldHelper.getChunk(level, pos);
+                            workingChunk = WorldHelper.getChunk(world, pos);
                         if (workingChunk == null) continue;
 
-                        if (workingChunk.getBlockState(pos).getShape(level, pos).equals(Shapes.block()))
-                        {   LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
+                        if (workingChunk.getBlockState(pos).getShape(world, pos).equals(VoxelShapes.block()))
+                        {   WorldRenderer.renderLineBox(ms, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
                             continue;
                         }
 
@@ -183,7 +175,7 @@ public class HearthDebugRenderer
                 }
             }
             RenderSystem.disableBlend();
-            ps.popPose();
+            ms.popPose();
             buffer.endBatch(RenderType.LINES);
         }
     }
@@ -191,25 +183,27 @@ public class HearthDebugRenderer
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        ClientLevel level = Minecraft.getInstance().level;
-        if (event.phase == TickEvent.Phase.END && level != null
-        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
+        ClientWorld world = Minecraft.getInstance().level;
+        if (event.phase == TickEvent.Phase.END && world != null
+        && world.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
         && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {
-                if (!level.dimension().location().equals(entry.getSecond())) continue;
+                if (!world.dimension().location().equals(entry.getSecond())) continue;
 
                 BlockPos pos = entry.getFirst();
-                BlockEntity blockEntity = level.getBlockEntity(pos);
-                if (blockEntity instanceof HearthBlockEntity hearth)
+                TileEntity blockEntity = world.getBlockEntity(pos);
+                if (blockEntity instanceof HearthBlockEntity)
                 {
+                    HearthBlockEntity hearth = (HearthBlockEntity) blockEntity;
                     Set<BlockPos> lookup = hearth.getPathLookup();
 
                     Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
                     if (pathMap.size() != lookup.size())
                     {
-                        HEARTH_LOCATIONS.put(pos, lookup.stream().map(bp ->
+                        Map<BlockPos, Collection<Direction>> dirMap = Maps.newHashMap();
+                        for (BlockPos bp : lookup)
                         {
                             ArrayList<Direction> dirs = new ArrayList<>();
                             for (Direction dir : Direction.values())
@@ -217,8 +211,9 @@ public class HearthDebugRenderer
                                 if (lookup.contains(bp.relative(dir)))
                                     dirs.add(dir);
                             }
-                            return Map.entry(bp, dirs);
-                        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, Maps::newHashMap)));
+                            dirMap.put(bp, dirs);
+                        }
+                        HEARTH_LOCATIONS.put(pos, dirMap);
                     }
                 }
             }

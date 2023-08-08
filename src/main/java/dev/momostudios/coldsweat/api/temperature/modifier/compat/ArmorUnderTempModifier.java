@@ -4,10 +4,10 @@ import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import org.jwaresoftware.mcmods.lib.api.combat.Armory;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import org.jwaresoftware.mcmods.lib.Armory;
 
 import java.util.function.Function;
 
@@ -21,7 +21,7 @@ public class ArmorUnderTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        CompoundTag nbt = this.getNBT();
+        CompoundNBT nbt = this.getNBT();
         double bodyTemp = Temperature.get(entity, Temperature.Type.BODY);
         double totalOffset = 0;
 
@@ -30,15 +30,17 @@ public class ArmorUnderTempModifier extends TempModifier
         {
             switch (type)
             {
-                case FREEZING_POINT ->
+                case FREEZING_POINT :
                 {   totalOffset += Math.min(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
+                    break;
                 }
-                case BURNING_POINT ->
+                case BURNING_POINT :
                 {   totalOffset += Math.max(0,
                             Armory.getTLining(stack).getModifier() * 5
                             + nbt.getFloat("OzzyTemp"));
+                    break;
                 }
             }
 

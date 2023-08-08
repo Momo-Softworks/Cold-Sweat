@@ -1,8 +1,7 @@
 package dev.momostudios.coldsweat.api.event.common;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;

@@ -16,21 +16,22 @@ import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
-import dev.momostudios.coldsweat.util.math.ListBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Silverfish;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import dev.momostudios.coldsweat.util.serialization.ListBuilder;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.SilverfishEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -95,11 +96,12 @@ public class Temperature
         return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
     }
 
-    static Map<ResourceLocation, Silverfish> DUMMIES = new HashMap<>();
-    public static double getTemperatureAt(BlockPos pos, Level level)
+    static Map<ResourceLocation, SilverfishEntity> DUMMIES = new HashMap<>();
+    public static double getTemperatureAt(BlockPos pos, World world)
     {
-        LivingEntity dummy = DUMMIES.computeIfAbsent(level.dimension().location(), dim -> new Silverfish(EntityType.SILVERFISH, level));
-        dummy.setPos(CSMath.getCenterPos(pos));
+        LivingEntity dummy = DUMMIES.computeIfAbsent(world.dimension().location(), dim -> new SilverfishEntity(EntityType.SILVERFISH, world));
+        Vector3d vec = Vector3d.atCenterOf(pos);
+        dummy.setPos(vec.x, vec.y, vec.z);
         return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
                                                       .addIf(CompatManager.isSereneSeasonsLoaded(),
                                                           () -> TempModifierRegistry.getEntryFor("sereneseasons:season").orElse(null))
@@ -139,8 +141,7 @@ public class Temperature
         for (TempModifier modifier : getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(type))
         {
             if (condition.test(modifier))
-            {
-                return modifier;
+            {   return modifier;
             }
         }
         return null;
@@ -153,7 +154,7 @@ public class Temperature
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void addOrReplaceModifier(Player player, TempModifier modifier, Type type)
+    public static void addOrReplaceModifier(PlayerEntity player, TempModifier modifier, Type type)
     {
         addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
@@ -165,7 +166,7 @@ public class Temperature
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void replaceModifier(Player player, TempModifier modifier, Type type)
+    public static void replaceModifier(PlayerEntity player, TempModifier modifier, Type type)
     {
         addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
@@ -313,7 +314,7 @@ public class Temperature
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Type type)
     {
-        return getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(List.of());
+        return getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(Arrays.asList());
     }
 
     /**
@@ -352,8 +353,8 @@ public class Temperature
     {
         if (!entity.level.isClientSide)
         {
-            ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
-                            ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)
+            ColdSweatPacketHandler.INSTANCE.send(entity instanceof PlayerEntity
+                            ? PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) entity)
                             : PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
             new TemperatureSyncMessage(entity, cap.serializeTemps(), instant));
         }
@@ -363,12 +364,8 @@ public class Temperature
     {
         if (!entity.level.isClientSide)
         {
-            //ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
-            //                ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)
-            //                : PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-            if (entity instanceof Player player)
-            {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
+            if (entity instanceof PlayerEntity)
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) entity),
                 new TempModifiersSyncMessage(entity, cap.serializeModifiers()));
             }
         }
@@ -434,10 +431,20 @@ public class Temperature
         MC
     }
 
-    public record Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
+    public static class Addition
     {
+        private final Mode mode;
+        private final Order order;
+        private final Predicate<TempModifier> predicate;
+
         public static final Addition AT_END = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
         public static final Addition AT_START = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
+
+        public Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
+        {   this.mode = mode;
+            this.order = order;
+            this.predicate = predicate;
+        }
 
         public static Addition of(Mode mode, Order order, Predicate<TempModifier> predicate)
         {   return new Addition(mode, order, predicate);

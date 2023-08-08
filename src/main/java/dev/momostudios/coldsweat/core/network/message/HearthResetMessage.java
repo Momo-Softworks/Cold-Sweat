@@ -1,14 +1,12 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public class HearthResetMessage
@@ -21,12 +19,12 @@ public class HearthResetMessage
         this.blockPos = blockPos;
     }
 
-    public static void encode(HearthResetMessage message, FriendlyByteBuf buffer)
+    public static void encode(HearthResetMessage message, PacketBuffer buffer)
     {
         buffer.writeBlockPos(message.blockPos);
     }
 
-    public static HearthResetMessage decode(FriendlyByteBuf buffer)
+    public static HearthResetMessage decode(PacketBuffer buffer)
     {
         return new HearthResetMessage(buffer.readBlockPos());
     }
@@ -38,9 +36,10 @@ public class HearthResetMessage
         {
             context.enqueueWork(() ->
             {
-                BlockEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
-                if (te instanceof HearthBlockEntity hearth)
-                {   hearth.forceUpdate();
+                TileEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
+                if (te instanceof HearthBlockEntity)
+                {
+                    ((HearthBlockEntity) te).forceUpdate();
                 }
             });
         }

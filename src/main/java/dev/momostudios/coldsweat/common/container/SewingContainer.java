@@ -7,97 +7,80 @@ import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
-import dev.momostudios.coldsweat.core.init.MenuInit;
+import dev.momostudios.coldsweat.core.init.ContainerInit;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShearsItem;
-import net.minecraft.world.item.Wearable;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.IArmorVanishable;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShearsItem;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SewingContainer extends AbstractContainerMenu
+public class SewingContainer extends Container
 {
     BlockPos pos;
-    Inventory playerInventory;
+    PlayerInventory playerInventory;
     SewingInventory sewingInventory;
 
-    public static class SewingInventory implements Container
+    public static class SewingInventory implements IInventory
     {
         private final NonNullList<ItemStack> stackList;
-        private final AbstractContainerMenu menu;
+        private final Container menu;
 
-        public SewingInventory(AbstractContainerMenu menu)
-        {
-            this.stackList = NonNullList.withSize(3, ItemStack.EMPTY);
+        public SewingInventory(Container menu)
+        {   this.stackList = NonNullList.withSize(3, ItemStack.EMPTY);
             this.menu = menu;
         }
 
-        @Override
         public int getContainerSize()
-        {
-            return 3;
+        {   return 3;
         }
 
-        @Override
         public boolean isEmpty()
-        {
-            return !stackList.stream().anyMatch(stack -> !stack.isEmpty());
+        {   return stackList.stream().allMatch(ItemStack::isEmpty);
         }
 
-        @Nonnull
-        @Override
         public ItemStack getItem(int index)
-        {
-            return stackList.get(index);
+        {   return stackList.get(index);
         }
 
-        @Nonnull
         @Override
         public ItemStack removeItem(int index, int count)
         {
-            ItemStack itemstack = ContainerHelper.removeItem(this.stackList, index, count);
-            if (!itemstack.isEmpty()) {
-                this.menu.slotsChanged(this);
+            ItemStack itemstack = ItemStackHelper.removeItem(this.stackList, index, count);
+            if (!itemstack.isEmpty())
+            {   this.menu.slotsChanged(this);
             }
 
             return itemstack;
         }
 
-        @Nonnull
         @Override
         public ItemStack removeItemNoUpdate(int index)
-        {
-            return ContainerHelper.takeItem(this.stackList, index);
+        {   return ItemStackHelper.takeItem(this.stackList, index);
         }
 
         @Override
         public void setItem(int index, ItemStack stack)
-        {
-            this.stackList.set(index, stack);
+        {   this.stackList.set(index, stack);
             this.menu.slotsChanged(this);
         }
 
@@ -105,21 +88,19 @@ public class SewingContainer extends AbstractContainerMenu
         public void setChanged() {}
 
         @Override
-        public boolean stillValid(Player player)
-        {
-            return true;
+        public boolean stillValid(PlayerEntity player)
+        {   return true;
         }
 
         @Override
         public void clearContent()
-        {
-            stackList.clear();
+        {   stackList.clear();
         }
     }
 
-    public SewingContainer(final int windowId, final Inventory playerInv)
+    public SewingContainer(final int windowId, final PlayerInventory playerInv)
     {
-        super(MenuInit.SEWING_CONTAINER_TYPE.get(), windowId);
+        super(ContainerInit.SEWING_CONTAINER_TYPE.get(), windowId);
         this.pos = playerInv.player.blockPosition();
         this.playerInventory = playerInv;
         sewingInventory = new SewingInventory(this);
@@ -129,21 +110,21 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
-                return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
+            {   Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+                return stack.getItem() instanceof IArmorVanishable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
+
             @Override
-            public void onTake(Player player, ItemStack stack)
-            {
-                super.onTake(player, stack);
+            public ItemStack onTake(PlayerEntity player, ItemStack stack)
+            {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
+                return stack;
             }
+
             @Override
             public void setChanged()
-            {
-                super.setChanged();
+            {   super.setChanged();
                 SewingContainer.this.testForRecipe();
             }
         });
@@ -153,20 +134,20 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+            {   Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
                 return insulation.getFirst() != 0 || insulation.getSecond() != 0 || stack.getItem() instanceof ShearsItem;
             }
+
             @Override
-            public void onTake(Player player, ItemStack stack)
-            {
-                super.onTake(player, stack);
+            public ItemStack onTake(PlayerEntity player, ItemStack stack)
+            {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
+                return stack;
             }
+
             @Override
             public void setChanged()
-            {
-                super.setChanged();
+            {   super.setChanged();
                 SewingContainer.this.testForRecipe();
             }
         });
@@ -181,13 +162,15 @@ public class SewingContainer extends AbstractContainerMenu
             }
 
             @Override
-            public void onTake(Player player, ItemStack stack)
+            public ItemStack onTake(PlayerEntity player, ItemStack stack)
             {
                 super.onTake(player, stack);
                 SewingContainer.this.takeOutput(stack);
 
                 if (!SewingContainer.this.playerInventory.player.level.isClientSide)
-                    TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
+                {   TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
+                }
+                return stack;
             }
         });
 
@@ -207,7 +190,7 @@ public class SewingContainer extends AbstractContainerMenu
         }
     }
 
-    public SewingContainer(int i, Inventory inventory, FriendlyByteBuf friendlyByteBuf)
+    public SewingContainer(int i, PlayerInventory inventory, PacketBuffer friendlyByteBuf)
     {
         this(i, inventory);
         try {
@@ -217,8 +200,9 @@ public class SewingContainer extends AbstractContainerMenu
 
     public void setItem(int index, ItemStack stack)
     {
+        if (index >= sewingInventory.stackList.size())
+            return;
         this.sewingInventory.setItem(index, stack);
-        this.setRemoteSlot(index, stack);
     }
 
     public void growItem(int index, int amount)
@@ -226,7 +210,6 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack stack = this.sewingInventory.getItem(index);
         stack.grow(amount);
         this.sewingInventory.setItem(index, stack);
-        this.setRemoteSlot(index, stack);
     }
 
     public ItemStack getItem(int index)
@@ -240,7 +223,7 @@ public class SewingContainer extends AbstractContainerMenu
     }
     private void takeOutput(ItemStack stack)
     {
-        Player player = this.playerInventory.player;
+        PlayerEntity player = this.playerInventory.player;
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
@@ -258,7 +241,7 @@ public class SewingContainer extends AbstractContainerMenu
                     // Remove the last insulation item added
                     cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
                     // Play shear sound
-                    player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 0.8F, 1.0F);
 
                     serializeInsulation(input1, cap);
                 }
@@ -268,24 +251,29 @@ public class SewingContainer extends AbstractContainerMenu
             {   // Remove input items
                 this.growItem(0, -1);
                 this.growItem(1, -1);
-                player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+                player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundCategory.BLOCKS, 0.5f, 1f);
 
                 // Trigger advancement criteria
-                if (player instanceof ServerPlayer serverPlayer)
-                    ModAdvancementTriggers.ARMOR_INSULATED.trigger(serverPlayer, input1, input2);
+                if (player instanceof ServerPlayerEntity)
+                    ModAdvancementTriggers.ARMOR_INSULATED.trigger(((ServerPlayerEntity) player), input1, input2);
             }
         });
 
-        // Get equip sound for the armor item
-        SoundEvent equipSound = stack.getItem().getEquipSound();
-        if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+        if (stack.getItem() instanceof ArmorItem)
+        {
+            ArmorItem armor = (ArmorItem) stack.getItem();
+            // Get equip sound for the armor item
+            SoundEvent equipSound = armor.getMaterial().getEquipSound();
+            player.level.playSound(null, player.blockPosition(), equipSound, SoundCategory.BLOCKS, 1f, 1f);
+        }
     }
 
     static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
     {
-        if (iCap instanceof ItemInsulationCap cap)
+        if (iCap instanceof ItemInsulationCap)
         {
-            CompoundTag tag = cap.serializeSimple(stack);
+            ItemInsulationCap cap = (ItemInsulationCap) iCap;
+            CompoundNBT tag = cap.serializeSimple(stack);
 
             // Remove "Insulation" tag if armor has no insulation left
             if (iCap.getInsulation().isEmpty())
@@ -300,7 +288,7 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack insulatorItem = this.getItem(1);
 
         // Is the first item armor, and the second item an insulator
-        if (wearableItem.getItem() instanceof Wearable)
+        if (wearableItem.getItem() instanceof IArmorVanishable)
         {
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
@@ -308,15 +296,14 @@ public class SewingContainer extends AbstractContainerMenu
                 wearableItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
                 {
                     if (cap.getInsulation().size() > 0)
-                    {
-                        this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
+                    {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
                 });
             }
             // Item is for insulation
             else if ((ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()) || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()))
-            && (!(insulatorItem.getItem() instanceof Wearable)
-            || LivingEntity.getEquipmentSlotForItem(wearableItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
+            && (!(insulatorItem.getItem() instanceof IArmorVanishable)
+            || MobEntity.getEquipmentSlotForItem(wearableItem) == MobEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = wearableItem.copy();
                 IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
@@ -330,25 +317,26 @@ public class SewingContainer extends AbstractContainerMenu
                 // Get the total positive/negative insulation of the armor
                 insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(pair ->
                 {
-                    if (pair instanceof ItemInsulationCap.Insulation insul)
-                    {   if (insul.getHot() > 0 || insul.getCold() > 0) posInsul.getAndIncrement();
+                    if (pair instanceof ItemInsulationCap.Insulation)
+                    {   ItemInsulationCap.Insulation insul = (ItemInsulationCap.Insulation) pair;
+                        if (insul.getHot() > 0 || insul.getCold() > 0) posInsul.getAndIncrement();
                         else negInsul.getAndIncrement();
                     }
-                    if (pair instanceof ItemInsulationCap.AdaptiveInsulation insul)
-                    {   if (insul.getInsulation() > 0) posInsul.getAndIncrement();
+                    if (pair instanceof ItemInsulationCap.AdaptiveInsulation)
+                    {   ItemInsulationCap.AdaptiveInsulation insul = (ItemInsulationCap.AdaptiveInsulation) pair;
+                        if (insul.getInsulation() > 0) posInsul.getAndIncrement();
                         else negInsul.getAndIncrement();
                     }
                 });
                 if (posInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem))
-                {
-                    return;
+                {   return;
                 }
 
                 // Transfer enchantments
                 Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(processed);
                 insulator.getEnchantmentTags().removeIf(nbt ->
                 {
-                    CompoundTag enchantTag = ((CompoundTag) nbt);
+                    CompoundNBT enchantTag = ((CompoundNBT) nbt);
                     Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
                     if (ench == null) return false;
 
@@ -367,28 +355,26 @@ public class SewingContainer extends AbstractContainerMenu
         }
     }
 
-    public SewingContainer(final int windowId, final Player playerInv, BlockPos pos)
-    {
-        this(windowId, playerInv.getInventory());
+    public SewingContainer(final int windowId, final PlayerEntity player, BlockPos pos)
+    {   this(windowId, player.inventory);
         this.pos = pos;
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(PlayerEntity player)
     {
         super.removed(player);
 
         // Drop the contents of the input slots
-        if (player instanceof ServerPlayer)
+        if (player instanceof ServerPlayerEntity)
         {
             for (int i = 0; i < sewingInventory.getContainerSize(); i++)
             {
-                ItemStack itemStack = this.getSlot(i).getItem();
+                ItemStack itemStack = this.sewingInventory.getItem(i);
                 if (!itemStack.isEmpty() && i != 2)
                 {
-                    if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
-                    {
-                        player.getInventory().placeItemBackInInventory(itemStack);
+                    if (player.isAlive() && !((ServerPlayerEntity) player).hasDisconnected())
+                    {   player.inventory.placeItemBackInInventory(player.level, itemStack);
                     }
                     else player.drop(itemStack, false, true);
                 }
@@ -397,15 +383,16 @@ public class SewingContainer extends AbstractContainerMenu
     }
 
     @Override
-    public boolean stillValid(Player playerIn)
+    public boolean stillValid(PlayerEntity playerIn)
     {
         if (this.pos != null)
-            return playerIn.distanceToSqr(Vec3.atCenterOf(this.pos)) <= 64.0D;
+        {   return playerIn.distanceToSqr(Vector3d.atCenterOf(this.pos)) <= 64.0D;
+        }
         else return true;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
+    public ItemStack quickMoveStack(PlayerEntity player, int index)
     {
         ItemStack newStack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
@@ -417,8 +404,7 @@ public class SewingContainer extends AbstractContainerMenu
             if (CSMath.withinRange(index, 0, 2))
             {
                 if (this.moveItemStackTo(slotItem, 3, 39, true))
-                {
-                    slot.onTake(player, newStack);
+                {   slot.onTake(player, newStack);
                 }
                 else return ItemStack.EMPTY;
             }

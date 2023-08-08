@@ -1,19 +1,18 @@
 package dev.momostudios.coldsweat.common.entity.data.edible;
 
-import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.common.entity.Chameleon;
+import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.data.tags.ModItemTags;
+import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.Item;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.tags.ITag;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.server.ServerWorld;
 
 public class HumidBiomeEdible extends Edible
 {
@@ -24,7 +23,7 @@ public class HumidBiomeEdible extends Edible
     }
 
     @Override
-    public Result onEaten(Chameleon entity, ItemEntity item)
+    public Result onEaten(ChameleonEntity entity, ItemEntity item)
     {
         if (!entity.level.isClientSide)
         {
@@ -32,16 +31,18 @@ public class HumidBiomeEdible extends Edible
             entity.setSearching(true);
 
             // Locate the nearest biome with temp > 0.8 and humid
-            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(holder -> holder.value().isHumid(), entity.blockPosition(), 2000, 8);
+            BlockPos pos = entity.blockPosition();
+            BlockPos biomePos = ((ServerWorld) entity.level).getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), 2000,
+                                                                                                                                  Biome::isHumid, entity.getRandom());
 
-            if (biomePair != null)
+            if (biomePos != null)
             {
                 TaskScheduler.scheduleServer(() ->
                 {
                     // Set the chameleon to track this position
-                    entity.setTrackingPos(biomePair.getFirst());
+                    entity.setTrackingPos(biomePos);
 
-                    WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
+                    WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, EntityHelper.getVoicePitch(entity));
                     WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
                     // Stop searching
@@ -67,12 +68,17 @@ public class HumidBiomeEdible extends Edible
     }
 
     @Override
-    public boolean shouldEat(Chameleon entity, ItemEntity item)
+    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
     {   return true;
     }
 
     @Override
-    public TagKey<Item> associatedItems()
+    public ITag.INamedTag<Item> associatedItems()
     {   return ModItemTags.CHAMELEON_HUMID;
+    }
+
+    @Override
+    public String getName()
+    {   return "cold_sweat:humid_biomes";
     }
 }

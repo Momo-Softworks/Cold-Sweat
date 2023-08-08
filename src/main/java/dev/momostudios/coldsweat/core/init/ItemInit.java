@@ -5,18 +5,12 @@ import dev.momostudios.coldsweat.common.block.*;
 import dev.momostudios.coldsweat.common.item.*;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.registries.ModArmorMaterials;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.*;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ItemInit
 {
@@ -40,25 +34,25 @@ public class ItemInit
 
     // Armor Items
     public static final RegistryObject<Item> HOGLIN_HEADPIECE = ITEMS.register("hoglin_headpiece", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlot.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     public static final RegistryObject<Item> HOGLIN_TUNIC = ITEMS.register("hoglin_tunic", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlot.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     public static final RegistryObject<Item> HOGLIN_TROUSERS = ITEMS.register("hoglin_trousers", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlot.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     public static final RegistryObject<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlot.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     public static final RegistryObject<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
-            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
-            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
-            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
-            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlot.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new GoatArmorItem(ModArmorMaterials.GOAT, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     // Block Items
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
@@ -67,9 +61,9 @@ public class ItemInit
     public static final RegistryObject<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(BlockInit.HEARTH_BOTTOM.get(), HearthBottomBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> THERMOLITH = ITEMS.register("thermolith", () -> new BlockItem(BlockInit.THERMOLITH.get(), ThermolithBlock.getItemProperties()));
     public static final RegistryObject<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new SoulSproutItem(BlockInit.SOUL_STALK.get(),
-            SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(4).saturationMod(1).alwaysEat().fast().build())));
+            SoulStalkBlock.getItemProperties().food(new Food.Builder().nutrition(4).saturationMod(1).alwaysEat().fast().build())));
 
     // Spawn Eggs
     public static final RegistryObject<ForgeSpawnEggItem> CHAMELEON_SPAWN_EGG = ITEMS.register("chameleon_spawn_egg", () ->
-            new ForgeSpawnEggItem(EntityInit.CHAMELEON, 0x82C841, 0x1C9170, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+            new ForgeSpawnEggItem(EntityInit.CHAMELEON, 0x82C841, 0x1C9170, new Item.Properties().tab(ItemGroup.TAB_MISC)));
 }

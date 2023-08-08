@@ -2,12 +2,12 @@ package dev.momostudios.coldsweat.core.network.message;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.charset.StandardCharsets;
@@ -17,17 +17,17 @@ import java.util.function.Supplier;
 
 public class ParticleBatchMessage
 {
-    Set<Pair<ParticleOptions, ParticlePlacement>> particles = new HashSet<>();
+    Set<Pair<IParticleData, ParticlePlacement>> particles = new HashSet<>();
 
-    public void addParticle(ParticleOptions particle, ParticlePlacement placement)
+    public void addParticle(IParticleData particle, ParticlePlacement placement)
     {
         particles.add(Pair.of(particle, placement));
     }
 
-    public static void encode(ParticleBatchMessage message, FriendlyByteBuf buffer)
+    public static void encode(ParticleBatchMessage message, PacketBuffer buffer)
     {
         buffer.writeInt(message.particles.size());
-        for (Pair<ParticleOptions, ParticlePlacement> entry : message.particles)
+        for (Pair<IParticleData, ParticlePlacement> entry : message.particles)
         {
             String particleID = ForgeRegistries.PARTICLE_TYPES.getKey(entry.getFirst().getType()).toString();
             buffer.writeInt(particleID.length());
@@ -37,7 +37,7 @@ public class ParticleBatchMessage
         }
     }
 
-    public static ParticleBatchMessage decode(FriendlyByteBuf buffer)
+    public static ParticleBatchMessage decode(PacketBuffer buffer)
     {
         ParticleBatchMessage message = new ParticleBatchMessage();
         int size = buffer.readInt();
@@ -45,7 +45,7 @@ public class ParticleBatchMessage
         {
             int particleIDLength = buffer.readInt();
             ParticleType type = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(buffer.readCharSequence(particleIDLength, StandardCharsets.UTF_8).toString()));
-            ParticleOptions particle = type.getDeserializer().fromNetwork(type, buffer);
+            IParticleData particle = type.getDeserializer().fromNetwork(type, buffer);
             ParticlePlacement placement = ParticlePlacement.fromNBT(buffer.readNbt());
             message.addParticle(particle, placement);
         }
@@ -59,9 +59,9 @@ public class ParticleBatchMessage
         if (context.getDirection().getReceptionSide().isClient())
         context.enqueueWork(() ->
         {
-            for (Pair<ParticleOptions, ParticlePlacement> entry : message.particles)
+            for (Pair<IParticleData, ParticlePlacement> entry : message.particles)
             {
-                ParticleOptions particle = entry.getFirst();
+                IParticleData particle = entry.getFirst();
                 ParticlePlacement placement = entry.getSecond();
                 Minecraft.getInstance().level.addParticle(particle, placement.x, placement.y, placement.z, placement.vx, placement.vy, placement.vz);
             }
@@ -83,9 +83,9 @@ public class ParticleBatchMessage
             this.vz = vz;
         }
 
-        public CompoundTag toNBT()
+        public CompoundNBT toNBT()
         {
-            CompoundTag tag = new CompoundTag();
+            CompoundNBT tag = new CompoundNBT();
             tag.putDouble("x", x);
             tag.putDouble("y", y);
             tag.putDouble("z", z);
@@ -95,7 +95,7 @@ public class ParticleBatchMessage
             return tag;
         }
 
-        public static ParticlePlacement fromNBT(CompoundTag tag)
+        public static ParticlePlacement fromNBT(CompoundNBT tag)
         {
             return new ParticlePlacement(
                     tag.getDouble("x"),

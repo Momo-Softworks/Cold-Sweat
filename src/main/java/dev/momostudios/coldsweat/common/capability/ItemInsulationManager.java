@@ -2,13 +2,16 @@ package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.enchantment.IArmorVanishable;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -30,7 +33,7 @@ public class ItemInsulationManager
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
         Item item = event.getObject().getItem();
-        if (item instanceof Wearable
+        if (item instanceof IArmorVanishable
         && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item)
         && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item))
         {
@@ -40,7 +43,7 @@ public class ItemInsulationManager
             LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
             Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
 
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
+            ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
             {
                 @Nonnull
                 @Override
@@ -55,13 +58,13 @@ public class ItemInsulationManager
                 }
 
                 @Override
-                public CompoundTag serializeNBT()
+                public CompoundNBT serializeNBT()
                 {
                     return itemInsulationCap.serializeNBT();
                 }
 
                 @Override
-                public void deserializeNBT(CompoundTag nbt)
+                public void deserializeNBT(CompoundNBT nbt)
                 {
                     itemInsulationCap.deserializeNBT(nbt);
                 }
@@ -73,23 +76,23 @@ public class ItemInsulationManager
             capOptional.ifPresent(iCap ->
             {
                 ItemStack stack = event.getObject();
-                CompoundTag stackNBT = stack.getOrCreateTag();
+                CompoundNBT stackNBT = stack.getOrCreateTag();
                 if (stackNBT.getBoolean("insulated"))
                 {
-                    EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getSlot() : null;
+                    EquipmentSlotType slot = stack.getItem() instanceof ArmorItem ? ((ArmorItem) stack.getItem()).getSlot() : null;
                     if (slot != null)
                     {
                         stackNBT.remove("insulated");
-                        iCap.addInsulationItem(
                         switch (slot)
-                        {   case HEAD -> Items.LEATHER_HELMET.getDefaultInstance();
-                            case CHEST -> Items.LEATHER_CHESTPLATE.getDefaultInstance();
-                            case LEGS -> Items.LEATHER_LEGGINGS.getDefaultInstance();
-                            case FEET -> Items.LEATHER_BOOTS.getDefaultInstance();
-                            default -> ItemStack.EMPTY;
-                        });
-                        if (iCap instanceof ItemInsulationCap cap)
-                            cap.serializeSimple(stack);
+                        {   case HEAD  : iCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
+                            case CHEST : iCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
+                            case LEGS  : iCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
+                            case FEET  : iCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
+                            default : iCap.addInsulationItem(ItemStack.EMPTY); break;
+                        }
+                        if (iCap instanceof ItemInsulationCap)
+                        {   ((ItemInsulationCap) iCap).serializeSimple(stack);
+                        }
                     }
                 }
             });
@@ -106,7 +109,7 @@ public class ItemInsulationManager
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
         // if the inventory screen is open
-        Player player = event.player;
+        PlayerEntity player = event.player;
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 20 == 0
         && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
@@ -114,8 +117,8 @@ public class ItemInsulationManager
             {
                 stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
                 {
-                    if (iCap instanceof ItemInsulationCap cap)
-                    {   cap.serializeSimple(stack);
+                    if (iCap instanceof ItemInsulationCap)
+                    {   ((ItemInsulationCap) iCap).serializeSimple(stack);
                     }
                 });
             });

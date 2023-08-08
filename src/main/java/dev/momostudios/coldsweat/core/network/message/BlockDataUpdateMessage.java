@@ -1,40 +1,40 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class BlockDataUpdateMessage
 {
     BlockPos blockPos;
-    BlockEntity blockEntity;
-    CompoundTag tag;
+    TileEntity blockEntity;
+    CompoundNBT tag;
 
-    public BlockDataUpdateMessage(BlockEntity blockEntity)
+    public BlockDataUpdateMessage(TileEntity blockEntity)
     {
         this.blockPos = blockEntity.getBlockPos();
         this.blockEntity = blockEntity;
     }
 
-    public BlockDataUpdateMessage(BlockPos blockPos, CompoundTag tag)
+    public BlockDataUpdateMessage(BlockPos blockPos, CompoundNBT tag)
     {
         this.blockPos = blockPos;
         this.tag = tag;
     }
 
-    public static void encode(BlockDataUpdateMessage message, FriendlyByteBuf buffer)
+    public static void encode(BlockDataUpdateMessage message, PacketBuffer buffer)
     {
         buffer.writeBlockPos(message.blockPos);
         buffer.writeNbt(message.blockEntity.getUpdateTag());
     }
 
-    public static BlockDataUpdateMessage decode(FriendlyByteBuf buffer)
+    public static BlockDataUpdateMessage decode(PacketBuffer buffer)
     {
         return new BlockDataUpdateMessage(buffer.readBlockPos(), buffer.readNbt());
     }
@@ -46,13 +46,12 @@ public class BlockDataUpdateMessage
         {
             context.enqueueWork(() ->
             {
-                ClientLevel level = Minecraft.getInstance().level;
-                if (level != null)
+                ClientWorld world = Minecraft.getInstance().level;
+                if (world != null)
                 {
-                    BlockEntity be = level.getBlockEntity(message.blockPos);
+                    TileEntity be = world.getBlockEntity(message.blockPos);
                     if (be != null)
-                    {
-                        be.handleUpdateTag(message.tag);
+                    {   be.handleUpdateTag(be.getBlockState(), message.tag);
                     }
                 }
             });

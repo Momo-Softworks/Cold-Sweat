@@ -11,16 +11,16 @@ import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.state.Property;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -28,11 +28,6 @@ import java.util.function.Predicate;
 @Mod.EventBusSubscriber
 public class TempModifierInit
 {
-    @SubscribeEvent
-    public static void onServerStart(ServerStartingEvent event)
-    {   buildRegistries();
-    }
-
     // Trigger registry events
     public static void buildRegistries()
     {
@@ -72,7 +67,7 @@ public class TempModifierInit
                 final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
 
                 // Weakens over distance?
-                final boolean weaken = effectBuilder.size() < 4 || (boolean) effectBuilder.get(3);
+                final boolean weaken = effectBuilder.size() < 4 || (Boolean) effectBuilder.get(3);
 
                 // Get min/max effect
                 final double maxChange = effectBuilder.size() == 5 && effectBuilder.get(4) instanceof Number
@@ -120,7 +115,7 @@ public class TempModifierInit
                 event.register(new BlockTempConfig(blockPredicates, effectBlocks)
                 {
                     @Override
-                    public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
+                    public double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                     {
                         // Check the list of predicates first
                         if (blockPredicates.isEmpty() || this.testPredicates(state))

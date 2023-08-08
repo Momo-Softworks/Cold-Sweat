@@ -3,12 +3,12 @@ package dev.momostudios.coldsweat.util;
 import dev.momostudios.coldsweat.client.event.HearthDebugRenderer;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
-import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.audio.EntityTickableSound;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.HashMap;
 
@@ -18,11 +18,11 @@ import java.util.HashMap;
  */
 public class ClientOnlyHelper
 {
-    public static void playEntitySound(SoundEvent sound, SoundSource source, float volume, float pitch, Entity entity)
-    {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity));
+    public static void playEntitySound(SoundEvent sound, SoundCategory source, float volume, float pitch, Entity entity)
+    {   Minecraft.getInstance().getSoundManager().play(new EntityTickableSound(sound, source, volume, pitch, entity));
     }
 
-    public static Level getClientLevel()
+    public static World getClientWorld()
     {   return Minecraft.getInstance().level;
     }
 

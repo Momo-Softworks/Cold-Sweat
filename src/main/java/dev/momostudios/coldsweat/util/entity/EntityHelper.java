@@ -3,34 +3,51 @@ package dev.momostudios.coldsweat.util.entity;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+
+import java.lang.reflect.Method;
 
 public class EntityHelper
 {
     private EntityHelper() {}
 
-    public static ItemStack getItemInHand(LivingEntity player, HumanoidArm hand)
-    {
-        return player.getItemInHand(hand == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+    public static ItemStack getItemInHand(LivingEntity player, HandSide hand)
+    {   return player.getItemInHand(hand == player.getMainArm() ? Hand.MAIN_HAND : Hand.OFF_HAND);
     }
 
-    public static HumanoidArm getArmFromHand(InteractionHand hand, Player player)
-    {
-        return hand == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HumanoidArm.RIGHT ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
+    public static HandSide getArmFromHand(Hand hand, PlayerEntity player)
+    {   return hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
     }
 
-    public static boolean holdingLamp(LivingEntity player, HumanoidArm arm)
-    {
-        return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
+    public static boolean holdingLamp(LivingEntity player, HandSide arm)
+    {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
     }
 
     public static Capability<ITemperatureCap> getTemperatureCap(LivingEntity entity)
-    {
-        return entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
+    {   return entity instanceof PlayerEntity ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
+    }
+
+    public static HandSide getHandSide(Hand hand, PlayerEntity player)
+    {   return hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
+    }
+
+    static final Method GET_VOICE_PITCH;
+    static
+    {   GET_VOICE_PITCH = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70647_i");
+        GET_VOICE_PITCH.setAccessible(true);
+    }
+    public static float getVoicePitch(LivingEntity entity)
+    {   try
+        {   return (float) GET_VOICE_PITCH.invoke(entity);
+        }
+        catch (Exception e)
+        {   return 1f;
+        }
     }
 }

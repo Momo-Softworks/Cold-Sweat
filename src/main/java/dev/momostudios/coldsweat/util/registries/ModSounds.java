@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.core.init.SoundInit;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.SoundEvent;
 
 public class ModSounds
 {

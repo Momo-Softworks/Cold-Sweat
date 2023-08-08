@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.api.event.common;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.eventbus.api.Event;
 
 public class EntityPickEvent extends Event
