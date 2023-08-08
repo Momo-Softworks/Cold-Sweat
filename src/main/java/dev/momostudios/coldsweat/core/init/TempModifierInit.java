@@ -9,7 +9,7 @@ import dev.momostudios.coldsweat.api.temperature.block_temp.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.*;
 import dev.momostudios.coldsweat.config.WorldSettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.serialization.ConfigHelper;
+import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,6 +20,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 import java.util.*;
 import java.util.function.Predicate;

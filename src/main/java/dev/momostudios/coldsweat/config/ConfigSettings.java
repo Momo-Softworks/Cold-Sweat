@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.config;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.serialization.ConfigHelper;
+import dev.momostudios.coldsweat.config.util.ConfigHelper;
 import dev.momostudios.coldsweat.config.util.ValueHolder;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.serialization.Triplet;

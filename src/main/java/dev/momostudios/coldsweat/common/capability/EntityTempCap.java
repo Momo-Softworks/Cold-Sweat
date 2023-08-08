@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Type;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.serialization.NBTHelper;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;

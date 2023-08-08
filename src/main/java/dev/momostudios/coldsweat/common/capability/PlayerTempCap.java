@@ -7,7 +7,7 @@ import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModDamageSources;
-import dev.momostudios.coldsweat.util.serialization.NBTHelper;
+import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
