@@ -85,12 +85,19 @@ public class RenderLampHand
              */
             ms.pushPose();
             ms.translate(event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.575, event.getEquipProgress() * 0.25);
+            if (isRightHand)
+            {   ms.translate(0.77, -0.54, -0.755);
+                ms.mulPose(Vector3f.YP.rotationDegrees(20));
+            }
+            else
+            {   ms.translate(-0.53, -0.62, -0.715);
+            }
             try
             {
                 Minecraft.getInstance().getItemInHandRenderer().renderItem(
                                    Minecraft.getInstance().player,
                                    event.getItemStack(),
-                                   EntityHelper.getHandSide(event.getHand(), player) == HandSide.RIGHT
+                                   isRightHand
                                         ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
                                         : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
                                    true,
