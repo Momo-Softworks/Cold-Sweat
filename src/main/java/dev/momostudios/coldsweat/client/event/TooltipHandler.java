@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.event.client.RenderTooltipEvent;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -54,35 +55,25 @@ public class TooltipHandler
             if (!Screen.hasShiftDown())
             {   event.getToolTip().add(1, new StringTextComponent("§9? §8'Shift'"));
             }
-            else
-            {
-                for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
-                {   event.getToolTip().add(1, new StringTextComponent(""));
-                }
-            }
             if (event.getFlags().isAdvanced())
             {   event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), new StringTextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
             }
-            event.getToolTip().add(1, new StringTextComponent(" "));
         }
         else if (ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null)
-        {   event.getToolTip().add(1, new StringTextComponent(" "));
-        }
-        else if (stack.getItem() instanceof IArmorVanishable && stack.getCapability(ModCapabilities.ITEM_INSULATION).map(c -> c.getInsulation().size() > 0).orElse(false))
-        {   event.getToolTip().add(1, new StringTextComponent(" "));
+        {
+            event.getToolTip().add(1, new StringTextComponent(" "));
         }
     }
 
     @SubscribeEvent
-    public static void renderCustomTooltips(RenderTooltipEvent event)
+    public static void renderCustomTooltips(GuiScreenEvent.DrawScreenEvent.Post event)
     {
-        if (event.getScreen() instanceof ContainerScreen)
+        if (event.getGui() instanceof ContainerScreen)
         {
-            ContainerScreen<?> screen = (ContainerScreen<?>) event.getScreen();
-            if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.inventory.getCarried().isEmpty()) return;
+            ContainerScreen<?> screen = (ContainerScreen<?>) event.getGui();
             Slot slot = screen.getSlotUnderMouse();
             if (slot == null) return;
-            ItemStack stack = event.getItem();
+            ItemStack stack = screen.getSlotUnderMouse().getItem();
             if (stack.isEmpty()) return;
 
             Tooltip tooltip = null;

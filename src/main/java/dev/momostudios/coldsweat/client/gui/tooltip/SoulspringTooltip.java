@@ -37,21 +37,19 @@ public class SoulspringTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        x += 11;
         if (Minecraft.getInstance().screen instanceof ContainerScreen<?>)
         {
             Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-            AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 34, 30);
-            AbstractGui.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
+            AbstractGui.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
+            AbstractGui.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
             if (Screen.hasShiftDown())
             {
-                AbstractGui.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 34, 30);
+                AbstractGui.blit(poseStack, x + 34, y, 0, 0, 24, 16, 10, 30, 34);
 
                 int i = 0;
                 for (Item item : ConfigSettings.LAMP_FUEL_ITEMS.get().keySet())
                 {
-                    Minecraft.getInstance().getItemRenderer().blitOffset += 401;
-                    Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item.getDefaultInstance(), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
+                    Minecraft.getInstance().getItemRenderer().renderGuiItem(item.getDefaultInstance(), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                     i++;
                 }
             }
