@@ -1,27 +1,21 @@
 package dev.momostudios.coldsweat.core.advancement.trigger;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import dev.momostudios.coldsweat.ColdSweat;
-import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
-import net.minecraft.advancements.criterion.CriterionInstance;
-import net.minecraft.advancements.criterion.EntityPredicate;
-import net.minecraft.advancements.criterion.ItemPredicate;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.advancements.critereon.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
 
-public class ArmorInsulatedTrigger extends AbstractCriterionTrigger<ArmorInsulatedTrigger.Instance>
+public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulatedTrigger.Instance>
 {
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "armor_insulated");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.AndPredicate player, ConditionArrayParser context)
+    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
     {
         ItemPredicate armorStack = ItemPredicate.fromJson(json.get("armor_item"));
         ItemPredicate[] insulStack = ItemPredicate.fromJsonArray(json.get("insulation_item"));
@@ -35,17 +29,17 @@ public class ArmorInsulatedTrigger extends AbstractCriterionTrigger<ArmorInsulat
         return ID;
     }
 
-    public void trigger(ServerPlayerEntity player, ItemStack fuelStack, ItemStack lampStack)
+    public void trigger(ServerPlayer player, ItemStack fuelStack, ItemStack lampStack)
     {
         this.trigger(player, triggerInstance -> triggerInstance.matches(fuelStack, lampStack));
     }
 
-    public static class Instance extends CriterionInstance
+    public static class Instance extends AbstractCriterionTriggerInstance
     {
         private final ItemPredicate armorStack;
         private final ItemPredicate[] insulStack;
 
-        public Instance(EntityPredicate.AndPredicate player, ItemPredicate armorStack, ItemPredicate[] insulStack)
+        public Instance(EntityPredicate.Composite player, ItemPredicate armorStack, ItemPredicate[] insulStack)
         {
             super(ID, player);
             this.armorStack = armorStack;
@@ -59,7 +53,7 @@ public class ArmorInsulatedTrigger extends AbstractCriterionTrigger<ArmorInsulat
         }
 
         @Override
-        public JsonObject serializeToJson(ConditionArraySerializer context)
+        public JsonObject serializeToJson(SerializationContext context)
         {
             JsonObject obj = super.serializeToJson(context);
 

@@ -1,220 +1,119 @@
 package dev.momostudios.coldsweat.client.renderer.model.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.client.renderer.ChameleonAnimations;
+import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import dev.momostudios.coldsweat.client.renderer.animation.AnimationManager;
-import dev.momostudios.coldsweat.client.renderer.model.ModelPart;
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.entity.model.IHasHead;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> implements IHasHead
+public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 {
-	ChameleonEntity chameleon;
+	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "chameleon"), "main");
+
+	final Map<String, ModelPart> modelParts;
+	final ModelPart body;
+	Chameleon chameleon;
 	boolean tongueVisible = false;
 
-	public Map<String, ModelRenderer> modelParts = new HashMap<>();
-
-	private final ModelRenderer body;
-	private final ModelRenderer head;
-	private final ModelRenderer topFrill;
-	private final ModelRenderer jaw;
-	private final ModelRenderer rightEye;
-	private final ModelRenderer leftEye;
-	private final ModelRenderer tongue1;
-	private final ModelRenderer tongue2;
-	private final ModelRenderer tongue3;
-	private final ModelRenderer rightFrontLeg;
-	private final ModelRenderer rightFrontLeg2;
-	private final ModelRenderer rightFrontFoot1;
-	private final ModelRenderer rightFrontFoot2;
-	private final ModelRenderer leftFrontLeg;
-	private final ModelRenderer leftFrontLeg2;
-	private final ModelRenderer leftFrontFoot1;
-	private final ModelRenderer leftFrontFoot2;
-	private final ModelRenderer rightBackLeg;
-	private final ModelRenderer rightBackLeg2;
-	private final ModelRenderer rightBackFoot1;
-	private final ModelRenderer rightBackFoot2;
-	private final ModelRenderer leftBackLeg;
-	private final ModelRenderer leftBackLeg2;
-	private final ModelRenderer leftBackFoot1;
-	private final ModelRenderer leftBackFoot2;
-	private final ModelRenderer tail;
-	private final ModelRenderer tail2;
-	private final ModelRenderer tail3;
-
-	public ChameleonModel() {
-		texWidth = 48;
-		texHeight = 32;
-
-		modelParts.put("Body", body = new ModelRenderer(this));
-		body.setPos(0.0F, 24.0F, 0.0F);
-		body.texOffs(1, 16).addBox(-2.0F, -8.0F, -3.0F, 4.0F, 7.0F, 9.0F, 0.0F, false);
-
-		modelParts.put("Head", head = new ModelRenderer(this));
-		head.setPos(0.0F, -5.0F, -3.0F);
-		body.addChild(head);
-		head.texOffs(0, 0).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 4.0F, 7.0F, 0.0F, false);
-
-		modelParts.put("TopFrill", topFrill = new ModelRenderer(this));
-		topFrill.setPos(0.0F, -3.0F, -5.0F);
-		head.addChild(topFrill);
-		topFrill.xRot = 0.7418F;
-		topFrill.texOffs(30, 0).addBox(-1.0F, 1.4F, 0.05F, 2.0F, 4.0F, 7.0F, 0.0F, false);
-
-		modelParts.put("Jaw", jaw = new ModelRenderer(this));
-		jaw.setPos(0.0F, 2.0F, 0.0F);
-		head.addChild(jaw);
-		jaw.texOffs(15, 7).addBox(-2.0F, 0.0F, -7.0F, 4.0F, 1.0F, 7.0F, 0.0F, false);
-		jaw.texOffs(18, 15).addBox(0.0F, 1.0F, -6.0F, 0.0F, 1.0F, 6.0F, 0.0F, false);
-
-		modelParts.put("RightEye", rightEye = new ModelRenderer(this));
-		rightEye.setPos(-1.5F, 0.0F, -3.5F);
-		head.addChild(rightEye);
-		rightEye.texOffs(15, 1).addBox(-1.5F, -1.5F, -1.5F, 2.0F, 3.0F, 3.0F, 0.0F, false);
-
-		modelParts.put("LeftEye", leftEye = new ModelRenderer(this));
-		leftEye.setPos(1.0005F, -0.0218F, -3.366F);
-		head.addChild(leftEye);
-		leftEye.texOffs(15, 1).addBox(-0.0005F, -1.4782F, -1.634F, 2.0F, 3.0F, 3.0F, 0.0F, true);
-
-		modelParts.put("Tongue1", tongue1 = new ModelRenderer(this));
-		tongue1.setPos(0.0F, 2.0F, 0.0F);
-		head.addChild(tongue1);
-		tongue1.texOffs(27, 25).addBox(-1.0F, 0.0F, -7.0F, 2.0F, 0.0F, 7.0F, 0.0F, false);
-
-		modelParts.put("Tongue2", tongue2 = new ModelRenderer(this));
-		tongue2.setPos(0.0F, 3.0F, 3.0F);
-		tongue1.addChild(tongue2);
-		tongue2.texOffs(27, 25).addBox(-1.0F, -3.0F, -10.0F, 2.0F, 0.0F, 7.0F, 0.0F, false);
-
-		modelParts.put("Tongue3", tongue3 = new ModelRenderer(this));
-		tongue3.setPos(0.0F, 0.0F, 0.0F);
-		tongue2.addChild(tongue3);
-		tongue3.texOffs(27, 25).addBox(-1.0F, -3.0F, -10.0F, 2.0F, 0.0F, 7.0F, 0.0F, false);
-
-		modelParts.put("RightFrontLeg", rightFrontLeg = new ModelRenderer(this));
-		rightFrontLeg.setPos(-2.0F, -3.0F, -1.0F);
-		body.addChild(rightFrontLeg);
-		rightFrontLeg.texOffs(38, 25).addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("RightFrontLeg2", rightFrontLeg2 = new ModelRenderer(this));
-		rightFrontLeg2.setPos(-4.0F, 0.0F, 0.0F);
-		rightFrontLeg.addChild(rightFrontLeg2);
-		rightFrontLeg2.texOffs(38, 29).addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("RightFrontFoot1", rightFrontFoot1 = new ModelRenderer(this));
-		rightFrontFoot1.setPos(-4.0F, 0.0F, 0.0F);
-		rightFrontLeg2.addChild(rightFrontFoot1);
-		rightFrontFoot1.texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, 0.0F, true);
-
-		modelParts.put("RightFrontFoot2", rightFrontFoot2 = new ModelRenderer(this));
-		rightFrontFoot2.setPos(-4.0F, 0.0F, 0.0F);
-		rightFrontLeg2.addChild(rightFrontFoot2);
-		rightFrontFoot2.texOffs(28, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("LeftFrontLeg", leftFrontLeg = new ModelRenderer(this));
-		leftFrontLeg.setPos(2.0F, -3.0F, -1.0F);
-		body.addChild(leftFrontLeg);
-		leftFrontLeg.texOffs(38, 25).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("LeftFrontLeg2", leftFrontLeg2 = new ModelRenderer(this));
-		leftFrontLeg2.setPos(4.0F, 0.0F, 0.0F);
-		leftFrontLeg.addChild(leftFrontLeg2);
-		leftFrontLeg2.texOffs(38, 29).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("LeftFrontFoot1", leftFrontFoot1 = new ModelRenderer(this));
-		leftFrontFoot1.setPos(4.0F, 0.0F, 0.0F);
-		leftFrontLeg2.addChild(leftFrontFoot1);
-		leftFrontFoot1.texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, 0.0F, false);
-
-		modelParts.put("LeftFrontFoot2", leftFrontFoot2 = new ModelRenderer(this));
-		leftFrontFoot2.setPos(4.0F, 0.0F, 0.0F);
-		leftFrontLeg2.addChild(leftFrontFoot2);
-		leftFrontFoot2.texOffs(28, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("RightBackLeg", rightBackLeg = new ModelRenderer(this));
-		rightBackLeg.setPos(-2.0F, -3.0F, 4.0F);
-		body.addChild(rightBackLeg);
-		rightBackLeg.texOffs(38, 25).addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("RightBackLeg2", rightBackLeg2 = new ModelRenderer(this));
-		rightBackLeg2.setPos(-4.0F, 0.0F, 0.0F);
-		rightBackLeg.addChild(rightBackLeg2);
-		rightBackLeg2.texOffs(38, 29).addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("RightBackFoot1", rightBackFoot1 = new ModelRenderer(this));
-		rightBackFoot1.setPos(-4.0F, 0.0F, 0.0F);
-		rightBackLeg2.addChild(rightBackFoot1);
-		rightBackFoot1.texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, 0.0F, true);
-
-		modelParts.put("RightBackFoot2", rightBackFoot2 = new ModelRenderer(this));
-		rightBackFoot2.setPos(-4.0F, 0.0F, 0.0F);
-		rightBackLeg2.addChild(rightBackFoot2);
-		rightBackFoot2.texOffs(28, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, 0.0F, true);
-
-		modelParts.put("LeftBackLeg", leftBackLeg = new ModelRenderer(this));
-		leftBackLeg.setPos(2.0F, -3.0F, 4.0F);
-		body.addChild(leftBackLeg);
-		leftBackLeg.texOffs(38, 25).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("LeftBackLeg2", leftBackLeg2 = new ModelRenderer(this));
-		leftBackLeg2.setPos(4.0F, 0.0F, 0.0F);
-		leftBackLeg.addChild(leftBackLeg2);
-		leftBackLeg2.texOffs(38, 29).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("LeftBackFoot1", leftBackFoot1 = new ModelRenderer(this));
-		leftBackFoot1.setPos(4.0F, 0.0F, 0.0F);
-		leftBackLeg2.addChild(leftBackFoot1);
-		leftBackFoot1.texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, 0.0F, false);
-
-		modelParts.put("LeftBackFoot2", leftBackFoot2 = new ModelRenderer(this));
-		leftBackFoot2.setPos(4.0F, 0.0F, 0.0F);
-		leftBackLeg2.addChild(leftBackFoot2);
-		leftBackFoot2.texOffs(27, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, 0.0F, false);
-
-		modelParts.put("Tail", tail = new ModelRenderer(this));
-		tail.setPos(0.0F, -3.5F, 6.0F);
-		body.addChild(tail);
-		tail.texOffs(34, 18).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, 0.0F, false);
-
-		modelParts.put("Tail2", tail2 = new ModelRenderer(this));
-		tail2.setPos(0.0F, 0.0F, 4.0F);
-		tail.addChild(tail2);
-		tail2.texOffs(38, 13).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 3.0F, 0.0F, false);
-
-		modelParts.put("Tail3", tail3 = new ModelRenderer(this));
-		tail3.setPos(0.0F, 0.0F, 3.0F);
-		tail2.addChild(tail3);
-		tail3.texOffs(0, 17).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 4.0F, 4.0F, 0.0F, false);
+	public ChameleonModel(ModelPart root)
+	{
+		super(RenderType::entityTranslucent);
+		this.body = root.getChild("Body");
+		modelParts = AnimationManager.getChildrenMap(root);
 
 		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
 	}
 
-	@Override
-	public ModelRenderer getHead()
-	{	return head;
+	public static LayerDefinition createBodyLayer()
+	{
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
+
+		PartDefinition Body = partdefinition.addOrReplaceChild("Body", CubeListBuilder.create().texOffs(1, 16).addBox(-2.0F, -8.0F, -3.0F, 4.0F, 7.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+
+		PartDefinition Head = Body.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -5.0F, -3.0F));
+
+		PartDefinition TopFrill_r1 = Head.addOrReplaceChild("TopFrill_r1", CubeListBuilder.create().texOffs(30, 0).addBox(-1.0F, 1.4F, 0.05F, 2.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, -5.0F, 0.7418F, 0.0F, 0.0F));
+
+		PartDefinition Jaw = Head.addOrReplaceChild("Jaw", CubeListBuilder.create().texOffs(15, 7).addBox(-2.0F, 0.0F, -7.0F, 4.0F, 1.0F, 7.0F, new CubeDeformation(0.0F))
+		.texOffs(18, 15).addBox(0.0F, 1.0F, -6.0F, 0.0F, 1.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, 0.0F));
+
+		PartDefinition RightEye = Head.addOrReplaceChild("RightEye", CubeListBuilder.create().texOffs(15, 1).addBox(-1.5F, -1.5F, -1.5F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, 0.0F, -3.5F));
+
+		PartDefinition LeftEye = Head.addOrReplaceChild("LeftEye", CubeListBuilder.create().texOffs(15, 1).mirror().addBox(-0.0005F, -1.4782F, -1.634F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(1.0005F, -0.0218F, -3.366F));
+
+		PartDefinition Tongue1 = Head.addOrReplaceChild("Tongue1", CubeListBuilder.create().texOffs(27, 25).addBox(-1.0F, 0.0F, -7.0F, 2.0F, 0.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, 0.0F));
+
+		PartDefinition Tongue2 = Tongue1.addOrReplaceChild("Tongue2", CubeListBuilder.create().texOffs(27, 25).addBox(-1.0F, -3.0F, -10.0F, 2.0F, 0.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 3.0F, 3.0F));
+
+		PartDefinition Tongue3 = Tongue2.addOrReplaceChild("Tongue3", CubeListBuilder.create().texOffs(27, 25).addBox(-1.0F, -3.0F, -10.0F, 2.0F, 0.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+		PartDefinition RightFrontLeg = Body.addOrReplaceChild("RightFrontLeg", CubeListBuilder.create().texOffs(38, 25).mirror().addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-2.0F, -3.0F, -1.0F));
+
+		PartDefinition RightFrontLeg2 = RightFrontLeg.addOrReplaceChild("RightFrontLeg2", CubeListBuilder.create().texOffs(38, 29).mirror().addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition RightFrontFoot1 = RightFrontLeg2.addOrReplaceChild("RightFrontFoot1", CubeListBuilder.create().texOffs(28, 27).mirror().addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition RightFrontFoot2 = RightFrontLeg2.addOrReplaceChild("RightFrontFoot2", CubeListBuilder.create().texOffs(28, 24).mirror().addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftFrontLeg = Body.addOrReplaceChild("LeftFrontLeg", CubeListBuilder.create().texOffs(38, 25).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(2.0F, -3.0F, -1.0F));
+
+		PartDefinition LeftFrontLeg2 = LeftFrontLeg.addOrReplaceChild("LeftFrontLeg2", CubeListBuilder.create().texOffs(38, 29).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftFrontFoot1 = LeftFrontLeg2.addOrReplaceChild("LeftFrontFoot1", CubeListBuilder.create().texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftFrontFoot2 = LeftFrontLeg2.addOrReplaceChild("LeftFrontFoot2", CubeListBuilder.create().texOffs(28, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition RightBackLeg = Body.addOrReplaceChild("RightBackLeg", CubeListBuilder.create().texOffs(38, 25).mirror().addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-2.0F, -3.0F, 4.0F));
+
+		PartDefinition RightBackLeg2 = RightBackLeg.addOrReplaceChild("RightBackLeg2", CubeListBuilder.create().texOffs(38, 29).mirror().addBox(-4.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition RightBackFoot1 = RightBackLeg2.addOrReplaceChild("RightBackFoot1", CubeListBuilder.create().texOffs(28, 27).mirror().addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition RightBackFoot2 = RightBackLeg2.addOrReplaceChild("RightBackFoot2", CubeListBuilder.create().texOffs(28, 24).mirror().addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftBackLeg = Body.addOrReplaceChild("LeftBackLeg", CubeListBuilder.create().texOffs(38, 25).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(2.0F, -3.0F, 4.0F));
+
+		PartDefinition LeftBackLeg2 = LeftBackLeg.addOrReplaceChild("LeftBackLeg2", CubeListBuilder.create().texOffs(38, 29).addBox(0.0F, -1.0F, -1.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftBackFoot1 = LeftBackLeg2.addOrReplaceChild("LeftBackFoot1", CubeListBuilder.create().texOffs(28, 27).addBox(0.0F, -3.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition LeftBackFoot2 = LeftBackLeg2.addOrReplaceChild("LeftBackFoot2", CubeListBuilder.create().texOffs(27, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 0.0F, 0.0F));
+
+		PartDefinition Tail = Body.addOrReplaceChild("Tail", CubeListBuilder.create().texOffs(34, 18).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.5F, 6.0F));
+
+		PartDefinition Tail2 = Tail.addOrReplaceChild("Tail2", CubeListBuilder.create().texOffs(38, 13).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 4.0F));
+
+		PartDefinition Tail3 = Tail2.addOrReplaceChild("Tail3", CubeListBuilder.create().texOffs(0, 17).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 3.0F));
+
+		return LayerDefinition.create(meshdefinition, 48, 32);
 	}
 
 	@Override
-	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
+	public void setupAnim(@NotNull T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
 	{
 		chameleon = entity;
 		if (!Minecraft.getInstance().isPaused())
@@ -223,9 +122,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 			float tickDelta = Minecraft.getInstance().getDeltaFrameTime();
 			float partialTick = Minecraft.getInstance().getFrameTime();
-			ModelRenderer head = modelParts.get("Head");
-			ModelRenderer rightEye = modelParts.get("RightEye");
-			ModelRenderer leftEye = modelParts.get("LeftEye");
+			ModelPart head = modelParts.get("Head");
+			ModelPart rightEye = modelParts.get("RightEye");
+			ModelPart leftEye = modelParts.get("LeftEye");
 
 			// get the pitch (up/down) of the head in Radians
 			float desiredXHead = CSMath.toRadians(headPitch);
@@ -242,12 +141,14 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 			// Move the right eye if the Chameleon is looking at an object to its right
 			if (head.yRot < desiredYHead)
-			{	// If there is slop in the head rotation, make up the difference with the eye
+			{
+				// If there is slop in the head rotation, make up the difference with the eye
 				entity.yRotRightEye += (-CSMath.clamp((desiredYHead - head.yRot), -0.5f, 0.5f) - entity.yRotRightEye) * tickDelta;
 				entity.xRotRightEye += (-CSMath.clamp((desiredXHead - head.xRot), -0.5f, 0.5f) - entity.xRotRightEye) * tickDelta;
 			}
 			else
-			{	// Reset the eye rotation
+			{
+				// Reset the eye rotation
 				entity.yRotRightEye += (0 - entity.yRotRightEye) * tickDelta;
 				entity.xRotRightEye += (0 - entity.xRotRightEye) * tickDelta;
 			}
@@ -280,18 +181,17 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 			AnimationManager.animateEntity(entity, (animTime, frameTime) ->
 			{
-				Map<String, ModelRenderer> animatedParts = new HashMap<>(modelParts);
+				Map<String, ModelPart> animatedParts = new HashMap<>(modelParts);
 				animatedParts.remove("Head");
 				animatedParts.remove("LeftEye");
 				animatedParts.remove("RightEye");
-				ModelRenderer tail1  = animatedParts.remove("Tail");
-				ModelRenderer tail2 = animatedParts.remove("Tail2");
-				ModelRenderer tail3 = animatedParts.remove("Tail3");
+				ModelPart tail  = animatedParts.remove("Tail");
+				ModelPart tail2 = animatedParts.remove("Tail2");
+				ModelPart tail3 = animatedParts.remove("Tail3");
 
 				// Riding player animation
-				if (this.riding && entity.getVehicle() instanceof PlayerEntity)
+				if (this.riding && entity.getVehicle() instanceof Player player)
 				{
-					PlayerEntity player = (PlayerEntity) entity.getVehicle();
 					float playerYaw = CSMath.blend(player.yHeadRotO, player.yHeadRot, partialTick, 0, 1);
 					animTime += frameTime;
 
@@ -300,7 +200,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.RIDE.animate("Tail",  tail1,  0, false);
+						ChameleonAnimations.RIDE.animate("Tail",  tail,  0, false);
 						ChameleonAnimations.RIDE.animate("Tail2", tail2, 0, false);
 						ChameleonAnimations.RIDE.animate("Tail3", tail3, 0, false);
 					}
@@ -313,13 +213,13 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				// Walk animation
 				else if (entity.isWalking())
 				{
-					float walkSpeed = Math.min(0.15f, (float) new Vector3d((float) entity.getDeltaMovement().x, 0, (float) entity.getDeltaMovement().z).length());
+					float walkSpeed = Math.min(0.15f, new Vec2((float) entity.getDeltaMovement().x, (float) entity.getDeltaMovement().z).length());
 					animTime += (frameTime * walkSpeed * 30);
 
 					ChameleonAnimations.WALK.animateAll(animatedParts, animTime, false);
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.WALK.animate("Tail",  tail1,  animTime, true);
+						ChameleonAnimations.WALK.animate("Tail",  tail,  animTime, true);
 						ChameleonAnimations.WALK.animate("Tail2", tail2, animTime, true);
 						ChameleonAnimations.WALK.animate("Tail3", tail3, animTime, true);
 					}
@@ -333,7 +233,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())
 					{
-						ChameleonAnimations.WALK.animate("Tail",  tail1,  0, true);
+						ChameleonAnimations.WALK.animate("Tail",  tail,  0, true);
 						ChameleonAnimations.WALK.animate("Tail2", tail2, 0, true);
 						ChameleonAnimations.WALK.animate("Tail3", tail3, 0, true);
 					}
@@ -344,32 +244,31 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				{
 					BlockPos trackingPos = chameleon.getTrackingPos();
 
-					Vector3d entityPos = entity.getPosition(partialTick);
-					Vector3d trackingDirection = new Vector3d(trackingPos.getX() - entityPos.x, 0, trackingPos.getZ() - entityPos.z);
+					Vec3 entityPos = entity.getPosition(partialTick);
+					Vec3 trackingDirection = new Vec3(trackingPos.getX() - entityPos.x, 0, trackingPos.getZ() - entityPos.z);
 					float playerRotX = 0;
 					float rotY;
 
-					if (entity.getVehicle() instanceof PlayerEntity)
-					{	PlayerEntity player = (PlayerEntity) entity.getVehicle();
-						playerRotX = player.getViewXRot(partialTick);
+					if (entity.getVehicle() instanceof Player player)
+					{	playerRotX = player.getViewXRot(partialTick);
 						rotY = CSMath.blend(player.yHeadRotO, player.yHeadRot, partialTick, 0, 1);
 					}
 					else rotY = CSMath.blend(entity.yBodyRotO, entity.yBodyRot, partialTick, 0, 1);
 
 					// Get the angle between the entity's position and the tracking position (radians)
-					float angle = (float) Math.atan2(trackingDirection.z, trackingDirection.x) - CSMath.toRadians(MathHelper.wrapDegrees(rotY));
+					float angle = (float) Math.atan2(trackingDirection.z, trackingDirection.x) - CSMath.toRadians(Mth.wrapDegrees(rotY));
 
 					float desiredTailRot = angle + CSMath.toRadians(90);
 
 					// Side-to-side tail movement
 					tail2.yRot = (float) Math.sin(desiredTailRot) / 1.3f;
-					tail1.yRot = tail2.yRot;
+					tail.yRot  = tail2.yRot;
 					tail3.yRot = tail2.yRot;
 
 					// Up-and-down tail movement
 					tail2.xRot = Math.max(0, (float) Math.sin(desiredTailRot - Math.PI / 2) + 0.2f);
 					tail3.xRot = tail2.xRot / 1.5f;
-					tail1.xRot = tail3.xRot - CSMath.toRadians(playerRotX) / 1.25f + 0.1f;
+					tail.xRot = tail3.xRot - CSMath.toRadians(playerRotX) / 1.25f + 0.1f;
 				}
 
 				// Eat animation (applied on top of other anims)
@@ -381,12 +280,11 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 				// Move the tail in accordance with the velocity of the player it's riding
 				float playerXHead = 0;
-				if (entity.getVehicle() instanceof PlayerEntity)
-				{	PlayerEntity player = (PlayerEntity) entity.getVehicle();
-					playerXHead = CSMath.toRadians(player.getViewXRot(partialTick));
+				if (entity.getVehicle() instanceof Player player)
+				{	playerXHead = CSMath.toRadians(player.getViewXRot(partialTick));
 				}
 
-				Vector3d velocity = playerXHead != 0 ? entity.getVehicle().getDeltaMovement() : entity.getDeltaMovement();
+				Vec3 velocity = playerXHead != 0 ? entity.getVehicle().getDeltaMovement() : entity.getDeltaMovement();
 				// Side-to-side tail movement (disabled if the chameleon is tracking a biome)
 				if (!chameleon.isTracking())
 				{
@@ -402,9 +300,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 					float tailRot2 = (float) Math.sin(chameleon.tailPhase - 1) / speedStraightFactor;
 					float tailRot3 = (float) Math.sin(chameleon.tailPhase - 2) / speedStraightFactor;
 
-					float tailRotation = (1 + Math.abs(tail1.xRot - 0.2f) * 1);
+					float tailRotation = (1 + Math.abs(tail.xRot - 0.2f) * 1);
 
-					tail1.yRot  = tailRot1 / tailRotation;
+					tail.yRot  = tailRot1 / tailRotation;
 					tail2.yRot = tailRot2 / tailRotation;
 					tail3.yRot = tailRot3 / tailRotation;
 				}
@@ -412,8 +310,8 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				// Up/down tail movement (takes into account player head rotation)
 				float playerYVel = (float) velocity.y;
 				float tailRot = entity.xRotTail += (CSMath.clamp(playerYVel, -0.5, 0.5) - entity.xRotTail) * frameTime * 8;
-				tailRot *= CSMath.clamp(Math.abs(tail1.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
-				tail1.xRot += tailRot;
+				tailRot *= CSMath.clamp(Math.abs(tail.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
+				tail.xRot += tailRot;
 				tail2.xRot += tailRot;
 				tail3.xRot += tailRot;
 
@@ -423,11 +321,12 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 	}
 
 	@Override
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
-	{	renderToBuffer(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha, false);
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+	{
+		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha, false);
 	}
 
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
 	{
 		if (chameleon == null) return;
 
@@ -449,38 +348,46 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 			}
 		}
 
+		ModelPart tongue1 = modelParts.get("Tongue1");
+		ModelPart head = body.getChild("Head");
+
 		tongue1.visible = false;
 
 		if (young)
 		{	head.visible = false;
-			matrixStack.pushPose();
-			matrixStack.scale(0.75f, 0.75f, 0.75f);
+			poseStack.pushPose();
+			poseStack.scale(0.75f, 0.75f, 0.75f);
 			body.y = 32f;
-			body.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
-			matrixStack.popPose();
+			body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+			poseStack.popPose();
 
 			head.visible = true;
 			head.y = 19.25f;
 			head.z = -2.25f;
-			head.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+			head.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 		}
 		else
 		{	body.y = 23.5f;
 			head.y = -5f;
 			head.z = -3f;
-			body.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+			body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 		}
 
 		// Render the tongue with a different VertexConsumer that culls backfaces
 		if (tongueVisible && !isOverlay)
 		{
-			matrixStack.pushPose();
+			poseStack.pushPose();
+			ModelPart jaw = modelParts.get("Jaw");
+
+			// vertex consumer for entityTranslucentCull
+			VertexConsumer tongueConsumer = Minecraft.getInstance().renderBuffers().bufferSource()
+													 .getBuffer(RenderType.entityCutout(ChameleonEntityRenderer.CHAMELEON_GREEN));
 			tongue1.visible = true;
-			matrixStack.translate(0, 1.1555, -0.18755);
+			poseStack.translate(0, 1.1555, -0.18755);
 			tongue1.xRot = head.xRot + jaw.xRot / 2;
 			tongue1.yRot = head.yRot;
-			tongue1.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
-			matrixStack.popPose();
+			tongue1.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
+			poseStack.popPose();
 		}
 		RenderSystem.disableBlend();
 	}

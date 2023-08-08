@@ -4,10 +4,10 @@ import dev.momostudios.coldsweat.config.ColdSweatConfig;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public class SyncConfigSettingsMessage
 {
     static final UUID EMPTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    Map<String, CompoundNBT> configValues;
+    Map<String, CompoundTag> configValues;
     UUID menuOpener;
 
     public SyncConfigSettingsMessage()
@@ -30,29 +30,29 @@ public class SyncConfigSettingsMessage
         this(ConfigSettings.encode(), menuOpener);
     }
 
-    private SyncConfigSettingsMessage(Map<String, CompoundNBT> values, UUID menuOpener)
+    private SyncConfigSettingsMessage(Map<String, CompoundTag> values, UUID menuOpener)
     {
         this.configValues = values;
         this.menuOpener = menuOpener;
     }
 
-    public static void encode(SyncConfigSettingsMessage message, PacketBuffer buffer)
+    public static void encode(SyncConfigSettingsMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeUUID(message.menuOpener);
         buffer.writeInt(message.configValues.size());
-        for (Map.Entry<String, CompoundNBT> entry : message.configValues.entrySet())
+        for (Map.Entry<String, CompoundTag> entry : message.configValues.entrySet())
         {
             buffer.writeUtf(entry.getKey());
             buffer.writeNbt(entry.getValue());
         }
     }
 
-    public static SyncConfigSettingsMessage decode(PacketBuffer buffer)
+    public static SyncConfigSettingsMessage decode(FriendlyByteBuf buffer)
     {
         UUID openMenu = buffer.readUUID();
 
         int size = buffer.readInt();
-        Map<String, CompoundNBT> values = new HashMap<>();
+        Map<String, CompoundTag> values = new HashMap<>();
         for (int i = 0; i < size; i++)
         {   values.put(buffer.readUtf(), buffer.readNbt());
         }

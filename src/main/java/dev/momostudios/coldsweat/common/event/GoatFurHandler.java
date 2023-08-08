@@ -4,35 +4,44 @@ import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.capability.GoatFurCap;
 import dev.momostudios.coldsweat.common.capability.IShearableCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.SyncShearableDataMessage;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.serialization.Triplet;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
+import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,15 +53,12 @@ public class GoatFurHandler
     public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
     {
         Entity entity = event.getTarget();
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof LlamaEntity)
+        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
         {
-            LlamaEntity llama = (LlamaEntity) entity;
-            if (!(!llama.isBaby() && !llama.level.isClientSide && stack.getItem() == Items.SHEARS)) return;
-
-            llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
                 if (cap.isSheared())
                 {   event.setResult(PlayerInteractEvent.Result.DENY);
@@ -63,15 +69,51 @@ public class GoatFurHandler
                 player.swing(event.getHand(), true);
                 stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
                 // Play sound
-                llama.level.playSound(null, llama, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
-                WorldHelper.entityDropItem(llama, new ItemStack(ModItems.LLAMA_FUR));
+                WorldHelper.entityDropItem(goat, new ItemStack(ModItems.GOAT_FUR));
+
+                // Random chance to ram the player when sheared
+                if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
+                && !goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
+                {
+                    // Set ram cooldown ticks
+                    goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
+                    // Stop active goals
+                    goat.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
+
+                    // Start lowering head
+                    TaskScheduler.scheduleServer(() ->
+                    {
+                        ClientboundEntityEventPacket packet = new ClientboundEntityEventPacket(goat, (byte) 58);
+                        ((ServerChunkCache) goat.level.getChunkSource()).broadcastAndSend(goat, packet);
+                    }, 5);
+
+                    // Look at player
+                    BehaviorUtils.lookAtEntity(goat, player);
+                    // Stop walking
+                    goat.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+
+                    // Set ram target to player pos
+                    goat.getBrain().setMemory(MemoryModuleType.RAM_TARGET, player.position());
+                    TaskScheduler.scheduleServer(() ->
+                    {
+                        if (player.distanceTo(goat) <= 10)
+                        {
+                            goat.playSound(goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_PREPARE_RAM : SoundEvents.GOAT_PREPARE_RAM, 1.0F, 1.0F);
+                            goat.getBrain().setMemory(MemoryModuleType.RAM_TARGET, player.position());
+                        }
+                    }, 30);
+
+                    // Trigger ram
+                    goat.getBrain().setActiveActivityIfPossible(Activity.RAM);
+                }
 
                 // Set sheared
                 cap.setSheared(true);
-                cap.setLastSheared(llama.tickCount);
-                syncData(llama, null);
+                cap.setLastSheared(goat.tickCount);
+                syncData(goat, null);
                 event.setResult(PlayerInteractEvent.Result.ALLOW);
             });
         }
@@ -82,27 +124,25 @@ public class GoatFurHandler
     public static void onGoatTick(LivingEvent.LivingUpdateEvent event)
     {
         Entity entity = event.getEntity();
-        if (!(entity instanceof LlamaEntity)) return;
+        if (!(entity instanceof Goat goat)) return;
 
-        LlamaEntity llama = (LlamaEntity) entity;
-
-        Triplet<Integer, Integer, Double> furConfig = ConfigSettings.LLAMA_FUR_TIMINGS.get();
+        Triplet<Integer, Integer, Double> furConfig = ConfigSettings.GOAT_FUR_TIMINGS.get();
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
-        if (!llama.level.isClientSide && llama.tickCount % furConfig.getFirst() == 0 && Math.random() < furConfig.getThird())
+        if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
-            llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
                 // Growth cooldown has passed and goat is sheared
-                if (llama.tickCount - cap.lastSheared() >= furConfig.getSecond() && cap.isSheared())
+                if (goat.tickCount - cap.lastSheared() >= furConfig.getB() && cap.isSheared())
                 {
-                    WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, llama, llama.getSoundSource(), 0.5f, 0.6f);
-                    WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, llama, llama.getSoundSource(), 0.5f, 0.8f);
+                    WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, goat, goat.getSoundSource(), 0.5f, 0.6f);
+                    WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, goat.getSoundSource(), 0.5f, 0.8f);
 
                     // Spawn particles
-                    WorldHelper.spawnParticleBatch(llama.level, ParticleTypes.SPIT, llama.getX(), llama.getY() + llama.getBbHeight() / 2, llama.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
+                    WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
                     // Set not sheared
                     cap.setSheared(false);
-                    syncData(llama, null);
+                    syncData(goat, null);
                 }
             });
         }
@@ -111,12 +151,12 @@ public class GoatFurHandler
     @SubscribeEvent
     public static void onEntityLoaded(PlayerEvent.StartTracking event)
     {
-        if (event.getEntity() instanceof ServerPlayerEntity && event.getTarget() instanceof LlamaEntity)
-        {   syncData((LlamaEntity) event.getTarget(), (ServerPlayerEntity) event.getEntity());
+        if (event.getEntity() instanceof ServerPlayer player && event.getTarget() instanceof Goat goat)
+        {   syncData(goat, player);
         }
     }
 
-    public static void syncData(LlamaEntity goat, ServerPlayerEntity player)
+    public static void syncData(Goat goat, ServerPlayer player)
     {
         if (!goat.level.isClientSide)
         {   goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
@@ -130,7 +170,7 @@ public class GoatFurHandler
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
-        if (event.getObject() instanceof LlamaEntity)
+        if (event.getObject() instanceof Goat)
         {
             // Make a new capability instance to attach to the entity
             IShearableCap cap = new GoatFurCap();
@@ -138,7 +178,7 @@ public class GoatFurHandler
             LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
             Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
 
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
+            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
             {
                 @Nonnull
                 @Override
@@ -153,13 +193,13 @@ public class GoatFurHandler
                 }
 
                 @Override
-                public CompoundNBT serializeNBT()
+                public CompoundTag serializeNBT()
                 {
                     return cap.serializeNBT();
                 }
 
                 @Override
-                public void deserializeNBT(CompoundNBT nbt)
+                public void deserializeNBT(CompoundTag nbt)
                 {
                     cap.deserializeNBT(nbt);
                 }

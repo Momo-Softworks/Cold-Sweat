@@ -1,35 +1,44 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.tileentity.IceboxTileEntity;
-import dev.momostudios.coldsweat.core.init.TileEntityInit;
+import dev.momostudios.coldsweat.common.blockentity.IceboxBlockEntity;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import dev.momostudios.coldsweat.util.registries.ModBlockEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class IceboxBlock extends Block
+public class IceboxBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
@@ -52,17 +61,23 @@ public class IceboxBlock extends Block
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return type == ModBlockEntities.ICEBOX ? IceboxBlockEntity::tick : null;
+    }
+
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (world.getBlockEntity(pos) instanceof IceboxTileEntity)
+        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity)
         {
-            IceboxTileEntity te = (IceboxTileEntity) world.getBlockEntity(pos);
+            IceboxBlockEntity te = (IceboxBlockEntity) level.getBlockEntity(pos);
             ItemStack stack = player.getItemInHand(hand);
             int itemFuel = te.getItemFuel(stack);
 
-            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxTileEntity.MAX_FUEL)
+            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
             {
                 if (!player.isCreative())
                 {
@@ -70,7 +85,7 @@ public class IceboxBlock extends Block
                     {
                         ItemStack container = stack.getContainerItem();
                         stack.shrink(1);
-                        player.inventory.add(container);
+                        player.getInventory().add(container);
                     }
                     else
                     {
@@ -79,20 +94,22 @@ public class IceboxBlock extends Block
                 }
                 te.setFuel(te.getFuel() + itemFuel);
 
-                world.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
-            else if (!world.isClientSide)
+            else if (!level.isClientSide)
             {
-                NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+                NetworkHooks.openGui((ServerPlayer) player, te, pos);
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
 
+    @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {   return TileEntityInit.ICEBOX_BLOCK_ENTITY_TYPE.get().create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    {
+        return new IceboxBlockEntity(pos, state);
     }
 
     @SuppressWarnings("deprecation")
@@ -107,14 +124,14 @@ public class IceboxBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
     {
         if (state.getBlock() != newState.getBlock())
         {
-            TileEntity te = world.getBlockEntity(pos);
-            if (te instanceof IceboxTileEntity)
-            {   IceboxTileEntity icebox = (IceboxTileEntity) te;
-                InventoryHelper.dropContents(world, pos, icebox);
+            BlockEntity tileentity = world.getBlockEntity(pos);
+            if (tileentity instanceof IceboxBlockEntity te)
+            {
+                Containers.dropContents(world, pos, te);
                 world.updateNeighborsAt(pos, this);
             }
         }
@@ -123,16 +140,17 @@ public class IceboxBlock extends Block
 
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
-    {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    {
+        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, FROSTED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING, FROSTED);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
-    {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
     }
 }

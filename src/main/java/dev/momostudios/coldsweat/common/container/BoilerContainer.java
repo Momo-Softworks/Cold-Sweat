@@ -1,26 +1,26 @@
 package dev.momostudios.coldsweat.common.container;
 
-import dev.momostudios.coldsweat.common.tileentity.BoilerTileEntity;
-import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.common.blockentity.BoilerBlockEntity;
+import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.data.tags.ModItemTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.Objects;
 
-public class BoilerContainer extends Container
+public class BoilerContainer extends AbstractContainerMenu
 {
-    public final BoilerTileEntity te;
+    public final BoilerBlockEntity te;
 
-    public BoilerContainer(final int windowId, final PlayerInventory playerInv, final BoilerTileEntity te)
+    public BoilerContainer(final int windowId, final Inventory playerInv, final BoilerBlockEntity te)
     {
-        super(ContainerInit.BOILER_CONTAINER_TYPE.get(), windowId);
+        super(MenuInit.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Fuel slot
@@ -39,7 +39,7 @@ public class BoilerContainer extends Container
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return ModItemTags.BOILER_VALID.contains(stack.getItem());
+                {   return stack.is(ModItemTags.BOILER_VALID);
                 }
             });
         }
@@ -60,7 +60,7 @@ public class BoilerContainer extends Container
         }
     }
 
-    public BoilerContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
+    public BoilerContainer(final int windowId, final Inventory playerInv, final FriendlyByteBuf data)
     {
         this(windowId, playerInv, getTileEntity(playerInv, data));
     }
@@ -71,26 +71,26 @@ public class BoilerContainer extends Container
     }
 
 
-    private static BoilerTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static BoilerBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof BoilerTileEntity)
+        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        if (te instanceof BoilerBlockEntity)
         {
-            return (BoilerTileEntity) te;
+            return (BoilerBlockEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player)
+    public boolean stillValid(Player playerIn)
     {
-        return player.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
+        return playerIn.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int index)
+    public ItemStack quickMoveStack(Player player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
@@ -109,31 +109,35 @@ public class BoilerContainer extends Container
             }
             else
             {
-                if (ModItemTags.BOILER_VALID.contains(itemstack.getItem()))
+                if (itemstack.is(ModItemTags.BOILER_VALID))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
-                    {   slot.onQuickCraft(itemstack1, itemstack);
+                    {
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (this.te.getItemFuel(itemstack) > 0)
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
-                    {   slot.onQuickCraft(itemstack1, itemstack);
+                    {
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.withinRange(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 10, 36, false))
-                    {   slot.onQuickCraft(itemstack1, itemstack);
+                    {
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.withinRange(index, 10, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
-                    {   slot.onQuickCraft(itemstack1, itemstack);
+                    {
+                        slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -141,10 +145,12 @@ public class BoilerContainer extends Container
             }
 
             if (itemstack1.isEmpty())
-            {   slot.set(ItemStack.EMPTY);
+            {
+                slot.set(ItemStack.EMPTY);
             }
             else
-            {   slot.setChanged();
+            {
+                slot.setChanged();
             }
 
             slot.onTake(player, itemstack1);

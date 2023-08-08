@@ -2,11 +2,11 @@ package dev.momostudios.coldsweat.util.entity;
 
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -15,10 +15,10 @@ public class NBTHelper
 {
     private NBTHelper() {}
 
-    public static CompoundNBT modifierToTag(TempModifier modifier)
+    public static CompoundTag modifierToTag(TempModifier modifier)
     {
-        // Write the modifier's data to a CompoundNBT
-        CompoundNBT modifierTag = new CompoundNBT();
+        // Write the modifier's data to a CompoundTag
+        CompoundTag modifierTag = new CompoundTag();
         modifierTag.putString("Id", modifier.getID());
 
         // Add the modifier's arguments
@@ -38,9 +38,9 @@ public class NBTHelper
         return modifierTag;
     }
 
-    public static Optional<TempModifier> tagToModifier(CompoundNBT modifierTag)
+    public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
-        // Create a new modifier from the CompoundNBT
+        // Create a new modifier from the CompoundTag
         Optional<TempModifier> optional = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
         optional.ifPresent(modifier ->
         {
@@ -70,18 +70,18 @@ public class NBTHelper
 
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
-        CompoundNBT tag;
-        if (owner instanceof LivingEntity)
+        CompoundTag tag;
+        if (owner instanceof LivingEntity entity)
         {
-            tag = ((LivingEntity) owner).getPersistentData();
+            tag = entity.getPersistentData();
         }
-        else if (owner instanceof ItemStack)
+        else if (owner instanceof ItemStack stack)
         {
-            tag = ((ItemStack) owner).getOrCreateTag();
+            tag = stack.getOrCreateTag();
         }
-        else if (owner instanceof TileEntity)
+        else if (owner instanceof BlockEntity blockEntity)
         {
-            tag = ((TileEntity) owner).getTileData();
+            tag = blockEntity.getTileData();
         }
         else return 0;
 
@@ -101,16 +101,16 @@ public class NBTHelper
      */
     public static String getModifierTag(Temperature.Type type)
     {
-        switch (type)
+        return switch (type)
         {
-            case CORE  : return "coreTempModifiers";
-            case WORLD : return "worldTempModifiers";
-            case BASE  : return "baseTempModifiers";
-            case RATE  : return "rateTempModifiers";
-            case FREEZING_POINT : return "maxTempModifiers";
-            case BURNING_POINT  : return "minTempModifiers";
-            default : throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
-        }
+            case CORE  -> "coreTempModifiers";
+            case WORLD -> "worldTempModifiers";
+            case BASE  -> "baseTempModifiers";
+            case RATE  -> "rateTempModifiers";
+            case FREEZING_POINT -> "maxTempModifiers";
+            case BURNING_POINT -> "minTempModifiers";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
+        };
     }
 
     /**
@@ -121,14 +121,14 @@ public class NBTHelper
      */
     public static String getTemperatureTag(Temperature.Type type)
     {
-        switch (type)
+        return switch (type)
         {
-            case CORE  : return "coreTemp";
-            case WORLD : return "worldTemp";
-            case BASE  : return "baseTemp";
-            case FREEZING_POINT : return "maxWorldTemp";
-            case BURNING_POINT  : return "minWorldTemp";
-            default : throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
-        }
+            case CORE  -> "coreTemp";
+            case WORLD -> "worldTemp";
+            case BASE  -> "baseTemp";
+            case FREEZING_POINT -> "maxWorldTemp";
+            case BURNING_POINT -> "minWorldTemp";
+            default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
+        };
     }
 }

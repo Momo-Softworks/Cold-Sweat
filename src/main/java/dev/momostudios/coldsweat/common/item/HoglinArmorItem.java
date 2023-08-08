@@ -2,20 +2,23 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.client.event.RegisterModels;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.IItemRenderProperties;
+
+import java.util.function.Consumer;
 
 public class HoglinArmorItem extends ArmorItem
 {
-    public HoglinArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
+    public HoglinArmorItem(ArmorMaterial material, EquipmentSlot slot, Properties properties)
     {   super(material, slot, properties);
     }
 
-    /*@Override
+    @Override
     public void initializeClient(Consumer<IItemRenderProperties> consumer)
     {
         consumer.accept(new IItemRenderProperties()
@@ -34,10 +37,10 @@ public class HoglinArmorItem extends ArmorItem
                 };
             }
         });
-    }*/
+    }
 
     @Override
     public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer)
-    {   return stack.getItem() == ModItems.HOGLIN_HEADPIECE;
+    {   return stack.is(ModItems.HOGLIN_HEADPIECE);
     }
 }

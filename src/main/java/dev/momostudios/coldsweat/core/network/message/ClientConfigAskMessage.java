@@ -1,9 +1,9 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -22,11 +22,11 @@ public class ClientConfigAskMessage
         this(SyncConfigSettingsMessage.EMPTY_UUID);
     }
 
-    public static void encode(ClientConfigAskMessage message, PacketBuffer buffer) {
+    public static void encode(ClientConfigAskMessage message, FriendlyByteBuf buffer) {
         buffer.writeUUID(message.openerUUID);
     }
 
-    public static ClientConfigAskMessage decode(PacketBuffer buffer)
+    public static ClientConfigAskMessage decode(FriendlyByteBuf buffer)
     {
         return new ClientConfigAskMessage(buffer.readUUID());
     }

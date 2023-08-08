@@ -16,64 +16,68 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.command.impl.data.EntityDataAccessor;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 @Mod.EventBusSubscriber
-public class ChameleonEntity extends AnimalEntity
+public class Chameleon extends Animal
 {
-    static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(EntityDataManager.class, "func_187219_c", DataParameter.class);
+    static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
     static
     {   GET_DATA_ITEM.setAccessible(true);
     }
 
-    static final DataParameter<Boolean> SHEDDING = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BOOLEAN);
-    static final DataParameter<Integer> LAST_SHED = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
-    static final DataParameter<Integer> HURT_TIMESTAMP = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
-    static final DataParameter<CompoundNBT> TRUSTED_PLAYERS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.COMPOUND_TAG);
-    static final DataParameter<BlockPos> TRACKING_POS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BLOCK_POS);
-    static final DataParameter<Integer> EAT_TIMESTAMP = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
-    static final DataParameter<Float> TEMPERATURE = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.FLOAT);
-    static final DataParameter<CompoundNBT> EDIBLE_COOLDOWNS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.COMPOUND_TAG);
-    static final DataParameter<Boolean> SEARCHING = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BOOLEAN);
-    static final DataParameter<Integer> AGE_SECS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
+    static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<BlockPos> TRACKING_POS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BLOCK_POS);
+    static final EntityDataAccessor<Integer> EAT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
+    static final EntityDataAccessor<Float> TEMPERATURE = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.FLOAT);
+    static final EntityDataAccessor<CompoundTag> EDIBLE_COOLDOWNS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<Boolean> SEARCHING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Integer> AGE_SECS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
 
     public float xRotHead = 0;
     public float yRotHead = 0;
@@ -88,25 +92,25 @@ public class ChameleonEntity extends AnimalEntity
     public float opacity = 1;
     float desiredTemp = 1f;
 
-    public ChameleonEntity(EntityType<ChameleonEntity> type, World world)
+    public Chameleon(EntityType<Chameleon> type, Level Level)
     {
-        super(type, world);
+        super(type, Level);
     }
 
     @Override
     protected void registerGoals()
-    {   this.goalSelector.addGoal(0, new SwimGoal(this));
+    {   this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
-        this.goalSelector.addGoal(2, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagList(edible.associatedItems()))), false));
+        this.goalSelector.addGoal(2, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagValue(edible.associatedItems()))), false));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
-        this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6.0F));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
     }
 
-    public static AttributeModifierMap.MutableAttribute createAttributes()
+    public static AttributeSupplier.Builder createAttributes()
     {
-        return TameableEntity.createMobAttributes()
+        return TamableAnimal.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0D)
@@ -120,21 +124,20 @@ public class ChameleonEntity extends AnimalEntity
         this.entityData.define(SHEDDING, false);
         this.entityData.define(LAST_SHED, 0);
         this.entityData.define(HURT_TIMESTAMP, 0);
-        this.entityData.define(TRUSTED_PLAYERS, new CompoundNBT());
+        this.entityData.define(TRUSTED_PLAYERS, new CompoundTag());
         this.entityData.define(TRACKING_POS, BlockPos.ZERO);
         this.entityData.define(EAT_TIMESTAMP, 0);
         this.entityData.define(TEMPERATURE, 0f);
-        this.entityData.define(EDIBLE_COOLDOWNS, new CompoundNBT());
+        this.entityData.define(EDIBLE_COOLDOWNS, new CompoundTag());
         this.entityData.define(SEARCHING, false);
         this.entityData.define(AGE_SECS, 0);
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source)
+    public boolean isInvulnerableTo(@NotNull DamageSource source)
     {
-        if (this.getVehicle() instanceof PlayerEntity)
+        if (this.getVehicle() instanceof Player player)
         {
-            PlayerEntity player = (PlayerEntity) this.getVehicle();
             if (source.equals(DamageSource.IN_WALL) || source.equals(DamageSource.FALL)) return true;
             return player.isCreative() || player.isInvulnerableTo(source);
         }
@@ -144,16 +147,16 @@ public class ChameleonEntity extends AnimalEntity
     @Override
     public void die(DamageSource source)
     {
-        ITextComponent deathMessage = this.getCombatTracker().getDeathMessage();
+        Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(source);
 
         if (this.dead)
         {
-            ListNBT trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
+            ListTag trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
             if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !this.getTrustedPlayers().getList("Players", 8).isEmpty())
             {   trustedPlayers.forEach(string ->
                 {
-                    PlayerEntity player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
+                    Player player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
                     if (player != null)
                     {   player.sendMessage(deathMessage, Util.NIL_UUID);
                     }
@@ -162,26 +165,26 @@ public class ChameleonEntity extends AnimalEntity
         }
     }
 
+    @NotNull
     @Override
-    public ActionResultType mobInteract(PlayerEntity player, Hand hand)
+    public InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand)
     {
         if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
         {   this.startRiding(player);
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @SubscribeEvent
     public static void setHeight(EntityEvent.Size event)
     {
-        if (event.getEntity() instanceof ChameleonEntity)
+        if (event.getEntity() instanceof Chameleon chameleon)
         {
-            ChameleonEntity chameleon = (ChameleonEntity) event.getEntity();
             event.setNewEyeHeight(0.35F);
             if (chameleon.isBaby())
             {   event.setNewEyeHeight(0.25F);
-                event.setNewSize(EntitySize.fixed(0.65f, 0.5f));
+                event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f));
             }
             else event.setNewEyeHeight(0.35F);
         }
@@ -197,24 +200,28 @@ public class ChameleonEntity extends AnimalEntity
         return 6;
     }
 
+    @Nullable
     @Override
-    public AgeableEntity getBreedOffspring(ServerWorld world, AgeableEntity parent)
+    public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob parent)
     {
-        return EntityInit.CHAMELEON.get().create(world);
+        return EntityInit.CHAMELEON.get().create(level);
     }
 
+    @Nullable
     @Override
     protected SoundEvent getAmbientSound()
     {
         return ModSounds.CHAMELEON_AMBIENT;
     }
 
+    @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource source)
+    protected SoundEvent getHurtSound(@NotNull DamageSource source)
     {
         return ModSounds.CHAMELEON_HURT;
     }
 
+    @Nullable
     @Override
     protected SoundEvent getDeathSound()
     {
@@ -233,31 +240,31 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    protected void playHurtSound(DamageSource damageSource)
+    protected void playHurtSound(@NotNull DamageSource damageSource)
     {
         SoundEvent soundevent = this.getHurtSound(damageSource);
         if (soundevent != null)
-        {   // This method plays a sound that actually follows the entity
+        {
+            // This method plays a sound that actually follows the entity
             WorldHelper.playEntitySound(soundevent, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
         }
     }
 
     public boolean isWalking()
-    {   return new Vector3d((float) getDeltaMovement().x, 0, (float) getDeltaMovement().z).length() > 0.01;
+    {
+        return new Vec2((float) getDeltaMovement().x, (float) getDeltaMovement().z).length() > 0.01;
     }
 
     @Override
     public float tickHeadTurn(float p_21260_, float p_21261_)
     {
         if (this.isWalking())
-        {
-            //point body in the direction of motion (degreed)
-            this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
+        {   this.yBodyRot = this.getYRot();
             this.rotateHeadIfNecessary();
             this.rotateBodyIfNecessary();
         }
         if (Math.abs(yHeadRot - yBodyRot) > 45)
-        {   rotateHeadIfNecessary();
+        {   rotateBodyIfNecessary();
         }
         return p_21261_;
     }
@@ -274,12 +281,11 @@ public class ChameleonEntity extends AnimalEntity
 
         // Tick eat animation
         if (this.eatAnimationTimer > 0)
-        {   this.eatAnimationTimer--;
-        }
+            this.eatAnimationTimer--;
 
         // Age
         if (!this.level.isClientSide && this.tickCount % 20 == 0)
-        {   this.setAgeSecs(this.getAgeSecs() + 1);
+        {   this.setAgeSecs(this.age / 20);
         }
 
         // Tick shedding
@@ -287,12 +293,14 @@ public class ChameleonEntity extends AnimalEntity
         {
             boolean shedding = this.isShedding();
             if (this.tickCount % 20 == 0 && this.getAgeSecs() * 20 - this.getLastShed() > 24000 && !shedding && this.random.nextInt(30) == 1)
-            {   this.setShedding(true);
+            {
+                this.setShedding(true);
                 this.setLastShed(this.getAgeSecs() * 20);
             }
 
             if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
-            {   WorldHelper.entityDropItem(this, new ItemStack(ModItems.CHAMELEON_MOLT, this.random.nextInt(3) + 1));
+            {
+                WorldHelper.entityDropItem(this, new ItemStack(ModItems.CHAMELEON_MOLT, this.random.nextInt(3) + 1));
                 WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
                 this.setLastShed(this.getAgeSecs() * 20);
                 this.setShedding(false);
@@ -300,8 +308,8 @@ public class ChameleonEntity extends AnimalEntity
         }
 
         // Follow the player's movements when riding
-        if (this.getVehicle() instanceof PlayerEntity)
-        {   PlayerEntity player = (PlayerEntity) this.getVehicle();
+        if (this.getVehicle() instanceof Player player)
+        {
             float playerHeadYaw = player.yHeadRot;
             this.yHeadRot = CSMath.clamp(this.yHeadRot, playerHeadYaw - 50, playerHeadYaw + 50);
             this.yBodyRot = playerHeadYaw;
@@ -315,10 +323,9 @@ public class ChameleonEntity extends AnimalEntity
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof PlayerEntity)
+        if (this.getVehicle() instanceof Player player)
         {
-            PlayerEntity player = (PlayerEntity) this.getVehicle();
-            CompoundNBT data = player.getPersistentData();
+            CompoundTag data = player.getPersistentData();
             if (player.isCrouching())
             {
                 if (!data.getBoolean("Sneaking"))
@@ -345,8 +352,8 @@ public class ChameleonEntity extends AnimalEntity
             if (this.random.nextDouble() < 0.3)
             {
                 WorldHelper.spawnParticle(this.level, ParticleTypes.HAPPY_VILLAGER,
-                                          this.getX() + Math.random() - 0.5, this.getY() + Math.random() - 0.5 + this.getBbHeight() / 2, this.getZ() + Math.random() - 0.5,
-                                          0.01, 0.01, 0.01);
+                        this.getX() + Math.random() - 0.5, this.getY() + Math.random() - 0.5 + this.getBbHeight() / 2, this.getZ() + Math.random() - 0.5,
+                        0.01, 0.01, 0.01);
             }
 
             if (this.tickCount % 20 == 0 && (this.tickCount - this.getEatTimestamp() > 6000
@@ -356,7 +363,7 @@ public class ChameleonEntity extends AnimalEntity
                 if (this.getServer() != null)
                 {
                     Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
-                    for (ServerPlayerEntity player : this.level.getEntitiesOfClass(ServerPlayerEntity.class, this.getBoundingBox().inflate(20)))
+                    for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
                     {
                         if (advancement != null)
                         {
@@ -373,7 +380,7 @@ public class ChameleonEntity extends AnimalEntity
         // Tick cooldowns
         if (!level.isClientSide)
         {
-            CompoundNBT cooldowns = this.getCooldowns();
+            CompoundTag cooldowns = this.getCooldowns();
             for (String tag : cooldowns.getAllKeys())
             {
                 int time = cooldowns.getInt(tag);
@@ -393,22 +400,22 @@ public class ChameleonEntity extends AnimalEntity
         return super.hurt(source, amount);
     }
 
+    @Nullable
     @Override
-    public Entity changeDimension(ServerWorld world, ITeleporter teleporter)
+    public Entity changeDimension(ServerLevel p_20118_, ITeleporter teleporter)
     {   this.clearTrackingPos();
-        return super.changeDimension(world, teleporter);
+        return super.changeDimension(p_20118_, teleporter);
     }
 
     public void onEatEntity(Entity entity)
     {
         if (!level.isClientSide)
         {
-            if (entity instanceof ItemEntity)
+            if (entity instanceof ItemEntity itemEntity)
             {
-                ItemEntity itemEntity = (ItemEntity) entity;
                 if (this.isTamingItem(itemEntity.getItem()))
                 {
-                    PlayerEntity player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
+                    Player player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
                     if (player != null && !this.isPlayerTrusted(player))
                     {
                         if (player.isCreative() || Math.random() < 0.3)
@@ -438,24 +445,24 @@ public class ChameleonEntity extends AnimalEntity
     @Override
     public double getMyRidingOffset()
     {
-        return this.getVehicle() instanceof PlayerEntity
-               ? ((PlayerEntity) this.getVehicle()).getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.HOGLIN_HEADPIECE
+        return this.getVehicle() instanceof Player player
+               ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
                     ? 0.65 : 0.5
                : 0;
     }
 
-    public static boolean canSpawn(EntityType<ChameleonEntity> type, IWorld level, SpawnReason spawnType, BlockPos pos, Random random)
+    public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, Random random)
     {   return true;
     }
 
     private void rotateBodyIfNecessary()
     {
-        this.yBodyRot = MathHelper.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
+        this.yBodyRot = Mth.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
     }
 
     private void rotateHeadIfNecessary()
     {
-        this.yHeadRot = MathHelper.rotateIfNecessary(this.yHeadRot, this.yBodyRot, (float)this.getMaxHeadYRot());
+        this.yHeadRot = Mth.rotateIfNecessary(this.yHeadRot, this.yBodyRot, (float)this.getMaxHeadYRot());
     }
 
     @Override
@@ -469,20 +476,22 @@ public class ChameleonEntity extends AnimalEntity
         if (this.eatAnimationTimer <= 0)
         {
             if (!this.level.isClientSide)
-            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ChameleonEatMessage(this.getId()));
+            {
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ChameleonEatMessage(this.getId()));
             }
             else
-            {   AnimationManager.ANIMATION_TIMERS.put(this, 0f);
+            {
+                AnimationManager.ANIMATION_TIMERS.put(this, 0f);
             }
             this.eatAnimationTimer = this.getEatAnimLength();
         }
     }
 
-    public void manualSync(DataParameter<?> param)
+    public void manualSync(EntityDataAccessor<?> accessor)
     {
-        // Forge refuses to sync some DataItems, like CompoundNBTs
+        // Forge refuses to sync some DataItems, like CompoundTags
         try
-        {   ((EntityDataManager.DataEntry<?>) GET_DATA_ITEM.invoke(this.entityData, param)).setDirty(true);
+        {   ((SynchedEntityData.DataItem<?>) GET_DATA_ITEM.invoke(this.entityData, accessor)).setDirty(true);
         } catch (Exception ignored) {}
     }
 
@@ -501,16 +510,16 @@ public class ChameleonEntity extends AnimalEntity
         this.entityData.set(SHEDDING, shedding);
     }
 
-    public CompoundNBT getTrustedPlayers()
+    public CompoundTag getTrustedPlayers()
     {
         return this.entityData.get(TRUSTED_PLAYERS);
     }
 
     public void addTrustedPlayer(UUID player)
     {
-        CompoundNBT trustedPlayers = this.getTrustedPlayers();
-        ListNBT players = trustedPlayers.getList("Players", 8);
-        StringNBT uuid = StringNBT.valueOf(player.toString());
+        CompoundTag trustedPlayers = this.getTrustedPlayers();
+        ListTag players = trustedPlayers.getList("Players", 8);
+        StringTag uuid = StringTag.valueOf(player.toString());
         if (!players.contains(uuid))
         {   players.add(uuid);
         }
@@ -522,19 +531,19 @@ public class ChameleonEntity extends AnimalEntity
 
     public void removeTrustedPlayer(UUID player)
     {
-        CompoundNBT trustedPlayers = this.getTrustedPlayers();
+        CompoundTag trustedPlayers = this.getTrustedPlayers();
         trustedPlayers.getList("Players", 8).removeIf(tag -> tag.getAsString().equals(player.toString()));
         this.entityData.set(TRUSTED_PLAYERS, trustedPlayers);
     }
 
-    public boolean isPlayerTrusted(PlayerEntity player)
+    public boolean isPlayerTrusted(Player player)
     {
         return this.isPlayerTrusted(player.getUUID());
     }
 
     public boolean isPlayerTrusted(UUID player)
     {
-        return this.getTrustedPlayers().getList("Players", 8).contains(StringNBT.valueOf(player.toString()));
+        return this.getTrustedPlayers().getList("Players", 8).contains(StringTag.valueOf(player.toString()));
     }
 
     public int getLastShed()
@@ -608,8 +617,9 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     public void setCooldown(Edible edible, Integer time)
-    {   CompoundNBT map = this.entityData.get(EDIBLE_COOLDOWNS);
-        map.putInt(edible.getName(), time);
+    {
+        CompoundTag map = this.entityData.get(EDIBLE_COOLDOWNS);
+        map.putInt(edible.associatedItems().location().toString(), time);
         this.entityData.set(EDIBLE_COOLDOWNS, map);
     }
 
@@ -618,7 +628,7 @@ public class ChameleonEntity extends AnimalEntity
         return this.entityData.get(EDIBLE_COOLDOWNS).getInt(edible.getName());
     }
 
-    public CompoundNBT getCooldowns()
+    public CompoundTag getCooldowns()
     {
         return this.entityData.get(EDIBLE_COOLDOWNS);
     }
@@ -635,16 +645,16 @@ public class ChameleonEntity extends AnimalEntity
 
     public boolean isTamingItem(ItemStack item)
     {
-        return ModItemTags.CHAMELEON_TAMING.contains(item.getItem());
+        return item.is(ModItemTags.CHAMELEON_TAMING);
     }
 
 
     @Override
-    public CompoundNBT saveWithoutId(CompoundNBT tag)
+    public CompoundTag saveWithoutId(CompoundTag tag)
     {
         super.saveWithoutId(tag);
 
-        tag.put("TrustedPlayers", this.getTrustedPlayers().getList("Players", 8));
+        tag.put("TrustedPlayers", Objects.requireNonNullElseGet(this.getTrustedPlayers().get("Players"), ListTag::new));
         tag.putInt("LastShed", this.getLastShed());
         tag.putBoolean("Shedding", this.isShedding());
         tag.putInt("HurtTimestamp", this.getHurtTimestamp());
@@ -657,9 +667,10 @@ public class ChameleonEntity extends AnimalEntity
         else tag.remove("TrackingPos");
 
         // Edible cooldowns
-        ListNBT edibleCooldowns = new ListNBT();
+        ListTag edibleCooldowns = new ListTag();
         for (String key : this.getCooldowns().getAllKeys())
-        {   CompoundNBT cooldownTag = new CompoundNBT();
+        {
+            CompoundTag cooldownTag = new CompoundTag();
             cooldownTag.putString("Edible", key);
             cooldownTag.putInt("Cooldown", this.getCooldowns().getInt(key));
             edibleCooldowns.add(cooldownTag);
@@ -671,12 +682,12 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    public void load(CompoundNBT nbt)
+    public void load(CompoundTag nbt)
     {
         super.load(nbt);
 
-        CompoundNBT players = new CompoundNBT();
-        players.put("Players", nbt.getList("TrustedPlayers", 8));
+        CompoundTag players = new CompoundTag();
+        players.put("Players", Objects.requireNonNullElseGet(nbt.get("TrustedPlayers"), ListTag::new));
         this.entityData.set(TRUSTED_PLAYERS, players);
 
         this.setLastShed(nbt.getInt("LastShed"));
@@ -688,10 +699,10 @@ public class ChameleonEntity extends AnimalEntity
         if (nbt.contains("TrackingPos"))
             this.setTrackingPos(BlockPos.of(nbt.getLong("TrackingPos")));
 
-        ListNBT edibleCooldowns = nbt.getList("EdibleCooldowns", 10);
+        ListTag edibleCooldowns = nbt.getList("EdibleCooldowns", 10);
         for (int i = 0; i < edibleCooldowns.size(); i++)
         {
-            CompoundNBT cooldownTag = edibleCooldowns.getCompound(i);
+            CompoundTag cooldownTag = edibleCooldowns.getCompound(i);
             ChameleonEdibles.EDIBLES.stream().filter(ed -> ed.getName().equals(cooldownTag.getString("Item"))).findFirst().ifPresent(edible ->
             {   this.setCooldown(edible, cooldownTag.getInt("Cooldown"));
             });

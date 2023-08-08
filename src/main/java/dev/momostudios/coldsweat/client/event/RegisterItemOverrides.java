@@ -8,13 +8,13 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,7 +28,7 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemModelsProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity) ->
+            ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
             {
                 if (stack.getOrCreateTag().getBoolean("isOn"))
                 {
@@ -38,7 +38,7 @@ public class RegisterItemOverrides
                 return 0;
             });
 
-            ItemModelsProperties.register(ItemInit.THERMOMETER.get(), new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, livingEntity) ->
+            ItemProperties.register(ItemInit.THERMOMETER.get(), new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, livingEntity, id) ->
             {
                 Entity entity = (livingEntity != null ? livingEntity : stack.getEntityRepresentation());
                 if (entity != null)
@@ -48,36 +48,33 @@ public class RegisterItemOverrides
 
                     double worldTemp;
                     if (!entity.getPersistentData().contains("WorldTempTimestamp")
-                    || (entity.tickCount % 20 == 0 || (entity instanceof PlayerEntity && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
+                    || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
-                        if (entity instanceof LivingEntity)
-                        {   worldTemp = Temperature.getTemperatureCap(((LivingEntity) entity)).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0);
-                        }
-                        else worldTemp = Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
+                        worldTemp = entity instanceof LivingEntity living
+                                ? Temperature.getTemperatureCap(living).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
+                                : Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);
                         entity.getPersistentData().putInt("WorldTempTimestamp", entity.tickCount);
                     }
                     else worldTemp = entity.getPersistentData().getDouble("WorldTemp");
 
-                    if (entity instanceof ItemFrameEntity)
+                    if (entity instanceof ItemFrame frame)
                     {
-                        ItemFrameEntity frame = (ItemFrameEntity) entity;
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-                            String tempColor;
-                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            String tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
-                                case 0 : tempColor = "§f";
-                                case 2 : case 3 : tempColor = "§6";
-                                case 4 : tempColor = "§c";
-                                case -2 : case -3 : tempColor = "§b";
-                                case -4 : tempColor = "§9";
-                                default : tempColor = "§r";
+                                case 0 -> "§f";
+                                case 2,3 -> "§6";
+                                case 4 -> "§c";
+                                case -2,-3 -> "§b";
+                                case -4 -> "§9";
+                                default -> "§r";
                             };
                             int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
-                            frame.getItem().setHoverName(new StringTextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
+                            frame.getItem().setHoverName(new TextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
                         }
                     }
 

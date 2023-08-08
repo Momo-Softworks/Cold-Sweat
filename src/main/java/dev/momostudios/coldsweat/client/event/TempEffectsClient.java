@@ -1,6 +1,11 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
@@ -10,22 +15,21 @@ import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.shader.Shader;
-import net.minecraft.client.shader.ShaderGroup;
-import net.minecraft.client.shader.ShaderUniform;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.PostPass;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -50,7 +54,7 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void setCamera(EntityViewRenderEvent.CameraSetup event)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (!Minecraft.getInstance().isPaused() && player != null)
         {
             // Get the FPS of the game
@@ -66,9 +70,9 @@ public class TempEffectsClient
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
                 {
                     float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
-                    double tickTime = player.tickCount + event.getRenderPartialTicks();
+                    double tickTime = player.tickCount + event.getPartialTicks();
                     float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime));
-                    player.setYHeadRot(player.getYHeadRot() + shiverAmount);
+                    player.setYRot(player.getYRot() + shiverAmount);
                 }
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
                 {
@@ -93,8 +97,8 @@ public class TempEffectsClient
                     float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * factor);
 
                     // Apply the sway
-                    player.xRot = player.xRot + xOffs - PREV_X_SWAY;
-                    player.setYHeadRot(player.getYHeadRot() + yOffs - PREV_Y_SWAY);
+                    player.setXRot(player.getXRot() + xOffs - PREV_X_SWAY);
+                    player.setYRot(player.getYRot() + yOffs - PREV_Y_SWAY);
 
                     // Save the previous sway
                     PREV_X_SWAY = xOffs;
@@ -109,13 +113,13 @@ public class TempEffectsClient
     {
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END)
         {
-            PlayerEntity player = Minecraft.getInstance().player;
+            Player player = Minecraft.getInstance().player;
             if (player != null && player.tickCount % 5 == 0)
             {
                 boolean hasGrace = player.hasEffect(ModEffects.GRACE);
                 if (player.hasEffect(ModEffects.ICE_RESISTANCE) || hasGrace) COLD_IMMUNITY = 4;
                 else COLD_IMMUNITY = 0;
-                if (player.hasEffect(Effects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
+                if (player.hasEffect(MobEffects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
                 else HOT_IMMUNITY = 0;
 
                 if (CompatManager.isArmorUnderwearLoaded() && (COLD_IMMUNITY < 4 || HOT_IMMUNITY < 4))
@@ -134,16 +138,16 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void renderFog(EntityViewRenderEvent event)
     {
-        if (!(event instanceof EntityViewRenderEvent.FogDensity || event instanceof EntityViewRenderEvent.FogColors)) return;
+        if (!(event instanceof EntityViewRenderEvent.RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
             float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-            if (event instanceof EntityViewRenderEvent.FogDensity)
+            if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
             {
-                EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
-                fog.setDensity(CSMath.blend(fog.getDensity(), 100f, immunityModifier, 50f, 90f));
+                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), 6f, immunityModifier, 50f, 90f));
+                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), 2f, immunityModifier, 50f, 90f));
                 fog.setCanceled(true);
             }
             else
@@ -159,10 +163,11 @@ public class TempEffectsClient
     static final ResourceLocation FREEZE_TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
 
     @SubscribeEvent
-    public static void vignette(RenderGameOverlayEvent.Pre event)
+    public static void vignette(RenderGameOverlayEvent.PreLayer event)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
+        Player player = Minecraft.getInstance().player;
+        if (player != null && event.getOverlay() == ForgeIngameGui.VIGNETTE_ELEMENT
+        && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
             float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
             float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
@@ -178,29 +183,30 @@ public class TempEffectsClient
             RenderSystem.defaultBlendFunc();
             if (tempWithImmunity > 0)
             {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
-                RenderSystem.color4f(0.231f, 0f, 0f, vignetteBrightness);
-                Minecraft.getInstance().textureManager.bind(HAZE_TEXTURE);
+                RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
+                RenderSystem.setShaderTexture(0, HAZE_TEXTURE);
             }
             else
-            {   RenderSystem.color4f(1f, 1f, 1f, opacity);
-                Minecraft.getInstance().textureManager.bind(FREEZE_TEXTURE);
+            {   RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
+                RenderSystem.setShaderTexture(0, FREEZE_TEXTURE);
             }
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuilder();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder bufferbuilder = tesselator.getBuilder();
+            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             bufferbuilder.vertex(0.0D, height / scale, -90.0D).uv(0.0F, 1.0F).endVertex();
             bufferbuilder.vertex(width / scale, height / scale, -90.0D).uv(1.0F, 1.0F).endVertex();
             bufferbuilder.vertex(width / scale, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
             bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
-            tessellator.end();
+            tesselator.end();
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.defaultBlendFunc();
         }
     }
 
-    static ShaderUniform BLUR_RADIUS = null;
+    static Uniform BLUR_RADIUS = null;
     static Field POST_PASSES = null;
     static boolean BLUR_APPLIED = false;
 
@@ -208,36 +214,39 @@ public class TempEffectsClient
     {
         try
         {
-            POST_PASSES = ObfuscationReflectionHelper.findField(ShaderGroup.class, "field_148031_d");
+            POST_PASSES = ObfuscationReflectionHelper.findField(PostChain.class, "f_110009_");
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     @SubscribeEvent
-    public static void onRenderBlur(RenderGameOverlayEvent.Post event)
+    public static void onRenderBlur(RenderLevelStageEvent event)
     {
-        Minecraft mc = Minecraft.getInstance();
-        try
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER)
         {
-            float playerTemp = (float) Overlays.BODY_TEMP;
-            if (ClientSettingsConfig.getInstance().areDistortionsEnabled() && playerTemp >= 50 && HOT_IMMUNITY < 4)
+            Minecraft mc = Minecraft.getInstance();
+            try
             {
-                float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
-                if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
-                {   BLUR_APPLIED = false;
+                float playerTemp = (float) Overlays.BODY_TEMP;
+                if (ClientSettingsConfig.getInstance().areDistortionsEnabled() && playerTemp >= 50 && HOT_IMMUNITY < 4)
+                {
+                    float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
+                    if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
+                    {   BLUR_APPLIED = false;
+                    }
+                    if (!BLUR_APPLIED)
+                    {   mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
+                        BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
+                        BLUR_APPLIED = true;
+                    }
+                    if (BLUR_RADIUS != null)
+                    {   BLUR_RADIUS.set(blur);
+                    }
                 }
-                if (!BLUR_APPLIED)
-                {   mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
-                    BLUR_RADIUS = ((List<Shader>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
-                    BLUR_APPLIED = true;
+                else if (BLUR_APPLIED)
+                {   BLUR_RADIUS.set(0f);
+                    BLUR_APPLIED = false;
                 }
-                if (BLUR_RADIUS != null)
-                {   BLUR_RADIUS.set(blur);
-                }
-            }
-            else if (BLUR_APPLIED)
-            {   BLUR_RADIUS.set(0f);
-                BLUR_APPLIED = false;
-            }
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+        }
     }
 }

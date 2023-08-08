@@ -1,23 +1,21 @@
 package dev.momostudios.coldsweat.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.screen.inventory.CreativeScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class SoulLampTooltip
@@ -25,62 +23,42 @@ public class SoulLampTooltip
     static int FUEL_FADE_TIMER = 0;
 
     @SubscribeEvent
-    public static void renderLampTooltip(GuiScreenEvent.DrawScreenEvent.Post event)
+    public static void renderInsertTooltip(ScreenEvent.DrawScreenEvent.Post event)
     {
-        if (event.getGui() instanceof ContainerScreen)
+        if (event.getScreen() instanceof AbstractContainerScreen<?> screen)
         {
-            ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getGui();
-            PlayerEntity player = Minecraft.getInstance().player;
-
-            if (player != null && inventoryScreen.getSlotUnderMouse() != null
-                    && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
+            if (screen.getSlotUnderMouse() != null && screen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
             {
-                float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
-                ItemStack carriedStack = player.inventory.getCarried();
+                float fuel = screen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
+                ItemStack carriedStack = screen.getMenu().getCarried();
 
                 if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
                 {
-                    int fuelValue = carriedStack.getCount();
-                    int slotX = inventoryScreen.getSlotUnderMouse().x + ((ContainerScreen<?>) event.getGui()).getGuiLeft();
-                    int slotY = inventoryScreen.getSlotUnderMouse().y + ((ContainerScreen<?>) event.getGui()).getGuiTop();
+                    int fuelValue = screen.getMenu().getCarried().getCount() * ConfigSettings.LAMP_FUEL_ITEMS.get().get(carriedStack.getItem());
+                    int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
+                    int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 
-                    MatrixStack ms = event.getMatrixStack();
-
-                    // If the mouse is above the slot, move the box to the bottom
+                    PoseStack ps = event.getPoseStack();
                     if (event.getMouseY() < slotY + 8)
-                        ms.translate(0, 32, 0);
+                        ps.translate(0, 32, 0);
 
-                    event.getGui().renderTooltip(ms, new StringTextComponent("       "), slotX - 18, slotY);
+                    event.getScreen().renderComponentTooltip(event.getPoseStack(), List.of(new TextComponent("       ")), slotX - 18, slotY + 1);
 
                     RenderSystem.defaultBlendFunc();
 
                     // Render background
-                    Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 24, 30);
+                    RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
+                    GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 0, 30, 8, 30, 34);
 
                     // Render ghost overlay
                     RenderSystem.enableBlend();
-                    RenderSystem.color4f(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 24, 30);
+                    RenderSystem.setShaderColor(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
+                    GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 34);
                     RenderSystem.disableBlend();
 
-                    // Render current fuel
-                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
-                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 24, 30);
-                }
-                else if (carriedStack.isEmpty())
-                {
-                    int mouseX = event.getMouseX();
-                    int mouseY = event.getMouseY();
-                    MatrixStack ms = event.getMatrixStack();
-
-                    if (event.getGui() instanceof CreativeScreen && ((CreativeScreen) event.getGui()).getSelectedTab() == ItemGroup.TAB_SEARCH.getId())
-                    {   event.getMatrixStack().translate(0, 10, 0);
-                    }
-
-                    Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 0, 30, 8, 24, 30);
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 16, (int) (fuel / 2.1333f), 8, 24, 30);
+                    // Render fuel
+                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
+                    GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
                 }
             }
         }

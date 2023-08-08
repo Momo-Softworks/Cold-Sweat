@@ -3,25 +3,29 @@ package dev.momostudios.coldsweat.common.block;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.*;
 
@@ -36,7 +40,8 @@ public class HearthTopBlock extends Block
         return Properties
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
-                .strength(2, 10)
+                .strength(2f)
+                .explosionResistance(10f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion()
                 .dynamicShape();
@@ -45,7 +50,7 @@ public class HearthTopBlock extends Block
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
-        calculateFacingShapes(VoxelShapes.or(
+        calculateFacingShapes(Shapes.or(
             Block.box(3, -16, 3.5, 13, 2, 12.5), // Shell
             Block.box(4, 2, 5, 9, 11, 10), // Exhaust
             Block.box(-1, -13, 6, 17, -5, 10))); // Canisters
@@ -59,51 +64,50 @@ public class HearthTopBlock extends Block
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, IBlockReader world, BlockPos pos)
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
     {
         return true;
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context)
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
     {   return SHAPES.get(state.getValue(FACING));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!world.isClientSide && world.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
-        {
-            ModBlocks.HEARTH_BOTTOM.use(world.getBlockState(pos.below()), world, pos.below(), player, hand, rayTraceResult);
+        if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
+        {   hearthBottomBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
-    {   super.neighborChanged(state, world, pos, block, fromPos, isMoving);
-        if (world.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM)
-        {   this.destroy(world, pos, state);
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+    {   super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+        if (level.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM)
+        {   this.destroy(level, pos, state);
         }
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (world.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
-            {   world.destroyBlock(pos.below(), false);
+            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
+            {   level.destroyBlock(pos.below(), false);
             }
         }
-        super.onRemove(state, world, pos, newState, isMoving);
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override
-    public ItemStack getCloneItemStack(IBlockReader getter, BlockPos pos, BlockState state)
+    public ItemStack getCloneItemStack(BlockGetter getter, BlockPos pos, BlockState state)
     {   return new ItemStack(ItemInit.HEARTH.get());
     }
 
@@ -123,12 +127,12 @@ public class HearthTopBlock extends Block
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_48855_)
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48855_)
     {   p_48855_.add(FACING);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
+    public BlockState getStateForPlacement(BlockPlaceContext context)
     {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 }

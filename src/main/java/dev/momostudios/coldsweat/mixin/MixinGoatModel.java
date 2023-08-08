@@ -1,24 +1,36 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.client.renderer.model.PartPose;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.event.GoatFurHandler;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.entity.model.LlamaModel;
-import net.minecraft.client.renderer.entity.model.QuadrupedModel;
-import net.minecraft.entity.passive.horse.LlamaEntity;
+import net.minecraft.client.model.GoatModel;
+import net.minecraft.client.model.QuadrupedModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.animal.goat.Goat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-@Mixin(LlamaModel.class)
-public class MixinGoatModel
+@Mixin(GoatModel.class)
+public class MixinGoatModel extends QuadrupedModel<Goat>
 {
-    /*@Inject(method = "createBodyLayer()Lnet/minecraft/client/model/geom/builders/LayerDefinition;", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS,
+    protected MixinGoatModel(ModelPart p_170857_, boolean p_170858_, float p_170859_, float p_170860_, float p_170861_, float p_170862_, int p_170863_)
+    {
+        super(p_170857_, p_170858_, p_170859_, p_170860_, p_170861_, p_170862_, p_170863_);
+    }
+
+    @Inject(method = "createBodyLayer()Lnet/minecraft/client/model/geom/builders/LayerDefinition;", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS,
     locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void createBodyLayer(CallbackInfoReturnable<LayerDefinition> cir, MeshDefinition mesh, PartDefinition base, PartDefinition head)
     {
@@ -38,5 +50,5 @@ public class MixinGoatModel
         {
             head.xRot += CSMath.toRadians(Minecraft.getInstance().getFrameTime());
         }
-    }*/
+    }
 }

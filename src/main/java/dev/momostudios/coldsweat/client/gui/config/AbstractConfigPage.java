@@ -1,18 +1,16 @@
 package dev.momostudios.coldsweat.client.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -46,8 +44,8 @@ public abstract class AbstractConfigPage extends Screen
 
     private final Screen parentScreen;
 
-    public Map<String, List<IGuiEventListener>> widgetBatches = new HashMap<>();
-    public Map<String, List<ITextProperties>> tooltips = new HashMap<>();
+    public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
+    public Map<String, List<FormattedText>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
     protected int leftSideLength = 0;
@@ -62,14 +60,14 @@ public abstract class AbstractConfigPage extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
-    public abstract ITextComponent sectionOneTitle();
+    public abstract BaseComponent sectionOneTitle();
 
     @Nullable
-    public abstract ITextComponent sectionTwoTitle();
+    public abstract BaseComponent sectionTwoTitle();
 
     public AbstractConfigPage(Screen parentScreen)
     {
-        super(new TranslationTextComponent("cold_sweat.config.title"));
+        super(new TranslatableComponent("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
     }
 
@@ -99,7 +97,7 @@ public abstract class AbstractConfigPage extends Screen
         int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         ConfigLabel label = new ConfigLabel(id, text, labelX, labelY, color);
 
-        this.addWidgetBatch(id, Arrays.asList(label));
+        this.addWidgetBatch(id, List.of(label));
 
         if (side == Side.LEFT)
             this.leftSideLength += font.lineHeight + 4;
@@ -135,10 +133,10 @@ public abstract class AbstractConfigPage extends Screen
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
         // Make the button
-        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, new StringTextComponent(label), button1 ->
+        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, new TextComponent(label), button1 ->
         {
             onClick.accept(button1);
-            button1.setMessage(new StringTextComponent(dynamicLabel.get()));
+            button1.setMessage(new TextComponent(dynamicLabel.get()));
         })
         {
             @Override
@@ -150,18 +148,18 @@ public abstract class AbstractConfigPage extends Screen
         button.active = shouldBeActive;
 
         // Add the clientside indicator
-        if (clientside) this.addWidget(new ImageWidget(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslationTextComponent("cold_sweat.config.clientside_warning").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
 
-        this.addWidgetBatch(id, Arrays.asList(button));
+        this.addWidgetBatch(id, List.of(button));
 
         // Mark this space as used
         if (side == Side.LEFT)
@@ -181,7 +179,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the input is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the input when hovered.
      */
-    protected void addDecimalInput(String id, Side side, ITextComponent label, Consumer<Double> onValueWrite, Consumer<TextFieldWidget> onInit,
+    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> onValueWrite, Consumer<EditBox> onInit,
                                    boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
@@ -191,7 +189,7 @@ public abstract class AbstractConfigPage extends Screen
                           font.width(label.getString()) - 84 : 0;
 
         // Make the input
-        TextFieldWidget textBox = new TextFieldWidget(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, new StringTextComponent(""))
+        EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, new TextComponent(""))
         {
             @Override
             public void insertText(String text)
@@ -240,19 +238,19 @@ public abstract class AbstractConfigPage extends Screen
         // Make the label
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
-        if (clientside) this.addWidget(new ImageWidget(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslationTextComponent("cold_sweat.config.clientside_warning").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
 
         // Add the widget
-        this.addWidgetBatch(id, Arrays.asList(textBox, configLabel));
+        this.addWidgetBatch(id, List.of(textBox, configLabel));
 
         // Mark this space as used
         if (side == Side.LEFT)
@@ -273,7 +271,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the panel is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the panel when hovered.
      */
-    protected void addDirectionPanel(String id, Side side, ITextComponent label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
+    protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
     {
         int xOffset = side == Side.LEFT ? -97 : 136;
@@ -340,18 +338,18 @@ public abstract class AbstractConfigPage extends Screen
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-            this.addWidget(new ImageWidget(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+            this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
         {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+new TranslationTextComponent("cold_sweat.config.clientside_warning").getString()+"§r");
+            tooltipList.add("§8"+new TranslatableComponent("cold_sweat.config.clientside_warning").getString()+"§r");
             tooltip = tooltipList.toArray(new String[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
 
-        this.addWidgetBatch(id, Arrays.asList(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
+        this.addWidgetBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
 
         // Add height to the list
         if (side == Side.LEFT)
@@ -366,11 +364,11 @@ public abstract class AbstractConfigPage extends Screen
         this.leftSideLength = 0;
         this.rightSideLength = 0;
 
-        this.addWidget(new Button(
+        this.addRenderableWidget(new Button(
             this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
             this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
             BOTTOM_BUTTON_WIDTH, 20,
-            new TranslationTextComponent("gui.done"),
+            new TranslatableComponent("gui.done"),
             button -> this.close())
         );
 
@@ -378,56 +376,55 @@ public abstract class AbstractConfigPage extends Screen
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
                 button -> mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen)));
         if (this.index() < ConfigScreen.LAST_PAGE)
-            this.addWidget(nextNavButton);
+            this.addRenderableWidget(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
                 button -> mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen)));
         if (this.index() > ConfigScreen.FIRST_PAGE)
-            this.addWidget(prevNavButton);
+            this.addRenderableWidget(prevNavButton);
     }
 
     @Override
-    public void render(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
+        this.renderBackground(poseStack);
 
         // Page Title
-        drawCenteredString(matrixStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
+        drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        drawString(matrixStack, this.font, new StringTextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
+        drawString(poseStack, this.font, new TextComponent(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
 
         // Section 1 Title
-        drawString(matrixStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
+        drawString(poseStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
 
         // Section 1 Divider
-        this.minecraft.textureManager.bind(TEXTURE);
-        this.blit(matrixStack, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        this.blit(poseStack, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
 
         if (this.sectionTwoTitle() != null)
         {
             // Section 2 Title
-            drawString(matrixStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
+            drawString(poseStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
 
             // Section 2 Divider
-            this.minecraft.textureManager.bind(TEXTURE);
-            this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
+            RenderSystem.setShaderTexture(0, TEXTURE);
+            this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
         }
 
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
 
         // Render tooltip
         if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
-        for (Map.Entry<String, List<IGuiEventListener>> entry : widgetBatches.entrySet())
+        for (Map.Entry<String, List<GuiEventListener>> entry : widgetBatches.entrySet())
         {
             String id = entry.getKey();
-            List<IGuiEventListener> widgets = entry.getValue();
+            List<GuiEventListener> widgets = entry.getValue();
             int minX = 0, minY = 0, maxX = 0, maxY = 0;
-            for (IGuiEventListener listener : widgets)
+            for (GuiEventListener listener : widgets)
             {
-                if (listener instanceof Widget)
+                if (listener instanceof AbstractWidget widget)
                 {
-                    Widget widget = (Widget) listener;
                     if (minX == 0 || widget.x < minX)
                         minX = widget.x;
                     if (minY == 0 || widget.y < minY)
@@ -442,11 +439,11 @@ public abstract class AbstractConfigPage extends Screen
             // if the mouse is hovering over any of the widgets in the batch, show the corresponding tooltip
             if (CSMath.withinRange(mouseX, minX, maxX) && CSMath.withinRange(mouseY, minY, maxY))
             {
-                List<ITextProperties> tooltipList = this.tooltips.get(id);
+                List<FormattedText> tooltipList = this.tooltips.get(id);
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
-                    List<ITextComponent> tooltip = this.tooltips.get(id).stream().map(text -> new StringTextComponent(text.getString())).collect(Collectors.toList());
-                    this.renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
+                    List<Component> tooltip = this.tooltips.get(id).stream().map(text -> new TextComponent(text.getString())).collect(Collectors.toList());
+                    this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
                 }
                 break;
             }
@@ -477,25 +474,24 @@ public abstract class AbstractConfigPage extends Screen
         RIGHT
     }
 
-    protected void addWidgetBatch(String id, List<IGuiEventListener> elements)
+    protected void addWidgetBatch(String id, List<GuiEventListener> elements)
     {
-        for (IGuiEventListener element : elements)
+        for (GuiEventListener element : elements)
         {
-            if (element instanceof Widget)
-            {   this.addWidget((Widget & IGuiEventListener) element);
-            }
+            if (element instanceof Widget && element instanceof NarratableEntry widget)
+                this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
         }
         this.widgetBatches.put(id, elements);
     }
 
-    public List<IGuiEventListener> getWidgetBatch(String id)
+    public List<GuiEventListener> getWidgetBatch(String id)
     {
         return this.widgetBatches.get(id);
     }
 
     protected void setTooltip(String id, String[] tooltip)
     {
-        List<ITextProperties> tooltipList = new ArrayList<>();
+        List<FormattedText> tooltipList = new ArrayList<>();
         for (String string : tooltip)
         {
             tooltipList.addAll(font.getSplitter().splitLines(string, 300, Style.EMPTY));

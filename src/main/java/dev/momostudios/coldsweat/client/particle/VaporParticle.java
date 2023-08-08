@@ -1,30 +1,29 @@
 package dev.momostudios.coldsweat.client.particle;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.settings.ParticleStatus;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.util.ReuseableStream;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.stream.Stream;
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class VaporParticle extends SpriteTexturedParticle
+public class VaporParticle extends TextureSheetParticle
 {
-    private final IAnimatedSprite ageSprite;
+    private final SpriteSet ageSprite;
     private final boolean hasGravity;
     private boolean collidedY;
     private float maxAlpha;
 
-    protected VaporParticle(ClientWorld world, double x, double y, double z, double vx, double vy, double vz, IAnimatedSprite spriteSet, boolean hasGravity)
+    protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, boolean hasGravity)
     {
         super(world, x, y, z);
         this.ageSprite = spriteSet;
@@ -34,17 +33,17 @@ public class VaporParticle extends SpriteTexturedParticle
         this.setSize(quadSize / 10f, quadSize / 10f);
         this.lifetime = 40 + (int) (Math.random() * 20 - 10);
         this.hasPhysics = true;
-        this.xd = vx;
-        this.yd = vy;
-        this.zd = vz;
+        this.setParticleSpeed(vx, vy, vz);
+        this.setSpriteFromAge(spriteSet);
         this.hasGravity = hasGravity;
         this.gravity = hasGravity ? 0.04f : -0.04f;
     }
 
     @Nonnull
     @Override
-    public IParticleRenderType getRenderType()
-    {   return IParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public ParticleRenderType getRenderType()
+    {
+        return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
     }
 
     @Override
@@ -100,7 +99,7 @@ public class VaporParticle extends SpriteTexturedParticle
         double d1 = y;
         double d2 = z;
         if (this.hasPhysics && (x != 0.0D || y != 0.0D || z != 0.0D)) {
-            Vector3d vec3 = Entity.collideBoundingBox(new Vector3d(x, y, z), this.getBoundingBox(), this.level, ISelectionContext.empty(), new ReuseableStream<>(Stream.of()));
+            Vec3 vec3 = Entity.collideBoundingBox((Entity)null, new Vec3(x, y, z), this.getBoundingBox(), this.level, List.of());
             x = vec3.x;
             y = vec3.y;
             z = vec3.z;
@@ -108,7 +107,7 @@ public class VaporParticle extends SpriteTexturedParticle
 
         if (x != 0.0D || y != 0.0D || z != 0.0D) {
             this.setBoundingBox(this.getBoundingBox().move(x, collidedY ? 0 : y, z));
-            AxisAlignedBB axisalignedbb = this.getBoundingBox();
+            AABB axisalignedbb = this.getBoundingBox();
             this.x = (axisalignedbb.minX + axisalignedbb.maxX) / 2.0D;
             this.y = axisalignedbb.minY + (hasGravity ? 0.2 : 0);
             this.z = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
@@ -129,16 +128,17 @@ public class VaporParticle extends SpriteTexturedParticle
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class SteamFactory implements IParticleFactory<BasicParticleType>
+    public static class SteamFactory implements ParticleProvider<SimpleParticleType>
     {
-        private final IAnimatedSprite sprite;
+        private final SpriteSet sprite;
 
-        public SteamFactory(IAnimatedSprite spriteSet) {
+        public SteamFactory(SpriteSet spriteSet) {
             this.sprite = spriteSet;
         }
 
+        @Nullable
         @Override
-        public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
                 return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
@@ -148,16 +148,17 @@ public class VaporParticle extends SpriteTexturedParticle
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class MistFactory implements IParticleFactory<BasicParticleType>
+    public static class MistFactory implements ParticleProvider<SimpleParticleType>
     {
-        private final IAnimatedSprite sprite;
+        private final SpriteSet sprite;
 
-        public MistFactory(IAnimatedSprite spriteSet) {
+        public MistFactory(SpriteSet spriteSet) {
             this.sprite = spriteSet;
         }
 
+        @Nullable
         @Override
-        public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             ParticleStatus status = Minecraft.getInstance().options.particles;
             if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)

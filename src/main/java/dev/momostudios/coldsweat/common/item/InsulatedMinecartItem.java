@@ -1,15 +1,15 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.item.minecart.MinecartEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class InsulatedMinecartItem extends Item
 {
@@ -19,27 +19,27 @@ public class InsulatedMinecartItem extends Item
     }
 
     @Override
-    public ActionResultType useOn(ItemUseContext context)
+    public InteractionResult useOn(UseOnContext context)
     {
-        World world = context.getLevel();
+        Level level = context.getLevel();
         BlockPos blockpos = context.getClickedPos();
-        BlockState blockstate = world.getBlockState(blockpos);
+        BlockState blockstate = level.getBlockState(blockpos);
         if (blockstate.is(BlockTags.RAILS))
         {
             ItemStack itemstack = context.getItemInHand();
-            if (!world.isClientSide)
+            if (!level.isClientSide)
             {
-                MinecartEntity minecart = new MinecartEntity(world, blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D);
+                Minecart minecart = new Minecart(level, blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D);
                 if (itemstack.hasCustomHoverName())
                 {   minecart.setCustomName(itemstack.getHoverName());
                 }
                 minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
                 minecart.setDisplayOffset(5);
-                world.addFreshEntity(minecart);
+                level.addFreshEntity(minecart);
             }
             itemstack.shrink(1);
-            return ActionResultType.sidedSuccess(world.isClientSide);
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
-        else return ActionResultType.PASS;
+        else return InteractionResult.PASS;
     }
 }

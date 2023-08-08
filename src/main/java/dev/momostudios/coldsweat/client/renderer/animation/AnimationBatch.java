@@ -4,10 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.momostudios.coldsweat.client.renderer.model.ModelPart;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +23,8 @@ public class AnimationBatch
     public AnimationBatch(Animation... animations)
     {
         for (Animation animation : animations)
-        {   this.animations.put(animation.partName, animation);
+        {
+            this.animations.put(animation.partName, animation);
         }
     }
 
@@ -34,18 +34,21 @@ public class AnimationBatch
     }
 
     public Animation getAnimation(String name)
-    {   return animations.computeIfAbsent(name, k -> new Animation(name, 0, new ArrayList<>(), new ArrayList<>()));
+    {
+        return animations.computeIfAbsent(name, k -> new Animation(name, 0, new ArrayList<>(), new ArrayList<>()));
     }
 
-    public void animateAll(Map<String, ModelRenderer> parts, float animationTime, boolean offset)
+    public void animateAll(Map<String, ModelPart> parts, float animationTime, boolean offset)
     {
         parts.forEach((name, part) ->
-        {   this.getAnimation(name).setPositions(animationTime, part, offset).setRotations(animationTime, part, offset);
+        {
+            this.getAnimation(name).setPositions(animationTime, part, offset).setRotations(animationTime, part, offset);
         });
     }
 
-    public void animate(String name, ModelRenderer part, float animationTime, boolean offset)
-    {   this.getAnimation(name).setPositions(animationTime, part, offset).setRotations(animationTime, part, offset);
+    public void animate(String name, ModelPart part, float animationTime, boolean offset)
+    {
+        this.getAnimation(name).setPositions(animationTime, part, offset).setRotations(animationTime, part, offset);
     }
 
     public static AnimationBatch loadFromFile(ResourceLocation path)
@@ -58,8 +61,7 @@ public class AnimationBatch
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(path).getInputStream();
 
             // Parse the file as JSON
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(new InputStreamReader(inputStream)).getAsJsonObject();
+            JsonObject obj = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
             JsonObject animations = obj.getAsJsonObject("animations");
 
             // Iterate through each animation (there's usually only one)
@@ -149,11 +151,13 @@ public class AnimationBatch
     static float floatFromJSON(JsonElement element)
     {
         try
-        {   return element.getAsFloat();
+        {
+            return element.getAsFloat();
         }
         catch (Exception e)
         {
             String str = element.getAsString();
+
             if (str.equals("-")) return 0;
             return Float.parseFloat(element.getAsString().replaceAll("[^\\d-.]", ""));
         }

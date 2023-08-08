@@ -11,23 +11,28 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +47,15 @@ public class FilledWaterskinItem extends Item
         DispenserBlock.registerBehavior(this, (source, stack) ->
         {
             BlockPos pos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            World level = source.getLevel();
-            IChunk chunk = WorldHelper.getChunk(level, pos);
+            Level level = source.getLevel();
+            ChunkAccess chunk = WorldHelper.getChunk(level, pos);
             double itemTemp = stack.getOrCreateTag().getDouble("temperature");
 
             if (chunk == null) return stack;
 
             // Play sound
             level.playLocalSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
-                                 SoundCategory.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+                    SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
             // Spawn particles
             Random rand = new Random();
@@ -62,15 +67,15 @@ public class FilledWaterskinItem extends Item
                     for (int p = 0; p < rand.nextInt(5) + 5; p++)
                     {
                         particles.addParticle(ParticleTypes.FALLING_WATER,
-                                              new ParticleBatchMessage.ParticlePlacement(pos.getX() + rand.nextDouble(),
+                                new ParticleBatchMessage.ParticlePlacement(pos.getX() + rand.nextDouble(),
                                                                            pos.getY() + rand.nextDouble(),
                                                                            pos.getZ() + rand.nextDouble(), 0, 0, 0));
                     }
-                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (Chunk) chunk), particles);
+                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) chunk), particles);
                 }, i);
             }
 
-            final AxisAlignedBB[] aabb = { new AxisAlignedBB(pos).inflate(0.5) };
+            final AABB[] aabb = { new AABB(pos).inflate(0.5) };
 
             // Spawn a hitbox that falls at the same rate as the particles and gives players below the waterskin effect
             new Object()
@@ -78,7 +83,7 @@ public class FilledWaterskinItem extends Item
                 double acceleration = 0;
                 int tick = 0;
                 // Track affected players to prevent duplicate effects
-                List<PlayerEntity> affectedPlayers = new ArrayList<>();
+                List<Player> affectedPlayers = new ArrayList<>();
 
                 void start()
                 {
@@ -94,7 +99,7 @@ public class FilledWaterskinItem extends Item
                         double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
 
                         // Move the box down at the speed of gravity
-                        AxisAlignedBB movedBox;
+                        AABB movedBox;
                         aabb[0] = movedBox = aabb[0].move(0, -acceleration, 0);
 
                         // If there's ground, stop
@@ -106,7 +111,7 @@ public class FilledWaterskinItem extends Item
                         }
 
                         // Apply the waterskin modifier to all entities in the box
-                        level.getEntitiesOfClass(PlayerEntity.class, movedBox).forEach(player ->
+                        level.getEntitiesOfClass(Player.class, movedBox).forEach(player ->
                         {
                             if (!affectedPlayers.contains(player))
                             {
@@ -134,12 +139,11 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack itemstack, World world, Entity entity, int slot, boolean isSelected)
+    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean isSelected)
     {
         super.inventoryTick(itemstack, world, entity, slot, isSelected);
-        if (entity.tickCount % 5 == 0 && entity instanceof PlayerEntity)
+        if (entity.tickCount % 5 == 0 && entity instanceof Player player)
         {
-            PlayerEntity player = (PlayerEntity) entity;
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
@@ -155,9 +159,9 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand)
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
     {
-        ActionResult<ItemStack> ar = super.use(level, player, hand);
+        InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
         ItemStack itemstack = ar.getObject();
 
         double amount = itemstack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
@@ -165,18 +169,20 @@ public class FilledWaterskinItem extends Item
 
         // Play empty sound
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
-                SoundCategory.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+                SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
         // Create empty waterskin item
         ItemStack emptyStack = getEmpty(itemstack);
 
         // Add the item to the player's inventory
-        if (player.inventory.contains(emptyStack))
-        {   player.addItem(emptyStack);
+        if (player.getInventory().contains(emptyStack))
+        {
+            player.addItem(emptyStack);
             player.setItemInHand(hand, ItemStack.EMPTY);
         }
         else
-        {   player.setItemInHand(hand, emptyStack);
+        {
+            player.setItemInHand(hand, emptyStack);
         }
 
         player.swing(hand);
@@ -220,11 +226,12 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {   return slotChanged;
+    {
+        return slotChanged;
     }
 
     public String getDescriptionId()
     {
-        return new TranslationTextComponent("item.cold_sweat.waterskin").getString();
+        return new TranslatableComponent("item.cold_sweat.waterskin").getString();
     }
 }

@@ -85,35 +85,12 @@ public class TriggerHelper
         return values;
     }
 
-    public static class TempCondition
+    record TempCondition(Temperature.Type type, double below, double above)
     {
-        private final Temperature.Type type;
-        private final double below;
-        private final double above;
-
-        public TempCondition(Temperature.Type type, double below, double above)
-        {
-            this.type = type;
-            this.below = below;
-            this.above = above;
-        }
-
         public boolean matches(double value)
         {   return below > above
                  ? value >= above && value <= below
                  : value >= above || value <= below;
-        }
-
-        public Temperature.Type type()
-        {   return type;
-        }
-
-        public double below()
-        {   return below;
-        }
-
-        public double above()
-        {   return above;
         }
     }
 }

@@ -2,11 +2,11 @@ package dev.momostudios.coldsweat.core.init;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.block.*;
-import net.minecraft.block.Block;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BlockInit

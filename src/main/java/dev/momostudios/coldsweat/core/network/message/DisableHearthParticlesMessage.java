@@ -1,49 +1,49 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class DisableHearthParticlesMessage
 {
-    CompoundNBT nbt;
+    CompoundTag nbt;
     int entityID;
     String worldKey;
 
-    public DisableHearthParticlesMessage(PlayerEntity player, CompoundNBT nbt)
+    public DisableHearthParticlesMessage(Player player, CompoundTag nbt)
     {
         this.nbt = nbt;
         this.entityID = player.getId();
         this.worldKey = player.level.dimension().location().toString();
     }
 
-    DisableHearthParticlesMessage(int entityID, String worldKey, CompoundNBT nbt)
+    DisableHearthParticlesMessage(int entityID, String worldKey, CompoundTag nbt)
     {
         this.nbt = nbt;
         this.entityID = entityID;
         this.worldKey = worldKey;
     }
 
-    public static void encode(DisableHearthParticlesMessage message, PacketBuffer buffer)
+    public static void encode(DisableHearthParticlesMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityID);
         buffer.writeUtf(message.worldKey);
         buffer.writeNbt(message.nbt);
     }
 
-    public static DisableHearthParticlesMessage decode(PacketBuffer buffer)
+    public static DisableHearthParticlesMessage decode(FriendlyByteBuf buffer)
     {
         return new DisableHearthParticlesMessage(buffer.readInt(), buffer.readUtf(), buffer.readNbt());
     }
@@ -55,14 +55,15 @@ public class DisableHearthParticlesMessage
         {
             try
             {
-                World world = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientWorld().dimension().location().toString().equals(message.worldKey))
-                        ? ClientOnlyHelper.getClientWorld()
-                        : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
-                if (world != null)
+                Level level = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.worldKey))
+                        ? ClientOnlyHelper.getClientLevel()
+                        : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
+                if (level != null)
                 {
-                    Entity entity = world.getEntity(message.entityID);
-                    if (entity instanceof PlayerEntity)
-                    {   entity.getPersistentData().put("disabledHearths", message.nbt);
+                    Entity entity = level.getEntity(message.entityID);
+                    if (entity instanceof Player)
+                    {
+                        entity.getPersistentData().put("disabledHearths", message.nbt);
                     }
                 }
             } catch (Exception ignored) {}

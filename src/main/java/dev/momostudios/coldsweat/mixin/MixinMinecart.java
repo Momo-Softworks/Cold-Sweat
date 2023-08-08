@@ -1,27 +1,27 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractMinecartEntity.class)
+@Mixin(AbstractMinecart.class)
 public class MixinMinecart
 {
-    AbstractMinecartEntity minecart = (AbstractMinecartEntity) (Object) this;
+    AbstractMinecart minecart = (AbstractMinecart) (Object) this;
 
-    @Inject(method = "hurt(Lnet/minecraft/util/DamageSource;F)Z",
+    @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
             at = @At
             (
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;destroy(Lnet/minecraft/util/DamageSource;)V"
+                target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
             ),
             remap = ColdSweat.REMAP_MIXINS, cancellable = true)
     public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
@@ -40,7 +40,7 @@ public class MixinMinecart
                 minecart.spawnAtLocation(itemstack);
                 minecart.spawnAtLocation(carryStack);
             }
-            minecart.remove();
+            minecart.remove(Entity.RemovalReason.KILLED);
             ci.cancel();
         }
     }

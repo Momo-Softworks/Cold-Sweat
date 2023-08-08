@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config.util;
 
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -11,26 +11,26 @@ import java.util.function.Supplier;
  * Contains a value that updates as needed (usually when a player interacts with the config screen). <br>
  * If added to {@link ConfigSettings#CONFIG_SETTINGS}, it will be synced to the client.
  */
-public class ValueHolder<T>
+public class ValueSupplier<T>
 {
     private T value;
     private final Supplier<T> valueCreator;
-    private Function<T, CompoundNBT> encoder;
-    private Function<CompoundNBT, T> decoder;
+    private Function<T, CompoundTag> encoder;
+    private Function<CompoundTag, T> decoder;
     private Consumer<T> saver;
     private boolean synced = false;
 
-    public ValueHolder(Supplier<T> valueCreator)
+    public ValueSupplier(Supplier<T> valueCreator)
     {   this.valueCreator = valueCreator;
     }
 
-    public static <V> ValueHolder<V> of(Supplier<V> valueCreator)
-    {   return new ValueHolder<>(valueCreator);
+    public static <V> ValueSupplier<V> of(Supplier<V> valueCreator)
+    {   return new ValueSupplier<>(valueCreator);
     }
 
-    public static <V> ValueHolder<V> synced(Supplier<V> valueCreator, Function<V, CompoundNBT> encoder, Function<CompoundNBT, V> decoder, Consumer<V> saver)
+    public static <V> ValueSupplier<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
     {
-        ValueHolder<V> loader = new ValueHolder<>(valueCreator);
+        ValueSupplier<V> loader = new ValueSupplier<>(valueCreator);
         loader.encoder = encoder;
         loader.decoder = decoder;
         loader.saver = saver;
@@ -57,11 +57,11 @@ public class ValueHolder<T>
     {   this.value = valueCreator.get();
     }
 
-    public CompoundNBT encode()
+    public CompoundTag encode()
     {   return encoder.apply(value);
     }
 
-    public void decode(CompoundNBT tag)
+    public void decode(CompoundTag tag)
     {   this.value = decoder.apply(tag);
     }
 

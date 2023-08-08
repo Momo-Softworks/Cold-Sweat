@@ -1,13 +1,13 @@
 package dev.momostudios.coldsweat.api.temperature.block_temp;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
+import net.minecraft.core.BlockPos;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class FurnaceBlockTemp extends BlockTemp
@@ -18,7 +18,7 @@ public class FurnaceBlockTemp extends BlockTemp
     }
 
     @Override
-    public double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance)
+    public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
         if (state.getValue(AbstractFurnaceBlock.LIT))
         {   return CSMath.blend(CSMath.convertTemp(15, Temperature.Units.F, Temperature.Units.MC, false), 0, distance, 0.5, 7);

@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.api.temperature.block_temp;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.Map;

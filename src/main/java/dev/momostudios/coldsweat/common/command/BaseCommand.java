@@ -1,12 +1,12 @@
 package dev.momostudios.coldsweat.common.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
 public class BaseCommand
 {
-    protected LiteralArgumentBuilder<CommandSource> builder;
+    protected LiteralArgumentBuilder<CommandSourceStack> builder;
     boolean enabled;
 
     public BaseCommand(String name, int permissionLevel, boolean enabled)
@@ -15,7 +15,7 @@ public class BaseCommand
         this.enabled = enabled;
     }
 
-    public LiteralArgumentBuilder<CommandSource> getBuilder()
+    public LiteralArgumentBuilder<CommandSourceStack> getBuilder()
     {
         return builder;
     }
@@ -24,7 +24,7 @@ public class BaseCommand
         return enabled;
     }
 
-    public LiteralArgumentBuilder<CommandSource> setExecution()
+    public LiteralArgumentBuilder<CommandSourceStack> setExecution()
     {
         return null;
     }

@@ -4,14 +4,14 @@ import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class ConfigButton extends Button
 {
-    public ConfigButton(int x, int y, int width, int height, ITextComponent title, Button.IPressable pressedAction)
+    public ConfigButton(int x, int y, int width, int height, BaseComponent title, Button.OnPress pressedAction)
     {
         super(x, y, width, height, title, pressedAction);
     }
@@ -27,11 +27,10 @@ public class ConfigButton extends Button
         {
             ConfigSettings.DIFFICULTY.set(4);
 
-            if (Minecraft.getInstance().screen instanceof ConfigPageOne)
+            if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
             {
-                ConfigPageOne page = (ConfigPageOne) Minecraft.getInstance().screen;
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
-                        new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.name").getString() +
+                        new TextComponent(new TranslatableComponent("cold_sweat.config.difficulty.name").getString() +
                                 " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
             }
         }

@@ -1,29 +1,30 @@
 package dev.momostudios.coldsweat.core.itemgroup;
 
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-public class ColdSweatGroup extends ItemGroup
+public class ColdSweatGroup extends CreativeModeTab
 {
     public static final ColdSweatGroup COLD_SWEAT = new ColdSweatGroup("cold_sweat");
-
     public ColdSweatGroup(String label)
-    {   super(label);
+    {
+        super(label);
     }
 
     @Override
-    public ItemStack makeIcon()
-    {   return new ItemStack(ModItems.FILLED_WATERSKIN);
+    public ItemStack makeIcon() {
+        return new ItemStack(ModItems.FILLED_WATERSKIN);
     }
 
     @Override
-    public void fillItemList(NonNullList<ItemStack> items)
+    public void fillItemList(@NotNull NonNullList<ItemStack> items)
     {
         ModItems.WATERSKIN.fillItemCategory(this, items);
         ModItems.FILLED_WATERSKIN.fillItemCategory(this, items);
-        ModItems.LLAMA_FUR.fillItemCategory(this, items);
+        ModItems.GOAT_FUR.fillItemCategory(this, items);
         ModItems.HOGLIN_HIDE.fillItemCategory(this, items);
         ModItems.CHAMELEON_MOLT.fillItemCategory(this, items);
         ModItems.MINECART_INSULATION.fillItemCategory(this, items);

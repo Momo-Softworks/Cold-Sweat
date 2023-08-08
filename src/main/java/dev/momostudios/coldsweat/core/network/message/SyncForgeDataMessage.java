@@ -1,17 +1,17 @@
 package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class SyncForgeDataMessage
 {
-    CompoundNBT forgeData;
+    CompoundTag forgeData;
     int entityID;
     String dimension;
 
@@ -22,21 +22,21 @@ public class SyncForgeDataMessage
         this.dimension = entity.level.dimension().location().toString();
     }
 
-    public SyncForgeDataMessage(CompoundNBT forgeData, int entityID, String dimension)
+    public SyncForgeDataMessage(CompoundTag forgeData, int entityID, String dimension)
     {
         this.forgeData = forgeData;
         this.entityID = entityID;
         this.dimension = dimension;
     }
 
-    public static void encode(SyncForgeDataMessage message, PacketBuffer buffer)
+    public static void encode(SyncForgeDataMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeNbt(message.forgeData);
         buffer.writeInt(message.entityID);
         buffer.writeUtf(message.dimension);
     }
 
-    public static SyncForgeDataMessage decode(PacketBuffer buffer)
+    public static SyncForgeDataMessage decode(FriendlyByteBuf buffer)
     {
         return new SyncForgeDataMessage(buffer.readNbt(), buffer.readInt(), buffer.readUtf());
     }
@@ -46,12 +46,12 @@ public class SyncForgeDataMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientWorld().dimension().location().toString().equals(message.dimension))
+            if (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
             {
-                World world = ClientOnlyHelper.getClientWorld();
-                if (world != null)
+                Level level = ClientOnlyHelper.getClientLevel();
+                if (level != null)
                 {
-                    Entity entity = world.getEntity(message.entityID);
+                    Entity entity = level.getEntity(message.entityID);
                     if (entity != null)
                     {   entity.getPersistentData().merge(message.forgeData);
                     }

@@ -8,7 +8,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 public class ClientSettingsConfig
@@ -45,7 +44,7 @@ public class ClientSettingsConfig
                 .define("Enable In-Game Config", true);
         configButtonPos = BUILDER
                 .comment("The position (offset) of the config button on the screen")
-                .defineList("Config Button Position", Arrays.asList(0, 0),
+                .defineList("Config Button Position", List.of(0, 0),
                 it -> it instanceof Integer);
 
         /*

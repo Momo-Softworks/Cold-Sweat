@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
@@ -9,30 +9,27 @@ import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.gui.DisplayEffectsScreen;
-import net.minecraft.client.gui.widget.button.ImageButton;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
-import java.awt.*;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 
-public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
+public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer>
 {
     private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
-    public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".hearth"));
+        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth"));
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
@@ -47,7 +44,7 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
     public void init()
     {
         super.init();
-        this.addWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+        this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
         {
             hideParticles = !hideParticles;
             // If particles are disabled, add the hearth to the list of disabled hearths
@@ -64,7 +61,7 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
             }
 
-            Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "field_191747_p");
+            Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
             imageX.setAccessible(true);
             try
             {   imageX.set(button, 176 + (!hideParticles ? 0 : 12));
@@ -77,7 +74,7 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             {
                 if (this.active && this.visible && this.isValidClickButton(button) && this.clicked(mouseX, mouseY))
                 {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
                     this.onClick(mouseX, mouseY);
                     return true;
                 }
@@ -85,36 +82,36 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             }
 
             @Override
-            public void renderToolTip(MatrixStack matrix, int mouseX, int mouseY)
+            public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY)
             {
-                HearthScreen.this.renderComponentTooltip(matrix, Arrays.asList(new TranslationTextComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY);
+                HearthScreen.this.renderComponentTooltip(poseStack, List.of(new TranslatableComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
             }
         });
     }
 
     @Override
-    public void render(MatrixStack matrix, int mouseX, int mouseY, float partialTicks)
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrix);
-        super.render(matrix, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrix, mouseX, mouseY);
+        this.renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
+        this.renderTooltip(poseStack, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.color4f(1f, 1f, 1f, 1f);
-        this.minecraft.textureManager.bind(HEARTH_GUI);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.setShaderTexture(0, HEARTH_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
-        this.blit(matrix, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);
         int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
 
         // Render hot/cold fuel gauges
-        blit(matrix, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, hotFuel, 256, 256);
-        blit(matrix, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, coldFuel, 256, 256);
+        blit(poseStack, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, hotFuel, 256, 256);
+        blit(poseStack, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, coldFuel, 256, 256);
     }
 
     @Override

@@ -1,20 +1,21 @@
 package dev.momostudios.coldsweat.util.registries;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Supplier;
 
-public enum ModArmorMaterials implements IArmorMaterial
+public enum ModArmorMaterials implements ArmorMaterial
 {
     HOGLIN("hoglin", 7, new int[]{1, 3, 5, 2}, 25, SoundEvents.ARMOR_EQUIP_LEATHER,
            1.5F, 0.0F, () -> Ingredient.of(ModItems.HOGLIN_HIDE)),
     GOAT("goat", 5, new int[]{1, 2, 3, 1}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
-        0F, 0.0F, () -> Ingredient.of(ModItems.LLAMA_FUR));
+        0F, 0.0F, () -> Ingredient.of(ModItems.GOAT_FUR));
 
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
     private final String name;
@@ -24,7 +25,7 @@ public enum ModArmorMaterials implements IArmorMaterial
     private final SoundEvent sound;
     private final float toughness;
     private final float knockbackResistance;
-    private final Supplier<Ingredient> repairIngredient;
+    private final LazyLoadedValue<Ingredient> repairIngredient;
 
     ModArmorMaterials(String name, int durability, int[] protection, int enchantability, SoundEvent equipSound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient) {
         this.name = name;
@@ -34,14 +35,14 @@ public enum ModArmorMaterials implements IArmorMaterial
         this.sound = equipSound;
         this.toughness = toughness;
         this.knockbackResistance = knockbackResistance;
-        this.repairIngredient = repairIngredient;
+        this.repairIngredient = new LazyLoadedValue<>(repairIngredient);
     }
 
-    public int getDurabilityForSlot(EquipmentSlotType p_40484_) {
+    public int getDurabilityForSlot(EquipmentSlot p_40484_) {
         return HEALTH_PER_SLOT[p_40484_.getIndex()] * this.durabilityMultiplier;
     }
 
-    public int getDefenseForSlot(EquipmentSlotType p_40487_) {
+    public int getDefenseForSlot(EquipmentSlot p_40487_) {
         return this.slotProtections[p_40487_.getIndex()];
     }
 

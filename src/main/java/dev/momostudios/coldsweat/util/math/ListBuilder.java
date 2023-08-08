@@ -1,9 +1,8 @@
-package dev.momostudios.coldsweat.util.serialization;
+package dev.momostudios.coldsweat.util.math;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ListBuilder<T>
 {
@@ -40,7 +39,7 @@ public class ListBuilder<T>
      */
     @SafeVarargs
     public final ListBuilder<T> addIf(boolean condition, Supplier<T>... elements)
-    {   if (condition) this.elements.addAll(Arrays.stream(elements).map(Supplier::get).collect(Collectors.toList()));
+    {   if (condition) this.elements.addAll(Arrays.stream(elements).map(Supplier::get).toList());
         return this;
     }
 

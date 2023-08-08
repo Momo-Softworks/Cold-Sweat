@@ -3,9 +3,9 @@ package dev.momostudios.coldsweat.common.capability;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -25,10 +25,10 @@ public interface ITemperatureCap
     {   target.hurt(ConfigSettings.DAMAGE_SCALING.get() ? source.setScalesWithDifficulty() : source, amount);
     }
 
-    CompoundNBT serializeNBT();
-    void deserializeNBT(CompoundNBT tag);
-    CompoundNBT serializeModifiers();
-    void deserializeModifiers(CompoundNBT tag);
-    CompoundNBT serializeTemps();
-    void deserializeTemps(CompoundNBT tag);
+    CompoundTag serializeNBT();
+    void deserializeNBT(CompoundTag tag);
+    CompoundTag serializeModifiers();
+    void deserializeModifiers(CompoundTag tag);
+    CompoundTag serializeTemps();
+    void deserializeTemps(CompoundTag tag);
 }

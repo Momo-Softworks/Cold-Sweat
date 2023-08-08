@@ -2,31 +2,31 @@ package dev.momostudios.coldsweat.common.container;
 
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
-import dev.momostudios.coldsweat.core.init.ContainerInit;
+import dev.momostudios.coldsweat.core.init.MenuInit;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.PacketBuffer;
-import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.network.FriendlyByteBuf;
+import dev.momostudios.coldsweat.common.blockentity.HearthBlockEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.Objects;
 
-public class HearthContainer extends Container
+public class HearthContainer extends AbstractContainerMenu
 {
     public final HearthBlockEntity te;
-    public HearthContainer(final int windowId, final PlayerInventory playerInv, final HearthBlockEntity te)
+    public HearthContainer(final int windowId, final Inventory playerInv, final HearthBlockEntity te)
     {
-        super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
+        super(MenuInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Block entity slots
@@ -35,11 +35,11 @@ public class HearthContainer extends Container
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                if (HearthBlockEntity.getItemFuel(stack) != 0 || stack.getItem() == Items.MILK_BUCKET) return true;
+                if (HearthBlockEntity.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
                 // Check if the potion is blacklisted
-                Collection<EffectInstance> effects = PotionUtils.getMobEffects(stack);
+                Collection< MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
                 return effects.size() > 0
-                    && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.POTIONS.getKey(eff.getEffect())));
+                    && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect())));
             }
 
             @Override
@@ -65,7 +65,7 @@ public class HearthContainer extends Container
         }
     }
 
-    public HearthContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
+    public HearthContainer(final int windowId, final Inventory playerInv, final FriendlyByteBuf data)
     {
         this(windowId, playerInv, getTileEntity(playerInv, data));
     }
@@ -80,25 +80,26 @@ public class HearthContainer extends Container
         return te.getColdFuel();
     }
 
-    private static HearthBlockEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static HearthBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof HearthBlockEntity)
-        {   return ((HearthBlockEntity) te);
+        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        if (te instanceof HearthBlockEntity hearth)
+        {
+            return hearth;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean stillValid(PlayerEntity playerIn)
+    public boolean stillValid(Player playerIn)
     {
-        return playerIn.distanceToSqr(Vector3d.atCenterOf(te.getBlockPos())) <= 64.0D;
+        return playerIn.distanceToSqr(Vec3.atCenterOf(te.getBlockPos())) <= 64.0D;
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int index)
+    public ItemStack quickMoveStack(Player player, int index)
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);

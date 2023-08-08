@@ -4,8 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,11 +14,11 @@ import java.util.Optional;
 public class LootEntryCodec implements Codec<LootEntryCodec.LootEntry>
 {
     private final Codec<ResourceLocation> itemID;
-    private final Codec<Optional<CompoundNBT>> tag;
+    private final Codec<Optional<CompoundTag>> tag;
     private final Codec<Pair<Integer, Integer>> count;
     private final Codec<Integer> weight;
 
-    public LootEntryCodec(Codec<ResourceLocation> itemID, Codec<Pair<Integer, Integer>> count, Codec<Integer> weight, Codec<Optional<CompoundNBT>> tag)
+    public LootEntryCodec(Codec<ResourceLocation> itemID, Codec<Pair<Integer, Integer>> count, Codec<Integer> weight, Codec<Optional<CompoundTag>> tag)
     {
         this.itemID = itemID;
         this.count = count;
@@ -60,23 +61,5 @@ public class LootEntryCodec implements Codec<LootEntryCodec.LootEntry>
                 '}';
     }
 
-    public static class LootEntry
-    {
-        ResourceLocation itemID;
-        Optional<CompoundNBT> tag;
-        Pair<Integer, Integer> count;
-        int weight;
-
-        public LootEntry(ResourceLocation itemID, Optional<CompoundNBT> tag, Pair<Integer, Integer> count, int weight)
-        {   this.itemID = itemID;
-            this.tag = tag;
-            this.count = count;
-            this.weight = weight;
-        }
-
-        public ResourceLocation getItemID() { return itemID; }
-        public Optional<CompoundNBT> getTag() { return tag; }
-        public Pair<Integer, Integer> getCount() { return count; }
-        public int getWeight() { return weight; }
-    }
+    public record LootEntry(ResourceLocation itemID, Optional<CompoundTag> tag, Pair<Integer, Integer> count, int weight) {}
 }

@@ -18,6 +18,13 @@ public class Keyframe
     @Override
     public String toString()
     {
-        return String.format("{ time : %s, x: %s, y: %s, z: %s }", time, x, y, z);
+        return """
+                {
+                    "time": %s,
+                    "x": %s,
+                    "y": %s,
+                    "z": %s
+                }
+                """.formatted(time, x, y, z);
     }
 }

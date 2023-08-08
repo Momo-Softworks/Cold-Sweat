@@ -4,22 +4,19 @@ import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.serialization.Triplet;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITag;
+import oshi.util.tuples.Triplet;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ConfigHelper
 {
@@ -33,10 +30,9 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                ITag<Block> blockTag = BlockTags.getAllTags().getTag(new ResourceLocation(tagID));
-                if (blockTag != null)
-                {   blocks.addAll(blockTag.getValues());
-                }
+                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
+                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
             }
             else
             {
@@ -58,13 +54,15 @@ public class ConfigHelper
             if (blockID.startsWith("#"))
             {
                 final String tagID = blockID.replace("#", "");
-                ITag<Block> blockTag = BlockTags.getAllTags().getTag(new ResourceLocation(tagID));
-                if (blockTag != null)
+                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
+                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(blockITag ->
                 {
-                    for (Block block : blockTag.getValues())
-                    {   map.put(block, (Number) entry.get(1));
+                    for (Block block : optionalTag.get().stream().toList())
+                    {
+                        map.put(block, (Number) entry.get(1));
                     }
-                }
+                });
             }
             else
             {   Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID));
@@ -82,10 +80,9 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                ITag<Item> itemTag = ItemTags.getAllTags().getTag(new ResourceLocation(tagID));
-                if (itemTag != null)
-                {   items.addAll(itemTag.getValues());
-                }
+                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
+                        tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
             }
             else
             {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
@@ -107,13 +104,15 @@ public class ConfigHelper
             if (itemID.startsWith("#"))
             {
                 final String tagID = itemID.replace("#", "");
-                ITag<Item> itemTag = ItemTags.getAllTags().getTag(new ResourceLocation(tagID));
-                if (itemTag != null)
+                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
+                                                   tag.getKey().location().toString().equals(tagID)).findFirst();
+                optionalTag.ifPresent(itemITag ->
                 {
-                    for (Item item : itemTag.getValues())
-                    {   map.put(item, ((Number) entry.get(1)).doubleValue());
+                    for (Item item : optionalTag.get().stream().toList())
+                    {
+                        map.put(item, ((Number) entry.get(1)).doubleValue());
                     }
-                }
+                });
             }
             else
             {
@@ -164,44 +163,44 @@ public class ConfigHelper
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
-    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).collect(Collectors.toList());
+    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).toList();
     }
 
-    public static CompoundNBT writeNBTBoolean(boolean value, String key)
+    public static CompoundTag writeNBTBoolean(boolean value, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putBoolean(key, value);
         return tag;
     }
 
-    public static CompoundNBT writeNBTInt(int value, String key)
+    public static CompoundTag writeNBTInt(int value, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putInt(key, value);
         return tag;
     }
 
-    public static CompoundNBT writeNBTDouble(double value, String key)
+    public static CompoundTag writeNBTDouble(double value, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putDouble(key, value);
         return tag;
     }
 
-    public static CompoundNBT writeNBTString(String value, String key)
+    public static CompoundTag writeNBTString(String value, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putString(key, value);
         return tag;
     }
 
-    public static CompoundNBT writeNBTPairMap(Map<ResourceLocation, Pair<Double, Double>> map, String key)
+    public static CompoundTag writeNBTPairMap(Map<ResourceLocation, Pair<Double, Double>> map, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
-        CompoundNBT mapTag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<ResourceLocation, Pair<Double, Double>> entry : map.entrySet())
         {
-            CompoundNBT biomeTag = new CompoundNBT();
+            CompoundTag biomeTag = new CompoundTag();
             biomeTag.putDouble("min", entry.getValue().getFirst());
             biomeTag.putDouble("max", entry.getValue().getSecond());
             mapTag.put(entry.getKey().toString(), biomeTag);
@@ -210,22 +209,22 @@ public class ConfigHelper
         return tag;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Double>> readNBTPairMap(CompoundNBT tag, String key)
+    public static Map<ResourceLocation, Pair<Double, Double>> readNBTPairMap(CompoundTag tag, String key)
     {
         Map<ResourceLocation, Pair<Double, Double>> map = new HashMap<>();
-        CompoundNBT mapTag = tag.getCompound(key);
+        CompoundTag mapTag = tag.getCompound(key);
         for (String biomeID : mapTag.getAllKeys())
         {
-            CompoundNBT biomeTag = mapTag.getCompound(biomeID);
+            CompoundTag biomeTag = mapTag.getCompound(biomeID);
             map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("min"), biomeTag.getDouble("max")));
         }
         return map;
     }
 
-    public static CompoundNBT writeNBTDoubleMap(Map<ResourceLocation, Double> map, String key)
+    public static CompoundTag writeNBTDoubleMap(Map<ResourceLocation, Double> map, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
-        CompoundNBT mapTag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<ResourceLocation, Double> entry : map.entrySet())
         {
             mapTag.putDouble(entry.getKey().toString(), entry.getValue());
@@ -234,10 +233,10 @@ public class ConfigHelper
         return tag;
     }
 
-    public static Map<ResourceLocation, Double> readNBTDoubleMap(CompoundNBT tag, String key)
+    public static Map<ResourceLocation, Double> readNBTDoubleMap(CompoundTag tag, String key)
     {
         Map<ResourceLocation, Double> map = new HashMap<>();
-        CompoundNBT mapTag = tag.getCompound(key);
+        CompoundTag mapTag = tag.getCompound(key);
         for (String biomeID : mapTag.getAllKeys())
         {
             map.put(new ResourceLocation(biomeID), mapTag.getDouble(biomeID));
@@ -245,13 +244,13 @@ public class ConfigHelper
         return map;
     }
 
-    public static CompoundNBT writeNBTItemMap(Map<Item, Pair<Double, Double>> map, String key)
+    public static CompoundTag writeNBTItemMap(Map<Item, Pair<Double, Double>> map, String key)
     {
-        CompoundNBT tag = new CompoundNBT();
-        CompoundNBT mapTag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<Item, Pair<Double, Double>> entry : map.entrySet())
         {
-            CompoundNBT itemTag = new CompoundNBT();
+            CompoundTag itemTag = new CompoundTag();
             itemTag.putDouble("value1", entry.getValue().getFirst());
             itemTag.putDouble("value2", entry.getValue().getSecond());
             ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
@@ -262,13 +261,13 @@ public class ConfigHelper
         return tag;
     }
 
-    public static Map<Item, Pair<Double, Double>> readNBTItemMap(CompoundNBT tag, String key)
+    public static Map<Item, Pair<Double, Double>> readNBTItemMap(CompoundTag tag, String key)
     {
         Map<Item, Pair<Double, Double>> map = new HashMap<>();
-        CompoundNBT mapTag = tag.getCompound(key);
+        CompoundTag mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
-            CompoundNBT itemTag = mapTag.getCompound(itemID);
+            CompoundTag itemTag = mapTag.getCompound(itemID);
             map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)), Pair.of(itemTag.getDouble("value1"), itemTag.getDouble("value2")));
         }
         return map;

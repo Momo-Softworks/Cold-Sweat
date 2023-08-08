@@ -1,8 +1,7 @@
 package dev.momostudios.coldsweat.client.renderer.animation;
 
-import dev.momostudios.coldsweat.client.renderer.model.ModelPart;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.geom.ModelPart;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class Animation
         this.rotKeyframes = new ArrayList<>(rotFrames);
     }
 
-    public Animation setRotations(float time, ModelRenderer part, boolean offset)
+    public Animation setRotations(float time, ModelPart part, boolean offset)
     {
         if (rotKeyframes.isEmpty()) return this;
 
@@ -48,7 +47,7 @@ public class Animation
         return this;
     }
 
-    public Animation setPositions(float time, ModelRenderer part, boolean offset)
+    public Animation setPositions(float time, ModelPart part, boolean offset)
     {
         if (posKeyframes.isEmpty()) return this;
 
@@ -97,6 +96,19 @@ public class Animation
     @Override
     public String toString()
     {
-        return String.format("Animation{ partName: %s, duration: %s, offset: %s, positions: { %s } rotations { %s } }", partName, duration, offsetAmount, posKeyframes, rotKeyframes);
+        return """
+                Animation{
+                    partName: %s,
+                    duration: %s,
+                    offset: %s,
+                    positions:
+                    {
+                        %s,
+                    }
+                    rotations
+                    {
+                        %s,
+                    }
+                }""".formatted(partName, duration, offsetAmount, posKeyframes, rotKeyframes);
     }
 }

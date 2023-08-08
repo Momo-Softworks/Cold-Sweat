@@ -1,36 +1,36 @@
 package dev.momostudios.coldsweat.common.block;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.data.tags.ModBlockTags;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootContext;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IPlantable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -51,7 +51,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     {
         return Properties
                 .of(Material.PLANT)
-                .sound(SoundType.CROP)
+                .sound(SoundType.BIG_DRIPLEAF)
                 .strength(0f, 0.5f)
                 .randomTicks()
                 .lightLevel(state -> state.getValue(SECTION) == 3 ? 6 : 0)
@@ -64,8 +64,7 @@ public class SoulStalkBlock extends Block implements IPlantable
         return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 
-    @Override
-    public void randomTick(BlockState state, ServerWorld level, BlockPos pos, Random rand)
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random rand)
     {
         if (level.isEmptyBlock(pos.above()))
         {
@@ -89,8 +88,9 @@ public class SoulStalkBlock extends Block implements IPlantable
         }
     }
 
+    @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
+    public BlockState getStateForPlacement(BlockPlaceContext context)
     {   BlockPos pos = context.getClickedPos();
         return context.getLevel().getBlockState(pos.below()).getBlock() == this ? this.defaultBlockState().setValue(SECTION, 3)
              : context.getLevel().getBlockState(pos.above()).isAir() && this.canSurvive(this.defaultBlockState(), context.getLevel(), pos) ? this.defaultBlockState()
@@ -98,18 +98,18 @@ public class SoulStalkBlock extends Block implements IPlantable
     }
 
     @Override
-    public void onPlace(BlockState state, World world, BlockPos pos, BlockState lastState, boolean p_60570_)
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
-        if (world.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
+        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
         {
-            if (world.getBlockState(pos.above()).isAir())
-            {   world.setBlock(pos.above(), ModBlocks.SOUL_STALK.defaultBlockState().setValue(SECTION, 3), 3);
+            if (level.getBlockState(pos.above()).isAir())
+            {   level.setBlock(pos.above(), ModBlocks.SOUL_STALK.defaultBlockState().setValue(SECTION, 3), 3);
             }
         }
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, IWorld ilevel, BlockPos pos, BlockPos otherPos)
+    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor ilevel, BlockPos pos, BlockPos otherPos)
     {
         if (!this.canSurvive(state, ilevel, pos))
         {   return Blocks.AIR.defaultBlockState();
@@ -128,22 +128,22 @@ public class SoulStalkBlock extends Block implements IPlantable
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader getter, BlockPos pos, ISelectionContext context)
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
     {   return SHAPE;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {   builder.add(AGE, SECTION);
     }
 
     @Override
-    public BlockState getPlant(IBlockReader level, BlockPos pos)
+    public BlockState getPlant(BlockGetter level, BlockPos pos)
     {   return this.defaultBlockState();
     }
 
     @Override
-    public boolean canSurvive(BlockState state, IWorldReader level, BlockPos pos)
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
     {   BlockState below = level.getBlockState(pos.below());
         return below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) || below.getBlock() == this;
     }

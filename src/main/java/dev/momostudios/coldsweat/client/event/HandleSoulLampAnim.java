@@ -2,10 +2,10 @@ package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,15 +23,15 @@ public class HandleSoulLampAnim
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        PlayerEntity player = event.player;
+        Player player = event.player;
         if (player.level.isClientSide && event.phase == TickEvent.Phase.START)
         {
             if (player.tickCount % 20 == 0)
-                LEFT_HANDED = player.getMainArm() == HandSide.LEFT;
+                LEFT_HANDED = player.getMainArm() == HumanoidArm.LEFT;
 
             Pair<Float, Float> rightArmRot = RIGHT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
-            if (player.getItemInHand(LEFT_HANDED ? Hand.OFF_HAND : Hand.MAIN_HAND).getItem() == ModItems.SOULSPRING_LAMP)
+            if (player.getItemInHand(LEFT_HANDED ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND).getItem() == ModItems.SOULSPRING_LAMP)
             {
                 float prevRot = rightArmRot.getFirst();
                 if (prevRot < 69.99)
@@ -48,7 +48,7 @@ public class HandleSoulLampAnim
 
             Pair<Float, Float> leftArmRot = LEFT_ARM_ROTATIONS.getOrDefault(player, Pair.of(0f, 0f));
 
-            if (player.getItemInHand(LEFT_HANDED ? Hand.MAIN_HAND : Hand.OFF_HAND).getItem() == ModItems.SOULSPRING_LAMP)
+            if (player.getItemInHand(LEFT_HANDED ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND).getItem() == ModItems.SOULSPRING_LAMP)
             {
                 float prevRot = leftArmRot.getFirst();
                 if (prevRot < 69.99)

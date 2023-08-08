@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.serialization.ListBuilder;
+import dev.momostudios.coldsweat.util.math.ListBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -10,7 +10,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 public class EntitySettingsConfig
@@ -34,20 +33,13 @@ public class EntitySettingsConfig
                 .comment("List of entities that will insulate the player when riding them",
                          "The rate at which the player's temperature changes is divided by the resistance value",
                          "Format: [\"entity_id\", coldResistance, hotResistance]")
-                .defineList("Insulated Mounts", Arrays.asList(),
-                        it ->
-                        {
-                            if (it instanceof List<?>)
-                            {   List<?> list = ((List<?>) it);
-                                return list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number;
-                            }
-                            return false;
-                        });
+                .defineList("Insulated Mounts", List.of(),
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         goatFurGrowth = BUILDER
                 .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
-                .defineList("Goat Fur Growth Timings", Arrays.asList(
+                .defineList("Goat Fur Growth Timings", List.of(
                         1200, 2400, 0.20
                     ), it -> it instanceof Number);
 
@@ -58,98 +50,84 @@ public class EntitySettingsConfig
                 .comment("Defines the biomes that Chameleons can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
-                                Arrays.asList("minecraft:bamboo_jungle", 80),
-                                Arrays.asList("minecraft:jungle", 80),
-                                Arrays.asList("minecraft:sparse_jungle", 35),
-                                Arrays.asList("minecraft:desert", 1))
+                                List.of("minecraft:bamboo_jungle", 80),
+                                List.of("minecraft:jungle", 80),
+                                List.of("minecraft:sparse_jungle", 35),
+                                List.of("minecraft:desert", 1))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
-                                () -> Arrays.asList("biomesoplenty:lush_desert", 3),
-                                () -> Arrays.asList("biomesoplenty:rainforest", 40),
-                                () -> Arrays.asList("biomesoplenty:rocky_rainforest", 15),
-                                () -> Arrays.asList("biomesoplenty:fungal_jungle", 10),
-                                () -> Arrays.asList("biomesoplenty:tropics", 8),
-                                () -> Arrays.asList("biomesoplenty:outback", 2))
+                                () -> List.of("biomesoplenty:lush_desert", 3),
+                                () -> List.of("biomesoplenty:rainforest", 40),
+                                () -> List.of("biomesoplenty:rocky_rainforest", 15),
+                                () -> List.of("biomesoplenty:fungal_jungle", 10),
+                                () -> List.of("biomesoplenty:tropics", 8),
+                                () -> List.of("biomesoplenty:outback", 2))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
-                                () -> Arrays.asList("byg:tropical_rainforest", 60),
-                                () -> Arrays.asList("byg:jacaranda_forest", 3),
-                                () -> Arrays.asList("byg:guiana_shield", 3),
-                                () -> Arrays.asList("byg:crag_gardens", 4),
-                                () -> Arrays.asList("byg:atacama_desert", 1),
-                                () -> Arrays.asList("byg:cypress_swamplands", 3),
-                                () -> Arrays.asList("byg:mojave_desert", 1),
-                                () -> Arrays.asList("byg:windswept_desert", 2))
+                                () -> List.of("byg:tropical_rainforest", 60),
+                                () -> List.of("byg:jacaranda_forest", 3),
+                                () -> List.of("byg:guiana_shield", 3),
+                                () -> List.of("byg:crag_gardens", 4),
+                                () -> List.of("byg:atacama_desert", 1),
+                                () -> List.of("byg:cypress_swamplands", 3),
+                                () -> List.of("byg:mojave_desert", 1),
+                                () -> List.of("byg:windswept_desert", 2))
                             .addIf(CompatManager.isAtmosphericLoaded(),
-                                () -> Arrays.asList("atmospheric:dunes", 0.75),
-                                () -> Arrays.asList("atmospheric:flourishing_dunes", 1.5),
-                                () -> Arrays.asList("atmospheric:rocky_dunes", 0.75),
-                                () -> Arrays.asList("atmospheric:petrified_dunes", 0.5),
-                                () -> Arrays.asList("atmospheric:rainforest", 70),
-                                () -> Arrays.asList("atmospheric:sparse_rainforest", 40),
-                                () -> Arrays.asList("atmospheric:rainforest_basin", 50),
-                                () -> Arrays.asList("atmospheric:sparse_rainforest_basin", 30))
+                                () -> List.of("atmospheric:dunes", 0.75),
+                                () -> List.of("atmospheric:flourishing_dunes", 1.5),
+                                () -> List.of("atmospheric:rocky_dunes", 0.75),
+                                () -> List.of("atmospheric:petrified_dunes", 0.5),
+                                () -> List.of("atmospheric:rainforest", 70),
+                                () -> List.of("atmospheric:sparse_rainforest", 40),
+                                () -> List.of("atmospheric:rainforest_basin", 50),
+                                () -> List.of("atmospheric:sparse_rainforest_basin", 30))
                            .addIf(CompatManager.isTerralithLoaded(),
-                                () -> Arrays.asList("terralith:red_oasis", 3),
-                                () -> Arrays.asList("terralith:desert_oasis", 3),
-                                () -> Arrays.asList("terralith:tropical_jungle", 80),
-                                () -> Arrays.asList("terralith:arid_highlands", 1.5),
-                                () -> Arrays.asList("terralith:rocky_jungle", 80),
-                                () -> Arrays.asList("terralith:brushland", 1.5))
+                                () -> List.of("terralith:red_oasis", 3),
+                                () -> List.of("terralith:desert_oasis", 3),
+                                () -> List.of("terralith:tropical_jungle", 80),
+                                () -> List.of("terralith:arid_highlands", 1.5),
+                                () -> List.of("terralith:rocky_jungle", 80),
+                                () -> List.of("terralith:brushland", 1.5))
                            .addIf(CompatManager.isWythersLoaded(),
-                                () -> Arrays.asList("wythers:cactus_desert", 1),
-                                () -> Arrays.asList("wythers:tropical_forest", 10),
-                                () -> Arrays.asList("wythers:tropical_rainforest", 80)
+                                () -> List.of("wythers:cactus_desert", 1),
+                                () -> List.of("wythers:tropical_forest", 10),
+                                () -> List.of("wythers:tropical_rainforest", 80)
                         ).build(),
-                        it ->
-                        {
-                            if (it instanceof List<?>)
-                            {   List<?> list = ((List<?>) it);
-                                return list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number;
-                            }
-                            return false;
-                        });
+                        it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         goatBiomes = BUILDER
                 .comment("Defines additional biomes that goats can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
                          "Not affected by the \"Increase Goat Spawns\" option")
                 .defineList("Goat Spawn Biomes", ListBuilder.begin(
-                                Arrays.asList("minecraft:frozen_peaks", 8),
-                                Arrays.asList("minecraft:jagged_peaks", 8),
-                                Arrays.asList("minecraft:snowy_slopes", 8),
-                                Arrays.asList("minecraft:meadow", 3),
-                                Arrays.asList("minecraft:windswept_hills", 6),
-                                Arrays.asList("minecraft:windswept_forest", 6),
-                                Arrays.asList("minecraft:windswept_gravelly_hills", 4),
-                                Arrays.asList("minecraft:grove", 5),
-                                Arrays.asList("minecraft:stony_peaks", 8))
+                                List.of("minecraft:frozen_peaks", 8),
+                                List.of("minecraft:jagged_peaks", 8),
+                                List.of("minecraft:snowy_slopes", 8),
+                                List.of("minecraft:meadow", 3),
+                                List.of("minecraft:windswept_hills", 6),
+                                List.of("minecraft:windswept_forest", 6),
+                                List.of("minecraft:windswept_gravelly_hills", 4),
+                                List.of("minecraft:grove", 5),
+                                List.of("minecraft:stony_peaks", 8))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
-                                () -> Arrays.asList("biomesoplenty:boreal_forest", 5),
-                                () -> Arrays.asList("biomesoplenty:jade_cliffs", 4),
-                                () -> Arrays.asList("biomesoplenty:crag", 3))
+                                () -> List.of("biomesoplenty:boreal_forest", 5),
+                                () -> List.of("biomesoplenty:jade_cliffs", 4),
+                                () -> List.of("biomesoplenty:crag", 3))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
-                                () -> Arrays.asList("byg:canadian_shield", 3),
-                                () -> Arrays.asList("byg:guiana_shield", 3),
-                                () -> Arrays.asList("byg:fragment_forest", 128),
-                                () -> Arrays.asList("byg:howling_peaks", 6),
-                                () -> Arrays.asList("byg:shattered_glacier", 6),
-                                () -> Arrays.asList("byg:dacite_ridges", 5))
+                                () -> List.of("byg:canadian_shield", 3),
+                                () -> List.of("byg:guiana_shield", 3),
+                                () -> List.of("byg:fragment_forest", 128),
+                                () -> List.of("byg:howling_peaks", 6),
+                                () -> List.of("byg:shattered_glacier", 6),
+                                () -> List.of("byg:dacite_ridges", 5))
                             .addIf(CompatManager.isTerralithLoaded(),
-                                () -> Arrays.asList("terralith:blooming_plateau", 5),
-                                () -> Arrays.asList("terralith:rocky_mountains", 6),
-                                () -> Arrays.asList("terralith:alpine_grove", 6),
-                                () -> Arrays.asList("terralith:scarlet_mountains", 4),
-                                () -> Arrays.asList("terralith:windswept_spires", 16),
-                                () -> Arrays.asList("terralith:cloud_forest", 4),
-                                () -> Arrays.asList("terralith:haze_mountain", 4)
+                                () -> List.of("terralith:blooming_plateau", 5),
+                                () -> List.of("terralith:rocky_mountains", 6),
+                                () -> List.of("terralith:alpine_grove", 6),
+                                () -> List.of("terralith:scarlet_mountains", 4),
+                                () -> List.of("terralith:windswept_spires", 16),
+                                () -> List.of("terralith:cloud_forest", 4),
+                                () -> List.of("terralith:haze_mountain", 4)
                         ).build(),
-                        it ->
-                        {
-                            if (it instanceof List<?>)
-                            {   List<?> list = ((List<?>) it);
-                                return list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number;
-                            }
-                            return false;
-                        });
+                        it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

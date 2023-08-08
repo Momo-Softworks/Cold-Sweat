@@ -3,7 +3,10 @@ package dev.momostudios.coldsweat.api.temperature.modifier.compat;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
+import weather2.ServerTickHandler;
+import weather2.weathersystem.WeatherManagerServer;
+import weather2.weathersystem.storm.WeatherObjectParticleStorm;
 
 import java.util.function.Function;
 
@@ -17,7 +20,7 @@ public class StormTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        /*if (!entity.level.isClientSide())
+        if (!entity.level.isClientSide())
         {
             WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(entity.level.dimension());
             WeatherObjectParticleStorm snowStorm = weatherManager.getClosestParticleStormByIntensity(entity.position(), WeatherObjectParticleStorm.StormType.SNOWSTORM);
@@ -28,7 +31,7 @@ public class StormTempModifier extends TempModifier
                     return temp -> temp;
                 return temp -> temp - CSMath.blend(0.5, 0, distance, 100, snowStorm.getSize()) * snowStorm.getIntensity();
             }
-        }*/
+        }
         return temp -> temp;
     }
 

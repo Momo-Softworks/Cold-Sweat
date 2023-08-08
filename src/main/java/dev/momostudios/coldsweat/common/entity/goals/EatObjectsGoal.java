@@ -1,23 +1,23 @@
 package dev.momostudios.coldsweat.common.entity.goals;
 
-import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
+import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import dev.momostudios.coldsweat.common.entity.data.edible.Edible;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.Path;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,18 +26,20 @@ import java.util.UUID;
 public class EatObjectsGoal extends Goal
 {
     List<EntityType<?>> wantedEntities;
-    ChameleonEntity entity;
+    Chameleon entity;
     Entity target;
     boolean stoppedTasks;
-    Vector3d lookPos = null;
+    Vec3 lookPos = null;
 
-    public EatObjectsGoal(ChameleonEntity chameleon, List<EntityType<?>> wantedEntities)
-    {   this.wantedEntities = wantedEntities;
+    public EatObjectsGoal(Chameleon chameleon, List<EntityType<?>> wantedEntities)
+    {
+        this.wantedEntities = wantedEntities;
         this.entity = chameleon;
     }
 
     public boolean canContinueToUse()
-    {   return (this.target != null && this.target.isAlive()) || this.entity.getEatTimer() > 0;
+    {
+        return (this.target != null && this.target.isAlive() && !this.target.isRemoved()) || this.entity.getEatTimer() > 0;
     }
 
     public boolean isInterruptable()
@@ -51,10 +53,9 @@ public class EatObjectsGoal extends Goal
         List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
         for (Entity ent : items)
         {
-            if (ent instanceof ItemEntity && ((ItemEntity) ent).getThrower() != null
-            && (this.entity.isPlayerTrusted(((ItemEntity) ent).getThrower()) || this.entity.isTamingItem(((ItemEntity) ent).getItem())))
+            if (ent instanceof ItemEntity itemEntity && itemEntity.getThrower() != null
+            && (this.entity.isPlayerTrusted(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
-                ItemEntity itemEntity = (ItemEntity) ent;
                 Item item = itemEntity.getItem().getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
                 if (edible.isPresent())
@@ -89,7 +90,7 @@ public class EatObjectsGoal extends Goal
 
     public void tick()
     {
-        if ((this.target == null || this.target.isAlive()) && this.entity.getEatTimer() <= 0)
+        if ((this.target == null || this.target.isRemoved()) && this.entity.getEatTimer() <= 0)
         {
             this.stop();
             return;
@@ -102,7 +103,7 @@ public class EatObjectsGoal extends Goal
         if (this.entity.getEatTimer() <= 0)
         {
             // Move to the target
-            PathNavigator navigator = this.entity.getNavigation();
+            PathNavigation navigator = this.entity.getNavigation();
             Path path = navigator.createPath(target, 0);
             if (path != null) navigator.moveTo(path, 1.5);
 
@@ -123,14 +124,13 @@ public class EatObjectsGoal extends Goal
                 // Remove target item
                 TaskScheduler.scheduleServer(() ->
                 {
-                    if (this.target != null && this.target.isAlive() && !this.target.isAlive())
+                    if (this.target != null && this.target.isAlive() && !this.target.isRemoved())
                     {
                         this.entity.onEatEntity(this.target);
-                        this.target.remove();
+                        this.target.remove(Entity.RemovalReason.KILLED);
 
-                        if (this.target instanceof ItemEntity)
-                        {   ItemEntity item = (ItemEntity) this.target;
-                            this.entity.onItemPickup(item);
+                        if (this.target instanceof ItemEntity item)
+                        {   this.entity.onItemPickup(item);
 
                             UUID thrower = item.getThrower();
                             if (item.getItem().getCount() > 1)
@@ -156,8 +156,9 @@ public class EatObjectsGoal extends Goal
             this.entity.goalSelector.getRunningGoals().forEach(goal ->
             {
                 Goal g = goal.getGoal();
-                if (g instanceof TemptGoal || g instanceof LookAtGoal || g instanceof LookRandomlyGoal || g instanceof LazyLookGoal)
-                {   this.stoppedTasks = true;
+                if (g instanceof TemptGoal || g instanceof LookAtPlayerGoal || g instanceof RandomLookAroundGoal || g instanceof LazyLookGoal)
+                {
+                    this.stoppedTasks = true;
                     goal.stop();
                 }
             });

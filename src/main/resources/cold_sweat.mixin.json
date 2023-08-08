@@ -1,8 +1,8 @@
 {
   "required": true,
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "package": "dev.momostudios.coldsweat.mixin",
-  "minVersion": "0.8",
+  "minVersion": "0.8.5",
   "client": [
     "MixinEffectsScreen",
     "MixinGoatModel",
@@ -13,7 +13,6 @@
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
-    "ItemSwapMixin",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",
@@ -21,8 +20,7 @@
     "MixinMinecart",
     "MixinPickEntity",
     "MixinSoulCampfire",
-    "MixinSoulFire",
-    "MixinTriggerBounds$MixinFloatBound"
+    "MixinSoulFire"
   ],
   "injectors": {
     "defaultRequire": 1

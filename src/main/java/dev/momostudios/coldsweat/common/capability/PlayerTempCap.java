@@ -11,12 +11,12 @@ import dev.momostudios.coldsweat.util.entity.NBTHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.potion.Effects;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.*;
@@ -100,8 +100,7 @@ public class PlayerTempCap implements ITemperatureCap
     @Override
     public void tickDummy(LivingEntity entity)
     {
-        if (!(entity instanceof PlayerEntity)) return;
-        PlayerEntity player = (PlayerEntity) entity;
+        if (!(entity instanceof Player player)) return;
 
         for (Type type : VALID_MODIFIER_TYPES)
         {   Temperature.apply(0, player, type, getModifiers(type));
@@ -115,8 +114,7 @@ public class PlayerTempCap implements ITemperatureCap
     @Override
     public void tick(LivingEntity entity)
     {
-        if (!(entity instanceof ServerPlayerEntity)) return;
-        ServerPlayerEntity player = (ServerPlayerEntity) entity;
+        if (!(entity instanceof ServerPlayer player)) return;
 
         // Tick expiration time for world modifiers
         double newWorldTemp = Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
@@ -180,7 +178,7 @@ public class PlayerTempCap implements ITemperatureCap
         double bodyTemp = getTemp(Type.BODY);
 
         boolean hasGrace = player.hasEffect(ModEffects.GRACE);
-        boolean hasFireResist = player.hasEffect(Effects.FIRE_RESISTANCE);
+        boolean hasFireResist = player.hasEffect(MobEffects.FIRE_RESISTANCE);
         boolean hasIceResist = player.hasEffect(ModEffects.ICE_RESISTANCE);
 
         //Deal damage to the player if temperature is critical
@@ -199,7 +197,7 @@ public class PlayerTempCap implements ITemperatureCap
         else setTemp(Type.CORE, 0);
     }
 
-    private void setTemperatures(ServerPlayerEntity player, double[] temps)
+    private void setTemperatures(ServerPlayer player, double[] temps)
     {
         for (Type type : VALID_TEMPERATURE_TYPES)
         {
@@ -212,10 +210,10 @@ public class PlayerTempCap implements ITemperatureCap
         }
     }
 
-    public void calculateVisibility(PlayerEntity player)
+    public void calculateVisibility(Player player)
     {
         showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
-                || player.inventory.items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
+                || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
                 || player.getOffhandItem().getItem() == ModItems.THERMOMETER
                 || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
         showBodyTemp = !player.isCreative() && !player.isSpectator();
@@ -240,10 +238,10 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundNBT serializeNBT()
+    public CompoundTag serializeNBT()
     {
         // Save the player's temperatures
-        CompoundNBT nbt = this.serializeTemps();
+        CompoundTag nbt = this.serializeTemps();
 
         // Save the player's modifiers
         nbt.merge(this.serializeModifiers());
@@ -251,9 +249,9 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundNBT serializeTemps()
+    public CompoundTag serializeTemps()
     {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
 
         // Save the player's temperature data
         for (Type type : VALID_TEMPERATURE_TYPES)
@@ -264,14 +262,14 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundNBT serializeModifiers()
+    public CompoundTag serializeModifiers()
     {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
 
         // Save the player's modifiers
         for (Type type : VALID_MODIFIER_TYPES)
         {
-            ListNBT modifiers = new ListNBT();
+            ListTag modifiers = new ListTag();
             for (TempModifier modifier : this.getModifiers(type))
             {
                 modifiers.add(NBTHelper.modifierToTag(modifier));
@@ -284,7 +282,7 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt)
+    public void deserializeNBT(CompoundTag nbt)
     {
         // Load the player's temperatures
         deserializeTemps(nbt);
@@ -294,7 +292,7 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeTemps(CompoundNBT nbt)
+    public void deserializeTemps(CompoundTag nbt)
     {
         for (Type type : VALID_TEMPERATURE_TYPES)
         {
@@ -303,19 +301,19 @@ public class PlayerTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeModifiers(CompoundNBT nbt)
+    public void deserializeModifiers(CompoundTag nbt)
     {
         for (Type type : VALID_MODIFIER_TYPES)
         {
             getModifiers(type).clear();
 
             // Get the list of modifiers from the player's persistent data
-            ListNBT modifiers = nbt.getList(NBTHelper.getModifierTag(type), 10);
+            ListTag modifiers = nbt.getList(NBTHelper.getModifierTag(type), 10);
 
             // For each modifier in the list
             modifiers.forEach(modNBT ->
             {
-                NBTHelper.tagToModifier((CompoundNBT) modNBT).ifPresent(modifier ->
+                NBTHelper.tagToModifier((CompoundTag) modNBT).ifPresent(modifier ->
                 {   getModifiers(type).add(modifier);
                 });
             });

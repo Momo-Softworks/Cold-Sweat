@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.api.temperature.modifier;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
@@ -15,6 +15,7 @@ public class SoulLampTempModifier extends TempModifier
         return temp ->
         {
             if (temp < almostMax) return temp;
+
             return Math.max(temp * 0.4, almostMax);
         };
     }

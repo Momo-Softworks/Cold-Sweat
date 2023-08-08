@@ -4,38 +4,38 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class TemperatureSyncMessage
 {
     int entityId;
-    CompoundNBT temps;
+    CompoundTag temps;
     boolean instant;
 
-    public TemperatureSyncMessage(LivingEntity entity, CompoundNBT temps, boolean instant)
+    public TemperatureSyncMessage(LivingEntity entity, CompoundTag temps, boolean instant)
     {   this.entityId = entity.getId();
         this.temps = temps;
         this.instant = instant;
     }
 
-    TemperatureSyncMessage(int entityId, CompoundNBT temps, boolean instant)
+    TemperatureSyncMessage(int entityId, CompoundTag temps, boolean instant)
     {   this.entityId = entityId;
         this.temps = temps;
         this.instant = instant;
     }
 
-    public static void encode(TemperatureSyncMessage message, PacketBuffer buffer)
+    public static void encode(TemperatureSyncMessage message, FriendlyByteBuf buffer)
     {   buffer.writeInt(message.entityId);
         buffer.writeNbt(message.temps);
         buffer.writeBoolean(message.instant);
     }
 
-    public static TemperatureSyncMessage decode(PacketBuffer buffer)
+    public static TemperatureSyncMessage decode(FriendlyByteBuf buffer)
     {   return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
     }
 

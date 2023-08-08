@@ -835,7 +835,7 @@ Fixes:
 - Fixed goats trying to ram players in creative mode
 
 Technical Changes:
-- TempModifiers now have a full CompoundNBT attached to each instance
+- TempModifiers now have a full CompoundTag attached to each instance
       - This can be used to store any custom data that needs to be saved
       - Replaces the old "arguments" system
 
