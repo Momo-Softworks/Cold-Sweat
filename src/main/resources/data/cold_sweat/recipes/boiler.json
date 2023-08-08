@@ -4,7 +4,7 @@
   [
     "CCC",
     "C C",
-    "DDD"
+    "SSS"
   ],
   "key":
   {
@@ -12,9 +12,9 @@
     {
       "item": "minecraft:cobblestone"
     },
-    "D":
+    "S":
     {
-      "tag": "cold_sweat:boiler_craftable_deepslate"
+      "tag": "forge:stone"
     }
   },
   "result":
