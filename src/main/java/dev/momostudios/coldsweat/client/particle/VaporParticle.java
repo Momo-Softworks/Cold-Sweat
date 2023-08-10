@@ -39,6 +39,7 @@ public class VaporParticle extends SpriteTexturedParticle
         this.zd = vz;
         this.hasGravity = hasGravity;
         this.gravity = hasGravity ? 0.04f : -0.04f;
+        this.setSpriteFromAge(spriteSet);
     }
 
     @Nonnull
