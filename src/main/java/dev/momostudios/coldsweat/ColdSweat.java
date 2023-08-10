@@ -53,6 +53,7 @@ public class ColdSweat
         PotionInit.POTIONS.register(bus);
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
+        FeatureInit.PLACEMENTS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();

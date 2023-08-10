@@ -33,10 +33,11 @@ public class SoulStalkFeature extends Feature<NoFeatureConfig>
         int minHeight = 0;
         int maxHeight = world.getMaxBuildHeight();
         for (int i = -10; i < 10; i++)
-        {   pos.setY(startY + i);
+        {
+            pos.setY(startY + i);
             if (pos.getY() < minHeight) continue;
             if (pos.getY() > maxHeight) break;
-            if (world.getBlockState(pos).isAir())
+            if (world.getBlockState(pos).canBeReplacedByLeaves(world, pos))
             {   break;
             }
         }
@@ -53,7 +54,6 @@ public class SoulStalkFeature extends Feature<NoFeatureConfig>
             world.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
             return true;
         }
-
         return false;
     }
 }
