@@ -61,13 +61,16 @@ public class BiomeTempModifier extends TempModifier
 
                 for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
                 {
+                    int x = blockPos.getX();
+                    int y = blockPos.getY();
+                    int z = blockPos.getZ();
                     List<Biome> biomeList = WorldHelper.getHeight(blockPos, world) < entity.getY()
-                                                    ? Arrays.asList(world.getBiomeManager().getBiome(blockPos))
-                                                    : Stream.of(world.getBiomeManager().getBiome(blockPos),
-                                                              world.getBiomeManager().getBiome(blockPos.above(8)),
-                                                              world.getBiomeManager().getBiome(blockPos.above(16)),
-                                                              world.getBiomeManager().getBiome(blockPos.below(8)),
-                                                              world.getBiomeManager().getBiome(blockPos.below(16))).distinct().collect(Collectors.toList());
+                                                    ? Arrays.asList(world.getUncachedNoiseBiome(x, y, z))
+                                                    : Stream.of(world.getUncachedNoiseBiome(x, y, z),
+                                                                world.getUncachedNoiseBiome(x, y + 8, z),
+                                                                world.getUncachedNoiseBiome(x, y + 16, z),
+                                                                world.getUncachedNoiseBiome(x, y - 8, z),
+                                                                world.getUncachedNoiseBiome(x, y - 16, z)).distinct().collect(Collectors.toList());
                     for (Biome biome : biomeList)
                     {
                         ResourceLocation biomeID = biome.getRegistryName();
@@ -79,7 +82,7 @@ public class BiomeTempModifier extends TempModifier
                         // Get the biome's temperature, either overridden by config or calculated
                         // Start with biome override
                         Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
-                                                                                                                         new Triplet<>(baseTemp - biomeVariance, baseTemp + biomeVariance, Temperature.Units.MC));
+                                                                           new Triplet<>(baseTemp - biomeVariance, baseTemp + biomeVariance, Temperature.Units.MC));
                         Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
                                                                              new Triplet<>(0d, 0d, Temperature.Units.MC));
                         configTemp = CSMath.addPairs(Pair.of(cTemp.getFirst(), cTemp.getSecond()), Pair.of(cOffset.getFirst(), cOffset.getSecond()));
