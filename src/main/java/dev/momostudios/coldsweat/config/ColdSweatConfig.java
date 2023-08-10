@@ -285,83 +285,108 @@ public class ColdSweatConfig
     /*
      * Safe set methods for config values
      */
-    public void setDifficulty(int value) {
-        difficulty.set(value);
+    public void setDifficulty(int value)
+    {   synchronized (difficulty)
+        {   difficulty.set(value);
+        }
     }
 
-    public void setMaxHabitable(double temp) {
-        maxHabitable.set(temp);
+    public void setMaxHabitable(double temp)
+    {   synchronized (maxHabitable)
+        {   maxHabitable.set(temp);
+        }
     }
 
-    public void setMinHabitable(double temp) {
-        minHabitable.set(temp);
+    public void setMinHabitable(double temp)
+    {   synchronized (minHabitable)
+        {   minHabitable.set(temp);
+        }
     }
 
-    public void setRateMultiplier(double rate) {
-        rateMultiplier.set(rate);
+    public void setRateMultiplier(double rate)
+    {   synchronized (rateMultiplier)
+        {   rateMultiplier.set(rate);
+        }
     }
 
-    public void setFireResistanceEnabled(boolean isEffective) {
-        fireResistanceEffect.set(isEffective);
+    public void setFireResistanceEnabled(boolean isEffective)
+    {   synchronized (fireResistanceEffect)
+        {   fireResistanceEffect.set(isEffective);
+        }
     }
 
-    public void setIceResistanceEnabled(boolean isEffective) {
-        iceResistanceEffect.set(isEffective);
+    public void setIceResistanceEnabled(boolean isEffective)
+    {   synchronized (iceResistanceEffect)
+        {   iceResistanceEffect.set(isEffective);
+        }
     }
 
-    public void setRequireThermometer(boolean required) {
-        requireThermometer.set(required);
+    public void setRequireThermometer(boolean required)
+    {   synchronized (requireThermometer)
+        {   requireThermometer.set(required);
+        }
     }
 
-    public void setDamageScaling(boolean enabled) {
-        damageScaling.set(enabled);
+    public void setDamageScaling(boolean enabled)
+    {   synchronized (damageScaling)
+        {   damageScaling.set(enabled);
+        }
     }
 
     public void setGracePeriodLength(int ticks)
-    {
-        gracePeriodLength.set(ticks);
+    {   synchronized (gracePeriodLength)
+        {   gracePeriodLength.set(ticks);
+        }
     }
 
     public void setGracePeriodEnabled(boolean enabled)
-    {
-        gracePeriodEnabled.set(enabled);
+    {   synchronized (gracePeriodEnabled)
+        {   gracePeriodEnabled.set(enabled);
+        }
     }
 
     public void setHeatstrokeFog(boolean fog)
-    {
-        heatstrokeFog.set(fog);
+    {   synchronized (heatstrokeFog)
+        {   heatstrokeFog.set(fog);
+        }
     }
 
     public void setFreezingHearts(boolean hearts)
-    {
-        freezingHearts.set(hearts);
+    {   synchronized (freezingHearts)
+        {   freezingHearts.set(hearts);
+        }
     }
 
     public void setColdKnockback(boolean knockback)
-    {
-        coldKnockback.set(knockback);
+    {   synchronized (coldKnockback)
+        {   coldKnockback.set(knockback);
+        }
     }
 
     public void setColdMining(boolean mining)
-    {
-        coldMining.set(mining);
+    {   synchronized (coldMining)
+        {   coldMining.set(mining);
+        }
     }
 
     public void setColdMovement(boolean movement)
-    {
-        coldMovement.set(movement);
+    {   synchronized (coldMovement)
+        {   coldMovement.set(movement);
+        }
     }
 
     public void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {
-        hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (hearthSpreadWhitelist)
+        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
     public void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {
-        hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (hearthSpreadBlacklist)
+        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
 
-    public void save() {
-        SPEC.save();
+    public void save()
+    {   SPEC.save();
     }
 }
