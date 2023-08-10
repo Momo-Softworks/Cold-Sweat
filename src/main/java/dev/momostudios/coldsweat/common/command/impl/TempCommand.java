@@ -83,29 +83,20 @@ public class TempCommand extends BaseCommand
         if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
         {
             source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
-            return Command.SINGLE_SUCCESS;
+            return 0;
         }
         // Set the temperature for all affected targets
         for (Entity entity : entities)
-        {
-            Capability<ITemperatureCap> iCap = entity instanceof PlayerEntity ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
-            if (iCap == null) continue;
-            entity.getCapability(iCap).ifPresent(cap ->
-            {
-                cap.setTemp(Temperature.Type.CORE, temp);
-                Temperature.updateTemperature((LivingEntity) entity, cap, true);
-            });
+        {   Temperature.set((LivingEntity) entity, Temperature.Type.CORE, temp);
         }
 
         //Compose & send message
         if (entities.size() == 1)
-        {
-            Entity target = entities.iterator().next();
+        {   Entity target = entities.iterator().next();
             source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
         }
         else
-        {
-            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
+        {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -115,7 +106,7 @@ public class TempCommand extends BaseCommand
         if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
         {
             source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
-            return Command.SINGLE_SUCCESS;
+            return 0;
         }
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).collect(Collectors.toList()))
         {
