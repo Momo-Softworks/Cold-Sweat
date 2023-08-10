@@ -20,13 +20,13 @@ public class HearthParticle extends SpriteTexturedParticle
 
         this.alpha = 0.0f;
         this.setSize(size, size);
-        this.scale(.4f + (float) (Math.random() / 2.5f));
+        this.scale(3f + (float) (Math.random()));
         this.lifetime = 40;
-        this.gravity = -0.01f;
+        this.gravity = 0;
         this.hasPhysics = true;
-        this.xd = vx * 1;
-        this.yd = vy * 1;
-        this.zd = vz * 1;
+        this.xd = vx;
+        this.yd = vy;
+        this.zd = vz;
         this.setSpriteFromAge(spriteSet);
     }
 
