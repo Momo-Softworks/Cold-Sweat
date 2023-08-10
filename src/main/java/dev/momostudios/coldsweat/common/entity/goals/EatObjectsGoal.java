@@ -89,7 +89,7 @@ public class EatObjectsGoal extends Goal
 
     public void tick()
     {
-        if ((this.target == null || this.target.isAlive()) && this.entity.getEatTimer() <= 0)
+        if ((this.target == null || !this.target.isAlive()) && this.entity.getEatTimer() <= 0)
         {
             this.stop();
             return;
@@ -123,7 +123,7 @@ public class EatObjectsGoal extends Goal
                 // Remove target item
                 TaskScheduler.scheduleServer(() ->
                 {
-                    if (this.target != null && this.target.isAlive() && !this.target.isAlive())
+                    if (this.target != null && this.target.isAlive())
                     {
                         this.entity.onEatEntity(this.target);
                         this.target.remove();
