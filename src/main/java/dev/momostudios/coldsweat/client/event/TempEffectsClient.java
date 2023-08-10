@@ -58,43 +58,43 @@ public class TempEffectsClient
             float temp = (float) Temperature.get(player, Temperature.Type.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
-            BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
+            Overlays.BODY_TEMP += (temp - Overlays.BODY_TEMP) * frameTime / 20;
 
             if (ClientSettingsConfig.getInstance().areDistortionsEnabled())
             {
                 // Camera "shivers" when temp is < -50
-                if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
+                if (Overlays.BODY_TEMP <= -50 && COLD_IMMUNITY < 4)
                 {
-                    float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
+                    float factor = (float) CSMath.blend(0.05f, 0f, Overlays.BODY_TEMP, -100, -50);
                     double tickTime = player.tickCount + event.getRenderPartialTicks();
                     float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime));
                     player.setYHeadRot(player.getYHeadRot() + shiverAmount);
                 }
-                else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
+                else if (Overlays.BODY_TEMP >= 50 && HOT_IMMUNITY < 4)
                 {
-                    float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-                    float factor = CSMath.blend(0, 8, immunityModifier, 50, 100);
+                    float immunityModifier = (float) CSMath.blend(Overlays.BODY_TEMP, 50, HOT_IMMUNITY, 0, 4);
+                    float swayStrength = CSMath.blend(0, 16, immunityModifier, 50, 100);
 
                     // Set random sway speed every once in a while
                     if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
                     {
                         TIME_SINCE_NEW_SWAY = 0;
-                        X_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
-                        Y_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
+                        X_SWAY_SPEED = (float) (Math.random() * 0.02f + 0.008f);
+                        Y_SWAY_SPEED = (float) (Math.random() * 0.02f + 0.008f);
                     }
                     TIME_SINCE_NEW_SWAY += frameTime;
 
                     // Blend to the new sway speed
-                    X_SWAY_PHASE += 2 * Math.PI * frameTime * X_SWAY_SPEED;
-                    Y_SWAY_PHASE += 2 * Math.PI * frameTime * Y_SWAY_SPEED;
+                    X_SWAY_PHASE += 1.3 * Math.PI * frameTime * X_SWAY_SPEED;
+                    Y_SWAY_PHASE += 1.3 * Math.PI * frameTime * Y_SWAY_SPEED;
 
                     // Apply the sway speed to a sin function
-                    float xOffs = (float) (Math.sin(X_SWAY_PHASE) * factor);
-                    float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * factor);
+                    float xOffs = (float) (Math.sin(X_SWAY_PHASE) * swayStrength);
+                    float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * swayStrength);
 
                     // Apply the sway
                     player.xRot = player.xRot + xOffs - PREV_X_SWAY;
-                    player.setYHeadRot(player.getYHeadRot() + yOffs - PREV_Y_SWAY);
+                    player.yRot = player.yRot + yOffs - PREV_Y_SWAY;
 
                     // Save the previous sway
                     PREV_X_SWAY = xOffs;
@@ -137,13 +137,18 @@ public class TempEffectsClient
         if (!(event instanceof EntityViewRenderEvent.FogDensity || event instanceof EntityViewRenderEvent.FogColors)) return;
 
         PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
+        if (player != null && Overlays.BODY_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
-            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
+            float immunityModifier = (float) CSMath.blend(Overlays.BODY_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof EntityViewRenderEvent.FogDensity)
             {
                 EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
-                fog.setDensity(CSMath.blend(fog.getDensity(), 100f, immunityModifier, 50f, 90f));
+                float density = CSMath.withinRange(immunityModifier, 50, 55)
+                                ? CSMath.blend(-1, 0f, immunityModifier, 50f, 55f)
+                                : CSMath.withinRange(immunityModifier, 55, 80)
+                                ? CSMath.blend(0f, 0.1f, immunityModifier, 55f, 80f)
+                                : CSMath.blend(0.1f, 0.3f, immunityModifier, 80f, 90f);
+                ((EntityViewRenderEvent.FogDensity) event).setDensity(density);
                 fog.setCanceled(true);
             }
             else
@@ -161,42 +166,43 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void vignette(RenderGameOverlayEvent.Pre event)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
         {
-            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
-            float tickTime = player.tickCount + event.getPartialTicks();
-            if (opacity == 0) return;
-            double width = event.getWindow().getWidth();
-            double height = event.getWindow().getHeight();
-            double scale = event.getWindow().getGuiScale();
+            PlayerEntity player = Minecraft.getInstance().player;
+            if (player != null && ((Overlays.BODY_TEMP > 0 && HOT_IMMUNITY < 4) || (Overlays.BODY_TEMP < 0 && COLD_IMMUNITY < 4)))
+            {
+                float tempWithImmunity = (float) CSMath.blend(Overlays.BODY_TEMP, 50, Overlays.BODY_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
+                float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
+                float tickTime = player.tickCount + event.getPartialTicks();
+                if (opacity == 0) return;
+                double width = event.getWindow().getWidth();
+                double height = event.getWindow().getHeight();
+                double scale = event.getWindow().getGuiScale();
 
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            if (tempWithImmunity > 0)
-            {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
-                RenderSystem.color4f(0.231f, 0f, 0f, vignetteBrightness);
-                Minecraft.getInstance().textureManager.bind(HAZE_TEXTURE);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                if (tempWithImmunity > 0)
+                {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
+                    RenderSystem.color4f(0.231f, 0f, 0f, vignetteBrightness);
+                    Minecraft.getInstance().textureManager.bind(HAZE_TEXTURE);
+                }
+                else
+                {   RenderSystem.color4f(1f, 1f, 1f, opacity);
+                    Minecraft.getInstance().textureManager.bind(FREEZE_TEXTURE);
+                }
+                Tessellator tessellator = Tessellator.getInstance();
+                BufferBuilder bufferbuilder = tessellator.getBuilder();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                bufferbuilder.vertex(0.0D, height / scale, -90.0D).uv(0.0F, 1.0F).endVertex();
+                bufferbuilder.vertex(width / scale, height / scale, -90.0D).uv(1.0F, 1.0F).endVertex();
+                bufferbuilder.vertex(width / scale, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
+                bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
+                tessellator.end();
+                RenderSystem.depthMask(true);
+                RenderSystem.enableDepthTest();
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.defaultBlendFunc();
             }
-            else
-            {   RenderSystem.color4f(1f, 1f, 1f, opacity);
-                Minecraft.getInstance().textureManager.bind(FREEZE_TEXTURE);
-            }
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuilder();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-            bufferbuilder.vertex(0.0D, height / scale, -90.0D).uv(0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, height / scale, -90.0D).uv(1.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
-            bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
-            tessellator.end();
-            RenderSystem.depthMask(true);
-            RenderSystem.enableDepthTest();
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.defaultBlendFunc();
         }
     }
 
