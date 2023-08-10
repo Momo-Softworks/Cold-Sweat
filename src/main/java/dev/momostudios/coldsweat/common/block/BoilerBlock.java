@@ -77,7 +77,7 @@ public class BoilerBlock extends Block
                 ItemStack stack = player.getItemInHand(hand);
                 int itemFuel = boiler.getItemFuel(stack);
 
-                if (itemFuel != 0 && boiler.getFuel() + itemFuel * 0.75 < BoilerTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && boiler.getFuel() + itemFuel * 0.75 <= BoilerTileEntity.MAX_FUEL)
                 {
                     if (!player.isCreative())
                     {
@@ -163,6 +163,11 @@ public class BoilerBlock extends Block
             world.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
             world.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
         }
+    }
+
+    @Override
+    public boolean hasTileEntity(BlockState state)
+    {   return true;
     }
 
     @Override

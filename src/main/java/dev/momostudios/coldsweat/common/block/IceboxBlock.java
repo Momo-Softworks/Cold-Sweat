@@ -89,6 +89,10 @@ public class IceboxBlock extends Block
         return ActionResultType.SUCCESS;
     }
 
+    @Override
+    public boolean hasTileEntity(BlockState state)
+    {   return true;
+    }
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)

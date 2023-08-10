@@ -85,6 +85,10 @@ public class HearthBottomBlock extends Block
     {   return SHAPES.get(state.getValue(FACING));
     }
 
+    @Override
+    public boolean hasTileEntity(BlockState state)
+    {   return true;
+    }
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
