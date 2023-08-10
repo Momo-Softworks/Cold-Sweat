@@ -9,7 +9,7 @@
     "description": {
         "translate": "advancements.cold_sweat.root.description"
     },
-    "background": "minecraft:textures/block/smooth_basalt.png",
+    "background": "minecraft:textures/block/basalt_side.png",
     "frame": "task",
     "show_toast": false,
     "announce_to_chat": false,
