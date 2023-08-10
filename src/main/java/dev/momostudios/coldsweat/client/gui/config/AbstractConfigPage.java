@@ -414,7 +414,13 @@ public abstract class AbstractConfigPage extends Screen
             this.blit(matrixStack, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
         }
 
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        // Render widgets
+        this.children.forEach(listener ->
+        {
+            if (listener instanceof Widget)
+            {   ((Widget) listener).render(matrixStack, mouseX, mouseY, partialTicks);
+            }
+        });
 
         // Render tooltip
         if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
@@ -482,7 +488,7 @@ public abstract class AbstractConfigPage extends Screen
         for (IGuiEventListener element : elements)
         {
             if (element instanceof Widget)
-            {   this.addWidget((Widget & IGuiEventListener) element);
+            {   this.addWidget((Widget) element);
             }
         }
         this.widgetBatches.put(id, elements);
