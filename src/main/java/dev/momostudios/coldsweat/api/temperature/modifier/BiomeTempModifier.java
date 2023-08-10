@@ -64,50 +64,40 @@ public class BiomeTempModifier extends TempModifier
                     int x = blockPos.getX();
                     int y = blockPos.getY();
                     int z = blockPos.getZ();
-                    List<Biome> biomeList = WorldHelper.getHeight(blockPos, world) < entity.getY()
-                                                    ? Arrays.asList(world.getUncachedNoiseBiome(x, y, z))
-                                                    : Stream.of(world.getUncachedNoiseBiome(x, y, z),
-                                                                world.getUncachedNoiseBiome(x, y + 8, z),
-                                                                world.getUncachedNoiseBiome(x, y + 16, z),
-                                                                world.getUncachedNoiseBiome(x, y - 8, z),
-                                                                world.getUncachedNoiseBiome(x, y - 16, z)).distinct().collect(Collectors.toList());
-                    for (Biome biome : biomeList)
+                    Biome biome = world.getUncachedNoiseBiome(x, y, z);
+                    ResourceLocation biomeID = biome.getRegistryName();
+
+                    Pair<Double, Double> configTemp;
+                    double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                    double baseTemp = biome.getBaseTemperature();
+
+                    // Get the biome's temperature, either overridden by config or calculated
+                    // Start with biome override
+                    Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+                                                                       new Triplet<>(baseTemp - biomeVariance, baseTemp + biomeVariance, Temperature.Units.MC));
+                    Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+                                                                         new Triplet<>(0d, 0d, Temperature.Units.MC));
+                    configTemp = CSMath.addPairs(Pair.of(cTemp.getFirst(), cTemp.getSecond()), Pair.of(cOffset.getFirst(), cOffset.getSecond()));
+
+                    // Biome temp at midnight (bottom of the sine wave)
+                    double min = configTemp.getFirst();
+                    // Biome temp at noon (top of the sine wave)
+                    double max = configTemp.getSecond();
+
+                    // Divide by this to get average
+
+                    DimensionType dimension = world.dimensionType();
+                    if (!dimension.hasCeiling())
                     {
-                        ResourceLocation biomeID = biome.getRegistryName();
-
-                        Pair<Double, Double> configTemp;
-                        double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-                        double baseTemp = biome.getBaseTemperature();
-
-                        // Get the biome's temperature, either overridden by config or calculated
-                        // Start with biome override
-                        Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
-                                                                           new Triplet<>(baseTemp - biomeVariance, baseTemp + biomeVariance, Temperature.Units.MC));
-                        Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
-                                                                             new Triplet<>(0d, 0d, Temperature.Units.MC));
-                        configTemp = CSMath.addPairs(Pair.of(cTemp.getFirst(), cTemp.getSecond()), Pair.of(cOffset.getFirst(), cOffset.getSecond()));
-
-                        // Biome temp at midnight (bottom of the sine wave)
-                        double min = configTemp.getFirst();
-                        // Biome temp at noon (top of the sine wave)
-                        double max = configTemp.getSecond();
-
-                        // Divide by this to get average
-                        double divisor = samples * biomeList.size();
-
-                        DimensionType dimension = world.dimensionType();
-                        if (!dimension.hasCeiling())
-                        {
-                            double altitude = entity.getY();
-                            double mid = (min + max) / 2;
-                            // Biome temp with time of day
-                            worldTemp += CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1, 1) / divisor
-                                      // Altitude calculation
-                                      + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / divisor;
-                        }
-                        // If dimension has ceiling (don't use time or altitude)
-                        else worldTemp += CSMath.average(max, min) / divisor;
+                        double altitude = entity.getY();
+                        double mid = (min + max) / 2;
+                        // Biome temp with time of day
+                        worldTemp += CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1d, 1d) / samples
+                                // Altitude calculation
+                                  + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / samples;
                     }
+                    // If dimension has ceiling (don't use time or altitude)
+                    else worldTemp += CSMath.average(max, min) / samples;
                 }
             }
             double finalWorldTemp = worldTemp;
