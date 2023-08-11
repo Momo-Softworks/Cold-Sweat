@@ -5,10 +5,12 @@
   "minVersion": "0.8",
   "client": [
     "MixinEffectsScreen",
-    "MixinGoatModel",
     "MixinHeartRender",
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
+    "MixinLlamaDecorLayer",
+    "MixinLlamaRender$ChangeTexture",
+    "MixinLlamaRender$RemapModel",
     "MixinTooltip",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
@@ -19,6 +21,7 @@
     "MixinCampfire",
     "MixinEntityRiding",
     "MixinInventoryOpenServer",
+    "MixinLlamaInteract",
     "MixinMinecart",
     "MixinPickEntity",
     "MixinSoulCampfire",

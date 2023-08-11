@@ -19,7 +19,7 @@ public class EntitySettingsConfig
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
+    private static final ForgeConfigSpec.ConfigValue<List<?>> llamaFurGrowth;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> llamaBiomes;
@@ -44,8 +44,8 @@ public class EntitySettingsConfig
                             return false;
                         });
 
-        goatFurGrowth = BUILDER
-                .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
+        llamaFurGrowth = BUILDER
+                .comment("Defines how often a llama will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", Arrays.asList(
                         1200, 2400, 0.20
@@ -109,7 +109,7 @@ public class EntitySettingsConfig
                         });
 
         llamaBiomes = BUILDER
-                .comment("Defines additional biomes that goats can spawn in",
+                .comment("Defines additional biomes that llamas can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Llama Spawn Biomes", ListBuilder.begin(
                                 Arrays.asList("minecraft:mountains", 10),
@@ -178,10 +178,10 @@ public class EntitySettingsConfig
     }
 
     public List<?> getGoatFurStats()
-    {   return goatFurGrowth.get();
+    {   return llamaFurGrowth.get();
     }
     public void setGoatFurStats(List<? extends Number> list)
-    {   goatFurGrowth.set(list);
+    {   llamaFurGrowth.set(list);
     }
 
     public List<? extends List<?>> getChameleonSpawnBiomes()

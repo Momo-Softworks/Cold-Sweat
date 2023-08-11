@@ -11,7 +11,7 @@
   "item.cold_sweat.soulspring_lamp":     "魂火灯",
   "item.cold_sweat.thermometer":         "温度计",
   "item.cold_sweat.waterskin":           "水袋",
-  "item.cold_sweat.goat_fur":            "山羊毛皮",
+  "item.cold_sweat.llama_fur":            "山羊毛皮",
   "item.cold_sweat.hoglin_hide":         "疣猪兽皮",
   "item.cold_sweat.waterskin.filled":    "满的",
   "item.cold_sweat.insulated_minecart":  "隔热矿车",
@@ -22,10 +22,10 @@
   "item.cold_sweat.hoglin_tunic":        "疣猪兽外衣",
   "item.cold_sweat.hoglin_trousers":     "疣猪兽裤子",
   "item.cold_sweat.hoglin_hooves":       "疣猪兽蹄",
-  "item.cold_sweat.goat_fur_cap":        "山羊毛皮帽",
-  "item.cold_sweat.goat_fur_parka":      "山羊毛大衣",
-  "item.cold_sweat.goat_fur_pants":      "山羊毛裤",
-  "item.cold_sweat.goat_fur_boots":      "山羊毛靴子",
+  "item.cold_sweat.llama_fur_cap":        "山羊毛皮帽",
+  "item.cold_sweat.llama_fur_parka":      "山羊毛大衣",
+  "item.cold_sweat.llama_fur_pants":      "山羊毛裤",
+  "item.cold_sweat.llama_fur_boots":      "山羊毛靴子",
 
 
   "entity.cold_sweat.chameleon": "变色龙",

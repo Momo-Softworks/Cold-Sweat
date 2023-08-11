@@ -40,47 +40,7 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber
 public class LlamaFurHandler
 {
-    @SubscribeEvent
-    public static void onShearLlama(PlayerInteractEvent.EntityInteract event)
-    {
-        Entity entity = event.getTarget();
-        PlayerEntity player = event.getPlayer();
-        ItemStack stack = event.getItemStack();
-
-        if (entity instanceof LlamaEntity)
-        {
-            LlamaEntity llama = (LlamaEntity) entity;
-            if (llama.isBaby() || stack.getItem() != Items.SHEARS) return;
-
-            llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
-            {
-                if (cap.isSheared())
-                {   event.setResult(PlayerInteractEvent.Result.DENY);
-                    event.setCanceled(true);
-                    return;
-                }
-
-                if (llama.level.isClientSide) return;
-
-                // Use shears
-                player.swing(event.getHand(), true);
-                stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
-                // Play sound
-                llama.level.playSound(null, llama, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-
-                // Spawn item
-                WorldHelper.entityDropItem(llama, new ItemStack(ModItems.LLAMA_FUR));
-
-                // Set sheared
-                cap.setSheared(true);
-                cap.setLastSheared(llama.tickCount);
-                syncData(llama, null);
-                event.setResult(PlayerInteractEvent.Result.ALLOW);
-            });
-        }
-    }
-
-    // Regrow goat fur
+    // Regrow llama fur
     @SubscribeEvent
     public static void onLlamaTick(LivingEvent.LivingUpdateEvent event)
     {
@@ -90,12 +50,12 @@ public class LlamaFurHandler
         LlamaEntity llama = (LlamaEntity) entity;
 
         Triplet<Integer, Integer, Double> furConfig = ConfigSettings.LLAMA_FUR_TIMINGS.get();
-        // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
+        // Entity is llama, current tick is a multiple of the regrow time, and random chance succeeds
         if (!llama.level.isClientSide && llama.tickCount % furConfig.getFirst() == 0 && Math.random() < furConfig.getThird())
         {
             llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
-                // Growth cooldown has passed and goat is sheared
+                // Growth cooldown has passed and llama is sheared
                 if (llama.tickCount - cap.lastSheared() >= furConfig.getSecond() && cap.isSheared())
                 {
                     WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, llama, llama.getSoundSource(), 0.5f, 0.6f);
@@ -119,13 +79,13 @@ public class LlamaFurHandler
         }
     }
 
-    public static void syncData(LlamaEntity goat, ServerPlayerEntity player)
+    public static void syncData(LlamaEntity llama, ServerPlayerEntity player)
     {
-        if (!goat.level.isClientSide)
-        {   goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+        if (!llama.level.isClientSide)
+        {   llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {   ColdSweatPacketHandler.INSTANCE.send(player != null ? PacketDistributor.PLAYER.with(() -> player)
-                                                                    : PacketDistributor.TRACKING_ENTITY.with(() -> goat),
-                                                     new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId()));
+                                                                    : PacketDistributor.TRACKING_ENTITY.with(() -> llama),
+                                                     new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), llama.getId()));
             });
         }
     }
@@ -168,7 +128,7 @@ public class LlamaFurHandler
                 }
             };
 
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "goat_fur"), provider);
+            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "llama_fur"), provider);
         }
     }
 }

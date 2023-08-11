@@ -23,10 +23,10 @@ public class LlamaArmorItem extends ArmorItem
     {
         switch (armorSlot)
         {
-            case HEAD : return (A) ArmorModels.GOAT_CAP_MODEL.withModelBase(playerModel);
+            case HEAD : return (A) ArmorModels.LLAMA_CAP_MODEL.withModelBase(playerModel);
             case CHEST :
             {
-                LlamaParkaModel<?> model = ArmorModels.GOAT_PARKA_MODEL.withModelBase(playerModel);
+                LlamaParkaModel<?> model = ArmorModels.LLAMA_PARKA_MODEL.withModelBase(playerModel);
                 ModelRenderer fluff = model.fluff;
                 float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getFrameTime());
                 float headYaw = CSMath.blend(entityLiving.yRotO, entityLiving.yRot, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -38,8 +38,8 @@ public class LlamaArmorItem extends ArmorItem
                 fluff.x = fluff.zRot * 2;
                 return (A) model;
             }
-            case LEGS : return (A) ArmorModels.GOAT_PANTS_MODEL.withModelBase(playerModel);
-            case FEET : return (A) ArmorModels.GOAT_BOOTS_MODEL.withModelBase(playerModel);
+            case LEGS : return (A) ArmorModels.LLAMA_PANTS_MODEL.withModelBase(playerModel);
+            case FEET : return (A) ArmorModels.LLAMA_BOOTS_MODEL.withModelBase(playerModel);
             default : return null;
         }
     }

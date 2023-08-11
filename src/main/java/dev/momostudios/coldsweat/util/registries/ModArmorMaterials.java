@@ -13,7 +13,7 @@ public enum ModArmorMaterials implements IArmorMaterial
 {
     HOGLIN("hoglin", 7, new int[]{1, 3, 5, 2}, 25, SoundEvents.ARMOR_EQUIP_LEATHER,
            1.5F, 0.0F, () -> Ingredient.of(ModItems.HOGLIN_HIDE)),
-    LLAMA("goat", 5, new int[]{1, 2, 3, 1}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
+    LLAMA("llama", 5, new int[]{1, 2, 3, 1}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
           0F, 0.0F, () -> Ingredient.of(ModItems.LLAMA_FUR));
 
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};

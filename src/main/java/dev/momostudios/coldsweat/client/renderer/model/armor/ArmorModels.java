@@ -7,8 +7,8 @@ public class ArmorModels
     public static HoglinHoovesModel<?> HOGLIN_HOOVES_MODEL = new HoglinHoovesModel<>();
     public static HoglinTrousersModel<?> HOGLIN_TROUSERS_MODEL = new HoglinTrousersModel<>();
 
-    public static LlamaCapModel<?> GOAT_CAP_MODEL = new LlamaCapModel<>();
-    public static LlamaParkaModel<?> GOAT_PARKA_MODEL = new LlamaParkaModel<>();
-    public static LlamaPantsModel<?> GOAT_PANTS_MODEL = new LlamaPantsModel<>();
-    public static LlamaBootsModel<?> GOAT_BOOTS_MODEL = new LlamaBootsModel<>();
+    public static LlamaCapModel<?> LLAMA_CAP_MODEL = new LlamaCapModel<>();
+    public static LlamaParkaModel<?> LLAMA_PARKA_MODEL = new LlamaParkaModel<>();
+    public static LlamaPantsModel<?> LLAMA_PANTS_MODEL = new LlamaPantsModel<>();
+    public static LlamaBootsModel<?> LLAMA_BOOTS_MODEL = new LlamaBootsModel<>();
 }

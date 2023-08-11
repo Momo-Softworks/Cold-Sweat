@@ -320,7 +320,7 @@ public class ConfigSettings
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).collect(Collectors.toList()));
 
-        LLAMA_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
+        LLAMA_FUR_TIMINGS = addSyncedSetting("llama_fur_timings", () ->
         {
             List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
@@ -359,7 +359,7 @@ public class ConfigSettings
             return map;
         });
 
-        LLAMA_BIOMES = addSetting("goat_spawn_biomes", () ->
+        LLAMA_BIOMES = addSetting("llama_spawn_biomes", () ->
         {
             Map<ResourceLocation, Integer> map = new HashMap<>();
             for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
