@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.client.renderer.animation;
 
-import dev.momostudios.coldsweat.client.renderer.model.ModelPart;
 import dev.momostudios.coldsweat.client.renderer.model.PartPose;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.ModelRenderer;
