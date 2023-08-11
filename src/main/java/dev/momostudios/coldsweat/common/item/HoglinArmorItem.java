@@ -1,11 +1,12 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.client.event.RegisterModels;
+import dev.momostudios.coldsweat.client.renderer.model.armor.HoglinHoovesModel;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.ItemStack;
 
@@ -15,26 +16,18 @@ public class HoglinArmorItem extends ArmorItem
     {   super(material, slot, properties);
     }
 
-    /*@Override
-    public void initializeClient(Consumer<IItemRenderProperties> consumer)
+    @Override
+    public <A extends BipedModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack stack, EquipmentSlotType armorSlot, A playerModel)
     {
-        consumer.accept(new IItemRenderProperties()
+        switch (armorSlot)
         {
-            @Override
-            public HumanoidModel<?> getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, HumanoidModel<?> playerModel)
-            {
-                RegisterModels.checkForInitModels();
-                return switch (armorSlot)
-                {
-                    case HEAD -> RegisterModels.HOGLIN_HEADPIECE_MODEL;
-                    case CHEST -> RegisterModels.HOGLIN_TUNIC_MODEL;
-                    case LEGS -> RegisterModels.HOGLIN_TROUSERS_MODEL;
-                    case FEET -> RegisterModels.HOGLIN_HOOVES_MODEL;
-                    default -> null;
-                };
-            }
-        });
-    }*/
+            case HEAD  : return (A) RegisterModels.HOGLIN_HEADPIECE_MODEL.withModelBase((playerModel));
+            case CHEST : return (A) RegisterModels.HOGLIN_TUNIC_MODEL.withModelBase((playerModel));
+            case LEGS  : return (A) RegisterModels.HOGLIN_TROUSERS_MODEL.withModelBase(playerModel);
+            case FEET  : return (A) new HoglinHoovesModel<>(1f);
+            default: return null;
+        }
+    }
 
     @Override
     public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer)
