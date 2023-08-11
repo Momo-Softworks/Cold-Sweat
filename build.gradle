@@ -118,12 +118,13 @@ dependencies {
     implementation fg.deobf("curse.maven:armor-underwear-mod-310383:3232088")
     implementation fg.deobf("curse.maven:carrots-lib-311327:3231845")
     implementation fg.deobf("curse.maven:create-328085:3536025")
+    implementation fg.deobf("curse.maven:flywheel-486392:3535459")
 
     compileOnly fg.deobf("curse.maven:better-weather-400714:3420517")
-    implementation fg.deobf("curse.maven:flywheel-486392:3535459")
     compileOnly fg.deobf("curse.maven:serene-api-291874:4537669")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4662189")
+    compileOnly fg.deobf("curse.maven:environmental-388992:3561534")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

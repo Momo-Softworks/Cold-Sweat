@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.api.temperature.block_temp;
 
+import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -32,5 +33,11 @@ public class NetherPortalBlockTemp extends BlockTemp
     public double minEffect()
     {
         return -1;
+    }
+
+    @Override
+    public double minTemperature()
+    {
+        return CSMath.convertTemp(70, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }
