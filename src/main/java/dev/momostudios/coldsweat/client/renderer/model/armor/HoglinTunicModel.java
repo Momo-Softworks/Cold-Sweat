@@ -20,9 +20,9 @@ public class HoglinTunicModel<T extends LivingEntity> extends BipedModel<T>
 	private final ModelRenderer leftArmBase;
 	private final ModelRenderer leftSleeve;
 
-	public HoglinTunicModel(float modelSize)
+	public HoglinTunicModel()
 	{
-		super(modelSize);
+		super(1f);
 	 	texWidth = 64;
 		texHeight = 128;
 
@@ -81,6 +81,13 @@ public class HoglinTunicModel<T extends LivingEntity> extends BipedModel<T>
 		matrixStack.scale(1.5f, 1.15f, 1.35f);
 		leftArmBase.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
+	}
+
+	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z)
+	{
+		modelRenderer.xRot = x;
+		modelRenderer.yRot = y;
+		modelRenderer.zRot = z;
 	}
 
 	public HoglinTunicModel<T> withModelBase(BipedModel<?> modelBase)

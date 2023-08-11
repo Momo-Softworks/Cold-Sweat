@@ -17,11 +17,13 @@ public class HoglinHoovesModel<T extends LivingEntity> extends BipedModel<T>
 	private final ModelRenderer rightBoot;
 	private final ModelRenderer leftBoot;
 
-	public HoglinHoovesModel(float modelSize)
+	public HoglinHoovesModel()
 	{
-		super(modelSize);
+		super(1f);
 		texWidth = 64;
-		texHeight = 128;rightBoot = new ModelRenderer(this);
+		texHeight = 128;
+
+		rightBoot = new ModelRenderer(this);
 		rightBoot.setPos(-0.15F, 0.0F, 0.0F);
 		rightBoot.texOffs(40, 96).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, false);
 
@@ -53,6 +55,13 @@ public class HoglinHoovesModel<T extends LivingEntity> extends BipedModel<T>
 		matrixStack.translate(0, -0.125, 0);
 		leftBoot.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
+	}
+
+	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z)
+	{
+		modelRenderer.xRot = x;
+		modelRenderer.yRot = y;
+		modelRenderer.zRot = z;
 	}
 
 	public HoglinHoovesModel<T> withModelBase(BipedModel<?> modelBase)

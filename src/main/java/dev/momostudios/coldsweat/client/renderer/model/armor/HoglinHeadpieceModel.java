@@ -14,9 +14,9 @@ public class HoglinHeadpieceModel<T extends LivingEntity> extends BipedModel<T>
 	private final ModelRenderer rightEar;
 	private final ModelRenderer headpiece;
 
-	public HoglinHeadpieceModel(float modelSize)
+	public HoglinHeadpieceModel()
 	{
-		super(modelSize);
+		super(1f);
 		texWidth = 64;
 		texHeight = 128;
 

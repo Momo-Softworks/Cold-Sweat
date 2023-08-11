@@ -18,9 +18,9 @@ public class HoglinTrousersModel<T extends LivingEntity> extends BipedModel<T>
 	private final ModelRenderer rightLegging;
 	private final ModelRenderer leftLegging;
 
-	public HoglinTrousersModel(float modelSize)
+	public HoglinTrousersModel()
 	{
-		super(modelSize);
+		super(1f);
 		texWidth = 64;
 		texHeight = 128;
 
@@ -67,6 +67,13 @@ public class HoglinTrousersModel<T extends LivingEntity> extends BipedModel<T>
 		matrixStack.scale(1.25f, 1.15f, 1.25f);
 		leftLegging.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
+	}
+
+	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z)
+	{
+		modelRenderer.xRot = x;
+		modelRenderer.yRot = y;
+		modelRenderer.zRot = z;
 	}
 
 	public HoglinTrousersModel<T> withModelBase(BipedModel<?> modelBase)
