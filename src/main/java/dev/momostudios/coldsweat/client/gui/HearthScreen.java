@@ -47,27 +47,24 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
     public void init()
     {
         super.init();
-        this.addWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+        this.addButton(new ImageButton(getGuiLeft() + 82, getGuiTop() + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
         {
+            ImageButton hearthButton = (ImageButton) button;
             hideParticles = !hideParticles;
-            // If particles are disabled, add the hearth to the list of disabled hearths
             if (hideParticles)
             {
                 HearthSaveDataHandler.DISABLED_HEARTHS.add(levelPos);
-                // Limit the number of disabled hearths to 64
-                if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 64)
-                {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.iterator().next());
+                if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 20)
+                {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.stream().findFirst().get());
                 }
             }
-            // Otherwise, remove it from the list
             else
             {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
             }
-
             Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "field_191747_p");
             imageX.setAccessible(true);
             try
-            {   imageX.set(button, 176 + (!hideParticles ? 0 : 12));
+            {   imageX.set(hearthButton, 176 + (!hideParticles ? 0 : 12));
             }
             catch (Exception ignored) {}
         })
@@ -77,7 +74,7 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             {
                 if (this.active && this.visible && this.isValidClickButton(button) && this.clicked(mouseX, mouseY))
                 {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
+                    Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, hideParticles ? 1.5f : 1.9f, 0.75f));
                     this.onClick(mouseX, mouseY);
                     return true;
                 }
@@ -85,9 +82,9 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             }
 
             @Override
-            public void renderToolTip(MatrixStack matrix, int mouseX, int mouseY)
+            public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY)
             {
-                HearthScreen.this.renderComponentTooltip(matrix, Arrays.asList(new TranslationTextComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY);
+                HearthScreen.this.renderWrappedToolTip(matrixStack, Arrays.asList(new TranslationTextComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
             }
         });
     }
