@@ -13,11 +13,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BiomeTempModifier extends TempModifier
 {
@@ -64,7 +60,7 @@ public class BiomeTempModifier extends TempModifier
                     int x = blockPos.getX();
                     int y = blockPos.getY();
                     int z = blockPos.getZ();
-                    Biome biome = world.getUncachedNoiseBiome(x, y, z);
+                    Biome biome = world.getUncachedNoiseBiome(x >> 2, y >> 2, z >> 2);
                     ResourceLocation biomeID = biome.getRegistryName();
 
                     Pair<Double, Double> configTemp;
