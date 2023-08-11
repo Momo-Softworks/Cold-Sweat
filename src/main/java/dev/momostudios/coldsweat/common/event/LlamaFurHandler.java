@@ -38,10 +38,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber
-public class GoatFurHandler
+public class LlamaFurHandler
 {
     @SubscribeEvent
-    public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
+    public static void onShearLlama(PlayerInteractEvent.EntityInteract event)
     {
         Entity entity = event.getTarget();
         PlayerEntity player = event.getPlayer();
@@ -50,14 +50,17 @@ public class GoatFurHandler
         if (entity instanceof LlamaEntity)
         {
             LlamaEntity llama = (LlamaEntity) entity;
-            if (!(!llama.isBaby() && !llama.level.isClientSide && stack.getItem() == Items.SHEARS)) return;
+            if (llama.isBaby() || stack.getItem() != Items.SHEARS) return;
 
             llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
             {
                 if (cap.isSheared())
                 {   event.setResult(PlayerInteractEvent.Result.DENY);
+                    event.setCanceled(true);
                     return;
                 }
+
+                if (llama.level.isClientSide) return;
 
                 // Use shears
                 player.swing(event.getHand(), true);
@@ -79,7 +82,7 @@ public class GoatFurHandler
 
     // Regrow goat fur
     @SubscribeEvent
-    public static void onGoatTick(LivingEvent.LivingUpdateEvent event)
+    public static void onLlamaTick(LivingEvent.LivingUpdateEvent event)
     {
         Entity entity = event.getEntity();
         if (!(entity instanceof LlamaEntity)) return;

@@ -7,14 +7,14 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 
-public class GoatParkaModel<T extends LivingEntity> extends BipedModel<T>
+public class LlamaParkaModel<T extends LivingEntity> extends BipedModel<T>
 {
 	public final ModelRenderer chestplate;
 	public final ModelRenderer fluff;
 	public final ModelRenderer rightSleeve;
 	public final ModelRenderer leftSleeve;
 
-	public GoatParkaModel()
+	public LlamaParkaModel()
 	{
 		super(1f);
 		texWidth = 64;
@@ -72,7 +72,7 @@ public class GoatParkaModel<T extends LivingEntity> extends BipedModel<T>
 		matrixStack.popPose();
 	}
 
-	public GoatParkaModel<T> withModelBase(BipedModel<?> modelBase)
+	public LlamaParkaModel<T> withModelBase(BipedModel<?> modelBase)
 	{
 		this.body = modelBase.body;
 		this.rightArm = modelBase.rightArm;

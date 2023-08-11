@@ -251,7 +251,6 @@ public class ChameleonEntity extends AnimalEntity
     {
         if (this.isWalking())
         {
-            //point body in the direction of motion (degreed)
             this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
             this.rotateHeadIfNecessary();
             this.rotateBodyIfNecessary();

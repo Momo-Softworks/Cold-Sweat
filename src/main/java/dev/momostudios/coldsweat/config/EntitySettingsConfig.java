@@ -22,7 +22,7 @@ public class EntitySettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
     private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
+    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> llamaBiomes;
 
     static
     {
@@ -108,25 +108,22 @@ public class EntitySettingsConfig
                             return false;
                         });
 
-        goatBiomes = BUILDER
+        llamaBiomes = BUILDER
                 .comment("Defines additional biomes that goats can spawn in",
-                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
-                         "Not affected by the \"Increase Goat Spawns\" option")
-                .defineList("Goat Spawn Biomes", ListBuilder.begin(
-                                Arrays.asList("minecraft:frozen_peaks", 8),
-                                Arrays.asList("minecraft:jagged_peaks", 8),
-                                Arrays.asList("minecraft:snowy_slopes", 8),
-                                Arrays.asList("minecraft:meadow", 3),
-                                Arrays.asList("minecraft:windswept_hills", 6),
-                                Arrays.asList("minecraft:windswept_forest", 6),
-                                Arrays.asList("minecraft:windswept_gravelly_hills", 4),
-                                Arrays.asList("minecraft:grove", 5),
-                                Arrays.asList("minecraft:stony_peaks", 8))
+                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
+                .defineList("Llama Spawn Biomes", ListBuilder.begin(
+                                Arrays.asList("minecraft:mountains", 10),
+                                Arrays.asList("minecraft:mountains_edge", 5),
+                                Arrays.asList("minecraft:wooded_mountains", 12),
+                                Arrays.asList("minecraft:snowy_taiga_mountains", 12),
+                                Arrays.asList("minecraft:taiga_mountains", 10),
+                                Arrays.asList("minecraft:gravelly_mountains", 8))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> Arrays.asList("biomesoplenty:boreal_forest", 5),
                                 () -> Arrays.asList("biomesoplenty:jade_cliffs", 4),
                                 () -> Arrays.asList("biomesoplenty:crag", 3))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
+                                () -> Arrays.asList("byg:alps", 16),
                                 () -> Arrays.asList("byg:canadian_shield", 3),
                                 () -> Arrays.asList("byg:guiana_shield", 3),
                                 () -> Arrays.asList("byg:fragment_forest", 128),
@@ -192,6 +189,6 @@ public class EntitySettingsConfig
     }
 
     public List<? extends List<?>> getGoatSpawnBiomes()
-    {   return goatBiomes.get();
+    {   return llamaBiomes.get();
     }
 }

@@ -10,19 +10,24 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 
-public class GoatCapModel<T extends LivingEntity> extends BipedModel<T>
+public class LlamaBootsModel<T extends LivingEntity> extends BipedModel<T>
 {
-	private final ModelRenderer helmet;
+	private final ModelRenderer rightBoot;
+	private final ModelRenderer leftBoot;
 
-	public GoatCapModel()
+	public LlamaBootsModel()
 	{
 		super(1f);
 		texWidth = 64;
 		texHeight = 128;
 
-		helmet = new ModelRenderer(this);
-		helmet.setPos(0.0F, -1.5F, 3.0F);
-		helmet.texOffs(16, 80).addBox(-4.0F, -6.5F, -7.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+		rightBoot = new ModelRenderer(this);
+		rightBoot.setPos(0.0F, 0.0F, 0.0F);
+		rightBoot.texOffs(48, 80).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, false);
+
+		leftBoot = new ModelRenderer(this);
+		leftBoot.setPos(0.0F, 0.0F, 0.0F);
+		leftBoot.texOffs(48, 80).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, true);
 	}
 
 	@Override
@@ -33,15 +38,24 @@ public class GoatCapModel<T extends LivingEntity> extends BipedModel<T>
 	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
 	{
 		matrixStack.pushPose();
-		matrixStack.translate(head.x / 16, head.y / 16, head.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(head.xRot, head.yRot, head.zRot));
-		matrixStack.scale(1.25f, 1.25f, 1.25f);
-		matrixStack.translate(0, 0.047f, 0);
-		helmet.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+		matrixStack.translate(rightLeg.x / 16, rightLeg.y / 16, rightLeg.z / 16);
+		matrixStack.mulPose(CSMath.getQuaternion(rightLeg.xRot, rightLeg.yRot, rightLeg.zRot));
+		matrixStack.scale(1.35f, 1.25f, 1.35f);
+		matrixStack.translate(-0.01, -0.125, 0);
+		rightBoot.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+		matrixStack.popPose();
+
+		// left boot
+		matrixStack.pushPose();
+		matrixStack.translate(leftLeg.x / 16, leftLeg.y / 16, leftLeg.z / 16);
+		matrixStack.mulPose(CSMath.getQuaternion(leftLeg.xRot, leftLeg.yRot, leftLeg.zRot));
+		matrixStack.scale(1.35f, 1.25f, 1.35f);
+		matrixStack.translate(0.01, -0.125, 0);
+		leftBoot.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
 	}
 
-	public GoatCapModel<T> withModelBase(BipedModel<?> modelBase)
+	public LlamaBootsModel<T> withModelBase(BipedModel<?> modelBase)
 	{
 		this.body = modelBase.body;
 		this.rightArm = modelBase.rightArm;

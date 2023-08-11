@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.client.renderer.model.armor.ArmorModels;
-import dev.momostudios.coldsweat.client.renderer.model.armor.GoatParkaModel;
+import dev.momostudios.coldsweat.client.renderer.model.armor.LlamaParkaModel;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -12,9 +12,9 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.ItemStack;
 
-public class GoatArmorItem extends ArmorItem
+public class LlamaArmorItem extends ArmorItem
 {
-    public GoatArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
+    public LlamaArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
     {   super(material, slot, properties);
     }
 
@@ -26,7 +26,7 @@ public class GoatArmorItem extends ArmorItem
             case HEAD : return (A) ArmorModels.GOAT_CAP_MODEL.withModelBase(playerModel);
             case CHEST :
             {
-                GoatParkaModel<?> model = ArmorModels.GOAT_PARKA_MODEL.withModelBase(playerModel);
+                LlamaParkaModel<?> model = ArmorModels.GOAT_PARKA_MODEL.withModelBase(playerModel);
                 ModelRenderer fluff = model.fluff;
                 float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getFrameTime());
                 float headYaw = CSMath.blend(entityLiving.yRotO, entityLiving.yRot, Minecraft.getInstance().getFrameTime(), 0, 1);

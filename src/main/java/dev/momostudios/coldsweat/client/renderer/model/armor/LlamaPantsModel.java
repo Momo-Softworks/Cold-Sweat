@@ -10,13 +10,13 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 
-public class GoatPantsModel<T extends LivingEntity> extends BipedModel<T>
+public class LlamaPantsModel<T extends LivingEntity> extends BipedModel<T>
 {
 	private final ModelRenderer waist;
 	private final ModelRenderer rightLegging;
 	private final ModelRenderer leftLegging;
 
-	public GoatPantsModel()
+	public LlamaPantsModel()
 	{
 		super(1f);
 		texWidth = 64;
@@ -67,7 +67,7 @@ public class GoatPantsModel<T extends LivingEntity> extends BipedModel<T>
 		matrixStack.popPose();
 	}
 
-	public GoatPantsModel<T> withModelBase(BipedModel<?> modelBase)
+	public LlamaPantsModel<T> withModelBase(BipedModel<?> modelBase)
 	{
 		this.body = modelBase.body;
 		this.rightArm = modelBase.rightArm;
