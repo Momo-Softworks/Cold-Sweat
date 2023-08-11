@@ -160,8 +160,8 @@ public class TempEffectsClient
         }
     }
 
-    static ResourceLocation HAZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
-    static final ResourceLocation FREEZE_TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
+    static final ResourceLocation HAZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
+    static final ResourceLocation FREEZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/freeze_overlay.png");
 
     @SubscribeEvent
     public static void vignette(RenderGameOverlayEvent.Pre event)
