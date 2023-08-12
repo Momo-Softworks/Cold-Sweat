@@ -21,18 +21,16 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.List;
 
 public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
 {
     private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
-    public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent title)
     {
-        super(screenContainer, inv, new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".hearth"));
+        super(screenContainer, inv, title);
         this.leftPos = 0;
         this.topPos = 0;
         this.imageWidth = 176;
@@ -74,7 +72,7 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
             {
                 if (this.active && this.visible && this.isValidClickButton(button) && this.clicked(mouseX, mouseY))
                 {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, hideParticles ? 1.5f : 1.9f, 0.75f));
+                    Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
                     this.onClick(mouseX, mouseY);
                     return true;
                 }

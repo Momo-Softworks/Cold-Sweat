@@ -285,105 +285,71 @@ public class ColdSweatConfig
     /*
      * Safe set methods for config values
      */
-    public void setDifficulty(int value)
-    {   synchronized (difficulty)
-        {   difficulty.set(value);
-        }
+    public synchronized void setDifficulty(int value)
+    {   difficulty.set(value);
     }
 
-    public void setMaxHabitable(double temp)
-    {   synchronized (maxHabitable)
-        {   maxHabitable.set(temp);
-        }
+    public synchronized void setMaxHabitable(double temp)
+    {   maxHabitable.set(temp);
     }
 
-    public void setMinHabitable(double temp)
-    {   synchronized (minHabitable)
-        {   minHabitable.set(temp);
-        }
+    public synchronized void setMinHabitable(double temp)
+    {   minHabitable.set(temp);
     }
 
-    public void setRateMultiplier(double rate)
-    {   synchronized (rateMultiplier)
-        {   rateMultiplier.set(rate);
-        }
+    public synchronized void setRateMultiplier(double rate)
+    {   rateMultiplier.set(rate);
     }
 
-    public void setFireResistanceEnabled(boolean isEffective)
-    {   synchronized (fireResistanceEffect)
-        {   fireResistanceEffect.set(isEffective);
-        }
+    public synchronized void setFireResistanceEnabled(boolean isEffective)
+    {   fireResistanceEffect.set(isEffective);
     }
 
-    public void setIceResistanceEnabled(boolean isEffective)
-    {   synchronized (iceResistanceEffect)
-        {   iceResistanceEffect.set(isEffective);
-        }
+    public synchronized void setIceResistanceEnabled(boolean isEffective)
+    {   iceResistanceEffect.set(isEffective);
     }
 
-    public void setRequireThermometer(boolean required)
-    {   synchronized (requireThermometer)
-        {   requireThermometer.set(required);
-        }
+    public synchronized void setRequireThermometer(boolean required)
+    {   requireThermometer.set(required);
     }
 
-    public void setDamageScaling(boolean enabled)
-    {   synchronized (damageScaling)
-        {   damageScaling.set(enabled);
-        }
+    public synchronized void setDamageScaling(boolean enabled)
+    {   damageScaling.set(enabled);
     }
 
-    public void setGracePeriodLength(int ticks)
-    {   synchronized (gracePeriodLength)
-        {   gracePeriodLength.set(ticks);
-        }
+    public synchronized void setGracePeriodLength(int ticks)
+    {   gracePeriodLength.set(ticks);
     }
 
-    public void setGracePeriodEnabled(boolean enabled)
-    {   synchronized (gracePeriodEnabled)
-        {   gracePeriodEnabled.set(enabled);
-        }
+    public synchronized void setGracePeriodEnabled(boolean enabled)
+    {   gracePeriodEnabled.set(enabled);
     }
 
-    public void setHeatstrokeFog(boolean fog)
-    {   synchronized (heatstrokeFog)
-        {   heatstrokeFog.set(fog);
-        }
+    public synchronized void setHeatstrokeFog(boolean fog)
+    {   heatstrokeFog.set(fog);
     }
 
-    public void setFreezingHearts(boolean hearts)
-    {   synchronized (freezingHearts)
-        {   freezingHearts.set(hearts);
-        }
+    public synchronized void setFreezingHearts(boolean hearts)
+    {   freezingHearts.set(hearts);
     }
 
-    public void setColdKnockback(boolean knockback)
-    {   synchronized (coldKnockback)
-        {   coldKnockback.set(knockback);
-        }
+    public synchronized void setColdKnockback(boolean knockback)
+    {   coldKnockback.set(knockback);
     }
 
-    public void setColdMining(boolean mining)
-    {   synchronized (coldMining)
-        {   coldMining.set(mining);
-        }
+    public synchronized void setColdMining(boolean mining)
+    {   coldMining.set(mining);
     }
 
-    public void setColdMovement(boolean movement)
-    {   synchronized (coldMovement)
-        {   coldMovement.set(movement);
-        }
+    public synchronized void setColdMovement(boolean movement)
+    {   coldMovement.set(movement);
     }
 
-    public void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {   synchronized (hearthSpreadWhitelist)
-        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
-        }
+    public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
+    {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
     }
-    public void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {   synchronized (hearthSpreadBlacklist)
-        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
-        }
+    public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
+    {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
     }
 
     public void save()
