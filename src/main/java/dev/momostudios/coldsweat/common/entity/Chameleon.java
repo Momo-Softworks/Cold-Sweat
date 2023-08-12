@@ -259,7 +259,7 @@ public class Chameleon extends Animal
     public float tickHeadTurn(float p_21260_, float p_21261_)
     {
         if (this.isWalking())
-        {   this.yBodyRot = this.getYRot();
+        {   this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
             this.rotateHeadIfNecessary();
             this.rotateBodyIfNecessary();
         }
