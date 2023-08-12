@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Holds almost all configs for Cold Sweat in memory for easy access.
@@ -137,27 +138,29 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
-        BIOME_TEMPS = addSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true));
+        BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
+        encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeTemps"),
+        decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeTemps"),
+        saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream().map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getA(), entry.getValue().getB(), entry.getValue().getC())).collect(Collectors.toList())));
 
-        BIOME_OFFSETS = addSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false));
+        BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
+        encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeOffsets"),
+        decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeOffsets"),
+        saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream().map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getA(), entry.getValue().getB(), entry.getValue().getC())).collect(Collectors.toList())));
 
-        DIMENSION_TEMPS = ValueSupplier.of(() ->
-        {   Map<ResourceLocation, Double> map = new HashMap<>();
+        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> WorldSettingsConfig.getInstance().getDimensionTemperatures().stream()
+                                                   .map(entry -> Map.entry(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue()))
+                                                   .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionTemps"),
+        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionTemps"),
+        saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream().map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue())).collect(Collectors.toList())));
 
-            for (List<?> entry : WorldSettingsConfig.getInstance().getDimensionTemperatures())
-            {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
-            }
-            return map;
-        });
-
-        DIMENSION_OFFSETS = ValueSupplier.of(() ->
-        {   Map<ResourceLocation, Double> map = new HashMap<>();
-
-            for (List<?> entry : WorldSettingsConfig.getInstance().getDimensionTempOffsets())
-            {   map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue());
-            }
-            return map;
-        });
+        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> WorldSettingsConfig.getInstance().getDimensionTempOffsets().stream()
+                                                     .map(entry -> Map.entry(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue()))
+                                                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionOffsets"),
+        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionOffsets"),
+        saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream().map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue())).collect(Collectors.toList())));
 
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
