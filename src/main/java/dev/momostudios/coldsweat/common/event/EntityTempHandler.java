@@ -198,20 +198,20 @@ public class EntityTempHandler
             {
                 // Add modifiers separately to ensure order
                 Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10), Temperature.Type.WORLD, false, Addition.AT_START);
-                Temperature.addModifier(player, new UndergroundTempModifier().tickRate(10), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-                Temperature.addModifier(player, new BlockTempModifier().tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                Temperature.addModifier(player, new DepthTempModifier().tickRate(10), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+                Temperature.addModifier(player, new BlockTempModifier().tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof DepthTempModifier));
 
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                 {
                     TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof DepthTempModifier)));
                 }
                 // Weather2 Compat
                 if (CompatManager.isWeather2Loaded())
                 {
                     TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof DepthTempModifier)));
                 }
 
                 // Armor underwear compat
@@ -254,19 +254,19 @@ public class EntityTempHandler
             {
                 // Basic modifiers
                 Temperature.addModifiers(entity, Arrays.asList(new BiomeTempModifier(9).tickRate(40),
-                                                               new UndergroundTempModifier().tickRate(40),
+                                                               new DepthTempModifier().tickRate(40),
                                                                new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                 {
                     TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                                                                                                      Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                                                                                                                      Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof DepthTempModifier)));
                 }
                 // Weather2 Compat
                 if (CompatManager.isWeather2Loaded())
                 {
                     TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                                                                                                Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
+                                                                                                                Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof DepthTempModifier)));
                 }
 
                 Temperature.set(entity, Temperature.Type.WORLD, Temperature.apply(0, entity, Temperature.Type.WORLD, Temperature.getModifiers(entity, Temperature.Type.WORLD)));

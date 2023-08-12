@@ -163,7 +163,7 @@ public class TempModifierInit
 
         event.register(BlockTempModifier::new);
         event.register(BiomeTempModifier::new);
-        event.register(UndergroundTempModifier::new);
+        event.register(DepthTempModifier::new);
         event.register(InsulationTempModifier::new);
         event.register(MountTempModifier::new);
         event.register(WaterskinTempModifier::new);

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class UndergroundTempModifier extends TempModifier
+public class DepthTempModifier extends TempModifier
 {
     static int SAMPLES = 16;
 
@@ -30,17 +30,16 @@ public class UndergroundTempModifier extends TempModifier
         List<Pair<Double, Double>> depthTable = new ArrayList<>();
 
         for (BlockPos pos : WorldHelper.getPositionGrid(playerPos, SAMPLES, 8))
-        {
-            depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, world) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
-
-            if (WorldHelper.getHeight(pos, world) <= entity.getY()) continue;
+        {   depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, world) - playerPos.getY()), Math.sqrt(pos.distSqr(playerPos))));
         }
 
         double finalDepth = CSMath.weightedAverage(depthTable);
         return temp ->
         {
-            return CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightType.SKY, entity.blockPosition()), 0, 15),
-                                          CSMath.blend(temp, midTemp, finalDepth, 4, 20), 1, 2);
+            return CSMath.blend(temp,
+                                CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightType.SKY, entity.blockPosition()), 0, 15),
+                                                       CSMath.blend(temp, midTemp, finalDepth, 4, 20), 1, 2),
+                                ConfigSettings.CAVE_INSULATION.get(), 0d, 1d);
         };
     }
 

@@ -22,6 +22,9 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
+
+    public static final ForgeConfigSpec.ConfigValue<Double> caveInsulation;
+
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
     public static final ForgeConfigSpec.IntValue blockRange;
 
@@ -460,7 +463,12 @@ public class WorldSettingsConfig
                 .defineInRange("Block Range", 7, 7, 16);
         BUILDER.pop();
 
+        BUILDER.push("Misc");
 
+        caveInsulation = BUILDER
+                .comment("The amount of temperature normalization from being deep underground",
+                         "0.0 = no insulation, 1.0 = full insulation")
+                .defineInRange("Cave Insulation Strength", 1.0, 0.0, 1.0);
 
         /* Serene Seasons config */
         if (CompatManager.isSereneSeasonsLoaded())
@@ -544,6 +552,10 @@ public class WorldSettingsConfig
     {   return blockRange.get();
     }
 
+    public double getCaveInsulation()
+    {   return caveInsulation.get();
+    }
+
     public Double[] getSummerTemps()
     {   return summerTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
@@ -562,6 +574,17 @@ public class WorldSettingsConfig
     }
     public void setBiomeTempOffsets(List<? extends List<?>> offsets)
     {   biomeOffsets.set(offsets);
+    }
+
+    public void setBlockTemps(List<? extends List<Object>> temps)
+    {   blockTemps.set(temps);
+    }
+    public void setBlockRange(int range)
+    {   blockRange.set(range);
+    }
+
+    public void setCaveInsulation(double insulation)
+    {   caveInsulation.set(insulation);
     }
 
     public void setDimensionTemperatures(List<? extends List<?>> temps)
