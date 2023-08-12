@@ -6,6 +6,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.datafixers.util.Pair;
+import dev.momostudios.coldsweat.api.event.client.RenderWorldEvent;
 import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
 import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
@@ -36,7 +37,6 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -45,7 +45,7 @@ public class HearthDebugRenderer
     public static Map<BlockPos, Map<BlockPos, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
 
     @SubscribeEvent
-    public static void onLevelRendered(RenderWorldLastEvent event)
+    public static void onLevelRendered(RenderWorldEvent event)
     {
         if (Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
         {
@@ -138,7 +138,7 @@ public class HearthDebugRenderer
                     float g = 0.7f;
                     float b = 0.6f;
 
-                    float renderAlpha = CSMath.blend(1f, 0f, (float) CSMath.getDistance(player, x + 0.5f, y + 0.5f, z + 0.5f), 5, viewDistance);
+                    float renderAlpha = CSMath.blend(1f, 0f, (float) CSMath.getDistance(player.position(), Vector3d.atCenterOf(pos)), 5, viewDistance);
 
                     if (renderAlpha > 0.01f && new ClippingHelper(matrix4f, event.getProjectionMatrix()).isVisible(new AxisAlignedBB(pos)))
                     {
