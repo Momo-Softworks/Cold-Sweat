@@ -45,7 +45,7 @@ public class InsulationTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
     {
-        x += 11;
+        y += 12;
         Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
 
         int slots = ConfigSettings.INSULATION_SLOTS.get()[3 - MobEntity.getEquipmentSlotForItem(stack).getIndex()];
@@ -132,7 +132,7 @@ public class InsulationTooltip extends Tooltip
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {
                 // background
-                AbstractGui.blit(poseStack, x + 7 + i*6, y + 1, 401, 0, 0, 6, 4, 24, 32);
+                AbstractGui.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 24, 32);
             }
 
             for (int i = 0; i < slots; i++)
@@ -151,13 +151,13 @@ public class InsulationTooltip extends Tooltip
                     cellU = factor < 0 ? 6 : 18;
 
                     // Draw base green underneath
-                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, 12, cellV, 6, 4, 24, 32);
+                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 0, 12, cellV, 6, 4, 24, 32);
 
                     // Draw either hot/cold texture ontop with alpha
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     RenderSystem.color4f(1.0f, 1.0f, 1.0f, alpha);
-                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, cellU, cellV, 6, 4, 24, 32);
+                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 24, 32);
                     RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                     RenderSystem.disableBlend();
                 }
@@ -170,7 +170,7 @@ public class InsulationTooltip extends Tooltip
                             : Math.abs(cold) > Math.abs(hot) ? 12
                             // hot
                             : 18;
-                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, cellU, cellV, 6, 4, 24, 32);
+                    AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 24, 32);
                 }
             }
 
@@ -178,10 +178,10 @@ public class InsulationTooltip extends Tooltip
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {
                 boolean end = i == Math.max(armorSlots, slots) - 1;
-                AbstractGui.blit(poseStack, x + 7 + i*6, y, 401, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 24, 32);
+                AbstractGui.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 24, 32);
             }
             // icon
-            AbstractGui.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 24, 32);
+            AbstractGui.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 24, 32);
 
             this.width += slots * 6 + 12;
 
@@ -189,9 +189,9 @@ public class InsulationTooltip extends Tooltip
             if (drawSign)
             {
                 if (isNegative)
-                    AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 24, 32);
+                    AbstractGui.blit(poseStack, x + 3, y + 3, 0, 19, 5, 5, 3, 24, 32);
                 else
-                    AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
+                    AbstractGui.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 24, 32);
             }
         }
     }

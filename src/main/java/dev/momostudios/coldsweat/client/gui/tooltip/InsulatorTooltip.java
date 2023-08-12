@@ -43,7 +43,7 @@ public class InsulatorTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
     {
-        x += 11;
+        y += 12;
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
         neutral = (cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0) * 2;
@@ -92,7 +92,7 @@ public class InsulatorTooltip extends Tooltip
             int uvY = isAdaptive
                       ? (rounded - i * 2 >= 2 ? 16 : 20)
                       : (rounded - i * 2 >= 2 ? 8 : 12);
-            AbstractGui.blit(matrixStack, x + i*6, y, 401, uvX, uvY, 6, 4, 24, 32);
+            AbstractGui.blit(matrixStack, x + i*6, y, 0, uvX, uvY, 6, 4, 24, 32);
         }
     }
 
@@ -104,7 +104,7 @@ public class InsulatorTooltip extends Tooltip
 
         // background
         for (int i = 0; i < slots; i++)
-        {   AbstractGui.blit(matrixStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 24, 32);
+        {   AbstractGui.blit(matrixStack, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 24, 32);
         }
 
         // slots
@@ -131,21 +131,21 @@ public class InsulatorTooltip extends Tooltip
         for (int i = 0; i < slots; i++)
         {
             boolean end = i == slots - 1;
-            AbstractGui.blit(matrixStack, x + 7 + i * 6, y, 401, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 24, 32);
+            AbstractGui.blit(matrixStack, x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 24, 32);
         }
 
         // icon
-        AbstractGui.blit(matrixStack, x, y - 1, 401, 24, 0, 8, 8, 24, 32);
+        AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 0, 8, 8, 24, 32);
 
         if (showSign)
         {
             if (isNegative)
             {   // negative sign
-                AbstractGui.blit(matrixStack, x + 3, y + 3, 401, 19, 5, 5, 3, 24, 32);
+                AbstractGui.blit(matrixStack, x + 3, y + 3, 0, 19, 5, 5, 3, 24, 32);
             }
             else
             {   // positive sign
-                AbstractGui.blit(matrixStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
+                AbstractGui.blit(matrixStack, x + 3, y + 2, 0, 19, 0, 5, 5, 24, 32);
             }
         }
     }
