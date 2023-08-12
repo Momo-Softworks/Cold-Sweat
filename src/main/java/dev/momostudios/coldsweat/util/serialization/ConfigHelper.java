@@ -221,6 +221,34 @@ public class ConfigHelper
         return map;
     }
 
+    public static CompoundNBT writeNBTTripletMap(Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map, String key)
+    {
+        CompoundNBT tag = new CompoundNBT();
+        CompoundNBT mapTag = new CompoundNBT();
+        for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
+        {
+            CompoundNBT biomeTag = new CompoundNBT();
+            biomeTag.putDouble("min", entry.getValue().getFirst());
+            biomeTag.putDouble("max", entry.getValue().getSecond());
+            biomeTag.putString("units", entry.getValue().getThird().toString());
+            mapTag.put(entry.getKey().toString(), biomeTag);
+        }
+        tag.put(key, mapTag);
+        return tag;
+    }
+
+    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> readNBTTripletMap(CompoundNBT tag, String key)
+    {
+        Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+        CompoundNBT mapTag = tag.getCompound(key);
+        for (String biomeID : mapTag.getAllKeys())
+        {
+            CompoundNBT biomeTag = mapTag.getCompound(biomeID);
+            map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("min"), biomeTag.getDouble("max"), Temperature.Units.valueOf(biomeTag.getString("units"))));
+        }
+        return map;
+    }
+
     public static CompoundNBT writeNBTDoubleMap(Map<ResourceLocation, Double> map, String key)
     {
         CompoundNBT tag = new CompoundNBT();

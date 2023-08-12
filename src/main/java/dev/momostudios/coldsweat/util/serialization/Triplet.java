@@ -12,6 +12,10 @@ public class Triplet<A, B, C>
         this.third = third;
     }
 
+    public Triplet<A, B, C> of(A first, B second, C third)
+    {   return new Triplet<>(first, second, third);
+    }
+
     public A getFirst()
     {   return first;
     }

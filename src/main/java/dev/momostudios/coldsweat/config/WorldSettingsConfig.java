@@ -556,4 +556,18 @@ public class WorldSettingsConfig
     public Double[] getSpringTemps()
     {   return springTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
+
+    public void setBiomeTemperatures(List<? extends List<?>> temps)
+    {   biomeTemps.set(temps);
+    }
+    public void setBiomeTempOffsets(List<? extends List<?>> offsets)
+    {   biomeOffsets.set(offsets);
+    }
+
+    public void setDimensionTemperatures(List<? extends List<?>> temps)
+    {   dimensionTemps.set(temps);
+    }
+    public void setDimensionTempOffsets(List<? extends List<?>> offsets)
+    {   dimensionOffsets.set(offsets);
+    }
 }
