@@ -67,14 +67,14 @@ public class UndergroundTempModifier extends TempModifier
             });
         }
 
-        double finalDepth = CSMath.weightedAverage(depthTable);
-        int finalBiomeCount = Math.max(1, caveBiomeCount[0]);
-        double finalBiomeTempTotal = biomeTempTotal[0] / finalBiomeCount;
+        double depth = CSMath.blend(0, CSMath.weightedAverage(depthTable), ConfigSettings.CAVE_INSULATION.get(), 0, 1);
+        int biomeCount = Math.max(1, caveBiomeCount[0]);
+        double biomeTempAvg = biomeTempTotal[0] / biomeCount;
         return temp ->
         {
             double depthAvg = CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15),
-                                          CSMath.blend(temp, midTemp, finalDepth, 4, 20), 1, 2);
-                return CSMath.blend(depthAvg, finalBiomeTempTotal, finalBiomeCount, 0, SAMPLES * 3);
+                                          CSMath.blend(temp, midTemp, depth, 4, 20), 1, 2);
+                return CSMath.blend(depthAvg, biomeTempAvg, biomeCount, 0, SAMPLES * 3);
         };
     }
 
