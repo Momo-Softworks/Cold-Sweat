@@ -285,7 +285,7 @@ public class Chameleon extends Animal
 
         // Age
         if (!this.level.isClientSide && this.tickCount % 20 == 0)
-        {   this.setAgeSecs(this.age / 20);
+        {   this.setAgeSecs(this.getAgeSecs() + 1);
         }
 
         // Tick shedding
