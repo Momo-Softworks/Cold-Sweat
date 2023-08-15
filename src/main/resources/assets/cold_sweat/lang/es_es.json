@@ -11,7 +11,7 @@
   "item.cold_sweat.waterskin":           "Cantimplora",
   "item.cold_sweat.waterskin.filled":    "Lleno",
 
-  "modifier.cold_sweat.insulated":      "Aislado",
+  "tooltip.cold_sweat.insulated":      "Aislado",
 
   "effect.cold_sweat.insulated":           "Aislado",
   "effect.cold_sweat.ice_resistance":      "Resistencia al hielo",

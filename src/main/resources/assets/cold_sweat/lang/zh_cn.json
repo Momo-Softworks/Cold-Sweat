@@ -31,7 +31,7 @@
   "entity.cold_sweat.chameleon": "变色龙",
 
 
-  "modifier.cold_sweat.insulated":      "绝缘的",
+  "tooltip.cold_sweat.insulated":      "绝缘的",
 
 
   "effect.cold_sweat.insulated":           "隔热材料",
