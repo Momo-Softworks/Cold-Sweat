@@ -32,32 +32,6 @@ import java.util.List;
 public class TooltipHandler
 {
     @SubscribeEvent
-    public static void addSimpleTooltips(ItemTooltipEvent event)
-    {
-        ItemStack stack = event.getItemStack();
-        if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getEntity() != null)
-        {
-            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-            double temp = stack.getOrCreateTag().getDouble("temperature");
-            String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
-            String tempUnits = celsius ? "C" : "F";
-            temp = temp / 2 + 95;
-            if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
-            temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
-
-            event.getToolTip().add(1, Component.literal("§7" + Component.translatable(
-                    "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
-        }
-        else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
-        {
-            if (event.getFlags().isAdvanced())
-            {
-                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), Component.literal("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
-            }
-        }
-    }
-
-    @SubscribeEvent
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
