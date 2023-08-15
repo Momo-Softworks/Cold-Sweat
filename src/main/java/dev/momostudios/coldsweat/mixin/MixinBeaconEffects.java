@@ -34,7 +34,7 @@ public class MixinBeaconEffects
 
     @ModifyArg(method = "applyEffects()V",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1))
-    private static EffectInstance modifyEffect(EffectInstance effect)
+    private EffectInstance modifyEffect(EffectInstance effect)
     {
         if (effect.getEffect() == ModEffects.INSULATION)
         {   return new EffectInstance(effect.getEffect(), effect.getDuration(), 4, effect.isAmbient(), effect.isVisible(), effect.showIcon());
