@@ -11,7 +11,7 @@
   "item.cold_sweat.waterskin":           "Bukłak",
   "item.cold_sweat.waterskin.filled":    "Pełny",
 
-  "modifier.cold_sweat.insulated":      "Ocieplony",
+  "tooltip.cold_sweat.insulated":      "Ocieplony",
 
   "effect.cold_sweat.insulated":            "Ocieplony",
   "effect.cold_sweat.ice_resistance":       "Odporność na mróz",
