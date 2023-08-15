@@ -2,25 +2,20 @@ package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
-import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
-import dev.momostudios.coldsweat.util.registries.ModItems;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Wearable;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -30,32 +25,6 @@ import java.util.List;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
-    @SubscribeEvent
-    public static void addSimpleTooltips(ItemTooltipEvent event)
-    {
-        ItemStack stack = event.getItemStack();
-        if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
-        {
-            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-            double temp = stack.getOrCreateTag().getDouble("temperature");
-            String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
-            String tempUnits = celsius ? "C" : "F";
-            temp = temp / 2 + 95;
-            if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
-            temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
-
-            event.getToolTip().add(1, new TextComponent("§7" + new TranslatableComponent(
-                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
-        }
-        else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
-        {
-            if (event.getFlags().isAdvanced())
-            {
-                event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), new TextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
-            }
-        }
-    }
-
     @SubscribeEvent
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
