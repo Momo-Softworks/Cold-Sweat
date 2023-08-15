@@ -16,6 +16,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -231,9 +233,9 @@ public class FilledWaterskinItem extends Item
     {
         double temp = stack.getOrCreateTag().getDouble("temperature");
         // Info tooltip for hotbar functionality
-        tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
+        tooltip.add(new TextComponent(""));
+        tooltip.add(new TranslatableComponent("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
+        tooltip.add(new TranslatableComponent("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
                                                                          + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(ChatFormatting.BLUE));
 
         // Tooltip to display temperature
@@ -244,7 +246,7 @@ public class FilledWaterskinItem extends Item
         if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
-        tooltip.add(1, Component.literal("§7" + Component.translatable(
+        tooltip.add(1, new TextComponent("§7" + new TranslatableComponent(
                 "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
 
         super.appendHoverText(stack, level, tooltip, advanced);
