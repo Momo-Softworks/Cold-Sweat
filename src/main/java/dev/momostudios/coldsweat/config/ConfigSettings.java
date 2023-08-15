@@ -141,14 +141,14 @@ public class ConfigSettings
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
-                                                            .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
+                                                            .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst().toString(), entry.getValue().getSecond(), entry.getValue().getThird()))
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeOffsets"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
-                                                           .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
+                                                           .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst().toString(), entry.getValue().getSecond(), entry.getValue().getThird()))
                                                            .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
