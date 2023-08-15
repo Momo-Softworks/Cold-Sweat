@@ -142,9 +142,9 @@ public class PlayerTempCap implements ITemperatureCap
                     * ((100 - player.getPersistentData().getInt(magnitude > 0 ? "HeatResistance" : "ColdResistance")) / 100d);
             newCoreTemp += Temperature.apply(changeBy, player, Type.RATE, getModifiers(Type.RATE));
         }
-        // If the player's temperature and world temperature are not both hot or both cold
+        // If the player's temperature and world temperature are not both hot or both cold, return to neutral
         int tempSign = CSMath.getSign(newCoreTemp);
-        if (tempSign != 0 && magnitude != tempSign)
+        if (tempSign != 0 && magnitude != tempSign && getModifiers(Type.CORE).isEmpty())
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
             double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
