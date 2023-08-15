@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.mixin;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
@@ -33,7 +34,8 @@ public class MixinBeaconEffects
     private static final Set<Effect> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
 
     @ModifyArg(method = "applyEffects()V",
-               at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1))
+               at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1),
+               remap = ColdSweat.REMAP_MIXINS)
     private EffectInstance modifyEffect(EffectInstance effect)
     {
         if (effect.getEffect() == ModEffects.INSULATION)
