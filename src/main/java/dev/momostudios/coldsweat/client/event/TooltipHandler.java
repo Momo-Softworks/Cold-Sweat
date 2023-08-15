@@ -1,14 +1,12 @@
 package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
-import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -17,7 +15,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -34,20 +31,7 @@ public class TooltipHandler
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
-        if (stack.getItem() == ModItems.FILLED_WATERSKIN && event.getPlayer() != null)
-        {
-            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-            double temp = stack.getOrCreateTag().getDouble("temperature");
-            String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
-            String tempUnits = celsius ? "C" : "F";
-            temp = temp / 2 + 95;
-            if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
-            temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
-
-            event.getToolTip().add(1, new StringTextComponent("§7" + new TranslationTextComponent(
-                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
-        }
-        else if (stack.getItem() == ModItems.SOULSPRING_LAMP)
+        if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
             {   event.getToolTip().add(1, new StringTextComponent("§9? §8'Shift'"));
@@ -57,9 +41,6 @@ public class TooltipHandler
                 for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
                 {   event.getToolTip().add(1, new StringTextComponent(""));
                 }
-            }
-            if (event.getFlags().isAdvanced())
-            {   event.getToolTip().add(Math.max(event.getToolTip().size() - 2, 1), new StringTextComponent("§fFuel: " + (int) event.getItemStack().getOrCreateTag().getDouble("fuel") + " / " + 64));
             }
             event.getToolTip().add(1, new StringTextComponent(" "));
         }
@@ -101,8 +82,7 @@ public class TooltipHandler
             .map(c ->
             {
                 if (c instanceof ItemInsulationCap)
-                {
-                    return ((ItemInsulationCap) c);
+                {   return ((ItemInsulationCap) c);
                 }
                 return new ItemInsulationCap();
             }).map(cap -> cap.deserializeSimple(stack)).orElse(new ArrayList<>());
@@ -148,8 +128,7 @@ public class TooltipHandler
         }
 
         if (tooltip != null)
-        {
-            tooltip.renderImage(Minecraft.getInstance().font, event.getX(), event.getY(), event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+        {   tooltip.renderImage(Minecraft.getInstance().font, event.getX(), event.getY(), event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             tooltip.renderText(Minecraft.getInstance().font, event.getX(), event.getY(), event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
         }
     }

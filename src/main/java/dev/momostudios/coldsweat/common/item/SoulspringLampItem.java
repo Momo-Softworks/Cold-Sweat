@@ -12,6 +12,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -28,11 +29,14 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mod.EventBusSubscriber
@@ -195,6 +199,15 @@ public class SoulspringLampItem extends Item
             stack.getOrCreateTag().putDouble("fuel", 64);
             itemList.add(stack);
         }
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
+    {
+        if (advanced.isAdvanced())
+        {   tooltip.add(new StringTextComponent("§fFuel: " + (int) stack.getOrCreateTag().getDouble("fuel") + " / " + 64));
+        }
+        super.appendHoverText(stack, level, tooltip, advanced);
     }
 
     @SubscribeEvent

@@ -24,6 +24,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -228,9 +229,9 @@ public class FilledWaterskinItem extends Item
         double temp = stack.getOrCreateTag().getDouble("temperature");
         // Info tooltip for hotbar functionality
         tooltip.add(new StringTextComponent(""));
-        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
+        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
         tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
-                                                                         + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(ChatFormatting.BLUE));
+                                                                         + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(TextFormatting.BLUE));
 
         // Tooltip to display temperature
         boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
