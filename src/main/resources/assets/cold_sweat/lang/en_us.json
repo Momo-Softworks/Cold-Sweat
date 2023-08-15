@@ -36,7 +36,9 @@
   "entity.cold_sweat.chameleon": "Chameleon",
 
 
-  "modifier.cold_sweat.insulated": "Insulated",
+  "tooltip.cold_sweat.insulated": "Insulated",
+  "tooltip.cold_sweat.hotbar": "When in Hotbar:",
+  "tooltip.cold_sweat.waterskin": "%d Temperature per Second",
 
 
   "effect.cold_sweat.insulated":            "Insulated",

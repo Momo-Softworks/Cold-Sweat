@@ -22,7 +22,7 @@
   "entity.cold_sweat.chameleon": "Хамелеон",
 
 
-  "modifier.cold_sweat.insulated":      "Иммунитет",
+  "tooltip.cold_sweat.insulated":      "Иммунитет",
 
 
   "effect.cold_sweat.insulated":           "Иммунитет",
