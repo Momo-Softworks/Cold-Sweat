@@ -470,6 +470,8 @@ public class WorldSettingsConfig
                          "0.0 = no insulation, 1.0 = full insulation")
                 .defineInRange("Cave Insulation Strength", 1.0, 0.0, 1.0);
 
+        BUILDER.pop();
+
         /* Serene Seasons config */
         if (CompatManager.isSereneSeasonsLoaded())
         {
