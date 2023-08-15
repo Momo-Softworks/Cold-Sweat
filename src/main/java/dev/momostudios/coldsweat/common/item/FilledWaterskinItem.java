@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -11,6 +12,7 @@ import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,16 +25,17 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,13 +150,13 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = 0.1 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
-                double newTemp = itemTemp - temp;
+                double temp = 0.04 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
+                double newTemp = itemTemp - temp * 2;
                 if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                Temperature.addModifier(player, new WaterskinTempModifier(temp / 1.5).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -176,8 +179,7 @@ public class FilledWaterskinItem extends Item
 
         // Add the item to the player's inventory
         if (player.getInventory().contains(emptyStack))
-        {
-            player.addItem(emptyStack);
+        {   player.addItem(emptyStack);
             player.setItemInHand(hand, ItemStack.EMPTY);
         }
         else
@@ -250,8 +252,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {
-        return slotChanged;
+    {   return slotChanged;
     }
 
     public String getDescriptionId()

@@ -112,9 +112,9 @@ public class EntityTempCap implements ITemperatureCap
             double changeBy = Math.max((difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(), Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)) * magnitude;
             newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, getModifiers(Type.RATE));
         }
-        // If the player's temperature and world temperature are not both hot or both cold
+        // If the entity's temperature and world temperature are not both hot or both cold, return to neutral
         int tempSign = CSMath.getSign(newCoreTemp);
-        if (tempSign != 0 && magnitude != tempSign)
+        if (tempSign != 0 && magnitude != tempSign && getModifiers(Type.CORE).isEmpty())
         {
             double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
             double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
