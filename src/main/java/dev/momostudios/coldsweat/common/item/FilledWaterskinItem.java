@@ -219,6 +219,30 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
+    {
+        double temp = stack.getOrCreateTag().getDouble("temperature");
+        // Info tooltip for hotbar functionality
+        tooltip.add(Component.empty());
+        tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                                                         + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(ChatFormatting.BLUE));
+
+        // Tooltip to display temperature
+        boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
+        String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
+        String tempUnits = celsius ? "C" : "F";
+        temp = temp / 2 + 95;
+        if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
+        temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
+
+        tooltip.add(1, Component.literal("§7" + Component.translatable(
+                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
+
+        super.appendHoverText(stack, level, tooltip, advanced);
+    }
+
+    @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
     {   return slotChanged;
     }
