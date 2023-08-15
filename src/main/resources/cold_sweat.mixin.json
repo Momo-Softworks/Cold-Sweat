@@ -17,6 +17,7 @@
   ],
   "mixins": [
     "ItemSwapMixin",
+    "MixinBeaconEffects",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",
