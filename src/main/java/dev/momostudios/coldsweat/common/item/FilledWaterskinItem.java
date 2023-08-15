@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -12,6 +13,7 @@ import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.DispenserBlock;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -20,6 +22,8 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -62,7 +66,7 @@ public class FilledWaterskinItem extends Item
                     for (int p = 0; p < rand.nextInt(5) + 5; p++)
                     {
                         particles.addParticle(ParticleTypes.FALLING_WATER,
-                                              new ParticleBatchMessage.ParticlePlacement(pos.getX() + rand.nextDouble(),
+                                new ParticleBatchMessage.ParticlePlacement(pos.getX() + rand.nextDouble(),
                                                                            pos.getY() + rand.nextDouble(),
                                                                            pos.getZ() + rand.nextDouble(), 0, 0, 0));
                     }
@@ -143,13 +147,13 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = 0.1 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
-                double newTemp = itemTemp - temp;
+                double temp = 0.04 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
+                double newTemp = itemTemp - temp * 2;
                 if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                Temperature.addModifier(player, new WaterskinTempModifier(temp / 1.5).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -219,13 +223,13 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
+    public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
         double temp = stack.getOrCreateTag().getDouble("temperature");
         // Info tooltip for hotbar functionality
-        tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
+        tooltip.add(new StringTextComponent(""));
+        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
+        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
                                                                          + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(ChatFormatting.BLUE));
 
         // Tooltip to display temperature
@@ -236,7 +240,7 @@ public class FilledWaterskinItem extends Item
         if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
-        tooltip.add(1, Component.literal("§7" + Component.translatable(
+        tooltip.add(1, new StringTextComponent("§7" + new TranslationTextComponent(
                 "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
 
         super.appendHoverText(stack, level, tooltip, advanced);
