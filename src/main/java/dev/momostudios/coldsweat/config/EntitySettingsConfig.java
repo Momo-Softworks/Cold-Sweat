@@ -34,22 +34,24 @@ public class EntitySettingsConfig
                 .comment("List of entities that will insulate the player when riding them",
                          "The rate at which the player's temperature changes is divided by the resistance value",
                          "Format: [\"entity_id\", coldResistance, hotResistance]")
-                .defineList("Insulated Mounts", Arrays.asList(),
-                        it ->
-                        {
-                            if (it instanceof List<?>)
-                            {   List<?> list = ((List<?>) it);
-                                return list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number;
-                            }
-                            return false;
-                        });
+                .defineListAllowEmpty(Collections.singletonList("Insulated Mounts"), () -> Arrays.asList(
+                ),
+                it ->
+                {
+                    if (it instanceof List<?>)
+                    {   List<?> list = ((List<?>) it);
+                        return list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number;
+                    }
+                    return false;
+                });
 
         llamaFurGrowth = BUILDER
                 .comment("Defines how often a llama will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", Arrays.asList(
                         1200, 2400, 0.20
-                    ), it -> it instanceof Number);
+                ),
+                it -> it instanceof Number);
 
         BUILDER.pop();
 

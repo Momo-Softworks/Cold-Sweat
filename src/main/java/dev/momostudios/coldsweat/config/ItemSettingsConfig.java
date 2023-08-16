@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class ItemSettingsConfig
@@ -45,7 +46,7 @@ public final class ItemSettingsConfig
                 .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
-                .defineList("Boiler", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Boiler"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:coal",         37),
                                 Arrays.asList("minecraft:charcoal",     37),
                                 Arrays.asList("minecraft:coal_block",   333),
@@ -62,7 +63,7 @@ public final class ItemSettingsConfig
                         });
 
         iceboxItems = BUILDER
-                .defineList("Icebox", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Icebox"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:snowball",     37),
                                 Arrays.asList("minecraft:clay",         37),
                                 Arrays.asList("minecraft:snow_block",   333),
@@ -81,7 +82,7 @@ public final class ItemSettingsConfig
 
         hearthItems = BUILDER
                 .comment("Negative values indicate cold fuel")
-                .defineList("Hearth", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Hearth"), () -> ListBuilder.begin(
                                 // Hot
                                 Arrays.asList("minecraft:coal",         37),
                                 Arrays.asList("minecraft:charcoal",     37),
@@ -107,7 +108,7 @@ public final class ItemSettingsConfig
         blacklistedPotions = BUILDER
                 .comment("Potions containing any of these effects will not be allowed in the hearth",
                          "Format: [\"effect_id\", \"effect_id\", ...etc]")
-                .defineList("Blacklisted Potion Effects", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Blacklisted Potion Effects"), () -> ListBuilder.begin(
                                 "minecraft:instant_damage",
                                 "minecraft:poison",
                                 "minecraft:wither",
@@ -129,7 +130,7 @@ public final class ItemSettingsConfig
         soulLampItems = BUILDER
                 .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
                         "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
-                .defineList("Fuel Items", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Fuel Items"), () -> ListBuilder.begin(
                                     Arrays.asList("cold_sweat:soul_sprout", 4)
                         ).build(),
                         it ->
@@ -144,7 +145,7 @@ public final class ItemSettingsConfig
         soulLampDimensions = BUILDER
                 .comment("Defines the dimensions that the Soulspring Lamp can be used in",
                         "Format: [\"dimension-id-1\", \"dimension-id-2\", ...etc]")
-                .defineList("Valid Dimensions", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Valid Dimensions"), () -> ListBuilder.begin(
                                 "minecraft:the_nether"
                         ).build(),
                         it -> it instanceof String);
@@ -160,7 +161,7 @@ public final class ItemSettingsConfig
                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                         "\"cold\": The amount of cold insulation the item provides.",
                         "\"hot\": The amount of heat insulation the item provides.")
-                .defineList("Insulation Ingredients", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Insulation Ingredients"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:leather_helmet",     4,  4),
                                 Arrays.asList("minecraft:leather_chestplate", 6,  6),
                                 Arrays.asList("minecraft:leather_leggings",   5,  5),
@@ -196,9 +197,9 @@ public final class ItemSettingsConfig
                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                         "\"insulation\": The amount of insulation the item provides. Will adjust to hot/cold based on the environment.",
                         "\"adaptSpeed\": The speed at which the item adapts to the current temperature. Higher values mean faster adaptation (from 0 to 1).")
-                .defineList("Adaptive Insulation Ingredients", ListBuilder.begin(
+                 .defineListAllowEmpty(Collections.singletonList("Adaptive Insulation Ingredients"), () -> ListBuilder.begin(
                                 Arrays.asList("cold_sweat:chameleon_molt", 2, 0.0085)
-                            ).build(),
+                        ).build(),
                         it ->
                         {
                             if (it instanceof List<?>)
@@ -211,7 +212,7 @@ public final class ItemSettingsConfig
         insulatingArmor = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]")
-                .defineList("Insulating Armor", ListBuilder.begin(
+                .defineListAllowEmpty(Collections.singletonList("Insulating Armor"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:leather_helmet",      4,  4),
                                 Arrays.asList("minecraft:leather_chestplate",  6,  6),
                                 Arrays.asList("minecraft:leather_leggings",    5,  5),
@@ -245,8 +246,9 @@ public final class ItemSettingsConfig
         insulationBlacklist = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
                         "Format: [\"item_id\", \"item_id\", ...etc]")
-                .defineList("Insulation Blacklist", Arrays.asList(),
-                        it -> it instanceof String);
+                .defineListAllowEmpty(Collections.singletonList("Insulation Blacklist"), () -> Arrays.asList(
+                ),
+                it -> it instanceof String);
 
         BUILDER.pop();
 
@@ -258,18 +260,16 @@ public final class ItemSettingsConfig
                 .comment("Defines items that affect the player's temperature when consumed",
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
                         "Negative values are cold foods, positive values are hot foods")
-                .defineList("Temperature-Affecting Foods", Arrays.asList
-                                (
-                                        // nothing here
-                                ),
-                        it ->
-                        {
-                            if (it instanceof List<?>)
-                            {   List<?> list = ((List<?>) it);
-                                return list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number;
-                            }
-                            return false;
-                        });
+                .defineListAllowEmpty(Collections.singletonList("Temperature-Affecting Foods"), () -> Arrays.asList(
+                ),
+                it ->
+                {
+                    if (it instanceof List<?>)
+                    {   List<?> list = ((List<?>) it);
+                        return list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number;
+                    }
+                    return false;
+                });
         waterskinStrength = BUILDER
                 .comment("Defines the amount a player's body temperature will change by when using a waterskin")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);

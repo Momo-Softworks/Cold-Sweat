@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -146,15 +147,17 @@ public class ColdSweatConfig
             hearthSpreadWhitelist = BUILDER
                     .comment("List of blocks that the hearth can spread through",
                              "Use this list if the hearth isn't spreading through particular blocks that it should")
-                    .defineList("Hearth Spread Whitelist", Arrays.asList(
+                    .defineListAllowEmpty(Collections.singletonList("Hearth Spread Whitelist"), () -> Arrays.asList(
                             "minecraft:iron_bars",
                             "#minecraft:leaves"
-                    ), o -> o instanceof String);
+                    ),
+                    o -> o instanceof String);
             hearthSpreadBlacklist = BUILDER
                     .comment("List of blocks that the hearth cannot spread through",
                              "Use this list if the hearth is spreading through particular blocks that it shouldn't")
-                    .defineList("Hearth Spread Blacklist", Arrays.asList(
-                    ), o -> o instanceof String);
+                    .defineListAllowEmpty(Collections.singletonList("Hearth Spread Blacklist"), () -> Arrays.asList(
+                    ),
+                    o -> o instanceof String);
         BUILDER.pop();
 
         BUILDER.push("Cold Soul Fire");
