@@ -1354,3 +1354,28 @@ Technical Changes:
 - Adjusted the formula for armor insulation to make increasing insulation have a more linear effect
       - "Diminishing returns" have been drastically smoothed out
 - The rate increase caused by negative insulation is now uncapped, and increases linearly
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05b
+- Hoglin hide can now be sold by the wandering trader
+
+Fixes:
+- Fixed crash caused by a mixin for campfires
+
+Technical Changes:
+- Optimized the algorithm for block temperature, especially in extreme cases with lots of blocks affecting the player
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05c
+- Added a config option to change the amount that temperature equalizes underground
+- Added a tooltip to the waterskin when filled, which describes the functionality of holding it in the hotbar
+- Insulation can now be chosen as a secondary power at a tier-4 beacon
+
+Fixes:
+- Fixed chameleons not dropping chameleon molt
+- Fixed the soul campfire freezing the player on contact when unlit
+
+Technical Changes:
+- The body temperature's tendency to "equalize" will no longer fight against modifiers applied to it (such as waterskins)
