@@ -141,14 +141,14 @@ public class ConfigSettings
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
-                                                            .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst().toString(), entry.getValue().getSecond(), entry.getValue().getThird()))
+                                                            .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeOffsets"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
-                                                           .map(entry -> Arrays.asList(entry.getKey(), entry.getValue().getFirst().toString(), entry.getValue().getSecond(), entry.getValue().getThird()))
+                                                           .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
                                                            .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
@@ -332,7 +332,7 @@ public class ConfigSettings
 
         LLAMA_FUR_TIMINGS = addSyncedSetting("llama_fur_timings", () ->
         {
-            List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
+            List<?> entry = EntitySettingsConfig.getInstance().getLlamaFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         },
         encoder ->
@@ -356,7 +356,7 @@ public class ConfigSettings
             list.add(saver.getFirst());
             list.add(saver.getSecond());
             list.add(saver.getThird());
-            EntitySettingsConfig.getInstance().setGoatFurStats(list);
+            EntitySettingsConfig.getInstance().setLlamaFurStats(list);
         });
 
         CHAMELEON_BIOMES = addSetting("chameleon_spawn_biomes", () ->
@@ -372,7 +372,7 @@ public class ConfigSettings
         LLAMA_BIOMES = addSetting("llama_spawn_biomes", () ->
         {
             Map<ResourceLocation, Integer> map = new HashMap<>();
-            for (List<?> entry : EntitySettingsConfig.getInstance().getGoatSpawnBiomes())
+            for (List<?> entry : EntitySettingsConfig.getInstance().getLlamaSpawnBiomes())
             {
                 map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
             }

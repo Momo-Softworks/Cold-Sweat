@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class EntitySettingsConfig
@@ -48,7 +49,7 @@ public class EntitySettingsConfig
         llamaFurGrowth = BUILDER
                 .comment("Defines how often a llama will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
-                .defineList("Goat Fur Growth Timings", Arrays.asList(
+                .defineList("Llama Fur Growth Timings", Arrays.asList(
                         1200, 2400, 0.20
                 ),
                 it -> it instanceof Number);
@@ -179,10 +180,10 @@ public class EntitySettingsConfig
     {   return insulatedEntities.get();
     }
 
-    public List<?> getGoatFurStats()
+    public List<?> getLlamaFurStats()
     {   return llamaFurGrowth.get();
     }
-    public void setGoatFurStats(List<? extends Number> list)
+    public void setLlamaFurStats(List<? extends Number> list)
     {   llamaFurGrowth.set(list);
     }
 
@@ -190,7 +191,7 @@ public class EntitySettingsConfig
     {   return chameleonBiomes.get();
     }
 
-    public List<? extends List<?>> getGoatSpawnBiomes()
+    public List<? extends List<?>> getLlamaSpawnBiomes()
     {   return llamaBiomes.get();
     }
 }
