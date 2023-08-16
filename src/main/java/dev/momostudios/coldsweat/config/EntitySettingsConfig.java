@@ -10,6 +10,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 public class EntitySettingsConfig
@@ -33,15 +34,24 @@ public class EntitySettingsConfig
                 .comment("List of entities that will insulate the player when riding them",
                          "The rate at which the player's temperature changes is divided by the resistance value",
                          "Format: [\"entity_id\", coldResistance, hotResistance]")
-                .defineList("Insulated Mounts", List.of(),
-                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                .defineListAllowEmpty(List.of("Insulated Mounts"), () -> Arrays.asList(
+                ),
+                it ->
+                {
+                    if (it instanceof List<?>)
+                    {   List<?> list = ((List<?>) it);
+                        return list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number;
+                    }
+                    return false;
+                });
 
         goatFurGrowth = BUILDER
                 .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", List.of(
                         1200, 2400, 0.20
-                    ), it -> it instanceof Number);
+                ),
+                it -> it instanceof Number);
 
         BUILDER.pop();
 
@@ -91,7 +101,7 @@ public class EntitySettingsConfig
                                 () -> List.of("wythers:tropical_forest", 10),
                                 () -> List.of("wythers:tropical_rainforest", 80)
                         ).build(),
-                        it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         goatBiomes = BUILDER
                 .comment("Defines additional biomes that goats can spawn in",
@@ -127,7 +137,7 @@ public class EntitySettingsConfig
                                 () -> List.of("terralith:cloud_forest", 4),
                                 () -> List.of("terralith:haze_mountain", 4)
                         ).build(),
-                        it -> it instanceof List<?> list && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
