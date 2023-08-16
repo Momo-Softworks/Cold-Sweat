@@ -9,6 +9,8 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class ItemSettingsConfig
@@ -44,17 +46,17 @@ public final class ItemSettingsConfig
                 .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
-                .defineList("Boiler", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Boiler"), () -> ListBuilder.begin(
                                 List.of("minecraft:coal",         37),
                                 List.of("minecraft:charcoal",     37),
                                 List.of("minecraft:coal_block",   333),
                                 List.of("minecraft:magma_block",  333),
                                 List.of("minecraft:lava_bucket",  1000)
                         ).build(),
-                        it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         iceboxItems = BUILDER
-                .defineList("Icebox", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
                                 List.of("minecraft:snowball",     37),
                                 List.of("minecraft:clay",         37),
                                 List.of("minecraft:snow_block",   333),
@@ -62,11 +64,11 @@ public final class ItemSettingsConfig
                                 List.of("minecraft:ice",          333),
                                 List.of("minecraft:packed_ice",   1000)
                         ).build(),
-                        it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         hearthItems = BUILDER
                 .comment("Negative values indicate cold fuel")
-                .defineList("Hearth", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Hearth"), () -> ListBuilder.begin(
                                 // Hot
                                 List.of("minecraft:coal",         37),
                                 List.of("minecraft:charcoal",     37),
@@ -81,11 +83,11 @@ public final class ItemSettingsConfig
                                 List.of("minecraft:ice",          -333),
                                 List.of("minecraft:packed_ice",   -1000)
                         ).build(),
-                        it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
         blacklistedPotions = BUILDER
                 .comment("Potions containing any of these effects will not be allowed in the hearth",
                          "Format: [\"effect_id\", \"effect_id\", ...etc]")
-                .defineList("Blacklisted Potion Effects", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Blacklisted Potion Effects"), () -> ListBuilder.begin(
                                 "minecraft:instant_damage",
                                 "minecraft:poison",
                                 "minecraft:wither",
@@ -107,15 +109,15 @@ public final class ItemSettingsConfig
         soulLampItems = BUILDER
                 .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
                         "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
-                .defineList("Fuel Items", ListBuilder.begin(
-                                List.of("cold_sweat:soul_sprout",   4)
+                .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.begin(
+                                    List.of("cold_sweat:soul_sprout", 4)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         soulLampDimensions = BUILDER
                 .comment("Defines the dimensions that the Soulspring Lamp can be used in",
                         "Format: [\"dimension-id-1\", \"dimension-id-2\", ...etc]")
-                .defineList("Valid Dimensions", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Valid Dimensions"), () -> ListBuilder.begin(
                                 "minecraft:the_nether"
                         ).build(),
                         it -> it instanceof String);
@@ -131,7 +133,7 @@ public final class ItemSettingsConfig
                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                         "\"cold\": The amount of cold insulation the item provides.",
                         "\"hot\": The amount of heat insulation the item provides.")
-                .defineList("Insulation Ingredients", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Insulation Ingredients"), () -> ListBuilder.begin(
                                 List.of("minecraft:leather_helmet",     4,  4),
                                 List.of("minecraft:leather_chestplate", 6,  6),
                                 List.of("minecraft:leather_leggings",   5,  5),
@@ -160,7 +162,7 @@ public final class ItemSettingsConfig
                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                         "\"insulation\": The amount of insulation the item provides. Will adjust to hot/cold based on the environment.",
                         "\"adaptSpeed\": The speed at which the item adapts to the current temperature. Higher values mean faster adaptation (from 0 to 1).")
-                .defineList("Adaptive Insulation Ingredients", ListBuilder.begin(
+                 .defineListAllowEmpty(List.of("Adaptive Insulation Ingredients"), () -> ListBuilder.begin(
                                 List.of("cold_sweat:chameleon_molt", 2, 0.0085)
                             ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
@@ -168,7 +170,7 @@ public final class ItemSettingsConfig
         insulatingArmor = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]")
-                .defineList("Insulating Armor", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.begin(
                                 List.of("minecraft:leather_helmet",      4,  4),
                                 List.of("minecraft:leather_chestplate",  6,  6),
                                 List.of("minecraft:leather_leggings",    5,  5),
@@ -195,8 +197,9 @@ public final class ItemSettingsConfig
         insulationBlacklist = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
                         "Format: [\"item_id\", \"item_id\", ...etc]")
-                .defineList("Insulation Blacklist", List.of(),
-                        it -> it instanceof String);
+                .defineListAllowEmpty(List.of("Insulation Blacklist"), () -> List.of(
+                ),
+                it -> it instanceof String);
 
         BUILDER.pop();
 
@@ -208,11 +211,9 @@ public final class ItemSettingsConfig
                 .comment("Defines items that affect the player's temperature when consumed",
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
                         "Negative values are cold foods, positive values are hot foods")
-                .defineList("Temperature-Affecting Foods", List.of
-                                (
-                                        // nothing here
-                                ),
-                        it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                .defineListAllowEmpty(List.of("Temperature-Affecting Foods"), () -> Arrays.asList(
+                ),
+                it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
         waterskinStrength = BUILDER
                 .comment("Defines the amount a player's body temperature will change by when using a waterskin")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
