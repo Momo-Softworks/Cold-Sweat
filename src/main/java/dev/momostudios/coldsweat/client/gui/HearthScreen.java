@@ -44,7 +44,11 @@ public class HearthScreen extends DisplayEffectsScreen<HearthContainer>
     @Override
     public void init()
     {
-        super.init();
+        this.checkEffectRendering();
+        this.width = this.minecraft.getWindow().getGuiScaledWidth();
+        this.height = this.minecraft.getWindow().getGuiScaledHeight();
+        this.leftPos = (this.width - this.imageWidth) / 2;
+        this.topPos = (this.height - this.imageHeight) / 2;
         this.addButton(new ImageButton(getGuiLeft() + 82, getGuiTop() + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
         {
             ImageButton hearthButton = (ImageButton) button;
