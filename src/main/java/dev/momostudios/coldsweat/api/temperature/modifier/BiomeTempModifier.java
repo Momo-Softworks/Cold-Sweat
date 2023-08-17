@@ -89,8 +89,8 @@ public class BiomeTempModifier extends TempModifier
                         double mid = (min + max) / 2;
                         // Biome temp with time of day
                         worldTemp += CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1d, 1d) / samples
-                                // Altitude calculation
-                                  + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / samples;
+                                   // Altitude calculation
+                                   + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / samples;
                     }
                     // If dimension has ceiling (don't use time or altitude)
                     else worldTemp += CSMath.average(max, min) / samples;

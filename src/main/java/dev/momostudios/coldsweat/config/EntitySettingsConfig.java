@@ -68,7 +68,8 @@ public class EntitySettingsConfig
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> Arrays.asList("biomesoplenty:lush_desert", 3),
                                 () -> Arrays.asList("biomesoplenty:rainforest", 40),
-                                () -> Arrays.asList("biomesoplenty:rocky_rainforest", 15),
+                                () -> Arrays.asList("biomesoplenty:rainforest_cliffs", 15),
+                                () -> Arrays.asList("biomesoplenty:rainforest_floodplain", 7),
                                 () -> Arrays.asList("biomesoplenty:fungal_jungle", 10),
                                 () -> Arrays.asList("biomesoplenty:tropics", 8),
                                 () -> Arrays.asList("biomesoplenty:outback", 2))
@@ -76,31 +77,23 @@ public class EntitySettingsConfig
                                 () -> Arrays.asList("byg:tropical_rainforest", 60),
                                 () -> Arrays.asList("byg:jacaranda_forest", 3),
                                 () -> Arrays.asList("byg:guiana_shield", 3),
-                                () -> Arrays.asList("byg:crag_gardens", 4),
-                                () -> Arrays.asList("byg:atacama_desert", 1),
+                                () -> Arrays.asList("byg:crag_gardens", 8),
                                 () -> Arrays.asList("byg:cypress_swamplands", 3),
-                                () -> Arrays.asList("byg:mojave_desert", 1),
-                                () -> Arrays.asList("byg:windswept_desert", 2))
+                                () -> Arrays.asList("byg:lush_red_desert", 3),
+                                () -> Arrays.asList("byg:red_desert", 2),
+                                () -> Arrays.asList("byg:red_rock_mountains", 2),
+                                () -> Arrays.asList("byg:mojave_desert", 1))
                             .addIf(CompatManager.isAtmosphericLoaded(),
                                 () -> Arrays.asList("atmospheric:dunes", 0.75),
                                 () -> Arrays.asList("atmospheric:flourishing_dunes", 1.5),
                                 () -> Arrays.asList("atmospheric:rocky_dunes", 0.75),
                                 () -> Arrays.asList("atmospheric:petrified_dunes", 0.5),
                                 () -> Arrays.asList("atmospheric:rainforest", 70),
-                                () -> Arrays.asList("atmospheric:sparse_rainforest", 40),
+                                () -> Arrays.asList("atmospheric:rainforest_mountains", 70),
+                                () -> Arrays.asList("atmospheric:rainforest_plateau", 70),
                                 () -> Arrays.asList("atmospheric:rainforest_basin", 50),
-                                () -> Arrays.asList("atmospheric:sparse_rainforest_basin", 30))
-                           .addIf(CompatManager.isTerralithLoaded(),
-                                () -> Arrays.asList("terralith:red_oasis", 3),
-                                () -> Arrays.asList("terralith:desert_oasis", 3),
-                                () -> Arrays.asList("terralith:tropical_jungle", 80),
-                                () -> Arrays.asList("terralith:arid_highlands", 1.5),
-                                () -> Arrays.asList("terralith:rocky_jungle", 80),
-                                () -> Arrays.asList("terralith:brushland", 1.5))
-                           .addIf(CompatManager.isWythersLoaded(),
-                                () -> Arrays.asList("wythers:cactus_desert", 1),
-                                () -> Arrays.asList("wythers:tropical_forest", 10),
-                                () -> Arrays.asList("wythers:tropical_rainforest", 80)
+                                () -> Arrays.asList("atmospheric:sparse_rainforest_plateau", 40),
+                                () -> Arrays.asList("atmospheric:sparse_rainforest_basin", 30)
                         ).build(),
                         it ->
                         {
@@ -123,24 +116,18 @@ public class EntitySettingsConfig
                                 Arrays.asList("minecraft:gravelly_mountains", 8))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> Arrays.asList("biomesoplenty:boreal_forest", 5),
-                                () -> Arrays.asList("biomesoplenty:jade_cliffs", 4),
-                                () -> Arrays.asList("biomesoplenty:crag", 3))
+                                () -> Arrays.asList("biomesoplenty:snowy_coniferous_forest", 5),
+                                () -> Arrays.asList("biomesoplenty:jade_cliffs", 4))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
                                 () -> Arrays.asList("byg:alps", 16),
-                                () -> Arrays.asList("byg:canadian_shield", 3),
+                                () -> Arrays.asList("byg:bluff_steeps", 8),
+                                () -> Arrays.asList("byg:bluff_peaks", 8),
+                                () -> Arrays.asList("byg:grassland_plateau", 4),
                                 () -> Arrays.asList("byg:guiana_shield", 3),
-                                () -> Arrays.asList("byg:fragment_forest", 128),
-                                () -> Arrays.asList("byg:howling_peaks", 6),
+                                () -> Arrays.asList("byg:stone_forest", 128),
                                 () -> Arrays.asList("byg:shattered_glacier", 6),
-                                () -> Arrays.asList("byg:dacite_ridges", 5))
-                            .addIf(CompatManager.isTerralithLoaded(),
-                                () -> Arrays.asList("terralith:blooming_plateau", 5),
-                                () -> Arrays.asList("terralith:rocky_mountains", 6),
-                                () -> Arrays.asList("terralith:alpine_grove", 6),
-                                () -> Arrays.asList("terralith:scarlet_mountains", 4),
-                                () -> Arrays.asList("terralith:windswept_spires", 16),
-                                () -> Arrays.asList("terralith:cloud_forest", 4),
-                                () -> Arrays.asList("terralith:haze_mountain", 4)
+                                () -> Arrays.asList("byg:skyris_highlands", 6),
+                                () -> Arrays.asList("byg:dover_mountains", 5)
                         ).build(),
                         it ->
                         {
