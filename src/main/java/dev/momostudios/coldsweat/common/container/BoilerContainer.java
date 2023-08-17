@@ -11,6 +11,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.Objects;
 
@@ -86,7 +87,7 @@ public class BoilerContainer extends Container
     @Override
     public boolean stillValid(PlayerEntity player)
     {
-        return player.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
+        return player.distanceToSqr(Vector3d.atCenterOf(te.getBlockPos())) <= 64.0D;
     }
 
     @Override

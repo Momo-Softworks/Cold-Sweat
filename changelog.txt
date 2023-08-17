@@ -769,14 +769,14 @@ Technical Changes:
       - A graphic of the armor's insulation will display in the item's tooltip
       - There are now multiple types of insulation items:
             - Leather: Provides an equal amount of hot and cold insulation
-            - Goat Fur: Provides strong cold insulation
+            - Llama Fur: Provides strong cold insulation
             - Hoglin Hide: Provides strong hot insulation
       - Leather armor can still be sewed to armor, filling all of its insulation slots
       - Insulation items can be combined in different ways for more specific use-cases
       - Because there are now two types of insulation, some configs have been changed to match
         (not deleting the old ones may cause a crash)
       - The number of insulation slots in helmets, chestplates, leggings, and boots is now configurable
-- Goats can now be sheared to get Goat Fur
+- Llamas can now be sheared to get Llama Fur
       - Their fur will grow back after some time (15% chance to grow back every 45 seconds)
       - Their texture has been tweaked to better incorporate this
 - Hoglins now drop Hoglin Hide when killed, in addition to their other drops
@@ -795,15 +795,15 @@ Fixes:
 - Insulation items can now be removed with Shears in the Sewing Table
 - Enchanted insulation items will now (irreversibly) transfer compatible enchantments to the armor when being sewn
 - The world temperature gauge is now much more responsive
-- Updated the Goat texture to look better when sheared
-- Changed Goats' fur growth:
+- Updated the Llama texture to look better when sheared
+- Changed Llamas' fur growth:
       - There is now a 2-minute minimum cooldown (configurable)
       - After this time, it tries to grow it back every 1 minute (configurable)
       - There is a 20% chance for this to succeed (configurable)
 
 Fixes:
 - Fixed player temperature sometimes not changing if it is at 0
-- Fixed crash related to Goats that might occur when joining the world
+- Fixed crash related to Llamas that might occur when joining the world
 - Fixed some configs being reset when any changes are made
 
 Technical Changes:
@@ -1075,7 +1075,7 @@ Fixes:
       - Each armor piece provides maximum heat insulation
       - Cannot be insulated in the sewing table
       - Can be used as insulation for other items (similar to leather armor)
-* New Armor Set: Goat Fur
+* New Armor Set: Llama Fur
       - Crafted with goat fur in typical armor patterns
       - Each armor piece provides maximum cold insulation
       - Cannot be insulated in the sewing table
@@ -1235,7 +1235,7 @@ Fixes:
 - Doubled the rate at which the hearth drains fuel (a full gauge will now last ~30 real minutes)
 - Added a normal-duration (3:00) ice resistance potion
     - The existing (8:00) potion is now the long-duration version (brewed with redstone)
-- Goats now drop 0-2 goat fur when killed
+- Llamas now drop 0-2 goat fur when killed
 - Rebalanced chameleon spawns again to make them more common in lush areas and rarer in sparse/desert-like areas
 - The player is now granted the sewing table recipe upon obtaining an insulation item
 - The chameleon can now be tempted with any item it can eat
@@ -1297,7 +1297,7 @@ Technical Changes:
 - Added new song: "Modulo"
       - Plays in-game and in the menu
 - Hoglin hide can now be obtained through piglin bartering
-- Goat fur now has a chance to be sold by the wandering trader
+- Llama fur now has a chance to be sold by the wandering trader
 - Updated chameleon sounds to be more true to real chameleons
 - A death message will now be displayed if a tamed chameleon dies
 
