@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.container;
 
+import dev.momostudios.coldsweat.common.tileentity.HearthTileEntity;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ContainerInit;
@@ -11,7 +12,6 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketBuffer;
-import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.tileentity.TileEntity;
@@ -23,8 +23,8 @@ import java.util.Objects;
 
 public class HearthContainer extends Container
 {
-    public final HearthBlockEntity te;
-    public HearthContainer(final int windowId, final PlayerInventory playerInv, final HearthBlockEntity te)
+    public final HearthTileEntity te;
+    public HearthContainer(final int windowId, final PlayerInventory playerInv, final HearthTileEntity te)
     {
         super(ContainerInit.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
@@ -35,7 +35,7 @@ public class HearthContainer extends Container
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                if (HearthBlockEntity.getItemFuel(stack) != 0 || stack.getItem() == Items.MILK_BUCKET) return true;
+                if (HearthTileEntity.getItemFuel(stack) != 0 || stack.getItem() == Items.MILK_BUCKET) return true;
                 // Check if the potion is blacklisted
                 Collection<EffectInstance> effects = PotionUtils.getMobEffects(stack);
                 return effects.size() > 0
@@ -44,7 +44,7 @@ public class HearthContainer extends Container
 
             @Override
             public void setChanged()
-            {   TaskScheduler.scheduleServer(() -> ((HearthBlockEntity) this.container).checkForFuel(), 0);
+            {   TaskScheduler.scheduleServer(() -> ((HearthTileEntity) this.container).checkForFuel(), 0);
                 super.setChanged();
             }
         });
@@ -80,13 +80,13 @@ public class HearthContainer extends Container
         return te.getColdFuel();
     }
 
-    private static HearthBlockEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static HearthTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof HearthBlockEntity)
-        {   return ((HearthBlockEntity) te);
+        if (te instanceof HearthTileEntity)
+        {   return ((HearthTileEntity) te);
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }

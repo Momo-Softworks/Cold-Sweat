@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.tileentity.HearthTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
@@ -37,9 +37,9 @@ public class HearthResetMessage
             context.enqueueWork(() ->
             {
                 TileEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
-                if (te instanceof HearthBlockEntity)
+                if (te instanceof HearthTileEntity)
                 {
-                    ((HearthBlockEntity) te).forceUpdate();
+                    ((HearthTileEntity) te).forceUpdate();
                 }
             });
         }

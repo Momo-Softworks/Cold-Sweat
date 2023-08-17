@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.block;
 
-import dev.momostudios.coldsweat.common.tileentity.HearthBlockEntity;
+import dev.momostudios.coldsweat.common.tileentity.HearthTileEntity;
 import dev.momostudios.coldsweat.core.init.TileEntityInit;
 import dev.momostudios.coldsweat.core.itemgroup.ColdSweatGroup;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -100,9 +100,9 @@ public class HearthBottomBlock extends Block
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
         TileEntity te = world.getBlockEntity(pos);
-        if (te instanceof HearthBlockEntity)
+        if (te instanceof HearthTileEntity)
         {
-            HearthBlockEntity hearth = (HearthBlockEntity) te;
+            HearthTileEntity hearth = (HearthTileEntity) te;
             ItemStack stack = player.getItemInHand(hand);
 
             // If the held item is a bucket, try to extract fluids
@@ -120,7 +120,7 @@ public class HearthBottomBlock extends Block
                 Vector3d sidePos = isLava ? lavaSidePos : waterSidePos;
                 BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
                                                  : ((BucketItem) Items.WATER_BUCKET);
-                int itemFuel = Math.abs(HearthBlockEntity.getItemFuel(filledBucket.getDefaultInstance()));
+                int itemFuel = Math.abs(HearthTileEntity.getItemFuel(filledBucket.getDefaultInstance()));
                 int hearthFuel = isLava ? hearth.getHotFuel() : hearth.getColdFuel();
 
                 if (hearthFuel >= itemFuel * 0.99)
@@ -149,10 +149,10 @@ public class HearthBottomBlock extends Block
             else
             {
                 // If the held item is fuel, try to insert the fuel
-                int itemFuel = HearthBlockEntity.getItemFuel(stack);
+                int itemFuel = HearthTileEntity.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? hearth.getHotFuel() : hearth.getColdFuel();
 
-                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthBlockEntity.MAX_FUEL)
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthTileEntity.MAX_FUEL)
                 {
                     // Consume the item if not in creative
                     if (!player.isCreative())
@@ -219,8 +219,8 @@ public class HearthBottomBlock extends Block
             }
 
             TileEntity tileentity = world.getBlockEntity(pos);
-            if (tileentity instanceof HearthBlockEntity)
-            {   InventoryHelper.dropContents(world, pos, (HearthBlockEntity) tileentity);
+            if (tileentity instanceof HearthTileEntity)
+            {   InventoryHelper.dropContents(world, pos, (HearthTileEntity) tileentity);
                 world.updateNeighborsAt(pos, this);
             }
         }

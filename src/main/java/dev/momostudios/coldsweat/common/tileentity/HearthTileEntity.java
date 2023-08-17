@@ -68,7 +68,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class HearthBlockEntity extends LockableLootTileEntity implements ITickableTileEntity
+public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     List<SpreadPath> paths = new ArrayList<>();
@@ -124,7 +124,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         catch (Exception ignored) {}
     }
 
-    public HearthBlockEntity()
+    public HearthTileEntity()
     {   super(TileEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get());
         MinecraftForge.EVENT_BUS.register(this);
     }
