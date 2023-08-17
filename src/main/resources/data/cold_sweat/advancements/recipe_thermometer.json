@@ -1,5 +1,4 @@
 {
-  "parent": "minecraft:recipes/root",
   "criteria": {
     "temperature": {
       "trigger": "cold_sweat:temperature",

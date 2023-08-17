@@ -1,24 +1,17 @@
 {
-  "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_item": {
+    "requirement": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
+        "player": {},
         "items": [
           {
-            "items": [
-              "cold_sweat:waterskin"
-            ]
+            "item": "cold_sweat:waterskin"
           }
         ]
       }
     }
   },
-  "requirements": [
-    [
-      "has_item"
-    ]
-  ],
   "rewards": {
     "recipes": [
       "cold_sweat:boiler",

@@ -19,11 +19,10 @@
     "requirement": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
+        "player": {},
         "items": [
           {
-            "items": [
-              "cold_sweat:soulspring_lamp"
-            ]
+            "item": "cold_sweat:soulspring_lamp"
           }
         ]
       }

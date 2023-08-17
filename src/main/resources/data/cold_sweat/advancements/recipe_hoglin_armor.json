@@ -1,14 +1,11 @@
 {
-  "parent": "minecraft:recipes/root",
   "criteria": {
     "has_item": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": [
-              "cold_sweat:hoglin_hide"
-            ]
+            "item": "cold_sweat:hoglin_hide"
           }
         ]
       }
@@ -19,7 +16,7 @@
         "recipe": "cold_sweat:hoglin_headpiece"
       }
     },
-    "has_chest_recipe": {
+    "has_body_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": "cold_sweat:hoglin_tunic"
@@ -42,7 +39,7 @@
     [
       "has_item",
       "has_helm_recipe",
-      "has_chest_recipe",
+      "has_body_recipe",
       "has_legs_recipe",
       "has_boots_recipe"
     ]
