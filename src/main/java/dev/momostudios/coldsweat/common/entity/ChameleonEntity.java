@@ -348,7 +348,7 @@ public class ChameleonEntity extends AnimalEntity
                                           0.01, 0.01, 0.01);
             }
 
-            if (this.tickCount % 20 == 0 && (this.tickCount - this.getEatTimestamp() > 6000
+            if (this.tickCount % 20 == 0 && (this.getAgeSecs() * 20L - this.getEatTimestamp() > 6000
             || Math.sqrt(Math.pow(this.getX() - this.getTrackingPos().getX(), 2) + Math.pow(this.getZ() - this.getTrackingPos().getZ(), 2)) < 20))
             {
                 // Award nearby players the "chameleon_find_biome" advancement
