@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -31,6 +32,8 @@ public class TooltipHandler
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
+        Pair<Double, Double> itemInsul;
+        Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
@@ -44,7 +47,7 @@ public class TooltipHandler
             }
             event.getToolTip().add(1, new StringTextComponent(" "));
         }
-        else if (ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null)
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null && !itemInsul.equals(emptyInsul))
         {   event.getToolTip().add(1, new StringTextComponent(" "));
         }
         else if (stack.getItem() instanceof IArmorVanishable && stack.getCapability(ModCapabilities.ITEM_INSULATION).map(c -> c.getInsulation().size() > 0).orElse(false))
@@ -62,20 +65,21 @@ public class TooltipHandler
         Tooltip tooltip = null;
 
         Pair<Double, Double> itemInsul = null;
+        Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null)
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
         {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false);
         }
-        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null)
+        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
         {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true);
         }
 
         // If the item is insulated armor
-        if (stack.getItem() instanceof IArmorVanishable && (itemInsul == null || !ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()).equals(itemInsul)))
+        if (stack.getItem() instanceof IArmorVanishable && !Objects.equals(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), itemInsul))
         {
             // Create the list of insulation pairs from NBT
             List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
