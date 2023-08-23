@@ -1,6 +1,7 @@
 package dev.momostudios.coldsweat;
 
 import dev.momostudios.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
+import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.init.*;
@@ -12,6 +13,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -41,6 +43,7 @@ public class ColdSweat
 
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
+        bus.addListener(this::registerCaps);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         BlockInit.BLOCKS.register(bus);
@@ -77,6 +80,21 @@ public class ColdSweat
         });
         // Load configs to memory
         ConfigSettings.load();
+    }
+
+    public void registerCaps(FMLCommonSetupEvent event)
+    {
+        /* Player temperature */
+        CapabilityManager.INSTANCE.register(PlayerTempCap.class, new DummyCapStorage<>(), PlayerTempCap::new);
+
+        /* Entity temperature */
+        CapabilityManager.INSTANCE.register(EntityTempCap.class, new DummyCapStorage<>(), EntityTempCap::new);
+
+        /* Llama fur */
+        CapabilityManager.INSTANCE.register(IShearableCap.class, new DummyCapStorage<>(), LlamaFurCap::new);
+
+        /* Armor insulation */
+        CapabilityManager.INSTANCE.register(IInsulatableCap.class, new DummyCapStorage<>(), ItemInsulationCap::new);
     }
 
     public void clientSetup(final FMLClientSetupEvent event)
