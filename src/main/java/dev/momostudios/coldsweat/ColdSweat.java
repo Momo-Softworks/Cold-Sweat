@@ -1,6 +1,8 @@
 package dev.momostudios.coldsweat;
 
 import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
+import dev.momostudios.coldsweat.common.capability.IShearableCap;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.*;
@@ -96,6 +98,8 @@ public class ColdSweat
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
         event.register(ITemperatureCap.class);
+        event.register(IInsulatableCap.class);
+        event.register(IShearableCap.class);
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)
