@@ -7,10 +7,13 @@ import dev.momostudios.coldsweat.client.renderer.model.entity.ChameleonModel;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+
+import javax.annotation.Nullable;
 
 public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRenderer<ChameleonEntity, ChameleonModel<ChameleonEntity>>
 {
@@ -48,6 +51,12 @@ public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRende
     @Override
     public ResourceLocation getTextureLocation(ChameleonEntity entity)
     {   return CHAMELEON_GREEN;
+    }
+
+    @Nullable
+    @Override
+    protected RenderType getRenderType(ChameleonEntity chameleon, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_)
+    {   return RenderType.entityTranslucent(this.getTextureLocation(chameleon));
     }
 }
 

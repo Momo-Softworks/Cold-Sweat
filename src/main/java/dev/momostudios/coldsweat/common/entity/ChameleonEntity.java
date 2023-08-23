@@ -17,7 +17,6 @@ import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.registries.ModSounds;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.command.impl.data.EntityDataAccessor;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -98,10 +97,10 @@ public class ChameleonEntity extends AnimalEntity
     {   this.goalSelector.addGoal(0, new SwimGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagList(edible.associatedItems()))), false));
-        this.goalSelector.addGoal(5, new LazyLookGoal(this));
-        this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6.0F));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagList(edible.associatedItems()))), false));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.goalSelector.addGoal(6, new LazyLookGoal(this));
+        this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
     }
 
     public static AttributeModifierMap.MutableAttribute createAttributes()
@@ -251,7 +250,9 @@ public class ChameleonEntity extends AnimalEntity
     {
         if (this.isWalking())
         {
-            this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
+            if (this.onGround)
+            {   this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
+            }
             this.rotateHeadIfNecessary();
             this.rotateBodyIfNecessary();
         }

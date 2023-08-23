@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.IHasHead;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -52,7 +53,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 	private final ModelRenderer leftBackLeg2;
 	private final ModelRenderer leftBackFoot1;
 	private final ModelRenderer leftBackFoot2;
-	private final ModelRenderer tail;
+	private final ModelRenderer tail1;
 	private final ModelRenderer tail2;
 	private final ModelRenderer tail3;
 
@@ -186,14 +187,14 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 		leftBackLeg2.addChild(leftBackFoot2);
 		leftBackFoot2.texOffs(27, 24).addBox(0.0F, 0.0F, -1.0F, 0.0F, 2.0F, 1.0F, 0.0F, false);
 
-		modelParts.put("Tail", tail = new ModelRenderer(this));
-		tail.setPos(0.0F, -3.5F, 6.0F);
-		body.addChild(tail);
-		tail.texOffs(34, 18).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, 0.0F, false);
+		modelParts.put("Tail", tail1 = new ModelRenderer(this));
+		tail1.setPos(0.0F, -3.5F, 6.0F);
+		body.addChild(tail1);
+		tail1.texOffs(34, 18).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, 0.0F, false);
 
 		modelParts.put("Tail2", tail2 = new ModelRenderer(this));
 		tail2.setPos(0.0F, 0.0F, 4.0F);
-		tail.addChild(tail2);
+		tail1.addChild(tail2);
 		tail2.texOffs(38, 13).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 3.0F, 0.0F, false);
 
 		modelParts.put("Tail3", tail3 = new ModelRenderer(this));
@@ -219,9 +220,6 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 			float tickDelta = Minecraft.getInstance().getDeltaFrameTime();
 			float partialTick = Minecraft.getInstance().getFrameTime();
-			ModelRenderer head = modelParts.get("Head");
-			ModelRenderer rightEye = modelParts.get("RightEye");
-			ModelRenderer leftEye = modelParts.get("LeftEye");
 
 			// get the pitch (up/down) of the head in Radians
 			float desiredXHead = CSMath.toRadians(headPitch);
@@ -280,9 +278,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				animatedParts.remove("Head");
 				animatedParts.remove("LeftEye");
 				animatedParts.remove("RightEye");
-				ModelRenderer tail1  = animatedParts.remove("Tail");
-				ModelRenderer tail2 = animatedParts.remove("Tail2");
-				ModelRenderer tail3 = animatedParts.remove("Tail3");
+				animatedParts.remove("Tail");
+				animatedParts.remove("Tail2");
+				animatedParts.remove("Tail3");
 
 				// Riding player animation
 				if (this.riding && entity.getVehicle() instanceof PlayerEntity)
@@ -377,12 +375,13 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 				// Move the tail in accordance with the velocity of the player it's riding
 				float playerXHead = 0;
-				if (entity.getVehicle() instanceof PlayerEntity)
+				Entity vehicle = entity.getVehicle();
+				if (vehicle instanceof PlayerEntity)
 				{	PlayerEntity player = (PlayerEntity) entity.getVehicle();
 					playerXHead = CSMath.toRadians(player.getViewXRot(partialTick));
 				}
 
-				Vector3d velocity = playerXHead != 0 ? entity.getVehicle().getDeltaMovement() : entity.getDeltaMovement();
+				Vector3d velocity = vehicle != null ? vehicle.getDeltaMovement() : entity.getDeltaMovement();
 				// Side-to-side tail movement (disabled if the chameleon is tracking a biome)
 				if (!chameleon.isTracking())
 				{
@@ -400,7 +399,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 					float tailRotation = (1 + Math.abs(tail1.xRot - 0.2f) * 1);
 
-					tail1.yRot  = tailRot1 / tailRotation;
+					tail1.yRot = tailRot1 / tailRotation;
 					tail2.yRot = tailRot2 / tailRotation;
 					tail3.yRot = tailRot3 / tailRotation;
 				}
