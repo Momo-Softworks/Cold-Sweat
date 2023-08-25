@@ -12,10 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Mixin(BeaconTileEntity.class)
 public class MixinBeaconEffects
 {
@@ -29,13 +25,9 @@ public class MixinBeaconEffects
         {Effects.REGENERATION, ModEffects.INSULATION}
     };
 
-    @Final
-    @Shadow
-    private static final Set<Effect> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
-
     @ModifyArg(method = "applyEffects()V",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1),
-               remap = ColdSweat.REMAP_MIXINS)
+               index = 0, remap = ColdSweat.REMAP_MIXINS)
     private EffectInstance modifyEffect(EffectInstance effect)
     {
         if (effect.getEffect() == ModEffects.INSULATION)
