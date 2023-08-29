@@ -84,11 +84,8 @@ public class ColdSweat
 
     public void registerCaps(FMLCommonSetupEvent event)
     {
-        /* Player temperature */
-        CapabilityManager.INSTANCE.register(PlayerTempCap.class, new DummyCapStorage<>(), PlayerTempCap::new);
-
         /* Entity temperature */
-        CapabilityManager.INSTANCE.register(EntityTempCap.class, new DummyCapStorage<>(), EntityTempCap::new);
+        CapabilityManager.INSTANCE.register(ITemperatureCap.class, new DummyCapStorage<>(), EntityTempCap::new);
 
         /* Llama fur */
         CapabilityManager.INSTANCE.register(IShearableCap.class, new DummyCapStorage<>(), LlamaFurCap::new);
