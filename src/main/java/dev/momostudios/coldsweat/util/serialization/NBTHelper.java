@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.entity;
+package dev.momostudios.coldsweat.util.serialization;
 
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
 import dev.momostudios.coldsweat.api.util.Temperature;

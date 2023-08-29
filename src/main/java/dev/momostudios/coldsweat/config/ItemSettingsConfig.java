@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.math.ListBuilder;
+import dev.momostudios.coldsweat.util.serialization.ListBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class ItemSettingsConfig

@@ -16,7 +16,7 @@ import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
-import dev.momostudios.coldsweat.util.math.ListBuilder;
+import dev.momostudios.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
