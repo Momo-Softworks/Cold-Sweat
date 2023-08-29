@@ -3,8 +3,8 @@ package dev.momostudios.coldsweat.config;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.config.util.ConfigHelper;
-import dev.momostudios.coldsweat.config.util.ValueSupplier;
+import dev.momostudios.coldsweat.util.serialization.ConfigHelper;
+import dev.momostudios.coldsweat.config.util.ValueHolder;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -25,65 +25,65 @@ import java.util.stream.Collectors;
  */
 public class ConfigSettings
 {
-    public static final Map<String, ValueSupplier<?>> CONFIG_SETTINGS = new HashMap<>();
+    public static final Map<String, ValueHolder<?>> CONFIG_SETTINGS = new HashMap<>();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
     // Settings visible in the config screen
-    public static final ValueSupplier<Integer> DIFFICULTY;
-    public static final ValueSupplier<Double> MAX_TEMP;
-    public static final ValueSupplier<Double> MIN_TEMP;
-    public static final ValueSupplier<Double> TEMP_RATE;
-    public static final ValueSupplier<Boolean> FIRE_RESISTANCE_ENABLED;
-    public static final ValueSupplier<Boolean> ICE_RESISTANCE_ENABLED;
-    public static final ValueSupplier<Boolean> DAMAGE_SCALING;
-    public static final ValueSupplier<Boolean> REQUIRE_THERMOMETER;
-    public static final ValueSupplier<Integer> GRACE_LENGTH;
-    public static final ValueSupplier<Boolean> GRACE_ENABLED;
+    public static final ValueHolder<Integer> DIFFICULTY;
+    public static final ValueHolder<Double> MAX_TEMP;
+    public static final ValueHolder<Double> MIN_TEMP;
+    public static final ValueHolder<Double> TEMP_RATE;
+    public static final ValueHolder<Boolean> FIRE_RESISTANCE_ENABLED;
+    public static final ValueHolder<Boolean> ICE_RESISTANCE_ENABLED;
+    public static final ValueHolder<Boolean> DAMAGE_SCALING;
+    public static final ValueHolder<Boolean> REQUIRE_THERMOMETER;
+    public static final ValueHolder<Integer> GRACE_LENGTH;
+    public static final ValueHolder<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
-    public static final ValueSupplier<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
-    public static final ValueSupplier<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
-    public static final ValueSupplier<Double> CAVE_INSULATION;
-    public static final ValueSupplier<Double[]> SUMMER_TEMPS;
-    public static final ValueSupplier<Double[]> AUTUMN_TEMPS;
-    public static final ValueSupplier<Double[]> WINTER_TEMPS;
-    public static final ValueSupplier<Double[]> SPRING_TEMPS;
+    public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final ValueHolder<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
+    public static final ValueHolder<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static final ValueHolder<Double> CAVE_INSULATION;
+    public static final ValueHolder<Double[]> SUMMER_TEMPS;
+    public static final ValueHolder<Double[]> AUTUMN_TEMPS;
+    public static final ValueHolder<Double[]> WINTER_TEMPS;
+    public static final ValueHolder<Double[]> SPRING_TEMPS;
 
     // Block settings
-    public static final ValueSupplier<Boolean> COLD_SOUL_FIRE;
-    public static final ValueSupplier<List<Block>> HEARTH_SPREAD_WHITELIST;
-    public static final ValueSupplier<List<Block>> HEARTH_SPREAD_BLACKLIST;
+    public static final ValueHolder<Boolean> COLD_SOUL_FIRE;
+    public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
+    public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
 
     // Item settings
-    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
-    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
-    public static final ValueSupplier<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
-    public static final ValueSupplier<Integer[]> INSULATION_SLOTS;
-    public static final ValueSupplier<List<ResourceLocation>> INSULATION_BLACKLIST;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static final ValueHolder<Integer[]> INSULATION_SLOTS;
+    public static final ValueHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
-    public static final ValueSupplier<Boolean> CHECK_SLEEP_CONDITIONS;
+    public static final ValueHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final ValueSupplier<Map<Item, Double>> FOOD_TEMPERATURES;
+    public static final ValueHolder<Map<Item, Double>> FOOD_TEMPERATURES;
 
-    public static final ValueSupplier<Integer> WATERSKIN_STRENGTH;
+    public static final ValueHolder<Integer> WATERSKIN_STRENGTH;
 
-    public static final ValueSupplier<Map<Item, Integer>> LAMP_FUEL_ITEMS;
+    public static final ValueHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
-    public static final ValueSupplier<List<ResourceLocation>> LAMP_DIMENSIONS;
+    public static final ValueHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final ValueSupplier<Map<Item, Double>> BOILER_FUEL;
-    public static final ValueSupplier<Map<Item, Double>> ICEBOX_FUEL;
-    public static final ValueSupplier<Map<Item, Double>> HEARTH_FUEL;
-    public static final ValueSupplier<Boolean> HEARTH_POTIONS_ENABLED;
-    public static final ValueSupplier<List<ResourceLocation>> BLACKLISTED_POTIONS;
+    public static final ValueHolder<Map<Item, Double>> BOILER_FUEL;
+    public static final ValueHolder<Map<Item, Double>> ICEBOX_FUEL;
+    public static final ValueHolder<Map<Item, Double>> HEARTH_FUEL;
+    public static final ValueHolder<Boolean> HEARTH_POTIONS_ENABLED;
+    public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     // Entity Settings
-    public static final ValueSupplier<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
-    public static final ValueSupplier<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
-    public static final ValueSupplier<Map<ResourceLocation, Integer>> GOAT_BIOMES;
+    public static final ValueHolder<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
+    public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
+    public static final ValueHolder<Map<ResourceLocation, Integer>> GOAT_BIOMES;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -494,14 +494,14 @@ public class ConfigSettings
         }
     }
 
-    public static <T> ValueSupplier<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
-    {   ValueSupplier<T> loader = ValueSupplier.synced(supplier, writer, reader, saver);
+    public static <T> ValueHolder<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
+    {   ValueHolder<T> loader = ValueHolder.synced(supplier, writer, reader, saver);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
 
-    public static <T> ValueSupplier<T> addSetting(String id, Supplier<T> supplier)
-    {   ValueSupplier<T> loader = ValueSupplier.of(supplier);
+    public static <T> ValueHolder<T> addSetting(String id, Supplier<T> supplier)
+    {   ValueHolder<T> loader = ValueHolder.of(supplier);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
@@ -535,6 +535,6 @@ public class ConfigSettings
     }
 
     public static void load()
-    {   CONFIG_SETTINGS.values().forEach(ValueSupplier::load);
+    {   CONFIG_SETTINGS.values().forEach(ValueHolder::load);
     }
 }

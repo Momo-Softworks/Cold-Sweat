@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.config.util;
+package dev.momostudios.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;

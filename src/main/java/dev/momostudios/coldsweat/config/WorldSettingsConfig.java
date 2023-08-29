@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.math.ListBuilder;
+import dev.momostudios.coldsweat.util.serialization.ListBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;

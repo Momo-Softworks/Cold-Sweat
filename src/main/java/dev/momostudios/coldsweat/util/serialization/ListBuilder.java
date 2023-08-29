@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.util.math;
+package dev.momostudios.coldsweat.util.serialization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
