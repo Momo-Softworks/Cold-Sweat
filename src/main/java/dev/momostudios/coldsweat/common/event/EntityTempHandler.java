@@ -1,5 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
+import com.google.common.collect.ImmutableSet;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.EnableTemperatureEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
@@ -27,6 +28,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -56,7 +58,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
@@ -64,6 +68,7 @@ public class EntityTempHandler
 {
     public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
+    private static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
 
     /**
      * Attach temperature capability to entities
@@ -79,7 +84,7 @@ public class EntityTempHandler
                 EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
                 MinecraftForge.EVENT_BUS.post(enableEvent);
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) return;
-                EnableTemperatureEvent.ENABLED_ENTITIES.add(entity.getType());
+                TEMPERATURE_ENABLED_ENTITIES.add(entity.getType());
             }
 
             // Make a new capability instance to attach to the entity
@@ -127,7 +132,7 @@ public class EntityTempHandler
     public static void onLivingTick(LivingEvent.LivingTickEvent event)
     {
         LivingEntity entity = event.getEntity();
-        if (!(entity instanceof Player || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
+        if (!(entity instanceof Player || TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType()))) return;
 
         Temperature.getTemperatureCap(entity).ifPresent(cap ->
         {
@@ -239,7 +244,7 @@ public class EntityTempHandler
             });
         }
         // Add basic TempModifiers to chameleons
-        else if (event.getEntity() instanceof LivingEntity entity && EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))
+        else if (event.getEntity() instanceof LivingEntity entity && TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType()))
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
             if (entity.getServer() != null)
@@ -421,5 +426,9 @@ public class EntityTempHandler
             {   Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Type.BASE);
             }
         }
+    }
+
+    public static Set<EntityType<?>> getEntitiesWithTemperature()
+    {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
     }
 }
