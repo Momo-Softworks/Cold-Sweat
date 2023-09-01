@@ -14,7 +14,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -45,13 +47,15 @@ public class TooltipHandler
                 {   event.getToolTip().add(1, new StringTextComponent(""));
                 }
             }
-            event.getToolTip().add(1, new StringTextComponent(" "));
+            event.getToolTip().add(1, new StringTextComponent(" §0---§r"));
         }
+        // Is insulation item
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null && !itemInsul.equals(emptyInsul))
-        {   event.getToolTip().add(1, new StringTextComponent(" "));
+        {   event.getToolTip().add(1, new StringTextComponent(" §0--§r"));
         }
+        // Has insulation (armor)
         else if (stack.getItem() instanceof IArmorVanishable && stack.getCapability(ModCapabilities.ITEM_INSULATION).map(c -> c.getInsulation().size() > 0).orElse(false))
-        {   event.getToolTip().add(1, new StringTextComponent(" "));
+        {   event.getToolTip().add(1, new StringTextComponent(" §0-§r"));
         }
     }
 
@@ -71,15 +75,17 @@ public class TooltipHandler
         {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !emptyInsul.equals(itemInsul))
         {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false);
         }
-        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
+        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !emptyInsul.equals(itemInsul))
         {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true);
         }
 
+
         // If the item is insulated armor
-        if (stack.getItem() instanceof IArmorVanishable && !Objects.equals(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), itemInsul))
+        Pair<Double, Double> armorInsul = null;
+        if (stack.getItem() instanceof IArmorVanishable && (!Objects.deepEquals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
             List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
@@ -130,10 +136,28 @@ public class TooltipHandler
             {   tooltip = new InsulationTooltip(insulation, stack);
             }
         }
+        // Find the empty line that this tooltip should fill
+        String lineToReplace = tooltip instanceof SoulspringTooltip ? " ---"
+                             : tooltip instanceof InsulatorTooltip ? " --"
+                             : tooltip instanceof InsulationTooltip ? " -" : null;
+        //if (tooltip != null)
+        //    Minecraft.getInstance().player.displayClientMessage(new StringTextComponent(lineToReplace + " " + tooltip.getClass().getSimpleName()), true);
+        int y = event.getY();
+        if (lineToReplace != null)
+        {
+            List<? extends ITextProperties> tooltipLines = event.getLines();
+            for (int i = 0; i < tooltipLines.size(); i++)
+            {
+                if (lineToReplace.equals(TextFormatting.stripFormatting(tooltipLines.get(i).getString())))
+                {   y += 10 * (i - 1) + 1;
+                    break;
+                }
+            }
+        }
 
         if (tooltip != null)
-        {   tooltip.renderImage(Minecraft.getInstance().font, event.getX(), event.getY(), event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-            tooltip.renderText(Minecraft.getInstance().font, event.getX(), event.getY(), event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+        {   tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+            tooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
         }
     }
 }
