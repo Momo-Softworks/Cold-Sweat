@@ -1330,3 +1330,302 @@ Fixes:
 Technical Changes:
 - Block updates now reset the hearth's entire AOE (the selective "smart" method of updating the AOE was too unreliable)
       - Sped up hearth "spread" calculations by 5x to account for sections of the AOE being unnecessarily cleared
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05a
+* Added a new "vague" temperature gauge
+      - Gives a rough idea of the world's temperature if the player doesn't have a thermometer
+      - When the player gets a thermometer, this will be replaced by the normal (exact) temperature gauge
+      - If "Require Thermometer" is turned off, the exact gauge will always be shown
+- Waterskins can now be heated at campfires and cooled at soul campfires
+
+Fixes:
+- Fixed block temperatures not being detected in some cases
+- Fixed chameleons attempting to access unloaded chunks when detecting temperature, causing the world to freeze
+- Fixed unnecessary overhead from the Task Scheduler
+- Fixed entity update packets being sent to all tracking players instead of just the player who needs the data
+- Fixed temperature configs for drinkable food items not working
+- Fixed armor with no insulation sometimes being shear-able if the server is lagging, causing the game to crash when attempted
+- Fixed insulation only being applied to the player from the first piece of armor equipped
+
+Technical Changes:
+- Configs are now reloaded when the server finishes starting, to ensure that all needed sources are loaded (such as datapacks)
+- Adjusted the formula for armor insulation to make increasing insulation have a more linear effect
+      - "Diminishing returns" have been drastically smoothed out
+- The rate increase caused by negative insulation is now uncapped, and increases linearly
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05b
+- Hoglin hide can now be sold by the wandering trader
+
+Fixes:
+- Fixed crash caused by a mixin for campfires
+
+Technical Changes:
+- Optimized the algorithm for block temperature, especially in extreme cases with lots of blocks affecting the player
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05c
+- Added a config option to change the amount that temperature equalizes underground
+- Added a tooltip to the waterskin when filled, which describes the functionality of holding it in the hotbar
+- Insulation can now be chosen as a secondary power at a tier-4 beacon
+
+Fixes:
+- Fixed chameleons not dropping chameleon molt
+- Fixed the soul campfire freezing the player on contact when unlit
+- Fixed config settings with lists of elements not being allowed to be empty
+
+Technical Changes:
+- The body temperature's tendency to "equalize" will no longer fight against modifiers applied to it (such as waterskins)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2 (So far)
+! Existing armor items using the old insulation format (from pre-2.2) will be automatically updated to the new insulation format. However:
+      ! The new insulation format cannot be read by older versions, so if you downgrade Cold Sweat again all item insulation will be lost
+      ! Even though this update should be fine to simply drop into an existing world, it is still recommended to back up your world first
+
+Revamped Armor Insulation System:
+      - Each piece of armor has a number of slots that can be filled with insulation
+      - A graphic of the armor's insulation will display in the item's tooltip
+      - There are now multiple types of insulation items:
+            - Leather: Provides an equal amount of hot and cold insulation
+            - Goat(1.18+) or Llama(1.16) Fur: Provides strong cold insulation
+            - Hoglin Hide: Provides strong hot insulation
+            - Wool: Provides insulation at a half-step between leather and goat fur
+            - Rabbit Hide: Provides insulation at a half-step between leather and hoglin hide
+            - Chameleon Molt: Special "adaptive" insulation that adjusts to the player's environment
+      - Items that can be used as insulation now have a tooltip displaying their effects
+      - Leather armor can still be sewed to armor, filling all of its insulation slots
+      - Insulation items can be combined in different ways for more specific use-cases
+      - Insulation items can now be removed with Shears in the Sewing Table
+      - Enchanted insulation items will now (irreversibly) transfer compatible enchantments to the armor when being sewn
+      - Because there are now two types of insulation, some configs have been changed to match
+        (not deleting the old ones may cause a crash)
+      - The number of insulation slots in helmets, chestplates, leggings, and boots is now configurable
+      - All wearable items can now have insulation, instead of just armor
+- Goats can now be sheared to get Goat Fur
+      - Their fur will grow back after some time (15% chance to grow back every 45 seconds)
+      - Their texture has been tweaked to better incorporate this
+- Hoglins now drop Hoglin Hide when killed, in addition to their other drops
+
+Soulspring Lamp Changes:
+- The Soulspring Lamp can now be fuelled by attacking an entity at full health with it
+      - This restores up to 4 fuel
+      - Only works once per entity, forever
+- When 'Shift' is held, the Soulspring Lamp's tooltip will now show a graphic of what items it can be fuelled with
+- Removed warped/crimson stems as default fuel sources for the soulspring lamp
+- Halved the rate at which the soulspring lamp consumes fuel
+
+Waterskin Changes:
+- Waterskins now extinguish the player when used
+- Waterskins can now be heated at campfires and cooled at soul campfires
+- Waterskins now have custom dispense behavior
+      - The dispenser pours the waterskin's contents onto players below
+      - The water's effect weakens over distance (does nothing after ~20 blocks)
+- Added a tooltip to the waterskin when filled, which describes the functionality of holding it in the hotbar
+
+New Temperature Effects:
+- Added various negative effects that are inflicted on the player if they are too hot/cold:
+      - Hot (disorients the player):
+            - Reduced view distance at temperatures above 50 (less range as temperature increases)
+            - Blurred vision as temperature increases above 50
+            - Randomly drifting camera as temperature increases above 50
+      - Cold (dangerous to the player):
+            - Reduced mining/movement speed (slower as temperature decreases)
+            - Player attack knockback is reduced (less knockback as temperature decreases)
+            - Up to 50% of the player's hearts freeze over (frozen hearts cannot be regenerated)
+      - All screen-distorting effects can be disabled in the config menu under (distortion effects)
+
+Misc. Temperature Changes:
+- Added a new "vague" temperature gauge
+      - Gives a rough idea of the world's temperature if the player doesn't have a thermometer
+      - When the player gets a thermometer, this will be replaced by the normal (exact) temperature gauge
+      - If "Require Thermometer" is turned off, the exact gauge will always be shown
+- Biome temperature now takes altitude into account more seriously
+      - Temperature will drop more substantially as height increases above sea level
+- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block type can affect the player
+- The temperature of lava is now drastically reduced while riding a strider
+      - This is to prevent the player overheating extremely quickly while riding a strider on a lava ocean
+- The body temperature's tendency to "equalize" will no longer fight against modifiers applied to it (such as waterskins)
+
+Chameleon:
+- Added new mob: Chameleon
+      - Spawns in tropical biomes (Like jungles)
+      - Change color according to the temperature around them (it can be a useful thermometer replacement!)
+      - It might trust you if you throw it a spider eye
+            - Chameleons can trust multiple players
+            - You can right-click a chameleon that trusts you to carry it on your head
+      - Occasionally, a chameleon will shed its skin, dropping the new Chameleon Molt item
+            - Chameleon molt will have important uses in future updates, so don't throw it away!
+      - Can perform new actions when fed certain items:
+            - Magma cream, nether wart, cactus: Chameleon will point towards nearest hot biome (temperature > 1.7) within 2000 blocks 1 minute
+            - Snowball, beetroot, sweet berries: Chameleon will point towards the nearest cold biome (temperature < 0.2) within 2000 blocks for 1 minute
+            - Slimeball, ink sac, cocoa beans: Chameleon will point towards the nearest humid biome (temperature > 0.8 and downfall > 0.85) within 2000 blocks for 1 minute
+            - Spider eye, fermented spider eye, fish: Heals 3 health for the chameleon
+
+New Armor Sets:
+* New Armor Set: Hoglin Hide
+      - Crafted with hoglin hide in typical armor patterns
+      - Each armor piece provides maximum heat insulation
+      - Cannot be insulated in the sewing table
+      - Can be used as insulation for other items (similar to leather armor)
+* New Armor Set: Goat Fur
+      - Crafted with goat fur in typical armor patterns
+      - Each armor piece provides maximum cold insulation
+      - Cannot be insulated in the sewing table
+      - Can be used as insulation for other items (similar to leather armor)
+
+New Blocks/Items:
+- New block: Soul Stalk
+      - Grows on soul sand and naturally generates in the Nether
+            - Grows like sugar cane, up to 6 blocks tall
+            - Grows much faster in hot environments
+      - When it grows, the new stalk will have a 50% chance to bear a soul berry
+      - The top bulb always drops a soul berry
+- New item: Soul Sprout
+      - Can be eaten to restore 3 hunger points (1.5 bars)
+      - Lowers the player's body temperature by 20 degrees when eaten (effect lasts 45 seconds)
+      - Can be planted on soul sand to grow a soul stalk
+      - Can be used as an effective source of fuel for the soulspring lamp
+      ! 'item-settings.toml' will need to be deleted for this change to take effect
+- Added new block: Thermolith
+      - Outputs a redstone signal based on the temperature of the nearby area (from 0 to 15 from minimum to maximum temperature set in the config)
+      - Crafted with 3 chameleon molt and 4 terracotta
+- Added "minecart with insulation" item
+      - Crafted with a minecart and minecart insulation
+
+Hearth:
+- Massive performance uplift
+- Doubled the rate at which the hearth drains fuel (a full gauge will now last ~30 real minutes)
+- Potions can now be placed into the hearth's fuel slot, giving all nearby players the effect until they leave the radius or the potion expires
+      - Milk can be used to clear all effects from the hearth
+- Added config options to blacklist or completely disable potions from being used in the hearth
+- Added the ability to pipe temperature-controlled air from the hearth using Create's pipes
+
+Original Music:
+- Added new song: Far Lands
+      - Plays randomly alongside Vanilla music in the Overworld
+- Added new song: "Modulo"
+      - Plays in-game and in the menu
+
+Potions:
+- Ice resistance potions are now brewed with a soul sprout instead of prismarine crystals
+- Added a normal-duration (1:30) ice resistance potion
+  - The existing (8:00) potion has been reduced to 4:00 and is now the long-duration version (brewed with redstone)
+- Fire/Ice resistance potions can be used to negate the new effects of temperature on the player
+
+Misc. Additions:
+- Added new recipe unlocks and advancements when certain criteria are met to help progression
+- the Thermometer can now be equipped as a charm if Curios is installed
+- Reorganized the Cold Sweat creative tab to group items more logically
+- Adjusted the spawn rates of goats(1.18+) or llamas(1.16) so it is actually possible to happen upon them in the wild
+      - Can now spawn in more biomes, including those from from Biomes O' Plenty, BYG, and Atmospheric
+- A Thermometer placed in an item frame will now display the exact temperature when hovered
+- The boiler can now be crafted with cobbled, polished, and normal deepslate (or stone in 1.16)
+- The icebox/boiler now only accept items from hoppers on the correct side
+      - Waterskins are inserted from the top, fuel is inserted at the side, and waterskins can be extracted from the bottom
+- Goats now drop 0-2 goat fur when killed
+- 1-5 Soul sprouts how have a chance to result from piglin bartering
+- Hoglin hide how has a chance to result from piglin bartering
+- Goat fur now has a chance to be sold by the wandering trader
+- Hoglin hide now has a chance to be sold by the wandering trader
+- Insulation can now be chosen as a secondary power at a tier-4 beacon
+
+Mod Compatibility:
+- Added support for Armor Underwear:
+      - Simple linings now allow the player to withstand more drastic temperatures
+      - Ozzy lining adapts to the player's body temperature and makes either hot or cold environments more habitable accordingly
+      - Otto/Ollie linings will protect against freezing/burning damage respectively. Each lined armor piece reduces the damage by 25%, up to 100%
+      - Otto/Ollie linings also lessen temperature debuffs
+- Added support for Oh the Biomes You'll Go!:
+      - Rebalanced several biomes' temperatures to be more accurate in Cold Sweat's temperature system
+      - Chameleons can now spawn in BYG biomes
+      ! 'world-settings.toml' and 'entity-settings.toml' will need to be deleted for these changes to take effect
+- Added support for Environmental:
+      - Adjusted the temperature of the marsh biome to be more in line with other swamp-like biomes
+      - Yak pants now provide insulation when worn
+      - Yak hair blocks can be used as an insulation item (equivalent to goat fur)
+            - For balancing purposes, it also has 1 negative heat insulation
+      ! 'world-settings.toml' and 'item-settings.toml' will need to be deleted for these changes to take effect
+- Added support for Atmospheric:
+      - Adjusted the temperatures of several biomes to be more realistic in Cold Sweat's temperature system
+      - Chameleons can spawn in dunes and rainforest biomes from Atmospheric
+      ! 'world-settings.toml' and 'entity-settings.toml' will need to be deleted for these changes to take effect
+- Added support for Terralith (1.18+):
+      - Adjusted the temperatures of several biomes to be more fitting in Cold Sweat's temperature system
+      ! 'world-settings.toml' will need to be deleted for these changes to take effect
+- Added basic support for Weather, Storms & Tornadoes (1.18+):
+      - Snowstorms will now drastically lower the temperature in the affected area
+      - Rain from storms is now treated like normal rain (makes the player wet)
+- Added support for biomes from William Wyther's Overhauled Overworld (Pyrael on Discord)
+- Mod compat for loaded mods that are of an unsupported version will now be disabled to prevent conflicts
+      - For example, now that the minimum version of Create is 5.1, Cold Sweat will disable its Create compat if Create is below 5.1
+
+
+Technical Changes:
+- "Temperature" is no longer an object type
+      - All instances of Temperature have been replaced by double values
+      - Replaced "with()" with the static method "Temperature.apply()"
+      - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
+- TempModifiers now have a full CompoundTag attached to each instance
+      - This can be used to store any custom data that needs to be saved
+      - Replaces the old "arguments" system
+- TempModifier registration is now done using suppliers of TempModifiers
+    - This makes for a less hacky backend way of instantiating TempModifiers, no longer requiring a default constructor
+- Renamed methods in TempHelper (Temperature):
+      - "getTemperature()" -> "get()"
+      - "setTemperature()" -> "set()"
+      - "addTemperature()" -> "add()"
+- Added new method getTemperatureAt(BlockPos, Level)
+        - As you probably could have guessed, this method returns the world's temperature at the given position (using Cold Sweat's default TempModifiers)
+- Revamped the temperature system to allow all living entities to have their own temperatures
+      - Although the system has been reworked in the backend, there is very little difference in implementation aside from some method parameters
+      - This may pave the way for livestock temperature to make a return in the future\
+- Added new event: EntityPickEvent
+        - Fired when the player uses pick-block (middle-click) on an entity
+        - Allows for changing the ItemStack returned
+- Added new sub-command for /temperature: "showmodifiers"
+      - Displays all of the temperature modifiers present on an entity, as well as how each one affects the entity's temperature
+- Added #boiler_valid and #icebox_valid tags
+    - These tags now determine what items can be placed into the top slots of the icebox & boiler
+- Added tags for items that the chameleon can eat:
+    - #chameleon/find_hot_biomes: The chameleon will locate the nearest hot biome
+    - #chameleon/find_cold_biomes: The chameleon will locate the nearest cold biome
+    - #chameleon/find_humid_biomes: The chameleon will locate the nearest humid biome
+    - #chameleon/taming: Item used to tame a chameleon
+- Added #soulspring_lamp_valid tag to define dimensions that the soulspring lamp will activate in
+- New "HeatResistance" and "ColdResistance" NBT tags can now be applied to players for easy temperature resistance
+      - Slows the rate at which the player's temperature changes, similar to armor insulation
+      - Setting either of these values to 100 will make the player completely immune to that temperature
+
+Configs:
+- Added a config option to disable the mod preventing sleep if the player is too hot/cold
+- Fuel items for the soulspring lamp can now be configured to give different amounts of fuel
+- Block Temperatures can now be given a "predicate", which makes the block emit/not emit temperature based on its state (i.e. a campfire being lit)
+- The Cold Sweat config button can now be repositioned on the screen (option in the config menu)
+- Compacted & reworded some config settings to fit better in the menu
+- Hovering over config options to show the tooltip is now more consistent
+- The "Block Temperatures" config option has been moved to world-settings.toml
+    ! This will delete existing configs in main.toml. Back them up first!
+- Added new config option in item-settings.toml to "blacklist" items from allowing insulation
+- Added a config option to change the amount that temperature equalizes underground
+
+
+Translation Updates:
+- Added Brazilian Portuguese translation (by @Vellar on Discord)
+- Updated Chinese translation (by @wumeng on Discord)
+- Updated Brazilian Portuguese translation (by @Vellar on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05d
+
+Fixes:
+- Fixed the goat/llama fur drop overriding all other goat/llama drops
+- Fixed "Biome Temperatures/Offsets" config option being set to MC units when closing the config screen
+- Fixed some mods not working with Cold Sweat due to a bug with registering capabilities (1.16.5)
+- Fixed Cold Sweat item tooltips being rendered over other tooltips that are ordered before them (1.16.5)
