@@ -156,7 +156,7 @@ public class ConfigHelper
                 map.put(biomeID, new Triplet<>(min, max, units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing biome temperature config entry: " + entry.toString());
+            {   ColdSweat.LOGGER.error("Error parsing biome temp config: " + entry.toString() + ". The biome may not be loaded yet or the mod is not present.");
             }
         }
         return map;
