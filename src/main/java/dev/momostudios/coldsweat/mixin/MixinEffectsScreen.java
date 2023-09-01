@@ -17,7 +17,7 @@ public class MixinEffectsScreen
     AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
     @ModifyVariable(method = "renderEffects",
-              at = @At(value = "STORE"), ordinal = 0)
+                    at = @At(value = "STORE"), ordinal = 0)
     private Collection<MobEffectInstance> getEffects(Collection<MobEffectInstance> collection)
     {
         if (screen.getMenu() instanceof HearthContainer container)
