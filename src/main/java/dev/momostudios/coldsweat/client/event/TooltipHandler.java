@@ -140,8 +140,6 @@ public class TooltipHandler
         String lineToReplace = tooltip instanceof SoulspringTooltip ? " ---"
                              : tooltip instanceof InsulatorTooltip ? " --"
                              : tooltip instanceof InsulationTooltip ? " -" : null;
-        //if (tooltip != null)
-        //    Minecraft.getInstance().player.displayClientMessage(new StringTextComponent(lineToReplace + " " + tooltip.getClass().getSimpleName()), true);
         int y = event.getY();
         if (lineToReplace != null)
         {
