@@ -10,18 +10,21 @@ import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Container.class)
 public class ItemSwapMixin
 {
+    Container self = (Container)(Object)this;
     @Inject(method = "doClick(IILnet/minecraft/inventory/container/ClickType;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/item/ItemStack;",
-            at = @At(target = "Lnet/minecraft/inventory/container/Slot;getMaxStackSize(Lnet/minecraft/item/ItemStack;)I", value = "INVOKE", ordinal = 7),
-            cancellable = true, remap = ColdSweat.REMAP_MIXINS, locals = LocalCapture.CAPTURE_FAILSOFT)
+            slice = @Slice(from = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 0),
+                           to   = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 1)),
+            at = @At(target = "Lnet/minecraft/inventory/container/Slot;set(Lnet/minecraft/item/ItemStack;)V", value = "INVOKE", ordinal = 0),
+            cancellable = true, remap = ColdSweat.REMAP_MIXINS)
     private void onItemSwap(int slotId, int dragType, ClickType clickType, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir)
     {
-        if (MinecraftForge.EVENT_BUS.post(new ItemSwappedInInventoryEvent(player.inventory.getCarried(), player.inventory.getItem(slotId), (Container)(Object)this, player)))
+        if (MinecraftForge.EVENT_BUS.post(new ItemSwappedInInventoryEvent(self.getSlot(slotId).getItem(), player.inventory.getCarried(), (Container)(Object)this, player)))
         {   cir.setReturnValue(ItemStack.EMPTY);
         }
     }
