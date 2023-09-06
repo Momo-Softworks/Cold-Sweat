@@ -23,7 +23,7 @@ public class ColdSweatGroup extends ItemGroup
     {
         ModItems.WATERSKIN.fillItemCategory(this, items);
         ModItems.FILLED_WATERSKIN.fillItemCategory(this, items);
-        ModItems.LLAMA_FUR.fillItemCategory(this, items);
+        ModItems.FUR.fillItemCategory(this, items);
         ModItems.HOGLIN_HIDE.fillItemCategory(this, items);
         ModItems.CHAMELEON_MOLT.fillItemCategory(this, items);
         ModItems.MINECART_INSULATION.fillItemCategory(this, items);
@@ -40,9 +40,9 @@ public class ColdSweatGroup extends ItemGroup
         ModItems.HOGLIN_TUNIC.fillItemCategory(this, items);
         ModItems.HOGLIN_TROUSERS.fillItemCategory(this, items);
         ModItems.HOGLIN_HOOVES.fillItemCategory(this, items);
-        ModItems.GOAT_FUR_CAP.fillItemCategory(this, items);
-        ModItems.GOAT_FUR_PARKA.fillItemCategory(this, items);
-        ModItems.GOAT_FUR_PANTS.fillItemCategory(this, items);
-        ModItems.GOAT_FUR_BOOTS.fillItemCategory(this, items);
+        ModItems.FUR_CAP.fillItemCategory(this, items);
+        ModItems.FUR_PARKA.fillItemCategory(this, items);
+        ModItems.FUR_PANTS.fillItemCategory(this, items);
+        ModItems.FUR_BOOTS.fillItemCategory(this, items);
     }
 }

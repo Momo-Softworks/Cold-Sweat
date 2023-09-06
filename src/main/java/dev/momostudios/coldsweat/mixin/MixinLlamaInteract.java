@@ -1,6 +1,5 @@
 package dev.momostudios.coldsweat.mixin;
 
-import dev.momostudios.coldsweat.common.capability.IShearableCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.event.LlamaFurHandler;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -15,7 +14,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,7 +49,7 @@ public class MixinLlamaInteract
                 self.level.playSound(null, self, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
-                WorldHelper.entityDropItem(self, new ItemStack(ModItems.LLAMA_FUR));
+                WorldHelper.entityDropItem(self, new ItemStack(ModItems.FUR));
 
                 // Set sheared
                 cap.setSheared(true);
