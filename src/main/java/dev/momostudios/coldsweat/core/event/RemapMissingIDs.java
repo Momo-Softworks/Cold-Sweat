@@ -1,6 +1,8 @@
 package dev.momostudios.coldsweat.core.event;
 
+import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,11 +16,15 @@ public class RemapMissingIDs
     @SubscribeEvent
     public static void remapMissingItems(MissingMappingsEvent event)
     {
-        if (event.getRegistry() == ForgeRegistries.ITEMS) {
-            for (MissingMappingsEvent.Mapping<Item> mapping : event.getAllMappings(ForgeRegistries.Keys.ITEMS)) {
-                if (mapping.getKey().toString().equals("cold_sweat:hellspring_lamp")) {
-                    mapping.remap(ModItems.SOULSPRING_LAMP);
-                    break;
+        if (event.getRegistry() == ForgeRegistries.ITEMS)
+        {
+            for (MissingMappingsEvent.Mapping<Item> mapping : event.getAllMappings(ForgeRegistries.Keys.ITEMS))
+            {
+                if (mapping.getKey().equals(new ResourceLocation(ColdSweat.MOD_ID, "hellspring_lamp")))
+                {   mapping.remap(ModItems.SOULSPRING_LAMP);
+                }
+                else if (mapping.getKey().getNamespace().equals(ColdSweat.MOD_ID) && mapping.getKey().toString().contains("goat_fur"))
+                {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.getKey().toString().replace("goat_fur", "fur"))));
                 }
             }
         }

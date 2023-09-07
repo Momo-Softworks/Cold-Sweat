@@ -346,7 +346,7 @@ public class ConfigSettings
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
 
-        GOAT_FUR_TIMINGS = addSyncedSetting("goat_fur_timings", () ->
+        GOAT_FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {
             List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());

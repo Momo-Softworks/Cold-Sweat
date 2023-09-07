@@ -58,7 +58,7 @@ public class AttachGoatCaps
                 }
             };
 
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "goat_fur"), provider);
+            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "fur"), provider);
         }
     }
 }
