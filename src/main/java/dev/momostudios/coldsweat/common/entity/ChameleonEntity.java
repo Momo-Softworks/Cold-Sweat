@@ -54,6 +54,7 @@ import net.minecraft.network.datasync.DataParameter;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class ChameleonEntity extends AnimalEntity
@@ -97,7 +98,7 @@ public class ChameleonEntity extends AnimalEntity
     {   this.goalSelector.addGoal(0, new SwimGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES.stream().map(edible -> new Ingredient.TagList(edible.associatedItems()))), false));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream).map(ItemStack::new)), false));
         this.goalSelector.addGoal(3, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
         this.goalSelector.addGoal(6, new LazyLookGoal(this));
         this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
@@ -271,6 +272,10 @@ public class ChameleonEntity extends AnimalEntity
     public void tick()
     {
         super.tick();
+        if (this.tickCount % 20 == 0)
+        {
+            System.out.println(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream).collect(Collectors.toList()));
+        }
 
         // Tick eat animation
         if (this.eatAnimationTimer > 0)
