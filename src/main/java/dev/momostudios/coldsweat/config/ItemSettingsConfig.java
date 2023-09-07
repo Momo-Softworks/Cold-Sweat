@@ -168,17 +168,17 @@ public final class ItemSettingsConfig
                                 Arrays.asList("minecraft:leather_boots",      4,  4),
                                 Arrays.asList("minecraft:leather",            1,  1),
                                 Arrays.asList("cold_sweat:hoglin_hide",       0,  2),
-                                Arrays.asList("cold_sweat:llama_fur",          2,  0),
+                                Arrays.asList("cold_sweat:fur",          2,  0),
                                 Arrays.asList("#minecraft:wool",             1.5, 0),
                                 Arrays.asList("minecraft:rabbit_hide",        0,  1.5),
                                 Arrays.asList("cold_sweat:hoglin_headpiece",  0,  8),
                                 Arrays.asList("cold_sweat:hoglin_tunic",      0,  12),
                                 Arrays.asList("cold_sweat:hoglin_trousers",   0,  10),
                                 Arrays.asList("cold_sweat:hoglin_hooves",     0,  8),
-                                Arrays.asList("cold_sweat:llama_fur_cap",      8,  0),
-                                Arrays.asList("cold_sweat:llama_fur_parka",    12, 0),
-                                Arrays.asList("cold_sweat:llama_fur_pants",    10, 0),
-                                Arrays.asList("cold_sweat:llama_fur_boots",    8,  0))
+                                Arrays.asList("cold_sweat:fur_cap",      8,  0),
+                                Arrays.asList("cold_sweat:fur_parka",    12, 0),
+                                Arrays.asList("cold_sweat:fur_pants",    10, 0),
+                                Arrays.asList("cold_sweat:fur_boots",    8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_hair", 1.5, -1)
                         ).build(),
@@ -221,10 +221,10 @@ public final class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:hoglin_tunic",       0,  12),
                                 Arrays.asList("cold_sweat:hoglin_trousers",    0,  10),
                                 Arrays.asList("cold_sweat:hoglin_hooves",      0,  8),
-                                Arrays.asList("cold_sweat:llama_fur_cap",       8,  0),
-                                Arrays.asList("cold_sweat:llama_fur_parka",     12, 0),
-                                Arrays.asList("cold_sweat:llama_fur_pants",     10, 0),
-                                Arrays.asList("cold_sweat:llama_fur_boots",     8,  0))
+                                Arrays.asList("cold_sweat:fur_cap",       8,  0),
+                                Arrays.asList("cold_sweat:fur_parka",     12, 0),
+                                Arrays.asList("cold_sweat:fur_pants",     10, 0),
+                                Arrays.asList("cold_sweat:fur_boots",     8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_pants", 7.5, -5)
                         ).build(),

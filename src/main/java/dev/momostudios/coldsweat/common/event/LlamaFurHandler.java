@@ -122,7 +122,7 @@ public class LlamaFurHandler
                 }
             };
 
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "llama_fur"), provider);
+            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "fur"), provider);
         }
     }
 }
