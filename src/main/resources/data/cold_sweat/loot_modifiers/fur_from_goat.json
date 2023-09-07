@@ -5,7 +5,7 @@
       "loot_table_id": "minecraft:entities/goat"
     }
   ],
-  "addition": "cold_sweat:goat_fur",
+  "addition": "cold_sweat:fur",
   "count":
   {
     "min": 1,

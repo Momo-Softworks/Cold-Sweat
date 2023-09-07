@@ -11,7 +11,7 @@
   "item.cold_sweat.soulspring_lamp":     "Lanterna da Alma",
   "item.cold_sweat.thermometer":         "Termômetro",
   "item.cold_sweat.waterskin":           "Bolsa de Água",
-  "item.cold_sweat.goat_fur":            "Pele de Cabra",
+  "item.cold_sweat.fur":            "Pele de Cabra",
   "item.cold_sweat.hoglin_hide":         "Couro de Hoglin",
   "item.cold_sweat.waterskin.filled":    "Cheia",
   "item.cold_sweat.insulated_minecart":  "Minecart with Insulation",
@@ -22,10 +22,10 @@
   "item.cold_sweat.hoglin_tunic":        "Túnica Hoglin",
   "item.cold_sweat.hoglin_trousers":     "Calças Hoglin",
   "item.cold_sweat.hoglin_hooves":       "Botas Hoglin",
-  "item.cold_sweat.goat_fur_cap":        "Gorro de pele de cabra",
-  "item.cold_sweat.goat_fur_parka":      "Casaco de pele de Cabra",
-  "item.cold_sweat.goat_fur_pants":      "Calças de pele de cabra",
-  "item.cold_sweat.goat_fur_boots":      "Botas de pele de cabra",
+  "item.cold_sweat.fur_cap":        "Gorro de pele de cabra",
+  "item.cold_sweat.fur_parka":      "Casaco de pele de Cabra",
+  "item.cold_sweat.fur_pants":      "Calças de pele de cabra",
+  "item.cold_sweat.fur_boots":      "Botas de pele de cabra",
 
 
   "entity.cold_sweat.chameleon": "Camaleão",

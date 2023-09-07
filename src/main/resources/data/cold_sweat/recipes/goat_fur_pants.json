@@ -10,12 +10,12 @@
   {
     "F":
     {
-      "item": "cold_sweat:goat_fur"
+      "item": "cold_sweat:fur"
     }
   },
   "result":
   {
-    "item": "cold_sweat:goat_fur_pants",
+    "item": "cold_sweat:fur_pants",
     "count": 1
   }
 }

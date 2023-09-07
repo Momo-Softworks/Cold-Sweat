@@ -7,7 +7,7 @@
         "items": [
           {
             "items": [
-              "cold_sweat:goat_fur"
+              "cold_sweat:fur"
             ]
           }
         ]
@@ -16,25 +16,25 @@
     "has_helm_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:goat_fur_cap"
+        "recipe": "cold_sweat:fur_cap"
       }
     },
     "has_chest_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:goat_fur_parka"
+        "recipe": "cold_sweat:fur_parka"
       }
     },
     "has_legs_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:goat_fur_pants"
+        "recipe": "cold_sweat:fur_pants"
       }
     },
     "has_boots_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:goat_fur_boots"
+        "recipe": "cold_sweat:fur_boots"
       }
     }
   },
@@ -49,10 +49,10 @@
   ],
   "rewards": {
     "recipes": [
-      "cold_sweat:goat_fur_cap",
-      "cold_sweat:goat_fur_parka",
-      "cold_sweat:goat_fur_pants",
-      "cold_sweat:goat_fur_boots"
+      "cold_sweat:fur_cap",
+      "cold_sweat:fur_parka",
+      "cold_sweat:fur_pants",
+      "cold_sweat:fur_boots"
     ]
   }
 }
