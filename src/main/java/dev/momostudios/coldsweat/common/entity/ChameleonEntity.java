@@ -98,7 +98,8 @@ public class ChameleonEntity extends AnimalEntity
     {   this.goalSelector.addGoal(0, new SwimGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream).map(ItemStack::new)), false));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream)
+                                                                                                              .map(item -> (IItemProvider) () -> item).toArray(IItemProvider[]::new)), false));
         this.goalSelector.addGoal(3, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
         this.goalSelector.addGoal(6, new LazyLookGoal(this));
         this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
