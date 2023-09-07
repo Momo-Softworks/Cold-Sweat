@@ -20,8 +20,8 @@ public class RemapMissingIDs
             if (mapping.key.equals(new ResourceLocation(ColdSweat.MOD_ID, "hellspring_lamp")))
             {   mapping.remap(ModItems.SOULSPRING_LAMP);
             }
-            else if (mapping.key.getNamespace().equals(ColdSweat.MOD_ID) && mapping.key.toString().contains("fur"))
-            {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.key.toString().replace("fur", "fur"))));
+            else if (mapping.key.getNamespace().equals(ColdSweat.MOD_ID) && mapping.key.toString().contains("llama_fur"))
+            {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.key.toString().replace("llama_fur", "fur"))));
             }
         }
     }
