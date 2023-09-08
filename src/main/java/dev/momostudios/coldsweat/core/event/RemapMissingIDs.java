@@ -16,7 +16,7 @@ public class RemapMissingIDs
     @SubscribeEvent
     public static void remapMissingItems(MissingMappingsEvent event)
     {
-        if (event.getRegistry() == ForgeRegistries.ITEMS)
+        if (event.getRegistry().getRegistryName().equals(ForgeRegistries.ITEMS.getRegistryName()))
         {
             for (MissingMappingsEvent.Mapping<Item> mapping : event.getAllMappings(ForgeRegistries.Keys.ITEMS))
             {
@@ -24,7 +24,7 @@ public class RemapMissingIDs
                 {   mapping.remap(ModItems.SOULSPRING_LAMP);
                 }
                 else if (mapping.getKey().getNamespace().equals(ColdSweat.MOD_ID) && mapping.getKey().toString().contains("goat_fur"))
-                {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.getKey().toString().replace("goat_fur", "fur"))));
+                {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.getKey().getPath().replace("goat_fur", "fur"))));
                 }
             }
         }
