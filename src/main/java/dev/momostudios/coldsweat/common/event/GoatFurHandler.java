@@ -113,7 +113,7 @@ public class GoatFurHandler
                 goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
-                WorldHelper.entityDropItem(goat, new ItemStack(ModItems.GOAT_FUR));
+                WorldHelper.entityDropItem(goat, new ItemStack(ModItems.FUR));
 
                 // Random chance to ram the player when sheared
                 if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
