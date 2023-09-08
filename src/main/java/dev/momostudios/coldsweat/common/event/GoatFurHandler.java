@@ -34,7 +34,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -49,6 +48,48 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber
 public class GoatFurHandler
 {
+    @SubscribeEvent
+    public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
+    {
+        if (event.getObject() instanceof Goat)
+        {
+            // Make a new capability instance to attach to the entity
+            IShearableCap cap = new GoatFurCap();
+            // Optional that holds the capability instance
+            LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
+            Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
+
+            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
+            {
+                @Nonnull
+                @Override
+                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
+                {
+                    // If the requested cap is the temperature cap, return the temperature cap
+                    if (cap == capability)
+                    {
+                        return capOptional.cast();
+                    }
+                    return LazyOptional.empty();
+                }
+
+                @Override
+                public CompoundTag serializeNBT()
+                {
+                    return cap.serializeNBT();
+                }
+
+                @Override
+                public void deserializeNBT(CompoundTag nbt)
+                {
+                    cap.deserializeNBT(nbt);
+                }
+            };
+
+            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "fur"), provider);
+        }
+    }
+
     @SubscribeEvent
     public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
     {
@@ -126,7 +167,7 @@ public class GoatFurHandler
         Entity entity = event.getEntity();
         if (!(entity instanceof Goat goat)) return;
 
-        Triplet<Integer, Integer, Double> furConfig = ConfigSettings.GOAT_FUR_TIMINGS.get();
+        Triplet<Integer, Integer, Double> furConfig = ConfigSettings.FUR_TIMINGS.get();
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
         if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
@@ -164,48 +205,6 @@ public class GoatFurHandler
                                                                     : PacketDistributor.TRACKING_ENTITY.with(() -> goat),
                                                      new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId()));
             });
-        }
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
-    {
-        if (event.getObject() instanceof Goat)
-        {
-            // Make a new capability instance to attach to the entity
-            IShearableCap cap = new GoatFurCap();
-            // Optional that holds the capability instance
-            LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
-            Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
-
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
-            {
-                @Nonnull
-                @Override
-                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
-                {
-                    // If the requested cap is the temperature cap, return the temperature cap
-                    if (cap == capability)
-                    {
-                        return capOptional.cast();
-                    }
-                    return LazyOptional.empty();
-                }
-
-                @Override
-                public CompoundTag serializeNBT()
-                {
-                    return cap.serializeNBT();
-                }
-
-                @Override
-                public void deserializeNBT(CompoundTag nbt)
-                {
-                    cap.deserializeNBT(nbt);
-                }
-            };
-
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "goat_fur"), provider);
         }
     }
 }

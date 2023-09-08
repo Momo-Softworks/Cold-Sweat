@@ -81,7 +81,7 @@ public class ConfigSettings
     public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     // Entity Settings
-    public static final ValueHolder<Triplet<Integer, Integer, Double>> GOAT_FUR_TIMINGS;
+    public static final ValueHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final ValueHolder<Map<ResourceLocation, Integer>> GOAT_BIOMES;
 
@@ -346,7 +346,7 @@ public class ConfigSettings
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
 
-        GOAT_FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
+        FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {
             List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
@@ -359,14 +359,14 @@ public class ConfigSettings
             tag.put("Chance", DoubleTag.valueOf(triplet.getC()));
             return tag;
         },
-        tag ->
+                                       tag ->
         {
             int interval = tag.getInt("Interval");
             int cooldown = tag.getInt("Cooldown");
             double chance = tag.getDouble("Chance");
             return new Triplet<>(interval, cooldown, chance);
         },
-        triplet ->
+                                       triplet ->
         {
             List<Number> list = new ArrayList<>();
             list.add(triplet.getA());
