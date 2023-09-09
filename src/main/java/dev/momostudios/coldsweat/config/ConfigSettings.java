@@ -141,15 +141,27 @@ public class ConfigSettings
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
-                                                            .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
+                                                            .map(entry ->
+                                                            {
+                                                                Temperature.Units units = entry.getValue().getThird();
+                                                                double min = CSMath.convertTemp(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                                double max = CSMath.convertTemp(entry.getValue().getSecond(), Temperature.Units.MC, units, true);
+                                                                return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                                            })
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
         encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeOffsets"),
         decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
-                                                           .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond(), entry.getValue().getThird()))
-                                                           .collect(Collectors.toList())));
+                                                            .map(entry ->
+                                                            {
+                                                                Temperature.Units units = entry.getValue().getThird();
+                                                                double min = CSMath.convertTemp(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                                double max = CSMath.convertTemp(entry.getValue().getSecond(), Temperature.Units.MC, units, true);
+                                                                return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                                            })
+                                                            .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
         encoder -> ConfigHelper.writeNBTDouble(encoder, "CaveInsulation"),
