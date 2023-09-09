@@ -20,38 +20,37 @@ public class MixinGoatModel<T extends GoatEntity>
     GoatModel<GoatEntity> self = (GoatModel<GoatEntity>)(Object)this;
 
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer left_back_leg;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer right_back_leg;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer right_front_leg;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer left_front_leg;
     @Final
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer body;
     private ModelRenderer body2;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer head;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer nose;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer right_horn;
     @Final
-    @Shadow
+    @Shadow(remap = false)
     private ModelRenderer left_horn;
 
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = ColdSweat.REMAP_MIXINS,
-    locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void createBodyLayer(CallbackInfo ci)
     {   body = new ModelRenderer(self);
         body.setPos(0.0F, 24.0F, 0.0F);
@@ -62,7 +61,7 @@ public class MixinGoatModel<T extends GoatEntity>
         body.addChild(body2);
     }
 
-    @Inject(method = "setRotationAngles", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
+    @Inject(method = "setRotationAngles", at = @At("TAIL"), remap = false)
     private void setRotationAngles(T goat, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci)
     {
         goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
