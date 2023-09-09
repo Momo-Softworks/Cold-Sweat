@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.capability;
 
 import net.minecraft.nbt.CompoundNBT;
 
-public class LlamaFurCap implements IShearableCap
+public class FurCap implements IShearableCap
 {
     boolean sheared = false;
     int lastSheared = 0;

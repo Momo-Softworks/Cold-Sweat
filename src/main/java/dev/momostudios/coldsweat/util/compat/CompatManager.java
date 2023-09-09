@@ -1,10 +1,12 @@
 package dev.momostudios.coldsweat.util.compat;
 
+import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModDamageSources;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -38,6 +40,7 @@ public class CompatManager
     private static final boolean WEATHER_LOADED = modLoaded("weather2");
     private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
     private static final boolean BETTER_WEATHER_LOADED = modLoaded("betterweather");
+    private static final boolean CAVES_AND_CLIFFS_LOADED = modLoaded("cavesandcliffs");
 
     private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -107,6 +110,9 @@ public class CompatManager
     public static boolean isBetterWeatherLoaded()
     {   return BETTER_WEATHER_LOADED;
     }
+    public static boolean isCavesAndCliffsLoaded()
+    {   return CAVES_AND_CLIFFS_LOADED;
+    }
 
     public static boolean hasOzzyLiner(ItemStack stack)
     {
@@ -137,6 +143,10 @@ public class CompatManager
         return WorldHelper.canSeeSky(world, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
             && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();*/
         return false;
+    }
+
+    public static boolean isGoat(Entity entity)
+    {   return isCavesAndCliffsLoaded() && entity instanceof GoatEntity;
     }
 
     @SubscribeEvent

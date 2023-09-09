@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.event.LlamaFurHandler;
+import dev.momostudios.coldsweat.common.event.FurHandler;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
@@ -54,7 +54,7 @@ public class MixinLlamaInteract
                 // Set sheared
                 cap.setSheared(true);
                 cap.setLastSheared(self.tickCount);
-                LlamaFurHandler.syncData((LlamaEntity) self, null);
+                FurHandler.syncData(self, null);
                 cir.setReturnValue(ActionResultType.FAIL);
                 cir.cancel();
             });
