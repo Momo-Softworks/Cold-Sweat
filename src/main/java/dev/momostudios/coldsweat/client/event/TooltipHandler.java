@@ -49,7 +49,8 @@ public class TooltipHandler
         {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true)));
         }
         // If the item is insulated armor
-        if (stack.getItem() instanceof Wearable && !Objects.equals(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), itemInsul))
+        Pair<Double, Double> armorInsul;
+        if (stack.getItem() instanceof Wearable && (!Objects.deepEquals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
             List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)

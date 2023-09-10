@@ -156,11 +156,9 @@ public class ItemInsulationCap implements IInsulatableCap
     @Override
     public CompoundTag serializeNBT()
     {
-        // For some reason Forge runs this every tick,
-        // so we store the last-saved tag and return it
+        // For some reason Forge runs this nearly 400 times a second, so we cache the tag
         if (saveCooldown > 0)
-        {
-            saveCooldown--;
+        {   saveCooldown--;
             return savedTag;
         }
 
