@@ -22,36 +22,25 @@ import java.util.function.Supplier;
 
 public class FeatureInit
 {
-    public static final DeferredRegister<Feature<?>> FEATURES;
+    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, ColdSweat.MOD_ID);
 
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> SOUL_STALK_FEATURE;
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> SOUL_STALK_FEATURE = FEATURES.register("soul_stalk", () -> new SoulStalkFeature(NoneFeatureConfiguration.CODEC));
 
-    static
-    {
-        FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, ColdSweat.MOD_ID);
-
-        SOUL_STALK_FEATURE = FEATURES.register("soul_stalk", () -> new SoulStalkFeature(NoneFeatureConfiguration.CODEC));
-    }
 
     public static final class PlacedFeatureInit
     {
-        private static RegistryObject<PlacedFeature> register(String name, RegistryObject<? extends ConfiguredFeature<?, ?>> feature, List<PlacementModifier> placementModifiers) {
-            return PLACED_FEATURES.register(name, () -> new PlacedFeature((Holder)feature.getHolder().get(), ImmutableList.copyOf(placementModifiers)));
-        }
 
-        public static final DeferredRegister<PlacedFeature> PLACED_FEATURES;
+        public static final DeferredRegister<PlacedFeature> PLACED_FEATURES = DeferredRegister.create(Registry.PLACED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
 
-        public static final RegistryObject<PlacedFeature> SOUL_STALK_PLACEMENT;
+        public static final RegistryObject<PlacedFeature> SOUL_STALK_PLACEMENT = register("soul_stalk_placement", ConfiguredFeatureInit.SOUL_STALK_CONFIGURATION, List.of(RarityFilter.onAverageOnceEvery(5),
+                                                                                                                                                                          InSquarePlacement.spread(), PlacementUtils.RANGE_10_10,
+                                                                                                                                                                          BiomeFilter.biome(), CountPlacement.of(2)));
 
-        static
-        {
-            PLACED_FEATURES = DeferredRegister.create(Registry.PLACED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
-
-            SOUL_STALK_PLACEMENT = register("soul_stalk_placement", ConfiguredFeatureInit.SOUL_STALK_CONFIGURATION, List.of(RarityFilter.onAverageOnceEvery(5),
-                                                                                                                                  InSquarePlacement.spread(), PlacementUtils.RANGE_10_10,
-                                                                                                                                  BiomeFilter.biome(), CountPlacement.of(2)));
+        private static RegistryObject<PlacedFeature> register(String name, RegistryObject<? extends ConfiguredFeature<?, ?>> feature, List<PlacementModifier> placementModifiers)
+        {   return PLACED_FEATURES.register(name, () -> new PlacedFeature((Holder)feature.getHolder().get(), ImmutableList.copyOf(placementModifiers)));
         }
     }
+
 
     public static final class ConfiguredFeatureInit
     {
@@ -59,16 +48,14 @@ public class FeatureInit
             return CONFIGURED_FEATURES.register(name, feature);
         }
 
-        public static final DeferredRegister<ConfiguredFeature<?, ?>> CONFIGURED_FEATURES;
+        public static final DeferredRegister<ConfiguredFeature<?, ?>> CONFIGURED_FEATURES = DeferredRegister.create(Registry.CONFIGURED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
 
-        public static final RegistryObject<ConfiguredFeature<RandomPatchConfiguration, ?>> SOUL_STALK_CONFIGURATION;
+        public static final RegistryObject<ConfiguredFeature<RandomPatchConfiguration, ?>> SOUL_STALK_CONFIGURATION = register("soul_stalk_configuration",
+                                                                                                                               () -> new ConfiguredFeature<>(Feature.RANDOM_PATCH,
+                                                                                                                                        new RandomPatchConfiguration(8, 10, 5,
+                                                                                                                                            PlacementUtils.filtered(FeatureInit.SOUL_STALK_FEATURE.get(),
+                                                                                                                                            NoneFeatureConfiguration.INSTANCE,
+                                                                                                                                            BlockPredicate.not(BlockPredicate.solid())))));
 
-        static
-        {
-            CONFIGURED_FEATURES = DeferredRegister.create(Registry.CONFIGURED_FEATURE_REGISTRY, ColdSweat.MOD_ID);
-
-            SOUL_STALK_CONFIGURATION = register("soul_stalk_configuration", () -> new ConfiguredFeature<>(Feature.RANDOM_PATCH,
-                                                new RandomPatchConfiguration(8, 10, 5, PlacementUtils.filtered(FeatureInit.SOUL_STALK_FEATURE.get(), NoneFeatureConfiguration.INSTANCE, BlockPredicate.not(BlockPredicate.solid())))));
-        }
     }
 }

@@ -43,7 +43,7 @@ public class SoulStalkFeature extends Feature<NoneFeatureConfiguration>
             }
         }
         // Place the soul stalk
-        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && isAirOrLeaves(level, pos) && isAirOrLeaves(level, pos.above()))
+        if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && level.getBlockState(pos.above()).isAir())
         {
             level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
             int height = new Random().nextInt(5) + 2;

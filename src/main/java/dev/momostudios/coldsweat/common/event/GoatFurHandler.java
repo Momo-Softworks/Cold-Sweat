@@ -1,7 +1,7 @@
 package dev.momostudios.coldsweat.common.event;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.GoatFurCap;
+import dev.momostudios.coldsweat.common.capability.EntityFurCap;
 import dev.momostudios.coldsweat.common.capability.IShearableCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
@@ -54,7 +54,7 @@ public class GoatFurHandler
         if (event.getObject() instanceof Goat)
         {
             // Make a new capability instance to attach to the entity
-            IShearableCap cap = new GoatFurCap();
+            IShearableCap cap = new EntityFurCap();
             // Optional that holds the capability instance
             LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
             Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;

@@ -1,8 +1,6 @@
 package dev.momostudios.coldsweat;
 
-import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
-import dev.momostudios.coldsweat.common.capability.IShearableCap;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
+import dev.momostudios.coldsweat.common.capability.*;
 import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.*;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -91,9 +89,10 @@ public class ColdSweat
 
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
-        event.register(ITemperatureCap.class);
-        event.register(IInsulatableCap.class);
-        event.register(IShearableCap.class);
+        event.register(PlayerTempCap.class);
+        event.register(EntityTempCap.class);
+        event.register(ItemInsulationCap.class);
+        event.register(EntityFurCap.class);
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)

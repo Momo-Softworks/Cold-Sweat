@@ -9,8 +9,8 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.AdaptiveInsulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
@@ -88,7 +87,7 @@ public class ArmorInsulation
                         }
 
                         // Used for tracking "fully_insulated" advancement
-                        if ((cold + hot) / 2 >= getInsulationSlots(armorStack))
+                        if ((cold + hot) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
                         {   fullyInsulated++;
                         }
 
@@ -134,32 +133,5 @@ public class ArmorInsulation
         if (source == DamageSource.HOT_FLOOR && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
         {   event.setCanceled(true);
         }
-    }
-
-    public static Pair<Double, Double> getItemInsulation(ItemStack item)
-    {
-        Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().get(item.getItem());
-        if (insulation != null)
-            return insulation;
-        else
-        {
-            insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
-            if (insulation != null)
-                return insulation;
-        }
-        return new Pair<>(0.0, 0.0);
-    }
-
-    public static int getInsulationSlots(ItemStack item)
-    {
-        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
-        return switch (LivingEntity.getEquipmentSlotForItem(item))
-        {
-            case HEAD  -> slots.get(0).intValue();
-            case CHEST -> slots.get(1).intValue();
-            case LEGS  -> slots.get(2).intValue();
-            case FEET  -> slots.get(3).intValue();
-            default -> 0;
-        };
     }
 }

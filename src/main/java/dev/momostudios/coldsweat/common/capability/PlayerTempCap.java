@@ -222,25 +222,20 @@ public class PlayerTempCap implements ITemperatureCap
     {
         // Copy temperature values
         for (Type type : VALID_TEMPERATURE_TYPES)
-        {
-            if (type == Type.BODY || type == Type.RATE) continue;
-            this.setTemp(type, cap.getTemp(type));
+        {   this.setTemp(type, cap.getTemp(type));
         }
 
         // Copy the modifiers
         for (Type type : VALID_MODIFIER_TYPES)
-        {
-            this.getModifiers(type).clear();
+        {   this.getModifiers(type).clear();
             this.getModifiers(type).addAll(cap.getModifiers(type));
         }
     }
 
     @Override
     public CompoundTag serializeNBT()
-    {
-        // Save the player's temperatures
+    {   // Save the player's temperatures
         CompoundTag nbt = this.serializeTemps();
-
         // Save the player's modifiers
         nbt.merge(this.serializeModifiers());
         return nbt;
@@ -253,8 +248,7 @@ public class PlayerTempCap implements ITemperatureCap
 
         // Save the player's temperature data
         for (Type type : VALID_TEMPERATURE_TYPES)
-        {
-            nbt.putDouble(NBTHelper.getTemperatureTag(type), this.getTemp(type));
+        {   nbt.putDouble(NBTHelper.getTemperatureTag(type), this.getTemp(type));
         }
         return nbt;
     }
@@ -272,7 +266,6 @@ public class PlayerTempCap implements ITemperatureCap
             {
                 modifiers.add(NBTHelper.modifierToTag(modifier));
             }
-
             // Write the list of modifiers to the player's persistent data
             nbt.put(NBTHelper.getModifierTag(type), modifiers);
         }
@@ -281,10 +274,8 @@ public class PlayerTempCap implements ITemperatureCap
 
     @Override
     public void deserializeNBT(CompoundTag nbt)
-    {
-        // Load the player's temperatures
+    {   // Load the player's temperatures
         deserializeTemps(nbt);
-
         // Load the player's modifiers
         deserializeModifiers(nbt);
     }

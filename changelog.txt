@@ -1629,3 +1629,13 @@ Fixes:
 - Fixed "Biome Temperatures/Offsets" config option being set to MC units when closing the config screen
 - Fixed some mods not working with Cold Sweat due to a bug with registering capabilities (1.16.5)
 - Fixed Cold Sweat item tooltips being rendered over other tooltips that are ordered before them (1.16.5)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05e
+- Renamed all instances of Llama/Goat Fur to just "Fur" for better parity between 1.16 and 1.18/19
+      ! Existing goat/llama fur items will be automatically converted, so no worries about items being deleted by the ID change
+
+Fixes:
+- (1.16) Fixed the soulspring lamp not accepting fuel
+- (1.16) Fixed biome temperatures sometimes being set to MC units in the config
