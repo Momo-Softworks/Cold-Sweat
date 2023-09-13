@@ -44,7 +44,6 @@ class MixinInventoryOpenClient
     @Inject(method = "handleKeybinds()V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/Tutorial;onOpenInventory()V"))
     private void onPlayerInvOpen(CallbackInfo ci)
-    {
-        player.sendOpenInventory();
+    {   player.sendOpenInventory();
     }
 }

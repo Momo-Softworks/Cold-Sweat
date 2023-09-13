@@ -7,15 +7,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public class HearthResetMessage
 {
     BlockPos blockPos;
-    public HearthResetMessage() {
-    }
 
     public HearthResetMessage(BlockPos blockPos) {
         this.blockPos = blockPos;

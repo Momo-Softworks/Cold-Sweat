@@ -3,8 +3,8 @@ package dev.momostudios.coldsweat.common.container;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.MenuInit;
@@ -26,7 +26,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.Wearable;
@@ -130,7 +129,7 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+                Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
@@ -154,7 +153,7 @@ public class SewingContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+                Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return insulation.getFirst() != 0 || insulation.getSecond() != 0 || stack.getItem() instanceof ShearsItem;
             }
             @Override
@@ -308,8 +307,7 @@ public class SewingContainer extends AbstractContainerMenu
                 wearableItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
                 {
                     if (cap.getInsulation().size() > 0)
-                    {
-                        this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
+                    {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
                 });
             }
@@ -339,9 +337,8 @@ public class SewingContainer extends AbstractContainerMenu
                         else negInsul.getAndIncrement();
                     }
                 });
-                if (posInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem))
-                {
-                    return;
+                if (posInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem) || negInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
+                {   return;
                 }
 
                 // Transfer enchantments
@@ -353,8 +350,7 @@ public class SewingContainer extends AbstractContainerMenu
                     if (ench == null) return false;
 
                     if (ench.canApplyAtEnchantingTable(wearableItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
-                    {
-                        processed.enchant(ench, enchantTag.getInt("lvl"));
+                    {   processed.enchant(ench, enchantTag.getInt("lvl"));
                         return true;
                     }
                     return false;

@@ -134,23 +134,20 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public ItemStack removeInsulationItem(ItemStack stack)
     {
-        Optional<Pair<ItemStack, List<InsulationPair>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().sameItem(stack)).findFirst();
+        Optional<Pair<ItemStack, List<InsulationPair>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
         if (toRemove.isPresent())
-        {
-            this.insulation.remove(toRemove.get());
+        {   this.insulation.remove(toRemove.get());
             this.calculateInsulation();
         }
         return stack;
     }
 
     public ItemStack getInsulationItem(int index)
-    {
-        return this.insulation.stream().map(Pair::getFirst).skip(index).findFirst().orElse(ItemStack.EMPTY);
+    {   return this.insulation.stream().map(Pair::getFirst).skip(index).findFirst().orElse(ItemStack.EMPTY);
     }
 
     public List<InsulationPair> getInsulationValues()
-    {
-        return this.insulation.stream().map(Pair::getSecond).flatMap(Collection::stream).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    {   return this.insulation.stream().map(Pair::getSecond).flatMap(Collection::stream).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
     @Override
@@ -197,10 +194,7 @@ public class ItemInsulationCap implements IInsulatableCap
         }
 
         CompoundTag tag = new CompoundTag();
-        if (!insulNBT.isEmpty())
-            tag.put("Insulation", insulNBT);
-        else
-            tag.remove("Insulation");
+        tag.put("Insulation", insulNBT);
 
         saveCooldown = 400;
         savedTag = tag;
@@ -213,37 +207,34 @@ public class ItemInsulationCap implements IInsulatableCap
         this.insulation.clear();
 
         // Load the insulation items
-        ListTag insulNBT = tag.getList("Insulation", 10);
+        ListTag insulList = tag.getList("Insulation", 10);
 
         // Iterate over insulation items
-        for (int i = 0; i < insulNBT.size(); i++)
+        for (int i = 0; i < insulList.size(); i++)
         {
-            CompoundTag entryNBT = insulNBT.getCompound(i);
-            ItemStack stack = ItemStack.of(entryNBT.getCompound("Item"));
+            CompoundTag insulNBT = insulList.getCompound(i);
+            ItemStack insulItem = ItemStack.of(insulNBT.getCompound("Item"));
             List<InsulationPair> pairList = new ArrayList<>();
-            ListTag pairListNBT = entryNBT.getList("Values", 10);
+            ListTag pairListNBT = insulNBT.getList("Values", 10);
 
             // Iterate over insulation values for the item
             for (int j = 0; j < pairListNBT.size(); j++)
             {
                 CompoundTag pairTag = pairListNBT.getCompound(j);
                 if (pairTag.contains("Cold"))
-                {
-                    double cold = pairTag.getDouble("Cold");
+                {   double cold = pairTag.getDouble("Cold");
                     double hot = pairTag.getDouble("Hot");
                     pairList.add(new Insulation(cold, hot));
                 }
                 else if (pairTag.contains("Amount"))
-                {
-                    double insul = pairTag.getDouble("Amount");
+                {   double insul = pairTag.getDouble("Amount");
                     double factor = pairTag.getDouble("Factor");
                     double speed = pairTag.getDouble("Speed");
                     pairList.add(new AdaptiveInsulation(insul, factor, speed));
                 }
             }
-
             // Add the item to the map
-            this.insulation.add(Pair.of(stack, pairList));
+            insulation.add(Pair.of(insulItem, pairList));
         }
         this.calculateInsulation();
     }
@@ -272,17 +263,14 @@ public class ItemInsulationCap implements IInsulatableCap
                 insulTag.add(compound);
             }
         }
-        if (!insulTag.isEmpty())
-            tag.put("Insulation", insulTag);
-        else
-            tag.remove("Insulation");
+        tag.put("SimpleInsulation", insulTag);
 
         return tag;
     }
 
     public List<InsulationPair> deserializeSimple(ItemStack stack)
     {
-        List<InsulationPair> pairs = stack.getOrCreateTag().getList("Insulation", 10).stream()
+        List<InsulationPair> pairs = stack.getOrCreateTag().getList("SimpleInsulation", 10).stream()
         .map(nbt ->
         {
             CompoundTag compound = (CompoundTag) nbt;
@@ -300,32 +288,33 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public static List<InsulationPair> sortInsulationList(List<InsulationPair> pairs)
     {
-        pairs.sort(Comparator.comparingDouble(pair ->
+        List<InsulationPair> newPairs = new ArrayList<>(pairs);
+        newPairs.sort(Comparator.comparingDouble(pair ->
         {
             if (pair instanceof AdaptiveInsulation insul)
                 return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
             else if (pair instanceof Insulation insul)
             {
-                double abscold = Math.abs(insul.cold);
-                double abshot = Math.abs(insul.hot);
-                if (abscold >= 2 && abshot >= 2)
+                double absCold = Math.abs(insul.cold);
+                double absHot = Math.abs(insul.hot);
+                if (absCold >= 2 && absHot >= 2)
                     return 2;
-                else if (abscold >= 2)
+                else if (absCold >= 2)
                     return 0;
-                else if (abshot >= 2)
+                else if (absHot >= 2)
                     return 4;
-                else if (abscold >= 1 && abshot >= 1)
+                else if (absCold >= 1 && absHot >= 1)
                     return 3;
-                else if (abscold >= 1)
+                else if (absCold >= 1)
                     return 1;
-                else if (abshot >= 1)
+                else if (absHot >= 1)
                     return 5;
                 else
                     return 1;
             }
             return 0;
         }));
-        return pairs;
+        return newPairs;
     }
 
     public static abstract class InsulationPair
@@ -399,8 +388,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
         @Override
         public String toString()
-        {
-            return "AdaptiveInsulation{" + "insulation=" + insulation + ", factor=" + factor + ", speed=" + speed + '}';
+        {   return "AdaptiveInsulation{" + "insulation=" + insulation + ", factor=" + factor + ", speed=" + speed + '}';
         }
     }
 }
