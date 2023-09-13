@@ -5,9 +5,11 @@ import dev.momostudios.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -36,5 +38,13 @@ public class ClientOnlyHelper
 
     public static void openConfigScreen()
     {   Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen));
+    }
+
+    public static Player getClientPlayer()
+    {   return Minecraft.getInstance().player;
+    }
+
+    public static void sendPacketToServer(ServerboundSetCreativeModeSlotPacket packet)
+    {   Minecraft.getInstance().getConnection().send(packet);
     }
 }
