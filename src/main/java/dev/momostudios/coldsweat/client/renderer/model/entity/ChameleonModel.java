@@ -268,7 +268,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 			leftEye.zRot = entity.xRotLeftEye;
 
 			// Move the body down to the ground
-			body.y = 23.5f;
+			body.y = 23.25f;
 
 			AnimationManager.saveAnimationStates(entity, modelParts);
 
@@ -310,7 +310,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 					float walkSpeed = Math.min(0.15f, (float) new Vector3d((float) entity.getDeltaMovement().x, 0, (float) entity.getDeltaMovement().z).length());
 					animTime += (frameTime * walkSpeed * 30);
 
-					ChameleonAnimations.WALK.animateAll(animatedParts, animTime, false);
+					ChameleonAnimations.WALK.animateAll(animatedParts, animTime, true);
 					if (!chameleon.isTracking())
 					{
 						ChameleonAnimations.WALK.animate("Tail",  tail1,  animTime, true);
@@ -323,6 +323,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				{
 					animTime += frameTime;
 					ChameleonAnimations.IDLE.animateAll(animatedParts, animTime, false);
+					body.y = 23.75f;
 
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())
@@ -460,8 +461,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 			head.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 		}
 		else
-		{	body.y = 23.5f;
-			head.y = -5f;
+		{	head.y = -5f;
 			head.z = -3f;
 			body.render(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 		}
