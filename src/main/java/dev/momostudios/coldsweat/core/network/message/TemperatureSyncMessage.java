@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.core.network.message;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -51,7 +52,7 @@ public class TemperatureSyncMessage
 
                 if (entity != null)
                 {
-                    Temperature.getTemperatureCap(entity).ifPresent(cap ->
+                    EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                     {
                         cap.deserializeTemps(message.temps);
                         if (message.instant && cap instanceof PlayerTempCap)

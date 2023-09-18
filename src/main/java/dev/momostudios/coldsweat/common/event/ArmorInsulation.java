@@ -62,7 +62,7 @@ public class ArmorInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        LazyOptional<IInsulatableCap> iCap = armorStack.getCapability(ModCapabilities.ITEM_INSULATION);
+                        LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
                         List<InsulationPair> insulation = iCap.map(cap ->
                         {
                             if (cap instanceof ItemInsulationCap cap1)

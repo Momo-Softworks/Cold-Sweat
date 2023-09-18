@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.common.capability;
 
 import net.minecraft.nbt.CompoundTag;
 
-public class EntityFurCap implements IShearableCap
+public class ShearableFurCap implements IShearableCap
 {
     boolean sheared = false;
     int lastSheared = 0;

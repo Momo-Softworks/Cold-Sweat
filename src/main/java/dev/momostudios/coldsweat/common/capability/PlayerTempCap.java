@@ -18,7 +18,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import top.theillusivec4.curios.api.CuriosApi;
-import static dev.momostudios.coldsweat.common.event.EntityTempHandler.*;
+import static dev.momostudios.coldsweat.common.capability.EntityTempManager.*;
 
 import java.util.*;
 
@@ -95,14 +95,21 @@ public class PlayerTempCap implements ITemperatureCap
         getModifiers(type).clear();
     }
 
+    // See Temperature.class for more temperature-related methods
+
+    /**
+     * Used for clientside ticking of TempModifiers. The result is not used.
+     */
     @Override
     public void tickDummy(LivingEntity entity)
     {
         if (!(entity instanceof Player player)) return;
 
-        for (Type type : VALID_MODIFIER_TYPES)
-        {   Temperature.apply(0, player, type, getModifiers(type));
-        }
+        Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
+        Temperature.apply(getTemp(Type.CORE), player, Type.CORE, getModifiers(Type.CORE));
+        Temperature.apply(0, player, Type.BASE, getModifiers(Type.BASE));
+        Temperature.apply(0, player, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        Temperature.apply(0, player, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
 
         if (player.tickCount % 20 == 0)
         {   calculateVisibility(player);

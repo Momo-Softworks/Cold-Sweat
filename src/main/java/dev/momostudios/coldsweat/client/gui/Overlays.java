@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -219,7 +219,7 @@ public class Overlays
             Player player = Minecraft.getInstance().player;
             if (event.phase == TickEvent.Phase.START && player != null)
             {
-                player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(icap ->
+                EntityTempManager.getTemperatureCap(player).ifPresent(icap ->
                 {
                     if (!(icap instanceof PlayerTempCap cap)) return;
 

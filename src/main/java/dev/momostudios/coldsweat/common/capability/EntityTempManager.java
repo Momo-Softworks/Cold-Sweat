@@ -1,4 +1,4 @@
-package dev.momostudios.coldsweat.common.event;
+package dev.momostudios.coldsweat.common.capability;
 
 import com.google.common.collect.ImmutableSet;
 import dev.momostudios.coldsweat.ColdSweat;
@@ -9,14 +9,11 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition.Mode;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition.Order;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition;
-import dev.momostudios.coldsweat.common.capability.EntityTempCap;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.common.entity.Chameleon;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
@@ -58,17 +55,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
-public class EntityTempHandler
+public class EntityTempManager
 {
     public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     private static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
+
+    public static final Map<LivingEntity, LazyOptional<ITemperatureCap>> ENTITY_TEMPERATURE_CAPS = new HashMap<>();
 
     /**
      * Attach temperature capability to entities
@@ -125,6 +122,15 @@ public class EntityTempHandler
         }
     }
 
+    public static LazyOptional<ITemperatureCap> getTemperatureCap(LivingEntity entity)
+    {
+        return ENTITY_TEMPERATURE_CAPS.computeIfAbsent(entity, e ->
+        {   LazyOptional<ITemperatureCap> cap = e.getCapability(EntityHelper.getTemperatureCap(entity));
+            cap.addListener((opt) -> ENTITY_TEMPERATURE_CAPS.remove(e));
+            return cap;
+        });
+    }
+
     /**
      * Tick TempModifiers & update temperature for living entities
      */
@@ -134,7 +140,7 @@ public class EntityTempHandler
         LivingEntity entity = event.getEntity();
         if (!(entity instanceof Player || TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType()))) return;
 
-        Temperature.getTemperatureCap(entity).ifPresent(cap ->
+        getTemperatureCap(entity).ifPresent(cap ->
         {
             if (!entity.level.isClientSide)
             {   // Tick modifiers serverside
@@ -174,9 +180,9 @@ public class EntityTempHandler
             oldPlayer.reviveCaps();
 
             // Copy the capability to the new player
-            event.getEntity().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+            getTemperatureCap(event.getEntity()).ifPresent(cap ->
             {
-               oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
+                getTemperatureCap(oldPlayer).ifPresent(cap::copy);
             });
 
             oldPlayer.invalidateCaps();
@@ -362,7 +368,7 @@ public class EntityTempHandler
                 if (player.isSleeping())
                 {
                     // Divide the player's current temperature by 4
-                    player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                    getTemperatureCap(player).ifPresent(cap ->
                     {
                         double temp = cap.getTemp(Temperature.Type.CORE);
                         cap.setTemp(Temperature.Type.CORE, temp / 4f);
