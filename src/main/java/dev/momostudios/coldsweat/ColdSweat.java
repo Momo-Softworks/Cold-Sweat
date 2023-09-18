@@ -98,7 +98,7 @@ public class ColdSweat
         event.register(PlayerTempCap.class);
         event.register(EntityTempCap.class);
         event.register(ItemInsulationCap.class);
-        event.register(EntityFurCap.class);
+        event.register(ShearableFurCap.class);
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)

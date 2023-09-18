@@ -1,9 +1,6 @@
-package dev.momostudios.coldsweat.common.event;
+package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.EntityFurCap;
-import dev.momostudios.coldsweat.common.capability.IShearableCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.SyncShearableDataMessage;
@@ -21,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -44,17 +42,21 @@ import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
-public class GoatFurHandler
+public class ShearableFurManager
 {
+    public static Map<LivingEntity, LazyOptional<IShearableCap>> ENTITY_FUR_CAPS = new HashMap<>();
+
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
         if (event.getObject() instanceof Goat)
         {
             // Make a new capability instance to attach to the entity
-            IShearableCap cap = new EntityFurCap();
+            IShearableCap cap = new ShearableFurCap();
             // Optional that holds the capability instance
             LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
             Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
@@ -67,8 +69,7 @@ public class GoatFurHandler
                 {
                     // If the requested cap is the temperature cap, return the temperature cap
                     if (cap == capability)
-                    {
-                        return capOptional.cast();
+                    {   return capOptional.cast();
                     }
                     return LazyOptional.empty();
                 }
@@ -90,6 +91,15 @@ public class GoatFurHandler
         }
     }
 
+    public static LazyOptional<IShearableCap> getFurCap(LivingEntity entity)
+    {
+        return ENTITY_FUR_CAPS.computeIfAbsent(entity, e ->
+        {   LazyOptional<IShearableCap> cap = e.getCapability(ModCapabilities.SHEARABLE_FUR);
+            cap.addListener((opt) -> ENTITY_FUR_CAPS.remove(e));
+            return cap;
+        });
+    }
+
     @SubscribeEvent
     public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
     {
@@ -99,7 +109,7 @@ public class GoatFurHandler
 
         if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
         {
-            goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            getFurCap(goat).ifPresent(cap ->
             {
                 if (cap.isSheared())
                 {   event.setResult(PlayerInteractEvent.Result.DENY);
@@ -171,7 +181,7 @@ public class GoatFurHandler
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
         if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
-            goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            getFurCap(goat).ifPresent(cap ->
             {
                 // Growth cooldown has passed and goat is sheared
                 if (goat.tickCount - cap.lastSheared() >= furConfig.getB() && cap.isSheared())
@@ -200,7 +210,7 @@ public class GoatFurHandler
     public static void syncData(Goat goat, ServerPlayer player)
     {
         if (!goat.level.isClientSide)
-        {   goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+        {   getFurCap(goat).ifPresent(cap ->
             {   ColdSweatPacketHandler.INSTANCE.send(player != null ? PacketDistributor.PLAYER.with(() -> player)
                                                                     : PacketDistributor.TRACKING_ENTITY.with(() -> goat),
                                                      new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), goat.getId()));

@@ -4,7 +4,7 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
 import dev.momostudios.coldsweat.client.gui.config.AbstractConfigPage;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -14,8 +14,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.function.Supplier;
 
 public class ConfigPageOne extends AbstractConfigPage
 {
@@ -76,7 +74,7 @@ public class ConfigPageOne extends AbstractConfigPage
             clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.WORLD_TEMP = CSMath.convertTemp(player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
+                Overlays.WORLD_TEMP = CSMath.convertTemp(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
             properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 

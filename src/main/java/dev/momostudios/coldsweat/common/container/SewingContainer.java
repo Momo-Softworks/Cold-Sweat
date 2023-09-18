@@ -243,7 +243,7 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
-        input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+        ItemInsulationManager.getInsulationCap(input1).ifPresent(cap ->
         {
             // If insulation is being removed
             if (this.getItem(1).getItem() instanceof ShearsItem)
@@ -304,7 +304,7 @@ public class SewingContainer extends AbstractContainerMenu
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                wearableItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+                ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
                 {
                     if (cap.getInsulation().size() > 0)
                     {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
@@ -317,7 +317,7 @@ public class SewingContainer extends AbstractContainerMenu
             || LivingEntity.getEquipmentSlotForItem(wearableItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = wearableItem.copy();
-                IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
+                IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(processed).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);

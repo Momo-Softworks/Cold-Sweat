@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ItemInit;
@@ -51,7 +52,7 @@ public class RegisterItemOverrides
                     || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
                         worldTemp = entity instanceof LivingEntity living
-                                ? Temperature.getTemperatureCap(living).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
+                                ? EntityTempManager.getTemperatureCap(living).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
                                 : Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);

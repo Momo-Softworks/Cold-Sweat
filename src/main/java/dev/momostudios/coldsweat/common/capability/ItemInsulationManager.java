@@ -7,7 +7,6 @@ import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -22,15 +21,18 @@ import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
+    public static Map<ItemStack, LazyOptional<IInsulatableCap>> ITEM_INSULATION_CAPS = new HashMap<>();
+
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
@@ -74,8 +76,7 @@ public class ItemInsulationManager
             CompoundTag stackNBT = stack.getOrCreateTag();
             if (stackNBT.getBoolean("insulated"))
             {
-                LazyOptional<IInsulatableCap> gottenCap = event.getObject().getCapability(ModCapabilities.ITEM_INSULATION);
-                gottenCap.ifPresent(iCap ->
+                getInsulationCap(event.getObject()).ifPresent(iCap ->
                 {
                     EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getSlot() : null;
                     if (slot != null)
@@ -98,6 +99,15 @@ public class ItemInsulationManager
         }
     }
 
+    public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
+    {
+        return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s ->
+        {   LazyOptional<IInsulatableCap> cap = stack.getCapability(ModCapabilities.ITEM_INSULATION);
+            cap.addListener(c -> ITEM_INSULATION_CAPS.remove(stack));
+            return cap;
+        });
+    }
+
     @SubscribeEvent
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {
@@ -112,14 +122,18 @@ public class ItemInsulationManager
         if (event.phase == TickEvent.Phase.END && player.tickCount % 20 == 0
         && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
-            player.getArmorSlots().forEach(stack ->
+            player.getAllSlots().forEach(stack ->
             {
-                stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
+                if (isInsulatable(stack))
                 {
-                    if (iCap instanceof ItemInsulationCap cap)
-                    {   cap.serializeSimple(stack);
-                    }
-                });
+                    // Cache the item cap
+                    getInsulationCap(stack).ifPresent(iCap ->
+                    {
+                        if (iCap instanceof ItemInsulationCap cap)
+                        {   cap.serializeSimple(stack);
+                        }
+                    });
+                }
             });
         }
     }

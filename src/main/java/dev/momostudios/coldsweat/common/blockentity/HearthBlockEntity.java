@@ -9,7 +9,7 @@ import dev.momostudios.coldsweat.api.temperature.modifier.HearthTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.common.block.HearthBottomBlock;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.container.HearthContainer;
 import dev.momostudios.coldsweat.common.event.HearthSaveDataHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
@@ -537,7 +537,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                                    effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
         // Apply the insulation effect
-        player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
             double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
             double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);

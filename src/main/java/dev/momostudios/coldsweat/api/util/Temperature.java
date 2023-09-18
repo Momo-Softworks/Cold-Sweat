@@ -7,13 +7,13 @@ import dev.momostudios.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.BlockTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.UndergroundTempModifier;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.TempModifiersSyncMessage;
 import dev.momostudios.coldsweat.core.network.message.TemperatureSyncMessage;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
-import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.math.InterruptableStreamer;
 import dev.momostudios.coldsweat.util.serialization.ListBuilder;
@@ -26,7 +26,6 @@ import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,17 +49,17 @@ public class Temperature
      */
     public static double get(LivingEntity entity, Type type)
     {
-        return getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
+        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
     }
 
     public static void set(LivingEntity entity, Type type, double value)
     {
-        getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
+        EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
     }
 
     public static void add(LivingEntity entity, double value, Type type)
     {
-        getTemperatureCap(entity).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             cap.setTemp(type, value + cap.getTemp(type));
         });
@@ -114,7 +113,7 @@ public class Temperature
      */
     public static boolean hasModifier(LivingEntity entity, Type type, Class<? extends TempModifier> modClass)
     {
-        return getTemperatureCap(entity).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
+        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
     }
 
     /**
@@ -122,7 +121,7 @@ public class Temperature
      */
     public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Type type, Class<T> modClass)
     {
-        return getModifier(getTemperatureCap(entity).orElse(new PlayerTempCap()), type, modClass);
+        return getModifier(EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()), type, modClass);
     }
 
     public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Type type, Class<T> modClass)
@@ -136,7 +135,7 @@ public class Temperature
     @Nullable
     public static TempModifier getModifier(LivingEntity entity, Type type, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(type))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(type))
         {
             if (condition.test(modifier))
             {
@@ -190,7 +189,7 @@ public class Temperature
             TempModifier newModifier = event.getModifier();
             if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
             {
-                getTemperatureCap(entity).ifPresent(cap ->
+                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
                     List<TempModifier> modifiers = cap.getModifiers(event.type);
                     boolean changed = false;
@@ -250,7 +249,7 @@ public class Temperature
 
     public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Type type, boolean duplicates)
     {
-        getTemperatureCap(entity).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             List<TempModifier> list = cap.getModifiers(type);
             for (TempModifier modifier : modifiers)
@@ -273,7 +272,7 @@ public class Temperature
     {
         AtomicInteger removed = new AtomicInteger(0);
 
-        getTemperatureCap(entity).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             cap.getModifiers(type).removeIf(modifier ->
             {
@@ -313,7 +312,7 @@ public class Temperature
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Type type)
     {
-        return getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(List.of());
+        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(List.of());
     }
 
     /**
@@ -323,7 +322,7 @@ public class Temperature
      */
     public static void forEachModifier(LivingEntity entity, Type type, Consumer<TempModifier> action)
     {
-        getTemperatureCap(entity).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             if (cap.getModifiers(type) != null)
             {
@@ -334,18 +333,13 @@ public class Temperature
 
     public static void forEachModifier(LivingEntity entity, Type type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
-        getTemperatureCap(entity).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             if (cap.getModifiers(type) != null)
             {
                 CSMath.breakableForEach(cap.getModifiers(type), action);
             }
         });
-    }
-
-    public static LazyOptional<ITemperatureCap> getTemperatureCap(LivingEntity entity)
-    {
-        return entity.getCapability(EntityHelper.getTemperatureCap(entity));
     }
 
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
@@ -375,7 +369,7 @@ public class Temperature
     }
 
     public static Map<Type, Double> getTemperatures(LivingEntity entity)
-    {   return getTemperatureCap(entity).map(ITemperatureCap::getTemperatures).orElse(new EnumMap<>(Type.class));
+    {   return EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getTemperatures).orElse(new EnumMap<>(Type.class));
     }
 
     /**
