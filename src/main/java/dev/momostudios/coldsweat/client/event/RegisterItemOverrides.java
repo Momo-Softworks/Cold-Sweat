@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.client.event;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.Overlays;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.init.ItemInit;
@@ -50,10 +51,9 @@ public class RegisterItemOverrides
                     if (!entity.getPersistentData().contains("WorldTempTimestamp")
                     || (entity.tickCount % 20 == 0 || (entity instanceof PlayerEntity && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
-                        if (entity instanceof LivingEntity)
-                        {   worldTemp = Temperature.getTemperatureCap(((LivingEntity) entity)).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0);
-                        }
-                        else worldTemp = Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
+                        worldTemp = entity instanceof LivingEntity
+                                ? EntityTempManager.getTemperatureCap(((LivingEntity) entity)).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
+                                : Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);
                         entity.getPersistentData().putInt("WorldTempTimestamp", entity.tickCount);
@@ -69,12 +69,12 @@ public class RegisterItemOverrides
                             String tempColor;
                             switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
-                                case 0 : tempColor = "§f";
-                                case 2 : case 3 : tempColor = "§6";
-                                case 4 : tempColor = "§c";
-                                case -2 : case -3 : tempColor = "§b";
-                                case -4 : tempColor = "§9";
-                                default : tempColor = "§r";
+                                case 0 : tempColor = "§f"; break;
+                                case 2 : case 3 : tempColor = "§6"; break;
+                                case 4 : tempColor = "§c"; break;
+                                case -2 : case -3 : tempColor = "§b"; break;
+                                case -4 : tempColor = "§9"; break;
+                                default : tempColor = "§r"; break;
                             };
                             int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
                             frame.getItem().setHoverName(new StringTextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));

@@ -1,8 +1,12 @@
 package dev.momostudios.coldsweat.common.capability;
 
+import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import net.minecraft.enchantment.IArmorVanishable;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
@@ -25,14 +29,20 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
+    public static Map<ItemStack, LazyOptional<IInsulatableCap>> ITEM_INSULATION_CAPS = new HashMap<>();
+
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
-        Item item = event.getObject().getItem();
+        ItemStack stack = event.getObject();
+        Item item = stack.getItem();
         if (item instanceof IArmorVanishable
         && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item)
         && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item))
@@ -51,33 +61,30 @@ public class ItemInsulationManager
                 {
                     // If the requested cap is the insulation cap, return the insulation cap
                     if (cap == capability)
-                    {
-                        return capOptional.cast();
+                    {   return capOptional.cast();
                     }
                     return LazyOptional.empty();
                 }
 
                 @Override
                 public CompoundNBT serializeNBT()
-                {
-                    return itemInsulationCap.serializeNBT();
+                {   return itemInsulationCap.serializeNBT();
                 }
 
                 @Override
                 public void deserializeNBT(CompoundNBT nbt)
-                {
-                    itemInsulationCap.deserializeNBT(nbt);
+                {   itemInsulationCap.deserializeNBT(nbt);
                 }
             };
 
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
 
-            capOptional.ifPresent(iCap ->
+            // Legacy code for updating items using the pre-2.2 insulation system
+            CompoundNBT stackNBT = stack.getOrCreateTag();
+            if (stackNBT.getBoolean("insulated"))
             {
-                ItemStack stack = event.getObject();
-                CompoundNBT stackNBT = stack.getOrCreateTag();
-                if (stackNBT.getBoolean("insulated"))
+                getInsulationCap(event.getObject()).ifPresent(iCap ->
                 {
                     EquipmentSlotType slot = stack.getItem() instanceof ArmorItem ? ((ArmorItem) stack.getItem()).getSlot() : null;
                     if (slot != null)
@@ -94,9 +101,18 @@ public class ItemInsulationManager
                         {   ((ItemInsulationCap) iCap).serializeSimple(stack);
                         }
                     }
-                }
-            });
+                });
+            }
         }
+    }
+
+    public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
+    {
+        return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s ->
+        {   LazyOptional<IInsulatableCap> cap = stack.getCapability(ModCapabilities.ITEM_INSULATION);
+            cap.addListener(c -> ITEM_INSULATION_CAPS.remove(stack));
+            return cap;
+        });
     }
 
     @SubscribeEvent
@@ -113,15 +129,55 @@ public class ItemInsulationManager
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 20 == 0
         && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
-            player.getArmorSlots().forEach(stack ->
+            player.getAllSlots().forEach(stack ->
             {
-                stack.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(iCap ->
+                if (isInsulatable(stack))
                 {
-                    if (iCap instanceof ItemInsulationCap)
-                    {   ((ItemInsulationCap) iCap).serializeSimple(stack);
-                    }
-                });
+                    // Cache the item cap
+                    getInsulationCap(stack).ifPresent(iCap ->
+                    {
+                        if (iCap instanceof ItemInsulationCap)
+                        {   ((ItemInsulationCap) iCap).serializeSimple(stack);
+                        }
+                    });
+                }
             });
         }
+    }
+
+    public static Pair<Double, Double> getItemInsulation(ItemStack item)
+    {
+        Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().get(item.getItem());
+        if (insulation != null)
+            return insulation;
+        else
+        {
+            insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
+            if (insulation != null)
+                return insulation;
+        }
+        return new Pair<>(0.0, 0.0);
+    }
+
+    public static int getInsulationSlots(ItemStack item)
+    {
+        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
+        EquipmentSlotType slot = MobEntity.getEquipmentSlotForItem(item);
+
+        switch (slot)
+        {   case HEAD  : return slots.get(0).intValue();
+            case CHEST : return slots.get(1).intValue();
+            case LEGS  : return slots.get(2).intValue();
+            case FEET  : return slots.get(3).intValue();
+            default : return 0;
+        }
+    }
+
+    public static boolean isInsulatable(ItemStack stack)
+    {
+        Item item = stack.getItem();
+        return item instanceof IArmorVanishable
+            && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item)
+            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item);
     }
 }

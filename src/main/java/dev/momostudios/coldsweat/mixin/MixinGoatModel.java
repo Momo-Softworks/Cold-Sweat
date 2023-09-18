@@ -2,8 +2,7 @@ package dev.momostudios.coldsweat.mixin;
 
 import com.blackgear.cavesandcliffs.client.renderer.entity.model.GoatModel;
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
-import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ShearableFurManager;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GoatModel.class)
 public class MixinGoatModel<T extends GoatEntity>
@@ -64,7 +62,7 @@ public class MixinGoatModel<T extends GoatEntity>
     @Inject(method = "setRotationAngles", at = @At("TAIL"), remap = false)
     private void setRotationAngles(T goat, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci)
     {
-        goat.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+        ShearableFurManager.getFurCap(goat).ifPresent(cap ->
         {   body2.visible = !cap.isSheared();
         });
     }

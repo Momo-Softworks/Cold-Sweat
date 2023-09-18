@@ -1,7 +1,8 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -44,11 +45,11 @@ public class TempModifiersSyncMessage
         if (context.getDirection().getReceptionSide().isClient())
         context.enqueueWork(() ->
         {
-            LivingEntity entity = (LivingEntity) Minecraft.getInstance().level.getEntity(message.entityId);
+            Entity entity = Minecraft.getInstance().level.getEntity(message.entityId);
 
-            if (entity != null)
+            if (entity instanceof LivingEntity)
             {
-                entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                EntityTempManager.getTemperatureCap(((LivingEntity) entity)).ifPresent(cap ->
                 {   cap.deserializeModifiers(message.modifiers);
                 });
             }

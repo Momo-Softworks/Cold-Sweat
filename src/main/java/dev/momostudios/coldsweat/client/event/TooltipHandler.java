@@ -5,6 +5,7 @@ import dev.momostudios.coldsweat.client.gui.tooltip.*;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -88,7 +89,7 @@ public class TooltipHandler
         if (stack.getItem() instanceof IArmorVanishable && (!Objects.deepEquals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
-            List<InsulationPair> insulation = stack.getCapability(ModCapabilities.ITEM_INSULATION)
+            List<InsulationPair> insulation = ItemInsulationManager.getInsulationCap(stack)
             .map(c ->
             {
                 if (c instanceof ItemInsulationCap)

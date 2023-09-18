@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -12,15 +12,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.IngameGui;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -231,7 +227,7 @@ public class Overlays
         PlayerEntity player = Minecraft.getInstance().player;
         if (event.phase == TickEvent.Phase.START && player != null)
         {
-            player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(icap ->
+            EntityTempManager.getTemperatureCap(player).ifPresent(icap ->
             {
                 if (!(icap instanceof PlayerTempCap)) return;
                 PlayerTempCap cap = (PlayerTempCap) icap;

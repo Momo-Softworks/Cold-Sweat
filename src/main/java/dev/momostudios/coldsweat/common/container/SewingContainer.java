@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.common.container;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
 import dev.momostudios.coldsweat.common.event.ArmorInsulation;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
@@ -110,7 +110,7 @@ public class SewingContainer extends Container
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+            {   Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return stack.getItem() instanceof IArmorVanishable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
@@ -134,7 +134,7 @@ public class SewingContainer extends Container
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   Pair<Double, Double> insulation = ArmorInsulation.getItemInsulation(stack);
+            {   Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return insulation.getFirst() != 0 || insulation.getSecond() != 0 || stack.getItem() instanceof ShearsItem;
             }
 
@@ -227,7 +227,7 @@ public class SewingContainer extends Container
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
-        input1.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+        ItemInsulationManager.getInsulationCap(input1).ifPresent(cap ->
         {
             // If insulation is being removed
             if (this.getItem(1).getItem() instanceof ShearsItem)
@@ -293,7 +293,7 @@ public class SewingContainer extends Container
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                wearableItem.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(cap ->
+                ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
                 {
                     if (cap.getInsulation().size() > 0)
                     {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
@@ -306,7 +306,7 @@ public class SewingContainer extends Container
             || MobEntity.getEquipmentSlotForItem(wearableItem) == MobEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = wearableItem.copy();
-                IInsulatableCap insulCap = processed.getCapability(ModCapabilities.ITEM_INSULATION).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
+                IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(processed).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);
@@ -328,7 +328,7 @@ public class SewingContainer extends Container
                         else negInsul.getAndIncrement();
                     }
                 });
-                if (posInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem) || negInsul.get() > ArmorInsulation.getInsulationSlots(wearableItem))
+                if (posInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem) || negInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
                 {   return;
                 }
 

@@ -3,11 +3,9 @@ package dev.momostudios.coldsweat.common.command.impl;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.momostudios.coldsweat.api.event.common.EnableTemperatureEvent;
 import dev.momostudios.coldsweat.api.temperature.modifier.TempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.common.command.BaseCommand;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.command.CommandSource;
@@ -18,7 +16,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -80,7 +77,7 @@ public class TempCommand extends BaseCommand
 
     private int executeSetPlayerTemp(CommandSource source, Collection<? extends Entity> entities, int temp)
     {
-        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
+        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()))))
         {
             source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return 0;
@@ -103,7 +100,7 @@ public class TempCommand extends BaseCommand
 
     private int executeGetPlayerTemp(CommandSource source, Collection<? extends Entity> entities)
     {
-        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))))
+        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()))))
         {
             source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return 0;
@@ -119,7 +116,7 @@ public class TempCommand extends BaseCommand
 
     private int executeShowModifiers(CommandSource source, Entity entity, Temperature.Type type)
     {
-        if (!(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType())))
+        if (!(entity instanceof PlayerEntity || EntityTempManager.getEntitiesWithTemperature().contains(entity.getType())))
         {
             source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return Command.SINGLE_SUCCESS;

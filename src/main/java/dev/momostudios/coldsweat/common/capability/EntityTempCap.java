@@ -15,20 +15,22 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
-import static dev.momostudios.coldsweat.common.event.EntityTempHandler.VALID_MODIFIER_TYPES;
-import static dev.momostudios.coldsweat.common.event.EntityTempHandler.VALID_TEMPERATURE_TYPES;
+import static dev.momostudios.coldsweat.common.capability.EntityTempManager.VALID_MODIFIER_TYPES;
+import static dev.momostudios.coldsweat.common.capability.EntityTempManager.VALID_TEMPERATURE_TYPES;
 
 /**
- * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
+ * Holds all the information regarding the entity's temperature. <br>
+ * This capability isn't used for players (see {@link PlayerTempCap} instead).
  */
 public class EntityTempCap implements ITemperatureCap
 {
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;
+    // Ensures a minimum time between syncs
     int syncTimer = 0;
 
     // Map valid temperature types to a new EnumMap
-    EnumMap<Type, Double> temperatures = Arrays.stream(VALID_MODIFIER_TYPES).collect(
+    EnumMap<Type, Double> temperatures = Arrays.stream(VALID_TEMPERATURE_TYPES).collect(
             () -> new EnumMap<>(Type.class),
             (map, type) -> map.put(type, 0.0),
             EnumMap::putAll);
@@ -80,6 +82,11 @@ public class EntityTempCap implements ITemperatureCap
         getModifiers(type).clear();
     }
 
+    // See Temperature.class for more temperature-related methods
+
+    /**
+     * Used for clientside ticking of TempModifiers. The result is not used.
+     */
     public void tickDummy(LivingEntity entity)
     {
         Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
@@ -144,6 +151,7 @@ public class EntityTempCap implements ITemperatureCap
             syncTimer = 40;
         }
 
+        // Don't natively deal temperature damage to entities
         /*
         // Calculate body/base temperatures with modifiers
         double bodyTemp = getTemp(Type.BODY);

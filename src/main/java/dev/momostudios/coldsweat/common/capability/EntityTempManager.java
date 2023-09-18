@@ -1,5 +1,6 @@
-package dev.momostudios.coldsweat.common.event;
+package dev.momostudios.coldsweat.common.capability;
 
+import com.google.common.collect.ImmutableSet;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.event.common.EnableTemperatureEvent;
 import dev.momostudios.coldsweat.api.registry.TempModifierRegistry;
@@ -8,19 +9,17 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition.Mode;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition.Order;
 import dev.momostudios.coldsweat.api.util.Temperature.Addition;
-import dev.momostudios.coldsweat.common.capability.EntityTempCap;
-import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
-import dev.momostudios.coldsweat.common.capability.PlayerTempCap;
 import dev.momostudios.coldsweat.common.entity.ChameleonEntity;
 import dev.momostudios.coldsweat.config.EntitySettingsConfig;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.config.ConfigSettings;
+import dev.momostudios.coldsweat.util.entity.EntityHelper;
 import dev.momostudios.coldsweat.util.registries.ModBlocks;
 import dev.momostudios.coldsweat.util.registries.ModEffects;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -56,12 +55,16 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.*;
 
 @Mod.EventBusSubscriber
-public class EntityTempHandler
+public class EntityTempManager
 {
     public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
+    private static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
+
+    public static final Map<LivingEntity, LazyOptional<ITemperatureCap>> ENTITY_TEMPERATURE_CAPS = new HashMap<>();
 
     /**
      * Attach temperature capability to entities
@@ -78,7 +81,7 @@ public class EntityTempHandler
                 EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
                 MinecraftForge.EVENT_BUS.post(enableEvent);
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) return;
-                EnableTemperatureEvent.ENABLED_ENTITIES.add(entity.getType());
+                TEMPERATURE_ENABLED_ENTITIES.add(entity.getType());
             }
 
             // Make a new capability instance to attach to the entity
@@ -119,6 +122,15 @@ public class EntityTempHandler
         }
     }
 
+    public static LazyOptional<ITemperatureCap> getTemperatureCap(LivingEntity entity)
+    {
+        return ENTITY_TEMPERATURE_CAPS.computeIfAbsent(entity, e ->
+        {   LazyOptional<ITemperatureCap> cap = e.getCapability(EntityHelper.getTemperatureCap(entity));
+            cap.addListener((opt) -> ENTITY_TEMPERATURE_CAPS.remove(e));
+            return cap;
+        });
+    }
+
     /**
      * Tick TempModifiers & update temperature for living entities
      */
@@ -128,7 +140,7 @@ public class EntityTempHandler
         LivingEntity entity = event.getEntityLiving();
         if (!(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
 
-        Temperature.getTemperatureCap(entity).ifPresent(cap ->
+        getTemperatureCap(entity).ifPresent(cap ->
         {
             if (!entity.level.isClientSide)
             {   // Tick modifiers serverside
@@ -167,8 +179,9 @@ public class EntityTempHandler
             PlayerEntity oldPlayer = event.getOriginal();
 
             // Copy the capability to the new player
-            event.getPlayer().getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
-            {   oldPlayer.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap::copy);
+            getTemperatureCap(event.getPlayer()).ifPresent(cap ->
+            {
+                getTemperatureCap(oldPlayer).ifPresent(cap::copy);
             });
         }
     }
@@ -333,7 +346,7 @@ public class EntityTempHandler
                 if (player.isSleeping())
                 {
                     // Divide the player's current temperature by 4
-                    player.getCapability(ModCapabilities.PLAYER_TEMPERATURE).ifPresent(cap ->
+                    getTemperatureCap(player).ifPresent(cap ->
                     {
                         double temp = cap.getTemp(Temperature.Type.CORE);
                         cap.setTemp(Temperature.Type.CORE, temp / 4f);
@@ -398,5 +411,9 @@ public class EntityTempHandler
             {   Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Type.BASE);
             }
         }
+    }
+
+    public static Set<EntityType<?>> getEntitiesWithTemperature()
+    {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
     }
 }

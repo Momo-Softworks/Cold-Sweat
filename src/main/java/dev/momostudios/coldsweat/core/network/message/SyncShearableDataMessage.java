@@ -1,8 +1,9 @@
 package dev.momostudios.coldsweat.core.network.message;
 
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ShearableFurManager;
 import dev.momostudios.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -43,9 +44,9 @@ public class SyncShearableDataMessage
                     World world = ClientOnlyHelper.getClientWorld();
                     if (world != null)
                     {   Entity entity = world.getEntity(message.entityId);
-                        if (entity != null)
+                        if (entity instanceof LivingEntity)
                         {
-                            entity.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+                            ShearableFurManager.getFurCap(((LivingEntity) entity)).ifPresent(cap ->
                             {   cap.setSheared(message.isSheared);
                                 cap.setLastSheared(message.lastSheared);
                             });

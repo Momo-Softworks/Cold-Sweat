@@ -9,13 +9,12 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.AdaptiveInsulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
 import dev.momostudios.coldsweat.config.ItemSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -65,7 +64,7 @@ public class ArmorInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        LazyOptional<IInsulatableCap> iCap = armorStack.getCapability(ModCapabilities.ITEM_INSULATION);
+                        LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
                         List<InsulationPair> insulation = iCap.map(cap ->
                         {
                             if (cap instanceof ItemInsulationCap)
@@ -92,7 +91,7 @@ public class ArmorInsulation
                         }
 
                         // Used for tracking "fully_insulated" advancement
-                        if ((cold + hot) / 2 >= getInsulationSlots(armorStack))
+                        if ((cold + hot) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
                         {   fullyInsulated++;
                         }
                     }
@@ -133,34 +132,6 @@ public class ArmorInsulation
         DamageSource source = event.getSource();
         if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlotType.FEET).getItem() == ModItems.HOGLIN_HOOVES)
         {   event.setCanceled(true);
-        }
-    }
-
-    public static Pair<Double, Double> getItemInsulation(ItemStack item)
-    {
-        Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().get(item.getItem());
-        if (insulation != null)
-            return insulation;
-        else
-        {
-            insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
-            if (insulation != null)
-                return insulation;
-        }
-        return new Pair<>(0.0, 0.0);
-    }
-
-    public static int getInsulationSlots(ItemStack item)
-    {
-        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
-        EquipmentSlotType slot = MobEntity.getEquipmentSlotForItem(item);
-
-        switch (slot)
-        {   case HEAD  : return slots.get(0).intValue();
-            case CHEST : return slots.get(1).intValue();
-            case LEGS  : return slots.get(2).intValue();
-            case FEET  : return slots.get(3).intValue();
-            default : return 0;
         }
     }
 }

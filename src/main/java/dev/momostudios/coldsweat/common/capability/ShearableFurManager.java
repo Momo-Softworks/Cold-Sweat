@@ -1,9 +1,6 @@
-package dev.momostudios.coldsweat.common.event;
+package dev.momostudios.coldsweat.common.capability;
 
 import dev.momostudios.coldsweat.ColdSweat;
-import dev.momostudios.coldsweat.common.capability.FurCap;
-import dev.momostudios.coldsweat.common.capability.IShearableCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.core.network.ColdSweatPacketHandler;
 import dev.momostudios.coldsweat.core.network.message.SyncShearableDataMessage;
 import dev.momostudios.coldsweat.config.ConfigSettings;
@@ -36,10 +33,61 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
-public class FurHandler
+public class ShearableFurManager
 {
+    public static Map<LivingEntity, LazyOptional<IShearableCap>> ENTITY_FUR_CAPS = new HashMap<>();
+
+    @SubscribeEvent
+    public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
+    {
+        if (isShearable(event.getObject()))
+        {
+            // Make a new capability instance to attach to the entity
+            IShearableCap cap = new ShearableFurCap();
+            // Optional that holds the capability instance
+            LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
+            Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
+
+            ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
+            {
+                @Nonnull
+                @Override
+                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
+                {
+                    // If the requested cap is the temperature cap, return the temperature cap
+                    if (cap == capability)
+                    {   return capOptional.cast();
+                    }
+                    return LazyOptional.empty();
+                }
+
+                @Override
+                public CompoundNBT serializeNBT()
+                {   return cap.serializeNBT();
+                }
+
+                @Override
+                public void deserializeNBT(CompoundNBT nbt)
+                {   cap.deserializeNBT(nbt);
+                }
+            };
+            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "fur"), provider);
+        }
+    }
+
+    public static LazyOptional<IShearableCap> getFurCap(LivingEntity entity)
+    {
+        return ENTITY_FUR_CAPS.computeIfAbsent(entity, e ->
+        {   LazyOptional<IShearableCap> cap = e.getCapability(ModCapabilities.SHEARABLE_FUR);
+            cap.addListener((opt) -> ENTITY_FUR_CAPS.remove(e));
+            return cap;
+        });
+    }
+
     // Regrow fur
     @SubscribeEvent
     public static void onShearableEntityTick(LivingEvent.LivingUpdateEvent event)
@@ -93,7 +141,7 @@ public class FurHandler
                     // Set sheared
                     cap.setSheared(true);
                     cap.setLastSheared(entity.tickCount);
-                    FurHandler.syncData(entity, null);
+                    ShearableFurManager.syncData(entity, null);
                 }
             });
         }
@@ -115,44 +163,6 @@ public class FurHandler
                                                                     : PacketDistributor.TRACKING_ENTITY.with(() -> llama),
                                                      new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), llama.getId()));
             });
-        }
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
-    {
-        if (isShearable(event.getObject()))
-        {
-            // Make a new capability instance to attach to the entity
-            IShearableCap cap = new FurCap();
-            // Optional that holds the capability instance
-            LazyOptional<IShearableCap> capOptional = LazyOptional.of(() -> cap);
-            Capability<IShearableCap> capability = ModCapabilities.SHEARABLE_FUR;
-
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
-            {
-                @Nonnull
-                @Override
-                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
-                {
-                    // If the requested cap is the temperature cap, return the temperature cap
-                    if (cap == capability)
-                    {   return capOptional.cast();
-                    }
-                    return LazyOptional.empty();
-                }
-
-                @Override
-                public CompoundNBT serializeNBT()
-                {   return cap.serializeNBT();
-                }
-
-                @Override
-                public void deserializeNBT(CompoundNBT nbt)
-                {   cap.deserializeNBT(nbt);
-                }
-            };
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "fur"), provider);
         }
     }
 
