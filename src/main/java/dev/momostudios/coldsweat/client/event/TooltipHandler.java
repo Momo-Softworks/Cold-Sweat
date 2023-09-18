@@ -84,7 +84,7 @@ public class TooltipHandler
 
 
         // If the item is insulated armor
-        Pair<Double, Double> armorInsul = null;
+        Pair<Double, Double> armorInsul;
         if (stack.getItem() instanceof IArmorVanishable && (!Objects.deepEquals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
