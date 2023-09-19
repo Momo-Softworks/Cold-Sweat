@@ -273,10 +273,6 @@ public class ChameleonEntity extends AnimalEntity
     public void tick()
     {
         super.tick();
-        if (this.tickCount % 20 == 0)
-        {
-            System.out.println(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream).collect(Collectors.toList()));
-        }
 
         // Tick eat animation
         if (this.eatAnimationTimer > 0)
