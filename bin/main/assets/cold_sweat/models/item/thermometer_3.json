@@ -1,8 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures":
-  {
-    "layer0": "cold_sweat:items/thermometer/thermometer",
-    "layer1": "cold_sweat:items/thermometer/thermometer_level_3"
-  }
-}
