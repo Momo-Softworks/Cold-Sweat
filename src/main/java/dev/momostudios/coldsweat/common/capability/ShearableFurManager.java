@@ -48,7 +48,8 @@ import java.util.Map;
 @Mod.EventBusSubscriber
 public class ShearableFurManager
 {
-    public static Map<LivingEntity, LazyOptional<IShearableCap>> ENTITY_FUR_CAPS = new HashMap<>();
+    public static Map<LivingEntity, LazyOptional<IShearableCap>> SERVER_CAP_CACHE = new HashMap<>();
+    public static Map<LivingEntity, LazyOptional<IShearableCap>> CLIENT_CAP_CACHE = new HashMap<>();
 
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
@@ -93,9 +94,10 @@ public class ShearableFurManager
 
     public static LazyOptional<IShearableCap> getFurCap(LivingEntity entity)
     {
-        return ENTITY_FUR_CAPS.computeIfAbsent(entity, e ->
+        Map<LivingEntity, LazyOptional<IShearableCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<IShearableCap> cap = e.getCapability(ModCapabilities.SHEARABLE_FUR);
-            cap.addListener((opt) -> ENTITY_FUR_CAPS.remove(e));
+            cap.addListener((opt) -> cache.remove(e));
             return cap;
         });
     }

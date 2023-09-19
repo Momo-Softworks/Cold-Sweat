@@ -65,7 +65,8 @@ public class EntityTempManager
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     private static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
 
-    public static final Map<LivingEntity, LazyOptional<ITemperatureCap>> ENTITY_TEMPERATURE_CAPS = new HashMap<>();
+    public static final Map<LivingEntity, LazyOptional<ITemperatureCap>> SERVER_CAP_CACHE = new HashMap<>();
+    public static final Map<LivingEntity, LazyOptional<ITemperatureCap>> CLIENT_CAP_CACHE = new HashMap<>();
 
     /**
      * Attach temperature capability to entities
@@ -124,9 +125,10 @@ public class EntityTempManager
 
     public static LazyOptional<ITemperatureCap> getTemperatureCap(LivingEntity entity)
     {
-        return ENTITY_TEMPERATURE_CAPS.computeIfAbsent(entity, e ->
+        Map<LivingEntity, LazyOptional<ITemperatureCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<ITemperatureCap> cap = e.getCapability(EntityHelper.getTemperatureCap(entity));
-            cap.addListener((opt) -> ENTITY_TEMPERATURE_CAPS.remove(e));
+            cap.addListener((opt) -> cache.remove(e));
             return cap;
         });
     }
