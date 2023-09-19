@@ -88,7 +88,7 @@ public class ColdSweat
         CapabilityManager.INSTANCE.register(ITemperatureCap.class, new DummyCapStorage<>(), EntityTempCap::new);
 
         /* Llama fur */
-        CapabilityManager.INSTANCE.register(IShearableCap.class, new DummyCapStorage<>(), FurCap::new);
+        CapabilityManager.INSTANCE.register(IShearableCap.class, new DummyCapStorage<>(), ShearableFurCap::new);
 
         /* Armor insulation */
         CapabilityManager.INSTANCE.register(IInsulatableCap.class, new DummyCapStorage<>(), ItemInsulationCap::new);
