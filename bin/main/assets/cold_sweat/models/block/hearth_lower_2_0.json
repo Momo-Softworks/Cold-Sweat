@@ -1,8 +1,0 @@
-{
-    "parent": "cold_sweat:block/hearth_lower",
-    "textures": {
-        "hearth_body": "cold_sweat:blocks/hearth_body",
-        "hearth_piping": "cold_sweat:blocks/hearth_piping_2_0",
-        "particle": "cold_sweat:blocks/hearth_body"
-    }
-}
