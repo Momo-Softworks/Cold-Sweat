@@ -3,7 +3,7 @@ package dev.momostudios.coldsweat.mixin;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.momostudios.coldsweat.client.renderer.model.entity.ModLlamaModel;
 import dev.momostudios.coldsweat.common.capability.IShearableCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ShearableFurManager;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.LlamaDecorLayer;
 import net.minecraft.client.renderer.entity.model.LlamaModel;
@@ -29,6 +29,6 @@ public class MixinLlamaDecorLayer
     @Inject(method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/passive/horse/LlamaEntity;FFFFFF)V",
             at = @At(value = "HEAD"))
     private void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225628_3_, LlamaEntity entity, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_, CallbackInfo ci)
-    {   model.body.y = entity.getCapability(ModCapabilities.SHEARABLE_FUR).map(IShearableCap::isSheared).orElse(false) ? 6.5f : 5f;
+    {   model.body.y = ShearableFurManager.getFurCap(entity).map(IShearableCap::isSheared).orElse(false) ? 6.5f : 5f;
     }
 }

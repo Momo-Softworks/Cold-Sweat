@@ -277,16 +277,16 @@ public class ItemInsulationCap implements IInsulatableCap
             }
         }
         if (!insulTag.isEmpty())
-            tag.put("Insulation", insulTag);
+            tag.put("SimpleInsulation", insulTag);
         else
-            tag.remove("Insulation");
+            tag.remove("SimpleInsulation");
 
         return tag;
     }
 
     public List<InsulationPair> deserializeSimple(ItemStack stack)
     {
-        List<InsulationPair> pairs = stack.getOrCreateTag().getList("Insulation", 10).stream()
+        List<InsulationPair> pairs = stack.getOrCreateTag().getList("SimpleInsulation", 10).stream()
         .map(nbt ->
         {
             CompoundNBT compound = (CompoundNBT) nbt;

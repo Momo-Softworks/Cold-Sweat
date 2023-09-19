@@ -2,7 +2,7 @@ package dev.momostudios.coldsweat.mixin;
 
 import dev.momostudios.coldsweat.client.renderer.model.entity.ModLlamaModel;
 import dev.momostudios.coldsweat.common.capability.IShearableCap;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
+import dev.momostudios.coldsweat.common.capability.ShearableFurManager;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.LlamaRenderer;
@@ -53,7 +53,7 @@ public class MixinLlamaRender<T extends LivingEntity, M extends EntityModel<T>>
                 cancellable = true)
         private void getTextureLocation(LlamaEntity entity, CallbackInfoReturnable<ResourceLocation> cir)
         {
-            boolean sheared = entity.getCapability(ModCapabilities.SHEARABLE_FUR).map(IShearableCap::isSheared).orElse(false);
+            boolean sheared = ShearableFurManager.getFurCap(entity).map(IShearableCap::isSheared).orElse(false);
             cir.setReturnValue(sheared ? SHAVED_TEXTURES[entity.getVariant()] : TEXTURES[entity.getVariant()]);
         }
     }

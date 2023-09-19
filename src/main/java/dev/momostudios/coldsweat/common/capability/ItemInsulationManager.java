@@ -126,17 +126,14 @@ public class ItemInsulationManager
     {
         // if the inventory screen is open
         PlayerEntity player = event.player;
-        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && player.tickCount % 20 == 0
+        if (event.phase == TickEvent.Phase.END && player.tickCount % 20 == 0
         && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
         {
             player.getAllSlots().forEach(stack ->
             {
                 if (isInsulatable(stack))
-                {
-                    // Cache the item cap
-                    getInsulationCap(stack).ifPresent(iCap ->
-                    {
-                        if (iCap instanceof ItemInsulationCap)
+                {   getInsulationCap(stack).ifPresent(iCap ->
+                    {   if (iCap instanceof ItemInsulationCap)
                         {   ((ItemInsulationCap) iCap).serializeSimple(stack);
                         }
                     });

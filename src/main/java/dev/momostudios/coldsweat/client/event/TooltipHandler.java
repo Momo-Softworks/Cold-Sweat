@@ -2,11 +2,11 @@ package dev.momostudios.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.client.gui.tooltip.*;
+import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
@@ -27,6 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -36,26 +37,24 @@ public class TooltipHandler
     {
         ItemStack stack = event.getItemStack();
         Pair<Double, Double> itemInsul;
-        Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
             {   event.getToolTip().add(1, new StringTextComponent("§9? §8'Shift'"));
             }
-            else
-            {
-                for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
-                {   event.getToolTip().add(1, new StringTextComponent(""));
-                }
-            }
+            else for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
+                 {   event.getToolTip().add(1, new StringTextComponent(""));
+                 }
             event.getToolTip().add(1, new StringTextComponent(" §0---§r"));
         }
         // Is insulation item
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(), ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null && !itemInsul.equals(emptyInsul))
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(),
+                              ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null
+        && (itemInsul.getFirst() > 0 || itemInsul.getSecond() > 0))
         {   event.getToolTip().add(1, new StringTextComponent(" §0--§r"));
         }
         // Has insulation (armor)
-        else if (stack.getItem() instanceof IArmorVanishable && stack.getCapability(ModCapabilities.ITEM_INSULATION).map(c -> c.getInsulation().size() > 0).orElse(false))
+        else if (stack.getItem() instanceof IArmorVanishable && ItemInsulationManager.getInsulationCap(stack).map(c -> !c.getInsulation().isEmpty()).orElse(false))
         {   event.getToolTip().add(1, new StringTextComponent(" §0-§r"));
         }
     }
@@ -83,20 +82,12 @@ public class TooltipHandler
         {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true);
         }
 
-
         // If the item is insulated armor
         Pair<Double, Double> armorInsul;
         if (stack.getItem() instanceof IArmorVanishable && (!Objects.deepEquals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
-            List<InsulationPair> insulation = ItemInsulationManager.getInsulationCap(stack)
-            .map(c ->
-            {
-                if (c instanceof ItemInsulationCap)
-                {   return ((ItemInsulationCap) c);
-                }
-                return new ItemInsulationCap();
-            }).map(cap -> cap.deserializeSimple(stack)).orElse(new ArrayList<>());
+            List<InsulationPair> insulation = ((ItemInsulationCap) ItemInsulationManager.getInsulationCap(stack).orElse(new ItemInsulationCap())).deserializeSimple(stack);
 
             // If the armor has intrinsic insulation due to configs, add it to the list
             ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(stack.getItem(), (item, pair) ->

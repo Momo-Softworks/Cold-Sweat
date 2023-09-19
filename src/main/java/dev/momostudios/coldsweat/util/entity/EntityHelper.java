@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.util.entity;
 import dev.momostudios.coldsweat.common.capability.ITemperatureCap;
 import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.util.registries.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -27,10 +28,6 @@ public class EntityHelper
 
     public static boolean holdingLamp(LivingEntity player, HandSide arm)
     {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
-    }
-
-    public static Capability<ITemperatureCap> getTemperatureCap(LivingEntity entity)
-    {   return entity instanceof PlayerEntity ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE;
     }
 
     public static HandSide getHandSide(Hand hand, PlayerEntity player)

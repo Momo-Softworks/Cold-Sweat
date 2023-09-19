@@ -39,8 +39,8 @@ import java.util.Map;
 @Mod.EventBusSubscriber
 public class ShearableFurManager
 {
-    public static Map<LivingEntity, LazyOptional<IShearableCap>> SERVER_CAP_CACHE = new HashMap<>();
-    public static Map<LivingEntity, LazyOptional<IShearableCap>> CLIENT_CAP_CACHE = new HashMap<>();
+    public static Map<Entity, LazyOptional<IShearableCap>> SERVER_CAP_CACHE = new HashMap<>();
+    public static Map<Entity, LazyOptional<IShearableCap>> CLIENT_CAP_CACHE = new HashMap<>();
 
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
@@ -80,9 +80,9 @@ public class ShearableFurManager
         }
     }
 
-    public static LazyOptional<IShearableCap> getFurCap(LivingEntity entity)
+    public static LazyOptional<IShearableCap> getFurCap(Entity entity)
     {
-        Map<LivingEntity, LazyOptional<IShearableCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        Map<Entity, LazyOptional<IShearableCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
         return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<IShearableCap> cap = e.getCapability(ModCapabilities.SHEARABLE_FUR);
             cap.addListener((opt) -> cache.remove(e));
@@ -102,7 +102,7 @@ public class ShearableFurManager
             // Entity is shearable, current tick is a multiple of the regrow time, and random chance succeeds
             if (!entity.level.isClientSide && entity.tickCount % furConfig.getFirst() == 0 && Math.random() < furConfig.getThird())
             {
-                entity.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+                getFurCap(entity).ifPresent(cap ->
                 {
                     // Growth cooldown has passed and llama is sheared
                     if (entity.getAge() - cap.lastSheared() >= furConfig.getSecond() && cap.isSheared())
@@ -130,7 +130,7 @@ public class ShearableFurManager
         ItemStack stack = player.getItemInHand(hand);
         if (!entity.level.isClientSide && isShearable(entity) && !(entity instanceof AbstractChestedHorseEntity))
         {
-            entity.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            getFurCap(entity).ifPresent(cap ->
             {
                 if (!cap.isSheared())
                 {   // Use shears
@@ -160,7 +160,7 @@ public class ShearableFurManager
     public static void syncData(Entity llama, ServerPlayerEntity player)
     {
         if (!llama.level.isClientSide)
-        {   llama.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+        {   getFurCap(llama).ifPresent(cap ->
             {   ColdSweatPacketHandler.INSTANCE.send(player != null ? PacketDistributor.PLAYER.with(() -> player)
                                                                     : PacketDistributor.TRACKING_ENTITY.with(() -> llama),
                                                      new SyncShearableDataMessage(cap.isSheared(), cap.lastSheared(), llama.getId()));

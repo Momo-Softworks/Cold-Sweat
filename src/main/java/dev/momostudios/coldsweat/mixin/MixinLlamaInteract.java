@@ -32,7 +32,7 @@ public class MixinLlamaInteract
             ItemStack stack = player.getItemInHand(hand);
             if (self.isBaby() || stack.getItem() != Items.SHEARS) return;
 
-            self.getCapability(ModCapabilities.SHEARABLE_FUR).ifPresent(cap ->
+            ShearableFurManager.getFurCap(self).ifPresent(cap ->
             {
                 if (cap.isSheared())
                 {   cir.setReturnValue(ActionResultType.sidedSuccess(self.level.isClientSide));
