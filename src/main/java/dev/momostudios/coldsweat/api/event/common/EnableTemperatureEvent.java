@@ -11,7 +11,6 @@ import java.util.Set;
 @Cancelable
 public class EnableTemperatureEvent extends Event
 {
-    public static Set<EntityType<?>> ENABLED_ENTITIES = new HashSet<>();
     final LivingEntity entity;
     boolean enabled;
 

@@ -138,7 +138,7 @@ public class EntityTempManager
     public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
     {
         LivingEntity entity = event.getEntityLiving();
-        if (!(entity instanceof PlayerEntity || EnableTemperatureEvent.ENABLED_ENTITIES.contains(entity.getType()))) return;
+        if (!(entity instanceof PlayerEntity || getEntitiesWithTemperature().contains(entity.getType()))) return;
 
         getTemperatureCap(entity).ifPresent(cap ->
         {
