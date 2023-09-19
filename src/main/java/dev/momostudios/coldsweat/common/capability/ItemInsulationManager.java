@@ -148,8 +148,7 @@ public class ItemInsulationManager
         if (insulation != null)
             return insulation;
         else
-        {
-            insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
+        {   insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
             if (insulation != null)
                 return insulation;
         }
