@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.momostudios'
-version = '2.2-b05d'
+version = '2.2-b05f'
 
 java {
     archivesBaseName = 'ColdSweat'
@@ -120,8 +120,8 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:4418032")
     implementation fg.deobf("curse.maven:armorunderwear-310383:4502893")
     implementation fg.deobf("curse.maven:carrots-311327:4382778")
-    compileOnly fg.deobf("curse.maven:create-328085:4625533")
 
+    compileOnly fg.deobf("curse.maven:create-328085:4625533")
     compileOnly fg.deobf("curse.maven:storms-237746:4426524")
     compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3693809")
