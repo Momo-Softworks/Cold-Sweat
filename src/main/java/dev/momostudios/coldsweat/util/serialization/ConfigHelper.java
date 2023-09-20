@@ -3,7 +3,6 @@ package dev.momostudios.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -140,8 +139,8 @@ public class ConfigHelper
                 // The config defines a min and max value, with optional unit conversion
                 if (entry.size() > 2)
                 {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
-                    min = CSMath.convertTemp(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
-                    max = CSMath.convertTemp(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
+                    min = Temperature.convertUnits(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
+                    max = Temperature.convertUnits(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
                 }
                 // The config only defines a mid-temperature
                 else
@@ -157,6 +156,25 @@ public class ConfigHelper
             }
             catch (Exception e)
             {   ColdSweat.LOGGER.error("Error parsing biome temp config: " + entry.toString() + ". The biome may not be loaded yet or the mod is not present.");
+            }
+        }
+        return map;
+    }
+
+    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source)
+    {
+        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        for (List<?> entry : source)
+        {
+            try
+            {
+                ResourceLocation dimensionID = new ResourceLocation((String) entry.get(0));
+                double temp = ((Number) entry.get(1)).doubleValue();
+                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                map.put(dimensionID, Pair.of(temp, units));
+            }
+            catch (Exception e)
+            {   ColdSweat.LOGGER.error("Error parsing dimension temp config: " + entry.toString() + ".");
             }
         }
         return map;
@@ -194,57 +212,57 @@ public class ConfigHelper
         return tag;
     }
 
-    public static CompoundTag writeNBTPairMap(Map<ResourceLocation, Pair<Double, Double>> map, String key)
+    public static CompoundTag writeDimensionTemps(Map<ResourceLocation, Pair<Double, Temperature.Units>> map, String key)
     {
         CompoundTag tag = new CompoundTag();
         CompoundTag mapTag = new CompoundTag();
-        for (Map.Entry<ResourceLocation, Pair<Double, Double>> entry : map.entrySet())
+        for (Map.Entry<ResourceLocation, Pair<Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundTag biomeTag = new CompoundTag();
-            biomeTag.putDouble("min", entry.getValue().getFirst());
-            biomeTag.putDouble("max", entry.getValue().getSecond());
+            biomeTag.putDouble("Temp", entry.getValue().getFirst());
+            biomeTag.putString("Units", entry.getValue().getSecond().toString());
             mapTag.put(entry.getKey().toString(), biomeTag);
         }
         tag.put(key, mapTag);
         return tag;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Double>> readNBTPairMap(CompoundTag tag, String key)
+    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> readDimensionTemps(CompoundTag tag, String key)
     {
-        Map<ResourceLocation, Pair<Double, Double>> map = new HashMap<>();
+        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
         CompoundTag mapTag = tag.getCompound(key);
         for (String biomeID : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(biomeID);
-            map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("min"), biomeTag.getDouble("max")));
+            map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
 
-    public static CompoundTag writeNBTTripletMap(Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map, String key)
+    public static CompoundTag writeBiomeTemps(Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map, String key)
     {
         CompoundTag tag = new CompoundTag();
         CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundTag biomeTag = new CompoundTag();
-            biomeTag.putDouble("min", entry.getValue().getA());
-            biomeTag.putDouble("max", entry.getValue().getB());
-            biomeTag.putString("units", entry.getValue().getC().toString());
+            biomeTag.putDouble("Min", entry.getValue().getA());
+            biomeTag.putDouble("Max", entry.getValue().getB());
+            biomeTag.putString("Units", entry.getValue().getC().toString());
             mapTag.put(entry.getKey().toString(), biomeTag);
         }
         tag.put(key, mapTag);
         return tag;
     }
 
-    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> readNBTTripletMap(CompoundTag tag, String key)
+    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> readBiomeTemps(CompoundTag tag, String key)
     {
         Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
         CompoundTag mapTag = tag.getCompound(key);
         for (String biomeID : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(biomeID);
-            map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("min"), biomeTag.getDouble("max"), Temperature.Units.valueOf(biomeTag.getString("units"))));
+            map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -279,8 +297,8 @@ public class ConfigHelper
         for (Map.Entry<Item, Pair<Double, Double>> entry : map.entrySet())
         {
             CompoundTag itemTag = new CompoundTag();
-            itemTag.putDouble("value1", entry.getValue().getFirst());
-            itemTag.putDouble("value2", entry.getValue().getSecond());
+            itemTag.putDouble("Value1", entry.getValue().getFirst());
+            itemTag.putDouble("Value2", entry.getValue().getSecond());
             ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
             if (itemID != null)
                 mapTag.put(itemID.toString(), itemTag);
@@ -296,7 +314,7 @@ public class ConfigHelper
         for (String itemID : mapTag.getAllKeys())
         {
             CompoundTag itemTag = mapTag.getCompound(itemID);
-            map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)), Pair.of(itemTag.getDouble("value1"), itemTag.getDouble("value2")));
+            map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)), Pair.of(itemTag.getDouble("Value1"), itemTag.getDouble("Value2")));
         }
         return map;
     }

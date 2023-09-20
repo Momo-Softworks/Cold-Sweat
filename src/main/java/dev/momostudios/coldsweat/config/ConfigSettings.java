@@ -5,7 +5,6 @@ import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.util.compat.CompatManager;
 import dev.momostudios.coldsweat.util.serialization.ConfigHelper;
 import dev.momostudios.coldsweat.config.util.ValueHolder;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -44,8 +43,8 @@ public class ConfigSettings
     // World Settings
     public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
     public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static final ValueHolder<Map<ResourceLocation, Double>> DIMENSION_TEMPS;
-    public static final ValueHolder<Map<ResourceLocation, Double>> DIMENSION_OFFSETS;
+    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
+    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
     public static final ValueHolder<Double> CAVE_INSULATION;
     public static final ValueHolder<Double[]> SUMMER_TEMPS;
     public static final ValueHolder<Double[]> AUTUMN_TEMPS;
@@ -145,46 +144,44 @@ public class ConfigSettings
                                            saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
-        encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeTemps"),
-        decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeTemps"),
+        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
+        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
                                                                 Temperature.Units units = entry.getValue().getC();
-                                                                double min = CSMath.convertTemp(entry.getValue().getA(), Temperature.Units.MC, units, true);
-                                                                double max = CSMath.convertTemp(entry.getValue().getB(), Temperature.Units.MC, units, true);
+                                                                double min = Temperature.convertUnits(entry.getValue().getA(), Temperature.Units.MC, units, true);
+                                                                double max = Temperature.convertUnits(entry.getValue().getB(), Temperature.Units.MC, units, true);
                                                                 return Arrays.asList(entry.getKey().toString(), min, max, units);
                                                             })
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
-        encoder -> ConfigHelper.writeNBTTripletMap(encoder, "BiomeOffsets"),
-        decoder -> ConfigHelper.readNBTTripletMap(decoder, "BiomeOffsets"),
+        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeOffsets"),
+        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
                                                                 Temperature.Units units = entry.getValue().getC();
-                                                                double min = CSMath.convertTemp(entry.getValue().getA(), Temperature.Units.MC, units, false);
-                                                                double max = CSMath.convertTemp(entry.getValue().getB(), Temperature.Units.MC, units, false);
+                                                                double min = Temperature.convertUnits(entry.getValue().getA(), Temperature.Units.MC, units, false);
+                                                                double max = Temperature.convertUnits(entry.getValue().getB(), Temperature.Units.MC, units, false);
                                                                 return Arrays.asList(entry.getKey().toString(), min, max, units);
                                                             })
                                                             .collect(Collectors.toList())));
 
-        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> WorldSettingsConfig.getInstance().getDimensionTemperatures().stream()
-                                                     .map(entry -> Map.entry(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue()))
-                                                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionTemps"),
-        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionTemps"),
+        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures()),
+        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionTemps"),
+        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionTemps"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
-                                                     .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue()))
+                                                     .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
                                                      .collect(Collectors.toList())));
 
-        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> WorldSettingsConfig.getInstance().getDimensionTempOffsets().stream()
-                                                     .map(entry -> Map.entry(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).doubleValue()))
-                                                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-        encoder -> ConfigHelper.writeNBTDoubleMap(encoder, "DimensionOffsets"),
-        decoder -> ConfigHelper.readNBTDoubleMap(decoder, "DimensionOffsets"),
-        saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream().map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue())).collect(Collectors.toList())));
+        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets()),
+        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionOffsets"),
+        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionOffsets"),
+        saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
+                                                     .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
+                                                     .collect(Collectors.toList())));
 
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
@@ -449,8 +446,8 @@ public class ConfigSettings
     public enum Difficulty
     {
         SUPER_EASY(Map.of(
-            "min_temp", () -> CSMath.convertTemp(40, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> CSMath.convertTemp(120, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 0.5,
             "require_thermometer", () -> false,
             "fire_resistance_enabled", () -> true,
@@ -459,8 +456,8 @@ public class ConfigSettings
         )),
 
         EASY(Map.of(
-            "min_temp", () -> CSMath.convertTemp(45, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> CSMath.convertTemp(110, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 0.75,
             "require_thermometer", () -> false,
             "fire_resistance_enabled", () -> true,
@@ -469,8 +466,8 @@ public class ConfigSettings
         )),
 
         NORMAL(Map.of(
-            "min_temp", () -> CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> CSMath.convertTemp(100, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 1.0,
             "require_thermometer", () -> true,
             "fire_resistance_enabled", () -> true,
@@ -479,8 +476,8 @@ public class ConfigSettings
         )),
 
         HARD(Map.of(
-            "min_temp", () -> CSMath.convertTemp(60, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 1.5,
             "require_thermometer", () -> true,
             "fire_resistance_enabled", () -> false,
@@ -515,7 +512,7 @@ public class ConfigSettings
     }
 
     public static <T> ValueHolder<T> addSetting(String id, Supplier<T> supplier)
-    {   ValueHolder<T> loader = ValueHolder.of(supplier);
+    {   ValueHolder<T> loader = ValueHolder.simple(supplier);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
