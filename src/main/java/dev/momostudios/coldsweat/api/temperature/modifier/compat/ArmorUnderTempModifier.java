@@ -50,7 +50,7 @@ public class ArmorUnderTempModifier extends TempModifier
             }
         }
 
-        double returnTemp = CSMath.convertTemp(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
+        double returnTemp = Temperature.convertUnits(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
         return temp -> returnTemp;
     }
 
