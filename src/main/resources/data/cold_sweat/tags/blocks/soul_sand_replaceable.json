@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:base_stone_nether",
+    "#minecraft:nylium"
+  ],
+  "remove": [
+    "minecraft:basalt",
+    "#cold_sweat:may_place_on/soul_stalk"
+  ]
+}

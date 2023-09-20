@@ -16,8 +16,7 @@ public class AddFeatureGeneration
         if (event.getName() == null) return;
 
         if (event.getCategory().equals(Biome.BiomeCategory.NETHER))
-        {
-            event.getGeneration().getFeatures(GenerationStep.Decoration.VEGETAL_DECORATION).add(ModFeatures.SOUL_STALK_PLACEMENT);
+        {   event.getGeneration().getFeatures(GenerationStep.Decoration.VEGETAL_DECORATION).add(ModFeatures.SOUL_STALK_PLACEMENT);
         }
     }
 }

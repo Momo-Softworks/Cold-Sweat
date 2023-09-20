@@ -442,16 +442,19 @@ public class CSMath
      * Lowers the absolute value of the given number by [amount].
      */
     public static double shrink(double value, double amount)
-    {
-        return Math.max(0, Math.abs(value) - amount) * getSign(value);
+    {   return Math.max(0, Math.abs(value) - amount) * getSign(value);
     }
 
-    /**
-     * Integer overload for {@link #shrink(double, double)}
-     */
     public static int shrink(int value, int amount)
-    {
-        return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
+    {   return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
+    }
+
+    public static double grow(double value, double amount)
+    {   return Math.abs(value) + amount * getSign(value);
+    }
+
+    public static int grow(int value, int amount)
+    {   return value > 0 ? value + amount : value - amount;
     }
 
     /**
