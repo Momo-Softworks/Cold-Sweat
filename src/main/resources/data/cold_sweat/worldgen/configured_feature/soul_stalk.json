@@ -1,0 +1,49 @@
+{
+  "type": "cold_sweat:soul_stalk",
+  "config": {
+    "tries": 20,
+    "min_count": 2,
+    "max_count": 6,
+    "spread_xz": 16,
+    "spread_y": 8,
+    "disk_width": 4,
+    "disk_height": 2,
+    "disk_state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "minecraft:air"
+        }
+      },
+      "rules": [
+        {
+          "if_true": {
+            "type": "minecraft:true"
+          },
+          "then": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+              "Name": "minecraft:soul_sand"
+            }
+          }
+        }
+      ]
+    },
+    "disk_replace_target": {
+      "type": "minecraft:all_of",
+      "predicates": [
+        {
+          "type": "minecraft:matching_blocks",
+          "blocks": "#minecraft:nether_carver_replaceables"
+        },
+        {
+          "type": "minecraft:not",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "#cold_sweat:may_place_on/soul_stalk"
+          }
+        }
+      ]
+    }
+  }
+}

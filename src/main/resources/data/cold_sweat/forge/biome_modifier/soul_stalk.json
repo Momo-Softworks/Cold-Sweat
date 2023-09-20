@@ -1,6 +1,6 @@
 {
   "type": "forge:add_features",
   "biomes": "#minecraft:is_nether",
-  "features": "cold_sweat:soul_stalk_placement",
+  "features": "cold_sweat:soul_stalk",
   "step": "vegetal_decoration"
 }

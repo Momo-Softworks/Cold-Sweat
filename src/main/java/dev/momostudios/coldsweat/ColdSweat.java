@@ -54,8 +54,6 @@ public class ColdSweat
         PotionInit.POTIONS.register(bus);
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
-        FeatureInit.PlacedFeatureInit.PLACED_FEATURES.register(bus);
-        FeatureInit.ConfiguredFeatureInit.CONFIGURED_FEATURES.register(bus);
         BiomeCodecInit.BIOME_MODIFIER_SERIALIZERS.register(bus);
 
         // Setup configs
