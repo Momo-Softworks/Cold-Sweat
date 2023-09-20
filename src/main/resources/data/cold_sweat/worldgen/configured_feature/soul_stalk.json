@@ -34,7 +34,11 @@
       "predicates": [
         {
           "type": "minecraft:matching_blocks",
-          "blocks": "#minecraft:nether_carver_replaceables"
+          "blocks": "#minecraft:base_stone_nether"
+        },
+        {
+          "type": "minecraft:matching_blocks",
+          "blocks": "#minecraft:nylium"
         },
         {
           "type": "minecraft:not",
