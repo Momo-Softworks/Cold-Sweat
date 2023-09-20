@@ -47,6 +47,40 @@ public class Temperature
     private Temperature() {}
 
     /**
+     * Converts a double temperature to a different unit. If {@code from} and {@code to} are the same, returns {@code value}.<br>
+     * @param value The temperature to convert.
+     * @param from The unit to convert from.
+     * @param to The unit to convert to.
+     * @param absolute Used when dealing with world temperatures with Minecraft units.
+     * @return The converted temperature.
+     */
+    public static double convertTemp(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
+    {
+        switch (from)
+        {
+            case C : switch (to)
+            {
+                case C  : return value;
+                case F  : return value * 1.8 + 32d;
+                case MC : return value / 23.333333333d;
+            }
+            case F : switch (to)
+            {
+                case C  : return (value - 32) / 1.8;
+                case F  : return value;
+                case MC : return (value - (absolute ? 32d : 0d)) / 42d;
+            }
+            case MC : switch (to)
+            {
+                case C  : return value * 23.333333333d;
+                case F  : return value * 42d + (absolute ? 32d : 0d);
+                case MC : return value;
+            }
+        }
+        return value;
+    }
+
+    /**
      * Returns the player's temperature of the specified type.
      */
     public static double get(LivingEntity entity, Type type)

@@ -25,11 +25,11 @@ public class LavaBlockTemp extends BlockTemp
 
     @Override
     public double maxEffect() {
-        return CSMath.convertTemp(300, Temperature.Units.F, Temperature.Units.MC, false);
+        return Temperature.convertUnits(300, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double maxTemperature() {
-        return CSMath.convertTemp(1000, Temperature.Units.F, Temperature.Units.MC, true);
+        return Temperature.convertUnits(1000, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

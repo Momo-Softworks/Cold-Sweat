@@ -27,11 +27,11 @@ public class IceboxBlockTemp extends BlockTemp
 
     @Override
     public double minEffect() {
-        return CSMath.convertTemp(-40, Temperature.Units.F, Temperature.Units.MC, false);
+        return Temperature.convertUnits(-40, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double minTemperature() {
-        return CSMath.convertTemp(32, Temperature.Units.F, Temperature.Units.MC, true);
+        return Temperature.convertUnits(32, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

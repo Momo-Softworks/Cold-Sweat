@@ -5,16 +5,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -79,8 +76,8 @@ public class ConfigPageDifficulty extends Screen
     private static String getTemperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
-             + color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
+        return color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
+             + color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
     }
 
     private static TextComponent getRateComponent(ConfigSettings.Difficulty difficulty)

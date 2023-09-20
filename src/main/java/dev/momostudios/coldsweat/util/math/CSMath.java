@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.util.math;
 
 import com.mojang.datafixers.util.Pair;
-import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -20,40 +19,6 @@ import java.util.function.BiConsumer;
 public class CSMath
 {
     private CSMath() {}
-
-    /**
-     * Converts a double temperature to a different unit. If {@code from} and {@code to} are the same, returns {@code value}.<br>
-     * @param value The temperature to convert.
-     * @param from The unit to convert from.
-     * @param to The unit to convert to.
-     * @param absolute Used when dealing with world temperatures with Minecraft units.
-     * @return The converted temperature.
-     */
-    public static double convertTemp(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
-    {
-        switch (from)
-        {
-            case C : switch (to)
-            {
-                case C  : return value;
-                case F  : return value * 1.8 + 32d;
-                case MC : return value / 23.333333333d;
-            }
-            case F : switch (to)
-            {
-                case C  : return (value - 32) / 1.8;
-                case F  : return value;
-                case MC : return (value - (absolute ? 32d : 0d)) / 42d;
-            }
-            case MC : switch (to)
-            {
-                case C  : return value * 23.333333333d;
-                case F  : return value * 42d + (absolute ? 32d : 0d);
-                case MC : return value;
-            }
-        }
-        return value;
-    }
 
     public static float toRadians(float input) {
         return input * (float) (Math.PI / 180);
@@ -336,9 +301,9 @@ public class CSMath
         return direction;
     }
 
-    public static Direction getDirectionFrom(Vector3d Vector3d)
+    public static Direction getDirectionFrom(Vector3d vec3)
     {
-        return getDirectionFrom(Vector3d.x, Vector3d.y, Vector3d.z);
+        return getDirectionFrom(vec3.x, vec3.y, vec3.z);
     }
 
     public static Direction getDirectionFrom(BlockPos from, BlockPos to)

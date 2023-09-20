@@ -50,7 +50,7 @@ public class WorldSettingsConfig
         dimensionOffsets = BUILDER
                 .comment("Applies an offset to the world's temperature across an entire dimension")
             .defineList("Dimension Temperature Offsets", Arrays.asList(
-                    Arrays.asList("minecraft:the_nether", 0.7),
+                    Arrays.asList("minecraft:the_nether", 1.0),
                     Arrays.asList("minecraft:the_end", -0.1)
             ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
 

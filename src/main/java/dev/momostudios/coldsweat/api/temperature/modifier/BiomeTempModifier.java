@@ -13,7 +13,11 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BiomeTempModifier extends TempModifier
 {
@@ -36,31 +40,42 @@ public class BiomeTempModifier extends TempModifier
             double worldTemp = 0;
             ResourceLocation dimensionID = world.dimension().location();
 
-            worldTemp += ConfigSettings.DIMENSION_OFFSETS.get().getOrDefault(dimensionID, 0d);
-            Number dimensionOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
+            // In the case that the dimension temperature is overridden by config, use that and skip everything else
+            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
+            if (dimTempOverride != null)
+            {   return temp -> temp + Temperature.convertUnits(dimTempOverride.getFirst(), dimTempOverride.getSecond(), Temperature.Units.MC, true);
+            }
 
-            if (dimensionOverride != null)
-            {   return temp -> temp + dimensionOverride.doubleValue();
+            // Add dimension offset, if present
+            Pair<Double, Temperature.Units> dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get().get(dimensionID);
+            if (dimTempOffset != null)
+            {   worldTemp += Temperature.convertUnits(dimTempOffset.getFirst(), dimTempOffset.getSecond(), Temperature.Units.MC, false);
+            }
+
+            // Fallback for improper sample count
+            int samples;
+            if (this.getNBT().contains("Samples"))
+            {   samples = this.getNBT().getInt("Samples");
             }
             else
+            {   samples = 25;
+                this.getNBT().putInt("Samples", 25);
+            }
+
+
+            for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
             {
-                // Fallback for improper sample count
-                int samples;
-                if (this.getNBT().contains("Samples"))
-                {   samples = this.getNBT().getInt("Samples");
-                }
-                else
-                {   samples = 25;
-                    this.getNBT().putInt("Samples", 25);
-                }
-
-
-                for (BlockPos blockPos : WorldHelper.getPositionGrid(entity.blockPosition(), samples, 16))
+                List<Biome> biomeList = WorldHelper.getHeight(blockPos, world) < entity.getY()
+                                                ? Arrays.asList(world.getBiomeManager().getBiome(blockPos))
+                                                : Stream.of(world.getBiomeManager().getBiome(blockPos),
+                                                            world.getBiomeManager().getBiome(blockPos.above(8)),
+                                                            world.getBiomeManager().getBiome(blockPos.above(16)),
+                                                            world.getBiomeManager().getBiome(blockPos.below(8)),
+                                                            world.getBiomeManager().getBiome(blockPos.below(16))).distinct().collect(Collectors.toList());
+                for (Biome biome : biomeList)
                 {
-                    int x = blockPos.getX();
-                    int y = blockPos.getY();
-                    int z = blockPos.getZ();
-                    Biome biome = world.getUncachedNoiseBiome(x >> 2, y >> 2, z >> 2);
+                    if (biome == null) continue;
+
                     ResourceLocation biomeID = biome.getRegistryName();
 
                     Pair<Double, Double> configTemp;
@@ -81,6 +96,7 @@ public class BiomeTempModifier extends TempModifier
                     double max = configTemp.getSecond();
 
                     // Divide by this to get average
+                    double divisor = samples * biomeList.size();
 
                     DimensionType dimension = world.dimensionType();
                     if (!dimension.hasCeiling())
@@ -88,12 +104,12 @@ public class BiomeTempModifier extends TempModifier
                         double altitude = entity.getY();
                         double mid = (min + max) / 2;
                         // Biome temp with time of day
-                        worldTemp += CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1d, 1d) / samples
-                                   // Altitude calculation
-                                   + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / samples;
+                        worldTemp += CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1, 1) / divisor
+                                  // Altitude calculation
+                                  + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight()) / divisor;
                     }
                     // If dimension has ceiling (don't use time or altitude)
-                    else worldTemp += CSMath.average(max, min) / samples;
+                    else worldTemp += CSMath.average(max, min) / divisor;
                 }
             }
             double finalWorldTemp = worldTemp;

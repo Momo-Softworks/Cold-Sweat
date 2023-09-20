@@ -1,7 +1,6 @@
 package dev.momostudios.coldsweat.config;
 
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -95,11 +94,11 @@ public class ColdSweatConfig
         BUILDER.push("Details about how the player is affected by temperature");
         minHabitable = BUILDER
                 .comment("Defines the minimum habitable temperature")
-                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", CSMath.convertTemp(50, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         maxHabitable = BUILDER
                 .comment("Defines the maximum habitable temperature")
-                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", CSMath.convertTemp(90, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
