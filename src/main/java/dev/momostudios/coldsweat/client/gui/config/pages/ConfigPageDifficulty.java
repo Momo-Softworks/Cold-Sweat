@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.*;
 import dev.momostudios.coldsweat.api.util.Temperature;
 import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -75,8 +74,8 @@ public class ConfigPageDifficulty extends Screen
     private static String getTemperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
-             + color + df.format(CSMath.convertTemp(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
+        return color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
+             + color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
     }
 
     private static Component getRateComponent(ConfigSettings.Difficulty difficulty)

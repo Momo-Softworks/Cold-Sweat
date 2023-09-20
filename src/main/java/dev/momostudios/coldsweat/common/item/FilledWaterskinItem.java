@@ -241,7 +241,7 @@ public class FilledWaterskinItem extends Item
         String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
-        if (celsius) temp = CSMath.convertTemp(temp, Temperature.Units.F, Temperature.Units.C, true);
+        if (celsius) temp = Temperature.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
         tooltip.add(1, Component.literal("§7" + Component.translatable(

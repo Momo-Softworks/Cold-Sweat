@@ -74,7 +74,7 @@ public class RegisterItemOverrides
                                 case -4 -> "§9";
                                 default -> "§r";
                             };
-                            int convertedTemp = (int) CSMath.convertTemp(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
+                            int convertedTemp = (int) Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
                             frame.getItem().setHoverName(Component.literal(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
                         }
                     }

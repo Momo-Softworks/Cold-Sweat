@@ -24,10 +24,25 @@ public class ValueHolder<T>
     {   this.valueCreator = valueCreator;
     }
 
-    public static <V> ValueHolder<V> of(Supplier<V> valueCreator)
+    /**
+     * Creates a simple value holder.
+     * @param valueCreator A supplier that returns the holder's value.
+     * @return A value holder.
+     * @param <V> The type of the value.
+     */
+    public static <V> ValueHolder<V> simple(Supplier<V> valueCreator)
     {   return new ValueHolder<>(valueCreator);
     }
 
+    /**
+     * Creates a value holder that can be synced between the server and client.
+     * @param valueCreator A supplier that returns the holder's value.
+     * @param encoder Writes the value to a CompoundTag.
+     * @param decoder Reads the value from a CompoundTag.
+     * @param saver Writes the value to a config file. This may be either on the server or client.
+     * @return A synced value holder.
+     * @param <V> The type of the value.
+     */
     public static <V> ValueHolder<V> synced(Supplier<V> valueCreator, Function<V, CompoundTag> encoder, Function<CompoundTag, V> decoder, Consumer<V> saver)
     {
         ValueHolder<V> loader = new ValueHolder<>(valueCreator);

@@ -3,7 +3,6 @@ package dev.momostudios.coldsweat.util.math;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3d;
-import dev.momostudios.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -21,39 +20,6 @@ import java.util.function.BiConsumer;
 public class CSMath
 {
     private CSMath() {}
-
-    /**
-     * Converts a double temperature to a different unit. If {@code from} and {@code to} are the same, returns {@code value}.<br>
-     * @param value The temperature to convert.
-     * @param from The unit to convert from.
-     * @param to The unit to convert to.
-     * @param absolute Used when dealing with world temperatures with Minecraft units.
-     * @return The converted temperature.
-     */
-    public static double convertTemp(double value, Temperature.Units from, Temperature.Units to, boolean absolute)
-    {
-        return switch (from)
-        {
-            case C -> switch (to)
-            {
-                case C -> value;
-                case F -> value * 1.8 + 32d;
-                case MC -> value / 23.333333333d;
-            };
-            case F -> switch (to)
-            {
-                case C -> (value - 32) / 1.8;
-                case F -> value;
-                case MC -> (value - (absolute ? 32d : 0d)) / 42d;
-            };
-            case MC -> switch (to)
-            {
-                case C -> value * 23.333333333d;
-                case F -> value * 42d + (absolute ? 32d : 0d);
-                case MC -> value;
-            };
-        };
-    }
 
     public static float toRadians(float input) {
         return input * (float) (Math.PI / 180);

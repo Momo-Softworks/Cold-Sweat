@@ -7,7 +7,6 @@ import dev.momostudios.coldsweat.client.gui.config.ConfigScreen;
 import dev.momostudios.coldsweat.common.capability.EntityTempManager;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.config.ConfigSettings;
-import dev.momostudios.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -73,16 +72,16 @@ public class ConfigPageOne extends AbstractConfigPage
             clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.WORLD_TEMP = CSMath.convertTemp(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
+                Overlays.WORLD_TEMP = Temperature.convertUnits(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
             properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convertUnits(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
 
             ((EditBox) this.widgetBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
         }, false, false, true, Component.translatable("cold_sweat.config.units.desc").getString());
 
 
@@ -94,14 +93,14 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, Component.translatable("cold_sweat.config.max_temperature.name"),
-                value -> ConfigSettings.MAX_TEMP.set(CSMath.convertTemp(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MAX_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convertUnits(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
                 true, false, false, Component.translatable("cold_sweat.config.max_temperature.desc").getString());
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, Component.translatable("cold_sweat.config.min_temperature.name"),
-                value -> ConfigSettings.MIN_TEMP.set(CSMath.convertTemp(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(CSMath.convertTemp(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MIN_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
                 true, false, false, Component.translatable("cold_sweat.config.min_temperature.desc").getString());
 
         // Rate Multiplier
