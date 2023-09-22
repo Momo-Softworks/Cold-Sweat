@@ -1,10 +1,9 @@
 package dev.momostudios.coldsweat.api.temperature.modifier;
 
-import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.api.registry.BlockTempRegistry;
 import dev.momostudios.coldsweat.api.temperature.block_temp.BlockTemp;
 import dev.momostudios.coldsweat.api.util.Temperature;
-import dev.momostudios.coldsweat.config.WorldSettingsConfig;
+import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
@@ -19,10 +18,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
+import oshi.util.tuples.Triplet;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
@@ -33,22 +31,28 @@ public class BlockTempModifier extends TempModifier
     {   this.getNBT().putInt("RangeOverride", range);
     }
 
+    Map<ChunkPos, ChunkAccess> chunks = new HashMap<>(16);
+
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        Map<BlockTemp, Double> affectMap = new HashMap<>();
-        Map<BlockPos, Pair<BlockTemp, Double>> triggers = new HashMap<>();
-        Map<ChunkPos, ChunkAccess> chunks = new HashMap<>();
-        Map<BlockPos, BlockState> stateCache = new HashMap<>();
+        Map<BlockTemp, Double> affectMap = new HashMap<>(128);
+        Map<BlockPos, BlockState> stateCache = new HashMap<>(512);
+        List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>();
 
         Level level = entity.level;
-        int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : WorldSettingsConfig.getInstance().getBlockRange();
+        int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
 
         int entX = entity.blockPosition().getX();
         int entY = entity.blockPosition().getY();
         int entZ = entity.blockPosition().getZ();
         BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
         int minBuildHeight = level.getMinBuildHeight();
+
+        // Remove old chunks from the cache
+        while (chunks.keySet().size() > 16)
+        {   chunks.remove(chunks.keySet().iterator().next());
+        }
 
         boolean shouldTickAdvancements = this.getTicksExisted() % 20 == 0;
 
@@ -135,7 +139,7 @@ public class BlockTempModifier extends TempModifier
                                 affectMap.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
-                                {   triggers.put(blockpos, Pair.of(blockTemp, distance));
+                                {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
                                 }
                             }
                         }
@@ -147,9 +151,8 @@ public class BlockTempModifier extends TempModifier
         // Trigger advancements at every BlockPos with a BlockEffect attached to it
         if (entity instanceof ServerPlayer player && shouldTickAdvancements)
         {
-            for (Map.Entry<BlockPos, Pair<BlockTemp, Double>> trigger : triggers.entrySet())
-            {   Pair<BlockTemp, Double> entry = trigger.getValue();
-                ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getKey(), entry.getSecond(), affectMap.get(entry.getFirst()));
+            for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getA(), trigger.getC(), affectMap.get(trigger.getB()));
             }
         }
 
