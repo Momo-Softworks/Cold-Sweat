@@ -27,11 +27,9 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -105,6 +103,24 @@ public class WorldHelper
         {
             for (int z = -radius; z < radius; z += interval)
             {   posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
+            }
+        }
+
+        return posList;
+    }
+
+    public static List<BlockPos> getPositionCube(BlockPos pos, int root, int interval)
+    {
+        List<BlockPos> posList = new ArrayList<>();
+        int radius = (root * interval) / 2;
+
+        for (int x = -radius; x < radius; x += interval)
+        {
+            for (int y = -radius; y < radius; y += interval)
+            {
+                for (int z = -radius; z < radius; z += interval)
+                {   posList.add(pos.offset(x + interval / 2, y + interval / 2, z + interval / 2));
+                }
             }
         }
 
