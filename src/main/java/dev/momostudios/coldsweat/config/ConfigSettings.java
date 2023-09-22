@@ -52,6 +52,7 @@ public class ConfigSettings
     public static final ValueHolder<Double[]> SPRING_TEMPS;
 
     // Block settings
+    public static final ValueHolder<Integer> BLOCK_RANGE;
     public static final ValueHolder<Boolean> COLD_SOUL_FIRE;
     public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
     public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
@@ -391,6 +392,11 @@ public class ConfigSettings
             }
             return map;
         });
+
+        BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
+        encoder -> ConfigHelper.writeNBTInt(encoder, "BlockRange"),
+        decoder -> decoder.getInt("BlockRange"),
+        saver -> WorldSettingsConfig.getInstance().setBlockRange(saver));
 
         COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
 
