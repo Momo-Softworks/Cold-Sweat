@@ -109,6 +109,24 @@ public class WorldHelper
         return posList;
     }
 
+    public static List<BlockPos> getPositionCube(BlockPos pos, int root, int interval)
+    {
+        List<BlockPos> posList = new ArrayList<>();
+        int radius = (root * interval) / 2;
+
+        for (int x = -radius; x < radius; x += interval)
+        {
+            for (int y = -radius; y < radius; y += interval)
+            {
+                for (int z = -radius; z < radius; z += interval)
+                {   posList.add(pos.offset(x + interval / 2, y + interval / 2, z + interval / 2));
+                }
+            }
+        }
+
+        return posList;
+    }
+
     /**
      * More accurate method for detecting skylight access. Relies on block hitbox shape instead of light level.
      * @param pos The position to check
