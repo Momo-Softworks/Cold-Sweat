@@ -1,8 +1,8 @@
 package dev.momostudios.coldsweat.client.event;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.client.gui.tooltip.*;
-import dev.momostudios.coldsweat.common.capability.IInsulatableCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
@@ -15,23 +15,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
+    public static final TextFormatting COLD = TextFormatting.BLUE;
+    public static final TextFormatting HOT  = TextFormatting.RED;
+
     @SubscribeEvent
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
@@ -46,6 +49,20 @@ public class TooltipHandler
                  {   event.getToolTip().add(1, new StringTextComponent(""));
                  }
             event.getToolTip().add(1, new StringTextComponent(" §0---§r"));
+        }
+        else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
+        {
+            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(event.getItemStack().getItem(), (item, temp) ->
+            {
+                int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getToolTip().size() - 1 : event.getToolTip().size();
+                event.getToolTip().add(index,
+                        temp > 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
+                                 : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
+                );
+                event.getToolTip().add(index, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+                event.getToolTip().add(index, new StringTextComponent(""));
+                return temp;
+            });
         }
         // Is insulation item
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(),

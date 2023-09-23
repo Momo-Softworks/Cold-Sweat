@@ -38,7 +38,8 @@
 
   "tooltip.cold_sweat.insulated": "隔热",
   "tooltip.cold_sweat.hotbar": "放置在快捷栏:",
-  "tooltip.cold_sweat.waterskin": "%d 每秒温度",
+  "tooltip.cold_sweat.consumed": "消耗时:",
+  "tooltip.cold_sweat.temperature_effect": "%d 温度",
 
 
   "effect.cold_sweat.insulated":            "舒适",

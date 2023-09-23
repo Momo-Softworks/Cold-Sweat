@@ -38,7 +38,8 @@
 
   "tooltip.cold_sweat.insulated": "Insulated",
   "tooltip.cold_sweat.hotbar": "When in Hotbar:",
-  "tooltip.cold_sweat.waterskin": "%d Temperature per Second",
+  "tooltip.cold_sweat.consumed": "When Consumed:",
+  "tooltip.cold_sweat.temperature_effect": "%d Temperature",
 
 
   "effect.cold_sweat.insulated":            "Insulation",
