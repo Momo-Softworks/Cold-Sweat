@@ -48,7 +48,7 @@ public class BiomeTempModifier extends TempModifier
             }
 
             int biomeCount = 0;
-            for (BlockPos blockPos : world.dimensionType().hasCeiling() ? WorldHelper.getPositionCube(entPos, 6, 10) : WorldHelper.getPositionGrid(entPos, 36, 10))
+            for (BlockPos blockPos : WorldHelper.getPositionGrid(entPos, 36, 10))
             {
                 if (!World.isInWorldBounds(blockPos) || blockPos.distSqr(entPos) > 30*30) continue;
                 Biome biome = world.getBiomeManager().getBiome(blockPos);
