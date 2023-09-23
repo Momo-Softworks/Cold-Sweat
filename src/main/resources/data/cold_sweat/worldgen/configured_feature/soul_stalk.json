@@ -4,7 +4,7 @@
     "tries": 20,
     "min_count": 2,
     "max_count": 6,
-    "spread_xz": 16,
+    "spread_xz": 12,
     "spread_y": 8,
     "disk_width": 4,
     "disk_height": 2,
@@ -30,24 +30,8 @@
       ]
     },
     "disk_replace_target": {
-      "type": "minecraft:all_of",
-      "predicates": [
-        {
-          "type": "minecraft:matching_blocks",
-          "blocks": "#minecraft:base_stone_nether"
-        },
-        {
-          "type": "minecraft:matching_blocks",
-          "blocks": "#minecraft:nylium"
-        },
-        {
-          "type": "minecraft:not",
-          "predicate": {
-            "type": "minecraft:matching_blocks",
-            "blocks": "#cold_sweat:may_place_on/soul_stalk"
-          }
-        }
-      ]
+      "type": "minecraft:matching_blocks",
+      "blocks": "#cold_sweat:soul_sand_replaceable"
     }
   }
 }

@@ -91,7 +91,7 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
             {
                 for (int z = -radiusZ; z <= radiusZ; z++)
                 {
-                    if ((x * x) / (radiusX * radiusX) + (y * y) / (radiusY * radiusY) + (z * z) / (radiusZ * radiusZ) <= 1)
+                    if (Math.pow((double) x / radiusX, 2) + Math.pow((double) y / radiusY, 2) + Math.pow((double) z / radiusZ, 2) < 1)
                     {
                         BlockPos diskPos = pos.offset(x, y, z);
                         if (diskReplacer.test(level, diskPos))
