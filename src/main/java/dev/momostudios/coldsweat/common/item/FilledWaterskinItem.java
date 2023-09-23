@@ -2,6 +2,7 @@ package dev.momostudios.coldsweat.common.item;
 
 import dev.momostudios.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.client.event.TooltipHandler;
 import dev.momostudios.coldsweat.config.ClientSettingsConfig;
 import dev.momostudios.coldsweat.core.event.TaskScheduler;
 import dev.momostudios.coldsweat.core.init.ItemInit;
@@ -235,8 +236,8 @@ public class FilledWaterskinItem extends Item
         // Info tooltip for hotbar functionality
         tooltip.add(new TextComponent(""));
         tooltip.add(new TranslatableComponent("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
-        tooltip.add(new TranslatableComponent("tooltip.cold_sweat.waterskin", (CSMath.getSign(temp) >= 0 ? "+" : "-")
-                                                                         + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).withStyle(ChatFormatting.BLUE));
+        tooltip.add(new TranslatableComponent("tooltip.cold_sweat.temperature_effect", (CSMath.getSign(temp) >= 0 ? "+" : "-") + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0))
+                            .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : ChatFormatting.WHITE));
 
         // Tooltip to display temperature
         boolean celsius = ClientSettingsConfig.getInstance().isCelsius();

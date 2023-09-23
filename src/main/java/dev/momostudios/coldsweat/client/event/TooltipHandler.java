@@ -7,16 +7,20 @@ import dev.momostudios.coldsweat.common.capability.ItemInsulationCap;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
 import dev.momostudios.coldsweat.common.capability.ItemInsulationManager;
-import dev.momostudios.coldsweat.common.capability.ModCapabilities;
 import dev.momostudios.coldsweat.common.item.SoulspringLampItem;
 import dev.momostudios.coldsweat.config.ConfigSettings;
 import dev.momostudios.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.Wearable;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -27,7 +31,10 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
-    @SubscribeEvent
+    public static final ChatFormatting COLD = ChatFormatting.BLUE;
+    public static final ChatFormatting HOT = ChatFormatting.RED;
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
@@ -41,6 +48,20 @@ public class TooltipHandler
             {   event.getTooltipElements().add(1, Either.left(new TextComponent("§9? §8'Shift'")));
             }
             event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
+        }
+        else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
+        {
+            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(event.getItemStack().getItem(), (item, temp) ->
+            {
+                int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getTooltipElements().size() - 1 : event.getTooltipElements().size();
+                event.getTooltipElements().add(index, Either.left(
+                        temp > 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
+                                 : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
+                        ));
+                event.getTooltipElements().add(index, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
+                event.getTooltipElements().add(index, Either.left(new TextComponent("")));
+                return temp;
+            });
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
