@@ -1639,3 +1639,17 @@ Fixes:
 Fixes:
 - (1.16) Fixed the soulspring lamp not accepting fuel
 - (1.16) Fixed biome temperatures sometimes being set to MC units in the config
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05f
+- (1.16) Added support for shearing goats from the Caves & Cliffs Backport mod
+
+Fixes:
+- (1.18/1.19) Fixed armor insulation tooltips not displaying
+
+Technical Changes:
+- Player/entity/item capabilities are now cached, increasing performance
+
+Translation Updates:
+- Updated Chinese translation (by @wumeng on Discord)
