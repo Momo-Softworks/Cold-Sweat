@@ -1,6 +1,6 @@
 package dev.momostudios.coldsweat.common.event;
 
-import dev.momostudios.coldsweat.util.registries.ModFeatures;
+import dev.momostudios.coldsweat.util.registries.ModConfiguredFeatures;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
@@ -16,7 +16,7 @@ public class AddFeatureGeneration
         if (event.getName() == null) return;
 
         if (event.getCategory().equals(Biome.Category.NETHER))
-        {   event.getGeneration().getFeatures(GenerationStage.Decoration.VEGETAL_DECORATION).add(() -> ModFeatures.SOUL_STALK_CONFIG);
+        {   event.getGeneration().getFeatures(GenerationStage.Decoration.VEGETAL_DECORATION).add(() -> ModConfiguredFeatures.SOUL_STALK_CONFIG);
         }
     }
 }
