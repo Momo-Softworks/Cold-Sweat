@@ -12,11 +12,14 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.*;
 
+/**
+ * Required because configured features need to be lazily called, so they don't reference unloaded registry objects
+ */
 public class ModFeatures
 {
-    public static final Holder<ConfiguredFeature<SoulStalkFeatureConfig, ?>> SOUL_STALK = FeatureUtils.register("soul_stalk", FeatureInit.SOUL_STALK_FEATURE.get(), new SoulStalkFeatureConfig(
+    public static final Holder<ConfiguredFeature<SoulStalkFeatureConfig, ?>> SOUL_STALK_CONFIG = FeatureUtils.register("soul_stalk", FeatureInit.SOUL_STALK_FEATURE.get(), new SoulStalkFeatureConfig(
             20, 2, 6, 12, 8, 4, 2, BlockStateProvider.simple(Blocks.SOUL_SAND), BlockPredicate.matchesTag(ModBlockTags.SOUL_SAND_REPLACEABLE)));
 
-    public static final Holder<PlacedFeature> SOUL_STALK_PLACEMENT = PlacementUtils.register("soul_stalk_placement", SOUL_STALK,
-            RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome(), CountPlacement.of(1));
+    public static final Holder<PlacedFeature> SOUL_STALK_PLACEMENT = PlacementUtils.register("soul_stalk_placement", SOUL_STALK_CONFIG,
+                                                                                             RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome(), CountPlacement.of(1));
 }
