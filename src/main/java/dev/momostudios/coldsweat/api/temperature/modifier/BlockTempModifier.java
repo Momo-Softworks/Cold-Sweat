@@ -37,8 +37,8 @@ public class BlockTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
         Map<BlockTemp, Double> affectMap = new HashMap<>(128);
-        Map<BlockPos, BlockState> stateCache = new HashMap<>(512);
-        List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>();
+        Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);
+        List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(128);
 
         Level level = entity.level;
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
@@ -48,11 +48,6 @@ public class BlockTempModifier extends TempModifier
         int entZ = entity.blockPosition().getZ();
         BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
         int minBuildHeight = level.getMinBuildHeight();
-
-        // Remove old chunks from the cache
-        while (chunks.keySet().size() > 16)
-        {   chunks.remove(chunks.keySet().iterator().next());
-        }
 
         boolean shouldTickAdvancements = this.getTicksExisted() % 20 == 0;
 
@@ -156,6 +151,10 @@ public class BlockTempModifier extends TempModifier
             }
         }
 
+        // Remove old chunks from the cache
+        while (chunks.size() >= 16)
+        {   chunks.remove(chunks.keySet().iterator().next());
+        }
 
         // Add the effects of all the blocks together and return the result
         return temp ->
