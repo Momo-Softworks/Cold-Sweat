@@ -18,7 +18,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-group = 'dev.momosoftworks'
+group = 'dev.momostudios'
 version = '2.2-b05f'
 
 java {
