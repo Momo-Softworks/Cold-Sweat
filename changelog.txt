@@ -1653,3 +1653,20 @@ Technical Changes:
 
 Translation Updates:
 - Updated Chinese translation (by @wumeng on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05g
+- Soul stalk can now generate with a patch disk of soul sand underneath, allowing it to generate in almost any biome
+      - This should help with its reliability and make it more accessible to newer players
+- Foods with temperature values assigned via configs now have a tooltip displaying their effects
+- The vague temperature gauge now has a white outline when the player is in a critically hot/cold environment
+
+Fixes:
+- (1.16) Fixed crash due to MixinWorldRender not being remapped properly
+- (1.18+) Fixed crash when using tags in config settings
+- (1.18+) Fixed temperature inconsistency/jitter when traversing 3D biomes in some cases
+
+Technical Changes:
+- CSMath.convertUnits() has been moved to the Temperature class
+- All dev.momostudios packages have been changed to com.momosoftworks (sorry)
