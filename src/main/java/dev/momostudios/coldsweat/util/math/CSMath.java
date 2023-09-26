@@ -16,10 +16,15 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class CSMath
 {
     private CSMath() {}
+
+    public static <T> void ifNotNull(T object, Consumer<T> run)
+    {   if (object != null) run.accept(object);
+    }
 
     public static float toRadians(float input) {
         return input * (float) (Math.PI / 180);
