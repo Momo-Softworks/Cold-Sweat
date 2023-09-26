@@ -15,13 +15,13 @@ import net.minecraft.world.gen.placement.TopSolidRangeConfig;
 /**
  * Required because configured features need to be lazily called, so they don't reference unloaded registry objects
  */
-public class ModConfiguredFeatures
+public class ModFeatures
 {
     public static final ConfiguredFeature<?, ?> SOUL_STALK_CONFIG = Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, "soul_stalk_config",
                                                                                       FeatureInit.SOUL_STALK_FEATURE.get().configured(new SoulStalkFeatureConfig(
                                                                                                       20, 2, 6, 12, 8, 4, 2,
                                                                                                       new SimpleBlockStateProvider(Blocks.SOUL_SAND.defaultBlockState()),
-                                                                                                      ModBlockTags.SOUL_SAND_REPLACEABLE)).squared().count(1).chance(5)
+                                                                                                      ModBlockTags.SOUL_SAND_REPLACEABLE)).squared().count(1).chance(16)
                                                                                               .decorated(Features.Placements.HEIGHTMAP_DOUBLE)
                                                                                               .decorated(Placement.RANGE.configured(new TopSolidRangeConfig(10, 10, 256))));
 }
