@@ -3,6 +3,7 @@ package dev.momostudios.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Pair;
 import dev.momostudios.coldsweat.ColdSweat;
 import dev.momostudios.coldsweat.api.util.Temperature;
+import dev.momostudios.coldsweat.util.math.CSMath;
 import dev.momostudios.coldsweat.util.world.WorldHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -29,9 +30,10 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
-                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
-                optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
+                CSMath.ifNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
+                {   Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
+                });
             }
             else
             {
@@ -48,23 +50,24 @@ public class ConfigHelper
         Map<Block, Number> map = new HashMap<>();
         for (List<?> entry : source)
         {
-            String blockID = (String) entry.get(0);
+            String id = (String) entry.get(0);
 
-            if (blockID.startsWith("#"))
+            if (id.startsWith("#"))
             {
-                final String tagID = blockID.replace("#", "");
-                Optional<ITag<Block>> optionalTag = ForgeRegistries.BLOCKS.tags().stream().filter(tag ->
-                                                    tag.getKey().location().toString().equals(tagID)).findFirst();
-                optionalTag.ifPresent(blockITag ->
+                final String tagID = id.replace("#", "");
+                CSMath.ifNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
                 {
-                    for (Block block : optionalTag.get().stream().toList())
-                    {
-                        map.put(block, (Number) entry.get(1));
-                    }
+                    Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+
+                    optionalTag.ifPresent(itemITag ->
+                    {   for (Block block : optionalTag.get().stream().toList())
+                        {   map.put(block, (Number) entry.get(1));
+                        }
+                    });
                 });
             }
             else
-            {   Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockID));
+            {   Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
                 if (newBlock != null) map.put(newBlock, (Number) entry.get(1));
             }
         }
@@ -79,9 +82,10 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
-                        tag.getKey().location().toString().equals(tagID)).findFirst();
-                optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
+                CSMath.ifNotNull(ForgeRegistries.ITEMS.tags(), tags ->
+                {   Optional<ITag<Item>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
+                });
             }
             else
             {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
@@ -91,7 +95,6 @@ public class ConfigHelper
         }
         return items;
     }
-
 
     public static Map<Item, Double> getItemsWithValues(List<? extends List<?>> source)
     {
@@ -103,20 +106,18 @@ public class ConfigHelper
             if (itemID.startsWith("#"))
             {
                 final String tagID = itemID.replace("#", "");
-                Optional<ITag<Item>> optionalTag = ForgeRegistries.ITEMS.tags().stream().filter(tag ->
-                                                   tag.getKey().location().toString().equals(tagID)).findFirst();
-                optionalTag.ifPresent(itemITag ->
+                CSMath.ifNotNull(ForgeRegistries.ITEMS.tags(), tags ->
                 {
-                    for (Item item : optionalTag.get().stream().toList())
-                    {
-                        map.put(item, ((Number) entry.get(1)).doubleValue());
-                    }
+                    Optional<ITag<Item>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(itemITag ->
+                    {   for (Item item : optionalTag.get().stream().toList())
+                        {   map.put(item, ((Number) entry.get(1)).doubleValue());
+                        }
+                    });
                 });
             }
             else
-            {
-                Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
-
+            {   Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
                 if (newItem != null) map.put(newItem, ((Number) entry.get(1)).doubleValue());
             }
         }
