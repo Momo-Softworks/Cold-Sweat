@@ -1669,4 +1669,4 @@ Fixes:
 
 Technical Changes:
 - CSMath.convertUnits() has been moved to the Temperature class
-- All dev.momostudios packages have been changed to com.momosoftworks (sorry)
+- All com.momosoftworks packages have been changed to com.momosoftworks (sorry)
