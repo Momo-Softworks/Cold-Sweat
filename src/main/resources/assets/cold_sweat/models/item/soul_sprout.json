@@ -2,6 +2,6 @@
   "parent": "item/generated",
   "textures":
   {
-    "layer0": "cold_sweat:items/soul_sprout"
+    "layer0": "cold_sweat:item/soul_sprout"
   }
 }

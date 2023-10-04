@@ -52,7 +52,7 @@ public class MixinCampfire
         {
             double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
             CompoundTag tag = result.getOrCreateTag();
-            BlockState state = level.getBlockState(new BlockPos(x, y, z));
+            BlockState state = level.getBlockState(BlockPos.containing(x, y, z));
             if (state.is(ModBlockTags.SOUL_CAMPFIRES))
             {   tag.putDouble("temperature", waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
             }

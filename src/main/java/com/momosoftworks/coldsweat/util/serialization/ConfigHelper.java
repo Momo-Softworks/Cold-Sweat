@@ -146,7 +146,7 @@ public class ConfigHelper
                 // The config only defines a mid-temperature
                 else
                 {   double mid = ((Number) entry.get(1)).doubleValue();
-                    double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                    double variance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
                     min = mid - variance;
                     max = mid + variance;
                     units = Temperature.Units.MC;

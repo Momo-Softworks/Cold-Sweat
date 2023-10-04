@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "cold_sweat:items/minecart_insulation"
+    "layer0": "cold_sweat:item/minecart_insulation"
   }
 }

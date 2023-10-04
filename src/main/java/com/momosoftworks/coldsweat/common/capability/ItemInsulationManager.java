@@ -78,7 +78,7 @@ public class ItemInsulationManager
             {
                 getInsulationCap(event.getObject()).ifPresent(iCap ->
                 {
-                    EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getSlot() : null;
+                    EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getType().getSlot() : null;
                     if (slot != null)
                     {
                         stackNBT.remove("insulated");
@@ -169,7 +169,7 @@ public class ItemInsulationManager
     public static boolean isInsulatable(ItemStack stack)
     {
         Item item = stack.getItem();
-        return item instanceof Wearable
+        return item instanceof Equipable
             && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item)
             && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item);
     }

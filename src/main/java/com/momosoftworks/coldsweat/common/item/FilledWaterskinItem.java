@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -46,7 +45,7 @@ public class FilledWaterskinItem extends Item
 {
     public FilledWaterskinItem()
     {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
+        super(new Properties().stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
 
         DispenserBlock.registerBehavior(this, (source, stack) ->
         {
@@ -90,8 +89,7 @@ public class FilledWaterskinItem extends Item
                 List<Player> affectedPlayers = new ArrayList<>();
 
                 void start()
-                {
-                    MinecraftForge.EVENT_BUS.register(this);
+                {   MinecraftForge.EVENT_BUS.register(this);
                 }
 
                 @SubscribeEvent
@@ -107,10 +105,9 @@ public class FilledWaterskinItem extends Item
                         aabb[0] = movedBox = aabb[0].move(0, -acceleration, 0);
 
                         // If there's ground, stop
-                        BlockPos pos = new BlockPos(movedBox.minX, movedBox.minY, movedBox.minZ);
+                        BlockPos pos = BlockPos.containing(movedBox.minX, movedBox.minY, movedBox.minZ);
                         if (WorldHelper.isSpreadBlocked(level, chunk.getBlockState(pos), pos, Direction.DOWN, Direction.DOWN))
-                        {
-                            MinecraftForge.EVENT_BUS.unregister(this);
+                        {   MinecraftForge.EVENT_BUS.unregister(this);
                             return;
                         }
 
@@ -118,8 +115,7 @@ public class FilledWaterskinItem extends Item
                         level.getEntitiesOfClass(Player.class, movedBox).forEach(player ->
                         {
                             if (!affectedPlayers.contains(player))
-                            {
-                                // Apply the effect and store the player
+                            {   // Apply the effect and store the player
                                 Temperature.addModifier(player, new WaterskinTempModifier(waterTemp).expires(0), Temperature.Type.CORE, true);
                                 affectedPlayers.add(player);
                             }

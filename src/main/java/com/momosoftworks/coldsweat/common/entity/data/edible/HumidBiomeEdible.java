@@ -32,7 +32,7 @@ public class HumidBiomeEdible extends Edible
             entity.setSearching(true);
 
             // Locate the nearest biome with temp > 0.8 and humid
-            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findClosestBiome3d(holder -> holder.value().isHumid(), entity.blockPosition(), 2000, 32, 64);
+            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findClosestBiome3d(holder -> holder.value().getModifiedClimateSettings().downfall() > 0.85f, entity.blockPosition(), 2000, 32, 64);
 
             if (biomePair != null)
             {

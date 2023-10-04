@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,7 +51,7 @@ public class IceboxBlock extends Block implements EntityBlock
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties();
     }
 
     public IceboxBlock(Block.Properties properties)

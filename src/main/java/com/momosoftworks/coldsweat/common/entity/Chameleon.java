@@ -35,6 +35,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -137,8 +138,8 @@ public class Chameleon extends Animal
     public boolean isInvulnerableTo(@NotNull DamageSource source)
     {
         if (this.getVehicle() instanceof Player player)
-        {
-            if (source.equals(DamageSource.IN_WALL) || source.equals(DamageSource.FALL)) return true;
+        {   DamageSources damageSources = player.level.damageSources();
+            if (source.equals(damageSources.inWall()) || source.equals(damageSources.fall())) return true;
             return player.isCreative() || player.isInvulnerableTo(source);
         }
         return super.isInvulnerableTo(source);
@@ -415,12 +416,12 @@ public class Chameleon extends Animal
             {
                 if (this.isTamingItem(itemEntity.getItem()))
                 {
-                    Player player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
+                    Player player = itemEntity.getOwner() != null ? this.level.getPlayerByUUID(itemEntity.getOwner().getUUID()) : null;
                     if (player != null && !this.isPlayerTrusted(player))
                     {
                         if (player.isCreative() || Math.random() < 0.3)
                         {   this.setPersistenceRequired();
-                            this.addTrustedPlayer(itemEntity.getThrower());
+                            this.addTrustedPlayer(itemEntity.getOwner().getUUID());
                             WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
                         }
                         else

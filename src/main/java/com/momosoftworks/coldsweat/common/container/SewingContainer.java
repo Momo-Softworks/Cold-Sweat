@@ -25,9 +25,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
-import net.minecraft.world.item.Wearable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
@@ -129,7 +130,7 @@ public class SewingContainer extends AbstractContainerMenu
             public boolean mayPlace(ItemStack stack)
             {
                 Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
-                return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
+                return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
             @Override
@@ -275,8 +276,10 @@ public class SewingContainer extends AbstractContainerMenu
         });
 
         // Get equip sound for the armor item
-        SoundEvent equipSound = stack.getItem().getEquipSound();
-        if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+        if (stack.getItem() instanceof ArmorItem armor)
+        {   SoundEvent equipSound = armor.getMaterial().getEquipSound();
+            player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+        }
     }
 
     static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
@@ -298,7 +301,7 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack insulatorItem = this.getItem(1);
 
         // Is the first item armor, and the second item an insulator
-        if (wearableItem.getItem() instanceof Wearable)
+        if (wearableItem.getItem() instanceof Equipable)
         {
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
@@ -312,7 +315,7 @@ public class SewingContainer extends AbstractContainerMenu
             }
             // Item is for insulation
             else if ((ConfigSettings.INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()) || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(insulatorItem.getItem()))
-            && (!(insulatorItem.getItem() instanceof Wearable)
+            && (!(insulatorItem.getItem() instanceof Equipable)
             || LivingEntity.getEquipmentSlotForItem(wearableItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = wearableItem.copy();

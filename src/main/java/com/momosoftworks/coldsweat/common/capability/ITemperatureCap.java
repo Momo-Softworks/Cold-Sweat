@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.EnumMap;
@@ -22,7 +23,7 @@ public interface ITemperatureCap
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);
     default void dealTempDamage(LivingEntity target, DamageSource source, float amount)
-    {   target.hurt(ConfigSettings.DAMAGE_SCALING.get() ? source.setScalesWithDifficulty() : source, amount);
+    {   target.hurt(source, amount);
     }
 
     CompoundTag serializeNBT();

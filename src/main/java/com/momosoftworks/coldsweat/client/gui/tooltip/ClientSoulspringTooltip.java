@@ -35,7 +35,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
+    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer)
     {
         RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
         GuiComponent.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
@@ -46,7 +46,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
 
             int i = 0;
             for (Item item : ConfigSettings.LAMP_FUEL_ITEMS.get().keySet())
-            {   itemRenderer.renderGuiItem(item.getDefaultInstance(), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
+            {   itemRenderer.renderGuiItem(poseStack, item.getDefaultInstance(), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }
         }

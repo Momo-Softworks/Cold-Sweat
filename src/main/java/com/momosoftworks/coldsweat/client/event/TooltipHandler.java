@@ -16,9 +16,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.Wearable;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -73,7 +73,7 @@ public class TooltipHandler
         }
         // If the item is insulated armor
         Pair<Double, Double> armorInsul;
-        if (stack.getItem() instanceof Wearable && (!Objects.equals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
+        if (stack.getItem() instanceof Equipable && (!Objects.equals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
             List<InsulationPair> insulation = ItemInsulationManager.getInsulationCap(stack)

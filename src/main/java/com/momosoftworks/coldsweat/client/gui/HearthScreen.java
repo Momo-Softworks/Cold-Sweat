@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -43,7 +45,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
     public void init()
     {
         super.init();
-        this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+        ImageButton particleButton = this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
         {
             hideParticles = !hideParticles;
             // If particles are disabled, add the hearth to the list of disabled hearths
@@ -79,13 +81,8 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
                 }
                 return false;
             }
-
-            @Override
-            public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY)
-            {
-                HearthScreen.this.renderComponentTooltip(poseStack, List.of(Component.translatable("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
-            }
         });
+        particleButton.setTooltip(Tooltip.create(Component.translatable("cold_sweat.screen.hearth.show_particles")));
     }
 
     @Override

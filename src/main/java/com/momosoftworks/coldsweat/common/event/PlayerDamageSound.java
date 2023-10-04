@@ -14,11 +14,10 @@ public class PlayerDamageSound
     @SubscribeEvent
     public static void onPlayerHurt(LivingHurtEvent event)
     {
-        if (event.getSource().equals(ModDamageSources.COLD))
+        if (ModDamageSources.isFreezing(event.getSource()))
         {
             if (event.getEntity() instanceof Player player && !event.getEntity().level.isClientSide)
-            {
-                WorldHelper.playEntitySound(SoundEvents.PLAYER_HURT_FREEZE, player, player.getSoundSource(), 2f, player.getVoicePitch());
+            {   WorldHelper.playEntitySound(SoundEvents.PLAYER_HURT_FREEZE, player, player.getSoundSource(), 2f, player.getVoicePitch());
             }
         }
     }

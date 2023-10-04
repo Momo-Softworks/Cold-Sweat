@@ -2,11 +2,11 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"hearth_body": "cold_sweat:blocks/hearth_body",
-		"hearth_piping": "cold_sweat:blocks/hearth_extras",
-		"water": "cold_sweat:blocks/colored_water",
+		"hearth_body": "cold_sweat:block/hearth_body",
+		"hearth_piping": "cold_sweat:block/hearth_extras",
+		"water": "cold_sweat:block/colored_water",
 		"lava": "minecraft:block/lava_still",
-		"particle": "cold_sweat:blocks/hearth_body"
+		"particle": "cold_sweat:block/hearth_body"
 	},
 	"elements": [
 		{

@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.item;
 
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -19,14 +18,14 @@ public class MinecartInsulationItem extends Item
 {
     public MinecartInsulationItem()
     {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1));
+        super(new Properties().stacksTo(1));
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
     {
         ItemStack itemStack = player.getItemInHand(hand);
-        double reachDistance = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+        double reachDistance = player.getAttribute(ForgeMod.BLOCK_REACH.get()).getValue();
 
         Vec3 eye = player.getEyePosition();
         Vec3 look = eye.add(player.getLookAngle().scale(reachDistance));
@@ -38,8 +37,7 @@ public class MinecartInsulationItem extends Item
             if (entityHitResult.getEntity() instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() != ModBlocks.MINECART_INSULATION)
             {
                 if (!player.isCreative())
-                {
-                    player.getMainHandItem().shrink(1);
+                {   player.getMainHandItem().shrink(1);
                 }
                 player.swing(InteractionHand.MAIN_HAND, true);
                 level.playSound(null, minecart.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));

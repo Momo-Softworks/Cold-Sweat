@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -49,8 +49,8 @@ public class RenderLampHand
             event.setCanceled(true);
 
             ms.pushPose();
-            ms.mulPose(Vector3f.YP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 5 - 5)));
-            ms.mulPose(Vector3f.ZP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 10 - 10)));
+            ms.mulPose(Axis.YP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 5 - 5)));
+            ms.mulPose(Axis.ZP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 10 - 10)));
 
             ms.translate
             (
@@ -79,9 +79,9 @@ public class RenderLampHand
             VertexConsumer buffer = event.getMultiBufferSource().getBuffer(handRenderer.getModel().renderType(handRenderer.getTextureLocation(player)));
             if (isRightHand)
             {
-                ms.mulPose(Vector3f.ZP.rotationDegrees(98));
-                ms.mulPose(Vector3f.YP.rotationDegrees(170.0F));
-                ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+                ms.mulPose(Axis.ZP.rotationDegrees(98));
+                ms.mulPose(Axis.YP.rotationDegrees(170.0F));
+                ms.mulPose(Axis.XP.rotationDegrees(90.0F));
                 ms.translate(event.getEquipProgress() * 1, -event.getEquipProgress() * 0.2, -event.getEquipProgress() * 0.2);
 
                 if (player.isInvisible()) buffer.color(1, 1, 1, 0.25f);
@@ -90,9 +90,9 @@ public class RenderLampHand
             }
             else
             {
-                ms.mulPose(Vector3f.ZP.rotationDegrees(-98));
-                ms.mulPose(Vector3f.YP.rotationDegrees(190.0F));
-                ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+                ms.mulPose(Axis.ZP.rotationDegrees(-98));
+                ms.mulPose(Axis.YP.rotationDegrees(190.0F));
+                ms.mulPose(Axis.XP.rotationDegrees(90.0F));
                 ms.translate(-event.getEquipProgress() * 1, -event.getEquipProgress() * 0.2, -event.getEquipProgress() * 0.2);
 
                 if (player.isInvisible()) buffer.color(1, 1, 1, 0.25f);

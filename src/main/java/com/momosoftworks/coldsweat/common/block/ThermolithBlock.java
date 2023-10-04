@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.mojang.math.Vector3f;
 import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -30,6 +28,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +69,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     }
 
     public static Item.Properties getItemProperties()
-    {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(64);
+    {   return new Item.Properties().stacksTo(64);
     }
 
     @Override
@@ -156,13 +155,12 @@ public class ThermolithBlock extends Block implements EntityBlock
             // nextInt ensures particles don't spawn inside the block
             double pX = xAxis ? random.nextInt(2) * 0.8 + offset: 0.5;
             double pZ = xAxis ? 0.5 : random.nextInt(2) * 0.8 + offset;
-            level.addParticle(new DustParticleOptions(new Vector3f(Vec3.fromRGB24(4895036)), random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
+            level.addParticle(new DustParticleOptions(Vec3.fromRGB24(4895036).toVector3f(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
 
             if (random.nextDouble() < 0.5)
-            {
-                float rX = xAxis ? (float) (Math.random()) * 0.8f + offset : 0.5f;
+            {   float rX = xAxis ? (float) (Math.random()) * 0.8f + offset : 0.5f;
                 float rZ = xAxis ? 0.5f : (float) (Math.random()) * 0.8f + offset;
-                level.addParticle(new DustParticleOptions(new Vector3f(Vec3.fromRGB24(4895036)), random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
+                level.addParticle(new DustParticleOptions(Vec3.fromRGB24(4895036).toVector3f(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
             }
         }
     }

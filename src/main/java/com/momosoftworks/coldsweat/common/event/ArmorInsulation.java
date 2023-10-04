@@ -129,7 +129,7 @@ public class ArmorInsulation
     public static void onDamageTaken(LivingAttackEvent event)
     {
         DamageSource source = event.getSource();
-        if (source == DamageSource.HOT_FLOOR && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        if (source == event.getEntity().level.damageSources().hotFloor() && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
         {   event.setCanceled(true);
         }
     }

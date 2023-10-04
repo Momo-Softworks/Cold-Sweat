@@ -120,23 +120,23 @@ public class ConfigPageDifficulty extends Screen
     @Override
     protected void init()
     {
-        this.addRenderableWidget(new Button(
-                this.width / 2 - ConfigScreen.BOTTOM_BUTTON_WIDTH / 2,
-                this.height - ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET,
-                ConfigScreen.BOTTOM_BUTTON_WIDTH, 20,
-                CommonComponents.GUI_DONE,
-                button -> this.onClose()));
+        this.addRenderableWidget(new Button.Builder(
+                    CommonComponents.GUI_DONE,
+                    button -> this.onClose())
+                .pos(this.width / 2 - ConfigScreen.BOTTOM_BUTTON_WIDTH / 2, this.height - ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET)
+                .size(ConfigScreen.BOTTOM_BUTTON_WIDTH, 20)
+                .createNarration(title -> title.get()).build());
     }
 
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
     {
         // Render Background
-        if (this.minecraft.level != null) {
-            this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+        if (this.minecraft.level != null)
+        {   this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
         }
-        else {
-            this.renderDirtBackground(0);
+        else
+        {   this.renderDirtBackground(poseStack);
         }
 
         int difficulty = ConfigSettings.DIFFICULTY.get();
@@ -245,8 +245,7 @@ public class ConfigPageDifficulty extends Screen
             }
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
-            {
-                ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
+            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(new ResourceLocation("minecraft:block.note_block.hat"), 1.8f), 0.5f));
             }
             ConfigSettings.DIFFICULTY.set(newDifficulty);
         }

@@ -97,7 +97,7 @@ public class DrawConfigButton
                 AbstractButton doneButton = doneButtonAtomic.get();
 
                 // Create "left" button
-                ImageButton leftButton = new ImageButton(doneButton.x + doneButton.getWidth() + 2, doneButton.y, 14, 20, 0, 0, 20,
+                ImageButton leftButton = new ImageButton(doneButton.getX() + doneButton.getWidth() + 2, doneButton.getY(), 14, 20, 0, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {   buttonX.set(buttonX.get() - ConfigScreen.SHIFT_AMOUNT.get());
@@ -107,7 +107,7 @@ public class DrawConfigButton
                 event.addListener(leftButton);
 
                 // Create "up" button
-                ImageButton upButton = new ImageButton(leftButton.x + leftButton.getWidth(), leftButton.y, 20, 10, 14, 0, 20,
+                ImageButton upButton = new ImageButton(leftButton.getX() + leftButton.getWidth(), leftButton.getY(), 20, 10, 14, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {   buttonY.set(buttonY.get() - ConfigScreen.SHIFT_AMOUNT.get());
@@ -117,7 +117,7 @@ public class DrawConfigButton
                 event.addListener(upButton);
 
                 // Create "down" button
-                ImageButton downButton = new ImageButton(upButton.x, upButton.y + upButton.getHeight(), 20, 10, 14, 10, 20,
+                ImageButton downButton = new ImageButton(upButton.getX(), upButton.getY() + upButton.getHeight(), 20, 10, 14, 10, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {   buttonY.set(buttonY.get() + ConfigScreen.SHIFT_AMOUNT.get());
@@ -127,7 +127,7 @@ public class DrawConfigButton
                 event.addListener(downButton);
 
                 // Create "right" button
-                ImageButton rightButton = new ImageButton(upButton.x + upButton.getWidth(), upButton.y, 14, 20, 34, 0, 20,
+                ImageButton rightButton = new ImageButton(upButton.getX() + upButton.getWidth(), upButton.getY(), 14, 20, 34, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {   buttonX.set(buttonX.get() + ConfigScreen.SHIFT_AMOUNT.get());
@@ -137,7 +137,7 @@ public class DrawConfigButton
                 event.addListener(rightButton);
 
                 // Create "reset" button
-                ImageButton resetButton = new ImageButton(rightButton.x + rightButton.getWidth() + 2, rightButton.y, 20, 20, 48, 0, 20,
+                ImageButton resetButton = new ImageButton(rightButton.getX() + rightButton.getWidth() + 2, rightButton.getY(), 20, 20, 48, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {   buttonX.set(0);

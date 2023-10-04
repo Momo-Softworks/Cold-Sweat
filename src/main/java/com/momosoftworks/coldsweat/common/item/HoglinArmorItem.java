@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 
 public class HoglinArmorItem extends ArmorItem
 {
-    public HoglinArmorItem(ArmorMaterial material, EquipmentSlot slot, Properties properties)
-    {   super(material, slot, properties);
+    public HoglinArmorItem(ArmorMaterial material, ArmorItem.Type type, Properties properties)
+    {   super(material, type, properties);
     }
 
     @Override

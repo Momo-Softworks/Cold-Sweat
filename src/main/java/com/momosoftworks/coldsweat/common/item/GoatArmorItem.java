@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 
 public class GoatArmorItem extends ArmorItem
 {
-    public GoatArmorItem(ArmorMaterial material, EquipmentSlot slot, Properties properties)
-    {   super(material, slot, properties);
+    public GoatArmorItem(ArmorMaterial material, ArmorItem.Type type, Properties properties)
+    {   super(material, type, properties);
     }
 
     @Override

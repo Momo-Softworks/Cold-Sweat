@@ -3,14 +3,13 @@ package com.momosoftworks.coldsweat.client.gui.config;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
-public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListener, NarratableEntry
+public class ConfigLabel extends AbstractWidget implements GuiEventListener, NarratableEntry
 {
     public final String id;
 
@@ -25,8 +24,8 @@ public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListe
     {
         super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, Component.translatable(text));
         this.id = id;
-        this.x = x;
-        this.y = y;
+        this.setX(x);
+        this.setY(y);
         this.color = color;
     }
 
@@ -36,9 +35,9 @@ public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListe
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float depth)
+    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float depth)
     {
-        Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.x, this.y, color);
+        Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.getX(), this.getY(), color);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListe
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narration)
+    public void updateWidgetNarration(NarrationElementOutput narration)
     {
         narration.add(NarratedElementType.HINT, this.getMessage());
     }
@@ -56,6 +55,6 @@ public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListe
     @Override
     public boolean isMouseOver(double mouseX, double mouseY)
     {
-        return mouseX >= this.x - 5 && mouseY >= this.y - 5 && mouseX < this.x + Minecraft.getInstance().font.width(this.getMessage()) + 5 && mouseY < this.y + Minecraft.getInstance().font.lineHeight + 5;
+        return mouseX >= this.getX() - 5 && mouseY >= this.getY() - 5 && mouseX < this.getX() + Minecraft.getInstance().font.width(this.getMessage()) + 5 && mouseY < this.getY() + Minecraft.getInstance().font.lineHeight + 5;
     }
 }

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.tags;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -12,6 +13,6 @@ public class ModDimensionTags
 
     private static TagKey<DimensionType> createTag(String name)
     {
-        return TagKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(ColdSweat.MOD_ID, name));
+        return TagKey.create(Registries.DIMENSION_TYPE, new ResourceLocation(ColdSweat.MOD_ID, name));
     }
 }

@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
@@ -68,7 +68,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     public static Item.Properties getItemProperties()
-    {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1);
+    {   return new Item.Properties().stacksTo(1);
     }
 
     public HearthBottomBlock(Block.Properties properties)

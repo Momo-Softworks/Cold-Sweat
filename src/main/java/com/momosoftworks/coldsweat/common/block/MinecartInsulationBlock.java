@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,7 +30,7 @@ public class MinecartInsulationBlock extends Block
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties();
     }
 
     public Item asItem()

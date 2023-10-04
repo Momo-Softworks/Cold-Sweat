@@ -15,6 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jline.reader.Widget;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -364,12 +365,13 @@ public abstract class AbstractConfigPage extends Screen
         this.leftSideLength = 0;
         this.rightSideLength = 0;
 
-        this.addRenderableWidget(new Button(
-            this.width / 2 - BOTTOM_BUTTON_WIDTH / 2,
-            this.height - BOTTOM_BUTTON_HEIGHT_OFFSET,
-            BOTTOM_BUTTON_WIDTH, 20,
-            Component.translatable("gui.done"),
-            button -> this.close())
+        this.addRenderableWidget(new Button.Builder(
+                Component.translatable("gui.done"),
+                button -> this.close())
+            .pos(this.width / 2 - BOTTOM_BUTTON_WIDTH / 2, this.height - BOTTOM_BUTTON_HEIGHT_OFFSET)
+            .size(BOTTOM_BUTTON_WIDTH, 20)
+            .createNarration(button -> MutableComponent.create(button.get().getContents()))
+            .build()
         );
 
         // Navigation
@@ -425,14 +427,14 @@ public abstract class AbstractConfigPage extends Screen
             {
                 if (listener instanceof AbstractWidget widget)
                 {
-                    if (minX == 0 || widget.x < minX)
-                        minX = widget.x;
-                    if (minY == 0 || widget.y < minY)
-                        minY = widget.y;
-                    if (maxX == 0 || widget.x + widget.getWidth() > maxX)
-                        maxX = widget.x + widget.getWidth();
-                    if (maxY == 0 || widget.y + widget.getHeight() > maxY)
-                        maxY = widget.y + widget.getHeight();
+                    if (minX == 0 || widget.getX() < minX)
+                        minX = widget.getX();
+                    if (minY == 0 || widget.getY() < minY)
+                        minY = widget.getY();
+                    if (maxX == 0 || widget.getX() + widget.getWidth() > maxX)
+                        maxX = widget.getX() + widget.getWidth();
+                    if (maxY == 0 || widget.getY() + widget.getHeight() > maxY)
+                        maxY = widget.getY() + widget.getHeight();
                 }
             }
 
@@ -478,8 +480,8 @@ public abstract class AbstractConfigPage extends Screen
     {
         for (GuiEventListener element : elements)
         {
-            if (element instanceof Widget && element instanceof NarratableEntry widget)
-                this.addRenderableWidget((GuiEventListener & Widget & NarratableEntry) widget);
+            if (element instanceof Renderable widget)
+                this.addRenderableWidget((GuiEventListener & Renderable & NarratableEntry) widget);
         }
         this.widgetBatches.put(id, elements);
     }

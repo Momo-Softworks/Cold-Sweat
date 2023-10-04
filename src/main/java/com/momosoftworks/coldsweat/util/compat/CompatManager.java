@@ -149,7 +149,7 @@ public class CompatManager
             if (source == null) return;
 
             boolean isDamageCold;
-            if (((isDamageCold = source == ModDamageSources.COLD) || source == ModDamageSources.HOT))
+            if (((isDamageCold = ModDamageSources.isFreezing(source)) || ModDamageSources.isBurning(source)))
             {
                 int liners = 0;
                 for (ItemStack stack : event.getEntity().getArmorSlots())

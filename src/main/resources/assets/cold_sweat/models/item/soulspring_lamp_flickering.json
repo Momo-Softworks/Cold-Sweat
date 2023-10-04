@@ -1,11 +1,11 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "cold_sweat:items/soulspring_lamp/soulspring_lamp_body_1",
-		"1": "cold_sweat:items/soulspring_lamp/soulspring_lamp_ornaments",
-		"2": "cold_sweat:items/soulspring_lamp/soulspring_lamp_top_0",
-		"4": "cold_sweat:items/soulspring_lamp/soulspring_lamp_bottom_0",
-		"5": "cold_sweat:items/soulspring_lamp/soulspring_lamp_bottom_1"
+		"0": "cold_sweat:item/soulspring_lamp/soulspring_lamp_body_1",
+		"1": "cold_sweat:item/soulspring_lamp/soulspring_lamp_ornaments",
+		"2": "cold_sweat:item/soulspring_lamp/soulspring_lamp_top_0",
+		"4": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_0",
+		"5": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_1"
 	},
 	"elements": [
 		{

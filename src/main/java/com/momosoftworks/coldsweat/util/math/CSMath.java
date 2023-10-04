@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.util.math;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3d;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -10,6 +8,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Quaternionf;
+import org.joml.Vector3d;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -38,30 +38,47 @@ public class CSMath
         return input * (float) (180 / Math.PI);
     }
 
-    public static Vector3d getEulerAngles(Quaternion quat)
+    public static Vec3 getEulerAngles(Quaternionf quat)
     {
-        double ysqr = quat.i() * quat.i();
+        double x = quat.x();
+        double y = quat.y();
+        double z = quat.z();
+        double w = quat.w();
 
-        // roll (x-axis rotation)
-        double t0 = +2.0 * (quat.r() * quat.i() + quat.j() * quat.k());
-        double t1 = +1.0 - 2.0 * (ysqr + quat.j() * quat.j());
-        double roll = Math.atan2(t0, t1);
+        double sqw = w * w;
+        double sqx = x * x;
+        double sqy = y * y;
+        double sqz = z * z;
 
-        // pitch (y-axis rotation)
-        double t2 = +2.0 * (quat.r() * quat.j() - quat.k() * quat.i());
-        t2 = Math.min(t2, 1.0);
-        t2 = Math.max(t2, -1.0);
-        double pitch = Math.asin(t2);
+        double unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+        double test = x * y + z * w;
 
-        // yaw (z-axis rotation)
-        double t3 = +2.0 * (quat.r() * quat.k() + quat.i() * quat.j());
-        double t4 = +1.0 - 2.0 * (ysqr + quat.k() * quat.k());
-        double yaw = Math.atan2(t3, t4);
+        double heading;
+        double attitude;
+        double bank;
+        if (test > 0.499 * unit)
+        { // singularity at north pole
+            heading = 2 * Math.atan2(x, w);
+            attitude = Math.PI / 2;
+            bank = 0;
+        }
+        else if (test < -0.499 * unit)
+        { // singularity at south pole
+            heading = -2 * Math.atan2(x, w);
+            attitude = -Math.PI / 2;
+            bank = 0;
+        }
+        else
+        {
+            heading = Math.atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw);
+            attitude = Math.asin(2 * test / unit);
+            bank = Math.atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw);
+        }
 
-        return new Vector3d(roll, pitch, yaw);
+        return new Vec3(toDegrees((float) bank), toDegrees((float) heading), toDegrees((float) attitude));
     }
 
-    public static Quaternion getQuaternion(double x, double y, double z)
+    public static Quaternionf getQuaternion(double x, double y, double z)
     {
         double cy = Math.cos(z * 0.5);
         double sy = Math.sin(z * 0.5);
@@ -70,7 +87,7 @@ public class CSMath
         double cr = Math.cos(x * 0.5);
         double sr = Math.sin(x * 0.5);
 
-        return new Quaternion(
+        return new Quaternionf(
             (float) (sr * cp * cy - cr * sp * sy),
             (float) (cr * sp * cy + sr * cp * sy),
             (float) (cr * cp * sy - sr * sp * cy),

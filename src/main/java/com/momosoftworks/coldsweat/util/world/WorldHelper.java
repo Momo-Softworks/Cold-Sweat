@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -75,14 +76,14 @@ public class WorldHelper
     public static ResourceLocation getBiomeID(Biome biome)
     {
         ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(biome);
+        if (biomeID == null) biomeID = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
     {
         Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biomeID);
+        if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).get(biomeID);
         return biome;
     }
 
@@ -242,7 +243,7 @@ public class WorldHelper
     public static boolean isRainingAt(Level level, BlockPos pos)
     {
         Biome biome = level.getBiomeManager().getBiome(pos).value();
-        return level.isRaining() && biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
+        return level.isRaining() && biome.getPrecipitationAt(pos) == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
             || CompatManager.isWeather2RainingAt(level, pos);
     }
 
@@ -260,7 +261,7 @@ public class WorldHelper
         {
             Vec3 ray = to.subtract(from);
             Vec3 normalRay = ray.normalize();
-            BlockPos.MutableBlockPos pos = new BlockPos(from).mutable();
+            BlockPos.MutableBlockPos pos = BlockPos.containing(from).mutable();
             ChunkAccess workingChunk = chunk;
 
             // Iterate over every block-long segment of the ray
@@ -270,7 +271,7 @@ public class WorldHelper
                 Vec3 vec = from.add(normalRay.scale(i));
 
                 // Skip if the position is the same as the last one
-                if (new BlockPos(vec).equals(pos)) continue;
+                if (BlockPos.containing(vec).equals(pos)) continue;
                 pos.set(vec.x, vec.y, vec.z);
 
                 // Get the blockstate at the current position
@@ -312,7 +313,7 @@ public class WorldHelper
                 Vec3 vec = from.add(normalRay.scale(i));
 
                 // Skip if the position is the same as the last one
-                if (new BlockPos(vec).equals(pos)) continue;
+                if (BlockPos.containing(vec).equals(pos)) continue;
                 pos.set(vec.x, vec.y, vec.z);
 
                 // Return the first entity in the current block, or continue if there is none

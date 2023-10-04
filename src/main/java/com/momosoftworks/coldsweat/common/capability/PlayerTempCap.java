@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -191,11 +192,12 @@ public class PlayerTempCap implements ITemperatureCap
         {
             if (player.tickCount % 40 == 0 && !hasGrace)
             {
+                DamageSources damageSources = player.damageSources();
                 if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.HOT, 2f);
+                {   this.dealTempDamage(player, ConfigSettings.DAMAGE_SCALING.get() ? damageSources.source(ModDamageSources.HOT_SCALING) : damageSources.source(ModDamageSources.HOT), 2f);
                 }
                 else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.COLD, 2f);
+                {   this.dealTempDamage(player, ConfigSettings.DAMAGE_SCALING.get() ? damageSources.source(ModDamageSources.COLD_SCALING) : damageSources.source(ModDamageSources.COLD), 2f);
                 }
             }
         }

@@ -1,8 +1,8 @@
 {
 	"texture_size": [32, 32],
 	"textures": {
-		"hearth_piping": "cold_sweat:blocks/hearth_extras",
-		"particle": "cold_sweat:blocks/hearth_body"
+		"hearth_piping": "cold_sweat:block/hearth_extras",
+		"particle": "cold_sweat:block/hearth_body"
 	},
 	"elements": [
 		{

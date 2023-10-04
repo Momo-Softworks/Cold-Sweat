@@ -53,8 +53,8 @@ public class EatObjectsGoal extends Goal
         List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
         for (Entity ent : items)
         {
-            if (ent instanceof ItemEntity itemEntity && itemEntity.getThrower() != null
-            && (this.entity.isPlayerTrusted(itemEntity.getThrower()) || this.entity.isTamingItem(itemEntity.getItem())))
+            if (ent instanceof ItemEntity itemEntity && itemEntity.getOwner() != null
+            && (this.entity.isPlayerTrusted(itemEntity.getOwner().getUUID()) || this.entity.isTamingItem(itemEntity.getItem())))
             {
                 Item item = itemEntity.getItem().getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
@@ -132,12 +132,16 @@ public class EatObjectsGoal extends Goal
                         if (this.target instanceof ItemEntity item)
                         {   this.entity.onItemPickup(item);
 
-                            UUID thrower = item.getThrower();
-                            if (item.getItem().getCount() > 0)
-                            {   ItemStack stack = item.getItem().copy();
-                                stack.shrink(1);
-                                if (!stack.isEmpty())
-                                    WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
+                            Entity thrower = item.getOwner();
+                            if (thrower != null)
+                            {
+                                if (item.getItem().getCount() > 0)
+                                {   ItemStack stack = item.getItem().copy();
+                                    stack.shrink(1);
+                                    if (!stack.isEmpty())
+                                    {   WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower.getUUID());
+                                    }
+                                }
                             }
                         }
 

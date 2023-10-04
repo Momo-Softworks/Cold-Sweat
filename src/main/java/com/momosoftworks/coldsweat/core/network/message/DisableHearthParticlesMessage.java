@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -57,7 +58,7 @@ public class DisableHearthParticlesMessage
             {
                 Level level = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.worldKey))
                         ? ClientOnlyHelper.getClientLevel()
-                        : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
+                        : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(message.worldKey)));
                 if (level != null)
                 {
                     Entity entity = level.getEntity(message.entityID);

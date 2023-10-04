@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.tags.ModBlockTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -61,7 +61,7 @@ public class SoulStalkBlock extends Block implements IPlantable
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties();
     }
 
     @Override

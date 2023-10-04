@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -24,7 +23,7 @@ public class WaterskinItem extends Item
 {
     public WaterskinItem()
     {
-        super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(16));
+        super(new Properties().stacksTo(16));
     }
 
     @Override
@@ -58,7 +57,7 @@ public class WaterskinItem extends Item
                         if (itementity != null)
                         {
                             itementity.setNoPickUpDelay();
-                            itementity.setOwner(player.getUUID());
+                            itementity.setThrower(player.getUUID());
                         }
                     }
                     itemstack.shrink(1);
@@ -80,7 +79,6 @@ public class WaterskinItem extends Item
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {
-        return slotChanged;
+    {   return slotChanged;
     }
 }

@@ -328,7 +328,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void cancelFreezingDamage(LivingAttackEvent event)
     {
-        if (event.getSource() == DamageSource.FREEZE && event.getEntity().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
+        if (event.getSource().equals(event.getEntity().level.damageSources().freeze()) && event.getEntity().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
         {   event.setCanceled(true);
         }
     }

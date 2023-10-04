@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.tags.ModDimensionTags;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -17,8 +16,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -42,7 +39,7 @@ import java.util.Optional;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {   super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
+    {   super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
     }
 
     @Override
@@ -149,6 +146,7 @@ public class SoulspringLampItem extends Item
     {
         if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntity() instanceof Player))
         {
+            Level level = attacker.level;
             ItemStack stack = attacker.getMainHandItem();
             if (!(stack.getItem() instanceof SoulspringLampItem)) return;
 
@@ -165,7 +163,7 @@ public class SoulspringLampItem extends Item
                 addFuel(stack, (int) Math.min(8, target.getMaxHealth() / 2));
                 float extraDamage = Math.max(0, 8 - event.getAmount());
                 if (extraDamage > 0)
-                    target.hurt(new EntityDamageSource(DamageSource.MAGIC.msgId, attacker), extraDamage);
+                    target.hurt(level.damageSources().playerAttack(attacker), extraDamage);
 
                 // Spawn particles
                 if (!target.level.isClientSide)
@@ -184,18 +182,6 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player) {
         return !player.isCreative();
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
-    {
-        if (this.allowedIn(tab))
-        {
-            ItemStack stack = new ItemStack(this);
-            stack.getOrCreateTag().putBoolean("isOn", true);
-            stack.getOrCreateTag().putDouble("fuel", 64);
-            itemList.add(stack);
-        }
     }
 
     @Override

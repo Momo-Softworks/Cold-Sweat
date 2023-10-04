@@ -21,7 +21,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import com.momosoftworks.coldsweat.common.container.SewingContainer;
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     public static Item.Properties getItemProperties()
     {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
+        return new Item.Properties();
     }
 
     public SewingTableBlock(Block.Properties properties)

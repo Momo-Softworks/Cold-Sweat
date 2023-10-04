@@ -57,7 +57,7 @@ public class BiomeTempModifier extends TempModifier
                 Biome biome = holder.value();
                 ResourceLocation biomeID = holder.unwrapKey().get().location();
 
-                double biomeVariance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                double biomeVariance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
                 double baseTemp = biome.getBaseTemperature();
 
                 // Get the biome's temperature, either overridden by config or calculated
