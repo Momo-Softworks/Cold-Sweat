@@ -1,0 +1,14 @@
+[{
+  "modid": "cold_sweat",
+  "name": "Cold Sweat",
+  "description": "Adds a fitting and difficult temperature system to Minecraft, plus more!",
+  "version": "2.2",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Mikul"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}]
