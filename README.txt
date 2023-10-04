@@ -1,37 +1,10 @@
--------------------------------------------
-Source installation information for modders
--------------------------------------------
-This code follows the Minecraft Forge installation methodology. It will apply
-some small patches to the vanilla MCP source code, giving you and it access 
-to some of the data and functions you need to build a successful mod.
+# Cold-Sweat
+Cold Sweat is a mod for Minecraft 1.19.x, 1.18.2, 1.16.5, and 1.7.10 that adds a comprehensive temperature system to the game. This is the public repository for our project on CurseForge:
+https://www.curseforge.com/minecraft/mc-mods/cold-sweat
 
-Note also that the patches are built against "unrenamed" MCP source code (aka
-srgnames) - this means that you will not be able to read them directly against
-normal code.
+This project is completely open for reference and reproduction as per our GNU GPL 3.0 license; HOWEVER, any project that directly samples code, assets, or otherwise from Cold Sweat must also list their project under the GNU General Public License 3.0 and attribute this project (also defined in the license).
 
-Source pack installation information:
-
-Standalone source installation
-==============================
-
-To install this source code for development purposes, extract this zip file.
-It ships with a demonstration mod. Run 'gradlew setupDevWorkspace' to create
-a gradle environment primed with FML. Run 'gradlew eclipse' or 'gradlew idea' to
-create an IDE workspace of your choice.
-Refer to ForgeGradle for more information about the gradle environment
-Note: On macs or linux you run the './gradlew.sh' instead of 'gradlew'
-
-Forge source installation
-=========================
-MinecraftForge ships with this code and installs it as part of the forge
-installation process, no further action is required on your part.
-
-For reference this is version @MAJOR@.@MINOR@.@REV@.@BUILD@ of FML
-for Minecraft version @MCVERSION@.
-
-LexManos' Install Video
-=======================
-https://www.youtube.com/watch?v=8VEdtQLuLO0&feature=youtu.be
-
-For more details update more often refer to the Forge Forums:
-http://www.minecraftforge.net/forum/index.php/topic,14048.0.html
+## Documentation
+Documentation for 3rd-party integration with Cold Sweat can be found here (WIP, out-of-date for 2.2+):
+https://mikul.gitbook.io/cold-sweat/
+The current documentation is only designed for 1.18.2, but it should be useable for 1.16.5 and 1.19.2 as this mod aims for as much backend parity as possible.
