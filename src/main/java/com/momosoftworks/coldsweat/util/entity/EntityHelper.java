@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.util.entity;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -22,7 +21,7 @@ public class EntityHelper
 
     static final Method GET_VOICE_PITCH;
     static
-    {   GET_VOICE_PITCH = ReflectionHelper.findMethod(EntityLivingBase.class, null, new String[] {"func_70647_i"});
+    {   GET_VOICE_PITCH = ReflectionHelper.findMethod(EntityLivingBase.class, null, new String[] {"getSoundPitch", "func_70647_i"});
         GET_VOICE_PITCH.setAccessible(true);
     }
     public static float getVoicePitch(EntityLivingBase entity)

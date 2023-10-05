@@ -7,15 +7,11 @@ import com.momosoftworks.coldsweat.util.math.Pair;
 import com.momosoftworks.coldsweat.util.world.BlockPos;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class DepthTempModifier extends TempModifier
@@ -41,7 +37,7 @@ public class DepthTempModifier extends TempModifier
         return temp ->
         {
             return CSMath.blend(temp,
-                                CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.worldObj.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, playerPos.getX(), playerPos.getY(), playerPos.getZ()), 0, 15),
+                                CSMath.weightedAverage(CSMath.blend(midTemp, temp, world.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, playerPos.getX(), playerPos.getY(), playerPos.getZ()), 0, 15),
                                                        CSMath.blend(temp, midTemp, finalDepth, 4, 20), 1, 2),
                                 ConfigSettings.CAVE_INSULATION.get(), 0d, 1d);
         };
