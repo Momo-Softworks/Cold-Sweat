@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.tileentity.ITileEntityDataHolder;
+import com.momosoftworks.coldsweat.util.world.ItemHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -75,7 +76,7 @@ public class NBTHelper
         {   tag = ((EntityLivingBase) owner).getEntityData();
         }
         else if (owner instanceof ItemStack)
-        {   tag = ((ItemStack) owner).getTagCompound();
+        {   tag = ItemHelper.getOrCrateTag(((ItemStack) owner));
         }
         else if (owner instanceof ITileEntityDataHolder)
         {   tag = ((ITileEntityDataHolder) owner).getTileData();
