@@ -1,0 +1,86 @@
+{
+  "block.cold_sweat.boiler":            "Caldaia",
+  "block.cold_sweat.hearth_bottom":            "Stufa",
+  "block.cold_sweat.hearth_top":             "Stufa",
+  "block.cold_sweat.icebox":            "Ghiacciaia",
+  "block.cold_sweat.sewing_table":      "Tavolo Da Cucito",
+
+  "item.cold_sweat.minecart_insulation": "Insulazione Per Carrello Da Miniera",
+  "item.cold_sweat.soulspring_lamp":     "Lampada Soulspring",
+  "item.cold_sweat.thermometer":         "Termometro",
+  "item.cold_sweat.waterskin":           "Otre",
+  "item.cold_sweat.waterskin.filled":    "Pieno",
+
+  "tooltip.cold_sweat.insulated":      "Insulato",
+
+  "effect.cold_sweat.insulated":           "Insulato",
+  "effect.cold_sweat.ice_resistance":      "Resistenza Al Freddo",
+  "effect.cold_sweat.ice_resistance_long": "Resistenza Al Freddo",
+  "effect.cold_sweat.grace":               "Grace",
+  "item.minecraft.potion.effect.ice_resistance": "Pozione Di Resistenza Al Freddo",
+  "item.minecraft.lingering_potion.effect.ice_resistance": "Pozione Persistente Di Resistenza Al Freddo",
+  "item.minecraft.splash_potion.effect.ice_resistance": "Pozione Da Lancio Di Resistenza Al Freddo",
+
+  "container.cold_sweat.boiler":        "Caldaia",
+  "container.cold_sweat.icebox":        "Ghiacciaia",
+  "container.cold_sweat.sewing_table": "Tavolo Da Cucito",
+
+  "itemGroup.cold_sweat": "Sudore Freddo",
+
+  "death.attack.cold":          "%1$s è morto di freddo",
+  "death.attack.cold.player":   "%1$s è morto di freddo mentre combatteva %2$s",
+  "death.attack.hot":           "%1$s è stato ucciso da un colpo di calore",
+  "death.attack.hot.player":    "%1$s è stato ucciso da un colpo di calore mentre combatteva %2$s",
+
+  "entity.player.damage.freeze": "Player freezes",
+
+  "cold_sweat.config.title":                        "Cold Sweat Config",
+  "cold_sweat.config.section.temperature_details":  "Gestione Della Temperatura",
+  "cold_sweat.config.section.other":                "Altre Impostazioni Sulla Temperatura",
+  "cold_sweat.config.section.hud_settings":         "Impostazioni HUD",
+  "cold_sweat.config.section.difficulty.name":      "Gestione Della Difficoltà",
+
+  "cold_sweat.config.difficulty.name":              "Difficoltà",
+  "cold_sweat.config.difficulty.super_easy.name":   "Super Facile",
+  "cold_sweat.config.difficulty.easy.name":         "Facile",
+  "cold_sweat.config.difficulty.normal.name":       "Normale",
+  "cold_sweat.config.difficulty.hard.name":         "Difficile",
+  "cold_sweat.config.difficulty.custom.name":       "Personalizzata",
+
+  "cold_sweat.config.difficulty.description.min_temp":        "La temperatura minima abitabile è %d",
+  "cold_sweat.config.difficulty.description.max_temp":        "La temperatura massima abitabile è %d",
+  "cold_sweat.config.difficulty.description.rate.decrease":   "Tasso di variazione della temperatura corporea ridotto del %d",
+  "cold_sweat.config.difficulty.description.rate.increase":   "Tasso di variazione della temperatura corporea aumentata del %d",
+  "cold_sweat.config.difficulty.description.rate.normal":     "Tasso di variazione della temperatura corporea è normale",
+  "cold_sweat.config.difficulty.description.world_temp_on":      "Temperatura Ambientale %dis%d é visibile senza un termometro",
+  "cold_sweat.config.difficulty.description.world_temp_off":     "Temperatura Ambientale è %dnot%d visibile senza un termometro",
+  "cold_sweat.config.difficulty.description.scaling_on":      "Il danno %dfa%d scala secondo la difficoltà del gioco",
+  "cold_sweat.config.difficulty.description.scaling_off":     "Il danno %dnon%d scala in base alla difficoltà del gioco",
+  "cold_sweat.config.difficulty.description.potions_on":      "Le pozioni di resistenza al fuoco e freddo sono %denabled%d",
+  "cold_sweat.config.difficulty.description.potions_off":     "Le pozioni di resistenza al fuoco e freddo sono %ddisabled%d",
+
+  "cold_sweat.config.difficulty.description.custom":  "Utilizzando Impostazioni Personalizzate",
+
+  "cold_sweat.config.animal_temperature.name":      "Temperatura dell'animale",
+  "cold_sweat.config.units.name":                   "Unità",
+  "cold_sweat.config.celsius.name":                 "Celsius",
+  "cold_sweat.config.fahrenheit.name":              "Fahrenheit",
+  "cold_sweat.config.custom_hotbar.name":           "Hotbar Personalizzata",
+  "cold_sweat.config.damage_scaling.name":          "Ridimensionamento Danno in base alla difficoltà",
+  "cold_sweat.config.fire_resistance.name":         "Resistenza Al Fuoco",
+  "cold_sweat.config.ice_resistance.name":          "Resistenza Al Freddo",
+  "cold_sweat.config.icon_bobbing.name":            "Ondeggiatura Dell'Icona",
+  "cold_sweat.config.max_temperature.name":         "Temperatura Massima",
+  "cold_sweat.config.min_temperature.name":         "Temperatura Minima",
+  "cold_sweat.config.offset_shift.name":            "* Tieni Premuto Shift Per Muoverti Di 10 Pixel",
+  "cold_sweat.config.rate_multiplier.name":         "Rateo Di Variazione",
+  "cold_sweat.config.require_thermometer.name":     "Richiede Un Termometro",
+  "cold_sweat.config.temp_offset.name":             "Compesazione Temperatura",
+  "cold_sweat.config.temperature_icon.name":        "Spostamento Icona*",
+  "cold_sweat.config.temp_readout_location.name":     "Compesazione Lettura*",
+
+
+  "commands.cold_sweat.temperature.set.single.result": "Imposta la temperatura di %d a %d",
+  "commands.cold_sweat.temperature.set.many.result":   "Imposta la temperatura di %d giocatori a %d",
+  "commands.cold_sweat.temperature.get.result":        "La temperatura corporea di %d è %d"
+}

@@ -1,0 +1,84 @@
+{
+  "block.cold_sweat.boiler":            "Bojler",
+  "block.cold_sweat.hearth_bottom":            "Palenisko",
+  "block.cold_sweat.hearth_top":           "Palenisko",
+  "block.cold_sweat.icebox":            "Zamrażarka",
+  "block.cold_sweat.sewing_table":      "Stół krawiecki",
+
+  "item.cold_sweat.minecart_insulation": "Ocieplenie wagonika",
+  "item.cold_sweat.obsidian_shard":      "Odłamek obsydianu",
+  "item.cold_sweat.thermometer":         "Termometr",
+  "item.cold_sweat.waterskin":           "Bukłak",
+  "item.cold_sweat.waterskin.filled":    "Pełny",
+
+  "tooltip.cold_sweat.insulated":      "Ocieplony",
+
+  "effect.cold_sweat.insulated":            "Ocieplony",
+  "effect.cold_sweat.ice_resistance":       "Odporność na mróz",
+  "effect.cold_sweat.ice_resistance_long":  "Odporność na mróz",
+  "effect.cold_sweat.grace":                "Grace",
+  "item.minecraft.potion.effect.ice_resistance": "Mikstura odporności na mróz",
+  "item.minecraft.lingering_potion.effect.ice_resistance": "Trwała mikstura odporności na mróz",
+  "item.minecraft.splash_potion.effect.ice_resistance": "Miotana mikstura odporności na mróz",
+
+  "container.cold_sweat.boiler":        "Bojler",
+  "container.cold_sweat.icebox":        "Zamrażarka",
+  "container.cold_sweat.sewing_table": "Stół krawiecki",
+
+  "itemGroup.cold_sweat": "Zimne Poty",
+
+  "death.attack.cold":          "%1$s zamarzł na śmierć",
+  "death.attack.cold.player":   "%1$s zamarzł na śmierć, walcząc z %2$s",
+  "death.attack.hot":           "%1$s dostał udaru",
+  "death.attack.hot.player":    "%1$s dostał udaru, walcząc z %2$s",
+
+  "cold_sweat.config.title":                        "Ustawienia Zimnych Potów",
+  "cold_sweat.config.section.temperature_details":  "Menedżer temperatur",
+  "cold_sweat.config.section.other":                "Inne ustawienia temperatur",
+  "cold_sweat.config.section.hud_settings":         "Ustawienia HUD",
+  "cold_sweat.config.section.difficulty.name":      "Ustawienia poziomu trudności",
+
+  "cold_sweat.config.difficulty.name":              "Poziom trudności",
+  "cold_sweat.config.difficulty.super_easy.name":   "Bardzo Łatwy",
+  "cold_sweat.config.difficulty.easy.name":         "Łatwy",
+  "cold_sweat.config.difficulty.normal.name":       "Normalny",
+  "cold_sweat.config.difficulty.hard.name":         "Trudny",
+  "cold_sweat.config.difficulty.custom.name":       "Własny",
+
+  "cold_sweat.config.difficulty.description.min_temp":          "Minimalna zdatna temperatura wynosi %d",
+  "cold_sweat.config.difficulty.description.max_temp":          "Maksymalna zdatna temperatura wynosi %d",
+  "cold_sweat.config.difficulty.description.rate.decrease":     "Prędkość zmiany temperatury ciała zmniejszona o %d",
+  "cold_sweat.config.difficulty.description.rate.increase":     "Prędkość zmiany temperatury ciała zwiększona o %d",
+  "cold_sweat.config.difficulty.description.rate.normal":       "Prędkość zmiany temperatury ciała funkcjonuje normalnie",
+  "cold_sweat.config.difficulty.description.world_temp_on":        "Temperatura środowiskowa %duwidacznia%d się bez konieczności użycia termometra",
+  "cold_sweat.config.difficulty.description.world_temp_off":       "Temperatura środowiskowa %djest niewidoczna%d bez wykorzystania termometra",
+  "cold_sweat.config.difficulty.description.scaling_on":        "Obrażenia %dnie%d skalują się z poziomem trudności Minecraft",
+  "cold_sweat.config.difficulty.description.scaling_off":       "Obrażenia %dskalują się%d wprostproporcjonalnie do poziomu trudności Minecraft",
+  "cold_sweat.config.difficulty.description.potions_on":        "Mikstury odporności na mróz i ogień są %dwłączone%d",
+  "cold_sweat.config.difficulty.description.potions_off":       "Mikstury odporności na mróz i ogień są %dwyłączone%d",
+
+  "cold_sweat.config.difficulty.description.custom":  "Korzysta z ustawień użytkownika",
+
+  "cold_sweat.config.animal_temperature.name":      "Temperatura zwierzęcia",
+  "cold_sweat.config.units.name":                   "Jednostki",
+  "cold_sweat.config.celsius.name":                 "Celsjusze",
+  "cold_sweat.config.fahrenheit.name":              "Fahrenheity",
+  "cold_sweat.config.custom_hotbar.name":           "Pasek narzędziowy - ustawienia użytkownika",
+  "cold_sweat.config.damage_scaling.name":          "Skalowanie obrażeń - poziom trudności",
+  "cold_sweat.config.fire_resistance.name":         "Odporność na ogień",
+  "cold_sweat.config.ice_resistance.name":          "Odporność na mróz",
+  "cold_sweat.config.icon_bobbing.name":            "Drgania ikon",
+  "cold_sweat.config.max_temperature.name":         "Maks. temperatura",
+  "cold_sweat.config.min_temperature.name":         "Min. temperatura",
+  "cold_sweat.config.offset_shift.name":            "* Przytrzymaj 'SHIFT' by przesunąć o 10 pikseli",
+  "cold_sweat.config.rate_multiplier.name":         "Modyfikator prędkości",
+  "cold_sweat.config.require_thermometer.name":     "Wymaga termometru",
+  "cold_sweat.config.temp_offset.name":             "Przesunięcie temp.",
+  "cold_sweat.config.temperature_icon.name":        "Przesunięcie ikon*",
+  "cold_sweat.config.temp_readout_location.name":   "Przesunięcie odczytu*",
+
+
+  "commands.cold_sweat.temperature.set.single.result": "Ustaw temperaturę %d na %d",
+  "commands.cold_sweat.temperature.set.many.result":   "Ustaw temperaturę %d graczy na %d",
+  "commands.cold_sweat.temperature.get.result":        "Temperatura ciała %d wynosi %d"
+}

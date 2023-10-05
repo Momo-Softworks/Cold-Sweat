@@ -1,0 +1,74 @@
+{
+	"textures": {
+		"side": "cold_sweat:blocks/thermolith_side",
+		"back": "cold_sweat:blocks/thermolith_back_off",
+		"top": "cold_sweat:blocks/thermolith_top_off",
+		"front": "cold_sweat:blocks/thermolith_front_off",
+		"bottom": "cold_sweat:blocks/thermolith_bottom",
+		"head": "cold_sweat:blocks/thermolith_head_off",
+		"particle": "cold_sweat:blocks/thermolith_side"
+	},
+	"elements": [
+		{
+			"from": [4, 0, 5],
+			"to": [12, 16, 16],
+			"faces": {
+				"north": {"uv": [4, 0, 12, 16], "texture": "#front"},
+				"east": {"uv": [14, 0, 3, 16], "texture": "#side"},
+				"south": {"uv": [4, 0, 12, 16], "texture": "#back"},
+				"west": {"uv": [3, 0, 14, 16], "texture": "#side"},
+				"up": {"uv": [12, 13, 4, 2], "texture": "#top"},
+				"down": {"uv": [12, 2, 4, 14], "texture": "#bottom"}
+			}
+		},
+		{
+			"from": [6, 0, 0],
+			"to": [10, 6, 5],
+			"faces": {
+				"north": {"uv": [5, 0, 9, 6], "texture": "#head"},
+				"east": {"uv": [0, 0, 5, 6], "texture": "#head"},
+				"south": {"uv": [5, 0, 9, 6], "texture": "#head"},
+				"west": {"uv": [5, 0, 0, 6], "texture": "#head"},
+				"up": {"uv": [13, 5, 9, 0], "texture": "#head"},
+				"down": {"uv": [0, 11, 4, 6], "texture": "#head"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [0, 35, 0],
+			"translation": [0, 1, -1.25],
+			"scale": [0.35, 0.35, 0.35]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [0, 35, 0],
+			"translation": [0, 1, -1.25],
+			"scale": [0.35, 0.35, 0.35]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 31, 0],
+			"translation": [0.75, 2.25, 0],
+			"scale": [0.5, 0.5, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 31, 0],
+			"translation": [0.75, 2.25, 0],
+			"scale": [0.5, 0.5, 0.4]
+		},
+		"ground": {
+			"translation": [0, 2.5, -0.5],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"gui": {
+			"rotation": [35, -135, 0],
+			"translation": [0.5, -0.25, 0],
+			"scale": [0.7, 0.7, 0.7]
+		},
+		"head": {
+			"translation": [0, 14.5, -2.5]
+		},
+		"fixed": {
+			"rotation": [0, -90, 0]
+		}
+	}
+}

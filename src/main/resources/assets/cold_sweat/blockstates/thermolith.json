@@ -1,0 +1,43 @@
+{
+  "variants":
+  {
+    "facing=north,powered=false":
+    {
+      "model": "cold_sweat:block/thermolith_off"
+    },
+    "facing=east,powered=false":
+    {
+      "model": "cold_sweat:block/thermolith_off",
+      "y": 90
+    },
+    "facing=south,powered=false":
+    {
+      "model": "cold_sweat:block/thermolith_off",
+      "y": 180
+    },
+    "facing=west,powered=false":
+    {
+      "model": "cold_sweat:block/thermolith_off",
+      "y": 270
+    },
+    "facing=north,powered=true":
+    {
+      "model": "cold_sweat:block/thermolith_on"
+    },
+    "facing=east,powered=true":
+    {
+      "model": "cold_sweat:block/thermolith_on",
+      "y": 90
+    },
+    "facing=south,powered=true":
+    {
+      "model": "cold_sweat:block/thermolith_on",
+      "y": 180
+    },
+    "facing=west,powered=true":
+    {
+      "model": "cold_sweat:block/thermolith_on",
+      "y": 270
+    }
+  }
+}

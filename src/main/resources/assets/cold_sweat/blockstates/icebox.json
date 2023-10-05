@@ -1,0 +1,44 @@
+{
+  "variants":
+  {
+    "facing=north,frosted=false":
+    {
+      "model": "cold_sweat:block/icebox"
+    },
+    "facing=east,frosted=false":
+    {
+      "model": "cold_sweat:block/icebox",
+      "y": 90
+    },
+    "facing=south,frosted=false":
+    {
+      "model": "cold_sweat:block/icebox",
+      "y": 180
+    },
+    "facing=west,frosted=false":
+    {
+      "model": "cold_sweat:block/icebox",
+      "y": 270
+    },
+
+    "facing=north,frosted=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted"
+    },
+    "facing=east,frosted=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted",
+      "y": 90
+    },
+    "facing=south,frosted=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted",
+      "y": 180
+    },
+    "facing=west,frosted=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted",
+      "y": 270
+    }
+  }
+}
