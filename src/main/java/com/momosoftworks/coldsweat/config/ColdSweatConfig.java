@@ -40,15 +40,6 @@ public class ColdSweatConfig
     public static Boolean coldMining;
     public static Boolean coldMovement;
 
-    public static void init(String configDir)
-    {
-        if (configDir != null)
-        {   File path = new File(configDir + "/" + ColdSweat.MOD_ID + "/main.cfg");
-            CONFIG = new Configuration(path);
-            loadConfig();
-        }
-    }
-
     public static void loadConfig()
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
@@ -56,29 +47,29 @@ public class ColdSweatConfig
         /*
          Difficulty
          */
-        difficulty = CONFIG.get("General", "Difficulty", 0, "This value is used by the in-game config screen to store the current difficulty. It does nothing otherwise").getInt();
+        difficulty = CONFIG.get("general", "Difficulty", 0, "This value is used by the in-game config screen to store the current difficulty. It does nothing otherwise").getInt();
 
         /*
          Core temperature mechanics
          */
-        minHabitable = CONFIG.get("General",
+        minHabitable = CONFIG.get("general",
                                   "Minimum Habitable Temperature",
                                   defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                   "Defines the minimum habitable temperature").getDouble();
-        maxHabitable = CONFIG.get("General",
+        maxHabitable = CONFIG.get("general",
                                   "Maximum Habitable Temperature",
                                   defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
                                   "Defines the maximum habitable temperature").getDouble();
-        rateMultiplier = CONFIG.get("General", "Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), "Rate at which entities' body temperature changes").getDouble();
+        rateMultiplier = CONFIG.get("general", "Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), "Rate at which entities' body temperature changes").getDouble();
 
         /*
          Potion effects affecting the player's temperature
          */
-        fireResistanceEffect = CONFIG.get("Item_Settings",
+        fireResistanceEffect = CONFIG.get("item_settings",
                                           "Fire Resistance Immunity",
                                           defaultDiff.getOrDefault("fire_resistance_enabled", true),
                                           "Allow fire resistance to block overheating damage").getBoolean();
-        iceResistanceEffect = CONFIG.get("Item_Settings",
+        iceResistanceEffect = CONFIG.get("item_settings",
                                          "Ice Resistance Immunity",
                                          defaultDiff.getOrDefault("ice_resistance_enabled", true),
                                          "Allow ice resistance to block freezing damage").getBoolean();
@@ -86,15 +77,15 @@ public class ColdSweatConfig
         /*
          Misc. temperature settings
          */
-        damageScaling = CONFIG.get("Misc",
+        damageScaling = CONFIG.get("misc",
                                    "Damage Scaling",
                                    defaultDiff.getOrDefault("damage_scaling", true),
                                    "Enable damage scaling based on Minecraft's difficulty setting").getBoolean();
-        checkSleep = CONFIG.get("Misc",
+        checkSleep = CONFIG.get("misc",
                                 "Prevent Sleep When in Danger",
                                 defaultDiff.getOrDefault("check_sleep_conditions", true),
                                 "Check the player's temperature when they wake up").getBoolean();
-        coldSoulFire = CONFIG.get("Misc",
+        coldSoulFire = CONFIG.get("misc",
                                   "Cold Soul Fire",
                                   true,
                                   "Converts damage dealt by Soul Fire to cold damage").getBoolean();
@@ -107,19 +98,19 @@ public class ColdSweatConfig
                                    defaultDiff.getOrDefault("heatstroke_fog", true),
                                    "When set to true, the player's view distance will decrease when they are too hot").getBoolean();
 
-        freezingHearts = CONFIG.get("Cold_Effects",
+        freezingHearts = CONFIG.get("cold_effects",
                                     "Freezing Hearts",
                                     defaultDiff.getOrDefault("freezing_hearts", true),
                                     "When set to true, some of the player's hearts will freeze when they are too cold, preventing regeneration").getBoolean();
-        coldKnockback = CONFIG.get("Cold_Effects",
+        coldKnockback = CONFIG.get("cold_effects",
                                    "Cold Knockback Reduction",
                                    defaultDiff.getOrDefault("knockback_impairment", true),
                                    "When set to true, the player's attack knockback will be reduced when they are too cold").getBoolean();
-        coldMovement = CONFIG.get("Cold_Effects",
+        coldMovement = CONFIG.get("cold_effects",
                                   "Cold Slowness",
                                   defaultDiff.getOrDefault("cold_slowness", true),
                                   "When set to true, the player's movement speed will be reduced when they are too cold").getBoolean();
-        coldMining = CONFIG.get("Cold_Effects",
+        coldMining = CONFIG.get("cold_effects",
                                 "Cold Mining Fatigue",
                                 defaultDiff.getOrDefault("cold_break_speed", true),
                                 "When set to true, the player's mining speed will be reduced when they are too cold").getBoolean();
@@ -127,28 +118,28 @@ public class ColdSweatConfig
         /*
          Grace Period
          */
-        gracePeriodEnabled = CONFIG.get("Grace_Period",
+        gracePeriodEnabled = CONFIG.get("grace_period",
                                         "Enable Grace Period",
                                         true,
                                         "When set to true, the player will be immune to temperature effects for a period after spawning").getBoolean();
-        gracePeriodLength = CONFIG.getInt("Grace_Period",
-                                          "Grace Period Length",
+        gracePeriodLength = CONFIG.getInt("Grace Period Length",
+                                          "grace_period",
                                           defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE,
                                           "The number of ticks for which the grace period will last");
 
         /*
          Hearth
          */
-        hearthEffect = CONFIG.get("Hearth",
+        hearthEffect = CONFIG.get("hearth",
                                   "Hearth Effect",
                                   defaultDiff.getOrDefault("hearth_effect", 0.5),
                                   "The strength of the hearth's effect on temperature", 0, 1).getDouble();
 
-        hearthSpreadWhitelist = CONFIG.get("Hearth",
+        hearthSpreadWhitelist = CONFIG.get("hearth",
                                            "Hearth Spread Whitelist",
                                            "",
                                            "A comma-separated list of block IDs that the hearth can spread through").getString();
-        hearthSpreadBlacklist = CONFIG.get("Hearth",
+        hearthSpreadBlacklist = CONFIG.get("hearth",
                                            "Hearth Spread Blacklist",
                                            "",
                                            "A comma-separated list of block IDs that the hearth cannot spread through").getString();
@@ -158,8 +149,13 @@ public class ColdSweatConfig
         }
     }
 
-    public static Configuration getInstance()
-    {   return CONFIG;
+    public static void init(String configDir)
+    {
+        if (configDir != null)
+        {   File path = new File(configDir + "/" + ColdSweat.MOD_ID + "/main.cfg");
+            CONFIG = new Configuration(path);
+            loadConfig();
+        }
     }
 
     @SubscribeEvent

@@ -4,10 +4,8 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.math.Pair;
 import com.momosoftworks.coldsweat.util.math.Triplet;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -49,7 +47,7 @@ public class ConfigHelper
 
     public static Map<Block, Number> getBlocksWithValues(String source)
     {
-        List<?> parsed = getNestedObjectList(source);
+        List<?> parsed = deserializeList(source);
 
         Map<Block, Number> map = new HashMap<>();
         for (Object entry : parsed)
@@ -74,7 +72,7 @@ public class ConfigHelper
 
     public static Map<Item, Double> getItemsWithValues(String source)
     {
-        List<?> parsed = getNestedObjectList(source);
+        List<?> parsed = deserializeList(source);
 
         Map<Item, Double> map = new HashMap<>();
         for (Object entry : parsed)
@@ -91,7 +89,7 @@ public class ConfigHelper
     {
         Map<Integer, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
 
-        List<?> parsed = getNestedObjectList(source);
+        List<?> parsed = deserializeList(source);
         for (Object entry : parsed)
         {
             if (entry instanceof List<?> && ((List<?>) entry).size() >= 2)
@@ -131,27 +129,30 @@ public class ConfigHelper
         return map;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source)
+    public static Map<Integer, Pair<Double, Temperature.Units>> getDimensionsWithValues(String source)
     {
-        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
-        for (List<?> entry : source)
+        Map<Integer, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        List<?> parsed = deserializeList(source);
+        for (Object obj : parsed)
         {
+            if (!(obj instanceof List<?>)) continue;
+            List<?> entry = (List<?>) obj;
             try
             {
-                ResourceLocation dimensionID = new ResourceLocation((String) entry.get(0));
-                double temp = ((Number) entry.get(1)).doubleValue();
-                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                Integer dimensionID = Integer.parseInt((String) entry.get(0));
+                double temp = Double.parseDouble((String) entry.get(1));
+                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(stripString(entry.get(2)).toUpperCase()) : Temperature.Units.MC;
                 map.put(dimensionID, Pair.of(temp, units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing dimension temp config: " + entry.toString() + ".");
+            {   ColdSweat.LOGGER.error("Error parsing dimension temp config: " + entry + ".", e);
             }
         }
         return map;
     }
 
     public static List<BiomeGenBase> getBiomes(String source)
-    {   List<?> parsed = getNestedObjectList(source);
+    {   List<?> parsed = deserializeList(source);
         return parsed.stream().map(entry -> BiomeGenBase.getBiome(Integer.parseInt((String) entry))).collect(Collectors.toList());
     }
 
@@ -183,11 +184,11 @@ public class ConfigHelper
         return tag;
     }
 
-    public static NBTTagCompound writeDimensionTemps(Map<ResourceLocation, Pair<Double, Temperature.Units>> map, String key)
+    public static NBTTagCompound writeDimensionTemps(Map<Integer, Pair<Double, Temperature.Units>> map, String key)
     {
         NBTTagCompound tag = new NBTTagCompound();
         NBTTagCompound mapTag = new NBTTagCompound();
-        for (Map.Entry<ResourceLocation, Pair<Double, Temperature.Units>> entry : map.entrySet())
+        for (Map.Entry<Integer, Pair<Double, Temperature.Units>> entry : map.entrySet())
         {
             NBTTagCompound biomeTag = new NBTTagCompound();
             biomeTag.setDouble("Temp", entry.getValue().getFirst());
@@ -198,24 +199,24 @@ public class ConfigHelper
         return tag;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> readDimensionTemps(NBTTagCompound tag, String key)
+    public static Map<Integer, Pair<Double, Temperature.Units>> readDimensionTemps(NBTTagCompound tag, String key)
     {
-        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        Map<Integer, Pair<Double, Temperature.Units>> map = new HashMap<>();
         NBTTagCompound mapTag = tag.getCompoundTag(key);
         for (Object obj : mapTag.func_150296_c())
         {
             String biomeID = (String) obj;
             NBTTagCompound biomeTag = mapTag.getCompoundTag(biomeID);
-            map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            map.put(Integer.parseInt(biomeID), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
 
-    public static NBTTagCompound writeBiomeTemps(Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map, String key)
+    public static NBTTagCompound writeBiomeTemps(Map<Integer, Triplet<Double, Double, Temperature.Units>> map, String key)
     {
         NBTTagCompound tag = new NBTTagCompound();
         NBTTagCompound mapTag = new NBTTagCompound();
-        for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
+        for (Map.Entry<Integer, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
         {
             NBTTagCompound biomeTag = new NBTTagCompound();
             biomeTag.setDouble("Min", entry.getValue().getFirst());
@@ -227,15 +228,15 @@ public class ConfigHelper
         return tag;
     }
 
-    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> readBiomeTemps(NBTTagCompound tag, String key)
+    public static Map<Integer, Triplet<Double, Double, Temperature.Units>> readBiomeTemps(NBTTagCompound tag, String key)
     {
-        Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+        Map<Integer, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
         NBTTagCompound mapTag = tag.getCompoundTag(key);
         for (Object obj : mapTag.func_150296_c())
         {
             String biomeID = (String) obj;
             NBTTagCompound biomeTag = mapTag.getCompoundTag(biomeID);
-            map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            map.put(Integer.parseInt(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -293,46 +294,6 @@ public class ConfigHelper
         return map;
     }
 
-    public static List<?> getNestedObjectList(String rawList)
-    {
-        // recursively parse the list using the getStringList() method
-        List<String> entries = getStringList(rawList);
-        List<Object> objects = new ArrayList<>();
-        for (String entry : entries)
-        {
-            if (entry.startsWith("["))
-            {   objects.add(getNestedObjectList(entry));
-            }
-            else
-            {   objects.add(entry);
-            }
-        }
-        return objects;
-    }
-
-    private static List<String> getStringList(String source)
-    {
-        List<String> entries = new ArrayList<>();
-        int depth = 0;
-        StringBuilder entry = new StringBuilder();
-        for (char c : source.toCharArray())
-        {
-            if (c == '[')
-                depth++;
-            else if (c == ']')
-                depth--;
-
-            if (depth == 0 && c == ',')
-            {   entries.add(entry.toString());
-                entry = new StringBuilder();
-            }
-            else
-                entry.append(c);
-        }
-        entries.add(entry.toString());
-        return entries;
-    }
-
     public static Optional<ResourceLocation> parseID(String id)
     {   String[] parsed = id.split(":");
         if (parsed.length != 2)
@@ -340,5 +301,104 @@ public class ConfigHelper
             return Optional.empty();
         }
         return Optional.of(new ResourceLocation(parsed[0], parsed[1]));
+    }
+
+    public static List<?> deserializeList(String source)
+    {
+        List<Object> list = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
+        int depth = 0;
+        for (int i = 0; i < source.length(); i++)
+        {
+            char c = source.charAt(i);
+            if (c == '[')
+            {   depth++;
+                if (depth == 1) continue;
+            }
+            else if (c == ']')
+            {   depth--;
+                if (depth == 0)
+                {   list.add(deserializeList(builder.toString()));
+                    builder = new StringBuilder();
+                    continue;
+                }
+            }
+            else if (c == ',' && depth == 0)
+            {   list.add(stripString(builder.toString()));
+                builder = new StringBuilder();
+                continue;
+            }
+            builder.append(c);
+        }
+        list.add(stripString(builder.toString()));
+        return list;
+    }
+
+    public static String[] deserializeArray(String source)
+    {
+        List<?> list = deserializeList(source);
+        String[] array = new String[list.size()];
+        for (int i = 0; i < list.size(); i++)
+        {   Object obj = list.get(i);
+            if (obj instanceof String)
+            {   array[i] = stripString(obj);
+            }
+        }
+        return array;
+    }
+
+    public static String serializeNestedList(List<?> list)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (Object obj : list)
+        {
+            if (obj instanceof List<?>)
+                builder.append(serializeNestedList((List<?>) obj));
+            else
+                builder.append(obj.toString());
+            builder.append(",");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String serializeList(List<?> list)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (Object obj : list)
+        {
+            if (obj instanceof List<?>)
+                builder.append(serializeList((List<?>) obj));
+            else
+                builder.append(obj.toString());
+            builder.append(",");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String serializeArray(Object[] array)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (Object obj : array)
+        {
+            if (obj instanceof Object[])
+                builder.append(serializeArray((Object[]) obj));
+            else
+                builder.append(obj.toString());
+            builder.append(",");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String stripString(Object object)
+    {   return object.toString().replace(" ", "");
     }
 }

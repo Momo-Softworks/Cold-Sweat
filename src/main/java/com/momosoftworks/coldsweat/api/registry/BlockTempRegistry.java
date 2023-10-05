@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
 import com.momosoftworks.coldsweat.util.world.BlockPos;
 import com.momosoftworks.coldsweat.util.world.BlockState;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
 
@@ -40,9 +39,9 @@ public class BlockTempRegistry
                         if (temp instanceof BlockTempConfig)
                         {
                             BlockTempConfig cfg2 = (BlockTempConfig) temp;
-                            if (cfg2.comparePredicates(cfg))
+                            if (cfg2.comparePredicate(cfg))
                             {   ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"" + block.getLocalizedName() + "\" as it already has one with the same predicates: \n"
-                                                               + cfg2.getPredicates());
+                                                               + cfg2.getPredicate());
                                 return;
                             }
                         }

@@ -3,32 +3,26 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 import com.momosoftworks.coldsweat.util.world.BlockState;
 import net.minecraft.block.Block;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.function.Predicate;
 
 public abstract class BlockTempConfig extends BlockTemp
 {
-    Map<String, Predicate<BlockState>> predicates;
+    Predicate<Integer> predicate;
 
-    public BlockTempConfig(Map<String, Predicate<BlockState>> predicates, Block... blocks)
+    public BlockTempConfig(Predicate<Integer> predicate, Block... blocks)
     {   super(blocks);
-        this.predicates = predicates;
+        this.predicate = predicate;
     }
 
-    public boolean testPredicates(BlockState state)
-    {
-        for (Predicate<BlockState> predicate : predicates.values())
-        {   if (!predicate.test(state)) return false;
-        }
-        return true;
+    public boolean testPredicate(BlockState state)
+    {   return predicate.test(state.getMeta());
     }
 
-    public boolean comparePredicates(BlockTempConfig other)
-    {   return predicates.keySet().equals(other.predicates.keySet());
+    public boolean comparePredicate(BlockTempConfig other)
+    {   return this.predicate.equals(other.predicate);
     }
 
-    public Collection<String> getPredicates()
-    {   return predicates.keySet();
+    public Predicate<Integer> getPredicate()
+    {   return predicate;
     }
 }

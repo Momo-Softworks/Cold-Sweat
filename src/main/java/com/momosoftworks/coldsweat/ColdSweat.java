@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat;
 
+import com.momosoftworks.coldsweat.client.event.ClientJoinSetup;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -36,6 +38,8 @@ public class ColdSweat
         regEventHandler(new TaskScheduler());
         regEventHandler(new Overlays());
         regEventHandler(new ColdSweatConfig());
+        regEventHandler(new WorldSettingsConfig());
+        regEventHandler(new ClientJoinSetup());
 
         ColdSweatPacketHandler.CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(ColdSweatPacketHandler.NETWORK_ID);
         ColdSweatPacketHandler.registerMessages();
@@ -50,6 +54,7 @@ public class ColdSweat
     public static void preInit(FMLPreInitializationEvent event)
     {   String configDir = event.getModConfigurationDirectory().toString();
         ColdSweatConfig.init(configDir);
+        WorldSettingsConfig.init(configDir);
     }
 
     @EventHandler

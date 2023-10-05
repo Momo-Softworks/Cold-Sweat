@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.config;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.ValueHolder;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Pair;
 import com.momosoftworks.coldsweat.util.math.Triplet;
@@ -9,15 +10,15 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ConfigSettings
 {
@@ -38,22 +39,22 @@ public class ConfigSettings
     public static final ValueHolder<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static final ValueHolder<Map<Integer, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Integer, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Integer, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Integer, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Double> CAVE_INSULATION = ValueHolder.simple(() -> 1.0);
-    public static final ValueHolder<Double[]> SUMMER_TEMPS = ValueHolder.simple(() -> new Double[]{0.0, 0.0, 0.0});
-    public static final ValueHolder<Double[]> AUTUMN_TEMPS = ValueHolder.simple(() -> new Double[]{0.0, 0.0, 0.0});
-    public static final ValueHolder<Double[]> WINTER_TEMPS = ValueHolder.simple(() -> new Double[]{0.0, 0.0, 0.0});
-    public static final ValueHolder<Double[]> SPRING_TEMPS = ValueHolder.simple(() -> new Double[]{0.0, 0.0, 0.0});
+    public static final ValueHolder<Map<Integer, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final ValueHolder<Map<Integer, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final ValueHolder<Map<Integer, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
+    public static final ValueHolder<Map<Integer, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
+    public static final ValueHolder<Double> CAVE_INSULATION;
+    public static final ValueHolder<Double[]> SUMMER_TEMPS;
+    public static final ValueHolder<Double[]> AUTUMN_TEMPS;
+    public static final ValueHolder<Double[]> WINTER_TEMPS;
+    public static final ValueHolder<Double[]> SPRING_TEMPS;
 
     // Block settings
-    public static final ValueHolder<Integer> BLOCK_RANGE = ValueHolder.simple(() -> 7);
-    public static final ValueHolder<Boolean> COLD_SOUL_FIRE = ValueHolder.simple(() -> true);
-    public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST = ValueHolder.simple(() -> new ArrayList<>());
-    public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST = ValueHolder.simple(() -> new ArrayList<>());
-    public static final ValueHolder<Double> HEARTH_EFFECT = ValueHolder.simple(() -> 0.5);
+    public static final ValueHolder<Integer> BLOCK_RANGE;
+    public static final ValueHolder<Boolean> COLD_SOUL_FIRE;
+    public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
+    public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
+    public static final ValueHolder<Double> HEARTH_EFFECT;
 
     // Item settings
     public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS = ValueHolder.simple(() -> new HashMap<>());
@@ -133,6 +134,111 @@ public class ConfigSettings
                                          encoder -> ConfigHelper.writeNBTBoolean(encoder, "GraceEnabled"),
                                          decoder -> decoder.getBoolean("GraceEnabled"),
                                          saver -> ColdSweatConfig.gracePeriodEnabled = saver);
+
+        BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.blockRange,
+                                       encoder -> ConfigHelper.writeNBTInt(encoder, "BlockRange"),
+                                       decoder -> decoder.getInteger("BlockRange"),
+                                       saver -> WorldSettingsConfig.blockRange = saver);
+
+        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.coldSoulFire);
+
+        HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.hearthEffect);
+
+        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(ColdSweatConfig.hearthSpreadWhitelist),
+        encoder ->
+        {
+            NBTTagCompound tag = new NBTTagCompound();
+            NBTTagList list = new NBTTagList();
+            for (Block entry : encoder)
+            {   ConfigHelper.getBlockID(entry).ifPresent(id -> list.appendTag(new NBTTagString(id.toString())));
+            }
+            tag.setTag("HearthWhitelist", list);
+            return tag;
+        },
+        decoder ->
+        {
+            List<Block> list = new ArrayList<>();
+            NBTTagList tagList = decoder.getTagList("HearthWhitelist", 8);
+            for (int i = 0; i < tagList.tagCount(); i++)
+            {   ConfigHelper.getBlock(tagList.getStringTagAt(i)).ifPresent(list::add);
+            }
+            return list;
+        },
+        saver -> ColdSweatConfig.hearthSpreadWhitelist = ConfigHelper.serializeList(saver.stream().map(ConfigHelper::getBlockID).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
+
+        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(ColdSweatConfig.hearthSpreadBlacklist),
+        encoder ->
+        {
+            NBTTagCompound tag = new NBTTagCompound();
+            NBTTagList list = new NBTTagList();
+            for (Block entry : encoder)
+            {   ConfigHelper.getBlockID(entry).ifPresent(id -> list.appendTag(new NBTTagString(id.toString())));
+            }
+            tag.setTag("HearthBlacklist", list);
+            return tag;
+        },
+        decoder ->
+        {
+            List<Block> list = new ArrayList<>();
+            NBTTagList tagList = decoder.getTagList("HearthBlacklist", 8);
+            for (int i = 0; i < tagList.tagCount(); i++)
+            {   ConfigHelper.getBlock(tagList.getStringTagAt(i)).ifPresent(list::add);
+            }
+            return list;
+        },
+        saver -> ColdSweatConfig.hearthSpreadBlacklist = ConfigHelper.serializeList(saver.stream().map(ConfigHelper::getBlockID).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
+
+        CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.caveInsulation,
+        encoder -> ConfigHelper.writeNBTDouble(encoder, "CaveInsulation"),
+        decoder -> decoder.getDouble("CaveInsulation"),
+        saver -> WorldSettingsConfig.caveInsulation = saver);
+
+        BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.biomeTemps, true),
+        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
+        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
+        saver -> WorldSettingsConfig.biomeTemps = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+                                        .map(entry ->
+                                             {
+                                                 Temperature.Units units = entry.getValue().getThird();
+                                                 double min = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                 double max = Temperature.convertUnits(entry.getValue().getSecond(), Temperature.Units.MC, units, false);
+                                                 return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                             })
+                                        .collect(Collectors.toList())));
+
+        BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.biomeOffsets, false),
+        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeOffsets"),
+        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeOffsets"),
+        saver -> WorldSettingsConfig.biomeOffsets = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+                                        .map(entry ->
+                                             {
+                                                 Temperature.Units units = entry.getValue().getThird();
+                                                 double min = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                 double max = Temperature.convertUnits(entry.getValue().getSecond(), Temperature.Units.MC, units, false);
+                                                 return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                             })
+                                        .collect(Collectors.toList())));
+
+        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.dimensionTemps),
+        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionTemps"),
+        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionTemps"),
+        saver -> WorldSettingsConfig.dimensionTemps = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+                                           .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
+                                           .collect(Collectors.toList())));
+
+        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.dimensionOffsets),
+        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionOffsets"),
+        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionOffsets"),
+        saver -> WorldSettingsConfig.dimensionOffsets = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+                                           .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
+                                           .collect(Collectors.toList())));
+
+
+        boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
+        SUMMER_TEMPS = addSetting("summer_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.summerTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
+        AUTUMN_TEMPS = addSetting("autumn_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.autumnTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
+        WINTER_TEMPS = addSetting("winter_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.winterTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
+        SPRING_TEMPS = addSetting("spring_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.springTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
     }
 
     public enum Difficulty
