@@ -34,7 +34,7 @@ public class WorldSettingsConfig
         /*
          Dimensions
          */
-        CONFIG.addCustomCategoryComment("dimensions", "Format: [[\"dimension_1\", temperature1], [\"dimension_2\", temperature2]... etc]"
+        CONFIG.addCustomCategoryComment("dimensions", "Format: [\"dimension_1\", temperature1], [\"dimension_2\", temperature2], [etc...], [etc...]"
         + "\nCommon dimension IDs: 0 (overworld), -1 (nether), 1 (end)");
             dimensionOffsets = CONFIG.getString("Dimension Temperature Offsets",
                                                 "dimensions",
@@ -42,13 +42,13 @@ public class WorldSettingsConfig
                                                 "Applies an offset to the world's temperature across an entire dimension");
             dimensionTemps = CONFIG.getString("Dimension Temperatures",
                                               "dimensions",
-                                              "[[-1, 0.7], [1, -0.1]]",
+                                              "[-1, 0.7], [1, -0.1]",
                                               "Overrides all existing dimension/biome temperatures/offsets");
 
         /*
          Biomes
          */
-        CONFIG.addCustomCategoryComment("biomes", "Format: [[\"biome_1\", tempLow, tempHigh, *units], [\"biome_2\", tempLow, tempHigh, *units]... etc]"
+        CONFIG.addCustomCategoryComment("biomes", "Format: [\"biome_1\", tempLow, tempHigh, *units], [\"biome_2\", tempLow, tempHigh, *units], [etc...], [etc...]"
         + "\ntemp-low: The temperature of the biome at midnight"
         + "\ntemp-high: The temperature of the biome at noon"
         + "\nunits: Optional. The units of the given temperature(s) (\"C\", \"F\", or \"MC\". Defaults to MC units)");
@@ -64,7 +64,7 @@ public class WorldSettingsConfig
         /*
          Block Temperatures
          */
-        CONFIG.addCustomCategoryComment("blocks", "Format: [[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, <*meta_values>], [etc...], [etc...]]"
+        CONFIG.addCustomCategoryComment("blocks", "Format: [\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, <*meta_values>], [etc...], [etc...]"
         + "\n(* = optional) (1 °MC = 42 °F/ 23.33 °C)"
         + "\nArguments:"
         + "\nblock-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")"
@@ -75,7 +75,7 @@ public class WorldSettingsConfig
         + "\nMultiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")");
             blockTemps = CONFIG.getString("Block Temperatures",
                                           "blocks",
-                                          "[[\"minecraft:fire\", 0.476, 7, true, 0.8], [\"minecraft:ice\", -0.15, 4, true, 0.5], [\"minecraft:packed_ice\", -0.25, 4, true, 1.0]]",
+                                          "[\"minecraft:fire\", 0.476, 7, true, 0.8], [\"minecraft:ice\", -0.15, 4, true, 0.5], [\"minecraft:packed_ice\", -0.25, 4, true, 1.0]",
                                           "");
             blockRange = CONFIG.getInt("Block Temperature Range",
                                        "blocks",
