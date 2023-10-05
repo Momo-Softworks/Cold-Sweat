@@ -78,7 +78,7 @@ public class WorldHelper
         for (int i = 0; i < iterations; i++)
         {
             BlockState state = WorldHelper.getBlockState(chunk, pos2);
-            VoxelShape shape = getBlockShape(world, state);
+            VoxelShape shape = getBlockShape(state);
             if (shape.isFullCube()) return false;
 
             if (isFullSide(shape.getFaceShape(Direction.Axis.Y), Direction.UP))
@@ -90,25 +90,26 @@ public class WorldHelper
         return true;
     }
 
-    public static VoxelShape getBlockShape(World world, BlockState state)
+    public static VoxelShape getBlockShape(BlockState state)
     {
-        Block block = state.block;
+        Block block = state.getBlock();
         return new VoxelShape(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(),
                 block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
     }
 
-    public static boolean isSpreadBlocked(World world, BlockState state, BlockPos pos, Direction toDir,Direction fromDir)
+    public static boolean isSpreadBlocked(BlockState state, Direction toDir,Direction fromDir)
     {
         Block block = state.getBlock();
-        if (state.isAir() || !state.block.getMaterial().blocksMovement() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block))
+        if (state.isAir() || !state.getBlock().getMaterial().blocksMovement() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block))
         // TODO: 9/24/23 Add this back when blocks are registered
         //|| block == ModBlocks.HEARTH_BOTTOM || block == ModBlocks.HEARTH_TOP)
         {   return false;
         }
         if (ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().contains(block)) return true;
 
-        VoxelShape shape = getBlockShape(world, state);
-        if (shape.isFullCube()) return true;
+        VoxelShape shape = getBlockShape(state);
+        if (shape.isFullCube())
+            return true;
 
         // Should it have spread here in the first place?
         return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)
@@ -146,8 +147,8 @@ public class WorldHelper
     }
 
     @Nullable
-    public static Chunk getChunk(World level, int chunkX, int chunkZ)
-    {   return level.getChunkProvider().provideChunk(chunkX, chunkZ);
+    public static Chunk getChunk(World world, int chunkX, int chunkZ)
+    {   return world.getChunkFromChunkCoords(chunkX, chunkZ);
     }
 
     public static ExtendedBlockStorage getChunkSection(Chunk chunk, int y)
@@ -165,17 +166,15 @@ public class WorldHelper
     }
 
     public static BlockState getBlockState(Chunk chunk, BlockPos pos)
-    {
-        int x = pos.getX();
+    {   int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
+        if (y < 0 || y >= 256) return BlockState.of(Blocks.air, 0);
         return BlockState.of(chunk.getBlock(x & 15, y, z & 15), chunk.getBlockMetadata(x & 15, y, z & 15));
     }
 
     public static BlockState getBlockState(World world, BlockPos pos)
-    {   Chunk chunk = getChunk(world, pos);
-        if (chunk == null) return BlockState.of(Blocks.air, 0);
-        return getBlockState(chunk, pos);
+    {   return BlockState.of(world.getBlock(pos.getX(), pos.getY(), pos.getZ()), world.getBlockMetadata(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static AxisAlignedBB getBox(BlockPos pos)
@@ -220,7 +219,7 @@ public class WorldHelper
         // Don't bother if the ray has no length
         if (!from.equals(to))
         {
-            Vec3 ray = to.subtract(from);
+            Vec3 ray = from.subtract(to);
             Vec3 normalRay = ray.normalize();
             BlockPos.Mutable pos = new BlockPos(from).mutable();
             Chunk workingChunk = chunk;
@@ -229,7 +228,7 @@ public class WorldHelper
             for (int i = 0; i < ray.lengthVector(); i++)
             {
                 // Get the position of the current segment
-                Vec3 vec = from.subtract(CSMath.scaleVec(normalRay, i));
+                Vec3 vec = from.addVector(normalRay.xCoord * i, normalRay.yCoord * i, normalRay.zCoord * i);
 
                 // Skip if the position is the same as the last one
                 if (new BlockPos(vec).equals(pos)) continue;
@@ -241,19 +240,22 @@ public class WorldHelper
                 if (state == null)
                 {   // Set new workingChunk if the ray travels outside the current one
                     if (workingChunk == null || !new ChunkPos(workingChunk).equals(new ChunkPos(pos)))
-                        workingChunk = getChunk(world, pos);
+                    {   workingChunk = getChunk(world, pos);
+                    }
 
                     if (workingChunk == null) continue;
-                    state = BlockState.of(workingChunk.getBlock(pos.getX(), pos.getY(), pos.getZ()), workingChunk.getBlockMetadata(pos.getX(), pos.getY(), pos.getZ()));
+                    state = getBlockState(workingChunk, pos);
                     stateCache.put(pos.immutable(), state);
                 }
 
-
                 // If the block isn't air, then we hit something
-                if (!state.isAir() && state.getBlock().getMaterial().blocksMovement() && --maxHits <= 0)
-                    break;
-
-                rayTracer.accept(state, pos);
+                if (!state.isAir())
+                {
+                    rayTracer.accept(state, pos);
+                    if (--maxHits <= 0)
+                    {   break;
+                    }
+                }
             }
         }
     }
@@ -263,7 +265,7 @@ public class WorldHelper
         // Don't bother if the ray has no length
         if (!from.equals(to))
         {
-            Vec3 ray = to.subtract(from);
+            Vec3 ray = from.subtract(to);
             Vec3 normalRay = ray.normalize();
             BlockPos.Mutable pos = new BlockPos.Mutable();
 

@@ -17,7 +17,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,14 +37,14 @@ public class BlockTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(EntityLivingBase entity, Temperature.Type type)
     {
-        Map<BlockTemp, Double> affectMap = new HashMap<>(128);
+        Map<BlockTemp, Double> blockEffectAmounts = new HashMap<>(128);
         Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);
         List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(128);
 
         World world = entity.worldObj;
         int range = this.getNBT().hasKey("RangeOverride", 3) ? this.getNBT().getInteger("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
 
-        BlockPos entPos = new BlockPos(entity.getPosition(0));
+        BlockPos entPos = new BlockPos(entity);
         int entX = entPos.getX();
         int entY = entPos.getY();
         int entZ = entPos.getZ();
@@ -59,85 +58,69 @@ public class BlockTempModifier extends TempModifier
                 Chunk chunk = chunks.get(chunkPos);
                 if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(world, chunkPos));
                 if (chunk == null) continue;
-                ExtendedBlockStorage[] sections = chunk.getBlockStorageArray();
 
                 for (int y = -range; y < range; y++)
                 {
-                    try
+                    blockpos.set(entX + x, entY + y, entZ + z);
+
+                    BlockState state = stateCache.get(blockpos);
+                    if (state == null)
+                    {   stateCache.put(blockpos.immutable(), state = WorldHelper.getBlockState(chunk, blockpos));
+                    }
+                    Block block = state.getBlock();
+
+                    if (block.getMaterial() == Material.air) continue;
+
+                    // Get the BlockTemp associated with the block
+                    List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
+
+                    if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
+
+                    // Is totalTemp within the bounds of any BlockTemp's min/max range?
+                    if (isInTempRange(blockEffectAmounts, blockTemps))
                     {
-                        blockpos.set(entX + x, entY + y, entZ + z);
+                        // Get Vector positions of the centers of the source block and player
+                        Vec3 pos = CSMath.atCenterOf(blockpos);
 
-                        BlockState state = stateCache.get(blockpos);
-                        if (state == null)
-                        {   stateCache.put(blockpos, state = BlockState.of(world.getBlock(x, y, z), world.getBlockMetadata(x, y, z)));
-                        }
-                        Block block = state.getBlock();
+                        // Gets the closest point in the player's BB to the block
+                        double playerRadius = entity.width / 2;
+                        Vec3 playerClosest = Vec3.createVectorHelper(CSMath.clamp(pos.xCoord, entity.posX - playerRadius, entity.posX + playerRadius),
+                                                              CSMath.clamp(pos.yCoord, entity.posY, entity.posY + entity.height),
+                                                              CSMath.clamp(pos.zCoord, entity.posZ - playerRadius, entity.posZ + playerRadius));
 
-                        if (block.getMaterial() == Material.air) continue;
+                        // Cast a ray between the player and the block
+                        // Lessen the effect with each block between the player and the block
+                        int[] blocks = new int[1];
+                        Vec3 ray = playerClosest.subtract(pos);
+                        Direction direction = Direction.getNearest(ray.xCoord, ray.yCoord, ray.zCoord);
 
-                        // Get the BlockTemp associated with the block
-                        List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
-
-                        if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
-
-                        // Is totalTemp within the bounds of any BlockTemp's min/max range?
-                        boolean isInTempRange = affectMap.isEmpty();
-                        if (!isInTempRange)
-                        {   for (Map.Entry<BlockTemp, Double> entry : affectMap.entrySet())
-                        {   BlockTemp key = entry.getKey();
-                            Double value = entry.getValue();
-
-                            if (!blockTemps.contains(key) || CSMath.withinRange(value, key.minEffect(), key.maxEffect()))
-                            {   isInTempRange = true;
-                                break;
+                        WorldHelper.forBlocksInRay(playerClosest, pos, world, chunk, stateCache,
+                        (rayState, bpos) ->
+                        {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(rayState, direction, direction))
+                            {   blocks[0]++;
                             }
-                        }
-                        }
-                        if (isInTempRange)
+                        }, 3);
+
+                        // Get the temperature of the block given the player's distance
+                        double distance = CSMath.getDistance(playerClosest, pos);
+
+                        for (int i = 0; i < blockTemps.size(); i++)
                         {
-                            // Get Vector positions of the centers of the source block and player
-                            Vec3 pos = CSMath.atCenterOf(blockpos);
+                            BlockTemp blockTemp = blockTemps.get(i);
+                            double tempToAdd = blockTemp.getTemperature(world, entity, state, blockpos, distance);
 
-                            // Gets the closest point in the player's BB to the block
-                            double playerRadius = entity.width / 2;
-                            Vec3 playerClosest = Vec3.createVectorHelper(CSMath.clamp(pos.xCoord, entity.posX - playerRadius, entity.posX + playerRadius),
-                                                                  CSMath.clamp(pos.yCoord, entity.posY, entity.posY + entity.height),
-                                                                  CSMath.clamp(pos.zCoord, entity.posZ - playerRadius, entity.posZ + playerRadius));
-
-                            // Cast a ray between the player and the block
-                            // Lessen the effect with each block between the player and the block
-                            int[] blocks = new int[1];
-                            Vec3 ray = pos.subtract(playerClosest);
-                            Direction direction = Direction.getNearest(ray.xCoord, ray.yCoord, ray.zCoord);
-
-                            WorldHelper.forBlocksInRay(playerClosest, pos, world, chunk, stateCache,
-                            (rayState, bpos) ->
-                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(world, rayState, bpos, direction, direction))
-                                {   blocks[0]++;
-                                }
-                            }, 3);
-
-                            // Get the temperature of the block given the player's distance
-                            double distance = CSMath.getDistance(playerClosest, pos);
-
-                            for (int i = 0; i < blockTemps.size(); i++)
-                            {
-                                BlockTemp blockTemp = blockTemps.get(i);
-                                double tempToAdd = blockTemp.getTemperature(world, entity, state, blockpos, distance);
-
-                                // Store this block type's total effect on the player
-                                // Dampen the effect with each block between the player and the block
-                                double blockTempTotal = affectMap.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
-                                affectMap.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
-                                // TODO: 9/24/23 Add this back if achievements are added
-                                // Used to trigger advancements
-                                /*if (shouldTickAdvancements)
-                                {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
-                                }*/
-                            }
+                            // Store this block type's total effect on the player
+                            // Dampen the effect with each block between the player and the block
+                            double blockTempTotal = blockEffectAmounts.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
+                            if (blockTempTotal < blockTemp.minEffect() || blockTempTotal > blockTemp.maxEffect()) continue;
+                            blockEffectAmounts.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                            // TODO: 9/24/23 Add this back if achievements are added
+                            // Used to trigger achievements
+                            /*if (shouldTickAdvancements)
+                            {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
+                            }*/
                         }
                     }
-                    catch (Exception ignored) {}
                 }
             }
         }
@@ -160,16 +143,34 @@ public class BlockTempModifier extends TempModifier
         // Add the effects of all the blocks together and return the result
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> effect : affectMap.entrySet())
+            double newTemp = temp;
+            for (Map.Entry<BlockTemp, Double> effect : blockEffectAmounts.entrySet())
             {
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
-                if (!CSMath.withinRange(temp, min, max)) continue;
-                temp = CSMath.clamp(temp + effect.getValue(), min, max);
+                if (!CSMath.withinRange(newTemp, min, max)) continue;
+                newTemp = CSMath.clamp(newTemp + effect.getValue(), min, max);
             }
-            return temp;
+            return newTemp;
         };
+    }
+
+    private static boolean isInTempRange(Map<BlockTemp, Double> affectMap, List<BlockTemp> blockTemps)
+    {
+        boolean isInTempRange = affectMap.isEmpty();
+        if (!isInTempRange)
+        {   for (Map.Entry<BlockTemp, Double> entry : affectMap.entrySet())
+            {   BlockTemp key = entry.getKey();
+                Double value = entry.getValue();
+
+                if (!blockTemps.contains(key) || CSMath.withinRange(value, key.minEffect(), key.maxEffect()))
+                {   isInTempRange = true;
+                    break;
+                }
+            }
+        }
+        return isInTempRange;
     }
 
     public String getID()

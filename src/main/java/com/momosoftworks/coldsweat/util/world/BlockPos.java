@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Direction;
-import com.momosoftworks.coldsweat.util.math.Vec3d;
 import com.momosoftworks.coldsweat.util.math.Vec3i;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Vec3;
@@ -17,7 +17,7 @@ public class BlockPos extends Vec3i
     }
 
     public BlockPos(Vec3 vec3)
-    {   this(vec3.xCoord, vec3.yCoord, vec3.zCoord);
+    {   super(vec3);
     }
 
     public BlockPos(Entity entity)
@@ -45,9 +45,9 @@ public class BlockPos extends Vec3i
         }
 
         public void set(double x, double y, double z)
-        {   this.x = (int) x;
-            this.y = (int) y;
-            this.z = (int) z;
+        {   this.x = CSMath.floor(x);
+            this.y = CSMath.floor(y);
+            this.z = CSMath.floor(z);
         }
 
         public void set(BlockPos pos)
@@ -143,5 +143,10 @@ public class BlockPos extends Vec3i
     public double distance(BlockPos pos2)
     {
         return Math.sqrt(Math.pow(pos2.x - this.x, 2) + Math.pow(pos2.y - this.y, 2) + Math.pow(pos2.z - this.z, 2));
+    }
+
+    @Override
+    public String toString()
+    {   return "BlockPos{" + x + ", " + y + ", " + z + "}";
     }
 }

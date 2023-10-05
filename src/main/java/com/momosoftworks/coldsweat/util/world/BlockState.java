@@ -5,8 +5,8 @@ import net.minecraft.init.Blocks;
 
 public class BlockState
 {
-    Block block;
-    int meta;
+    private final Block block;
+    private final int meta;
 
     public BlockState(Block block, int meta)
     {   this.block = block;
@@ -27,5 +27,10 @@ public class BlockState
 
     public static BlockState of(Block block, int meta)
     {   return new BlockState(block, meta);
+    }
+
+    @Override
+    public String toString()
+    {   return "{" + block.getUnlocalizedName() + ":" + meta + "}";
     }
 }

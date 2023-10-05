@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.math;
 
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
 public class Vec3i
@@ -15,15 +16,13 @@ public class Vec3i
     }
 
     public Vec3i(double x, double y, double z)
-    {   this.x = (int) x;
-        this.y = (int) y;
-        this.z = (int) z;
+    {   this.x = MathHelper.floor_double(x);
+        this.y = MathHelper.floor_double(y);
+        this.z = MathHelper.floor_double(z);
     }
 
     public Vec3i(Vec3 vec3)
-    {   this.x = (int) vec3.xCoord;
-        this.y = (int) vec3.yCoord;
-        this.z = (int) vec3.zCoord;
+    {   this(vec3.xCoord, vec3.yCoord, vec3.zCoord);
     }
 
     public int getX()
