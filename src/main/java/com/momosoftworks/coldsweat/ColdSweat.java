@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.config.ColdSweatConfig;
 import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartedEvent;
@@ -23,13 +24,14 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = ColdSweat.MOD_ID, version = ColdSweat.VERSION)
 public class ColdSweat
 {
-    public static final String MOD_ID = "assets/cold_sweat";
+    public static final String MOD_ID = "cold_sweat";
     public static final String VERSION = "2.1.1";
     public static final Logger LOGGER = LogManager.getLogger();
     
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
+        // Event handler classes
         regEventHandler(this);
         regEventHandler(new EntityTempManager());
         regEventHandler(new TaskScheduler());
@@ -40,6 +42,9 @@ public class ColdSweat
         regEventHandler(new ColdSweatConfig());
         regEventHandler(new WorldSettingsConfig());
         regEventHandler(new ClientJoinSetup());
+
+        // Registration
+        ModItems.init();
 
         ColdSweatPacketHandler.CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(ColdSweatPacketHandler.NETWORK_ID);
         ColdSweatPacketHandler.registerMessages();

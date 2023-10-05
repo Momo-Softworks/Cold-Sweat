@@ -135,6 +135,27 @@ public class BlockPos extends Vec3i
         return new BlockPos(this.x + direction.getNormal().getX(), this.y + direction.getNormal().getY(), this.z + direction.getNormal().getZ());
     }
 
+    public BlockPos offset(int direction)
+    {
+        switch (direction)
+        {
+            case 0:
+                return down();
+            case 1:
+                return up();
+            case 2:
+                return north();
+            case 3:
+                return south();
+            case 4:
+                return west();
+            case 5:
+                return east();
+            default:
+                return this;
+        }
+    }
+
     public BlockPos offset(int x, int y, int z)
     {
         return new BlockPos(this.x + x, this.y + y, this.z + z);
