@@ -97,32 +97,49 @@ public class ConfigHelper
                 List<?> listEntry = (List<?>) entry;
                 try
                 {
-                    int biomeID = Integer.parseInt((String) listEntry.get(0));
-                    BiomeGenBase biome = BiomeGenBase.getBiome(biomeID);
-
-                    double min;
-                    double max;
-                    Temperature.Units units;
-                    // The config defines a min and max value, with optional unit conversion
-                    if (listEntry.size() > 2)
-                    {   units = listEntry.size() == 4 ? Temperature.Units.valueOf(((String) listEntry.get(3)).toUpperCase()) : Temperature.Units.MC;
-                        min = Temperature.convertUnits(((Number) listEntry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
-                        max = Temperature.convertUnits(((Number) listEntry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
+                    List<Integer> biomeIDs = new ArrayList<>();
+                    // Try to parse an integer from the biome ID string
+                    try
+                    {   biomeIDs.add(Integer.parseInt((String) listEntry.get(0)));
                     }
-                    // The config only defines a mid-temperature
-                    else
-                    {   double mid = ((Number) listEntry.get(1)).doubleValue();
-                        double variance = 1 / Math.max(1, 2 + biome.rainfall * 2);
-                        min = mid - variance;
-                        max = mid + variance;
-                        units = Temperature.Units.MC;
+                    // Try to match the string against the biome registry
+                    catch (Exception e)
+                    {   biomeIDs.addAll(Arrays.stream(BiomeGenBase.getBiomeGenArray()).filter(biome -> biome != null && biome.biomeName.equalsIgnoreCase(((String) listEntry.get(0))))
+                                                                                      .map(biome -> biome.biomeID).collect(Collectors.toList()));
                     }
 
-                    // Maps the biome ID to the temperature (and variance if present)
-                    map.put(biomeID, new Triplet<>(min, max, units));
+                    if (biomeIDs.isEmpty())
+                    {   ColdSweat.LOGGER.error("Error parsing biome temperature config entry: " + listEntry + ". Biome not found");
+                        continue;
+                    }
+                    for (Integer biomeID : biomeIDs)
+                    {
+                        BiomeGenBase biome = BiomeGenBase.getBiome(biomeID);
+
+                        double min;
+                        double max;
+                        Temperature.Units units;
+                        // The config defines a min and max value, with optional unit conversion
+                        if (listEntry.size() > 2)
+                        {   units = listEntry.size() == 4 ? Temperature.Units.valueOf(((String) listEntry.get(3)).toUpperCase()) : Temperature.Units.MC;
+                            min = Temperature.convertUnits(Double.parseDouble(((String) listEntry.get(1))), units, Temperature.Units.MC, absolute);
+                            max = Temperature.convertUnits(Double.parseDouble(((String) listEntry.get(2))), units, Temperature.Units.MC, absolute);
+                        }
+                        // The config only defines a mid-temperature
+                        else
+                        {   double mid = ((Number) listEntry.get(1)).doubleValue();
+                            double variance = 1 / Math.max(1, 2 + biome.rainfall * 2);
+                            min = mid - variance;
+                            max = mid + variance;
+                            units = Temperature.Units.MC;
+                        }
+
+                        // Maps the biome ID to the temperature (and variance if present)
+                        map.put(biomeID, new Triplet<>(min, max, units));
+                    }
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Error parsing biome temperature config entry: " + listEntry);
+                {   ColdSweat.LOGGER.error("Error parsing biome temperature config entry: " + listEntry, e);
                 }
             }
         }
@@ -304,13 +321,15 @@ public class ConfigHelper
     }
 
     public static List<?> deserializeList(String source)
-    {
+    {   // Remove characters that will mess up the parsing
+        String fixed = source.replace(" ", "").replace("[[", "[").replace("]]", "]").replace("\"", "");
+
         List<Object> list = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < source.length(); i++)
+        for (int i = 0; i < fixed.length(); i++)
         {
-            char c = source.charAt(i);
+            char c = fixed.charAt(i);
             if (c == '[')
             {   depth++;
                 if (depth == 1) continue;
@@ -345,23 +364,6 @@ public class ConfigHelper
             }
         }
         return array;
-    }
-
-    public static String serializeNestedList(List<?> list)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        for (Object obj : list)
-        {
-            if (obj instanceof List<?>)
-                builder.append(serializeNestedList((List<?>) obj));
-            else
-                builder.append(obj.toString());
-            builder.append(",");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        builder.append("]");
-        return builder.toString();
     }
 
     public static String serializeList(List<?> list)
@@ -400,5 +402,9 @@ public class ConfigHelper
 
     public static String stripString(Object object)
     {   return object.toString().replace(" ", "");
+    }
+
+    public static ResourceLocation getResourceLocation(GameRegistry.UniqueIdentifier uid)
+    {   return new ResourceLocation(uid.modId, uid.name);
     }
 }
