@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Pair;
 import com.momosoftworks.coldsweat.util.math.Triplet;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
@@ -57,26 +58,26 @@ public class ConfigSettings
     public static final ValueHolder<Double> HEARTH_EFFECT;
 
     // Item settings
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Integer[]> INSULATION_SLOTS = ValueHolder.simple(() -> new Integer[]{4, 5, 6, 4});
-    public static final ValueHolder<List<ResourceLocation>> INSULATION_BLACKLIST = ValueHolder.simple(() -> new ArrayList<>());
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static final ValueHolder<Integer[]> INSULATION_SLOTS;
+    public static final ValueHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
-    public static final ValueHolder<Boolean> CHECK_SLEEP_CONDITIONS = ValueHolder.simple(() -> true);
+    public static final ValueHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final ValueHolder<Map<Item, Double>> FOOD_TEMPERATURES = ValueHolder.simple(() -> new HashMap<>());
+    public static final ValueHolder<Map<Item, Double>> FOOD_TEMPERATURES;
 
-    public static final ValueHolder<Integer> WATERSKIN_STRENGTH = ValueHolder.simple(() -> 50);
+    public static final ValueHolder<Integer> WATERSKIN_STRENGTH;
 
-    public static final ValueHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<List<ResourceLocation>> LAMP_DIMENSIONS = ValueHolder.simple(() -> new ArrayList<>());
+    public static final ValueHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS;
+    public static final ValueHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final ValueHolder<Map<Item, Double>> BOILER_FUEL = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Item, Double>> ICEBOX_FUEL = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Map<Item, Double>> HEARTH_FUEL = ValueHolder.simple(() -> new HashMap<>());
-    public static final ValueHolder<Boolean> HEARTH_POTIONS_ENABLED = ValueHolder.simple(() -> true);
-    public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS = ValueHolder.simple(() -> new ArrayList<>());
+    public static final ValueHolder<Map<Item, Double>> BOILER_FUEL;
+    public static final ValueHolder<Map<Item, Double>> ICEBOX_FUEL;
+    public static final ValueHolder<Map<Item, Double>> HEARTH_FUEL;
+    public static final ValueHolder<Boolean> HEARTH_POTIONS_ENABLED;
+    public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     // Entity Settings
     public static final ValueHolder<Triplet<Integer, Integer, Double>> LLAMA_FUR_TIMINGS = ValueHolder.simple(() -> new Triplet<>(24000, 24000, 0.5));
@@ -196,7 +197,7 @@ public class ConfigSettings
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.biomeTemps, true),
         encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
-        saver -> WorldSettingsConfig.biomeTemps = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+        saver -> WorldSettingsConfig.biomeTemps = ConfigHelper.serializeList(saver.entrySet().stream()
                                         .map(entry ->
                                              {
                                                  Temperature.Units units = entry.getValue().getThird();
@@ -209,7 +210,7 @@ public class ConfigSettings
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.biomeOffsets, false),
         encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeOffsets"),
         decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeOffsets"),
-        saver -> WorldSettingsConfig.biomeOffsets = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+        saver -> WorldSettingsConfig.biomeOffsets = ConfigHelper.serializeList(saver.entrySet().stream()
                                         .map(entry ->
                                              {
                                                  Temperature.Units units = entry.getValue().getThird();
@@ -222,14 +223,14 @@ public class ConfigSettings
         DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.dimensionTemps),
         encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionTemps"),
         decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionTemps"),
-        saver -> WorldSettingsConfig.dimensionTemps = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+        saver -> WorldSettingsConfig.dimensionTemps = ConfigHelper.serializeList(saver.entrySet().stream()
                                            .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
                                            .collect(Collectors.toList())));
 
         DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.dimensionOffsets),
         encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionOffsets"),
         decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionOffsets"),
-        saver -> WorldSettingsConfig.dimensionOffsets = ConfigHelper.serializeNestedList(saver.entrySet().stream()
+        saver -> WorldSettingsConfig.dimensionOffsets = ConfigHelper.serializeList(saver.entrySet().stream()
                                            .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
                                            .collect(Collectors.toList())));
 
@@ -239,6 +240,211 @@ public class ConfigSettings
         AUTUMN_TEMPS = addSetting("autumn_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.autumnTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
         WINTER_TEMPS = addSetting("winter_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.winterTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
         SPRING_TEMPS = addSetting("spring_temps", () -> ssLoaded ? Arrays.stream(ConfigHelper.deserializeArray(WorldSettingsConfig.springTemps)).map(Double::valueOf).toArray(Double[]::new) : new Double[]{0d, 0d, 0d});
+
+        INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
+        {
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (Object obj : ConfigHelper.deserializeList(ItemSettingsConfig.insulatingItems))
+            {
+                if (!(obj instanceof List)) continue;
+                List<?> entry = (List<?>) obj;
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Pair.of(Double.parseDouble((String) entry.get(1)), Double.parseDouble((String) entry.get(2))));
+                }
+            }
+            return map;
+        },
+        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulationItems"),
+        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulationItems"),
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
+            {   ResourceLocation itemID = ConfigHelper.getResourceLocation(GameRegistry.findUniqueIdentifierFor(entry.getKey()));
+                list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            }
+            ItemSettingsConfig.insulatingItems = ConfigHelper.serializeList(list);
+        });
+
+        ADAPTIVE_INSULATION_ITEMS = addSyncedSetting("adaptive_insulation_items", () ->
+        {
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (Object obj : ConfigHelper.deserializeList(ItemSettingsConfig.adaptiveInsulatingItems))
+            {
+                if (!(obj instanceof List)) continue;
+                List<?> entry = (List<?>) obj;
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Pair.of(Double.parseDouble((String) entry.get(1)), Double.parseDouble((String) entry.get(2))));
+                }
+            }
+            return map;
+        },
+        encoder -> ConfigHelper.writeNBTItemMap(encoder, "AdaptiveInsulationItems"),
+        decoder -> ConfigHelper.readNBTItemMap(decoder, "AdaptiveInsulationItems"),
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
+            {   ResourceLocation itemID = ConfigHelper.getResourceLocation(GameRegistry.findUniqueIdentifierFor(entry.getKey()));
+                list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            }
+            ItemSettingsConfig.adaptiveInsulatingItems = ConfigHelper.serializeList(list);
+        });
+
+        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () ->
+        {
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (Object obj : ConfigHelper.deserializeList(ItemSettingsConfig.insulatingArmor))
+            {
+                if (!(obj instanceof List)) continue;
+                List<?> entry = (List<?>) obj;
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Pair.of(Double.parseDouble((String) entry.get(1)), Double.parseDouble((String) entry.get(2))));
+                }
+            }
+            return map;
+        },
+        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulatingArmor"),
+        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulatingArmor"),
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
+            {   ResourceLocation itemID = ConfigHelper.getResourceLocation(GameRegistry.findUniqueIdentifierFor(entry.getKey()));
+                list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+            }
+            ItemSettingsConfig.insulatingArmor = ConfigHelper.serializeList(list);
+        });
+
+        INSULATION_SLOTS = addSyncedSetting("insulation_slots", () -> Arrays.stream(ConfigHelper.deserializeArray(ItemSettingsConfig.insulationSlots)).map(Integer::valueOf).toArray(Integer[]::new),
+        encoder ->
+        {   NBTTagCompound tag = new NBTTagCompound();
+            tag.setInteger("Head",  encoder[0]);
+            tag.setInteger("Chest", encoder[1]);
+            tag.setInteger("Legs",  encoder[2]);
+            tag.setInteger("Feet",  encoder[3]);
+            return tag;
+        },
+        decoder ->
+        {   return new Integer[] { decoder.getInteger("Head"), decoder.getInteger("Chest"), decoder.getInteger("Legs"), decoder.getInteger("Feet") };
+        },
+        saver ->
+        {   ItemSettingsConfig.insulationSlots = ConfigHelper.serializeArray(new Integer[] {saver[0], saver[1], saver[2], saver[3]});
+        });
+
+        INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ConfigHelper.deserializeList(ItemSettingsConfig.insulationBlacklist).stream().map(str -> new ResourceLocation((String) str)).collect(Collectors.toList()));
+
+        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> ColdSweatConfig.checkSleep);
+
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () ->
+        {
+            Map<Item, Double> map = new HashMap<>();
+            for (Object obj : ConfigHelper.deserializeList(ItemSettingsConfig.temperatureFoods))
+            {
+                if (!(obj instanceof List)) continue;
+                List<?> entry = (List<?>) obj;
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Double.parseDouble((String) entry.get(1)));
+                }
+            }
+            return map;
+        },
+        encoder ->
+        {
+            NBTTagCompound tag = new NBTTagCompound();
+            NBTTagCompound mapTag = new NBTTagCompound();
+            for (Map.Entry<Item, Double> entry : encoder.entrySet())
+            {
+                NBTTagCompound itemTag = new NBTTagCompound();
+                itemTag.setDouble("Value", entry.getValue());
+
+                ConfigHelper.getItemID(entry.getKey()).ifPresent(itemID -> mapTag.setTag(itemID.toString(), itemTag));
+            }
+            tag.setTag("FoodTemperatures", mapTag);
+            return tag;
+        },
+        decoder ->
+        {
+            Map<Item, Double> map = new HashMap<>();
+            NBTTagCompound mapTag = decoder.getCompoundTag("FoodTemperatures");
+            for (Object key : mapTag.func_150296_c())
+            {   NBTTagCompound itemTag = mapTag.getCompoundTag((String) key);
+                ConfigHelper.getItem((String) key).ifPresent(item -> map.put(item, itemTag.getDouble("Value")));
+            }
+            return map;
+        },
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Double> entry : saver.entrySet())
+            {   ResourceLocation itemID = ConfigHelper.getResourceLocation(GameRegistry.findUniqueIdentifierFor(entry.getKey()));
+                list.add(Arrays.asList(itemID.toString(), entry.getValue()));
+            }
+            ItemSettingsConfig.temperatureFoods = ConfigHelper.serializeList(list);
+        });
+
+        WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.waterskinStrength);
+
+        LAMP_FUEL_ITEMS = addSyncedSetting("lamp_fuel_items", () ->
+        {
+            Map<Item, Integer> map = new HashMap<>();
+            for (Object obj : ConfigHelper.deserializeList(ItemSettingsConfig.soulLampItems))
+            {
+                if (!(obj instanceof List)) continue;
+                List<?> entry = (List<?>) obj;
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Integer.parseInt((String) entry.get(1)));
+                }
+            }
+            return map;
+        },
+        encoder ->
+        {
+            NBTTagCompound tag = new NBTTagCompound();
+            NBTTagCompound mapTag = new NBTTagCompound();
+            for (Map.Entry<Item, Integer> entry : encoder.entrySet())
+            {
+                NBTTagCompound itemTag = new NBTTagCompound();
+                itemTag.setInteger("Value", entry.getValue());
+
+                ConfigHelper.getItemID(entry.getKey()).ifPresent(itemID -> mapTag.setTag(itemID.toString(), itemTag));
+            }
+            tag.setTag("LampFuelItems", mapTag);
+            return tag;
+        },
+        decoder ->
+        {
+            Map<Item, Integer> map = new HashMap<>();
+            NBTTagCompound mapTag = decoder.getCompoundTag("LampFuelItems");
+            for (Object key : mapTag.func_150296_c())
+            {   NBTTagCompound itemTag = mapTag.getCompoundTag((String) key);
+                ConfigHelper.getItem((String) key).ifPresent(item -> map.put(item, itemTag.getInteger("Value")));
+            }
+            return map;
+        },
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Integer> entry : saver.entrySet())
+            {   ResourceLocation itemID = ConfigHelper.getResourceLocation(GameRegistry.findUniqueIdentifierFor(entry.getKey()));
+                list.add(Arrays.asList(itemID.toString(), entry.getValue()));
+            }
+            ItemSettingsConfig.soulLampItems = ConfigHelper.serializeList(list);
+        });
+
+        LAMP_DIMENSIONS = addSetting("lamp_dimensions", () -> ConfigHelper.deserializeList(ItemSettingsConfig.soulLampDimensions).stream().map(str -> new ResourceLocation((String) str)).collect(Collectors.toList()));
+
+        BOILER_FUEL = addSetting("boiler_fuel", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.boilerItems));
+        ICEBOX_FUEL = addSetting("icebox_fuel", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.iceboxItems));
+        HEARTH_FUEL = addSetting("hearth_fuel", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.hearthItems));
+
+        HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.allowPotionsInHearth);
+        BLACKLISTED_POTIONS = addSetting("blacklisted_potions", () -> ConfigHelper.deserializeList(ItemSettingsConfig.blacklistedPotions).stream().map(str -> new ResourceLocation((String) str)).collect(Collectors.toList()));
     }
 
     public enum Difficulty
