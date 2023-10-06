@@ -5,14 +5,14 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.ChatColors;
 import com.momosoftworks.coldsweat.util.world.ItemHelper;
 import com.momosoftworks.coldsweat.util.world.TaskScheduler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -22,6 +22,8 @@ public class FilledWaterskinItem extends Item
 {
     public FilledWaterskinItem()
     {}
+
+    private static final double EFFECT_RATE = 0.5;
 
     @Override
     public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
@@ -33,7 +35,7 @@ public class FilledWaterskinItem extends Item
             double itemTemp = ItemHelper.getOrCrateTag(stack).getDouble("temperature");
             if (itemTemp != 0 && slot <= 8)
             {
-                double temp = 0.04 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
+                double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
                 double newTemp = itemTemp - temp * 2;
                 if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
 
@@ -60,7 +62,7 @@ public class FilledWaterskinItem extends Item
         if (player.inventory.hasItemStack(emptyStack))
         {   player.inventory.addItemStackToInventory(emptyStack);
             // clear the player's hand
-            player.setCurrentItemOrArmor(0, null);
+            player.setCurrentItemOrArmor(0, ItemHelper.EMPTY_STACK);
         }
         else
         {   player.setCurrentItemOrArmor(0, emptyStack);
@@ -108,27 +110,26 @@ public class FilledWaterskinItem extends Item
         double temp = ItemHelper.getOrCrateTag(stack).getDouble("temperature");
         // Info tooltip for hotbar functionality
         tooltip.add("");
-        tooltip.add("§7" + new ChatComponentTranslation("tooltip.cold_sweat.hotbar").getUnformattedTextForChat());
-        String tempColor = temp > 0 ? "§c" : temp < 0 ? "§9" : "§f";
-        tooltip.add(tempColor + new ChatComponentTranslation("tooltip.cold_sweat.temperature_effect", (CSMath.getSign(temp) >= 0 ? "+" : "-") + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0)).getUnformattedTextForChat());
+        tooltip.add(new ChatComponentTranslation("tooltip.cold_sweat.hotbar").setChatStyle(ChatColors.GRAY).getFormattedText());
+        ChatStyle tempColor = temp > 0 ? ChatColors.RED : temp < 0 ? ChatColors.BLUE : ChatColors.WHITE;
+        tooltip.add(new ChatComponentTranslation("tooltip.cold_sweat.temperature_effect",
+                                                 (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                               + (temp != 0 ? EFFECT_RATE * ConfigSettings.TEMP_RATE.get() : 0))
+                            .setChatStyle(tempColor).getFormattedText());
 
         // Tooltip to display temperature
         boolean celsius = false;//ClientSettingsConfig.getInstance().isCelsius();
-        String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
         if (celsius) temp = Temperature.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += 0;//ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
-        tooltip.add(1, "§7" + new ChatComponentTranslation(
-                "item.cold_sweat.waterskin.filled").getUnformattedTextForChat() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r");
+        tooltip.add(1, new ChatComponentTranslation("item.cold_sweat.waterskin.filled").setChatStyle(ChatColors.GRAY).getFormattedText()
+                     + " ("
+                     + new ChatComponentText((int) temp + " \u00B0" + tempUnits).setChatStyle(tempColor).getFormattedText()
+                     + ")");
         super.addInformation(stack, player, tooltip, advanced);
     }
-
-    /*@Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {   return slotChanged;
-    }*/
 
     @Override
     public String getItemStackDisplayName(ItemStack stack)
