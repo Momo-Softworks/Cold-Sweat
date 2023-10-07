@@ -28,26 +28,28 @@ public class DrawConfigButton
     public static boolean DRAW_CONTROLS = false;
 
     @SubscribeEvent
-    public static void eventHandler(ScreenEvent.Init event)
+    public static void eventHandler(ScreenEvent.Init.Post event)
     {
         if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
         {
             // The offset from the config
             Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();
-            AtomicInteger buttonX = new AtomicInteger(buttonPos.get().get(0));
-            AtomicInteger buttonY = new AtomicInteger(buttonPos.get().get(1));
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().get(0));
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().get(1));
+            int buttonX = event.getScreen().width / 2 - 183;
+            int buttonY = event.getScreen().height / 6 + 110;
             int screenWidth = event.getScreen().width;
             int screenHeight = event.getScreen().height;
 
-            if (buttonX.get() < -1 || buttonY.get() < -1)
-            {   buttonX.set(0);
-                buttonY.set(0);
+            if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
+            {   xOffset.set(0);
+                yOffset.set(0);
                 ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(0, 0));
                 ClientSettingsConfig.getInstance().save();
             }
 
             // Main config button
-            ImageButton mainButton = new ImageButton(event.getScreen().width / 2 - 183 + buttonX.get(), event.getScreen().height / 6 + 110 + buttonY.get(),
+            ImageButton mainButton = new ImageButton(buttonX + xOffset.get(), buttonY + yOffset.get(),
                                      24, 24, 40, 40, 24,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
@@ -66,11 +68,11 @@ public class DrawConfigButton
                 int buttonStartX = event.getScreen().width / 2 - 183;
                 int buttonStartY = event.getScreen().height / 6 + 110;
                 Runnable saveAndClamp = () ->
-                {   ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(buttonX.get(), buttonY.get()));
+                {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
+                    yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
+                    mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
+                    ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(xOffset.get(), yOffset.get()));
                     ClientSettingsConfig.getInstance().save();
-                    buttonX.set(CSMath.clamp(buttonX.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
-                    buttonY.set(CSMath.clamp(buttonY.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
-                    mainButton.setPosition(buttonStartX + buttonX.get(), buttonStartY + buttonY.get());
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
@@ -82,7 +84,8 @@ public class DrawConfigButton
                     {
                         boolean isDoneButton = button.getMessage().getString().equals(CommonComponents.GUI_DONE.getString());
                         if (!isDoneButton)
-                            button.active = false;
+                        {   button.active = false;
+                        }
                         else
                         {   doneButtonAtomic.set(button);
                             button.setWidth(button.getWidth() - 72);
@@ -100,7 +103,7 @@ public class DrawConfigButton
                 ImageButton leftButton = new ImageButton(doneButton.getX() + doneButton.getWidth() + 2, doneButton.getY(), 14, 20, 0, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonX.set(buttonX.get() - ConfigScreen.SHIFT_AMOUNT.get());
+                                     {   xOffset.set(xOffset.get() - ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
                                      });
                 // Add left button
@@ -110,7 +113,7 @@ public class DrawConfigButton
                 ImageButton upButton = new ImageButton(leftButton.getX() + leftButton.getWidth(), leftButton.getY(), 20, 10, 14, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonY.set(buttonY.get() - ConfigScreen.SHIFT_AMOUNT.get());
+                                     {   yOffset.set(yOffset.get() - ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
                                      });
                 // Add up button
@@ -120,7 +123,7 @@ public class DrawConfigButton
                 ImageButton downButton = new ImageButton(upButton.getX(), upButton.getY() + upButton.getHeight(), 20, 10, 14, 10, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonY.set(buttonY.get() + ConfigScreen.SHIFT_AMOUNT.get());
+                                     {   yOffset.set(yOffset.get() + ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
                                      });
                 // Add down button
@@ -130,7 +133,7 @@ public class DrawConfigButton
                 ImageButton rightButton = new ImageButton(upButton.getX() + upButton.getWidth(), upButton.getY(), 14, 20, 34, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonX.set(buttonX.get() + ConfigScreen.SHIFT_AMOUNT.get());
+                                     {   xOffset.set(xOffset.get() + ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
                                      });
                 // Add right button
@@ -140,8 +143,8 @@ public class DrawConfigButton
                 ImageButton resetButton = new ImageButton(rightButton.getX() + rightButton.getWidth() + 2, rightButton.getY(), 20, 20, 48, 0, 20,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
-                                     {   buttonX.set(0);
-                                         buttonY.set(0);
+                                     {   xOffset.set(0);
+                                         yOffset.set(0);
                                          saveAndClamp.run();
                                      });
                 // Add reset button
