@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -38,7 +38,7 @@ public class HearthTopBlock extends Block
     public static Properties getProperties()
     {
         return Properties
-                .of(Material.STONE)
+                .of()
                 .sound(SoundType.STONE)
                 .strength(2f)
                 .explosionResistance(10f)
@@ -113,7 +113,7 @@ public class HearthTopBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder)
     {   return ModBlocks.HEARTH_BOTTOM.getDrops(state, builder);
     }
 

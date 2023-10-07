@@ -29,7 +29,7 @@ public class WaterTempModifier extends TempModifier
 
         double strength = this.getNBT().getDouble("Strength");
         double returnRate = Math.min(-0.0012, -0.0012 - (worldTemp / 640));
-        double addAmount = WorldHelper.isInWater(entity) ? 0.05 : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? 0.0125 : returnRate;
+        double addAmount = WorldHelper.isInWater(entity) ? 0.05 : WorldHelper.isRainingAt(entity.level(), entity.blockPosition()) ? 0.0125 : returnRate;
         double maxStrength = CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
 
         double newStrength = CSMath.clamp(strength + addAmount, 0d, maxStrength);
@@ -48,7 +48,7 @@ public class WaterTempModifier extends TempModifier
                 {   double randX = entity.getBbWidth() * (Math.random() - 0.5);
                     double randY = entity.getBbHeight() * Math.random();
                     double randZ = entity.getBbWidth() * (Math.random() - 0.5);
-                    entity.level.addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
+                    entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
                 }
             }
             return temp - newStrength;

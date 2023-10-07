@@ -93,7 +93,7 @@ public class ShearableFurManager
 
     public static LazyOptional<IShearableCap> getFurCap(Entity entity)
     {
-        Map<Entity, LazyOptional<IShearableCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        Map<Entity, LazyOptional<IShearableCap>> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
         return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<IShearableCap> cap = e.getCapability(ModCapabilities.SHEARABLE_FUR);
             cap.addListener((opt) -> cache.remove(e));
@@ -108,7 +108,7 @@ public class ShearableFurManager
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
+        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level().isClientSide && stack.getItem() == Items.SHEARS)
         {
             getFurCap(goat).ifPresent(cap ->
             {
@@ -121,14 +121,14 @@ public class ShearableFurManager
                 player.swing(event.getHand(), true);
                 stack.hurtAndBreak(1, event.getEntity(), (p) -> p.broadcastBreakEvent(event.getHand()));
                 // Play sound
-                goat.level.playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
+                goat.level().playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
                 // Spawn item
                 WorldHelper.entityDropItem(goat, new ItemStack(ModItems.FUR));
 
                 // Random chance to ram the player when sheared
-                if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
-                && !goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
+                if (!player.isCreative() && goat.level().getDifficulty() != Difficulty.PEACEFUL
+                && !goat.level().isClientSide && goat.getRandom().nextDouble() < 0.4)
                 {
                     // Set ram cooldown ticks
                     goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
@@ -139,7 +139,7 @@ public class ShearableFurManager
                     TaskScheduler.scheduleServer(() ->
                     {
                         ClientboundEntityEventPacket packet = new ClientboundEntityEventPacket(goat, (byte) 58);
-                        ((ServerChunkCache) goat.level.getChunkSource()).broadcastAndSend(goat, packet);
+                        ((ServerChunkCache) goat.level().getChunkSource()).broadcastAndSend(goat, packet);
                     }, 5);
 
                     // Look at player
@@ -180,7 +180,7 @@ public class ShearableFurManager
 
         Triplet<Integer, Integer, Double> furConfig = ConfigSettings.FUR_TIMINGS.get();
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
-        if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
+        if (!goat.level().isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
             getFurCap(goat).ifPresent(cap ->
             {
@@ -191,7 +191,7 @@ public class ShearableFurManager
                     WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, goat.getSoundSource(), 0.5f, 0.8f);
 
                     // Spawn particles
-                    WorldHelper.spawnParticleBatch(goat.level, ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
+                    WorldHelper.spawnParticleBatch(goat.level(), ParticleTypes.SPIT, goat.getX(), goat.getY() + goat.getBbHeight() / 2, goat.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
                     // Set not sheared
                     cap.setSheared(false);
                     syncData(goat, null);
@@ -210,7 +210,7 @@ public class ShearableFurManager
 
     public static void syncData(Goat goat, ServerPlayer player)
     {
-        if (!goat.level.isClientSide)
+        if (!goat.level().isClientSide)
         {   getFurCap(goat).ifPresent(cap ->
             {   ColdSweatPacketHandler.INSTANCE.send(player != null ? PacketDistributor.PLAYER.with(() -> player)
                                                                     : PacketDistributor.TRACKING_ENTITY.with(() -> goat),

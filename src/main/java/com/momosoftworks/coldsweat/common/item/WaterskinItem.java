@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -40,7 +40,7 @@ public class WaterskinItem extends Item
         }
         else
         {
-            if (lookingAt.getFluidState().isSource() && lookingAt.getMaterial() == Material.WATER)
+            if (lookingAt.getFluidState().isSource() && lookingAt.getFluidState().getType().isSame(Fluids.WATER))
             {
                 ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
                 filledWaterskin.setTag(itemstack.getTag());

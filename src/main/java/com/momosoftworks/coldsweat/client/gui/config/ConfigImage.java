@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -18,13 +16,17 @@ public class ConfigImage extends ImageWidget implements GuiEventListener, Narrat
     public ConfigImage(ResourceLocation texture, int x, int y, int width, int height, int u, int v)
     {   super(x, y, width, height, texture);
         this.texture = texture;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         this.u = u;
         this.v = v;
     }
 
-    public void render(PoseStack poseStack, int x, int y, float partialTick)
-    {   RenderSystem.setShaderTexture(0, texture);
-        blit(poseStack, this.x, this.y, u, v, width, height);
+    @Override
+    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    {   graphics.blit(texture, this.x, this.y, u, v, width, height);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class HearthDebugRenderer
             Frustum frustum = event.getFrustum();
             PoseStack ps = event.getPoseStack();
             Vec3 camPos = event.getCamera().getPosition();
-            Level level = player.level;
+            Level level = player.level();
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.enableBlend();

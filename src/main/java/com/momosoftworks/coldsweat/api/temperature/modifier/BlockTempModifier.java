@@ -16,7 +16,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 import oshi.util.tuples.Triplet;
 
@@ -40,7 +39,7 @@ public class BlockTempModifier extends TempModifier
         Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);
         List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(128);
 
-        Level level = entity.level;
+        Level level = entity.level();
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
 
         int entX = entity.blockPosition().getX();
@@ -74,7 +73,7 @@ public class BlockTempModifier extends TempModifier
                             stateCache.put(blockpos.immutable(), state);
                         }
 
-                        if (state.getMaterial() == Material.AIR) continue;
+                        if (state.isAir()) continue;
 
                         // Get the BlockTemp associated with the block
                         List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,11 +26,10 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
-    {
-        this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(poseStack, mouseX, mouseY);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+    {   this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
@@ -40,19 +40,18 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        RenderSystem.setShaderTexture(0, SEWING_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
-        this.blit(poseStack, x, y, 0, 0, this.getXSize(), this.getYSize());
+        graphics.blit(SEWING_GUI, x, y, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
-        {   this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
+        {   graphics.blit(SEWING_GUI, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
         }
         if (!menu.getSlot(1).hasItem())
-        {   this.blit(poseStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
+        {   graphics.blit(SEWING_GUI, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
         }
     }
 }

@@ -56,7 +56,7 @@ public class TempEffectsCommon
                 if (!player.isFallFlying())
                 {
                     // Get protection from armor underwear
-                    float liningProtFactor = CSMath.blend(player.isOnGround() ? 0.5f : 0.75f, 1, getArmorUnderProt(player, true), 0, 4);
+                    float liningProtFactor = CSMath.blend(player.onGround() ? 0.5f : 0.75f, 1, getArmorUnderProt(player, true), 0, 4);
                     if (liningProtFactor != 1)
                     {
                         float moveSpeed = CSMath.blend(liningProtFactor, 1, temp, -100, -50);

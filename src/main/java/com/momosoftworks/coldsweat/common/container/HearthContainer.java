@@ -84,10 +84,9 @@ public class HearthContainer extends AbstractContainerMenu
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        final BlockEntity te = playerInv.player.level().getBlockEntity(data.readBlockPos());
         if (te instanceof HearthBlockEntity hearth)
-        {
-            return hearth;
+        {   return hearth;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }

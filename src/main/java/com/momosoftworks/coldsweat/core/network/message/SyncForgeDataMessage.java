@@ -19,7 +19,7 @@ public class SyncForgeDataMessage
     {
         this.forgeData = entity.getPersistentData();
         this.entityID = entity.getId();
-        this.dimension = entity.level.dimension().location().toString();
+        this.dimension = entity.level().dimension().location().toString();
     }
 
     public SyncForgeDataMessage(CompoundTag forgeData, int entityID, String dimension)

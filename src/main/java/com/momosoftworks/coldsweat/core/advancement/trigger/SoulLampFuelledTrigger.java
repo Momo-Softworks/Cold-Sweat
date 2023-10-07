@@ -13,7 +13,7 @@ public class SoulLampFuelledTrigger extends SimpleCriterionTrigger<SoulLampFuell
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fuelled");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
+    protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
     {
         ItemPredicate[] fuelStack = ItemPredicate.fromJsonArray(json.get("fuel_item"));
         ItemPredicate lampStack = ItemPredicate.fromJson(json.get("lamp_item"));
@@ -37,7 +37,7 @@ public class SoulLampFuelledTrigger extends SimpleCriterionTrigger<SoulLampFuell
         private final ItemPredicate[] fuelStack;
         private final ItemPredicate lampStack;
 
-        public Instance(EntityPredicate.Composite player, ItemPredicate[] fuelStack, ItemPredicate lampStack)
+        public Instance(ContextAwarePredicate player, ItemPredicate[] fuelStack, ItemPredicate lampStack)
         {
             super(ID, player);
             this.fuelStack = fuelStack;

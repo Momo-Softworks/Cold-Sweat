@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -15,9 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jline.reader.Widget;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -149,7 +147,9 @@ public abstract class AbstractConfigPage extends Screen
         button.active = shouldBeActive;
 
         // Add the clientside indicator
-        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        if (clientside)
+        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        }
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
@@ -239,7 +239,9 @@ public abstract class AbstractConfigPage extends Screen
         // Make the label
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
-        if (clientside) this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        if (clientside)
+        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        }
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
@@ -387,34 +389,32 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(poseStack);
+        this.renderBackground(graphics);
+        Font font = this.font;
 
         // Page Title
-        drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        drawString(poseStack, this.font, Component.literal(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215);
+        graphics.drawString(this.font, Component.literal(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215, true);
 
         // Section 1 Title
-        drawString(poseStack, this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215);
+        graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);
 
         // Section 1 Divider
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        this.blit(poseStack, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
+        graphics.blit(TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
 
         if (this.sectionTwoTitle() != null)
-        {
-            // Section 2 Title
-            drawString(poseStack, this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215);
+        {   // Section 2 Title
+            graphics.drawString(this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215, true);
 
             // Section 2 Divider
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            this.blit(poseStack, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
+            graphics.blit(TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
         }
 
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render tooltip
         if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
@@ -445,7 +445,7 @@ public abstract class AbstractConfigPage extends Screen
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
                     List<Component> tooltip = this.tooltips.get(id).stream().map(text -> Component.literal(text.getString())).collect(Collectors.toList());
-                    this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+                    graphics.renderTooltip(font, tooltip, Optional.empty(), mouseX, mouseY);
                 }
                 break;
             }

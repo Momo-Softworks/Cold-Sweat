@@ -75,7 +75,7 @@ public class BoilerContainer extends AbstractContainerMenu
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
-        final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+        final BlockEntity te = playerInv.player.level().getBlockEntity(data.readBlockPos());
         if (te instanceof BoilerBlockEntity)
         {
             return (BoilerBlockEntity) te;

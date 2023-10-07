@@ -158,7 +158,7 @@ public class WorldHelper
     public static boolean isSpreadBlocked(LevelAccessor level, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
     {
         Block block = state.getBlock();
-        if (state.isAir() || !state.getMaterial().blocksMotion() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block)
+        if (state.isAir() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block)
         || block == ModBlocks.HEARTH_BOTTOM || block == ModBlocks.HEARTH_TOP)
         {   return false;
         }
@@ -221,7 +221,7 @@ public class WorldHelper
     {
         if (!entity.isSilent())
         {
-            if (entity.level.isClientSide)
+            if (entity.level().isClientSide)
             {   ClientOnlyHelper.playEntitySound(sound, source, volume, pitch, entity);
             }
             else
@@ -235,7 +235,7 @@ public class WorldHelper
     public static boolean isInWater(Entity entity)
     {
         BlockPos pos = entity.blockPosition();
-        ChunkAccess chunk = WorldHelper.getChunk(entity.level, pos);
+        ChunkAccess chunk = WorldHelper.getChunk(entity.level(), pos);
         if (chunk == null) return false;
         return entity.isInWater() || chunk.getBlockState(pos).getBlock() == Blocks.BUBBLE_COLUMN;
     }
@@ -289,8 +289,9 @@ public class WorldHelper
 
 
                 // If the block isn't air, then we hit something
-                if (!state.isAir() && state.getMaterial().blocksMotion() && --maxHits <= 0)
-                    break;
+                if (!state.isAir() && --maxHits <= 0)
+                {   break;
+                }
 
                 rayTracer.accept(state, pos);
             }

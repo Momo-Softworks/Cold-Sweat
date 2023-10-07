@@ -17,8 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import com.momosoftworks.coldsweat.common.container.SewingContainer;
 
@@ -32,7 +32,7 @@ public class SewingTableBlock extends Block implements MenuProvider
     public static Properties getProperties()
     {
         return Properties
-                .of(Material.WOOD)
+                .of()
                 .sound(SoundType.WOOD)
                 .strength(2f, 5f);
     }
@@ -63,7 +63,7 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder)
     {   List<ItemStack> drops = super.getDrops(state, builder);
         if (!drops.isEmpty())
             return drops;

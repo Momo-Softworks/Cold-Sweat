@@ -32,13 +32,13 @@ public class HotBiomeEdible extends Edible
     @Override
     public Result onEaten(Chameleon entity, ItemEntity item)
     {
-        if (!entity.level.isClientSide)
+        if (!entity.level().isClientSide)
         {
             // Flag for searching
             entity.setSearching(true);
 
             // Locate the nearest biome with temp > 1.5
-            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findClosestBiome3d(holder ->
+            Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level()).findClosestBiome3d(holder ->
             {
                 Biome biome = holder.value();
                 ResourceLocation biomeName = ForgeRegistries.BIOMES.getKey(biome);
@@ -60,7 +60,7 @@ public class HotBiomeEdible extends Edible
                     entity.setTrackingPos(biomePair.getFirst());
 
                     WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
-                    WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
+                    WorldHelper.spawnParticleBatch(entity.level(), ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
                     // Stop searching
                     entity.setSearching(false);
@@ -72,7 +72,7 @@ public class HotBiomeEdible extends Edible
             {
                 TaskScheduler.scheduleServer(() ->
                 {
-                    WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.SMOKE, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
+                    WorldHelper.spawnParticleBatch(entity.level(), ParticleTypes.SMOKE, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
                     // Stop searching
                     entity.setSearching(false);

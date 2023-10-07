@@ -95,11 +95,11 @@ public class TempCommand extends BaseCommand
         if (entities.size() == 1)
         {
             Entity target = entities.iterator().next();
-            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
+            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.set.single.result", target.getName().getString(), temp), true);
         }
         else
         {
-            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
+            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.set.many.result", entities.size(), temp), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -115,7 +115,7 @@ public class TempCommand extends BaseCommand
         {
             //Compose & send message
             int bodyTemp = (int) Temperature.get((LivingEntity) target, Temperature.Type.BODY);
-            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
+            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -129,7 +129,7 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(Component.literal("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
+            source.sendSuccess(() -> Component.literal("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
         }
         return Command.SINGLE_SUCCESS;
     }

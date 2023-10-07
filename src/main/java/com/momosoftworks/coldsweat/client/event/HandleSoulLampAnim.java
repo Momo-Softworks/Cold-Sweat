@@ -24,7 +24,7 @@ public class HandleSoulLampAnim
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (player.level.isClientSide && event.phase == TickEvent.Phase.START)
+        if (player.level().isClientSide && event.phase == TickEvent.Phase.START)
         {
             if (player.tickCount % 20 == 0)
                 LEFT_HANDED = player.getMainArm() == HumanoidArm.LEFT;

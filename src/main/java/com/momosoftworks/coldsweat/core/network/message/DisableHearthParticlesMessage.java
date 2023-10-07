@@ -27,7 +27,7 @@ public class DisableHearthParticlesMessage
     {
         this.nbt = nbt;
         this.entityID = player.getId();
-        this.worldKey = player.level.dimension().location().toString();
+        this.worldKey = player.level().dimension().location().toString();
     }
 
     DisableHearthParticlesMessage(int entityID, String worldKey, CompoundTag nbt)

@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
@@ -86,28 +87,26 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
-    {
-        this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(poseStack, mouseX, mouseY);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+    {   this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        RenderSystem.setShaderTexture(0, HEARTH_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
-        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(HEARTH_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);
         int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
 
         // Render hot/cold fuel gauges
-        blit(poseStack, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, hotFuel, 256, 256);
-        blit(poseStack, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, coldFuel, 256, 256);
+        graphics.blit(HEARTH_GUI, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, hotFuel, 256, 256);
+        graphics.blit(HEARTH_GUI, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, coldFuel, 256, 256);
     }
 
     @Override

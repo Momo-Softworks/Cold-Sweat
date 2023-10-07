@@ -16,7 +16,7 @@ public class PlayerDamageSound
     {
         if (ModDamageSources.isFreezing(event.getSource()))
         {
-            if (event.getEntity() instanceof Player player && !event.getEntity().level.isClientSide)
+            if (event.getEntity() instanceof Player player && !event.getEntity().level().isClientSide)
             {   WorldHelper.playEntitySound(SoundEvents.PLAYER_HURT_FREEZE, player, player.getSoundSource(), 2f, player.getVoicePitch());
             }
         }

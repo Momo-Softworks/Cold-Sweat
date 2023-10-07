@@ -24,11 +24,11 @@ public class UndergroundTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
+        if (entity.level().dimensionType().hasCeiling()) return temp -> temp;
 
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
         BlockPos playerPos = entity.blockPosition();
-        Level level = entity.level;
+        Level level = entity.level();
 
         List<Pair<Double, Double>> depthTable = new ArrayList<>();
 
@@ -67,7 +67,7 @@ public class UndergroundTempModifier extends TempModifier
         double biomeTempAvg = biomeTempTotal / biomeCount;
         return temp ->
         {
-            double depthAvg = CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15),
+            double depthAvg = CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level().getBrightness(LightLayer.SKY, entity.blockPosition()), 0, 15),
                                           CSMath.blend(temp, midTemp, depth, 4, 20), 1, 2);
             return CSMath.blend(depthAvg, biomeTempAvg, biomeCount, 0, depthTable.size());
         };

@@ -19,10 +19,10 @@ public class HealingEdible extends Edible
     @Override
     public Result onEaten(Chameleon entity, ItemEntity item)
     {
-        if (!entity.level.isClientSide && item.getOwner() != null && entity.isPlayerTrusted(item.getOwner().getUUID()))
+        if (!entity.level().isClientSide && item.getOwner() != null && entity.isPlayerTrusted(item.getOwner().getUUID()))
         {
             entity.heal(6);
-            WorldHelper.spawnParticle(entity.level, ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(), 0, 0, 0);
+            WorldHelper.spawnParticle(entity.level(), ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(), 0, 0, 0);
             return Result.SUCCESS;
         }
         return Result.FAIL;

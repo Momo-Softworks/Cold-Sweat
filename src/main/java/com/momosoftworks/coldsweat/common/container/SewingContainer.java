@@ -185,7 +185,7 @@ public class SewingContainer extends AbstractContainerMenu
                 super.onTake(player, stack);
                 SewingContainer.this.takeOutput(stack);
 
-                if (!SewingContainer.this.playerInventory.player.level.isClientSide)
+                if (!SewingContainer.this.playerInventory.player.level().isClientSide)
                     TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
             }
         });
@@ -257,7 +257,7 @@ public class SewingContainer extends AbstractContainerMenu
                     // Remove the last insulation item added
                     cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
                     // Play shear sound
-                    player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
 
                     serializeInsulation(input1, cap);
                 }
@@ -267,7 +267,7 @@ public class SewingContainer extends AbstractContainerMenu
             {   // Remove input items
                 this.growItem(0, -1);
                 this.growItem(1, -1);
-                player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+                player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
 
                 // Trigger advancement criteria
                 if (player instanceof ServerPlayer serverPlayer)
@@ -278,7 +278,7 @@ public class SewingContainer extends AbstractContainerMenu
         // Get equip sound for the armor item
         if (stack.getItem() instanceof ArmorItem armor)
         {   SoundEvent equipSound = armor.getMaterial().getEquipSound();
-            player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+            player.level().playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
         }
     }
 

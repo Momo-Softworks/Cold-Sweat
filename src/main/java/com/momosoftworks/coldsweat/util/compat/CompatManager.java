@@ -140,7 +140,7 @@ public class CompatManager
     {
         if (!(event instanceof LivingDamageEvent || event instanceof LivingAttackEvent)) return;
         // Armor Underwear compat
-        if (ARMOR_UNDERWEAR_LOADED && !event.getEntity().level.isClientSide)
+        if (ARMOR_UNDERWEAR_LOADED && !event.getEntity().level().isClientSide)
         {
             // Get the damage source from the event (different methods for LivingDamage/LivingAttack)
             DamageSource source = event instanceof LivingDamageEvent

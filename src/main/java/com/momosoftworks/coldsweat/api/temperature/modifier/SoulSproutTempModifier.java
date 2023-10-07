@@ -15,7 +15,7 @@ public class SoulSproutTempModifier extends TempModifier
     {
         if (Math.random() < 0.3 && entity.tickCount % 5 == 0)
         {
-            WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.SOUL, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(),
+            WorldHelper.spawnParticleBatch(entity.level(), ParticleTypes.SOUL, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(),
                     entity.getBbWidth() / 2, entity.getBbHeight() / 2, entity.getBbWidth() / 2, 1, 0.02);
         }
         return temp -> temp - 20;

@@ -47,7 +47,7 @@ public class ItemFrameEvents
     public static void onItemFrameLoaded(PlayerEvent.StartTracking event)
     {
         if (event.getTarget() instanceof ItemFrame frame && event.getEntity() instanceof ServerPlayer player
-        && frame.getItem().getItem() == ModItems.THERMOMETER && !frame.level.isClientSide)
+        && frame.getItem().getItem() == ModItems.THERMOMETER && !frame.level().isClientSide)
         {
             if (frame.getPersistentData().contains("ItemName"))
             {   // Sync the item name to the client

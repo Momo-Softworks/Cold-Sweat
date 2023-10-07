@@ -15,7 +15,7 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "armor_insulated");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
+    protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
     {
         ItemPredicate armorStack = ItemPredicate.fromJson(json.get("armor_item"));
         ItemPredicate[] insulStack = ItemPredicate.fromJsonArray(json.get("insulation_item"));
@@ -39,7 +39,7 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
         private final ItemPredicate armorStack;
         private final ItemPredicate[] insulStack;
 
-        public Instance(EntityPredicate.Composite player, ItemPredicate armorStack, ItemPredicate[] insulStack)
+        public Instance(ContextAwarePredicate player, ItemPredicate armorStack, ItemPredicate[] insulStack)
         {
             super(ID, player);
             this.armorStack = armorStack;

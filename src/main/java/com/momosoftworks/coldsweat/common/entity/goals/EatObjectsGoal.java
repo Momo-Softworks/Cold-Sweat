@@ -50,7 +50,7 @@ public class EatObjectsGoal extends Goal
     public void start()
     {
         // Scan for ItemEntity in a 5-block range
-        List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
+        List<Entity> items = this.entity.level().getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
         for (Entity ent : items)
         {
             if (ent instanceof ItemEntity itemEntity && itemEntity.getOwner() != null

@@ -37,7 +37,7 @@ public class ArmorInsulation
     public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
+        if (event.phase == TickEvent.Phase.END && !player.level().isClientSide() && player.tickCount % 10 == 0)
         {
             Map<Item, Pair<Double, Double>> insulatingArmors = ConfigSettings.INSULATING_ARMORS.get();
 
@@ -129,7 +129,7 @@ public class ArmorInsulation
     public static void onDamageTaken(LivingAttackEvent event)
     {
         DamageSource source = event.getSource();
-        if (source == event.getEntity().level.damageSources().hotFloor() && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        if (source == event.getEntity().level().damageSources().hotFloor() && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
         {   event.setCanceled(true);
         }
     }

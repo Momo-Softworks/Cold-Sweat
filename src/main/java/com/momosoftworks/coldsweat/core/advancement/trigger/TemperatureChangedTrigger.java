@@ -19,7 +19,7 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
+    protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
     {
         JsonArray tempList = json.get("temperature").getAsJsonArray();
         List<TriggerHelper.TempCondition> conditions = new ArrayList<>();
@@ -53,7 +53,7 @@ public class TemperatureChangedTrigger extends SimpleCriterionTrigger<Temperatur
     {
         List<TriggerHelper.TempCondition> conditions;
 
-        public Instance(EntityPredicate.Composite player, List<TriggerHelper.TempCondition> conditions)
+        public Instance(ContextAwarePredicate player, List<TriggerHelper.TempCondition> conditions)
         {
             super(ID, player);
             this.conditions = conditions;

@@ -146,7 +146,7 @@ public class SoulspringLampItem extends Item
     {
         if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntity() instanceof Player))
         {
-            Level level = attacker.level;
+            Level level = attacker.level();
             ItemStack stack = attacker.getMainHandItem();
             if (!(stack.getItem() instanceof SoulspringLampItem)) return;
 
@@ -166,15 +166,16 @@ public class SoulspringLampItem extends Item
                     target.hurt(level.damageSources().playerAttack(attacker), extraDamage);
 
                 // Spawn particles
-                if (!target.level.isClientSide)
+                if (!target.level().isClientSide)
                 {
                     int particleCount = (int) CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50);
-                    WorldHelper.spawnParticleBatch(attacker.level, ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
-                        target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
+                    WorldHelper.spawnParticleBatch(attacker.level(), ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
+                                                   target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
                 }
                 // Play soul stealing sound
-                if (attacker.level.isClientSide)
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
+                if (attacker.level().isClientSide)
+                {   WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
+                }
             }
         }
     }

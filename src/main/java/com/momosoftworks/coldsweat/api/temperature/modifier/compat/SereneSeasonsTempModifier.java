@@ -20,9 +20,9 @@ public class SereneSeasonsTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
     {
-        if (entity.level.dimensionType().natural())
+        if (entity.level().dimensionType().natural())
         {
-            ISeasonState season = SeasonHelper.getSeasonState(entity.level);
+            ISeasonState season = SeasonHelper.getSeasonState(entity.level());
             double startValue;
             double endValue;
 

@@ -35,7 +35,7 @@ public class BiomeTempModifier extends TempModifier
         try
         {
             double worldTemp = 0;
-            Level level = entity.level;
+            Level level = entity.level();
             BlockPos entPos = entity.blockPosition();
             ResourceLocation dimensionID = level.dimension().location();
 

@@ -53,7 +53,7 @@ public class RegisterItemOverrides
                     {
                         worldTemp = entity instanceof LivingEntity living
                                 ? EntityTempManager.getTemperatureCap(living).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0.0)
-                                : Temperature.getTemperatureAt(entity.blockPosition(), entity.level);
+                                : Temperature.getTemperatureAt(entity.blockPosition(), entity.level());
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);
                         entity.getPersistentData().putInt("WorldTempTimestamp", entity.tickCount);

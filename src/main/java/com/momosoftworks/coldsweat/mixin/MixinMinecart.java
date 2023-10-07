@@ -29,7 +29,7 @@ public class MixinMinecart
         ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
         if (!carryStack.isEmpty())
         {
-            if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
+            if (minecart.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
             {
                 ItemStack itemstack = new ItemStack(Items.MINECART);
                 if (minecart.hasCustomName())

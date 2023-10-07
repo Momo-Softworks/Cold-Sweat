@@ -124,7 +124,7 @@ public class EntityTempManager
 
     public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
     {
-        Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
         return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<ITemperatureCap> cap = e.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE);
             cap.addListener((opt) -> cache.remove(e));
@@ -143,7 +143,7 @@ public class EntityTempManager
 
         getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (!entity.level.isClientSide)
+            if (!entity.level().isClientSide)
             {   // Tick modifiers serverside
                 cap.tick(entity);
             }
@@ -174,7 +174,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void returnFromEnd(PlayerEvent.Clone event)
     {
-        if (!event.isWasDeath() && !event.getEntity().level.isClientSide)
+        if (!event.isWasDeath() && !event.getEntity().level().isClientSide)
         {
             // Get the old player's capability
             Player oldPlayer = event.getOriginal();
@@ -206,7 +206,7 @@ public class EntityTempManager
     public static void initModifiersOnEntity(EntityJoinLevelEvent event)
     {
         // Add basic TempModifiers to player
-        if (event.getEntity() instanceof ServerPlayer player && !player.level.isClientSide)
+        if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide)
         {
             // Sometimes the entity isn't fully initialized, so wait until next tick
             if (player.getServer() != null)
@@ -288,11 +288,11 @@ public class EntityTempManager
         Player player = event.player;
 
         // Water / Rain
-        if (!player.level.isClientSide && event.phase == TickEvent.Phase.START)
+        if (!player.level().isClientSide && event.phase == TickEvent.Phase.START)
         {
             if (player.tickCount % 5 == 0)
             {
-                if (WorldHelper.isInWater(player) || player.tickCount % 40 == 0 && WorldHelper.isRainingAt(player.level, player.blockPosition()))
+                if (WorldHelper.isInWater(player) || player.tickCount % 40 == 0 && WorldHelper.isRainingAt(player.level(), player.blockPosition()))
                     Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Type.WORLD, false);
 
                 if (player.isFreezing())
@@ -328,7 +328,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void cancelFreezingDamage(LivingAttackEvent event)
     {
-        if (event.getSource().equals(event.getEntity().level.damageSources().freeze()) && event.getEntity().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
+        if (event.getSource().equals(event.getEntity().level().damageSources().freeze()) && event.getEntity().hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
         {   event.setCanceled(true);
         }
     }
@@ -339,7 +339,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void onInsulationUpdate(MobEffectEvent event)
     {
-        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
+        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
         && event.getEffectInstance().getEffect() == ModEffects.INSULATION)
         {
             // Add TempModifier on potion effect added
@@ -386,7 +386,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void playerRiding(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.tickCount % 5 == 0)
+        if (event.phase == TickEvent.Phase.END && !event.player.level().isClientSide() && event.player.tickCount % 5 == 0)
         {
             Player player = event.player;
             if (player.getVehicle() != null)
@@ -421,7 +421,7 @@ public class EntityTempManager
     {
         if (event.getEntity() instanceof Player player
         && (event.getItem().getUseAnimation() == UseAnim.DRINK || event.getItem().getUseAnimation() == UseAnim.EAT)
-        && !event.getEntity().level.isClientSide)
+        && !event.getEntity().level().isClientSide)
         {
             // If food item defined in config
             float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();

@@ -16,7 +16,6 @@
     "MixinBeaconEffects",
     "MixinBlockUpdate",
     "MixinCampfire",
-    "MixinEntityRiding",
     "MixinInventoryOpenServer",
     "MixinMinecart",
     "MixinPickEntity",

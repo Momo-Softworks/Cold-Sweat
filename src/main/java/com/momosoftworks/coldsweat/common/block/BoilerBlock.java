@@ -27,8 +27,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -47,7 +47,7 @@ public class BoilerBlock extends Block implements EntityBlock
     public static Properties getProperties()
     {
         return Properties
-                .of(Material.STONE)
+                .of()
                 .sound(SoundType.STONE)
                 .destroyTime(2f)
                 .explosionResistance(10f)
@@ -118,7 +118,7 @@ public class BoilerBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder)
     {   List<ItemStack> drops = super.getDrops(state, builder);
         if (!drops.isEmpty())
             return drops;

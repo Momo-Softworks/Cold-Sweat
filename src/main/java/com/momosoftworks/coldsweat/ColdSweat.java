@@ -55,6 +55,7 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         BiomeCodecInit.BIOME_MODIFIER_SERIALIZERS.register(bus);
+        CreativeTabInit.ITEM_GROUPS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();

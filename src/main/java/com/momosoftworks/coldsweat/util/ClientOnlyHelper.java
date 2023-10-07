@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class ClientOnlyHelper
 {
     public static void playEntitySound(SoundEvent sound, SoundSource source, float volume, float pitch, Entity entity)
-    {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity, entity.getLevel().random.nextLong()));
+    {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity, entity.level().random.nextLong()));
     }
 
     public static Level getClientLevel()

@@ -138,7 +138,7 @@ public class Chameleon extends Animal
     public boolean isInvulnerableTo(@NotNull DamageSource source)
     {
         if (this.getVehicle() instanceof Player player)
-        {   DamageSources damageSources = player.level.damageSources();
+        {   DamageSources damageSources = player.level().damageSources();
             if (source.equals(damageSources.inWall()) || source.equals(damageSources.fall())) return true;
             return player.isCreative() || player.isInvulnerableTo(source);
         }
@@ -154,10 +154,10 @@ public class Chameleon extends Animal
         if (this.dead)
         {
             ListTag trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
-            if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !this.getTrustedPlayers().getList("Players", 8).isEmpty())
+            if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !this.getTrustedPlayers().getList("Players", 8).isEmpty())
             {   trustedPlayers.forEach(string ->
                 {
-                    Player player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
+                    Player player = level().getPlayerByUUID(UUID.fromString(string.getAsString()));
                     if (player != null)
                     {   player.sendSystemMessage(deathMessage);
                     }
@@ -177,17 +177,19 @@ public class Chameleon extends Animal
         return InteractionResult.PASS;
     }
 
+    @Override
+    public float getEyeHeight(Pose pose)
+    {   return this.isBaby() ? 0.25F : 0.35F;
+    }
+
     @SubscribeEvent
     public static void setHeight(EntityEvent.Size event)
     {
         if (event.getEntity() instanceof Chameleon chameleon)
         {
-            event.setNewEyeHeight(0.35F);
             if (chameleon.isBaby())
-            {   event.setNewEyeHeight(0.25F);
-                event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f));
+            {   event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f));
             }
-            else event.setNewEyeHeight(0.35F);
         }
     }
 
@@ -233,7 +235,7 @@ public class Chameleon extends Animal
     public void playAmbientSound()
     {
         SoundEvent soundevent = this.getAmbientSound();
-        if (!this.level.isClientSide && soundevent != null && !this.isSearching())
+        if (!this.level().isClientSide && soundevent != null && !this.isSearching())
         {
             // This method plays a sound that actually follows the entity
             WorldHelper.playEntitySound(soundevent, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
@@ -245,15 +247,13 @@ public class Chameleon extends Animal
     {
         SoundEvent soundevent = this.getHurtSound(damageSource);
         if (soundevent != null)
-        {
-            // This method plays a sound that actually follows the entity
+        {   // This method plays a sound that actually follows the entity
             WorldHelper.playEntitySound(soundevent, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
         }
     }
 
     public boolean isWalking()
-    {
-        return new Vec2((float) getDeltaMovement().x, (float) getDeltaMovement().z).length() > 0.01;
+    {   return new Vec2((float) getDeltaMovement().x, (float) getDeltaMovement().z).length() > 0.01;
     }
 
     @Override
@@ -285,12 +285,12 @@ public class Chameleon extends Animal
             this.eatAnimationTimer--;
 
         // Age
-        if (!this.level.isClientSide && this.tickCount % 20 == 0)
+        if (!this.level().isClientSide && this.tickCount % 20 == 0)
         {   this.setAgeSecs(this.getAgeSecs() + 1);
         }
 
         // Tick shedding
-        if (!this.level.isClientSide)
+        if (!this.level().isClientSide)
         {
             boolean shedding = this.isShedding();
             if (this.tickCount % 20 == 0 && this.getAgeSecs() * 20 - this.getLastShed() > 24000 && !shedding && this.random.nextInt(30) == 1)
@@ -352,7 +352,7 @@ public class Chameleon extends Animal
         {
             if (this.random.nextDouble() < 0.3)
             {
-                WorldHelper.spawnParticle(this.level, ParticleTypes.HAPPY_VILLAGER,
+                WorldHelper.spawnParticle(this.level(), ParticleTypes.HAPPY_VILLAGER,
                         this.getX() + Math.random() - 0.5, this.getY() + Math.random() - 0.5 + this.getBbHeight() / 2, this.getZ() + Math.random() - 0.5,
                         0.01, 0.01, 0.01);
             }
@@ -364,7 +364,7 @@ public class Chameleon extends Animal
                 if (this.getServer() != null)
                 {
                     Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
-                    for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
+                    for (ServerPlayer player : this.level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
                     {
                         if (advancement != null)
                         {
@@ -379,7 +379,7 @@ public class Chameleon extends Animal
         }
 
         // Tick cooldowns
-        if (!level.isClientSide)
+        if (!level().isClientSide)
         {
             CompoundTag cooldowns = this.getCooldowns();
             for (String tag : cooldowns.getAllKeys())
@@ -410,22 +410,22 @@ public class Chameleon extends Animal
 
     public void onEatEntity(Entity entity)
     {
-        if (!level.isClientSide)
+        if (!level().isClientSide)
         {
             if (entity instanceof ItemEntity itemEntity)
             {
                 if (this.isTamingItem(itemEntity.getItem()))
                 {
-                    Player player = itemEntity.getOwner() != null ? this.level.getPlayerByUUID(itemEntity.getOwner().getUUID()) : null;
+                    Player player = itemEntity.getOwner() != null ? this.level().getPlayerByUUID(itemEntity.getOwner().getUUID()) : null;
                     if (player != null && !this.isPlayerTrusted(player))
                     {
                         if (player.isCreative() || Math.random() < 0.3)
                         {   this.setPersistenceRequired();
                             this.addTrustedPlayer(itemEntity.getOwner().getUUID());
-                            WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                            WorldHelper.spawnParticleBatch(this.level(), ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
                         }
                         else
-                        {   WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                        {   WorldHelper.spawnParticleBatch(this.level(), ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
                         }
                     }
                 }
@@ -476,13 +476,11 @@ public class Chameleon extends Animal
     {
         if (this.eatAnimationTimer <= 0)
         {
-            if (!this.level.isClientSide)
-            {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ChameleonEatMessage(this.getId()));
+            if (!this.level().isClientSide)
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ChameleonEatMessage(this.getId()));
             }
             else
-            {
-                AnimationManager.ANIMATION_TIMERS.put(this, 0f);
+            {   AnimationManager.ANIMATION_TIMERS.put(this, 0f);
             }
             this.eatAnimationTimer = this.getEatAnimLength();
         }

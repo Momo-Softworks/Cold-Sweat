@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -35,9 +35,9 @@ public class ConfigLabel extends AbstractWidget implements GuiEventListener, Nar
     }
 
     @Override
-    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float depth)
+    protected void renderWidget(GuiGraphics graphics, int pmousex, int mouseY, float partialTick)
     {
-        Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.getX(), this.getY(), color);
+        graphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY(), color, true);
     }
 
     @Override

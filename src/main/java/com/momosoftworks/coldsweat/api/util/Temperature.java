@@ -380,7 +380,7 @@ public class Temperature
 
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
     {
-        if (!entity.level.isClientSide)
+        if (!entity.level().isClientSide)
         {
             ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
                             ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)
@@ -391,7 +391,7 @@ public class Temperature
 
     public static void updateModifiers(LivingEntity entity, ITemperatureCap cap)
     {
-        if (!entity.level.isClientSide)
+        if (!entity.level().isClientSide)
         {
             //ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
             //                ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)

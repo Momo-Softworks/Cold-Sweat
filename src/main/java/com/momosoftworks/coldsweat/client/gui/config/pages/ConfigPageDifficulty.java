@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -15,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,14 +129,15 @@ public class ConfigPageDifficulty extends Screen
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks)
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
         // Render Background
+        PoseStack poseStack = graphics.pose();
         if (this.minecraft.level != null)
-        {   this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+        {   graphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         }
         else
-        {   this.renderDirtBackground(poseStack);
+        {   this.renderDirtBackground(graphics);
         }
 
         int difficulty = ConfigSettings.DIFFICULTY.get();
@@ -162,33 +163,32 @@ public class ConfigPageDifficulty extends Screen
         // Draw Text Box
         int middleX = this.width / 2;
         int middleY = this.height / 2;
-        this.renderTooltip(poseStack, descLines, ItemStack.EMPTY.getTooltipImage(), middleX - longestLine / 2 - 10, middleY - 16, this.font);
+        graphics.renderTooltip(font, descLines, ItemStack.EMPTY.getTooltipImage(), middleX - longestLine / 2 - 10, middleY - 16);
 
         // Set the mouse's position for ConfigScreen (used for click events)
         ConfigScreen.MOUSE_X = mouseX;
         ConfigScreen.MOUSE_Y = mouseY;
 
         // Draw Title
-        drawCenteredString(poseStack, this.font, this.title.getString(), this.width / 2, ConfigScreen.TITLE_HEIGHT, 0xFFFFFF);
-
+        graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, ConfigScreen.TITLE_HEIGHT, 0xFFFFFF);
 
         RenderSystem.setShaderTexture(0, CONFIG_BUTTONS_LOCATION);
 
         // Draw Slider Bar
-        this.blit(poseStack, this.width / 2 - 76, this.height / 2 - 53, 12,
+        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 76, this.height / 2 - 53, 12,
                 isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
 
         // Draw Slider Head
-        this.blit(poseStack, this.width / 2 - 78 + (difficulty * 37), this.height / 2 - 58,
+        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 78 + (difficulty * 37), this.height / 2 - 58,
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
         String difficultyName = getDifficultyName(difficulty);
-        this.font.drawShadow(poseStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
-                             this.height / 2.0f - 84, getDifficultyColor(difficulty));
+        graphics.drawString(font, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
+                             this.height / 2.0f - 84, getDifficultyColor(difficulty), true);
 
         // Render Button(s)
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

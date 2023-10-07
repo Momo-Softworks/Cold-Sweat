@@ -68,7 +68,7 @@ public class AddPiglinBartersModifier extends LootModifier
             if (!replace)
             {
                 // Build vanilla items
-                for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLootTable(PIGLIN_BARTER_LOCATION))))
+                for (LootPool pool : ((List<LootPool>) POOLS.get(context.getResolver().getLootTable(PIGLIN_BARTER_LOCATION))))
                 {
                     for (LootPoolEntryContainer container : ((LootPoolEntryContainer[]) ENTRIES.get(pool)))
                     {

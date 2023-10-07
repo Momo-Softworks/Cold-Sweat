@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,24 +27,23 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+        this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        RenderSystem.setShaderTexture(0, ICEBOX_GUI);
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        this.blit(matrixStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(ICEBOX_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw fuel gauge
-        blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (menu.te.getFuel() / 31.25), 16, 256, 256);
+        graphics.blit(ICEBOX_GUI, leftPos + 109, topPos + 63, 176, 0, (int) (menu.te.getFuel() / 31.25), 16, 256, 256);
     }
 }

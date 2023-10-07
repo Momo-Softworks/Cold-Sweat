@@ -19,7 +19,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "block_affects_temperature");
 
     @Override
-    protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
+    protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
     {
         double distance = json.has("distance") ? json.get("distance").getAsDouble() : 0;
         double totalEffect = json.has("total_effect") ? json.get("total_effect").getAsDouble() : 0;
@@ -60,7 +60,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
         MinMaxBounds.Doubles totalEffect;
         List<TriggerHelper.TempCondition> conditions;
 
-        public Instance(EntityPredicate.Composite player, BlockPredicate block, double distance, double totalEffect, List<TriggerHelper.TempCondition> conditions)
+        public Instance(ContextAwarePredicate player, BlockPredicate block, double distance, double totalEffect, List<TriggerHelper.TempCondition> conditions)
         {
             super(ID, player);
             this.block = block;
@@ -74,7 +74,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
             Map<Temperature.Type, Double> temps = Temperature.getTemperatures(player);
             return this.distance.matches(distance)
                 && this.totalEffect.matches(totalEffect)
-                && this.block.matches(player.getLevel(), pos)
+                && this.block.matches(player.serverLevel(), pos)
                 && conditions.stream().allMatch(condition -> condition.matches(temps.get(condition.type())));
         }
 
