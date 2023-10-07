@@ -15,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public class ConfigSettings
 {
-    public static final Map<String, ValueHolder<?>> CONFIG_SETTINGS = new HashMap<>();
+    public static final Map<String, ValueHolder<?>> CONFIG_SETTINGS = new ConcurrentHashMap<>();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
