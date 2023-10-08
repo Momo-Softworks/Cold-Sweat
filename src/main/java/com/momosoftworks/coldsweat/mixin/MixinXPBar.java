@@ -58,28 +58,28 @@ public class MixinXPBar
     @Mixin(Gui.class)
     public static class MixinItemLabel
     {
-        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+        @Inject(method = "renderSelectedItemName*",
                 at = @At
                 (   value = "INVOKE",
                     target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
                     shift = At.Shift.AFTER
                 ),
                 remap = ColdSweat.REMAP_MIXINS)
-        public void renderItemNamePre(GuiGraphics graphics, int yShift, CallbackInfo ci)
+        public void renderItemNamePre(GuiGraphics graphics, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())
             {   graphics.pose().translate(0, -4, 0);
             }
         }
 
-        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+        @Inject(method = "renderSelectedItemName*",
                 at = @At
                 (   value = "INVOKE",
                     target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V",
                     shift = At.Shift.BEFORE
                 ),
                 remap = ColdSweat.REMAP_MIXINS)
-        public void renderItemNamePost(GuiGraphics graphics, int yShift, CallbackInfo ci)
+        public void renderItemNamePost(GuiGraphics graphics, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())
             {   graphics.pose().translate(0, 4, 0);
