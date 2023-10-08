@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Gui.class)
@@ -58,31 +59,51 @@ public class MixinXPBar
     @Mixin(Gui.class)
     public static class MixinItemLabel
     {
+        private static boolean MOVED_UP = false;
+
+        @Surrogate
         @Inject(method = "renderSelectedItemName*",
-                at = @At
-                (   value = "INVOKE",
-                    target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
-                    shift = At.Shift.AFTER
-                ),
+                at = @At(value = "HEAD"),
                 remap = ColdSweat.REMAP_MIXINS)
         public void renderItemNamePre(GuiGraphics graphics, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (!MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
             {   graphics.pose().translate(0, -4, 0);
+                MOVED_UP = true;
             }
         }
 
         @Inject(method = "renderSelectedItemName*",
-                at = @At
-                (   value = "INVOKE",
-                    target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V",
-                    shift = At.Shift.BEFORE
-                ),
+                at = @At(value = "HEAD"),
+                remap = ColdSweat.REMAP_MIXINS)
+        public void renderItemNamePre(GuiGraphics graphics, int height, CallbackInfo ci)
+        {
+            if (!MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            {   graphics.pose().translate(0, -4, 0);
+                MOVED_UP = true;
+            }
+        }
+
+        @Surrogate
+        @Inject(method = "renderSelectedItemName*",
+                at = @At("TAIL"),
                 remap = ColdSweat.REMAP_MIXINS)
         public void renderItemNamePost(GuiGraphics graphics, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
             {   graphics.pose().translate(0, 4, 0);
+                MOVED_UP = false;
+            }
+        }
+
+        @Inject(method = "renderSelectedItemName*",
+                at = @At("TAIL"),
+                remap = ColdSweat.REMAP_MIXINS)
+        public void renderItemNamePost(GuiGraphics graphics, int height, CallbackInfo ci)
+        {
+            if (MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            {   graphics.pose().translate(0, 4, 0);
+                MOVED_UP = false;
             }
         }
     }
