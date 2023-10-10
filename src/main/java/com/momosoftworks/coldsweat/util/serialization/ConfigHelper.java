@@ -321,35 +321,46 @@ public class ConfigHelper
     }
 
     public static List<?> deserializeList(String source)
-    {   // Remove characters that will mess up the parsing
-        String fixed = source.replace(" ", "").replace("[[", "[").replace("]]", "]").replace("\"", "");
+    {
+        // Remove characters that will mess up the parsing
+        String fixed = source.replace(", ", ",").replace("\"", "");
 
+        // recursively parse a list from the "source" string
+        // Format: [[a, b, c], a, b, c] where "[]" represent a list and "a, b, c" represent list elements
+        // Preserve list nesting
         List<Object> list = new ArrayList<>();
-        StringBuilder builder = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < fixed.length(); i++)
+        int index = 0;
+        while (index < fixed.length())
         {
-            char c = fixed.charAt(i);
-            if (c == '[')
-            {   depth++;
-                if (depth == 1) continue;
-            }
-            else if (c == ']')
-            {   depth--;
-                if (depth == 0)
-                {   list.add(deserializeList(builder.toString()));
-                    builder = new StringBuilder();
-                    continue;
+            int endIndex = index;
+            if (fixed.charAt(index) == '[')
+            {
+                // Find the end of the list
+                int depth = 0;
+                do
+                {   if (fixed.charAt(endIndex) == '[') depth++;
+                    else if (fixed.charAt(endIndex) == ']') depth--;
+                    endIndex++;
                 }
+                while (depth > 0);
+                // Parse the contents of the list
+                list.add(deserializeList(fixed.substring(index + 1, endIndex - 1)));
             }
-            else if (c == ',' && depth == 0)
-            {   list.add(stripString(builder.toString()));
-                builder = new StringBuilder();
-                continue;
+            else
+            {
+                // Find the end of the element
+                do
+                {   endIndex++;
+                }
+                while (endIndex < fixed.length() && fixed.charAt(endIndex) != ',');
+                // Parse the element
+                list.add(fixed.substring(index, endIndex));
             }
-            builder.append(c);
+            index = endIndex + 1;
         }
-        list.add(stripString(builder.toString()));
+        if (list.size() == 1 && list.get(0) instanceof List)
+        {   return (List<?>) list.get(0);
+        }
         return list;
     }
 
@@ -401,7 +412,7 @@ public class ConfigHelper
     }
 
     public static String stripString(Object object)
-    {   return object.toString().replace(" ", "");
+    {   return object.toString().trim();
     }
 
     public static ResourceLocation getResourceLocation(GameRegistry.UniqueIdentifier uid)
