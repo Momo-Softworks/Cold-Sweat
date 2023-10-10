@@ -27,7 +27,21 @@ public class ConfigSettings
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
-    // Settings visible in the config screen
+    // Clientside Settings
+    public static final ValueHolder<Boolean> CELSIUS;
+    public static final ValueHolder<Integer> TEMP_OFFSET;
+    public static final ValueHolder<Boolean> SHOW_CONFIG_BUTTON;
+    public static final ValueHolder<Integer[]> CONFIG_BUTTON_OFFSET;
+    public static final ValueHolder<Integer[]> BODY_ICON_OFFSET;
+    public static final ValueHolder<Integer[]> BODY_READOUT_OFFSET;
+    public static final ValueHolder<Integer[]> WORLD_GAUGE_OFFSET;
+    public static final ValueHolder<Boolean> CUSTOM_HOTBAR_LAYOUT;
+    public static final ValueHolder<Boolean> ICON_BOBBING;
+    public static final ValueHolder<Boolean> HEARTH_DEBUG;
+    public static final ValueHolder<Boolean> DISTORTION_EFFECTS;
+
+
+    // Config Screen Settings
     public static final ValueHolder<Integer> DIFFICULTY;
     public static final ValueHolder<Double> MAX_TEMP;
     public static final ValueHolder<Double> MIN_TEMP;
@@ -86,6 +100,28 @@ public class ConfigSettings
     
     static
     {
+        CELSIUS = addSetting("celsius", () -> ClientSettingsConfig.celsius);
+
+        TEMP_OFFSET = addSetting("temp_offset", () -> ClientSettingsConfig.tempOffset);
+
+        SHOW_CONFIG_BUTTON = addSetting("show_config_button", () -> ClientSettingsConfig.showConfigButton);
+
+        CONFIG_BUTTON_OFFSET = addSetting("config_button_offset", () -> Arrays.stream(ConfigHelper.deserializeArray(ClientSettingsConfig.configButtonPos)).map(Integer::valueOf).toArray(Integer[]::new));
+
+        BODY_ICON_OFFSET = addSetting("body_icon_offset", () -> Arrays.stream(ConfigHelper.deserializeArray(ClientSettingsConfig.bodyIconPos)).map(Integer::valueOf).toArray(Integer[]::new));
+
+        BODY_READOUT_OFFSET = addSetting("body_readout_offset", () -> Arrays.stream(ConfigHelper.deserializeArray(ClientSettingsConfig.bodyReadoutPos)).map(Integer::valueOf).toArray(Integer[]::new));
+
+        WORLD_GAUGE_OFFSET = addSetting("world_gauge_offset", () -> Arrays.stream(ConfigHelper.deserializeArray(ClientSettingsConfig.worldGaugePos)).map(Integer::valueOf).toArray(Integer[]::new));
+
+        CUSTOM_HOTBAR_LAYOUT = addSetting("custom_hotbar_layout", () -> ClientSettingsConfig.customHotbarLayout);
+
+        ICON_BOBBING = addSetting("icon_bobbing", () -> ClientSettingsConfig.iconBobbing);
+
+        HEARTH_DEBUG = addSetting("hearth_debug", () -> ClientSettingsConfig.hearthDebug);
+
+        DISTORTION_EFFECTS = addSetting("distortion_effects", () -> ClientSettingsConfig.distortionEffects);
+
         DIFFICULTY = addSyncedSetting("difficulty", () -> ColdSweatConfig.difficulty,
                                       encoder -> ConfigHelper.writeNBTInt(encoder, "Difficulty"),
                                       decoder -> decoder.getInteger("Difficulty"),

@@ -118,11 +118,11 @@ public class FilledWaterskinItem extends Item
                             .setChatStyle(tempColor).getFormattedText());
 
         // Tooltip to display temperature
-        boolean celsius = false;//ClientSettingsConfig.getInstance().isCelsius();
+        boolean celsius = ConfigSettings.CELSIUS.get();
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
         if (celsius) temp = Temperature.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
-        temp += 0;//ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
+        temp += ConfigSettings.TEMP_OFFSET.get();
 
         tooltip.add(1, new ChatComponentTranslation("item.cold_sweat.waterskin.filled").setChatStyle(ChatColors.GRAY).getFormattedText()
                      + " ("

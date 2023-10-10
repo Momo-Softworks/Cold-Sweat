@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.properties.IEntityTempProperty;
 import com.momosoftworks.coldsweat.core.properties.PlayerTempProperty;
@@ -60,8 +61,7 @@ public class Overlays extends Gui
                 double max = ConfigSettings.MAX_TEMP.get();
 
                 // Get player world temperature
-                // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                double temp = Temperature.convertUnits(WORLD_TEMP, false/*CLIENT_CONFIG.isCelsius()*/ ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
@@ -86,22 +86,20 @@ public class Overlays extends Gui
                 mc.getTextureManager().bindTexture(WORLD_TEMP_GAUGE);
 
                 // Render frame
-                // TODO: 10/1/23 Fix these values when ClientSettingsConfig is added
-                int gaugeX = (width / 2) + 92 + 0 /*CLIENT_CONFIG.getWorldGaugeX()*/;
-                int gaugeY = height - 19 + 0/*CLIENT_CONFIG.getWorldGaugeY()*/;
-                this.func_146110_a(gaugeX, gaugeY, 0, 64 - severity * 16f, 25, 16, 25, 144);
+                int gaugeX = (width / 2) + 92 + ConfigSettings.WORLD_GAUGE_OFFSET.get()[0];
+                int gaugeY = height - 19 + ConfigSettings.WORLD_GAUGE_OFFSET.get()[1];
+                func_146110_a(gaugeX, gaugeY, 0, 64 - severity * 16f, 25, 16, 25, 144);
 
                 // Sets the text bobbing offset (or none if disabled)
-                // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                int bob = true /*CLIENT_CONFIG.isIconBobbingEnabled()*/ && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.ticksExisted % 2 == 0 ? 1 : 0;
+                int bob = ClientSettingsConfig.iconBobbing && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.ticksExisted % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, event.partialTicks, 0, 1);
 
-                // TODO: 10/1/23 Fix these values when ClientSettingsConfig is added
-                Minecraft.getMinecraft().fontRenderer.drawString((blendedTemp + 0/*CLIENT_CONFIG.getTempOffset()*/)+"",
-                                width / 2 + 105 + (Integer.toString(blendedTemp + 0/*CLIENT_CONFIG.getTempOffset()*/).length() * -3) + 0/*CLIENT_CONFIG.getWorldGaugeX()*/,
-                                height - 15 - bob + 0/*CLIENT_CONFIG.getWorldGaugeY()*/, color);
+                String worldTempNum = (blendedTemp + ClientSettingsConfig.tempOffset)+"";
+                Minecraft.getMinecraft().fontRenderer.drawString(worldTempNum,
+                                gaugeX + 13 - Minecraft.getMinecraft().fontRenderer.getStringWidth(worldTempNum) / 2,
+                                gaugeY + 4 - bob, color);
                 GL11.glDisable(GL11.GL_BLEND);
             }
         }
@@ -144,8 +142,7 @@ public class Overlays extends Gui
                             : 0;
 
                 int bobLevel = Math.min(Math.abs(BODY_TEMP_SEVERITY), 3);
-                // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                int threatOffset = false/*!CLIENT_CONFIG.isIconBobbingEnabled()*/ ? 0
+                int threatOffset = ClientSettingsConfig.iconBobbing ? 0
                                  : bobLevel == 2 ? ICON_BOB
                                  : bobLevel == 3 ? mc.thePlayer.ticksExisted % 2
                                  : 0;
@@ -156,15 +153,13 @@ public class Overlays extends Gui
                 // Render old icon (if blending)
                 mc.getTextureManager().bindTexture(BODY_TEMP_GAUGE);
                 if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
-                {   // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                    this.func_146110_a((width / 2) - 5 + 0/*CLIENT_CONFIG.getBodyIconX()*/, height - 53 - threatOffset + 0/*CLIENT_CONFIG.getBodyIconY()*/, 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                {   func_146110_a((width / 2) - 5 + ConfigSettings.BODY_ICON_OFFSET.get()[0], height - 53 - threatOffset + ConfigSettings.BODY_ICON_OFFSET.get()[1], 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
                     GL11.glColor4f(1, 1, 1, (event.partialTicks + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
                 }
 
                 // Render new icon on top of old icon (if blending)
                 // Otherwise this is just the regular icon
-                // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                this.func_146110_a((width / 2) - 5 + 0/*CLIENT_CONFIG.getBodyIconX()*/, height - 53 - threatOffset + 0/*CLIENT_CONFIG.getBodyIconY()*/, 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+                func_146110_a((width / 2) - 5 + ConfigSettings.BODY_ICON_OFFSET.get()[0], height - 53 - threatOffset + ConfigSettings.BODY_ICON_OFFSET.get()[1], 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
                 GL11.glColor4f(1, 1, 1, 1);
 
                 // Render Readout
@@ -173,9 +168,8 @@ public class Overlays extends Gui
                 int scaledHeight = event.resolution.getScaledHeight();
 
                 String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                // TODO: 10/1/23 Fix these values when ClientSettingsConfig is added
-                int x = (scaledWidth - font.getStringWidth(s)) / 2 + 0/*CLIENT_CONFIG.getBodyReadoutX()*/;
-                int y = scaledHeight - 31 - 10 + 0/*CLIENT_CONFIG.getBodyReadoutY()*/;
+                int x = (scaledWidth - font.getStringWidth(s)) / 2 + ConfigSettings.BODY_READOUT_OFFSET.get()[0];
+                int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_OFFSET.get()[1];
 
                 // Draw the outline
                 font.drawString(s, x + 1, y, colorBG);
@@ -205,8 +199,7 @@ public class Overlays extends Gui
                 double max = ConfigSettings.MAX_TEMP.get();
 
                 // Get player world temperature
-                // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-                double temp = Temperature.convertUnits(WORLD_TEMP, false/*CLIENT_CONFIG.isCelsius()*/ ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+                double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
                 int renderOffset = CSMath.clamp(severity, -1, 1) * 3;
@@ -219,8 +212,7 @@ public class Overlays extends Gui
                 mc.getTextureManager().bindTexture(VAGUE_TEMP_GAUGE);
 
                 // Render gauge
-                // TODO: 10/1/23 Fix these values when ClientSettingsConfig is added
-                this.func_146110_a((width / 2) + 96 + 0/*CLIENT_CONFIG.getWorldGaugeX()*/, height - 19 + 0/*CLIENT_CONFIG.getWorldGaugeY()*/ - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
+                func_146110_a((width / 2) + 96 + ConfigSettings.WORLD_GAUGE_OFFSET.get()[0], height - 19 + ConfigSettings.WORLD_GAUGE_OFFSET.get()[1] - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
             }
         }
     }
@@ -243,8 +235,7 @@ public class Overlays extends Gui
             /* World Temp */
 
             // Get temperature in actual degrees
-            // TODO: 10/1/23 Fix this when ClientSettingsConfig is added
-            boolean celsius = false/*CLIENT_CONFIG.isCelsius()*/;
+            boolean celsius = ConfigSettings.CELSIUS.get();
             double worldTemp = cap.getTemp(Temperature.Type.WORLD);
             double realTemp = Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
             // Calculate the blended world temp for this tick

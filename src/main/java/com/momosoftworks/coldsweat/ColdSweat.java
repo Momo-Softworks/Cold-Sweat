@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat;
 import com.momosoftworks.coldsweat.client.event.ClientJoinSetup;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
@@ -43,6 +44,7 @@ public class ColdSweat
         regEventHandler(new ColdSweatConfig());
         regEventHandler(new WorldSettingsConfig());
         regEventHandler(new ItemSettingsConfig());
+        regEventHandler(new ClientSettingsConfig());
         regEventHandler(new ClientJoinSetup());
 
         // Registration
@@ -63,6 +65,7 @@ public class ColdSweat
         ColdSweatConfig.init(configDir);
         WorldSettingsConfig.init(configDir);
         ItemSettingsConfig.init(configDir);
+        ClientSettingsConfig.init(configDir);
     }
 
     @EventHandler
