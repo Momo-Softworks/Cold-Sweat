@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.registries;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
+import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.common.item.WaterskinItem;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.creativetab.CreativeTabs;
@@ -11,13 +12,18 @@ public class ModItems
 {
     public static Item WATERSKIN;
     public static Item FILLED_WATERSKIN;
+    public static Item THERMOMETER;
 
     public static void init()
     {
         WATERSKIN = namedItem(new WaterskinItem(), "waterskin").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(16);
         FILLED_WATERSKIN = namedItem(new FilledWaterskinItem(), "filled_waterskin").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(1);
+
+        THERMOMETER = namedItem(new ThermometerItem(), "thermometer").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(1);
+
         GameRegistry.registerItem(WATERSKIN, WATERSKIN.getUnlocalizedName());
         GameRegistry.registerItem(FILLED_WATERSKIN, FILLED_WATERSKIN.getUnlocalizedName());
+        GameRegistry.registerItem(THERMOMETER, THERMOMETER.getUnlocalizedName());
     }
 
     private static Item namedItem(Item item, String name)

@@ -63,7 +63,7 @@ public class ColdSweatConfig
         rateMultiplier = CONFIG.get("general", "Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), "Rate at which entities' body temperature changes").getDouble();
 
         /*
-         Potion effects affecting the player's temperature
+         Item Settings
          */
         fireResistanceEffect = CONFIG.get("item_settings",
                                           "Fire Resistance Immunity",
@@ -73,6 +73,10 @@ public class ColdSweatConfig
                                          "Ice Resistance Immunity",
                                          defaultDiff.getOrDefault("ice_resistance_enabled", true),
                                          "Allow ice resistance to block freezing damage").getBoolean();
+        requireThermometer = CONFIG.get("item_settings",
+                                        "Require Thermometer",
+                                        defaultDiff.getOrDefault("require_thermometer", true),
+                                        "Thermometer item is required to see detailed world temperature").getBoolean();
 
         /*
          Misc. temperature settings

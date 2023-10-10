@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import ibxm.Player;
 import net.minecraft.entity.Entity;
@@ -13,7 +14,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 
@@ -229,10 +229,9 @@ public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTem
 
     public void calculateVisibility(EntityPlayer player)
     {
-        /*showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
-                || Arrays.stream(player.inventory.mainInventory).limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER);
-                || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();*/
-        showWorldTemp = player.capabilities.isCreativeMode;
+        showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
+                || Arrays.stream(player.inventory.mainInventory).limit(9).anyMatch(stack -> stack != null && stack.getItem() == ModItems.THERMOMETER);
+                /*|| CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();*/
         showBodyTemp = !player.capabilities.isCreativeMode;
     }
 

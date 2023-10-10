@@ -296,4 +296,20 @@ public class Overlays extends Gui
         PREV_BODY_TEMP = temp;
         BLEND_BODY_TEMP = (int) temp;
     }
+
+    public static double getWorldTemp()
+    {   return WORLD_TEMP;
+    }
+
+    public static double getBodyTemp()
+    {   return BODY_TEMP;
+    }
+
+    public static double getMinOffset()
+    {   return MIN_OFFSET;
+    }
+
+    public static double getMaxOffset()
+    {   return MAX_OFFSET;
+    }
 }
