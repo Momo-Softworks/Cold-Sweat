@@ -9,8 +9,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
-import java.util.Arrays;
-
 public class ThermometerItem extends Item
 {
     private final IIcon[] icons = new IIcon[9];
@@ -27,7 +25,6 @@ public class ThermometerItem extends Item
             if (itemIcon == null) itemIcon = icon;
             icons[i] = icon;
         }
-        System.out.println(Arrays.toString(icons));
     }
 
     @Override
