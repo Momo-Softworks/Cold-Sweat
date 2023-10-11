@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
@@ -21,14 +20,12 @@ import org.lwjgl.opengl.GL11;
 
 public class Overlays extends Gui
 {
-    //static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
-
     // Stuff for world temperature
-    public static double WORLD_TEMP = 0;
-    static boolean ADVANCED_WORLD_TEMP = false;
-    static double PREV_WORLD_TEMP = 0;
-    static double MAX_OFFSET = 0;
-    static double MIN_OFFSET = 0;
+    private static double WORLD_TEMP = 0;
+    private static boolean ADVANCED_WORLD_TEMP = false;
+    private static double PREV_WORLD_TEMP = 0;
+    private static double MAX_OFFSET = 0;
+    private static double MIN_OFFSET = 0;
 
     // Stuff for body temperature
     public static double BODY_TEMP = 0;

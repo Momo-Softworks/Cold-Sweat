@@ -27,6 +27,6 @@ public class ModItems
     }
 
     private static Item namedItem(Item item, String name)
-    {   return item.setUnlocalizedName(ColdSweat.MOD_ID + "." + name).setTextureName(ColdSweat.MOD_ID + ":" + name);
+    {   return item.setUnlocalizedName(name).setTextureName(ColdSweat.MOD_ID + ":" + name);
     }
 }

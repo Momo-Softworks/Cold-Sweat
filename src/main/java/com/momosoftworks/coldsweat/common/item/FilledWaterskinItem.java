@@ -20,10 +20,11 @@ import java.util.Random;
 
 public class FilledWaterskinItem extends Item
 {
-    public FilledWaterskinItem()
-    {}
+    private static final double EFFECT_RATE = 0.4;
 
-    private static final double EFFECT_RATE = 0.5;
+    public FilledWaterskinItem()
+    {
+    }
 
     @Override
     public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
@@ -35,13 +36,12 @@ public class FilledWaterskinItem extends Item
             double itemTemp = ItemHelper.getOrCrateTag(stack).getDouble("temperature");
             if (itemTemp != 0 && slot <= 8)
             {
-                double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
-                double newTemp = itemTemp - temp * 2;
-                if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
+                double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get();
+                double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
                 ItemHelper.getOrCrateTag(stack).setDouble("temperature", newTemp);
 
-                Temperature.addModifier(player, new WaterskinTempModifier(temp).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.getSign(itemTemp)).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -125,9 +125,9 @@ public class FilledWaterskinItem extends Item
         temp += ConfigSettings.TEMP_OFFSET.get();
 
         tooltip.add(1, new ChatComponentTranslation("item.cold_sweat.waterskin.filled").setChatStyle(ChatColors.GRAY).getFormattedText()
-                     + " ("
+                     + new ChatComponentText(" (").setChatStyle(ChatColors.GRAY).getFormattedText()
                      + new ChatComponentText((int) temp + " \u00B0" + tempUnits).setChatStyle(tempColor).getFormattedText()
-                     + ")");
+                     + new ChatComponentText(")").setChatStyle(ChatColors.GRAY).getFormattedText());
         super.addInformation(stack, player, tooltip, advanced);
     }
 

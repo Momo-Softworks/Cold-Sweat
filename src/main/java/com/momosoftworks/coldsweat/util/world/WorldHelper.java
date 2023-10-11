@@ -97,7 +97,7 @@ public class WorldHelper
                 block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
     }
 
-    public static boolean isSpreadBlocked(BlockState state, Direction toDir,Direction fromDir)
+    public static boolean isSpreadBlocked(BlockState state, Direction toDir, Direction fromDir)
     {
         Block block = state.getBlock();
         if (state.isAir() || !state.getBlock().getMaterial().blocksMovement() || ConfigSettings.HEARTH_SPREAD_WHITELIST.get().contains(block))

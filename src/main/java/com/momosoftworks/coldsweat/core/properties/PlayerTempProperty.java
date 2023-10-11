@@ -22,14 +22,12 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
+import static com.momosoftworks.coldsweat.common.event.EntityTempManager.VALID_MODIFIER_TYPES;
+import static com.momosoftworks.coldsweat.common.event.EntityTempManager.VALID_TEMPERATURE_TYPES;
+
 public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTempProperty
 {
     public static final String PROPERTY_NAME = "cold_sweat:temperature";
-    protected Player player;
-    protected World world;
-
-    static Temperature.Type[] VALID_MODIFIER_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.BURNING_POINT, Temperature.Type.FREEZING_POINT, Temperature.Type.WORLD};
-    static Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.BURNING_POINT, Temperature.Type.FREEZING_POINT, Temperature.Type.WORLD};
 
     private double[] syncedValues = new double[5];
     boolean neverSynced = true;

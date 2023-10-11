@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.google.common.collect.ImmutableSet;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
@@ -39,10 +38,10 @@ public class EntityTempManager
 {
     public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
-    private static final Set<Integer> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
+    private static final Set<Class<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
 
-    public static final Map<Entity, IEntityTempProperty> SERVER_CAP_CACHE = new HashMap<>();
-    public static final Map<Entity, IEntityTempProperty> CLIENT_CAP_CACHE = new HashMap<>();
+    public static final Map<Entity, IEntityTempProperty> SERVER_PROP_CACHE = new HashMap<>();
+    public static final Map<Entity, IEntityTempProperty> CLIENT_PROP_CACHE = new HashMap<>();
 
     /**
      * Attach temperature capability to entities
@@ -55,12 +54,11 @@ public class EntityTempManager
             EntityLivingBase entity = (EntityLivingBase) event.entity;
             // Players always get the capability
             if (!(entity instanceof EntityPlayer))
-            {
-                EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
+            {   EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
                 MinecraftForge.EVENT_BUS.post(enableEvent);
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) return;
-                TEMPERATURE_ENABLED_ENTITIES.add(entity.getEntityId());
             }
+            TEMPERATURE_ENABLED_ENTITIES.add(entity.getClass());
 
             entity.registerExtendedProperties(entity instanceof EntityPlayer ? ModProperties.PLAYER_TEMP
                                                                              : ModProperties.ENTITY_TEMP,
@@ -70,7 +68,7 @@ public class EntityTempManager
 
     public static IEntityTempProperty getTemperatureProperty(Entity entity)
     {
-        Map<Entity, IEntityTempProperty> cache = entity.worldObj.isRemote ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        Map<Entity, IEntityTempProperty> cache = entity.worldObj.isRemote ? CLIENT_PROP_CACHE : SERVER_PROP_CACHE;
         return cache.computeIfAbsent(entity, e ->
         {
             return (IEntityTempProperty) e.getExtendedProperties(entity instanceof EntityPlayer ? ModProperties.PLAYER_TEMP
@@ -85,7 +83,7 @@ public class EntityTempManager
     public void onLivingTick(LivingEvent.LivingUpdateEvent event)
     {
         EntityLivingBase entity = event.entityLiving;
-        if (!(entity instanceof EntityPlayer || getEntitiesWithTemperature().contains(entity.getEntityId()))) return;
+        if (!(entity instanceof EntityPlayer || getEntitiesWithTemperature().contains(entity.getClass()))) return;
 
         IEntityTempProperty prop = getTemperatureProperty(entity);
         {
@@ -198,7 +196,7 @@ public class EntityTempManager
             });*/
         }
         // Add basic TempModifiers to chameleons
-        else if (event.entity instanceof EntityLivingBase && getEntitiesWithTemperature().contains(event.entity.getEntityId()))
+        else if (event.entity instanceof EntityLivingBase && getEntitiesWithTemperature().contains(event.entity.getClass()))
         {
             EntityLivingBase entity = (EntityLivingBase) event.entity;
             // Basic modifiers
@@ -352,7 +350,7 @@ public class EntityTempManager
         }
     }
 
-    public static Set<Integer> getEntitiesWithTemperature()
+    public static Set<Class<?>> getEntitiesWithTemperature()
     {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
     }
 }
