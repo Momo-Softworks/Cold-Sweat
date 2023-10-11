@@ -16,10 +16,10 @@ public class ModItems
 
     public static void init()
     {
-        WATERSKIN = namedItem(new WaterskinItem(), "waterskin").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(16);
-        FILLED_WATERSKIN = namedItem(new FilledWaterskinItem(), "filled_waterskin").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(1);
+        WATERSKIN = namedItem(new WaterskinItem(), "waterskin").setCreativeTab(ColdSweat.TAB_COLD_SWEAT).setMaxStackSize(16);
+        FILLED_WATERSKIN = namedItem(new FilledWaterskinItem(), "filled_waterskin").setCreativeTab(ColdSweat.TAB_COLD_SWEAT).setMaxStackSize(1);
 
-        THERMOMETER = namedItem(new ThermometerItem(), "thermometer").setCreativeTab(CreativeTabs.tabMisc).setMaxStackSize(1);
+        THERMOMETER = namedItem(new ThermometerItem(), "thermometer").setCreativeTab(ColdSweat.TAB_COLD_SWEAT).setMaxStackSize(1);
 
         GameRegistry.registerItem(WATERSKIN, WATERSKIN.getUnlocalizedName());
         GameRegistry.registerItem(FILLED_WATERSKIN, FILLED_WATERSKIN.getUnlocalizedName());
