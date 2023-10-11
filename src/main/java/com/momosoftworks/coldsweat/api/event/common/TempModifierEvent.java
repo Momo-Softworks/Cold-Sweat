@@ -1,10 +1,11 @@
+
 package com.momosoftworks.coldsweat.api.event.common;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import cpw.mods.fml.common.eventhandler.Cancelable;
 import cpw.mods.fml.common.eventhandler.Event;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.function.Predicate;
@@ -15,6 +16,28 @@ import java.util.function.Predicate;
  */
 public class TempModifierEvent extends Event
 {
+    protected final Entity entity;
+    protected TempModifier modifier;
+    protected Temperature.Type type;
+
+    private TempModifierEvent(Entity entity, TempModifier modifier, Temperature.Type type)
+    {   this.entity = entity;
+        this.modifier = modifier;
+        this.type = type;
+    }
+
+    public final Entity getEntity()
+    {   return entity;
+    }
+
+    public TempModifier getModifier()
+    {   return modifier;
+    }
+
+    public Temperature.Type getType()
+    {   return type;
+    }
+
     /**
      * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
@@ -29,34 +52,14 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        private final EntityLivingBase entity;
-        private TempModifier modifier;
-        public Temperature.Type type;
-
-        public void setModifierType(Temperature.Type newType) {
-            this.type = newType;
+        public void setModifierType(Temperature.Type newType)
+        {   this.type = newType;
         }
 
-        public final TempModifier getModifier() {
-            return modifier;
-        }
-
-        public void setModifier(TempModifier modifier) {
-            this.modifier = modifier;
-        }
-
-        public final EntityLivingBase getEntity() {
-            return entity;
-        }
-
-        public Add(TempModifier modifier, EntityLivingBase entity, Temperature.Type type)
-        {
-            this.entity = entity;
-            this.type = type;
-            this.modifier = modifier;
+        public Add(TempModifier modifier, Entity entity, Temperature.Type type)
+        {   super(entity, modifier, type);
         }
     }
-
 
     /**
      * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
@@ -74,15 +77,11 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Remove extends TempModifierEvent
     {
-        public final EntityLivingBase entity;
-        public final Temperature.Type type;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(EntityLivingBase entity, Temperature.Type type, int count, Predicate<TempModifier> condition)
-        {
-            this.entity = entity;
-            this.type = type;
+        public Remove(Entity entity, TempModifier modifier, Temperature.Type type, int count, Predicate<TempModifier> condition)
+        {   super(entity, modifier, type);
             this.count = count;
             this.condition = condition;
         }
@@ -98,10 +97,6 @@ public class TempModifierEvent extends Event
             return count;
         }
 
-        public final EntityLivingBase getEntity() {
-            return entity;
-        }
-
         public Predicate<TempModifier> getCondition() {
             return condition;
         }
@@ -114,20 +109,14 @@ public class TempModifierEvent extends Event
      */
     public static class Calculate extends TempModifierEvent
     {
-        public EntityLivingBase entity;
-        public TempModifier modifier;
         public double temperature;
 
-        public Calculate(TempModifier modifier, EntityLivingBase entity, double temperature)
-        {
-            this.entity = entity;
+        private Calculate(Entity entity, TempModifier modifier, Temperature.Type type, double temperature)
+        {   super(entity, modifier, type);
             this.modifier = modifier;
             this.temperature = temperature;
         }
 
-        public TempModifier getModifier() {
-            return modifier;
-        }
         public double getTemperature() {
             return temperature;
         }
@@ -145,8 +134,8 @@ public class TempModifierEvent extends Event
         @Cancelable
         public static class Pre extends Calculate
         {
-            public Pre(TempModifier modifier, EntityLivingBase entity, double temperature)
-            {   super(modifier, entity, temperature);
+            public Pre(Entity entity, TempModifier modifier, Temperature.Type type, double temperature)
+            {   super(entity, modifier, type, temperature);
             }
         }
 
@@ -161,8 +150,8 @@ public class TempModifierEvent extends Event
          */
         public static class Post extends Calculate
         {
-            public Post(TempModifier modifier, EntityLivingBase entity, double temperature)
-            {   super(modifier, entity, temperature);
+            public Post(Entity entity, TempModifier modifier, Temperature.Type type, double temperature)
+            {   super(entity, modifier, type, temperature);
             }
         }
     }

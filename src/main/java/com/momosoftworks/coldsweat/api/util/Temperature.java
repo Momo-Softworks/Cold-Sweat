@@ -14,13 +14,12 @@ import com.momosoftworks.coldsweat.core.network.message.SyncTemperaturesMessage;
 import com.momosoftworks.coldsweat.core.properties.IEntityTempProperty;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
-import com.momosoftworks.coldsweat.util.registries.ModProperties;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import com.momosoftworks.coldsweat.util.world.BlockPos;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntitySilverfish;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -176,23 +175,23 @@ public class Temperature
     /**
      * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
      * Otherwise, it will add the modifier.<br>
-     * @param player The player to apply the modifier to
+     * @param entity The player to apply the modifier to
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void addOrReplaceModifier(EntityPlayer player, TempModifier modifier, Type type)
-    {   addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+    public static void addOrReplaceModifier(Entity entity, TempModifier modifier, Type type)
+    {   addModifier(entity, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
     /**
      * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
      * It will not add the modifier if an existing instance of the same TempModifier class is not found.<br>
-     * @param player The player to apply the modifier to
+     * @param entity The player to apply the modifier to
      * @param modifier The modifier to apply
      * @param type The type of temperature to apply the modifier to
      */
-    public static void replaceModifier(EntityPlayer player, TempModifier modifier, Type type)
-    {   addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+    public static void replaceModifier(Entity entity, TempModifier modifier, Type type)
+    {   addModifier(entity, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
     /**
@@ -201,11 +200,11 @@ public class Temperature
      * @param allowDupes allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(EntityLivingBase entity, TempModifier modifier, Type type, boolean allowDupes)
+    public static void addModifier(Entity entity, TempModifier modifier, Type type, boolean allowDupes)
     {   addModifier(entity, modifier, type, allowDupes, Addition.AT_END);
     }
 
-    public static void addModifier(EntityLivingBase entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
+    public static void addModifier(Entity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, type);
         MinecraftForge.EVENT_BUS.post(event);
@@ -215,7 +214,7 @@ public class Temperature
             if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
             {
                 IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
-                List<TempModifier> modifiers = prop.getModifiers(event.type);
+                List<TempModifier> modifiers = prop.getModifiers(event.getType());
                 boolean changed = false;
                 try
                 {
@@ -299,7 +298,7 @@ public class Temperature
         {
             if (removed.get() < count)
             {
-                TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, type, count, condition);
+                TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, modifier, type, count, condition);
                 MinecraftForge.EVENT_BUS.post(event);
                 if (!event.isCanceled())
                 {
@@ -361,7 +360,7 @@ public class Temperature
         }
     }
 
-    public static void updateModifiers(EntityLivingBase entity, IEntityTempProperty prop)
+    public static void updateModifiers(Entity entity, IEntityTempProperty prop)
     {
         if (!entity.worldObj.isRemote)
         {
@@ -376,7 +375,7 @@ public class Temperature
         }
     }
 
-    public static Map<Type, Double> getTemperatures(EntityLivingBase entity)
+    public static Map<Type, Double> getTemperatures(Entity entity)
     {   return EntityTempManager.getTemperatureProperty(entity).getTemperatures();
     }
 

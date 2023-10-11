@@ -53,14 +53,14 @@ public abstract class TempModifier
      */
     public final double update(double temp, EntityLivingBase entity, Temperature.Type type)
     {
-        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
+        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(entity, this, type, temp);
         MinecraftForge.EVENT_BUS.post(pre);
 
         if (pre.isCanceled()) return pre.getTemperature();
 
         this.function = this.calculate(entity, type);
 
-        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
+        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(entity, this, type, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
 
         return post.getTemperature();
