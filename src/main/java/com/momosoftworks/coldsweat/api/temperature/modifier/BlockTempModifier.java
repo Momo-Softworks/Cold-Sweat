@@ -58,7 +58,6 @@ public class BlockTempModifier extends TempModifier
                 ChunkAccess chunk = chunks.get(chunkPos);
                 if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, chunkPos));
                 if (chunk == null) continue;
-                LevelChunkSection[] sections = chunk.getSections();
 
                 for (int y = -range; y < range; y++)
                 {
@@ -68,7 +67,7 @@ public class BlockTempModifier extends TempModifier
 
                         BlockState state = stateCache.get(blockpos);
                         if (state == null)
-                        {   LevelChunkSection section = sections[CSMath.clamp((blockpos.getY() >> 4) - (minBuildHeight >> 4), 0, sections.length - 1)];
+                        {   LevelChunkSection section = WorldHelper.getChunkSection(chunk, blockpos.getY());
                             state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
                             stateCache.put(blockpos.immutable(), state);
                         }
@@ -130,6 +129,7 @@ public class BlockTempModifier extends TempModifier
                                 // Store this block type's total effect on the player
                                 // Dampen the effect with each block between the player and the block
                                 double blockTempTotal = affectMap.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
+                                if (blockTempTotal < blockTemp.minEffect() || blockTempTotal > blockTemp.maxEffect()) continue;
                                 affectMap.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)

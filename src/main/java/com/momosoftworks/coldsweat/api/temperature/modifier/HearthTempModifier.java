@@ -26,7 +26,7 @@ public class HearthTempModifier extends TempModifier
         double min = ConfigSettings.MIN_TEMP.get();
         double max = ConfigSettings.MAX_TEMP.get();
         double mid = (min + max) / 2;
-        double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
+        double hearthStrength = ConfigSettings.HEARTH_EFFECT.get();
 
         int insulationStrength = this.getNBT().getInt("Strength");
 
