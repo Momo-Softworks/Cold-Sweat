@@ -1656,7 +1656,7 @@ Translation Updates:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.2-b05g
+2.2 Release (changes since 2.2-b05f)
 - Soul stalk can now generate with a patch disk of soul sand underneath, allowing it to generate in almost any biome
       - This should help with its reliability and make it more accessible to newer players
 - Foods with temperature values assigned via configs now have a tooltip displaying their effects
@@ -1669,4 +1669,21 @@ Fixes:
 
 Technical Changes:
 - CSMath.convertUnits() has been moved to the Temperature class
-- All net.momostudios packages have been changed to com.momosoftworks (sorry)
+- All dev.momostudios packages have been changed to com.momosoftworks (sorry)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.1
+
+Technical Changes:
+- (1.20) Changed how some mixins work to make the mod compatible with older versions of Forge (pre-47.1.14)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.2
+- Added a high contrast option, which simplifies and adds symbols to UI elements for better readability
+      - Can be toggled in the config menu
+
+Fixes:
+- (1.16) Fixed crash when paired with mods that change entity models (like Epic Fight)
+- (1.20) Fixed crash when taking burning/freezing damage
