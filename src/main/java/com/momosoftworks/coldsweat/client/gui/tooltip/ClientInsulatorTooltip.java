@@ -18,9 +18,11 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulatorTooltip implements ClientTooltipComponent
 {
+    public static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+    public static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
     public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png")
-                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
+                                                                : TOOLTIP;
 
     Pair<Double, Double> insulationValues;
     double cold = 0;
