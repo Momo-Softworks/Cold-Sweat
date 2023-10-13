@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -57,6 +58,7 @@ public class ConfigSettings
     public static final ValueHolder<Boolean> COLD_SOUL_FIRE;
     public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
     public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
+    public static final ValueHolder<Double> HEARTH_EFFECT;
 
     // Item settings
     public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
@@ -139,11 +141,6 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
-        CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
-                                           encoder -> ConfigHelper.writeNBTDouble(encoder, "CaveInsulation"),
-                                           decoder -> decoder.getDouble("CaveInsulation"),
-                                           saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
-
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
         encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
@@ -183,6 +180,11 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
                                                      .collect(Collectors.toList())));
+
+        CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
+                                           encoder -> ConfigHelper.writeNBTDouble(encoder, "CaveInsulation"),
+                                           decoder -> decoder.getDouble("CaveInsulation"),
+                                           saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
@@ -293,7 +295,57 @@ public class ConfigSettings
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> ColdSweatConfig.getInstance().isSleepChecked());
 
-        FOOD_TEMPERATURES = addSetting("food_temperatures", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getFoodTemperatures()));
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () ->
+        {
+            Map<Item, Double> map = new HashMap<>();
+            for (List<?> entry : ItemSettingsConfig.getInstance().getFoodTemperatures())
+            {
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, ((Number) entry.get(1)).doubleValue());
+                }
+            }
+            return map;
+        },
+        encoder ->
+        {
+            CompoundNBT tag = new CompoundNBT();
+            CompoundNBT mapTag = new CompoundNBT();
+            for (Map.Entry<Item, Double> entry : encoder.entrySet())
+            {
+                CompoundNBT itemTag = new CompoundNBT();
+                itemTag.putDouble("Value", entry.getValue());
+
+                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   mapTag.put(itemID.toString(), itemTag);
+                }
+            }
+            tag.put("FoodTemperatures", mapTag);
+            return tag;
+        },
+        decoder ->
+        {
+            Map<Item, Double> map = new HashMap<>();
+            CompoundNBT mapTag = decoder.getCompound("FoodTemperatures");
+            for (String key : mapTag.getAllKeys())
+            {
+                CompoundNBT itemTag = mapTag.getCompound(key);
+                map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), itemTag.getDouble("Value"));
+            }
+            return map;
+        },
+        saver ->
+        {
+            List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Double> entry : saver.entrySet())
+            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue()));
+                }
+            }
+            ItemSettingsConfig.getInstance().setFoodTemperatures(list);
+        });
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
@@ -441,6 +493,8 @@ public class ConfigSettings
             return list;
         },
         saver -> ColdSweatConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).collect(Collectors.toList())));
+
+        HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
