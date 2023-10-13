@@ -196,6 +196,7 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 					animTime += frameTime;
 
 					ChameleonAnimations.RIDE.animateAll(animatedParts, animTime, false);
+					body.y = 31.75f;
 
 					// Free up the tail if the chameleon is pointing toward a biome
 					if (!chameleon.isTracking())

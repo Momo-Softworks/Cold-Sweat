@@ -80,18 +80,7 @@ public class CSMath
 
     public static Quaternionf getQuaternion(double x, double y, double z)
     {
-        double cy = Math.cos(z * 0.5);
-        double sy = Math.sin(z * 0.5);
-        double cp = Math.cos(y * 0.5);
-        double sp = Math.sin(y * 0.5);
-        double cr = Math.cos(x * 0.5);
-        double sr = Math.sin(x * 0.5);
-
-        return new Quaternionf(
-            (float) (sr * cp * cy - cr * sp * sy),
-            (float) (cr * sp * cy + sr * cp * sy),
-            (float) (cr * cp * sy - sr * sp * cy),
-            (float) (cr * cp * cy + sr * sp * sy));
+        return new Quaternionf().rotateXYZ((float) x, (float) y, (float) z);
     }
 
     public static double clamp(double value, double min, double max)
