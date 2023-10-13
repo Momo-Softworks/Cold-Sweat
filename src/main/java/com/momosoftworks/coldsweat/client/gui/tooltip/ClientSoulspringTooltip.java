@@ -20,9 +20,11 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public class ClientSoulspringTooltip implements ClientTooltipComponent
 {
+    private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
+    private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png");
     public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png")
-                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
+            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
+                                                                : TOOLTIP;
 
     double fuel;
 
