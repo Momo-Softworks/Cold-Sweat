@@ -90,8 +90,7 @@ public class FilledWaterskinItem extends Item
                 List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
                 void start()
-                {
-                    MinecraftForge.EVENT_BUS.register(this);
+                {   MinecraftForge.EVENT_BUS.register(this);
                 }
 
                 @SubscribeEvent
@@ -103,18 +102,17 @@ public class FilledWaterskinItem extends Item
                         double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
 
                         // Move the box down at the speed of gravity
-                        AxisAlignedBB movedBox;
-                        aabb = movedBox = aabb.move(0, -acceleration, 0);
+                        aabb = aabb.move(0, -acceleration, 0);
 
                         // If there's ground, stop
-                        BlockPos pos = new BlockPos(movedBox.minX, movedBox.minY, movedBox.minZ);
+                        BlockPos pos = new BlockPos(aabb.minX, aabb.minY, aabb.minZ);
                         if (WorldHelper.isSpreadBlocked(level, chunk.getBlockState(pos), pos, Direction.DOWN, Direction.DOWN))
                         {   MinecraftForge.EVENT_BUS.unregister(this);
                             return;
                         }
 
                         // Apply the waterskin modifier to all entities in the box
-                        level.getEntitiesOfClass(PlayerEntity.class, movedBox).forEach(player ->
+                        level.getEntitiesOfClass(PlayerEntity.class, aabb).forEach(player ->
                         {
                             if (!affectedPlayers.contains(player))
                             {   // Apply the effect and store the player
@@ -257,7 +255,6 @@ public class FilledWaterskinItem extends Item
     }
 
     public String getDescriptionId()
-    {
-        return new TranslationTextComponent("item.cold_sweat.waterskin").getString();
+    {   return new TranslationTextComponent("item.cold_sweat.waterskin").getString();
     }
 }
