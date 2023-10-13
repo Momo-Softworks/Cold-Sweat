@@ -7,21 +7,14 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.function.Supplier;
+import static com.momosoftworks.coldsweat.client.gui.tooltip.ClientInsulationTooltip.TOOLTIP_LOCATION;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulatorTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
-    public static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
-    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
-                                                                : TOOLTIP;
-
     Pair<Double, Double> insulationValues;
     double cold = 0;
     double hot = 0;
