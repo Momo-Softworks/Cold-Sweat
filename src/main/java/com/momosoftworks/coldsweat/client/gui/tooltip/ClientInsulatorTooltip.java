@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -12,9 +13,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulatorTooltip implements ClientTooltipComponent
 {
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+
     Pair<Double, Double> insulationValues;
     double cold = 0;
     double hot = 0;
@@ -53,7 +60,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         int hotSlots = Math.abs(CSMath.ceil(hot/2));
         width = coldSlots + neutralSlots + hotSlots;
 
-        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
+        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
 
         // Render positive and negative insulation separately
         int barLength = 0;

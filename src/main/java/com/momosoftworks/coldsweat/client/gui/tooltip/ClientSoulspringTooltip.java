@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
@@ -14,9 +15,15 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class ClientSoulspringTooltip implements ClientTooltipComponent
 {
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
+
     double fuel;
 
     public ClientSoulspringTooltip(double fuel)
@@ -37,7 +44,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     @Override
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer)
     {
-        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
+        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
         GuiComponent.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
         GuiComponent.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
         if (Screen.hasShiftDown())
