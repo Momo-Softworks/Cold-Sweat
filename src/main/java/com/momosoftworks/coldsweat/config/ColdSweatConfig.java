@@ -62,17 +62,34 @@ public class ColdSweatConfig
                 .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         /*
+         Details about how the player is affected by temperature
+         */
+        BUILDER.push("Details about how the player is affected by temperature");
+        minHabitable = BUILDER
+                .comment("Defines the minimum habitable temperature")
+                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
+                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        maxHabitable = BUILDER
+                .comment("Defines the maximum habitable temperature")
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
+                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        rateMultiplier = BUILDER
+                .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
+                .defineInRange("Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
+        BUILDER.pop();
+
+        /*
          Potion effects affecting the player's temperature
          */
         BUILDER.push("Item settings");
         fireResistanceEffect = BUILDER
-                .comment("Fire Resistance blocks all hot temperatures")
+                .comment("Allow fire resistance to block overheating damage")
                 .define("Fire Resistance Immunity", defaultDiff.getOrDefault("fire_resistance_enabled", true));
         iceResistanceEffect = BUILDER
-                .comment("Ice Resistance blocks all cold temperatures")
+                .comment("Allow ice resistance to block freezing damage")
                 .define("Ice Resistance Immunity", defaultDiff.getOrDefault("ice_resistance_enabled", true));
         requireThermometer = BUILDER
-            .comment("Thermometer item is required to see world temperature")
+            .comment("Thermometer item is required to see detailed world temperature")
             .define("Require Thermometer", defaultDiff.getOrDefault("require_thermometer", true));
         BUILDER.pop();
 
@@ -88,24 +105,10 @@ public class ColdSweatConfig
             .define("Prevent Sleep When in Danger", defaultDiff.getOrDefault("check_sleep_conditions", true));
         BUILDER.pop();
 
+
         /*
-         Details about how the player is affected by temperature
+         Temperature effects
          */
-        BUILDER.push("Details about how the player is affected by temperature");
-        minHabitable = BUILDER
-                .comment("Defines the minimum habitable temperature")
-                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
-                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        maxHabitable = BUILDER
-                .comment("Defines the maximum habitable temperature")
-                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
-                               Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        rateMultiplier = BUILDER
-                .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
-                .defineInRange("Rate Multiplier", defaultDiff.<Double>getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
-        BUILDER.pop();
-
-
         BUILDER.push("Temperature Effects");
             BUILDER.push("Hot");
             heatstrokeFog = BUILDER
@@ -132,19 +135,19 @@ public class ColdSweatConfig
 
         BUILDER.push("Grace Period Details");
                 gracePeriodLength = BUILDER
-                .comment("Grace period length in ticks (default: 6000)")
+                .comment("The number of ticks after the player spawns during which they are immune to temperature effects")
                 .defineInRange("Grace Period Length", defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE);
                 gracePeriodEnabled = BUILDER
-                .comment("Enables the grace period (default: true)")
+                .comment("Enables the grace period")
                 .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
         BUILDER.pop();
 
         BUILDER.push("Hearth");
             hearthEffect = BUILDER
-                    .comment("How strong the hearth is (default: 0.5)")
+                    .comment("How strong the hearth is")
                     .defineInRange("Hearth Strength", defaultDiff.getOrDefault("hearth_strength", 0.5), 0, 1.0);
             hearthSpreadWhitelist = BUILDER
-                    .comment("List of blocks that the hearth can spread through",
+                    .comment("List of additional blocks that the hearth can spread through",
                              "Use this list if the hearth isn't spreading through particular blocks that it should")
                     .defineListAllowEmpty(Collections.singletonList("Hearth Spread Whitelist"), () -> Arrays.asList(
                             "minecraft:iron_bars",
@@ -152,7 +155,7 @@ public class ColdSweatConfig
                     ),
                     o -> o instanceof String);
             hearthSpreadBlacklist = BUILDER
-                    .comment("List of blocks that the hearth cannot spread through",
+                    .comment("List of additional blocks that the hearth cannot spread through",
                              "Use this list if the hearth is spreading through particular blocks that it shouldn't")
                     .defineListAllowEmpty(Collections.singletonList("Hearth Spread Blacklist"), () -> Arrays.asList(
                     ),
@@ -176,76 +179,65 @@ public class ColdSweatConfig
 
         // Create the config folder
         try
-        {
-            Files.createDirectory(csConfigPath);
+        {   Files.createDirectory(csConfigPath);
         }
-        catch (Exception e)
-        {
-            // Do nothing
-        }
+        catch (Exception ignored) {}
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
     }
 
     public static ColdSweatConfig getInstance()
-    {
-        return INSTANCE;
+    {   return INSTANCE;
     }
 
     /*
      * Non-private values for use elsewhere
      */
 
-    public int   getDifficulty() {
-        return difficulty.get();
+    public int getDifficulty()
+    {   return difficulty.get();
     }
 
-    public boolean isFireResistanceEnabled() {
-        return fireResistanceEffect.get();
+    public boolean isFireResistanceEnabled()
+    {   return fireResistanceEffect.get();
+    }
+    public boolean isIceResistanceEnabled()
+    {   return iceResistanceEffect.get();
     }
 
-    public boolean isIceResistanceEnabled() {
-        return iceResistanceEffect.get();
+    public boolean thermometerRequired()
+    {   return requireThermometer.get();
     }
 
-    public boolean thermometerRequired() {
-        return requireThermometer.get();
+    public boolean doDamageScaling()
+    {   return damageScaling.get();
     }
 
-    public boolean doDamageScaling() {
-        return damageScaling.get();
+    public double getMinTempHabitable()
+    {   return minHabitable.get();
+    }
+    public double getMaxTempHabitable()
+    {   return maxHabitable.get();
     }
 
-    public double getMinTempHabitable() {
-        return minHabitable.get();
-    }
-
-    public double getMaxTempHabitable() {
-        return maxHabitable.get();
-    }
-
-    public double getRateMultiplier() {
-        return rateMultiplier.get();
+    public double getRateMultiplier()
+    {   return rateMultiplier.get();
     }
 
     public int getGracePeriodLength()
-    {
-        return gracePeriodLength.get();
+    {   return gracePeriodLength.get();
     }
 
     public boolean isGracePeriodEnabled()
-    {
-        return gracePeriodEnabled.get();
+    {   return gracePeriodEnabled.get();
     }
 
     public boolean isSoulFireCold()
-    {
-        return coldSoulFire.get();
+    {   return coldSoulFire.get();
     }
 
     public double getHearthEffect()
-    {
-        return hearthEffect.get();
+    {   return hearthEffect.get();
     }
     public List<String> getHearthSpreadWhitelist()
     {   return (List<String>) hearthSpreadWhitelist.get();
@@ -255,33 +247,24 @@ public class ColdSweatConfig
     }
 
     public boolean isSleepChecked()
-    {
-        return checkSleep.get();
+    {   return checkSleep.get();
     }
 
     public boolean heatstrokeFog()
-    {
-        return heatstrokeFog.get();
+    {   return heatstrokeFog.get();
     }
 
     public boolean freezingHearts()
-    {
-        return freezingHearts.get();
+    {   return freezingHearts.get();
     }
-
     public boolean coldKnockback()
-    {
-        return coldKnockback.get();
+    {   return coldKnockback.get();
     }
-
     public boolean coldMining()
-    {
-        return coldMining.get();
+    {   return coldMining.get();
     }
-
     public boolean coldMovement()
-    {
-        return coldMovement.get();
+    {   return coldMovement.get();
     }
 
     /*

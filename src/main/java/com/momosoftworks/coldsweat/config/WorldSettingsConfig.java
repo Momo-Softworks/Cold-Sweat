@@ -40,11 +40,8 @@ public class WorldSettingsConfig
         /*
          Dimensions
          */
-        BUILDER.comment("Format: [[\"dimension_1\", temperature1], [\"dimension_2\", temperature2]... etc]",
-                        "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end",
-                        "Note: all temperatures are in Minecraft units",
-                        "°F to MC = (x - 32) / 42",
-                        "°C to MC = x / 23.3")
+        BUILDER.comment("Format: [[\"dimension_1\", temperature1, *units], [\"dimension_2\", temperature2, *units]... etc]",
+                        "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end")
                .push("Dimensions");
 
         dimensionOffsets = BUILDER
@@ -69,12 +66,11 @@ public class WorldSettingsConfig
         BUILDER.comment("Format: [[\"biome_1\", tempLow, tempHigh, *units], [\"biome_2\", tempLow, tempHigh, *units]... etc]",
                        "temp-low: The temperature of the biome at midnight",
                        "temp-high: The temperature of the biome at noon",
-                       "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)",
-                       "Note: all temperatures are in Minecraft units")
+                       "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)")
                .push("Biomes");
 
         biomeOffsets = BUILDER
-            .comment("Applies an offset to the temperature of a biome (in Minecraft units).")
+            .comment("Applies an offset to the temperature of a biome")
             .defineList("Biome Temperature Offsets", Arrays.asList(),
                 it ->
                 {
@@ -90,7 +86,7 @@ public class WorldSettingsConfig
 
 
         biomeTemps = BUILDER
-            .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets (in Minecraft units).")
+            .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets.")
             .defineList("Biome Temperatures", ListBuilder.begin(
                             Arrays.asList("minecraft:soul_sand_valley", 53, 53, "F"),
                             Arrays.asList("minecraft:tall_birch_forest", 58, 72, "F"),
@@ -204,7 +200,7 @@ public class WorldSettingsConfig
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, *<predicates>], [etc...], [etc...]]",
+                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, <*predicates>], [etc...], [etc...]]",
                          "(* = optional) (1 °MC = 42 °F/ 23.33 °C)",
                          "",
                          "Arguments:",
@@ -236,7 +232,7 @@ public class WorldSettingsConfig
                 .comment("The maximum range of blocks' area of effect",
                          "Note: This will not change anything unless blocks are configured to utilize the expanded range",
                           "This value is capped at 16 for performance reasons")
-                .defineInRange("Block Range", 7, 7, 16);
+                .defineInRange("Block Range", 7, 1, 16);
         BUILDER.pop();
 
         BUILDER.push("Misc");
@@ -288,32 +284,25 @@ public class WorldSettingsConfig
 
         // Create the config folder
         try
-        {
-            Files.createDirectory(csConfigPath);
+        {   Files.createDirectory(csConfigPath);
         }
-        catch (Exception e)
-        {
-            // Do nothing
-        }
+        catch (Exception ignored) {}
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/world_settings.toml");
     }
 
     public static WorldSettingsConfig getInstance()
-    {
-        return INSTANCE;
+    {   return INSTANCE;
     }
 
     /*
      * Non-private values for use elsewhere
      */
     public List<? extends List<?>> getBiomeTempOffsets()
-    {
-        return biomeOffsets.get();
+    {   return biomeOffsets.get();
     }
     public List<? extends List<?>> getBiomeTemperatures()
-    {
-        return biomeTemps.get();
+    {   return biomeTemps.get();
     }
 
     public List<? extends List<?>> getDimensionTempOffsets()

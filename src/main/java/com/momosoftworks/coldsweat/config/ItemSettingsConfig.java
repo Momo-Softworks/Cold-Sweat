@@ -128,8 +128,8 @@ public final class ItemSettingsConfig
          */
         BUILDER.push("Soulspring Lamp");
         soulLampItems = BUILDER
-                .comment("Defines the items that the Soulspring Lamp can use as fuel and their values",
-                        "Format: [\"item-id-1\", \"item-id-2\", ...etc]")
+                .comment("Defines items that the Soulspring Lamp can use as fuel",
+                        "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
                 .defineListAllowEmpty(Collections.singletonList("Fuel Items"), () -> ListBuilder.begin(
                                     Arrays.asList("cold_sweat:soul_sprout", 4)
                         ).build(),
@@ -211,7 +211,10 @@ public final class ItemSettingsConfig
 
         insulatingArmor = BUILDER
                 .comment("Defines the items that provide insulation when worn",
-                        "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]")
+                        "Format: [[\"item_id\", cold, hot], [\"item_id\", cold, hot], ...etc]",
+                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
+                         "\"cold\": The amount of cold insulation the item provides.",
+                         "\"hot\": The amount of heat insulation the item provides.")
                 .defineListAllowEmpty(Collections.singletonList("Insulating Armor"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:leather_helmet",      4,  4),
                                 Arrays.asList("minecraft:leather_chestplate",  6,  6),
@@ -253,7 +256,7 @@ public final class ItemSettingsConfig
         BUILDER.pop();
 
         /*
-         Temperature-Affecting Foods
+         Consumables
          */
         BUILDER.push("Consumables");
         temperatureFoods = BUILDER
@@ -271,7 +274,7 @@ public final class ItemSettingsConfig
                     return false;
                 });
         waterskinStrength = BUILDER
-                .comment("Defines the amount a player's body temperature will change by when using a waterskin")
+                .comment("Defines how much a waterskin will change the player's body temperature by when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
@@ -285,8 +288,7 @@ public final class ItemSettingsConfig
 
         // Create the config folder
         try
-        {
-            Files.createDirectory(csConfigPath);
+        {   Files.createDirectory(csConfigPath);
         }
         catch (Exception ignored) {}
 
@@ -294,43 +296,35 @@ public final class ItemSettingsConfig
     }
 
     public static ItemSettingsConfig getInstance()
-    {
-        return INSTANCE;
+    {   return INSTANCE;
     }
 
     public List<? extends List<?>> getBoilerFuelItems()
-    {
-        return boilerItems.get();
+    {   return boilerItems.get();
     }
 
     public List<? extends List<?>> getIceboxFuelItems()
-    {
-        return iceboxItems.get();
+    {   return iceboxItems.get();
     }
 
     public List<? extends List<?>> getHearthFuelItems()
-    {
-        return hearthItems.get();
+    {   return hearthItems.get();
     }
 
     public List<? extends List<?>> getInsulationItems()
-    {
-        return insulatingItems.get();
+    {   return insulatingItems.get();
     }
 
     public List<? extends List<?>> getAdaptiveInsulationItems()
-    {
-        return adaptiveInsulatingItems.get();
+    {   return adaptiveInsulatingItems.get();
     }
 
     public List<? extends List<?>> getInsulatingArmorItems()
-    {
-        return insulatingArmor.get();
+    {   return insulatingArmor.get();
     }
 
     public List<? extends Number> getArmorInsulationSlots()
-    {
-        return insulationSlots.get();
+    {   return insulationSlots.get();
     }
 
     public List<? extends String> getInsulationBlacklist()
@@ -338,23 +332,19 @@ public final class ItemSettingsConfig
     }
 
     public List<? extends List<?>> getSoulLampFuelItems()
-    {
-        return soulLampItems.get();
+    {   return soulLampItems.get();
     }
 
     public List<? extends List<?>> getFoodTemperatures()
-    {
-        return temperatureFoods.get();
+    {   return temperatureFoods.get();
     }
 
     public List<? extends String> getValidSoulLampDimensions()
-    {
-        return soulLampDimensions.get();
+    {   return soulLampDimensions.get();
     }
 
     public int getWaterskinStrength()
-    {
-        return waterskinStrength.get();
+    {   return waterskinStrength.get();
     }
 
     public boolean arePotionsEnabled()
@@ -366,58 +356,47 @@ public final class ItemSettingsConfig
     }
 
     public void setBoilerFuelItems(List<? extends List<?>> itemMap)
-    {
-        boilerItems.set(itemMap);
+    {   boilerItems.set(itemMap);
     }
 
     public void setIceboxFuelItems(List<? extends List<?>> itemMap)
-    {
-        iceboxItems.set(itemMap);
+    {   iceboxItems.set(itemMap);
     }
 
     public void setHearthFuelItems(List<? extends List<?>> itemMap)
-    {
-        hearthItems.set(itemMap);
+    {   hearthItems.set(itemMap);
     }
 
     public void setInsulationItems(List<? extends List<?>> items)
-    {
-        insulatingItems.set(items);
+    {   insulatingItems.set(items);
     }
 
     public void setAdaptiveInsulationItems(List<? extends List<?>> items)
-    {
-        adaptiveInsulatingItems.set(items);
+    {   adaptiveInsulatingItems.set(items);
     }
 
     public void setInsulatingArmorItems(List<? extends List<?>> itemMap)
-    {
-        insulatingArmor.set(itemMap);
+    {   insulatingArmor.set(itemMap);
     }
 
     public void setArmorInsulationSlots(List<? extends Number> slots)
-    {
-        insulationSlots.set(slots);
+    {   insulationSlots.set(slots);
     }
 
     public void setSoulLampFuelItems(List<? extends List<?>> items)
-    {
-        soulLampItems.set(items);
+    {   soulLampItems.set(items);
     }
 
     public void setFoodTemperatures(List<? extends List<?>> itemMap)
-    {
-        temperatureFoods.set(itemMap);
+    {   temperatureFoods.set(itemMap);
     }
 
     public void setValidSoulLampDimensions(List<? extends String> items)
-    {
-        soulLampDimensions.set(items);
+    {   soulLampDimensions.set(items);
     }
 
     public void setWaterskinStrength(int strength)
-    {
-        waterskinStrength.set(strength);
+    {   waterskinStrength.set(strength);
     }
 
     public void setPotionsEnabled(Boolean saver)
