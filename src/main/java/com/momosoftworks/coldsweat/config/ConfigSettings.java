@@ -496,6 +496,8 @@ public class ConfigSettings
 
         HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
 
+        HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
+
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
         AUTUMN_TEMPS = addSetting("autumn_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getAutumnTemps() : () -> new Double[3]);
