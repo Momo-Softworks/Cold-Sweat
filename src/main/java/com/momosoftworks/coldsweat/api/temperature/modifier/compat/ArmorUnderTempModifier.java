@@ -32,19 +32,19 @@ public class ArmorUnderTempModifier extends TempModifier
             {
                 case FREEZING_POINT ->
                 {   totalOffset += Math.min(0,
-                            Armory.getTLining(stack).getModifier() * 5
+                            Armory.getTLining(stack).getModifier() * 3
                             + nbt.getFloat("OzzyTemp"));
                 }
                 case BURNING_POINT ->
                 {   totalOffset += Math.max(0,
-                            Armory.getTLining(stack).getModifier() * 5
+                            Armory.getTLining(stack).getModifier() * 3
                             + nbt.getFloat("OzzyTemp"));
                 }
             }
 
             // Special functionality for certain linings
             if (CompatManager.hasOzzyLiner(stack))
-            {   nbt.putFloat("OzzyTemp", (float) (CSMath.blend(-10, 10, bodyTemp, -100, 100)));
+            {   nbt.putFloat("OzzyTemp", (float) (CSMath.blend(-4, 4, bodyTemp, -100, 100)));
             }
             else nbt.remove("OzzyTemp");
         }

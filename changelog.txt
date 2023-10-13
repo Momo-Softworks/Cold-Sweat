@@ -1629,3 +1629,44 @@ Fixes:
 - Fixed "Biome Temperatures/Offsets" config option being set to MC units when closing the config screen
 - Fixed some mods not working with Cold Sweat due to a bug with registering capabilities (1.16.5)
 - Fixed Cold Sweat item tooltips being rendered over other tooltips that are ordered before them (1.16.5)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05e
+- Renamed all instances of Llama/Goat Fur to just "Fur" for better parity between 1.16 and 1.18/19
+      ! Existing goat/llama fur items will be automatically converted, so no worries about items being deleted by the ID change
+
+Fixes:
+- (1.16) Fixed the soulspring lamp not accepting fuel
+- (1.16) Fixed biome temperatures sometimes being set to MC units in the config
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05f
+- (1.16) Added support for shearing goats from the Caves & Cliffs Backport mod
+
+Fixes:
+- (1.18/1.19) Fixed armor insulation tooltips not displaying
+
+Technical Changes:
+- Player/entity/item capabilities are now cached, increasing performance
+
+Translation Updates:
+- Updated Chinese translation (by @wumeng on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2-b05g
+- Soul stalk can now generate with a patch disk of soul sand underneath, allowing it to generate in almost any biome
+      - This should help with its reliability and make it more accessible to newer players
+- Foods with temperature values assigned via configs now have a tooltip displaying their effects
+- The vague temperature gauge now has a white outline when the player is in a critically hot/cold environment
+
+Fixes:
+- (1.16) Fixed crash due to MixinWorldRender not being remapped properly
+- (1.18+) Fixed crash when using tags in config settings
+- (1.18+) Fixed temperature inconsistency/jitter when traversing 3D biomes in some cases
+
+Technical Changes:
+- CSMath.convertUnits() has been moved to the Temperature class
+- All net.momostudios packages have been changed to com.momosoftworks (sorry)
