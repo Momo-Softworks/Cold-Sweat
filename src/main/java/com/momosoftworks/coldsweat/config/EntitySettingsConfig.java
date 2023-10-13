@@ -151,7 +151,8 @@ public class EntitySettingsConfig
         // Create the config folder
         try
         {   Files.createDirectory(csConfigPath);
-        } catch (Exception ignored) {}
+        }
+        catch (Exception ignored) {}
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
     }

@@ -34,7 +34,7 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue showConfigButton;
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
-    static final ForgeConfigSpec.BooleanValue distortionEffects;
+    private static final ForgeConfigSpec.BooleanValue distortionEffects;
 
     private static final ForgeConfigSpec.BooleanValue highContrast;
 
