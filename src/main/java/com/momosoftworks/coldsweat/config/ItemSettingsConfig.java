@@ -130,7 +130,7 @@ public final class ItemSettingsConfig
         soulLampItems = BUILDER
                 .comment("Defines items that the Soulspring Lamp can use as fuel",
                         "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
-                .defineListAllowEmpty(Collections.singletonList("Fuel Items"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(Arrays.asList("Fuel Items"), () -> ListBuilder.begin(
                                     Arrays.asList("cold_sweat:soul_sprout", 4)
                         ).build(),
                         it ->
