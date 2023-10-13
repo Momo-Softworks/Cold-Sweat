@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
@@ -18,10 +19,15 @@ import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+
     List<ItemInsulationCap.InsulationPair> insulation;
     ItemStack stack;
      int width = 0;
@@ -46,7 +52,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
+        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
 
         int slots = ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()];
 
@@ -174,8 +180,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
             // border
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
-            {
-                boolean end = i == Math.max(armorSlots, slots) - 1;
+            {   boolean end = i == Math.max(armorSlots, slots) - 1;
                 GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
             }
             // icon

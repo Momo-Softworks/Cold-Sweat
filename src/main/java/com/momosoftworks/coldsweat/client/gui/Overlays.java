@@ -22,9 +22,21 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.function.Supplier;
+
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Overlays
 {
+    public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
+    public static final Supplier<ResourceLocation> WORLD_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
+    public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
+
     static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
     // Stuff for world temperature
@@ -83,7 +95,7 @@ public class Overlays
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
                 // Set gauge texture
-                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
+                RenderSystem.setShaderTexture(0, WORLD_TEMP_GAUGE_LOCATION.get());
 
                 // Render frame
                 GuiComponent.blit(poseStack, (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
@@ -143,7 +155,7 @@ public class Overlays
                 RenderSystem.defaultBlendFunc();
 
                 // Render old icon (if blending)
-                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
+                RenderSystem.setShaderTexture(0, BODY_TEMP_GAUGE_LOCATION.get());
                 if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
                 {
                     GuiComponent.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
@@ -190,7 +202,7 @@ public class Overlays
                 double temp = Temperature.convertUnits(WORLD_TEMP, CLIENT_CONFIG.isCelsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
-                int renderOffset = CSMath.clamp(severity, -1, 1) * 3;
+                int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
                 poseStack.pushPose();
                 RenderSystem.enableBlend();
@@ -199,7 +211,7 @@ public class Overlays
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
                 // Set gauge texture
-                RenderSystem.setShaderTexture(0, new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png"));
+                RenderSystem.setShaderTexture(0, VAGUE_TEMP_GAUGE_LOCATION.get());
 
                 // Render frame
                 GuiComponent.blit(poseStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
