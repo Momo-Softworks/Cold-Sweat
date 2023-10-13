@@ -35,6 +35,8 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'coldsweat'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             mods {
                 coldsweat {
                     source sourceSets.main
@@ -47,6 +49,8 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'coldsweat'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             mods {
                 coldsweat {
                     source sourceSets.main
@@ -101,6 +105,10 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    maven {
+        name = "Illusive Soulworks maven"
+        url = "https://maven.theillusivec4.top/"
+    }
     mavenCentral()
 }
 
@@ -115,11 +123,11 @@ dependencies {
     compileOnly fg.deobf("curse.maven:create-328085:4550987")
     compileOnly fg.deobf("curse.maven:armorunderwear-310383:4625067")
     compileOnly fg.deobf("curse.maven:carrots-311327:4624988")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.4-5.1.5.4:api")
 
-    implementation fg.deobf("curse.maven:curios-309927:4523020")
-
+    //runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.4-5.1.5.4")
     runtimeOnly fg.deobf("curse.maven:spark-361579:4505309")
-    runtimeOnly fg.deobf("curse.maven:byg-247560:4602199")
+    //runtimeOnly fg.deobf("curse.maven:byg-247560:4602199")
     runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4577599")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4681520")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:4629898")
@@ -128,9 +136,9 @@ dependencies {
     //runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514") // Causes weird issues IDK
     //runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
     runtimeOnly fg.deobf("curse.maven:jei-238222:4712556")
-    runtimeOnly fg.deobf("curse.maven:geckolib-388172:4568326")
-    runtimeOnly fg.deobf("curse.maven:corgilib-693313:4583678")
-    runtimeOnly fg.deobf("curse.maven:terralith-513688:4720177")
+    //runtimeOnly fg.deobf("curse.maven:geckolib-388172:4568326")
+    //runtimeOnly fg.deobf("curse.maven:corgilib-693313:4583678")
+    //runtimeOnly fg.deobf("curse.maven:terralith-513688:4720177")
     runtimeOnly fg.deobf("curse.maven:wythers-490686:4454950")
     runtimeOnly fg.deobf("curse.maven:smooth-boot-633412:4685317")
     runtimeOnly fg.deobf("curse.maven:modernfix-790626:4728404")
