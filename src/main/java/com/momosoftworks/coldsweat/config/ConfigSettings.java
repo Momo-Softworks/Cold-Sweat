@@ -310,11 +310,11 @@ public class ConfigSettings
         },
         encoder ->
         {
-            CompoundNBT tag = new CompoundNBT();
-            CompoundNBT mapTag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
+            CompoundTag mapTag = new CompoundTag();
             for (Map.Entry<Item, Double> entry : encoder.entrySet())
             {
-                CompoundNBT itemTag = new CompoundNBT();
+                CompoundTag itemTag = new CompoundTag();
                 itemTag.putDouble("Value", entry.getValue());
 
                 ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
@@ -328,10 +328,10 @@ public class ConfigSettings
         decoder ->
         {
             Map<Item, Double> map = new HashMap<>();
-            CompoundNBT mapTag = decoder.getCompound("FoodTemperatures");
+            CompoundTag mapTag = decoder.getCompound("FoodTemperatures");
             for (String key : mapTag.getAllKeys())
             {
-                CompoundNBT itemTag = mapTag.getCompound(key);
+                CompoundTag itemTag = mapTag.getCompound(key);
                 map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), itemTag.getDouble("Value"));
             }
             return map;
