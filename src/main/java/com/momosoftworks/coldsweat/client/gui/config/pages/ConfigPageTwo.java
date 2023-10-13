@@ -86,6 +86,15 @@ public class ConfigPageTwo extends AbstractConfigPage
                 },
                 false, false, true, Component.translatable("cold_sweat.config.distortion.desc").getString());
 
+        // High Contrast
+        this.addButton("high_contrast", Side.LEFT, () -> Component.translatable("cold_sweat.config.high_contrast.name").getString()
+                        + ": " + (clientConfig.isHighContrast() ? ON : OFF),
+                button ->
+                {
+                    clientConfig.setHighContrast(!clientConfig.isHighContrast());
+                },
+                false, false, true, Component.translatable("cold_sweat.config.high_contrast.desc").getString());
+
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
                 amount -> clientConfig.setBodyIconX(clientConfig.getBodyIconX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),

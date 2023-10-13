@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,10 +11,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulatorTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP_LOCATION = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
 
     Pair<Double, Double> insulationValues;
     double cold = 0;
@@ -86,7 +91,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
             int uvY = isAdaptive
                       ? (rounded - i * 2 >= 2 ? 16 : 20)
                       : (rounded - i * 2 >= 2 ? 8 : 12);
-            graphics.blit(TOOLTIP_LOCATION, x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
+            graphics.blit(TOOLTIP_LOCATION.get(), x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
         }
     }
 
@@ -98,7 +103,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
         // background
         for (int i = 0; i < slots; i++)
-        {   graphics.blit(TOOLTIP_LOCATION, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
+        {   graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
         }
 
         // slots
@@ -125,21 +130,21 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         for (int i = 0; i < slots; i++)
         {
             boolean end = i == slots - 1;
-            graphics.blit(TOOLTIP_LOCATION, x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+            graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
         }
 
         // icon
-        graphics.blit(TOOLTIP_LOCATION, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
+        graphics.blit(TOOLTIP_LOCATION.get(), x, y - 1, 0, 24, 0, 8, 8, 32, 24);
 
         if (showSign)
         {
             if (isNegative)
             {   // negative sign
-                graphics.blit(TOOLTIP_LOCATION, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
+                graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
             }
             else
             {   // positive sign
-                graphics.blit(TOOLTIP_LOCATION, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+                graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
             }
         }
     }

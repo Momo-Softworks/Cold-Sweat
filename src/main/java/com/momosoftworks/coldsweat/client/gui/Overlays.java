@@ -22,12 +22,20 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.function.Supplier;
+
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Overlays
 {
-    public static final ResourceLocation WORLD_TEMP_GAUGE_LOCATION = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
-    public static final ResourceLocation BODY_TEMP_GAUGE_LOCATION  = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_LOCATION = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
+    public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
+    public static final Supplier<ResourceLocation> WORLD_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
+    public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
 
     static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
@@ -89,7 +97,7 @@ public class Overlays
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
                 // Render frame
-                graphics.blit(WORLD_TEMP_GAUGE_LOCATION, (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
+                graphics.blit(WORLD_TEMP_GAUGE_LOCATION.get(), (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
                 RenderSystem.disableBlend();
 
@@ -147,13 +155,13 @@ public class Overlays
 
                 // Render old icon (if blending)
                 if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
-                {   graphics.blit(BODY_TEMP_GAUGE_LOCATION, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                {   graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
                 }
                 // Render new icon on top of old icon (if blending)
                 // Otherwise this is just the regular icon
-                graphics.blit(BODY_TEMP_GAUGE_LOCATION, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+                graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
                 RenderSystem.setShaderColor(1, 1, 1, 1);
 
                 // Render Readout
@@ -192,7 +200,7 @@ public class Overlays
                 double temp = Temperature.convertUnits(WORLD_TEMP, CLIENT_CONFIG.isCelsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
-                int renderOffset = CSMath.clamp(severity, -1, 1) * 3;
+                int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
                 poseStack.pushPose();
                 RenderSystem.enableBlend();
@@ -201,7 +209,7 @@ public class Overlays
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
                 // Render frame
-                graphics.blit(VAGUE_TEMP_GAUGE_LOCATION, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
+                graphics.blit(VAGUE_TEMP_GAUGE_LOCATION.get(), (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
 
                 RenderSystem.disableBlend();
                 poseStack.popPose();

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
@@ -17,11 +18,14 @@ import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP_LOCATION = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
 
     List<ItemInsulationCap.InsulationPair> insulation;
     ItemStack stack;
@@ -130,7 +134,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         {
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {   // background
-                graphics.blit(TOOLTIP_LOCATION, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 24);
+                graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 24);
             }
 
             for (int i = 0; i < slots; i++)
@@ -149,13 +153,13 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     cellU = factor < 0 ? 6 : 18;
 
                     // Draw base green underneath
-                    graphics.blit(TOOLTIP_LOCATION, x + 7 + i * 6, y + 1, 0, 12, cellV, 6, 4, 32, 24);
+                    graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, 12, cellV, 6, 4, 32, 24);
 
                     // Draw either hot/cold texture ontop with alpha
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-                    graphics.blit(TOOLTIP_LOCATION, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
+                    graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
                     RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                     RenderSystem.disableBlend();
                 }
@@ -168,17 +172,17 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                             : Math.abs(cold) > Math.abs(hot) ? 12
                             // hot
                             : 18;
-                    graphics.blit(TOOLTIP_LOCATION, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
+                    graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
                 }
             }
 
             // border
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {   boolean end = i == Math.max(armorSlots, slots) - 1;
-                graphics.blit(TOOLTIP_LOCATION, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+                graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
             }
             // icon
-            graphics.blit(TOOLTIP_LOCATION, x, y - 1, 0, 24, 8, 8, 8, 32, 24);
+            graphics.blit(TOOLTIP_LOCATION.get(), x, y - 1, 0, 24, 8, 8, 8, 32, 24);
 
             this.width += slots * 6 + 12;
 
@@ -186,10 +190,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             if (drawSign)
             {
                 if (isNegative)
-                {   graphics.blit(TOOLTIP_LOCATION, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
+                {   graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
                 }
                 else
-                {   graphics.blit(TOOLTIP_LOCATION, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+                {   graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
                 }
             }
         }

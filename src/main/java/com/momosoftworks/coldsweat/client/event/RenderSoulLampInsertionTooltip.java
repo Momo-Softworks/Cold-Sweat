@@ -53,17 +53,17 @@ public class RenderSoulLampInsertionTooltip
                     RenderSystem.defaultBlendFunc();
 
                     // Render background
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION, slotX - 7, slotY - 11, 401, 0, 0, 30, 8, 30, 34);
+                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 0, 30, 8, 30, 34);
 
                     // Render ghost overlay
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION, slotX - 7, slotY - 11, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 34);
+                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 34);
                     RenderSystem.disableBlend();
 
                     // Render fuel
                     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION, slotX - 7, slotY - 11, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
+                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
                 }
             }
         }
