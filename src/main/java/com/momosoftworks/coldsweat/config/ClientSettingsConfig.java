@@ -37,6 +37,8 @@ public class ClientSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
     private static final ForgeConfigSpec.BooleanValue distortionEffects;
 
+    private static final ForgeConfigSpec.BooleanValue highContrast;
+
 
     static 
     {
@@ -107,6 +109,10 @@ public class ClientSettingsConfig
                 .comment("Enables visual distortion effects when the player is too hot or cold")
                 .define("Distortion Effects", true);
 
+        highContrast = BUILDER
+                .comment("Enables high contrast mode for UI elements")
+                .define("High Contrast", false);
+
         SPEC = BUILDER.build();
     }
 
@@ -131,6 +137,13 @@ public class ClientSettingsConfig
     /*
      * Non-private values for use elsewhere
      */
+
+    public boolean isHighContrast()
+    {   return highContrast.get();
+    }
+    public void setHighContrast(boolean enabled)
+    {   highContrast.set(enabled);
+    }
 
     public boolean isCelsius()
     {   return celsius.get();

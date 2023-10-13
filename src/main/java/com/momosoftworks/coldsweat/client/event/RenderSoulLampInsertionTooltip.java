@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -18,7 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
-public class SoulLampTooltip
+public class RenderSoulLampInsertionTooltip
 {
     static int FUEL_FADE_TIMER = 0;
 
@@ -53,7 +54,7 @@ public class SoulLampTooltip
                     RenderSystem.defaultBlendFunc();
 
                     // Render background
-                    Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
+                    Minecraft.getInstance().textureManager.bind(SoulspringTooltip.TOOLTIP_LOCATION.get());
                     AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 34, 30);
 
                     // Render ghost overlay
@@ -66,20 +67,6 @@ public class SoulLampTooltip
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
                     AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 34, 30);
                 }
-                /*else if (carriedStack.isEmpty())
-                {
-                    int mouseX = event.getMouseX();
-                    int mouseY = event.getMouseY();
-                    MatrixStack ms = event.getMatrixStack();
-
-                    if (event.getGui() instanceof CreativeScreen && ((CreativeScreen) event.getGui()).getSelectedTab() == ItemGroup.TAB_SEARCH.getId())
-                    {   event.getMatrixStack().translate(0, 10, 0);
-                    }
-
-                    Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 0, 30, 8, 30, 24);
-                    AbstractGui.blit(ms, mouseX + 11, mouseY, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 24);
-                }*/
             }
         }
     }

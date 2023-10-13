@@ -21,9 +21,28 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.function.Supplier;
+
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
+    public static final ResourceLocation BODY_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
+    public static final ResourceLocation BODY_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png");
+    public static final ResourceLocation WORLD_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
+    public static final ResourceLocation WORLD_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png");
+
+    public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? BODY_TEMP_GAUGE_HC
+                                                                : BODY_TEMP_GAUGE;
+    public static final Supplier<ResourceLocation> WORLD_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? WORLD_TEMP_GAUGE_HC
+                                                                : WORLD_TEMP_GAUGE;
+    public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? VAGUE_TEMP_GAUGE_HC
+                                                                : VAGUE_TEMP_GAUGE;
+
     static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
     // Stuff for world temperature
@@ -83,7 +102,7 @@ public class Overlays
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Set gauge texture
-                Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png"));
+                Minecraft.getInstance().textureManager.bind(WORLD_TEMP_GAUGE_LOCATION.get());
 
                 // Render frame
                 AbstractGui.blit(poseStack, (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
@@ -150,7 +169,7 @@ public class Overlays
                 RenderSystem.defaultBlendFunc();
 
                 // Render old icon (if blending)
-                mc.textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png"));
+                mc.textureManager.bind(BODY_TEMP_GAUGE_LOCATION.get());
                 if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
                 {
                     AbstractGui.blit(poseStack, (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
@@ -210,7 +229,7 @@ public class Overlays
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
                 // Set gauge texture
-                mc.textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png"));
+                mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
 
                 // Render frame
                 AbstractGui.blit(matrixStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);

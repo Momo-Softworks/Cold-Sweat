@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -10,6 +11,10 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.function.Supplier;
+
+import static com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip.TOOLTIP_LOCATION;
 
 @OnlyIn(Dist.CLIENT)
 public class InsulatorTooltip extends Tooltip
@@ -54,7 +59,7 @@ public class InsulatorTooltip extends Tooltip
         int hotSlots = Math.abs(CSMath.ceil(hot/2));
         width = coldSlots + neutralSlots + hotSlots;
 
-        Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png"));
+        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
 
         // Render positive and negative insulation separately
         int barLength = 0;

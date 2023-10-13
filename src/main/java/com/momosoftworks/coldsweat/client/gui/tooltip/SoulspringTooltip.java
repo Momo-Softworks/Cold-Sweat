@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -14,9 +15,17 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class SoulspringTooltip extends Tooltip
 {
+    private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
+    private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png");
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
+            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
+                                                                : TOOLTIP;
+
     double fuel;
 
     public SoulspringTooltip(double fuel)
@@ -40,7 +49,7 @@ public class SoulspringTooltip extends Tooltip
         y += 11;
         if (Minecraft.getInstance().screen instanceof ContainerScreen<?>)
         {
-            Minecraft.getInstance().textureManager.bind(new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png"));
+            Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
             AbstractGui.blit(poseStack, x, y, 0, 0, 0, 30, 8, 34, 30);
             AbstractGui.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
             if (Screen.hasShiftDown())
