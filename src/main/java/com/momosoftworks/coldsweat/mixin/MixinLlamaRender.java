@@ -33,7 +33,7 @@ public class MixinLlamaRender<T extends LivingEntity, M extends EntityModel<T>>
                 at = @At(value = "RETURN"))
         private void init(EntityRendererManager renderManager, M model, float shadowSize, CallbackInfo ci)
         {
-            if (model.getClass() == LlamaModel.class)
+            if (self instanceof LlamaRenderer)
             {   this.model = (M) new ModLlamaModel(0f);
             }
         }
@@ -52,8 +52,7 @@ public class MixinLlamaRender<T extends LivingEntity, M extends EntityModel<T>>
                 at = @At(value = "HEAD"),
                 cancellable = true)
         private void getTextureLocation(LlamaEntity entity, CallbackInfoReturnable<ResourceLocation> cir)
-        {
-            boolean sheared = ShearableFurManager.getFurCap(entity).map(IShearableCap::isSheared).orElse(false);
+        {   boolean sheared = ShearableFurManager.getFurCap(entity).map(IShearableCap::isSheared).orElse(false);
             cir.setReturnValue(sheared ? SHAVED_TEXTURES[entity.getVariant()] : TEXTURES[entity.getVariant()]);
         }
     }
