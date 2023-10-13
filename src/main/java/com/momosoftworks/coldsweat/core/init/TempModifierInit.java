@@ -135,8 +135,7 @@ public class TempModifierInit
                 });
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
-                e.printStackTrace();
+            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"", e);
                 break;
             }
         }
