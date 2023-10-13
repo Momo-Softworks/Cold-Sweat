@@ -43,6 +43,8 @@ import java.util.Random;
 
 public class FilledWaterskinItem extends Item
 {
+    private static final double EFFECT_RATE = 0.4;
+
     public FilledWaterskinItem()
     {
         super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
@@ -78,13 +80,12 @@ public class FilledWaterskinItem extends Item
                 }, i);
             }
 
-            final AxisAlignedBB[] aabb = { new AxisAlignedBB(pos).inflate(0.5) };
-
             // Spawn a hitbox that falls at the same rate as the particles and gives players below the waterskin effect
             new Object()
             {
                 double acceleration = 0;
                 int tick = 0;
+                AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(0.5);
                 // Track affected players to prevent duplicate effects
                 List<PlayerEntity> affectedPlayers = new ArrayList<>();
 
@@ -103,13 +104,12 @@ public class FilledWaterskinItem extends Item
 
                         // Move the box down at the speed of gravity
                         AxisAlignedBB movedBox;
-                        aabb[0] = movedBox = aabb[0].move(0, -acceleration, 0);
+                        aabb = movedBox = aabb.move(0, -acceleration, 0);
 
                         // If there's ground, stop
                         BlockPos pos = new BlockPos(movedBox.minX, movedBox.minY, movedBox.minZ);
                         if (WorldHelper.isSpreadBlocked(level, chunk.getBlockState(pos), pos, Direction.DOWN, Direction.DOWN))
-                        {
-                            MinecraftForge.EVENT_BUS.unregister(this);
+                        {   MinecraftForge.EVENT_BUS.unregister(this);
                             return;
                         }
 
@@ -117,8 +117,7 @@ public class FilledWaterskinItem extends Item
                         level.getEntitiesOfClass(PlayerEntity.class, movedBox).forEach(player ->
                         {
                             if (!affectedPlayers.contains(player))
-                            {
-                                // Apply the effect and store the player
+                            {   // Apply the effect and store the player
                                 Temperature.addModifier(player, new WaterskinTempModifier(waterTemp).expires(0), Temperature.Type.CORE, true);
                                 affectedPlayers.add(player);
                             }
@@ -151,13 +150,12 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = 0.04 * ConfigSettings.TEMP_RATE.get() * CSMath.getSign(itemTemp);
-                double newTemp = itemTemp - temp * 2;
-                if (CSMath.withinRange(newTemp, -1, 1)) newTemp = 0;
+                double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get();
+                double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
 
-                Temperature.addModifier(player, new WaterskinTempModifier(temp).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.getSign(itemTemp)).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -234,7 +232,9 @@ public class FilledWaterskinItem extends Item
         // Info tooltip for hotbar functionality
         tooltip.add(new StringTextComponent(""));
         tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
-        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", (CSMath.getSign(temp) >= 0 ? "+" : "-") + (temp != 0 ? 0.8 * ConfigSettings.TEMP_RATE.get() : 0))
+        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.temperature_effect",
+                                                 (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                               + (temp != 0 ? EFFECT_RATE * ConfigSettings.TEMP_RATE.get() : 0))
                             .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : TextFormatting.WHITE));
 
         // Tooltip to display temperature
