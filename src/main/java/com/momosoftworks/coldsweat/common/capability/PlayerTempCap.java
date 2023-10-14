@@ -127,8 +127,8 @@ public class PlayerTempCap implements ITemperatureCap
         double newWorldTemp = Temperature.apply(0, player, Type.WORLD, getModifiers(Type.WORLD));
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), player, Type.CORE, getModifiers(Type.CORE));
         double newBaseTemp  = Temperature.apply(0, player, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, player, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
-        double newMinOffset = Temperature.apply(0, player, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
+        double newMinOffset = Temperature.apply(0, player, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        double newMaxOffset = Temperature.apply(0, player, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;

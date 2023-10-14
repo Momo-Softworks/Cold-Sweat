@@ -48,10 +48,11 @@ public class ArmorUnderTempModifier extends TempModifier
             if (CompatManager.hasOzzyLiner(stack))
             {   nbt.putFloat("OzzyTemp", (float) (CSMath.blend(-10, 10, bodyTemp, -100, 100)));
             }
+            else nbt.remove("OzzyTemp");
         }
 
         double returnTemp = Temperature.convertUnits(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
-        return temp -> returnTemp;
+        return temp -> temp + returnTemp;
     }
 
     @Override
