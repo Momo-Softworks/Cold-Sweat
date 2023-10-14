@@ -116,11 +116,11 @@ public class TempEffectsClient
             Player player = Minecraft.getInstance().player;
             if (player != null && player.tickCount % 5 == 0)
             {
+                COLD_IMMUNITY = 0;
+                HOT_IMMUNITY = 0;
                 boolean hasGrace = player.hasEffect(ModEffects.GRACE);
                 if (player.hasEffect(ModEffects.ICE_RESISTANCE) || hasGrace) COLD_IMMUNITY = 4;
-                else COLD_IMMUNITY = 0;
                 if (player.hasEffect(MobEffects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
-                else HOT_IMMUNITY = 0;
 
                 if (CompatManager.isArmorUnderwearLoaded() && (COLD_IMMUNITY < 4 || HOT_IMMUNITY < 4))
                 {   player.getArmorSlots().forEach(stack ->
