@@ -12,11 +12,11 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.neoforged.gradle' version '[6.0.13, 6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'net.neoforged.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
@@ -97,19 +97,12 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
     mavenCentral()
 }
 
 dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.minecraftforge:forge:1.20.1-47.2.1'
+    minecraft 'net.neoforged:forge:1.20.1-47.1.79'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     compileOnly fg.deobf("curse.maven:sereneapi-291874:4761605")
@@ -120,6 +113,7 @@ dependencies {
   //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
 
     implementation fg.deobf("curse.maven:curios-309927:4780205")
+
 
     //runtimeOnly fg.deobf("curse.maven:spark-361579:4505309")
     //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
