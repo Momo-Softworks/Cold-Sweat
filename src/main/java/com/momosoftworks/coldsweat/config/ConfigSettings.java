@@ -36,6 +36,7 @@ public class ConfigSettings
     public static final ValueHolder<Double> MAX_TEMP;
     public static final ValueHolder<Double> MIN_TEMP;
     public static final ValueHolder<Double> TEMP_RATE;
+    public static final ValueHolder<Double> TEMP_DAMAGE;
     public static final ValueHolder<Boolean> FIRE_RESISTANCE_ENABLED;
     public static final ValueHolder<Boolean> ICE_RESISTANCE_ENABLED;
     public static final ValueHolder<Boolean> DAMAGE_SCALING;
@@ -111,6 +112,11 @@ public class ConfigSettings
         encoder -> ConfigHelper.writeNBTDouble(encoder, "TempRate"),
         decoder -> decoder.getDouble("TempRate"),
         saver -> ColdSweatConfig.getInstance().setRateMultiplier(saver));
+
+        TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> ColdSweatConfig.getInstance().getTempDamage(),
+        encoder -> ConfigHelper.writeNBTDouble(encoder, "TempDamage"),
+        decoder -> decoder.getDouble("TempDamage"),
+        saver -> ColdSweatConfig.getInstance().setTempDamage(saver));
 
         FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> ColdSweatConfig.getInstance().isFireResistanceEnabled(),
         encoder -> ConfigHelper.writeNBTBoolean(encoder, "FireResistanceEnabled"),
@@ -494,8 +500,6 @@ public class ConfigSettings
             return list;
         },
         saver -> ColdSweatConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).collect(Collectors.toList())));
-
-        HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
 
         HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
 

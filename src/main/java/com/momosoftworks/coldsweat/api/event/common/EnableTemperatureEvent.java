@@ -1,23 +1,22 @@
 package com.momosoftworks.coldsweat.api.event.common;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EntityType;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.event.lifecycle.IModBusEvent;
 
 @Cancelable
-public class EnableTemperatureEvent extends Event
+public class EnableTemperatureEvent extends Event implements IModBusEvent
 {
-    final LivingEntity entity;
-    boolean enabled;
+    final EntityType<?> entityType;
+    boolean enabled = false;
 
-    public EnableTemperatureEvent(LivingEntity entity)
-    {
-        this.entity = entity;
+    public EnableTemperatureEvent(EntityType<?> entityType)
+    {   this.entityType = entityType;
     }
 
-    public LivingEntity getEntity()
-    {
-        return entity;
+    public EntityType<?> getEntityType()
+    {   return entityType;
     }
 
     public void setEnabled(boolean enabled)

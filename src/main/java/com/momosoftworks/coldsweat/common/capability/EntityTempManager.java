@@ -2,17 +2,17 @@ package com.momosoftworks.coldsweat.common.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.common.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Mode;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Order;
-import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
-import com.momosoftworks.coldsweat.common.entity.ChameleonEntity;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.EntitySettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -20,6 +20,8 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -34,7 +36,6 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -53,7 +54,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.*;
 
 @Mod.EventBusSubscriber
@@ -61,7 +61,7 @@ public class EntityTempManager
 {
     public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.FREEZING_POINT, Temperature.Type.BURNING_POINT, Temperature.Type.WORLD};
-    private static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>();
+    public static final Set<EntityType<?>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<?>>builder().add(EntityType.PLAYER).build());
 
     public static final Map<Entity, LazyOptional<ITemperatureCap>> SERVER_CAP_CACHE = new HashMap<>();
     public static final Map<Entity, LazyOptional<ITemperatureCap>> CLIENT_CAP_CACHE = new HashMap<>();
@@ -75,14 +75,7 @@ public class EntityTempManager
         if (event.getObject() instanceof LivingEntity)
         {
             LivingEntity entity = (LivingEntity) event.getObject();
-            // Players always get the capability
-            if (!(entity instanceof PlayerEntity))
-            {
-                EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(entity);
-                MinecraftForge.EVENT_BUS.post(enableEvent);
-                if (!enableEvent.isEnabled() || enableEvent.isCanceled()) return;
-                TEMPERATURE_ENABLED_ENTITIES.add(entity.getType());
-            }
+            if (!TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
             // Make a new capability instance to attach to the entity
             ITemperatureCap tempCap = entity instanceof PlayerEntity ? new PlayerTempCap() : new EntityTempCap();
@@ -185,15 +178,6 @@ public class EntityTempManager
                 getTemperatureCap(oldPlayer).ifPresent(cap::copy);
             });
         }
-    }
-
-    /**
-     * Enable temperature handling for chameleons
-     */
-    @SubscribeEvent
-    public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
-    {
-        if (event.getEntity() instanceof ChameleonEntity) event.setEnabled(true);
     }
 
     /**
@@ -414,7 +398,67 @@ public class EntityTempManager
         }
     }
 
+    @SubscribeEvent
+    public static void resetTempOnRespawn(PlayerEvent.PlayerRespawnEvent event)
+    {
+        if (!event.isEndConquered())
+        getTemperatureCap(event.getEntity()).ifPresent(cap ->
+        {
+            cap.copy(new PlayerTempCap());
+            if (!event.getEntity().level.isClientSide)
+            {   Temperature.updateTemperature(event.getEntityLiving(), cap, true);
+            }
+        });
+    }
+
     public static Set<EntityType<?>> getEntitiesWithTemperature()
     {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
+    }
+
+    public static Set<ModifiableAttributeInstance> getModifiableTempAttributes(LivingEntity entity)
+    {
+        return ImmutableSet.<ModifiableAttributeInstance>builder()
+                .add(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE_OFFSET))
+                .add(entity.getAttribute(ModAttributes.CORE_BODY_TEMPERATURE_OFFSET))
+                .add(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE_OFFSET))
+                .add(entity.getAttribute(ModAttributes.BURNING_POINT_OFFSET))
+                .add(entity.getAttribute(ModAttributes.FREEZING_POINT_OFFSET))
+                .add(entity.getAttribute(ModAttributes.COLD_DAMPENING))
+                .add(entity.getAttribute(ModAttributes.HEAT_DAMPENING))
+                .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE_OFFSET))
+                .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE_OFFSET)).build();
+    }
+
+    public static Double[] applyAttributesPre(LivingEntity entity)
+    {   return getModifiableTempAttributes(entity).stream().map(attribute -> attribute == null ? 0 : attribute.getValue()).toArray(Double[]::new);
+    }
+
+    public static double[] applyAttributesPost(LivingEntity entity, double[] temps)
+    {
+        double[] tempsCopy = temps.clone();
+        int i = 0;
+        for (ModifiableAttributeInstance attribute : getModifiableTempAttributes(entity))
+        {
+            if (attribute == null) continue;
+            for (AttributeModifier modifier : attribute.getModifiers())
+            {
+                switch (modifier.getOperation())
+                {
+                    case ADDITION : tempsCopy[i] += modifier.getAmount(); break;
+                    case MULTIPLY_BASE : tempsCopy[i] *= 1 + modifier.getAmount(); break;
+                    case MULTIPLY_TOTAL : tempsCopy[i] *= modifier.getAmount(); break;
+                    default : {} break;
+                }
+            }
+            i++;
+        }
+
+        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[0]));
+        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.CORE_BODY_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[1]));
+        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[2]));
+        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BURNING_POINT), attribute -> attribute.setBaseValue(tempsCopy[3] + ConfigSettings.MAX_TEMP.get()));
+        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.FREEZING_POINT), attribute -> attribute.setBaseValue(tempsCopy[4] + ConfigSettings.MIN_TEMP.get()));
+
+        return tempsCopy;
     }
 }

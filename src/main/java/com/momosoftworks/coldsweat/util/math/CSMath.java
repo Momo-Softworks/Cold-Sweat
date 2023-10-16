@@ -15,10 +15,24 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class CSMath
 {
     private CSMath() {}
+
+    /**
+     * Runs the given runnable if the given object is not null.
+     */
+    public static <T> void doIfNotNull(T object, Consumer<T> run)
+    {   if (object != null) run.accept(object);
+    }
+
+    public static <T, R> R getIfNotNull(T object, Function<T, R> run, R defaultValue)
+    {   if (object != null) return run.apply(object);
+        return defaultValue;
+    }
 
     public static float toRadians(float input) {
         return input * (float) (Math.PI / 180);

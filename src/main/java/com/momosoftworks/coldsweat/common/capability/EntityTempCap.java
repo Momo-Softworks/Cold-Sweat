@@ -98,12 +98,27 @@ public class EntityTempCap implements ITemperatureCap
 
     public void tick(LivingEntity entity)
     {
-        // Tick expiration time for world modifiers
-        double newWorldTemp = Temperature.apply(0, entity, Type.WORLD, getModifiers(Type.WORLD));
-        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
-        double newBaseTemp  = Temperature.apply(0, entity, Type.BASE, getModifiers(Type.BASE));
-        double newMaxOffset = Temperature.apply(0, entity, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
-        double newMinOffset = Temperature.apply(0, entity, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
+        // Get the base temperature values as defined by the player's attributes
+        Double[] attributeBases = EntityTempManager.applyAttributesPre(entity);
+
+        // Tick TempModifiers
+        double newWorldTemp = Temperature.apply(attributeBases[0], entity, Type.WORLD, getModifiers(Type.WORLD));
+        double newCoreTemp  = Temperature.apply(getTemp(Type.CORE) + attributeBases[1], entity, Type.CORE, getModifiers(Type.CORE));
+        double newBaseTemp  = Temperature.apply(attributeBases[2], entity, Type.BASE, getModifiers(Type.BASE));
+        double newMaxOffset = Temperature.apply(attributeBases[3], entity, Type.FREEZING_POINT, getModifiers(Type.FREEZING_POINT));
+        double newMinOffset = Temperature.apply(attributeBases[4], entity, Type.BURNING_POINT, getModifiers(Type.BURNING_POINT));
+        double coldDampening = attributeBases[5];
+        double heatDampening = attributeBases[6];
+        double coldResistance = attributeBases[7];
+        double heatResistance = attributeBases[8];
+
+        // Apply attribute modifiers after TempModifiers
+        double[] modifiedAttributes = EntityTempManager.applyAttributesPost(entity, new double[] {newWorldTemp, newCoreTemp, newBaseTemp, newMaxOffset, newMinOffset, coldDampening, heatDampening, coldResistance, heatResistance});
+        newWorldTemp = modifiedAttributes[0];
+        newCoreTemp  = modifiedAttributes[1];
+        newBaseTemp  = modifiedAttributes[2];
+        newMaxOffset = modifiedAttributes[3];
+        newMinOffset = modifiedAttributes[4];
 
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
@@ -114,8 +129,17 @@ public class EntityTempCap implements ITemperatureCap
         // If temp is dangerous, change core temp
         if (magnitude != 0)
         {
+            // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = Math.max((difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(), Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)) * magnitude;
+            double changeBy = (Math.max(
+                    // Ensure a minimum speed for temperature change
+                    (difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(),
+                    Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)
+                    // If it's hot or cold
+            ) * magnitude);
+            // Apply cold/heat dampening to slow/increase the rate
+            if (changeBy < 0) changeBy = (coldDampening < 0 ? changeBy * -coldDampening : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
+            else              changeBy = (heatDampening < 0 ? changeBy * -heatDampening : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, getModifiers(Type.RATE));
         }
         // If the entity's temperature and world temperature are not both hot or both cold, return to neutral
@@ -150,31 +174,6 @@ public class EntityTempCap implements ITemperatureCap
             neverSynced = false;
             syncTimer = 40;
         }
-
-        // Don't natively deal temperature damage to entities
-        /*
-        // Calculate body/base temperatures with modifiers
-        double bodyTemp = getTemp(Type.BODY);
-
-        //Deal damage to the player if temperature is critical
-        if (!entity.isCreative() && !entity.isSpectator())
-        {
-            if (entity.tickCount % 40 == 0 && !entity.hasEffect(ModEffects.GRACE))
-            {
-                boolean damageScaling = config.damageScaling;
-
-                if (bodyTemp >= 100 && !(entity.hasEffect(MobEffects.FIRE_RESISTANCE) && config.fireRes))
-                {
-                    entity.hurt(damageScaling ? ModDamageSources.HOT.setScalesWithDifficulty() : ModDamageSources.HOT, 2f);
-                }
-                else if (bodyTemp <= -100 && !(entity.hasEffect(ModEffects.ICE_RESISTANCE) && config.iceRes))
-                {
-                    entity.hurt(damageScaling ? ModDamageSources.COLD.setScalesWithDifficulty() : ModDamageSources.COLD, 2f);
-                }
-            }
-        }
-        else setTemp(Type.CORE, 0);
-        */
     }
 
     @Override

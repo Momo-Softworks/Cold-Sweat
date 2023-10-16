@@ -53,11 +53,11 @@ public class TemperatureSyncMessage
 
                 if (entity instanceof LivingEntity)
                 {
-                    EntityTempManager.getTemperatureCap(((LivingEntity) entity)).ifPresent(cap ->
+                    EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                     {
                         cap.deserializeTemps(message.temps);
                         if (message.instant && cap instanceof PlayerTempCap)
-                        {   Overlays.setBodyTemp(cap.getTemp(Temperature.Type.BODY));
+                        {   Overlays.setBodyTempInstant(cap.getTemp(Temperature.Type.BODY));
                         }
                     });
                 }
