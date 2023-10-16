@@ -85,13 +85,6 @@ public class ConfigPageOne extends AbstractConfigPage
                     Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
         }, false, false, true, new TranslatableComponent("cold_sweat.config.units.desc").getString());
 
-
-        // Temp Offset
-        this.addDecimalInput("temp_offset", Side.LEFT, new TranslatableComponent("cold_sweat.config.temp_offset.name"),
-                value -> clientConfig.setTempOffset(value.intValue()),
-                input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
-                false, false, true, new TranslatableComponent("cold_sweat.config.temp_offset.desc").getString()+"§r");
-
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.max_temperature.name"),
                 value -> ConfigSettings.MAX_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
@@ -103,6 +96,12 @@ public class ConfigPageOne extends AbstractConfigPage
                 value -> ConfigSettings.MIN_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
                 input -> input.setValue(String.valueOf(Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
                 true, false, false, new TranslatableComponent("cold_sweat.config.min_temperature.desc").getString());
+
+        // Temp Damage
+        this.addDecimalInput("temp_damage", Side.LEFT, new TranslatableComponent("cold_sweat.config.temp_damage.name"),
+                value -> ConfigSettings.TEMP_DAMAGE.set(value),
+                input -> input.setValue(String.valueOf(ConfigSettings.TEMP_DAMAGE.get())),
+                true, false, false, new TranslatableComponent("cold_sweat.config.temp_damage.desc").getString());
 
         // Rate Multiplier
         this.addDecimalInput("rate", Side.LEFT, new TranslatableComponent("cold_sweat.config.temperature_rate.name"),

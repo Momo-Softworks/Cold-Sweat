@@ -30,7 +30,7 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                CSMath.ifNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
+                CSMath.doIfNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
                 {   Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
                     optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
                 });
@@ -55,7 +55,7 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                CSMath.ifNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
+                CSMath.doIfNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
                 {
                     Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
 
@@ -82,7 +82,7 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                CSMath.ifNotNull(ForgeRegistries.ITEMS.tags(), tags ->
+                CSMath.doIfNotNull(ForgeRegistries.ITEMS.tags(), tags ->
                 {   Optional<ITag<Item>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
                     optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
                 });
@@ -106,7 +106,7 @@ public class ConfigHelper
             if (itemID.startsWith("#"))
             {
                 final String tagID = itemID.replace("#", "");
-                CSMath.ifNotNull(ForgeRegistries.ITEMS.tags(), tags ->
+                CSMath.doIfNotNull(ForgeRegistries.ITEMS.tags(), tags ->
                 {
                     Optional<ITag<Item>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
                     optionalTag.ifPresent(itemITag ->
