@@ -24,6 +24,7 @@ public class ColdSweatConfig
     public static final ForgeConfigSpec.ConfigValue<Double> maxHabitable;
     public static final ForgeConfigSpec.ConfigValue<Double> minHabitable;
     public static final ForgeConfigSpec.ConfigValue<Double> rateMultiplier;
+    public static final ForgeConfigSpec.ConfigValue<Double> tempDamage;
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> fireResistanceEffect;
     public static final ForgeConfigSpec.ConfigValue<Boolean> iceResistanceEffect;
@@ -74,6 +75,9 @@ public class ColdSweatConfig
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
+        tempDamage = BUILDER
+                .comment("Damage dealt to the player when they are too hot or too cold")
+                .defineInRange("Temperature Damage", defaultDiff.getOrDefault("temp_damage", 2d), 0d, Double.POSITIVE_INFINITY);
         BUILDER.pop();
 
         /*
@@ -211,6 +215,10 @@ public class ColdSweatConfig
     {   return damageScaling.get();
     }
 
+    public double getTempDamage()
+    {   return tempDamage.get();
+    }
+
     public double getMinTempHabitable()
     {   return minHabitable.get();
     }
@@ -269,70 +277,111 @@ public class ColdSweatConfig
      * Safe set methods for config values
      */
     public synchronized void setDifficulty(int value)
-    {   difficulty.set(value);
+    {   synchronized (difficulty)
+        {   difficulty.set(value);
+        }
     }
 
     public synchronized void setMaxHabitable(double temp)
-    {   maxHabitable.set(temp);
+    {   synchronized (maxHabitable)
+        {   maxHabitable.set(temp);
+        }
     }
 
     public synchronized void setMinHabitable(double temp)
-    {   minHabitable.set(temp);
+    {   synchronized (minHabitable)
+        {   minHabitable.set(temp);
+        }
     }
 
     public synchronized void setRateMultiplier(double rate)
-    {   rateMultiplier.set(rate);
+    {   synchronized (rateMultiplier)
+        {   rateMultiplier.set(rate);
+        }
     }
 
     public synchronized void setFireResistanceEnabled(boolean isEffective)
-    {   fireResistanceEffect.set(isEffective);
+    {   synchronized (fireResistanceEffect)
+        {   fireResistanceEffect.set(isEffective);
+        }
     }
 
     public synchronized void setIceResistanceEnabled(boolean isEffective)
-    {   iceResistanceEffect.set(isEffective);
+    {   synchronized (iceResistanceEffect)
+        {   iceResistanceEffect.set(isEffective);
+        }
     }
 
     public synchronized void setRequireThermometer(boolean required)
-    {   requireThermometer.set(required);
+    {   synchronized (requireThermometer)
+        {   requireThermometer.set(required);
+        }
     }
 
     public synchronized void setDamageScaling(boolean enabled)
-    {   damageScaling.set(enabled);
+    {   synchronized (damageScaling)
+        {   damageScaling.set(enabled);
+        }
+    }
+
+    public synchronized void setTempDamage(double damage)
+    {   synchronized (tempDamage)
+        {   tempDamage.set(damage);
+        }
     }
 
     public synchronized void setGracePeriodLength(int ticks)
-    {   gracePeriodLength.set(ticks);
+    {   synchronized (gracePeriodLength)
+        {   gracePeriodLength.set(ticks);
+        }
     }
 
     public synchronized void setGracePeriodEnabled(boolean enabled)
-    {   gracePeriodEnabled.set(enabled);
+    {   synchronized (gracePeriodEnabled)
+        {   gracePeriodEnabled.set(enabled);
+        }
     }
 
     public synchronized void setHeatstrokeFog(boolean fog)
-    {   heatstrokeFog.set(fog);
+    {   synchronized (heatstrokeFog)
+        {   heatstrokeFog.set(fog);
+        }
     }
 
     public synchronized void setFreezingHearts(boolean hearts)
-    {   freezingHearts.set(hearts);
+    {   synchronized (freezingHearts)
+        {   freezingHearts.set(hearts);
+        }
     }
 
     public synchronized void setColdKnockback(boolean knockback)
-    {   coldKnockback.set(knockback);
+    {   synchronized (coldKnockback)
+        {   coldKnockback.set(knockback);
+        }
     }
 
     public synchronized void setColdMining(boolean mining)
-    {   coldMining.set(mining);
+    {   synchronized (coldMining)
+        {   coldMining.set(mining);
+        }
     }
 
     public synchronized void setColdMovement(boolean movement)
-    {   coldMovement.set(movement);
+    {   synchronized (coldMovement)
+        {   coldMovement.set(movement);
+        }
     }
 
     public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (hearthSpreadWhitelist)
+        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
     public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {
+        synchronized (hearthSpreadBlacklist)
+        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
 
     public void save()

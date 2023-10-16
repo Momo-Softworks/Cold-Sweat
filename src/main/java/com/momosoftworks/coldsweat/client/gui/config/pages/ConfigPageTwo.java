@@ -50,6 +50,12 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
 
+        // Temp Offset
+        this.addDecimalInput("temp_offset", Side.LEFT, Component.translatable("cold_sweat.config.temp_offset.name"),
+                             value -> clientConfig.setTempOffset(value.intValue()),
+                             input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
+                             false, false, true, Component.translatable("cold_sweat.config.temp_offset.desc").getString()+"§r");
+
         // Enable Grace Period
         this.addButton("grace_toggle", Side.LEFT, () -> Component.translatable("cold_sweat.config.grace_period.name").getString() + ": " + (ConfigSettings.GRACE_ENABLED.get() ? ON : OFF),
                 button ->
