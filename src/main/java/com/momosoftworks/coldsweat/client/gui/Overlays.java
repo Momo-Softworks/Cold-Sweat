@@ -300,9 +300,16 @@ public class Overlays
                              : (int) CSMath.blend(3, 7, absTemp, 100, 150) * sign;
     }
 
-    public static void setBodyTemp(double temp)
+    public static void setBodyTempInstant(double temp)
     {   BODY_TEMP = temp;
         PREV_BODY_TEMP = temp;
         BLEND_BODY_TEMP = (int) temp;
+        BODY_ICON = CSMath.clamp(getBodySeverity(BLEND_BODY_TEMP), -3, 3);
+        PREV_BODY_ICON = BODY_ICON;
+    }
+
+    public static void setWorldTempInstant(double temp)
+    {   WORLD_TEMP = temp;
+        PREV_WORLD_TEMP = temp;
     }
 }

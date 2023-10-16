@@ -56,7 +56,7 @@ public class TemperatureSyncMessage
                     {
                         cap.deserializeTemps(message.temps);
                         if (message.instant && cap instanceof PlayerTempCap)
-                        {   Overlays.setBodyTemp(cap.getTemp(Temperature.Type.BODY));
+                        {   Overlays.setBodyTempInstant(cap.getTemp(Temperature.Type.BODY));
                         }
                     });
                 }

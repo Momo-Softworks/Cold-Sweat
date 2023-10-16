@@ -44,6 +44,7 @@ public class ColdSweat
         bus.addListener(this::registerCaps);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
+        // Register stuff
         BlockInit.BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
         EntityInit.ENTITY_TYPES.register(bus);
@@ -55,6 +56,7 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         BiomeCodecInit.BIOME_MODIFIER_SERIALIZERS.register(bus);
+        AttributeInit.ATTRIBUTES.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
