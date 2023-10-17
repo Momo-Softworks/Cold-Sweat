@@ -105,7 +105,7 @@ public class ItemInsulationCap implements IInsulatableCap
                     double adaptSpeed = insul.getSpeed();
 
                     double newFactor;
-                    if (CSMath.withinRange(CSMath.blend(-1, 1, worldTemp, minTemp, maxTemp), -0.25, 0.25))
+                    if (CSMath.isWithin(CSMath.blend(-1, 1, worldTemp, minTemp, maxTemp), -0.25, 0.25))
                     {   newFactor = CSMath.shrink(factor, adaptSpeed);
                     }
                     else
