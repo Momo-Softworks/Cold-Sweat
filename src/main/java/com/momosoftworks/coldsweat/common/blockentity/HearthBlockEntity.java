@@ -542,7 +542,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-            if (CSMath.withinRange(temp, min, max))
+            if (CSMath.isWithin(temp, min, max))
             {
                 // Find the player's HearthTempModifier
                 TempModifier modifier = null;

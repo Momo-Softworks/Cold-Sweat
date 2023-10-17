@@ -8,18 +8,14 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Mode;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Order;
-import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.EntitySettingsConfig;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.*;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -444,8 +440,8 @@ public class EntityTempManager
                 .add(entity.getAttribute(ModAttributes.FREEZING_POINT_OFFSET))
                 .add(entity.getAttribute(ModAttributes.COLD_DAMPENING))
                 .add(entity.getAttribute(ModAttributes.HEAT_DAMPENING))
-                .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE_OFFSET))
-                .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE_OFFSET)).build();
+                .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE))
+                .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE)).build();
     }
 
     public static Double[] applyAttributesPre(LivingEntity entity)

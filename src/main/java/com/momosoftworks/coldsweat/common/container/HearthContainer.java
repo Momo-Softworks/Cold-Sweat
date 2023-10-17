@@ -124,7 +124,7 @@ public class HearthContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.withinRange(index, slots.size() - 9, slots.size() - 1))
+                else if (CSMath.isWithin(index, slots.size() - 9, slots.size() - 1))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, slots.size() - 10, false))
                     {
@@ -132,7 +132,7 @@ public class HearthContainer extends AbstractContainerMenu
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.withinRange(index, 1, slots.size() - 10))
+                else if (CSMath.isWithin(index, 1, slots.size() - 10))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {

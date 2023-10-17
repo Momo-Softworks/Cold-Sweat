@@ -42,7 +42,7 @@ public class MixinHumanoidModel
         Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
 
-        if (!CSMath.withinRange(rightArmRot, -0.01, 0.01))
+        if (!CSMath.isWithin(rightArmRot, -0.01, 0.01))
         {
             switch (model.rightArmPose)
             {
@@ -74,7 +74,7 @@ public class MixinHumanoidModel
         Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
 
-        if (!CSMath.withinRange(leftArmRot, -0.01, 0.01))
+        if (!CSMath.isWithin(leftArmRot, -0.01, 0.01))
         {
             switch (model.leftArmPose)
             {

@@ -157,7 +157,7 @@ public class CSMath
     /**
      * Calculates if the given value is between two values (inclusive)
      */
-    public static boolean withinRange(double value, double min, double max) {
+    public static boolean isWithin(double value, double min, double max) {
         return value >= min && value <= max;
     }
 
