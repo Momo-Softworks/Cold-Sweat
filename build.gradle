@@ -115,7 +115,7 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:4780205")
 
 
-    //runtimeOnly fg.deobf("curse.maven:spark-361579:4505309")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
     //runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4037228")
     //runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
