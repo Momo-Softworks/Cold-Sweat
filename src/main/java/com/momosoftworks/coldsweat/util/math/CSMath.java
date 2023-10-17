@@ -173,9 +173,10 @@ public class CSMath
      */
     public static double blend(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
+        // as factor goes from rangeMin to rangeMax, the result goes from blendFrom to blendTo
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
-        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendTo - blendFrom) + blendFrom;
+        return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
     }
 
     /**
@@ -185,7 +186,7 @@ public class CSMath
     {
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
-        return ((1 / (rangeMax - rangeMin)) * (factor - rangeMin)) * (blendTo - blendFrom) + blendFrom;
+        return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
     }
 
     public static double blendLog(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
@@ -207,9 +208,16 @@ public class CSMath
         return (pair.getFirst().doubleValue() + pair.getSecond().doubleValue()) / 2;
     }
 
-    public static Pair<Double, Double> addPairs(Pair<? extends Number, ? extends Number> pair1, Pair<? extends Number, ? extends Number> pair2)
+    @SafeVarargs
+    public static Pair<Double, Double> addPairs(Pair<? extends Number, ? extends Number>... pairs)
     {
-        return new Pair<>(pair1.getFirst().doubleValue() + pair2.getFirst().doubleValue(), pair1.getSecond().doubleValue() + pair2.getSecond().doubleValue());
+        double first = 0;
+        double second = 0;
+        for (Pair<? extends Number, ? extends Number> pair : pairs)
+        {   first += pair.getFirst().doubleValue();
+            second += pair.getSecond().doubleValue();
+        }
+        return Pair.of(first, second);
     }
 
     public static double getDistance(Entity entity, Vector3d pos)
