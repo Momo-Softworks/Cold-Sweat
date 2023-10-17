@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -31,10 +32,9 @@ public class TempEffectsCommon
         // If the player is too cold, slow down their mining speed
         if (temp < -50)
         {
+            float minMiningSpeed = CSMath.blend(0.25f, 1f, getTempResistance(player, true), 0, 4);
             // Get protection from armor underwear
-            float liningProtFactor = CSMath.blend(0.25f, 1, getArmorUnderProt(player, true), 0, 4);
-            if (liningProtFactor != 1)
-                event.setNewSpeed(event.getNewSpeed() * CSMath.blend(CSMath.blend(0.25f, 1, liningProtFactor, 0, 4), 1, temp, -100, -50));
+            event.setNewSpeed(event.getNewSpeed() * CSMath.blend(minMiningSpeed, 1f, temp, -100, -50));
         }
     }
 
@@ -56,10 +56,10 @@ public class TempEffectsCommon
                 if (!player.isFallFlying())
                 {
                     // Get protection from armor underwear
-                    float liningProtFactor = CSMath.blend(player.isOnGround() ? 0.5f : 0.75f, 1, getArmorUnderProt(player, true), 0, 4);
-                    if (liningProtFactor != 1)
+                    float minMoveMultiplier = CSMath.blend(player.isOnGround() ? 0.5f : 0.8f, 1, getTempResistance(player, true), 0, 4);
+                    if (minMoveMultiplier != 1)
                     {
-                        float moveSpeed = CSMath.blend(liningProtFactor, 1, temp, -100, -50);
+                        float moveSpeed = CSMath.blend(minMoveMultiplier, 1, temp, -100, -50);
                         player.setDeltaMovement(player.getDeltaMovement().multiply(moveSpeed, 1, moveSpeed));
                     }
                 }
@@ -79,9 +79,10 @@ public class TempEffectsCommon
             if (temp < -50)
             {
                 // Get protection from armor underwear
-                float liningProtFactor = CSMath.blend(0.5f, 1, getArmorUnderProt(player, true), 0, 4);
+                float liningProtFactor = CSMath.blend(0.5f, 1, getTempResistance(player, true), 0, 4);
                 if (liningProtFactor != 1)
-                    event.setStrength(event.getStrength() * CSMath.blend(liningProtFactor, 1, temp, -100, -50));
+                {   event.setStrength(event.getStrength() * CSMath.blend(liningProtFactor, 1, temp, -100, -50));
+                }
             }
         }
     }
@@ -100,22 +101,26 @@ public class TempEffectsCommon
             if (temp < -50)
             {
                 // Get protection from armor underwear
-                float liningProtFactor = CSMath.blend(0.5f, 1, getArmorUnderProt(player, true), 0, 4);
-                if (liningProtFactor != 1)
-                    event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(player.getMaxHealth() * CSMath.blend(0.5f, 1, temp, -100, -50)) - player.getHealth()));
+                float minFrozenHealth = CSMath.blend(0.5f, 1, getTempResistance(player, true), 0, 4);
+                if (minFrozenHealth != 1)
+                {   event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(player.getMaxHealth() * CSMath.blend(minFrozenHealth, 1, temp, -100, -50)) - player.getHealth()));
+                }
             }
         }
     }
 
-    public static int getArmorUnderProt(PlayerEntity player, boolean cold)
+    public static int getTempResistance(PlayerEntity player, boolean cold)
     {
+        int strength = 0;
         if (CompatManager.isArmorUnderwearLoaded())
         {
-            return ((Collection<ItemStack>) player.getArmorSlots()).stream()
+            strength += ((Collection<ItemStack>) player.getArmorSlots()).stream()
                     .map(stack -> cold ? CompatManager.hasOttoLiner(stack) : CompatManager.hasOllieLiner(stack))
                     .filter(Boolean::booleanValue)
                     .mapToInt(i -> 1).sum();
         }
-        return 0;
+        strength += CSMath.blend(0, 4, CSMath.getIfNotNull(cold ? player.getAttribute(ModAttributes.COLD_RESISTANCE)
+                                                                : player.getAttribute(ModAttributes.HEAT_RESISTANCE), att -> att.getValue(), 0).floatValue(), 0, 1);
+        return CSMath.clamp(strength, 0, 4);
     }
 }

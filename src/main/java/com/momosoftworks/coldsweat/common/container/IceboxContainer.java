@@ -100,7 +100,7 @@ public class IceboxContainer extends Container
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (CSMath.withinRange(index, 0, 9))
+            if (CSMath.isWithin(index, 0, 9))
             {
                 if (!this.moveItemStackTo(itemstack1, 10, 46, true))
                 {   return ItemStack.EMPTY;
@@ -124,14 +124,14 @@ public class IceboxContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.withinRange(index, slots.size() - 9, slots.size()))
+                else if (CSMath.isWithin(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 10, 36, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.withinRange(index, 10, slots.size() - 9))
+                else if (CSMath.isWithin(index, 10, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {   slot.onQuickCraft(itemstack1, itemstack);

@@ -16,7 +16,9 @@ public class PreventPlayerSleep
     public static void onTrySleep(PlayerSleepInBedEvent event)
     {
         // There's already something blocking the player from sleeping
-        if (event.getResultStatus() != null || !ConfigSettings.CHECK_SLEEP_CONDITIONS.get()) return;
+        if (event.getResultStatus() != null || !ConfigSettings.CHECK_SLEEP_CONDITIONS.get())
+        {   return;
+        }
 
         PlayerEntity player = event.getPlayer();
         double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
@@ -26,13 +28,21 @@ public class PreventPlayerSleep
 
         // If the player's body temperature is critical
         if (!CSMath.isBetween(bodyTemp, -100, 100))
-        {
+        {   // Let the player sleep if they're resistant to damage
+            if (TempEffectsCommon.getTempResistance(event.getPlayer(), bodyTemp < 100) >= 4)
+            {   return;
+            }
+            // Prevent sleep with message
             player.displayClientMessage(new TranslationTextComponent("cold_sweat.message.sleep.body." + (bodyTemp > 99 ? "hot" : "cold")), true);
             event.setResult(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }
         // If the player's world temperature is critical
-        else if (!CSMath.withinRange(worldTemp, minTemp, maxTemp))
-        {
+        else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
+        {   // Let the player sleep if they're resistant to damage
+            if (TempEffectsCommon.getTempResistance(event.getPlayer(), minTemp > worldTemp) >= 4)
+            {   return;
+            }
+            // Prevent sleep with message
             player.displayClientMessage(new TranslationTextComponent("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
             event.setResult(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }

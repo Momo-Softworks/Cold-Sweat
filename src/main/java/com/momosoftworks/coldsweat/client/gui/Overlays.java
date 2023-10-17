@@ -108,7 +108,7 @@ public class Overlays
                 AbstractGui.blit(poseStack, (width / 2) + 92 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
                 // Sets the text bobbing offset (or none if disabled)
-                int bob = CLIENT_CONFIG.isIconBobbingEnabled() && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
+                int bob = CLIENT_CONFIG.isIconBobbingEnabled() && !CSMath.isWithin(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);

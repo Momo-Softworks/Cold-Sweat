@@ -4,13 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
+import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
-import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
@@ -25,7 +26,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraft.client.renderer.Tessellator;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -67,7 +67,7 @@ public class TempEffectsClient
                 {
                     float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
                     double tickTime = player.tickCount + event.getRenderPartialTicks();
-                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime));
+                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime)) / (1 + COLD_IMMUNITY);
                     player.setYHeadRot(player.getYHeadRot() + shiverAmount);
                 }
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
@@ -116,17 +116,12 @@ public class TempEffectsClient
                 HOT_IMMUNITY = 0;
                 boolean hasGrace = player.hasEffect(ModEffects.GRACE);
                 if (player.hasEffect(ModEffects.ICE_RESISTANCE) || hasGrace) COLD_IMMUNITY = 4;
+                else COLD_IMMUNITY = 0;
                 if (player.hasEffect(Effects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
+                else HOT_IMMUNITY = 0;
 
-                if (CompatManager.isArmorUnderwearLoaded() && (COLD_IMMUNITY < 4 || HOT_IMMUNITY < 4))
-                {   player.getArmorSlots().forEach(stack ->
-                    {
-                        if (CompatManager.hasOllieLiner(stack))
-                            HOT_IMMUNITY++;
-                        if (CompatManager.hasOttoLiner(stack))
-                            COLD_IMMUNITY++;
-                    });
-                }
+                if (COLD_IMMUNITY != 4) COLD_IMMUNITY = TempEffectsCommon.getTempResistance(player, true);
+                if (HOT_IMMUNITY  != 4) HOT_IMMUNITY  = TempEffectsCommon.getTempResistance(player, false);
             }
         }
     }
@@ -139,23 +134,23 @@ public class TempEffectsClient
         PlayerEntity player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
-            float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
+            float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof EntityViewRenderEvent.RenderFogEvent)
             {
                 EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
-                float density = CSMath.withinRange(immunityModifier, 50, 55)
-                                ? CSMath.blend(-1, 0f, immunityModifier, 50f, 55f)
-                                : CSMath.withinRange(immunityModifier, 55, 80)
-                                ? CSMath.blend(0f, 0.1f, immunityModifier, 55f, 80f)
-                                : CSMath.blend(0.1f, 0.3f, immunityModifier, 80f, 90f);
+                float density = CSMath.isWithin(tempWithResistance, 50, 55)
+                                ? CSMath.blend(-1, 0f, tempWithResistance, 50f, 55f)
+                                : CSMath.isWithin(tempWithResistance, 55, 80)
+                                ? CSMath.blend(0f, 0.1f, tempWithResistance, 55f, 80f)
+                                : CSMath.blend(0.1f, 0.3f, tempWithResistance, 80f, 90f);
                 ((EntityViewRenderEvent.FogDensity) event).setDensity(density);
                 fog.setCanceled(true);
             }
             else
             {   EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
-                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, immunityModifier, 50, 90));
-                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, immunityModifier, 50, 90));
-                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, immunityModifier, 50, 90));
+                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithResistance, 50, 90));
+                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithResistance, 50, 90));
+                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithResistance, 50, 90));
             }
         }
     }
@@ -170,8 +165,8 @@ public class TempEffectsClient
         if (player != null && event.getType() == RenderGameOverlayEvent.ElementType.ALL
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
-            float tempWithImmunity = CSMath.blend(BLEND_TEMP, 50, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(tempWithImmunity), 50, 100);
+            float resistance = CSMath.blend(1, 0, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
+            float opacity = CSMath.blend(0f, 1f, Math.abs(BLEND_TEMP), 50, 100) * resistance;
             float tickTime = player.tickCount + event.getPartialTicks();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
@@ -180,7 +175,7 @@ public class TempEffectsClient
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (tempWithImmunity > 0)
+            if (BLEND_TEMP > 0)
             {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
                 RenderSystem.color4f(0.231f, 0f, 0f, vignetteBrightness);
                 Minecraft.getInstance().textureManager.bind(HAZE_TEXTURE);

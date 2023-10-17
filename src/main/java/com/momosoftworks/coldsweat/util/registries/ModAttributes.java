@@ -14,8 +14,8 @@ public class ModAttributes
     public static final Attribute FREEZING_POINT_OFFSET = AttributeInit.FREEZING_POINT_OFFSET.get();
 
     // Decreases damage dealt by overheating/freezing
-    public static final Attribute COLD_RESISTANCE_OFFSET = AttributeInit.COLD_RESISTANCE.get();
-    public static final Attribute HEAT_RESISTANCE_OFFSET = AttributeInit.HEAT_RESISTANCE.get();
+    public static final Attribute COLD_RESISTANCE = AttributeInit.COLD_RESISTANCE.get();
+    public static final Attribute HEAT_RESISTANCE = AttributeInit.HEAT_RESISTANCE.get();
 
     // Used to change core/base body temperature
     public static final Attribute CORE_BODY_TEMPERATURE_OFFSET = AttributeInit.CORE_BODY_TEMPERATURE_OFFSET.get();

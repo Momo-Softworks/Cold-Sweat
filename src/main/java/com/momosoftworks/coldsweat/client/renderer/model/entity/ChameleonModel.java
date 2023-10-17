@@ -437,7 +437,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 		// Don't do this if alpha is overridden
 		if (!isOverlay && chameleon.isAlive())
 		{
-			if (CSMath.withinRange(tickCount - hurtTime, 10, 120) && hurtTime != 0)
+			if (CSMath.isWithin(tickCount - hurtTime, 10, 120) && hurtTime != 0)
 			{	chameleon.opacity += (alpha * 0.15f - chameleon.opacity) * Minecraft.getInstance().getDeltaFrameTime() / 10;
 			}
 			else if (chameleon.opacity < alpha)

@@ -30,8 +30,8 @@ public class AddTempAttributes
             event.add(type, ModAttributes.HEAT_DAMPENING, 0.0);
             event.add(type, ModAttributes.BURNING_POINT_OFFSET, 0.0);
             event.add(type, ModAttributes.FREEZING_POINT_OFFSET, 0.0);
-            event.add(type, ModAttributes.COLD_RESISTANCE_OFFSET, 0.0);
-            event.add(type, ModAttributes.HEAT_RESISTANCE_OFFSET, 0.0);
+            event.add(type, ModAttributes.COLD_RESISTANCE, 0.0);
+            event.add(type, ModAttributes.HEAT_RESISTANCE, 0.0);
             event.add(type, ModAttributes.CORE_BODY_TEMPERATURE_OFFSET, 0.0);
             event.add(type, ModAttributes.BASE_BODY_TEMPERATURE_OFFSET, 0.0);
             event.add(type, ModAttributes.WORLD_TEMPERATURE_OFFSET, 0.0);

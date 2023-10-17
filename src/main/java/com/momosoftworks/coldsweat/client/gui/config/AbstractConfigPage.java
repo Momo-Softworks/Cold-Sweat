@@ -445,7 +445,7 @@ public abstract class AbstractConfigPage extends Screen
             }
 
             // if the mouse is hovering over any of the widgets in the batch, show the corresponding tooltip
-            if (CSMath.withinRange(mouseX, minX, maxX) && CSMath.withinRange(mouseY, minY, maxY))
+            if (CSMath.isWithin(mouseX, minX, maxX) && CSMath.isWithin(mouseY, minY, maxY))
             {
                 List<ITextProperties> tooltipList = this.tooltips.get(id);
                 if (tooltipList != null && !tooltipList.isEmpty())
