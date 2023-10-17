@@ -103,7 +103,7 @@ public class Overlays
                 RenderSystem.disableBlend();
 
                 // Sets the text bobbing offset (or none if disabled)
-                int bob = CLIENT_CONFIG.isIconBobbingEnabled() && !CSMath.withinRange(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
+                int bob = CLIENT_CONFIG.isIconBobbingEnabled() && !CSMath.isWithin(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
 
                 // Render text
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);

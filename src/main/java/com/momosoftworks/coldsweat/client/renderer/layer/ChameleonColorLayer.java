@@ -38,7 +38,7 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            if (!CSMath.withinRange(chameleon.getTemperature(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp)))
+            if (!CSMath.isWithin(chameleon.getTemperature(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp)))
             {
                 if (chameleon.getTemperature() > midTemp)
                 {
