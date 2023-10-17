@@ -441,8 +441,8 @@ public class EntityTempManager
                 .add(entity.getAttribute(ModAttributes.FREEZING_POINT_OFFSET))
                 .add(entity.getAttribute(ModAttributes.COLD_DAMPENING))
                 .add(entity.getAttribute(ModAttributes.HEAT_DAMPENING))
-                .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE_OFFSET))
-                .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE_OFFSET)).build();
+                .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE))
+                .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE)).build();
     }
 
     public static Double[] applyAttributesPre(LivingEntity entity)

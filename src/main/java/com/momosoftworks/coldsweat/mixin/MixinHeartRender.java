@@ -39,7 +39,7 @@ public class MixinHeartRender
             double temp = Overlays.BODY_TEMP;
 
             // Get protection from armor underwear
-            float coldLiningFactor = CSMath.blend(0.5f, 1, TempEffectsCommon.getArmorUnderProt(player, true), 0, 4);
+            float coldLiningFactor = CSMath.blend(0.5f, 1, TempEffectsCommon.getTempResistance(player, true), 0, 4);
             if (coldLiningFactor == 1) return;
 
             int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(coldLiningFactor, 1, temp, -100, -50));
