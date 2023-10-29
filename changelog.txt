@@ -1687,3 +1687,22 @@ Technical Changes:
 Fixes:
 - (1.16) Fixed crash when paired with mods that change entity models (like Epic Fight)
 - (1.20) Fixed crash when taking burning/freezing damage
+
+Technical Changes:
+- Changed to NeoForge
+- Added a ton of attributes for developers to use:
+      - cold_dampening: Slows the rate at which the player freezes. Negative values accelerate it.
+      - heat_dampening: Slows the rate at which the player overheats. Negative values accelerate it.
+      - burning_point_offset: Applies an offset to the player's maximum habitable world temperature.
+      - freezing_point_offset: Applies an offset to the player's minimum habitable world temperature.
+      - cold_resistance: A multiplier applied to incoming freezing damage (from 0 to 1, with 1 being full resistance).
+      - heat_resistance: A multiplier applied to incoming burning damage (from 0 to 1, with 1 being full resistance).
+      - core_temperature_offset: An offset applied to the player's core temperature every tick.
+      - base_temperature_offset: An offset that is added to the player's body temperature. This can be applied once and the offset is persistent.
+      - world_temperature_offset: Applies an offset to the player's perceived world temperature.
+      The following attributes are read-only values that mirror the player's temperatures:
+      - world_temperature: The player's current world temperature.
+      - burning_point: The player's maximum habitable world temperature.
+      - freezing_point: The player's minimum habitable world temperature.
+      - core_temperature: The player's core body temperature.
+      - base_temperature: The player's base body temperature.

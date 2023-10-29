@@ -14,7 +14,7 @@ https://mikul.gitbook.io/cold-sweat/
 [[dependencies.cold_sweat]]
    modId="forge"
    mandatory=true
-   versionRange="[43,)"
+   versionRange="[47,)"
    ordering="NONE"
    side="BOTH"
 [[dependencies.cold_sweat]]
