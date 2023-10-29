@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.client.event.ClientJoinSetup;
+import com.momosoftworks.coldsweat.client.gui.ModGuiHandler;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.event.RegisterDispenserBehaviors;
@@ -10,8 +11,10 @@ import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.registries.crafting.ModRecipes;
+import com.momosoftworks.coldsweat.util.registries.ModRecipes;
+import com.momosoftworks.coldsweat.util.registries.ModTileEntities;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -35,12 +38,19 @@ public class ColdSweat
     public static final String VERSION = "2.2.1";
     public static final Logger LOGGER = LogManager.getLogger();
 
+    @Mod.Instance(MOD_ID)
+    public static ColdSweat INSTANCE;
+
     public static CreativeTabs TAB_COLD_SWEAT = new CreativeTabs("tab_cold_sweat")
     {   @Override
         public Item getTabIconItem()
         {   return ModItems.FILLED_WATERSKIN;
         }
     };
+
+    public static String getPath(String name)
+    {   return MOD_ID + ":" + name;
+    }
     
     @EventHandler
     public void init(FMLInitializationEvent event)
@@ -60,8 +70,10 @@ public class ColdSweat
         regEventHandler(new ClientJoinSetup());
 
         // Registration
-        ModItems.init();
+        ModItems.registerItems();
+        ModBlocks.registerBlocks();
         ModRecipes.registerRecipes();
+        ModTileEntities.registerTileEntities();
 
         ColdSweatPacketHandler.CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(ColdSweatPacketHandler.NETWORK_ID);
         ColdSweatPacketHandler.registerMessages();
@@ -79,6 +91,7 @@ public class ColdSweat
         WorldSettingsConfig.init(configDir);
         ItemSettingsConfig.init(configDir);
         ClientSettingsConfig.init(configDir);
+        ModGuiHandler.register();
     }
 
     @EventHandler
