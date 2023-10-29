@@ -2,5 +2,12 @@ item.waterskin.name=Waterskin
 item.filled_waterskin.name=Waterskin
 item.thermometer.name=Thermometer
 item.cold_sweat.waterskin.filled=Filled
+
+tile.boiler.name=Boiler
+
+container.cold_sweat.boiler=Boiler
+
 tooltip.cold_sweat.hotbar=When in Hotbar:
 tooltip.cold_sweat.temperature_effect=%d Temperature
+
+itemGroup.tab_cold_sweat=Cold Sweat

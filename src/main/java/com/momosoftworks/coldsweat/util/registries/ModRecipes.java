@@ -1,7 +1,8 @@
-package com.momosoftworks.coldsweat.util.registries.crafting;
+package com.momosoftworks.coldsweat.util.registries;
 
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
@@ -26,5 +27,12 @@ public class ModRecipes
         " R ",
         " R ",
         'G', Items.gold_ingot, 'R', Items.redstone);
+
+        // Boiler
+        GameRegistry.addRecipe(new ItemStack(ModBlocks.BOILER, 1),
+        "CCC",
+        "C C",
+        "SSS",
+        'C', Blocks.cobblestone, 'S', Blocks.stone);
     }
 }

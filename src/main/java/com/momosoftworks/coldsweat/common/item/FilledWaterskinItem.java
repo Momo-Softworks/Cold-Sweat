@@ -62,7 +62,7 @@ public class FilledWaterskinItem extends Item
         if (player.inventory.hasItemStack(emptyStack))
         {   player.inventory.addItemStackToInventory(emptyStack);
             // clear the player's hand
-            player.setCurrentItemOrArmor(0, ItemHelper.EMPTY_STACK);
+            player.setCurrentItemOrArmor(0, null);
         }
         else
         {   player.setCurrentItemOrArmor(0, emptyStack);

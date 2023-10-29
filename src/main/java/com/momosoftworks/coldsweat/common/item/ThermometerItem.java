@@ -4,9 +4,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.util.world.BlockPos;
 import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -23,7 +21,7 @@ public class ThermometerItem extends Item
             if (index.length() < 2)
             {   index = "0" + index;
             }
-            IIcon icon = registry.registerIcon(ColdSweat.MOD_ID+":thermometer_" + index);
+            IIcon icon = registry.registerIcon(ColdSweat.getPath("thermometer_" + index));
             icons[i] = icon;
         }
         itemIcon = icons[4];
