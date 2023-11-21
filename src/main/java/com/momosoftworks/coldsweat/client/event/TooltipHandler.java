@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.gui.tooltip.*;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
@@ -11,8 +13,11 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.enchantment.IArmorVanishable;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.text.ITextProperties;
@@ -20,7 +25,9 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -164,6 +171,64 @@ public class TooltipHandler
         if (tooltip != null)
         {   tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             tooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+        }
+    }
+
+    static int FUEL_FADE_TIMER = 0;
+
+    @SubscribeEvent
+    public static void renderSoulLampInsertTooltip(GuiScreenEvent.DrawScreenEvent.Post event)
+    {
+        if (event.getGui() instanceof ContainerScreen)
+        {
+            ContainerScreen<?> inventoryScreen = (ContainerScreen<?>) event.getGui();
+            PlayerEntity player = Minecraft.getInstance().player;
+
+            if (player != null && inventoryScreen.getSlotUnderMouse() != null
+                    && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
+            {
+                float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
+                ItemStack carriedStack = player.inventory.getCarried();
+
+                if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
+                {
+                    int fuelValue = carriedStack.getCount();
+                    int slotX = inventoryScreen.getSlotUnderMouse().x + ((ContainerScreen<?>) event.getGui()).getGuiLeft();
+                    int slotY = inventoryScreen.getSlotUnderMouse().y + ((ContainerScreen<?>) event.getGui()).getGuiTop();
+
+                    MatrixStack ms = event.getMatrixStack();
+
+                    // If the mouse is above the slot, move the box to the bottom
+                    if (event.getMouseY() < slotY + 8)
+                        ms.translate(0, 32, 0);
+
+                    event.getGui().renderTooltip(ms, new StringTextComponent("       "), slotX - 18, slotY);
+
+                    RenderSystem.defaultBlendFunc();
+
+                    // Render background
+                    Minecraft.getInstance().textureManager.bind(SoulspringTooltip.TOOLTIP_LOCATION.get());
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 34, 30);
+
+                    // Render ghost overlay
+                    RenderSystem.enableBlend();
+                    RenderSystem.color4f(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 34, 30);
+                    RenderSystem.disableBlend();
+
+                    // Render current fuel
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
+                    AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 34, 30);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void tickSoulLampInsertTooltip(TickEvent.ClientTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END)
+        {   FUEL_FADE_TIMER++;
         }
     }
 }
