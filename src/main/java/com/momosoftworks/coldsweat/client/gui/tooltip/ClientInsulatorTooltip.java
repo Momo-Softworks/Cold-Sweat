@@ -47,7 +47,8 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         return width + 12;
     }
 
-    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
+    @Override
+    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer)
     {
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();

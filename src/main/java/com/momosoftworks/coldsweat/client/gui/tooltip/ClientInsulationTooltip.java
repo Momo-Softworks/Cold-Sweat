@@ -50,7 +50,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()] * 6 + 8;
     }
 
-    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
+    @Override
+    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer)
     {
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
 
