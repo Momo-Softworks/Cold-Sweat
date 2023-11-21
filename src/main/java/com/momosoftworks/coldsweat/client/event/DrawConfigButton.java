@@ -28,7 +28,7 @@ public class DrawConfigButton
     public static boolean DRAW_CONTROLS = false;
 
     @SubscribeEvent
-    public static void eventHandler(ScreenEvent.Init event)
+    public static void eventHandler(ScreenEvent.Init.Post event)
     {
         if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
         {
