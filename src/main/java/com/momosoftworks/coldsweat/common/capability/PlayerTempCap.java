@@ -210,10 +210,12 @@ public class PlayerTempCap implements ITemperatureCap
             if (player.tickCount % 40 == 0 && !hasGrace)
             {
                 if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.HOT, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
+                {   this.dealTempDamage(player, ConfigSettings.DAMAGE_SCALING.get() ? ModDamageSources.HOT.setScalesWithDifficulty()
+                                                                                    : ModDamageSources.HOT, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
                 }
                 else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.COLD, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
+                {   this.dealTempDamage(player, ConfigSettings.DAMAGE_SCALING.get() ? ModDamageSources.COLD.setScalesWithDifficulty()
+                                                                                    : ModDamageSources.COLD, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
                 }
             }
         }
