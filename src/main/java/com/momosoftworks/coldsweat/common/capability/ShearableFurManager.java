@@ -165,6 +165,7 @@ public class ShearableFurManager
                 // Set sheared
                 cap.setSheared(true);
                 cap.setLastSheared(goat.tickCount);
+                entity.getPersistentData().putInt("FurGrowthCooldown", ConfigSettings.FUR_TIMINGS.get().getB());
                 syncData(goat, null);
                 event.setResult(PlayerInteractEvent.Result.ALLOW);
             });
@@ -179,13 +180,17 @@ public class ShearableFurManager
         if (!(entity instanceof Goat goat)) return;
 
         Triplet<Integer, Integer, Double> furConfig = ConfigSettings.FUR_TIMINGS.get();
+        // Tick fur growth cooldown
+        if (entity.getPersistentData().getInt("FurGrowthCooldown") > 0)
+        {   entity.getPersistentData().putInt("FurGrowthCooldown", entity.getPersistentData().getInt("FurGrowthCooldown") - 1);
+        }
         // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
         if (!goat.level.isClientSide && goat.tickCount % furConfig.getA() == 0 && Math.random() < furConfig.getC())
         {
             getFurCap(goat).ifPresent(cap ->
             {
                 // Growth cooldown has passed and goat is sheared
-                if (goat.tickCount - cap.lastSheared() >= furConfig.getB() && cap.isSheared())
+                if (entity.getPersistentData().getInt("FurGrowthCooldown") <= 0 && cap.isSheared())
                 {
                     WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, goat, goat.getSoundSource(), 0.5f, 0.6f);
                     WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, goat, goat.getSoundSource(), 0.5f, 0.8f);
