@@ -129,13 +129,13 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void renderFog(EntityViewRenderEvent event)
     {
-        if (!(event instanceof EntityViewRenderEvent.RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
+        if (!(event instanceof EntityViewRenderEvent.FogDensity || event instanceof EntityViewRenderEvent.FogColors)) return;
 
         PlayerEntity player = Minecraft.getInstance().player;
         if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
             float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-            if (event instanceof EntityViewRenderEvent.RenderFogEvent)
+            if (event instanceof EntityViewRenderEvent.FogDensity)
             {
                 EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
                 float density = CSMath.isWithin(tempWithResistance, 50, 55)
