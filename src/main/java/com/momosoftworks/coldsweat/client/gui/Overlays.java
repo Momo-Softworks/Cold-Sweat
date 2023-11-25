@@ -221,7 +221,7 @@ public class Overlays
                 double temp = Temperature.convertUnits(WORLD_TEMP, CLIENT_CONFIG.isCelsius() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
                 // Get the temperature severity
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
-                int renderOffset = CSMath.clamp(severity, -1, 1) * 3;
+                int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
                 matrixStack.pushPose();
                 RenderSystem.defaultBlendFunc();
@@ -231,7 +231,7 @@ public class Overlays
                 // Set gauge texture
                 mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
 
-                // Render frame
+                // Render icon
                 AbstractGui.blit(matrixStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
 
                 matrixStack.popPose();
