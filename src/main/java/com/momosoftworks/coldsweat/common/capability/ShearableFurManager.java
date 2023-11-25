@@ -97,7 +97,7 @@ public class ShearableFurManager
         if (event.getEntityLiving() instanceof AgeableEntity)
         {
             AgeableEntity entity = (AgeableEntity) event.getEntityLiving();
-            Triplet<Integer, Integer, Double> furConfig = ConfigSettings.LLAMA_FUR_TIMINGS.get();
+            Triplet<Integer, Integer, Double> furConfig = ConfigSettings.FUR_TIMINGS.get();
             // Tick fur growth cooldown
             if (entity.getPersistentData().getInt("FurGrowthCooldown") > 0)
             {   entity.getPersistentData().putInt("FurGrowthCooldown", entity.getPersistentData().getInt("FurGrowthCooldown") - 1);
@@ -153,7 +153,7 @@ public class ShearableFurManager
                 // Set sheared
                 cap.setSheared(true);
                 cap.setLastSheared(entity.tickCount);
-                entity.getPersistentData().putInt("FurGrowthCooldown", ConfigSettings.LLAMA_FUR_TIMINGS.get().getSecond());
+                entity.getPersistentData().putInt("FurGrowthCooldown", ConfigSettings.FUR_TIMINGS.get().getSecond());
                 ShearableFurManager.syncData(entity, null);
             }
         });

@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -85,7 +84,7 @@ public class ConfigSettings
     public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     // Entity Settings
-    public static final ValueHolder<Triplet<Integer, Integer, Double>> LLAMA_FUR_TIMINGS;
+    public static final ValueHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final ValueHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
 
@@ -403,7 +402,7 @@ public class ConfigSettings
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).collect(Collectors.toList()));
 
-        LLAMA_FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
+        FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {
             List<?> entry = EntitySettingsConfig.getInstance().getLlamaFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
@@ -416,14 +415,14 @@ public class ConfigSettings
             tag.put("Chance", DoubleNBT.valueOf(encoder.getThird()));
             return tag;
         },
-        decoder ->
+                                       decoder ->
         {
             int interval = decoder.getInt("Interval");
             int cooldown = decoder.getInt("Cooldown");
             double chance = decoder.getDouble("Chance");
             return new Triplet<>(interval, cooldown, chance);
         },
-        saver ->
+                                       saver ->
         {
             List<Number> list = new ArrayList<>();
             list.add(saver.getFirst());
