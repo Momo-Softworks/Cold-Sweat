@@ -98,17 +98,20 @@ public class ShearableFurManager
         {
             AgeableEntity entity = (AgeableEntity) event.getEntityLiving();
             Triplet<Integer, Integer, Double> furConfig = ConfigSettings.LLAMA_FUR_TIMINGS.get();
+            // Tick fur growth cooldown
+            if (entity.getPersistentData().getInt("FurGrowthCooldown") > 0)
+            {   entity.getPersistentData().putInt("FurGrowthCooldown", entity.getPersistentData().getInt("FurGrowthCooldown") - 1);
+            }
             // Entity is shearable, current tick is a multiple of the regrow time, and random chance succeeds
             if (!entity.level.isClientSide && entity.tickCount % furConfig.getFirst() == 0 && Math.random() < furConfig.getThird())
             {
                 getFurCap(entity).ifPresent(cap ->
                 {
                     // Growth cooldown has passed and llama is sheared
-                    if (entity.getAge() - cap.lastSheared() >= furConfig.getSecond() && cap.isSheared())
+                    if (entity.getPersistentData().getInt("FurGrowthCooldown") <= 0 && cap.isSheared())
                     {
                         WorldHelper.playEntitySound(SoundEvents.WOOL_HIT, entity, entity.getSoundSource(), 0.5f, 0.6f);
                         WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, entity, entity.getSoundSource(), 0.5f, 0.8f);
-
                         // Spawn particles
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.SPIT, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 0.5f, 0.5f, 0.5f, 10, 0.05f);
                         // Set not sheared
@@ -120,32 +123,40 @@ public class ShearableFurManager
         }
     }
 
+    /**
+     * Handles shearing behavior for non-llama entities
+     */
     @SubscribeEvent
     public static void onEntitySheared(PlayerInteractEvent.EntityInteractSpecific event)
     {
         Entity entity = event.getTarget();
         PlayerEntity player = event.getPlayer();
         Hand hand = event.getHand();
-        ItemStack stack = player.getItemInHand(hand);
         if (!entity.level.isClientSide && isShearable(entity) && !(entity instanceof AbstractChestedHorseEntity))
-        {
-            getFurCap(entity).ifPresent(cap ->
-            {
-                if (!cap.isSheared())
-                {   // Use shears
-                    player.swing(hand, true);
-                    stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
-                    // Play sound
-                    entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-                    // Spawn item
-                    WorldHelper.entityDropItem(entity, new ItemStack(ModItems.FUR));
-                    // Set sheared
-                    cap.setSheared(true);
-                    cap.setLastSheared(entity.tickCount);
-                    ShearableFurManager.syncData(entity, null);
-                }
-            });
+        {   shearEntity(entity, player, hand);
         }
+    }
+
+    public static void shearEntity(Entity entity, PlayerEntity player, Hand hand)
+    {
+        ItemStack stack = player.getItemInHand(hand);
+        getFurCap(entity).ifPresent(cap ->
+        {
+            if (!cap.isSheared())
+            {   // Use shears
+                player.swing(hand, true);
+                stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
+                // Play sound
+                entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                // Spawn item
+                WorldHelper.entityDropItem(entity, new ItemStack(ModItems.FUR));
+                // Set sheared
+                cap.setSheared(true);
+                cap.setLastSheared(entity.tickCount);
+                entity.getPersistentData().putInt("FurGrowthCooldown", ConfigSettings.LLAMA_FUR_TIMINGS.get().getSecond());
+                ShearableFurManager.syncData(entity, null);
+            }
+        });
     }
 
     @SubscribeEvent
