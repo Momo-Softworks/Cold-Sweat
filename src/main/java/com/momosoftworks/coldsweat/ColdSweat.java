@@ -30,7 +30,7 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 public class ColdSweat
 {
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
-    public static final boolean REMAP_MIXINS = false;
+    public static final boolean REMAP_MIXINS = true;
 
     public static final String MOD_ID = "cold_sweat";
 
