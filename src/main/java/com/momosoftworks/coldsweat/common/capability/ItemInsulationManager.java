@@ -22,6 +22,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
@@ -78,30 +79,6 @@ public class ItemInsulationManager
 
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
-
-            // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundNBT stackNBT = stack.getOrCreateTag();
-            if (stackNBT.getBoolean("insulated"))
-            {
-                getInsulationCap(event.getObject()).ifPresent(iCap ->
-                {
-                    EquipmentSlotType slot = stack.getItem() instanceof ArmorItem ? ((ArmorItem) stack.getItem()).getSlot() : null;
-                    if (slot != null)
-                    {
-                        stackNBT.remove("insulated");
-                        switch (slot)
-                        {   case HEAD  : iCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
-                            case CHEST : iCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
-                            case LEGS  : iCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
-                            case FEET  : iCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
-                            default : iCap.addInsulationItem(ItemStack.EMPTY); break;
-                        }
-                        if (iCap instanceof ItemInsulationCap)
-                        {   ((ItemInsulationCap) iCap).serializeSimple(stack);
-                        }
-                    }
-                });
-            }
         }
     }
 
@@ -139,6 +116,39 @@ public class ItemInsulationManager
                 }
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
+    {
+        PlayerEntity player = event.getPlayer();
+        player.getAllSlots().forEach(stack ->
+        {
+            if (isInsulatable(stack))
+            {   getInsulationCap(stack).ifPresent(iCap ->
+                {
+                    // Legacy code for updating items using the pre-2.2 insulation system
+                    CompoundNBT stackNBT = stack.getOrCreateTag();
+                    if (stack.getItem() instanceof ArmorItem)
+                    {
+                        ArmorItem armor = (ArmorItem) stack.getItem();
+                        if (stackNBT.getBoolean("insulated"))
+                        {   stackNBT.remove("insulated");
+                            switch (armor.getSlot())
+                            {   case HEAD  : iCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
+                                case CHEST : iCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
+                                case LEGS  : iCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
+                                case FEET  : iCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
+                                default    : iCap.addInsulationItem(ItemStack.EMPTY); break;
+                            }
+                            if (iCap instanceof ItemInsulationCap)
+                            {   ((ItemInsulationCap) iCap).serializeSimple(stack);
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 
     public static Pair<Double, Double> getItemInsulation(ItemStack item)
