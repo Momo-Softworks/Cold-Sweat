@@ -40,7 +40,7 @@ public class ItemInsulationManager
         if (isInsulatable(stack))
         {
             // Make a new capability instance to attach to the item
-            final IInsulatableCap itemInsulationCap = new ItemInsulationCap();
+            ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
             // Optional that holds the capability instance
             final LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
             Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
@@ -74,27 +74,19 @@ public class ItemInsulationManager
 
             // Legacy code for updating items using the pre-2.2 insulation system
             CompoundTag stackNBT = stack.getOrCreateTag();
-            if (stackNBT.getBoolean("insulated"))
+            if (stack.getItem() instanceof ArmorItem armor)
             {
-                getInsulationCap(event.getObject()).ifPresent(iCap ->
-                {
-                    EquipmentSlot slot = stack.getItem() instanceof ArmorItem armor ? armor.getSlot() : null;
-                    if (slot != null)
-                    {
-                        stackNBT.remove("insulated");
-                        iCap.addInsulationItem(
-                        switch (slot)
-                        {   case HEAD -> Items.LEATHER_HELMET.getDefaultInstance();
-                            case CHEST -> Items.LEATHER_CHESTPLATE.getDefaultInstance();
-                            case LEGS -> Items.LEATHER_LEGGINGS.getDefaultInstance();
-                            case FEET -> Items.LEATHER_BOOTS.getDefaultInstance();
-                            default -> ItemStack.EMPTY;
-                        });
-                        if (iCap instanceof ItemInsulationCap cap)
-                        {   cap.serializeSimple(stack);
-                        }
+                if (stackNBT.getBoolean("insulated"))
+                {   stackNBT.remove("insulated");
+                    switch (armor.getSlot())
+                    {   case HEAD  : itemInsulationCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
+                        case CHEST : itemInsulationCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
+                        case LEGS  : itemInsulationCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
+                        case FEET  : itemInsulationCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
+                        default    : itemInsulationCap.addInsulationItem(ItemStack.EMPTY); break;
                     }
-                });
+                    itemInsulationCap.serializeSimple(stack);
+                }
             }
         }
     }
