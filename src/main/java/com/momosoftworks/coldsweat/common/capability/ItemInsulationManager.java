@@ -48,7 +48,7 @@ public class ItemInsulationManager
         && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item))
         {
             // Make a new capability instance to attach to the item
-            IInsulatableCap itemInsulationCap = new ItemInsulationCap();
+            ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
             // Optional that holds the capability instance
             LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
             Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
@@ -79,6 +79,24 @@ public class ItemInsulationManager
 
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
+
+            // Legacy code for updating items using the pre-2.2 insulation system
+            CompoundNBT stackNBT = stack.getOrCreateTag();
+            if (stack.getItem() instanceof ArmorItem)
+            {
+                ArmorItem armor = (ArmorItem) stack.getItem();
+                if (stackNBT.getBoolean("insulated"))
+                {   stackNBT.remove("insulated");
+                    switch (armor.getSlot())
+                    {   case HEAD  : itemInsulationCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
+                        case CHEST : itemInsulationCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
+                        case LEGS  : itemInsulationCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
+                        case FEET  : itemInsulationCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
+                        default    : itemInsulationCap.addInsulationItem(ItemStack.EMPTY); break;
+                    }
+                    itemInsulationCap.serializeSimple(stack);
+                }
+            }
         }
     }
 
