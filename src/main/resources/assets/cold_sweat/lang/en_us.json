@@ -192,5 +192,31 @@
   "advancements.cold_sweat.soul_lamp_fuel.title": "Borrowed Time",
   "advancements.cold_sweat.soul_lamp_fuel.description": "Fuel the soulspring lamp by clicking it with fuel in your inventory",
   "advancements.cold_sweat.chameleon_find_biome.title": "Follow the Leader",
-  "advancements.cold_sweat.chameleon_find_biome.description": "Follow a chameleon's tail to find a new biome"
+  "advancements.cold_sweat.chameleon_find_biome.description": "Follow a chameleon's tail to find a new biome",
+
+
+  "attribute.base_temperature": "Base Temperature",
+  "attribute.base_temperature.desc": "The player's base body temperature",
+  "attribute.base_temperature_offset": "Base Temperature Offset",
+  "attribute.base_temperature_offset.desc": "An offset that is added to the player's body temperature (is applied once and persistent)",
+  "attribute.burning_point": "Burning Point",
+  "attribute.burning_point_offset": "Burning Point Offset",
+  "attribute.cold_dampening": "Cold Dampening",
+  "attribute.cold_dampening.desc": "Slows the rate at which the player freezes (negative values accelerate it)",
+  "attribute.cold_resistance": "Cold Resistance",
+  "attribute.cold_resistance.desc": "A multiplier applied to freezing damage and effects (1 means fully resistant)",
+  "attribute.core_temperature": "Core Temperature",
+  "attribute.core_temperature.desc": "The player's core body temperature",
+  "attribute.core_temperature_offset": "Core Temperature Offset",
+  "attribute.core_temperature_offset.desc": "An offset applied to the player's core temperature (every tick)",
+  "attribute.freezing_point": "Freezing Point",
+  "attribute.freezing_point.desc": "The player's minimum habitable world temperature",
+  "attribute.heat_dampening": "Heat Dampening",
+  "attribute.heat_dampening.desc": "Slows the rate at which the player overheats (negative values accelerate it)",
+  "attribute.heat_resistance": "Heat Resistance",
+  "attribute.heat_resistance.desc": "A multiplier applied to burning damage and effects (1 means fully resistant)",
+  "attribute.world_temperature": "World Temperature",
+  "attribute.world_temperature.desc": "The player's current world temperature",
+  "attribute.world_temperature_offset": "World Temperature Offset",
+  "attribute.world_temperature_offset.desc": "Applies an offset to the player's perceived world temperature"
 }
