@@ -27,7 +27,7 @@ public class MixinBeaconEffects
 
     @ModifyArg(method = "applyEffects()V",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1),
-               index = 0, remap = ColdSweat.REMAP_MIXINS)
+               index = 0)
     private EffectInstance modifyEffect(EffectInstance effect)
     {
         if (effect.getEffect() == ModEffects.INSULATION)

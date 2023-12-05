@@ -24,8 +24,7 @@ public class MixinXPBar
             (
                 from = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/IProfiler;pop()V", ordinal = 0),
                 to   = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;width(Ljava/lang/String;)I")
-            ),
-            remap = ColdSweat.REMAP_MIXINS)
+            ))
     public void moveXPNumberDown(MatrixStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
@@ -35,8 +34,7 @@ public class MixinXPBar
     }
 
     @Inject(method = "renderExperienceBar(Lcom/mojang/blaze3d/matrix/MatrixStack;I)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/IProfiler;pop()V", ordinal = 1),
-            remap = ColdSweat.REMAP_MIXINS)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/IProfiler;pop()V", ordinal = 1))
     public void renderXPNumberPost(MatrixStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
@@ -49,7 +47,7 @@ public class MixinXPBar
     public static class MixinItemLabel
     {
         @Inject(method = "renderSelectedItemName(Lcom/mojang/blaze3d/matrix/MatrixStack;)V",
-                at = @At(value = "HEAD"), remap = ColdSweat.REMAP_MIXINS)
+                at = @At(value = "HEAD"))
         public void moveItemNameUp(MatrixStack matrixStack, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())
@@ -58,7 +56,7 @@ public class MixinXPBar
         }
 
         @Inject(method = "renderSelectedItemName(Lcom/mojang/blaze3d/matrix/MatrixStack;)V",
-                at = @At(value = "TAIL"), remap = ColdSweat.REMAP_MIXINS)
+                at = @At(value = "TAIL"))
         public void renderItemNamePost(MatrixStack matrixStack, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())

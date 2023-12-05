@@ -26,7 +26,7 @@ public class MixinSoulCampfire
     private int fireDamage;
 
     @Inject(method = "entityInside(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V",
-    at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+    at = @At("HEAD"), cancellable = true)
     public void entityInside(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci)
     {
         if (state.getBlock() == Blocks.SOUL_CAMPFIRE && state.getValue(CampfireBlock.LIT)

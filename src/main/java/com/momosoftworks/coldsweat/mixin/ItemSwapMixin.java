@@ -21,7 +21,7 @@ public class ItemSwapMixin
             slice = @Slice(from = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 0),
                            to   = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 1)),
             at = @At(target = "Lnet/minecraft/inventory/container/Slot;set(Lnet/minecraft/item/ItemStack;)V", value = "INVOKE", ordinal = 0),
-            cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+            cancellable = true)
     private void onItemSwap(int slotId, int dragType, ClickType clickType, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir)
     {
         if (MinecraftForge.EVENT_BUS.post(new ItemSwappedInInventoryEvent(self.getSlot(slotId).getItem(), player.inventory.getCarried(), (Container)(Object)this, player)))

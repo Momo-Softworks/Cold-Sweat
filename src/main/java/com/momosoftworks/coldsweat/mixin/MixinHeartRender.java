@@ -21,7 +21,7 @@ public class MixinHeartRender extends IngameGui
     {   super(mc);
     }
 
-    /*@Inject(method = "renderHealth", at = @At("TAIL"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+    /*@Inject(method = "renderHealth", at = @At("TAIL"), cancellable = true)
     private void renderHeart(int width, int height, MatrixStack mStack, CallbackInfo ci)
     {
         PlayerEntity player = Minecraft.getInstance().player;

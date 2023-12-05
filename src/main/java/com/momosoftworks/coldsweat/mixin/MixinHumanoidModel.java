@@ -28,7 +28,7 @@ public class MixinHumanoidModel
     public ModelRenderer leftArm;
 
     @Inject(method = "poseRightArm",
-            at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
+            at = @At("TAIL"))
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HandSide.RIGHT);
@@ -58,7 +58,7 @@ public class MixinHumanoidModel
     }
 
     @Inject(method = "poseLeftArm",
-            at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
+            at = @At("TAIL"))
     public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HandSide.LEFT);

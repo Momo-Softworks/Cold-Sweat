@@ -23,7 +23,7 @@ public class MixinCampfire
 
     // Heat waterskins gradually
     @Inject(method = "cook",
-            at = @At(value = "HEAD"), remap = ColdSweat.REMAP_MIXINS)
+            at = @At(value = "HEAD"))
     private void onItemCook(CallbackInfo ci)
     {
         double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
@@ -49,7 +49,7 @@ public class MixinCampfire
     // Ensure waterskin temperature is not reset when cooking finishes
     @ModifyArg(method = "cook",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/InventoryHelper;dropItemStack(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V"),
-               index = 4, remap = ColdSweat.REMAP_MIXINS)
+               index = 4)
     private ItemStack onItemFinishedCooking(World level, double x, double y, double z, ItemStack result)
     {
         if (result.getItem() == ModItems.FILLED_WATERSKIN)

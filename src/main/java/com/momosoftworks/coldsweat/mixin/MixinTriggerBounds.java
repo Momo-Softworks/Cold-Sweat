@@ -25,7 +25,7 @@ public abstract class MixinTriggerBounds
         {   return null;
         }
 
-        @Inject(method = "matches", at = @At("HEAD"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+        @Inject(method = "matches", at = @At("HEAD"), cancellable = true)
         public void matches(float value, CallbackInfoReturnable<Boolean> cir)
         {
             Float min = self.getMin();
