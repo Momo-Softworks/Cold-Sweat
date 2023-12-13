@@ -1,11 +1,9 @@
 package com.momosoftworks.coldsweat.api.util;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
-import com.momosoftworks.coldsweat.api.temperature.modifier.BiomeTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.BlockTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.DepthTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.ITemperatureCap;
@@ -13,13 +11,10 @@ import com.momosoftworks.coldsweat.common.capability.PlayerTempCap;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.TempModifiersSyncMessage;
 import com.momosoftworks.coldsweat.core.network.message.TemperatureSyncMessage;
-import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.SilverfishEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -131,17 +126,24 @@ public class Temperature
         return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
     }
 
-    static Map<ResourceLocation, SilverfishEntity> DUMMIES = new HashMap<>();
+    static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
     public static double getTemperatureAt(BlockPos pos, World world)
     {
-        LivingEntity dummy = DUMMIES.computeIfAbsent(world.dimension().location(), dim -> new SilverfishEntity(EntityType.SILVERFISH, world));
-        Vector3d vec = Vector3d.atCenterOf(pos);
-        dummy.setPos(vec.x, vec.y, vec.z);
-        return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
-                                                      .addIf(CompatManager.isSereneSeasonsLoaded(),
-                                                          () -> TempModifierRegistry.getEntryFor("sereneseasons:season").orElse(null))
-                                                      .add(new DepthTempModifier(),
-                                                           new BlockTempModifier()).build());
+        ResourceLocation dimension = world.dimension().location();
+        // There is one "dummy" entity per world, which TempModifiers are applied to
+        DummyPlayer dummy = DUMMIES.get(dimension);
+        // If the dummy for this dimension is invalid, make a new one
+        if (dummy == null || dummy.level != world)
+        {   DUMMIES.put(dimension, dummy = new DummyPlayer(world));
+            // Use default player modifiers to determine the temperature
+            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Type.WORLD);
+            MinecraftForge.EVENT_BUS.post(event);
+            addModifiers(dummy, event.getModifiers(), Type.WORLD, true);
+        }
+        // Move the dummy to the position being tested
+        Vector3d centerPos = CSMath.getCenterPos(pos);
+        dummy.setPos(centerPos.x, centerPos.y, centerPos.z);
+        return apply(0, dummy, Type.WORLD, getModifiers(dummy, Type.WORLD));
     }
 
     /**
@@ -214,7 +216,7 @@ public class Temperature
      */
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes)
     {
-        addModifier(entity, modifier, type, allowDupes, Addition.AT_END);
+        addModifier(entity, modifier, type, allowDupes, Addition.AFTER_LAST);
     }
 
     public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
@@ -467,8 +469,8 @@ public class Temperature
         private final Order order;
         private final Predicate<TempModifier> predicate;
 
-        public static final Addition AT_END = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
-        public static final Addition AT_START = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
+        public static final Addition AFTER_LAST = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
+        public static final Addition BEFORE_FIRST = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
 
         public Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
         {   this.mode = mode;
@@ -492,18 +494,24 @@ public class Temperature
         {   return order;
         }
 
-        public enum Order
-        {
-            FIRST,
-            LAST
-        }
-
         public enum Mode
         {
+            // Inserts the new modifier before the targeted modifier's position
             BEFORE,
+            // Inserts the new modifier after the targeted modifier's position
             AFTER,
+            // Replace the desired instance of the modifier (fails if no modifiers pass the predicate)
             REPLACE,
+            // Replace the desired instance of the modifier if it exists, otherwise add it to the end
             REPLACE_OR_ADD
+        }
+
+        public enum Order
+        {
+            // Targets the first modifier that passes the predicate
+            FIRST,
+            // Targets the last modifier that passes the predicate
+            LAST
         }
     }
 }
