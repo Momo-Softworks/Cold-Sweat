@@ -6,12 +6,12 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 public class InsulatorTooltip implements TooltipComponent
 {
     Pair<Double, Double> insulationValues;
-    boolean isAdaptive;
+    InsulationType type;
 
-    public InsulatorTooltip(Pair<Double, Double> insulationValues, boolean isAdaptive)
+    public InsulatorTooltip(Pair<Double, Double> insulationValues, InsulationType type)
     {
         this.insulationValues = insulationValues;
-        this.isAdaptive = isAdaptive;
+        this.type = type;
     }
 
     public Pair<Double, Double> getInsulationValues()
@@ -19,8 +19,14 @@ public class InsulatorTooltip implements TooltipComponent
         return insulationValues;
     }
 
-    public boolean isAdaptive()
+    public InsulationType getType()
+    {   return type;
+    }
+
+    public enum InsulationType
     {
-        return isAdaptive;
+        NORMAL,
+        ADAPTIVE,
+        CURIO
     }
 }
