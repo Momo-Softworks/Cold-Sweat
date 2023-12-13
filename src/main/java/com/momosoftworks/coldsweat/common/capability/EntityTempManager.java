@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -33,6 +34,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -43,6 +45,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.SleepFinishedTimeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -61,6 +64,16 @@ public class EntityTempManager
 
     public static final Map<Entity, LazyOptional<ITemperatureCap>> SERVER_CAP_CACHE = new HashMap<>();
     public static final Map<Entity, LazyOptional<ITemperatureCap>> CLIENT_CAP_CACHE = new HashMap<>();
+
+    public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
+    {
+        Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        return cache.computeIfAbsent(entity, e ->
+        {   LazyOptional<ITemperatureCap> cap = e.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE);
+            cap.addListener((opt) -> cache.remove(e));
+            return cap;
+        });
+    }
 
     /**
      * Attach temperature capability to entities
@@ -110,14 +123,29 @@ public class EntityTempManager
         }
     }
 
-    public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
+    /**
+     * Add modifiers to the player & valid entities when they join the world
+     */
+    @SubscribeEvent
+    public static void initModifiersOnEntity(EntityJoinLevelEvent event)
     {
-        Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
-        return cache.computeIfAbsent(entity, e ->
-        {   LazyOptional<ITemperatureCap> cap = e.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE);
-            cap.addListener((opt) -> cache.remove(e));
-            return cap;
-        });
+        if (event.getEntity() instanceof LivingEntity living && !living.level.isClientSide()
+        && TEMPERATURE_ENABLED_ENTITIES.contains(living.getType()))
+        {
+            if (living.getServer() != null) living.getServer().execute(() ->
+            {
+                for (Temperature.Type type : VALID_MODIFIER_TYPES)
+                {
+                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, type);
+                    MinecraftForge.EVENT_BUS.post(gatherEvent);
+                    getTemperatureCap(living).ifPresent(cap ->
+                    {
+                        cap.clearModifiers(type);
+                        cap.getModifiers(type).addAll(gatherEvent.getModifiers());
+                    });
+                }
+            });
+        }
     }
 
     /**
@@ -179,40 +207,62 @@ public class EntityTempManager
     }
 
     /**
-     * Add modifiers to the player & valid entities when they join the world
+     * Add default modifiers to players & temperature-enabled entities
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
+    {
+        // Default TempModifiers for players
+        if (event.getEntity() instanceof Player && event.getType() == Temperature.Type.WORLD)
+        {
+            event.addModifier(new BiomeTempModifier(25).tickRate(10), false, Addition.BEFORE_FIRST);
+            event.addModifier(new UndergroundTempModifier().tickRate(10), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier().tickRate(4), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+
+            // Serene Seasons compat
+            if (CompatManager.isSereneSeasonsLoaded())
+            {
+                TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                          mod2 -> mod2 instanceof UndergroundTempModifier)));
+            }
+            // Weather2 Compat
+            if (CompatManager.isWeather2Loaded())
+            {
+                TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                    mod2 -> mod2 instanceof UndergroundTempModifier)));
+            }
+        }
+        // Default TempModifiers for other temperature-enabled entities
+        else if (event.getType() == Temperature.Type.WORLD && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
+        {
+            // Basic modifiers
+            event.addModifier(new BiomeTempModifier(16).tickRate(40), false, Addition.BEFORE_FIRST);
+            event.addModifier(new UndergroundTempModifier().tickRate(40), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier(4).tickRate(20), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+
+            // Serene Seasons compat
+            if (CompatManager.isSereneSeasonsLoaded())
+            {
+                TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                          mod2 -> mod2 instanceof UndergroundTempModifier)));
+            }
+            // Weather2 Compat
+            if (CompatManager.isWeather2Loaded())
+            {
+                TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                    mod2 -> mod2 instanceof UndergroundTempModifier)));
+            }
+        }
+    }
+
+    /**
+     * Used to grant the player the sewing table recipe when they get an insulation item
      */
     @SubscribeEvent
-    public static void initModifiersOnEntity(EntityJoinLevelEvent event)
+    public static void addSewingIngredientListener(EntityJoinLevelEvent event)
     {
-        // Add basic TempModifiers to player
-        if (event.getEntity() instanceof ServerPlayer player && !player.level.isClientSide)
-        {
-            // Sometimes the entity isn't fully initialized, so wait until next tick
-            if (player.getServer() != null)
-            player.getServer().execute(() ->
-            {
-                // Add modifiers separately to ensure order
-                Temperature.addModifier(player, new BiomeTempModifier(25).tickRate(10), Temperature.Type.WORLD, false, Addition.AT_START);
-                Temperature.addModifier(player, new UndergroundTempModifier().tickRate(10), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-                Temperature.addModifier(player, new BlockTempModifier().tickRate(4), Temperature.Type.WORLD, false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
-
-                // Serene Seasons compat
-                if (CompatManager.isSereneSeasonsLoaded())
-                {
-                    TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
-                // Weather2 Compat
-                if (CompatManager.isWeather2Loaded())
-                {
-                    TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(player, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                            Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
-
-                Temperature.set(player, Temperature.Type.WORLD, Temperature.apply(0, player, Temperature.Type.WORLD, Temperature.getModifiers(player, Temperature.Type.WORLD)));
-            });
-
-            // Add listener for granting the sewing table recipe when the player gets an insulation item
+        // Add listener for granting the sewing table recipe when the player gets an insulation item
+        if (event.getEntity() instanceof Player player)
             player.containerMenu.addSlotListener(new ContainerListener()
             {
                 public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack)
@@ -226,36 +276,8 @@ public class EntityTempManager
                         }
                     }
                 }
-                public void dataChanged(AbstractContainerMenu p_143462_, int p_143463_, int p_143464_) {}
+                public void dataChanged(AbstractContainerMenu menu, int slot, int value) {}
             });
-        }
-        // Add basic TempModifiers to chameleons
-        else if (event.getEntity() instanceof LivingEntity entity && TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType()))
-        {
-            // Sometimes the entity isn't fully initialized, so wait until next tick
-            if (entity.getServer() != null)
-            entity.getServer().execute(() ->
-            {
-                // Basic modifiers
-                Temperature.addModifiers(entity, List.of(new BiomeTempModifier(9).tickRate(40),
-                                                                                    new UndergroundTempModifier().tickRate(40),
-                                                                                    new BlockTempModifier(4).tickRate(20)), Temperature.Type.WORLD, false);
-                // Serene Seasons compat
-                if (CompatManager.isSereneSeasonsLoaded())
-                {
-                    TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                                                                                                      Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
-                // Weather2 Compat
-                if (CompatManager.isWeather2Loaded())
-                {
-                    TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> Temperature.addModifier(entity, mod.tickRate(60), Temperature.Type.WORLD, false,
-                                                                                                                Addition.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
-
-                Temperature.set(entity, Temperature.Type.WORLD, Temperature.apply(0, entity, Temperature.Type.WORLD, Temperature.getModifiers(entity, Temperature.Type.WORLD)));
-            });
-        }
     }
 
     /**
@@ -414,7 +436,10 @@ public class EntityTempManager
         }
     }
 
-    @SubscribeEvent
+    /**
+     * Reset the player's temperature upon respawning
+     */
+    //@SubscribeEvent
     public static void resetTempOnRespawn(PlayerEvent.PlayerRespawnEvent event)
     {
         if (!event.isEndConquered())
