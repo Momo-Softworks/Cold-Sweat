@@ -34,6 +34,8 @@ public final class ItemSettingsConfig
 
     private static final ForgeConfigSpec.IntValue waterskinStrength;
 
+    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingCurios;
+
     static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
 
     static
@@ -190,6 +192,18 @@ public final class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
+        if (CompatManager.isCuriosLoaded())
+        {
+            insulatingCurios = BUILDER
+                    .comment("Defines the items that provide insulation when worn in a curio slot",
+                             "Format: [[\"item_id\", cold, hot], [\"item_id\", cold, hot], ...etc]",
+                             "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
+                             "\"cold\": The amount of cold insulation the item provides.",
+                             "\"hot\": The amount of heat insulation the item provides.")
+                    .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(),
+                                          it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+        }
+
         insulationSlots = BUILDER
                 .comment("Defines how many insulation slots armor pieces have",
                          "Format: [head, chest, legs, feet]")
@@ -298,6 +312,10 @@ public final class ItemSettingsConfig
     {   return (List<String>) blacklistedPotions.get();
     }
 
+    public List<? extends List<?>> getInsulatingCurios()
+    {   return CompatManager.isCuriosLoaded() ? insulatingCurios.get() : List.of();
+    }
+
     public void setBoilerFuelItems(List<? extends List<?>> itemMap)
     {   boilerItems.set(itemMap);
     }
@@ -352,5 +370,12 @@ public final class ItemSettingsConfig
 
     public void setInsulationBlacklist(List<String> blacklist)
     {   insulationBlacklist.set(blacklist);
+    }
+
+    public void setInsulatingCurios(List<? extends List<?>> items)
+    {
+        if (CompatManager.isCuriosLoaded())
+        {   insulatingCurios.set(items);
+        }
     }
 }

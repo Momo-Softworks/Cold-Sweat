@@ -165,6 +165,7 @@ public class TempModifierInit
         String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
         String armorUnder = compatPath + "ArmorUnderTempModifier";
         String weatherStorms = compatPath + "StormTempModifier";
+        String curios = compatPath + "CuriosTempModifier";
 
         event.register(BlockTempModifier::new);
         event.register(BiomeTempModifier::new);
@@ -192,6 +193,11 @@ public class TempModifierInit
         if (CompatManager.isWeather2Loaded())
         {   event.registerByClassName(weatherStorms);
         }
+
+        if (CompatManager.isCuriosLoaded())
+        {   event.registerByClassName(curios);
+        }
+
         ColdSweat.LOGGER.debug("Registered TempModifiers in " + (System.currentTimeMillis() - startMS) + "ms");
     }
 }
