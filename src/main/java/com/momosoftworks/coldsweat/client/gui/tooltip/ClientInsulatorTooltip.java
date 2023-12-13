@@ -135,7 +135,6 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         }
 
         // icon
-        GuiComponent.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
         if (isCurio)
         {   GuiComponent.blit(poseStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24);
         }
