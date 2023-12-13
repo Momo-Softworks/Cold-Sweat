@@ -135,7 +135,8 @@ public class TempModifierInit
                 });
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"", e);
+            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
+                e.printStackTrace();
                 break;
             }
         }
@@ -159,6 +160,7 @@ public class TempModifierInit
         String betterWeather = compatPath + "BetterWeatherTempModifier";
         String armorUnder = compatPath + "ArmorUnderTempModifier";
         String weatherStorms = compatPath + "StormTempModifier";
+        String curios = compatPath + "CuriosTempModifier";
 
         event.register(BlockTempModifier::new);
         event.register(BiomeTempModifier::new);
@@ -183,6 +185,9 @@ public class TempModifierInit
         }
         if (CompatManager.isWeather2Loaded())
         {   event.registerByClassName(weatherStorms);
+        }
+        if (CompatManager.isCuriosLoaded())
+        {   event.registerByClassName(curios);
         }
         if (CompatManager.isBetterWeatherLoaded())
         {   event.registerByClassName(betterWeather);

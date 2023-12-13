@@ -65,6 +65,7 @@ public class ConfigSettings
     public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
     public static final ValueHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
     public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_CURIOS;
     public static final ValueHolder<Integer[]> INSULATION_SLOTS;
     public static final ValueHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
@@ -275,6 +276,33 @@ public class ConfigSettings
                 }
             }
             ItemSettingsConfig.getInstance().setInsulatingArmorItems(list);
+        });
+
+        INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
+        {
+            if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
+
+            Map<Item, Pair<Double, Double>> map = new HashMap<>();
+            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulatingCurios())
+            {
+                String itemID = (String) entry.get(0);
+                for (Item item : ConfigHelper.getItems(itemID))
+                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
+                }
+            }
+            return map;
+        },
+        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulatingCurios"),
+        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulatingCurios"),
+        saver ->
+        {   List<List<?>> list = new ArrayList<>();
+            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
+            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
+                if (itemID != null)
+                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
+                }
+            }
+            ItemSettingsConfig.getInstance().setInsulatingCurios(list);
         });
 
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->

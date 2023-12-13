@@ -23,13 +23,13 @@ public class InsulatorTooltip extends Tooltip
     double cold = 0;
     double hot = 0;
     double neutral = 0;
-    boolean isAdaptive;
+    InsulatorTooltip.InsulationType type;
     int width = 0;
 
-    public InsulatorTooltip(Pair<Double, Double> insulationValues, boolean isAdaptive)
+    public InsulatorTooltip(Pair<Double, Double> insulationValues, InsulatorTooltip.InsulationType type)
     {
         this.insulationValues = insulationValues;
-        this.isAdaptive = isAdaptive;
+        this.type = type;
     }
 
     @Override
@@ -47,6 +47,7 @@ public class InsulatorTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
     {
+        boolean isAdaptive = this.type == InsulatorTooltip.InsulationType.ADAPTIVE;
         y += 12;
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
@@ -72,14 +73,14 @@ public class InsulatorTooltip extends Tooltip
 
         // Positive insulation bar
         if (posSlots > 0)
-        {   renderBar(matrixStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false);
+        {   renderBar(matrixStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false, this.type == InsulatorTooltip.InsulationType.CURIO);
             matrixStack.translate(posSlots * 6 + 12, 0, 0);
             width += posSlots * 6 + 12;
         }
 
         // Negative insulation bar
         if (negSlots > 0)
-        {   renderBar(matrixStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true);
+        {   renderBar(matrixStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true, this.type == InsulatorTooltip.InsulationType.CURIO);
             width += negSlots * 6 + 12;
         }
 
@@ -100,7 +101,7 @@ public class InsulatorTooltip extends Tooltip
         }
     }
 
-    static void renderBar(MatrixStack matrixStack, int x, int y, int slots, double cold, double neutral, double hot, boolean isAdaptive, boolean showSign, boolean isNegative)
+    static void renderBar(MatrixStack matrixStack, int x, int y, int slots, double cold, double neutral, double hot, boolean isAdaptive, boolean showSign, boolean isNegative, boolean isCurio)
     {
         int coldSlots = Math.abs(CSMath.ceil(cold/2));
         int neutralSlots = Math.abs(CSMath.ceil(neutral/2));
@@ -139,7 +140,12 @@ public class InsulatorTooltip extends Tooltip
         }
 
         // icon
-        AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 0, 8, 8, 24, 32);
+        if (isCurio)
+        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24);
+        }
+        else
+        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
+        }
 
         if (showSign)
         {
@@ -152,5 +158,12 @@ public class InsulatorTooltip extends Tooltip
                 AbstractGui.blit(matrixStack, x + 3, y + 2, 0, 19, 0, 5, 5, 24, 32);
             }
         }
+    }
+
+    public enum InsulationType
+    {
+        NORMAL,
+        ADAPTIVE,
+        CURIO
     }
 }

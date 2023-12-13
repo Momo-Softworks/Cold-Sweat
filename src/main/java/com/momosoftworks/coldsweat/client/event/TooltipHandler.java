@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap.Insulatio
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -98,11 +99,14 @@ public class TooltipHandler
         {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !emptyInsul.equals(itemInsul))
-        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), false);
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
+        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.NORMAL);
         }
-        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !emptyInsul.equals(itemInsul))
-        {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), true);
+        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
+        {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.ADAPTIVE);
+        }
+        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
+        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.CURIO);
         }
 
         // If the item is insulated armor

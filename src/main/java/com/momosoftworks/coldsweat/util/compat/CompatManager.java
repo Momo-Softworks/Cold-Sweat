@@ -1,6 +1,10 @@
 package com.momosoftworks.coldsweat.util.compat;
 
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -11,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -20,6 +25,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.Armory;
+import top.theillusivec4.curios.api.CuriosApi;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -31,7 +37,7 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean ARMOR_UNDERWEAR_LOADED = modLoaded("armorunder");
     private static final boolean BYG_LOADED = modLoaded("byg");
-    private static final boolean CREATE_LOADED = modLoaded("create", 0, 5, 1);
+    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
@@ -60,6 +66,11 @@ public class CompatManager
             }
         }
         else return ModList.get().isLoaded(modID);
+    }
+
+    private static boolean modLoaded(String modID, String ver)
+    {   String[] version = ver.split("\\.");
+        return modLoaded(modID, Integer.parseInt(version[0]), Integer.parseInt(version[1]), Integer.parseInt(version[2]));
     }
 
     private static boolean modLoaded(String modID)
@@ -180,6 +191,31 @@ public class CompatManager
                     damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void tickCurios(TickEvent.PlayerTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END && CURIOS_LOADED && event.player.tickCount % 20 == 0)
+        {
+            CuriosApi.getCuriosHelper().getCuriosHandler(event.player).ifPresent(curiosInv ->
+            {
+                curiosInv.getCurios().forEach((identifier, curioStackHandler) ->
+                {
+                    for (int i = 0; i < curioStackHandler.getStacks().getSlots(); i++)
+                    {
+                        ItemStack stack = curioStackHandler.getStacks().getStackInSlot(i);
+                        if (!stack.isEmpty() && ConfigSettings.INSULATING_CURIOS.get().containsKey(stack.getItem()))
+                        {
+                            Pair<Double, Double> insulation = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
+                            double cold = insulation.getFirst();
+                            double hot = insulation.getSecond();
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
+                        }
+                    }
+                });
+            });
         }
     }
 }
