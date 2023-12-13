@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.util.compat;
 
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -9,6 +13,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -17,6 +22,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import top.theillusivec4.curios.api.CuriosApi;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -166,6 +172,31 @@ public class CompatManager
                 if (event instanceof LivingDamageEvent damageEvent)
                     damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void tickCurios(TickEvent.PlayerTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END && CURIOS_LOADED && event.player.tickCount % 20 == 0)
+        {
+            CuriosApi.getCuriosHelper().getCuriosHandler(event.player).ifPresent(curiosInv ->
+            {
+                curiosInv.getCurios().forEach((identifier, curioStackHandler) ->
+                {
+                    for (int i = 0; i < curioStackHandler.getStacks().getSlots(); i++)
+                    {
+                        ItemStack stack = curioStackHandler.getStacks().getStackInSlot(i);
+                        if (!stack.isEmpty() && ConfigSettings.INSULATING_CURIOS.get().containsKey(stack.getItem()))
+                        {
+                            Pair<Double, Double> insulation = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
+                            double cold = insulation.getFirst();
+                            double hot = insulation.getSecond();
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
+                        }
+                    }
+                });
+            });
         }
     }
 }

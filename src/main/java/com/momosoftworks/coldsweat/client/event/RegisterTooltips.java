@@ -14,6 +14,6 @@ public class RegisterTooltips
     {
         event.register(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
         event.register(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getStack()));
-        event.register(InsulatorTooltip.class, tooltip -> new ClientInsulatorTooltip(tooltip.getInsulationValues(), tooltip.isAdaptive()));
+        event.register(InsulatorTooltip.class, tooltip -> new ClientInsulatorTooltip(tooltip.getInsulationValues(), tooltip.getType()));
     }
 }

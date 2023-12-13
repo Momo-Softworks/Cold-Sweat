@@ -3,13 +3,11 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,13 +20,13 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
     double cold = 0;
     double hot = 0;
     double neutral = 0;
-    boolean isAdaptive;
+    InsulatorTooltip.InsulationType type;
     int width = 0;
 
-    public ClientInsulatorTooltip(Pair<Double, Double> insulationValues, boolean isAdaptive)
+    public ClientInsulatorTooltip(Pair<Double, Double> insulationValues, InsulatorTooltip.InsulationType type)
     {
         this.insulationValues = insulationValues;
-        this.isAdaptive = isAdaptive;
+        this.type = type;
     }
 
     @Override
@@ -45,6 +43,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
+        boolean isAdaptive = this.type == InsulatorTooltip.InsulationType.ADAPTIVE;
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
         neutral = (cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0) * 2;
@@ -69,14 +68,14 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
         // Positive insulation bar
         if (posSlots > 0)
-        {   renderBar(poseStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false);
+        {   renderBar(poseStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false, this.type == InsulatorTooltip.InsulationType.CURIO);
             poseStack.translate(posSlots * 6 + 12, 0, 0);
             width += posSlots * 6 + 12;
         }
 
         // Negative insulation bar
         if (negSlots > 0)
-        {   renderBar(poseStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true);
+        {   renderBar(poseStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true, this.type == InsulatorTooltip.InsulationType.CURIO);
             width += negSlots * 6 + 12;
         }
 
@@ -97,7 +96,7 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
         }
     }
 
-    static void renderBar(PoseStack poseStack, int x, int y, int slots, double cold, double neutral, double hot, boolean isAdaptive, boolean showSign, boolean isNegative)
+    static void renderBar(PoseStack poseStack, int x, int y, int slots, double cold, double neutral, double hot, boolean isAdaptive, boolean showSign, boolean isNegative, boolean isCurio)
     {
         int coldSlots = Math.abs(CSMath.ceil(cold/2));
         int neutralSlots = Math.abs(CSMath.ceil(neutral/2));
@@ -137,6 +136,12 @@ public class ClientInsulatorTooltip implements ClientTooltipComponent
 
         // icon
         GuiComponent.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
+        if (isCurio)
+        {   GuiComponent.blit(poseStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24);
+        }
+        else
+        {   GuiComponent.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
+        }
 
         if (showSign)
         {
