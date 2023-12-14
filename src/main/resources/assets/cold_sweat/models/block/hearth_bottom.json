@@ -1,0 +1,40 @@
+{
+	"texture_size": [64, 64],
+	"textures": {
+		"2": "cold_sweat:block/hearth_side",
+		"3": "cold_sweat:block/hearth_top",
+		"4": "cold_sweat:block/hearth_front",
+		"5": "cold_sweat:block/hearth_bottom",
+		"hearth_grate": "cold_sweat:block/hearth_grate",
+		"particle": "cold_sweat:block/hearth_front"
+	},
+	"elements": [
+		{
+			"name": "Grate",
+			"from": [3, 2, -1],
+			"to": [13, 9, 0],
+			"rotation": {"angle": 0, "axis": "y", "origin": [13, 6, 0]},
+			"faces": {
+				"north": {"uv": [0, 0, 10, 7], "texture": "#hearth_grate"},
+				"east": {"uv": [0, 0, 1, 7], "texture": "#hearth_grate"},
+				"west": {"uv": [10, 0, 9, 7], "texture": "#hearth_grate"},
+				"up": {"uv": [0, 0, 10, 1], "rotation": 180, "texture": "#hearth_grate"},
+				"down": {"uv": [0, 6, 10, 7], "rotation": 180, "texture": "#hearth_grate"}
+			}
+		},
+		{
+			"name": "Body",
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, 0, 15]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#4"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#3"},
+				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#5"}
+			}
+		}
+	]
+}
