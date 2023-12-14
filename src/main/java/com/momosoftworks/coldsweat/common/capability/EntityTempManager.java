@@ -488,11 +488,11 @@ public class EntityTempManager
                 .add(entity.getAttribute(ModAttributes.HEAT_RESISTANCE)).build();
     }
 
-    public static Double[] applyAttributesPre(LivingEntity entity)
+    public static Double[] getAttributes(LivingEntity entity)
     {   return getModifiableTempAttributes(entity).stream().map(attribute -> attribute == null ? 0 : attribute.getValue()).toArray(Double[]::new);
     }
 
-    public static double[] applyAttributesPost(LivingEntity entity, double[] temps)
+    public static double[] applyAttributes(LivingEntity entity, double[] temps)
     {
         double[] tempsCopy = temps.clone();
         int i = 0;
