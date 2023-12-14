@@ -99,7 +99,7 @@ public class EntityTempCap implements ITemperatureCap
     public void tick(LivingEntity entity)
     {
         // Get the base temperature values as defined by the player's attributes
-        Double[] attributeBases = EntityTempManager.applyAttributesPre(entity);
+        Double[] attributeBases = EntityTempManager.getAttributes(entity);
 
         // Tick TempModifiers
         double newWorldTemp = Temperature.apply(attributeBases[0], entity, Type.WORLD, getModifiers(Type.WORLD));
@@ -113,7 +113,7 @@ public class EntityTempCap implements ITemperatureCap
         double heatResistance = attributeBases[8];
 
         // Apply attribute modifiers after TempModifiers
-        double[] modifiedAttributes = EntityTempManager.applyAttributesPost(entity, new double[] {newWorldTemp, newCoreTemp, newBaseTemp, newMaxOffset, newMinOffset, coldDampening, heatDampening, coldResistance, heatResistance});
+        double[] modifiedAttributes = EntityTempManager.applyAttributes(entity, new double[] {newWorldTemp, newCoreTemp, newBaseTemp, newMaxOffset, newMinOffset, coldDampening, heatDampening, coldResistance, heatResistance});
         newWorldTemp = modifiedAttributes[0];
         newCoreTemp  = modifiedAttributes[1];
         newBaseTemp  = modifiedAttributes[2];
@@ -124,31 +124,51 @@ public class EntityTempCap implements ITemperatureCap
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
-        int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
+        int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
-        // If temp is dangerous, change core temp
-        if (magnitude != 0)
+        boolean isFullyColdDampened = worldTempSign < 0 && coldDampening >= 1;
+        boolean isFullyHeatDampened = worldTempSign > 0 && heatDampening >= 1;
+
+        // Don't change player temperature if they're in creative/spectator mode
+        if (worldTempSign != 0
+        && !(isFullyColdDampened || isFullyHeatDampened))
         {
             // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
+
+            // How much the player's temperature should change
             double changeBy = (Math.max(
-                    // Ensure a minimum speed for temperature change
+                    // Change proportionally to the extremity of the world temperature
                     (difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(),
+                    // Ensure a minimum speed for temperature change
                     Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)
                     // If it's hot or cold
-            ) * magnitude);
+            ) * worldTempSign);
+
             // Apply cold/heat dampening to slow/increase the rate
             if (changeBy < 0) changeBy = (coldDampening < 0 ? changeBy * -coldDampening : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
             else              changeBy = (heatDampening < 0 ? changeBy * -heatDampening : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, getModifiers(Type.RATE));
         }
-        // If the entity's temperature and world temperature are not both hot or both cold, return to neutral
-        int tempSign = CSMath.getSign(newCoreTemp);
-        if (tempSign != 0 && magnitude != tempSign && getModifiers(Type.CORE).isEmpty())
+
+        // If the player's temperature and world temperature are not both hot or both cold, return to neutral
+        int coreTempSign = CSMath.getSign(newCoreTemp);
+        if (getModifiers(Type.CORE).isEmpty())
         {
-            double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
-            newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
+            double factor = 0;
+            if (isFullyColdDampened && coreTempSign < 0)
+            {   factor = ConfigSettings.TEMP_RATE.get() / 10d;
+            }
+            else if (isFullyHeatDampened && coreTempSign > 0)
+            {   factor = ConfigSettings.TEMP_RATE.get() / -10d;
+            }
+            else if (coreTempSign != 0 && coreTempSign != worldTempSign)
+            {   factor = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
+            }
+            if (factor != 0)
+            {   double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
+                newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
+            }
         }
 
         // Write the new temperature values
