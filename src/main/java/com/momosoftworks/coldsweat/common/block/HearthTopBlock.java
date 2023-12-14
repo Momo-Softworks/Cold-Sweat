@@ -50,10 +50,7 @@ public class HearthTopBlock extends Block
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
-        calculateFacingShapes(Shapes.or(
-            Block.box(3, -16, 3.5, 13, 2, 12.5), // Shell
-            Block.box(4, 2, 5, 9, 11, 10), // Exhaust
-            Block.box(-1, -13, 6, 17, -5, 10))); // Canisters
+        calculateFacingShapes(Block.box(4, 0, 4, 12, 16, 12));
     }
 
     static void calculateFacingShapes(VoxelShape shape)
