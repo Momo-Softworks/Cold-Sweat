@@ -31,6 +31,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class HearthBottomBlock extends Block
@@ -61,10 +62,7 @@ public class HearthBottomBlock extends Block
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
-        calculateFacingShapes(VoxelShapes.or(
-            Block.box(3, 0, 3.5, 13, 18, 12.5), // Shell
-            Block.box(4, 18, 5, 9, 27, 10), // Exhaust
-            Block.box(-1, 3, 6, 17, 11, 10))); // Canisters
+        calculateFacingShapes(Block.box(0, 0, 0, 16, 16, 16));
     }
 
     static void calculateFacingShapes(VoxelShape shape)
