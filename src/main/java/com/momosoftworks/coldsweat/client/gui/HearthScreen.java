@@ -78,6 +78,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
                 {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
                     this.onClick(mouseX, mouseY);
+                    this.setFocused(false);
                     return true;
                 }
                 return false;
@@ -91,6 +92,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
     {   this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(graphics, mouseX, mouseY);
+        this.children().get(0).setFocused(false);
     }
 
     @Override
