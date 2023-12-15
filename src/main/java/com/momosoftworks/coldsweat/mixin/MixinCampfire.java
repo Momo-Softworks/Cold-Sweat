@@ -21,7 +21,7 @@ public class MixinCampfire
 {
     // Heat waterskins gradually
     @Inject(method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
-            at = @At(value = "HEAD"), remap = ColdSweat.REMAP_MIXINS)
+            at = @At(value = "HEAD"))
     private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci)
     {
         double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
@@ -45,7 +45,7 @@ public class MixinCampfire
 
     // Ensure waterskin temperature is not reset when cooking finishes
     @ModifyArg(method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
-               at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Containers;dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V"), index = 4, remap = ColdSweat.REMAP_MIXINS)
+               at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Containers;dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V"), index = 4)
     private static ItemStack onItemFinishedCooking(Level level, double x, double y, double z, ItemStack result)
     {
         if (result.is(ModItems.FILLED_WATERSKIN))
