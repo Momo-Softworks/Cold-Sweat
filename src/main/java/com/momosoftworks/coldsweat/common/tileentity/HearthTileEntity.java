@@ -25,14 +25,13 @@ import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RotatedPillarBlock;
-import net.minecraft.block.SixWayBlock;
+import com.sun.istack.internal.NotNull;
+import net.minecraft.block.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
@@ -57,12 +56,18 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,15 +88,25 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     public static final int SLOT_COUNT = 1;
     private static final boolean CREATE_LOADED = CompatManager.isCreateLoaded();
 
+    FluidStack coldFuel = new FluidStack(Fluids.WATER, 0);
+    FluidStack hotFuel = new FluidStack(Fluids.LAVA, 0);
+
+    protected IFluidHandler bottomFuelHandler = new BottomFluidHandler();
+    private final LazyOptional<IFluidHandler> bottomFuelHolder = LazyOptional.of(() -> {
+        return this.bottomFuelHandler;
+    });
+    protected IFluidHandler sidesFuelHandler = new SidesFluidHandler();
+    private final LazyOptional<IFluidHandler> sidesFuelHolder = LazyOptional.of(() -> {
+        return this.sidesFuelHandler;
+    });
+
     protected NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
     int x = 0;
     int y = 0;
     int z = 0;
 
-    int hotFuel = 0;
     int lastHotFuel = 0;
-    int coldFuel = 0;
     int lastColdFuel = 0;
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
@@ -111,6 +126,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     boolean showParticles = true;
     int frozenPaths = 0;
     boolean spreading = true;
+
+    int smokestackHeight = 2;
 
     private static final Direction[] DIRECTIONS = Direction.values();
 
@@ -239,7 +256,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         {   this.updateNotifiedPaths();
         }
 
-        if (hotFuel > 0 || coldFuel > 0)
+        if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
         {
             // Gradually increases insulation amount
             if (insulationLevel < INSULATION_TIME)
@@ -315,12 +332,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                         && CSMath.withinCube(spreadPath.origin, pos, this.getMaxRange()))
                         {
                             /*
-                             Get the chunk at this position
-                             */
-
-                            /*
                              Spreading algorithm
                              */
+                            BlockState state = level.getBlockState(pathPos);
+
                             // Build a map of what positions can see the sky
                             Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
                             Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
@@ -332,10 +347,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                             {   canSeeSky = seeSkyState.getSecond();
                             }
 
-                            if (!canSeeSky)
+                            if (!canSeeSky || isPipe(state))
                             {
-                                BlockState state = level.getBlockState(pathPos);
-
                                 // Try to spread in every direction from the current position
                                 for (int d = 0; d < DIRECTIONS.length; d++)
                                 {
@@ -414,15 +427,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 if (this.ticksExisted % 40 == 0)
                 {
                     if (shouldUseColdFuel)
-                    {   this.setColdFuel(coldFuel - 1, true);
+                    {   this.setColdFuel(this.getColdFuel() - 1, true);
                     }
                     if (shouldUseHotFuel)
-                    {   this.setHotFuel(hotFuel - 1, true);
-                    }
-                    if (Math.abs(coldFuel - lastColdFuel) > 27|| Math.abs(hotFuel - lastHotFuel) > 27)
-                    {   this.updateFuelState();
-                        this.lastColdFuel = coldFuel;
-                        this.lastHotFuel = hotFuel;
+                    {   this.setHotFuel(this.getHotFuel() - 1, true);
                     }
 
                     shouldUseColdFuel = false;
@@ -435,22 +443,36 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         {   this.checkForFuel();
         }
 
+        // Update fuel
+        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36)
+        {   this.updateFuelState();
+            this.lastColdFuel = this.getColdFuel();
+            this.lastHotFuel = this.getHotFuel();
+        }
+
         // Particles
         if (isClient)
         {
+            if (this.ticksExisted % 20 == 0)
+            {
+                this.smokestackHeight = 2;
+                for (; level.getBlockState(new BlockPos(pos.getX(), this.y + smokestackHeight, pos.getZ())).getBlock() instanceof WallBlock; smokestackHeight++)
+                {}
+            }
+
             Random rand = new Random();
-            if (rand.nextDouble() < coldFuel / 3000d)
+            if (rand.nextDouble() < this.getColdFuel() / 3000d)
             {   double d0 = this.x + 0.5d;
-                double d1 = this.y + 1.8d;
+                double d1 = this.y + smokestackHeight;
                 double d2 = this.z + 0.5d;
                 double d3 = (rand.nextDouble() - 0.5) / 4;
                 double d4 = (rand.nextDouble() - 0.5) / 4;
                 double d5 = (rand.nextDouble() - 0.5) / 4;
                 level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
             }
-            if (rand.nextDouble() < hotFuel / 3000d)
+            if (rand.nextDouble() < this.getHotFuel() / 3000d)
             {   double d0 = this.x + 0.5d;
-                double d1 = this.y + 1.8d;
+                double d1 = this.y + smokestackHeight;
                 double d2 = this.z + 0.5d;
                 double d3 = (rand.nextDouble() - 0.5) / 2;
                 double d4 = (rand.nextDouble() - 0.5) / 2;
@@ -501,7 +523,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 int itemFuel = getItemFuel(fuelStack);
                 if (itemFuel != 0)
                 {
-                    int fuel = itemFuel > 0 ? hotFuel : coldFuel;
+                    int fuel = itemFuel > 0 ? this.getHotFuel() : this.getColdFuel();
                     if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
                     {
                         if (!fuelStack.hasContainerItem() || fuelStack.getCount() > 1)
@@ -555,9 +577,9 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             }
 
             // Tell the hearth to use hot fuel
-            shouldUseHotFuel |= hotFuel > 0 && temp < min;
+            shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
             // Tell the hearth to use cold fuel
-            shouldUseColdFuel |= coldFuel > 0 && temp > max;
+            shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
 
             if (shouldUseHotFuel || shouldUseColdFuel)
             {   int effectLevel = Math.min(9, (insulationLevel / INSULATION_TIME) * 9);
@@ -582,6 +604,11 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             return false;
         }
         return true;
+    }
+
+    private boolean isPipe(BlockState state)
+    {
+        return CREATE_LOADED && (state.getBlock() instanceof FluidPipeBlock || state.getBlock() instanceof GlassFluidPipeBlock);
     }
 
     void updateNotifiedPaths()
@@ -614,16 +641,19 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     public int getHotFuel()
-    {   return this.hotFuel;
+    {   return this.hotFuel.getAmount();
     }
 
     public int getColdFuel()
-    {   return this.coldFuel;
+    {   return this.coldFuel.getAmount();
     }
 
     public void setHotFuel(int amount, boolean update)
     {
-        this.hotFuel = CSMath.clamp(amount, 0, MAX_FUEL);
+        if (this.hotFuel.isEmpty())
+        {   this.hotFuel = new FluidStack(Fluids.LAVA, amount);
+        }
+        else this.hotFuel.setAmount(amount);
 
         if (amount == 0 && hasHotFuel)
         {   hasHotFuel = false;
@@ -639,7 +669,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public void setColdFuel(int amount, boolean update)
     {
-        this.coldFuel = CSMath.clamp(amount, 0, MAX_FUEL);
+        if (this.coldFuel.isEmpty())
+        {   this.coldFuel = new FluidStack(Fluids.WATER, amount);
+        }
+        else this.coldFuel.setAmount(amount);
 
         if (amount <= 0 && hasColdFuel)
         {   hasColdFuel = false;
@@ -653,22 +686,24 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   setColdFuel(amount, true);
     }
 
+    /**
+     * Negative numbers are cold, positive numbers are hot
+     */
     public void addFuel(int amount)
     {   if (amount > 0)
-            setHotFuelAndUpdate(this.hotFuel + amount);
+        {   setHotFuelAndUpdate(this.getHotFuel() + amount);
+        }
         else if (amount < 0)
-            setColdFuelAndUpdate(this.coldFuel + Math.abs(amount));
+        {   setColdFuelAndUpdate(this.getColdFuel() + Math.abs(amount));
+        }
     }
 
     public void updateFuelState()
     {
         if (level != null && !level.isClientSide)
-        {   int hotFuel = this.getHotFuel();
-            int coldFuel = this.getColdFuel();
-
-            BlockState state = level.getBlockState(this.getBlockPos());
-            int waterLevel = coldFuel == 0 ? 0 : (coldFuel < MAX_FUEL / 2 ? 1 : 2);
-            int lavaLevel = hotFuel == 0 ? 0 : (hotFuel < MAX_FUEL / 2 ? 1 : 2);
+        {   BlockState state = level.getBlockState(this.getBlockPos());
+            int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
+            int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
 
             BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
             if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
@@ -695,6 +730,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         this.handleUpdateTag(state, tag);
         ItemStackHelper.loadAllItems(tag, this.items);
+        this.coldFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel"));
+        this.hotFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel"));
     }
 
     @Override
@@ -702,6 +739,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   super.save(tag);
         tag.merge(this.getUpdateTag());
         ItemStackHelper.saveAllItems(tag, this.items);
+        tag.put("ColdFuel", this.coldFuel.writeToNBT(new CompoundNBT()));
+        tag.put("HotFuel", this.hotFuel.writeToNBT(new CompoundNBT()));
         return tag;
     }
 
@@ -757,6 +796,16 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   return new SUpdateTileEntityPacket(this.getBlockPos(), 0, this.getUpdateTag());
     }
 
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction facing)
+    {
+        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && facing != null
+             ? facing == Direction.DOWN
+                       ? bottomFuelHolder.cast()
+             : facing != Direction.UP && facing != this.getBlockState().getValue(HearthBottomBlock.FACING)
+                       ? sidesFuelHolder.cast()
+             : super.getCapability(capability, facing) : super.getCapability(capability, facing);
+    }
+
     public void replacePaths(ArrayList<SpreadPath> newPaths)
     {   this.frozenPaths = 0;
         this.paths = newPaths;
@@ -803,5 +852,121 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     public Set<BlockPos> getPathLookup()
     {   return this.pathLookup;
+    }
+
+    public abstract class FluidHandler implements IFluidHandler
+    {
+        @Override
+        public int getTanks()
+        {   return 2;
+        }
+
+        @Override
+        public @NotNull FluidStack getFluidInTank(int tank)
+        {   return tank == 0 ? coldFuel : hotFuel;
+        }
+
+        @Override
+        public int getTankCapacity(int tank)
+        {   return MAX_FUEL;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack)
+        {
+            return tank == 0 ? fluidStack.getFluid() == Fluids.WATER 
+                             : fluidStack.getFluid() == Fluids.LAVA;
+        }
+
+        @Override
+        public int fill(FluidStack fluidStack, FluidAction fluidAction)
+        {
+            if (fluidStack.getFluid() == Fluids.WATER)
+            {   int amount = Math.min(fluidStack.getAmount(), MAX_FUEL - coldFuel.getAmount());
+                if (fluidAction.execute())
+                {
+                    if (coldFuel.isEmpty())
+                    {   coldFuel = fluidStack.copy();
+                    }
+                    else coldFuel.grow(amount);
+                }
+                return amount;
+            }
+            else if (fluidStack.getFluid() == Fluids.LAVA)
+            {   int amount = Math.min(fluidStack.getAmount(), MAX_FUEL - hotFuel.getAmount());
+                if (fluidAction.execute())
+                {
+                    if (hotFuel.isEmpty())
+                    {   hotFuel = fluidStack.copy();
+                    }
+                    else hotFuel.grow(amount);
+                }
+                return amount;
+            }
+            return 0;
+        }
+
+        @Override
+        public @NotNull FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
+        {
+            return this.isFluidValid(0, fluidStack) || this.isFluidValid(1, fluidStack)
+                 ? this.drain(fluidStack.getAmount(), fluidAction)
+                 : FluidStack.EMPTY;
+        }
+
+        @Override
+        public abstract FluidStack drain(int amount, FluidAction fluidAction);
+
+        public void writeToNBT(CompoundNBT tag)
+        {   tag.put("ColdFuel", coldFuel.writeToNBT(new CompoundNBT()));
+            tag.put("HotFuel", hotFuel.writeToNBT(new CompoundNBT()));
+        }
+
+        public void readFromNBT(CompoundNBT tag)
+        {   coldFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel"));
+            hotFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel"));
+        }
+    }
+
+    /**
+     * Drains from water storage by default
+     */
+    private class SidesFluidHandler extends FluidHandler
+    {
+        @Override
+        public FluidStack drain(int amount, FluidAction fluidAction)
+        {
+            int drained = Math.min(coldFuel.getAmount(), amount);
+
+            FluidStack stack = new FluidStack(coldFuel, drained);
+            if (fluidAction.execute() && drained > 0)
+            {   coldFuel.shrink(drained);
+            }
+            HearthTileEntity.this.setChanged();
+            //WorldHelper.syncBlockEntityData(HearthBlockEntity.this);
+
+            return stack;
+        }
+    }
+
+    /**
+     * Drains from lava storage by default
+     */
+    private class BottomFluidHandler extends FluidHandler
+    {
+        @Override
+        public FluidStack drain(int amount, FluidAction fluidAction)
+        {
+            int drained = Math.min(hotFuel.getAmount(), amount);
+
+            FluidStack stack = new FluidStack(hotFuel, drained);
+            if (fluidAction.execute() && drained > 0)
+            {   hotFuel.shrink(drained);
+            }
+            HearthTileEntity.this.setChanged();
+            //WorldHelper.syncBlockEntityData(HearthBlockEntity.this);
+
+            return stack;
+        }
     }
 }
