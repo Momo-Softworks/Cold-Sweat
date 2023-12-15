@@ -64,10 +64,10 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -811,7 +811,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction facing)
     {
-        return capability == ForgeCapabilities.FLUID_HANDLER && facing != null
+        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && facing != null
              ? facing == Direction.DOWN
                        ? bottomFuelHolder.cast()
              : facing != Direction.UP && facing != this.getBlockState().getValue(HearthBottomBlock.FACING)
