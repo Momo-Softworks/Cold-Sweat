@@ -25,7 +25,6 @@ import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import com.sun.istack.internal.NotNull;
 import net.minecraft.block.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
@@ -444,7 +443,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         // Update fuel
-        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36)
+        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36
+        || this.ticksExisted % 20 == 0)
         {   this.updateFuelState();
             this.lastColdFuel = this.getColdFuel();
             this.lastHotFuel = this.getHotFuel();
@@ -796,7 +796,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   return new SUpdateTileEntityPacket(this.getBlockPos(), 0, this.getUpdateTag());
     }
 
-    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction facing)
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
     {
         return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && facing != null
              ? facing == Direction.DOWN
@@ -862,7 +862,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         @Override
-        public @NotNull FluidStack getFluidInTank(int tank)
+        public FluidStack getFluidInTank(int tank)
         {   return tank == 0 ? coldFuel : hotFuel;
         }
 
@@ -872,7 +872,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         @Override
-        public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack)
+        public boolean isFluidValid(int tank, FluidStack fluidStack)
         {
             return tank == 0 ? fluidStack.getFluid() == Fluids.WATER 
                              : fluidStack.getFluid() == Fluids.LAVA;
@@ -907,7 +907,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         @Override
-        public @NotNull FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
+        public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
         {
             return this.isFluidValid(0, fluidStack) || this.isFluidValid(1, fluidStack)
                  ? this.drain(fluidStack.getAmount(), fluidAction)
