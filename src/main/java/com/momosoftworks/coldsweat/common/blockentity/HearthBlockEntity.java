@@ -457,7 +457,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
 
         // Update fuel
-        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36)
+        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36
+        || this.ticksExisted % 20 == 0)
         {   this.updateFuelState();
             this.lastColdFuel = this.getColdFuel();
             this.lastHotFuel = this.getHotFuel();
