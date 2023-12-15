@@ -28,7 +28,7 @@ public class MixinGoatModel extends QuadrupedModel<Goat>
         super(p_170857_, p_170858_, p_170859_, p_170860_, p_170861_, p_170862_, p_170863_);
     }
 
-    @Inject(method = "createBodyLayer()Lnet/minecraft/client/model/geom/builders/LayerDefinition;", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS,
+    @Inject(method = "createBodyLayer()Lnet/minecraft/client/model/geom/builders/LayerDefinition;", at = @At("TAIL"),
     locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void createBodyLayer(CallbackInfoReturnable<LayerDefinition> cir, MeshDefinition mesh, PartDefinition base, PartDefinition head)
     {
@@ -36,7 +36,7 @@ public class MixinGoatModel extends QuadrupedModel<Goat>
         base.getChild("body").addOrReplaceChild("body2", CubeListBuilder.create().texOffs(0, 28).addBox(-5.0F, -18.0F, -8.0F, 11.0F, 14.0F, 11.0F), PartPose.offset(0.0F, 0.0F, 0.0F));
     }
 
-    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/animal/goat/Goat;FFFFF)V", at = @At("TAIL"), remap = ColdSweat.REMAP_MIXINS)
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/animal/goat/Goat;FFFFF)V", at = @At("TAIL"))
     private void setupAnim(Goat goat, float p_170588_, float p_170589_, float p_170590_, float p_170591_, float partialTick, CallbackInfo ci)
     {
         ShearableFurManager.getFurCap(goat).ifPresent(cap ->

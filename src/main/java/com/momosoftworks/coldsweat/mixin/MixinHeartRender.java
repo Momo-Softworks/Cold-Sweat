@@ -27,7 +27,7 @@ public class MixinHeartRender
     private static int HEART_INDEX = 0;
 
     @Surrogate
-    @Inject(method = "renderHeart", at = @At("TAIL"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+    @Inject(method = "renderHeart", at = @At("TAIL"), cancellable = true)
     private void renderHeart(GuiGraphics guiGraphics, Gui.HeartType heartType, int x, int y, int yOffset, boolean blink, boolean halfHeart, CallbackInfo ci)
     {
         Player player = Minecraft.getInstance().player;
