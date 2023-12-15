@@ -28,7 +28,7 @@ public class MixinHeartRender
     private static final ResourceLocation ICONS_TEXTURE = new ResourceLocation("minecraft", "textures/gui/icons.png");
     private static int HEART_COUNTER = 0;
 
-    @Inject(method = "renderHeart(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Gui$HeartType;IIIZZ)V", at = @At("TAIL"), cancellable = true, remap = ColdSweat.REMAP_MIXINS)
+    @Inject(method = "renderHeart(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Gui$HeartType;IIIZZ)V", at = @At("TAIL"), cancellable = true)
     private void renderHeart(PoseStack ps, Gui.HeartType type, int x, int y, int texV, boolean blink, boolean half, CallbackInfo ci)
     {
         Player player = Minecraft.getInstance().player;

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinPickEntity
 {
     @Redirect(method = "pickBlock",
-              at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getPickedResult(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/item/ItemStack;"), remap = ColdSweat.REMAP_MIXINS)
+              at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getPickedResult(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack getPickResult(Entity entity, HitResult hitResult)
     {
         if (hitResult.getType() == HitResult.Type.ENTITY)

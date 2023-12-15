@@ -22,7 +22,7 @@ public class MixinBlockUpdate
 {
     ServerLevel level = (ServerLevel) (Object) this;
 
-    @Inject(method = "onBlockStateChange", at = @At("HEAD"), remap = ColdSweat.REMAP_MIXINS)
+    @Inject(method = "onBlockStateChange", at = @At("HEAD"))
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
         if (!oldState.equals(newState))

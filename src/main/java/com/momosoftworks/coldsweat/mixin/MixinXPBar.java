@@ -28,8 +28,7 @@ public class MixinXPBar
             (
                 from = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V"),
                 to   = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I")
-            ),
-            remap = ColdSweat.REMAP_MIXINS)
+            ))
     public void renderExperienceBar1(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
@@ -49,8 +48,7 @@ public class MixinXPBar
             (
                 from = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I"),
                 to   = @At(value = "RETURN")
-            ),
-            remap = ColdSweat.REMAP_MIXINS)
+            ))
     public void renderExperienceBar2(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
@@ -69,7 +67,7 @@ public class MixinXPBar
                     value = "INVOKE",
                     target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
                     shift = At.Shift.AFTER
-                ), remap = ColdSweat.REMAP_MIXINS)
+                ))
         public void renderItemNamePre(PoseStack matrixStack, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())
@@ -84,7 +82,7 @@ public class MixinXPBar
                     value = "INVOKE",
                     target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V",
                     shift = At.Shift.BEFORE
-                ), remap = ColdSweat.REMAP_MIXINS)
+                ))
         public void renderItemNamePost(PoseStack matrixStack, CallbackInfo ci)
         {
             if (ClientSettingsConfig.getInstance().customHotbarEnabled())
