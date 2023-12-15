@@ -384,8 +384,8 @@ public class Temperature
     {
         if (!entity.level().isClientSide)
         {
-            ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
-                            ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)
+            ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
+                            ? PacketDistributor.PLAYER.with(() -> player)
                             : PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
             new TemperatureSyncMessage(entity, cap.serializeTemps(), instant));
         }
@@ -395,8 +395,8 @@ public class Temperature
     {
         if (!entity.level().isClientSide)
         {
-            ColdSweatPacketHandler.INSTANCE.send(entity instanceof Player player
-                            ? PacketDistributor.PLAYER.with(() -> (ServerPlayer) player)
+            ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
+                            ? PacketDistributor.PLAYER.with(() -> player)
                             : PacketDistributor.TRACKING_ENTITY.with(() -> entity),
             new TempModifiersSyncMessage(entity, cap.serializeModifiers()));
         }
