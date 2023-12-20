@@ -141,10 +141,10 @@ public class InsulatorTooltip extends Tooltip
 
         // icon
         if (isCurio)
-        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24);
+        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 16, 8, 8, 24, 32);
         }
         else
-        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
+        {   AbstractGui.blit(matrixStack, x, y - 1, 0, 24, 0, 8, 8, 24, 32);
         }
 
         if (showSign)
