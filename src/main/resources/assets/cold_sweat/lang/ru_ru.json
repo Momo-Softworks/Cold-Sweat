@@ -11,12 +11,21 @@
   "item.cold_sweat.soulspring_lamp":     "Адский светоч",
   "item.cold_sweat.thermometer":         "Термометр",
   "item.cold_sweat.waterskin":           "Бурдюк",
-  "item.cold_sweat.fur":            "Мех козы",
+  "item.cold_sweat.fur":                 "Мех",
   "item.cold_sweat.hoglin_hide":         "Шкура хоглина",
   "item.cold_sweat.waterskin.filled":    "Наполнен",
   "item.cold_sweat.insulated_minecart":  "Утеплённая вагонетка",
   "item.cold_sweat.chameleon_molt":      "Кожа хамелеона",
   "item.cold_sweat.chameleon_spawn_egg": "Яйцо призыва хамелеона",
+  "item.cold_sweat.soul_sprout":         "Росток души",
+  "item.cold_sweat.hoglin_headpiece":    "Шлем из хоглина",
+  "item.cold_sweat.hoglin_tunic":        "Туника из хоглина",
+  "item.cold_sweat.hoglin_trousers":     "Штаны из хоглина",
+  "item.cold_sweat.hoglin_hooves":       "Копыта хоглина",
+  "item.cold_sweat.fur_cap":             "Меховая шапка",
+  "item.cold_sweat.fur_parka":           "Меховая Парка",
+  "item.cold_sweat.fur_pants":           "Меховые Штаны",
+  "item.cold_sweat.fur_boots":           "Меховые Ботинки",
 
 
   "entity.cold_sweat.chameleon": "Хамелеон",
@@ -27,7 +36,6 @@
 
   "effect.cold_sweat.insulated":           "Иммунитет",
   "effect.cold_sweat.ice_resistance":      "Холодостойкость",
-  "effect.cold_sweat.ice_resistance_long": "Холодостойкость",
   "effect.cold_sweat.grace":               "Благословение",
 
 
