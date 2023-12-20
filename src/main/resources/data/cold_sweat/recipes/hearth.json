@@ -1,28 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
-    "  I",
-    "CFC",
-    "CCC"
+  "pattern": [
+    " # ",
+    "BBB",
+    "BiB"
   ],
-  "key":
-  {
-    "I":
-    {
-      "item": "minecraft:iron_ingot"
+  "key": {
+    "#": {
+      "tag": "forge:cobblestone"
     },
-    "C":
-    {
-      "item": "minecraft:cobblestone"
+    "B": {
+      "item": "minecraft:bricks"
     },
-    "F":
-    {
-      "item": "minecraft:furnace"
+    "i": {
+      "tag": "forge:ingots/iron"
     }
   },
-  "result":
-  {
+  "result": {
     "item": "cold_sweat:hearth",
     "count": 1
   }
