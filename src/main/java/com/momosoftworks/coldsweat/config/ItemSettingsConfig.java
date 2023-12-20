@@ -48,22 +48,26 @@ public final class ItemSettingsConfig
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
                 .defineListAllowEmpty(List.of("Boiler"), () -> ListBuilder.begin(
-                                List.of("minecraft:coal",         37),
-                                List.of("minecraft:charcoal",     37),
-                                List.of("minecraft:coal_block",   333),
-                                List.of("minecraft:magma_block",  333),
-                                List.of("minecraft:lava_bucket",  1000)
+                                List.of("#minecraft:planks",         10),
+                                List.of("minecraft:coal",            37),
+                                List.of("minecraft:charcoal",        37),
+                                List.of("#minecraft:logs_that_burn", 37),
+                                List.of("minecraft:coal_block",      333),
+                                List.of("minecraft:magma_block",     333),
+                                List.of("minecraft:lava_bucket",     1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
         iceboxItems = BUILDER
                 .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
-                                List.of("minecraft:snowball",     37),
-                                List.of("minecraft:clay_ball",    37),
-                                List.of("minecraft:snow_block",   333),
-                                List.of("minecraft:clay",         333),
-                                List.of("minecraft:ice",          1000),
-                                List.of("minecraft:water_bucket", 1000)
+                                List.of("minecraft:snowball",           -37),
+                                List.of("minecraft:clay_ball",          -37),
+                                List.of("minecraft:snow_block",         -333),
+                                List.of("minecraft:ice",                -333),
+                                List.of("minecraft:clay",               -333),
+                                List.of("minecraft:powder_snow_bucket", -333),
+                                List.of("minecraft:water_bucket",       -1000),
+                                List.of("minecraft:packed_ice",         -1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
@@ -71,18 +75,22 @@ public final class ItemSettingsConfig
                 .comment("Negative values indicate cold fuel")
                 .defineListAllowEmpty(List.of("Hearth"), () -> ListBuilder.begin(
                                 // Hot
-                                List.of("minecraft:coal",         37),
-                                List.of("minecraft:charcoal",     37),
-                                List.of("minecraft:coal_block",   333),
-                                List.of("minecraft:magma_block",  333),
-                                List.of("minecraft:lava_bucket",  1000),
+                                List.of("#minecraft:planks",         10),
+                                List.of("minecraft:coal",            37),
+                                List.of("minecraft:charcoal",        37),
+                                List.of("#minecraft:logs_that_burn", 37),
+                                List.of("minecraft:coal_block",      333),
+                                List.of("minecraft:magma_block",     333),
+                                List.of("minecraft:lava_bucket",     1000),
                                 // Cold
-                                List.of("minecraft:snowball",     -37),
-                                List.of("minecraft:clay",         -37),
-                                List.of("minecraft:snow_block",   -333),
-                                List.of("minecraft:water_bucket", -333),
-                                List.of("minecraft:ice",          -333),
-                                List.of("minecraft:packed_ice",   -1000)
+                                List.of("minecraft:snowball",           -37),
+                                List.of("minecraft:clay_ball",          -37),
+                                List.of("minecraft:snow_block",         -333),
+                                List.of("minecraft:ice",                -333),
+                                List.of("minecraft:clay",               -333),
+                                List.of("minecraft:powder_snow_bucket", -333),
+                                List.of("minecraft:water_bucket",       -1000),
+                                List.of("minecraft:packed_ice",         -1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
         blacklistedPotions = BUILDER
