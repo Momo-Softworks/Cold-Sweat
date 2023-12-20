@@ -38,7 +38,7 @@ public class ChameleonEntityRenderer<T extends Chameleon> extends MobRenderer<Ch
             ps.mulPose(CSMath.getQuaternion(CSMath.toRadians(playerHeadPitch), -CSMath.toRadians(playerHeadYaw), 0));
             ps.translate(0, ridingOffset, 0);
             ps.mulPose(CSMath.getQuaternion(0, CSMath.toRadians(playerHeadYaw), 0));
-
+            ps.translate(0, -1.45, 0);
         }
         super.render(entity, p_115456_, partialTick, ps, buffer, light);
         ps.popPose();
