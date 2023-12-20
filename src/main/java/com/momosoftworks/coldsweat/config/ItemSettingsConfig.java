@@ -48,12 +48,14 @@ public final class ItemSettingsConfig
                 .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
         boilerItems = BUILDER
-                .defineListAllowEmpty(Collections.singletonList("Boiler"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:coal",         37),
-                                Arrays.asList("minecraft:charcoal",     37),
-                                Arrays.asList("minecraft:coal_block",   333),
-                                Arrays.asList("minecraft:magma_block",  333),
-                                Arrays.asList("minecraft:lava_bucket",  1000)
+                .defineListAllowEmpty(Arrays.asList("Boiler"), () -> ListBuilder.begin(
+                                Arrays.asList("#minecraft:planks",         10),
+                                Arrays.asList("minecraft:coal",            37),
+                                Arrays.asList("minecraft:charcoal",        37),
+                                Arrays.asList("#minecraft:logs_that_burn", 37),
+                                Arrays.asList("minecraft:coal_block",      333),
+                                Arrays.asList("minecraft:magma_block",     333),
+                                Arrays.asList("minecraft:lava_bucket",     1000)
                         ).build(),
                         it ->
                         {
@@ -66,12 +68,14 @@ public final class ItemSettingsConfig
 
         iceboxItems = BUILDER
                 .defineListAllowEmpty(Arrays.asList("Icebox"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:snowball",     37),
-                                Arrays.asList("minecraft:clay_ball",    37),
-                                Arrays.asList("minecraft:snow_block",   333),
-                                Arrays.asList("minecraft:clay",         333),
-                                Arrays.asList("minecraft:ice",          1000),
-                                Arrays.asList("minecraft:water_bucket", 1000)
+                                Arrays.asList("minecraft:snowball",           -37),
+                                Arrays.asList("minecraft:clay_ball",          -37),
+                                Arrays.asList("minecraft:snow_block",         -333),
+                                Arrays.asList("minecraft:ice",                -333),
+                                Arrays.asList("minecraft:clay",               -333),
+                                Arrays.asList("minecraft:powder_snow_bucket", -333),
+                                Arrays.asList("minecraft:water_bucket",       -1000),
+                                Arrays.asList("minecraft:packed_ice",         -1000)
                         ).build(),
                         it ->
                         {
@@ -86,18 +90,22 @@ public final class ItemSettingsConfig
                 .comment("Negative values indicate cold fuel")
                 .defineListAllowEmpty(Collections.singletonList("Hearth"), () -> ListBuilder.begin(
                                 // Hot
-                                Arrays.asList("minecraft:coal",         37),
-                                Arrays.asList("minecraft:charcoal",     37),
-                                Arrays.asList("minecraft:coal_block",   333),
-                                Arrays.asList("minecraft:magma_block",  333),
-                                Arrays.asList("minecraft:lava_bucket",  1000),
+                                Arrays.asList("#minecraft:planks",         10),
+                                Arrays.asList("minecraft:coal",            37),
+                                Arrays.asList("minecraft:charcoal",        37),
+                                Arrays.asList("#minecraft:logs_that_burn", 37),
+                                Arrays.asList("minecraft:coal_block",      333),
+                                Arrays.asList("minecraft:magma_block",     333),
+                                Arrays.asList("minecraft:lava_bucket",     1000),
                                 // Cold
-                                Arrays.asList("minecraft:snowball",     -37),
-                                Arrays.asList("minecraft:clay",         -37),
-                                Arrays.asList("minecraft:snow_block",   -333),
-                                Arrays.asList("minecraft:water_bucket", -333),
-                                Arrays.asList("minecraft:ice",          -333),
-                                Arrays.asList("minecraft:packed_ice",   -1000)
+                                Arrays.asList("minecraft:snowball",           -37),
+                                Arrays.asList("minecraft:clay_ball",          -37),
+                                Arrays.asList("minecraft:snow_block",         -333),
+                                Arrays.asList("minecraft:ice",                -333),
+                                Arrays.asList("minecraft:clay",               -333),
+                                Arrays.asList("minecraft:powder_snow_bucket", -333),
+                                Arrays.asList("minecraft:water_bucket",       -1000),
+                                Arrays.asList("minecraft:packed_ice",         -1000)
                         ).build(),
                         it ->
                         {
