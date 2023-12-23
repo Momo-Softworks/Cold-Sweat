@@ -12,11 +12,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class ConfigHelper
 {
@@ -179,6 +182,38 @@ public class ConfigHelper
             }
         }
         return map;
+    }
+      
+    public static Map<String, Predicate<BlockState>> getBlockStatePredicates(Block block, String predicates)
+    {
+        Map<String, Predicate<BlockState>> blockPredicates = new HashMap<>();
+        // Separate comma-delineated predicates
+        String[] predicateList = predicates.split(",");
+
+        // Iterate predicates
+        for (String predicate : predicateList)
+        {
+            // Split predicate into key-value pairs separated by "="
+            String[] pair = predicate.split("=");
+            String key = pair[0];
+            String value = pair[1];
+
+            // Get the property with the given name
+            Property<?> property = block.getStateDefinition().getProperty(key);
+            if (property != null)
+            {
+                // Parse the desired value for this property
+                property.getValue(value).ifPresent(propertyValue ->
+                {
+                    // Add a new predicate to the list
+                    blockPredicates.put(predicate, state ->
+                    {   // If the value matches, this predicate returns true
+                        return state.getValue(property).equals(propertyValue);
+                    });
+                });
+            }
+        }
+        return blockPredicates;
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
