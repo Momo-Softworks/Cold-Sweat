@@ -152,7 +152,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public HearthBlockEntity(BlockPos pos, BlockState state)
     {
         super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
-        this.addPath(new SpreadPath(pos).setOrigin(this.getBlockPos()));
         MinecraftForge.EVENT_BUS.register(this);
     }
 
