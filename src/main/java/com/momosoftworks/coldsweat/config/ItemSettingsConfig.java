@@ -60,14 +60,14 @@ public final class ItemSettingsConfig
 
         iceboxItems = BUILDER
                 .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
-                                List.of("minecraft:snowball",           -37),
-                                List.of("minecraft:clay_ball",          -37),
-                                List.of("minecraft:snow_block",         -333),
-                                List.of("minecraft:ice",                -333),
-                                List.of("minecraft:clay",               -333),
-                                List.of("minecraft:powder_snow_bucket", -333),
-                                List.of("minecraft:water_bucket",       -1000),
-                                List.of("minecraft:packed_ice",         -1000)
+                                List.of("minecraft:snowball",           37),
+                                List.of("minecraft:clay_ball",          37),
+                                List.of("minecraft:snow_block",         333),
+                                List.of("minecraft:ice",                333),
+                                List.of("minecraft:clay",               333),
+                                List.of("minecraft:powder_snow_bucket", 333),
+                                List.of("minecraft:water_bucket",       1000),
+                                List.of("minecraft:packed_ice",         1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
