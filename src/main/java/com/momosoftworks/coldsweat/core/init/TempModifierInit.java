@@ -86,36 +86,9 @@ public class TempModifierInit
                 Block[] effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toArray(Block[]::new);
 
                 // Get block predicate
-                Map<String, Predicate<BlockState>> blockPredicates = new HashMap<>();
-                if (effectBuilder.size() == 6 && effectBuilder.get(5) instanceof String)
-                {
-                    // Separate comma-delineated predicates
-                    String[] predicateList = ((String) effectBuilder.get(5)).split(",");
-
-                    // Iterate predicates
-                    for (String predicate : predicateList)
-                    {
-                        // Split predicate into key-value pairs separated by "="
-                        String[] pair = predicate.split("=");
-                        String key = pair[0];
-                        String value = pair[1];
-
-                        // Get the property with the given name
-                        Property<?> property = effectBlocks[0].getStateDefinition().getProperty(key);
-                        if (property != null)
-                        {
-                            // Parse the desired value for this property
-                            property.getValue(value).ifPresent(propertyValue ->
-                            {
-                                // Add a new predicate to the list
-                                blockPredicates.put(predicate, state ->
-                                {   // If the value matches, this predicate returns true
-                                    return state.getValue(property).equals(propertyValue);
-                                });
-                            });
-                        }
-                    }
-                }
+                Map<String, Predicate<BlockState>> blockPredicates = effectBuilder.size() < 6 || !(effectBuilder.get(5) instanceof String)
+                                                                   ? new HashMap<>()
+                                                                   : ConfigHelper.getBlockStatePredicates(effectBlocks[0], (String) effectBuilder.get(5));
 
                 event.register(new BlockTempConfig(blockPredicates, effectBlocks)
                 {
