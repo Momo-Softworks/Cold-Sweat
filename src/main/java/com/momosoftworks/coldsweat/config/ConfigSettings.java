@@ -487,7 +487,7 @@ public class ConfigSettings
 
         COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
 
-        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(ColdSweatConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
+        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
         encoder ->
         {
             CompoundTag tag = new CompoundTag();
@@ -506,9 +506,9 @@ public class ConfigSettings
             }
             return list;
         },
-        saver -> ColdSweatConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
+        saver -> WorldSettingsConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(ColdSweatConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
+        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
         encoder ->
         {
             CompoundTag tag = new CompoundTag();
@@ -527,9 +527,9 @@ public class ConfigSettings
             }
             return list;
         },
-        saver -> ColdSweatConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
+        saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_EFFECT = addSetting("hearth_effect", () -> ColdSweatConfig.getInstance().getHearthEffect());
+        HEARTH_EFFECT = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthEffect());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
