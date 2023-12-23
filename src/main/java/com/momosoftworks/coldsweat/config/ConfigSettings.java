@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -529,7 +528,7 @@ public class ConfigSettings
         },
         saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_EFFECT = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthEffect());
+        HEARTH_EFFECT = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthStrength());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);

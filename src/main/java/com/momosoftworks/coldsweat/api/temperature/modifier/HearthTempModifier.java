@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.config.ColdSweatConfig;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
@@ -26,7 +26,7 @@ public class HearthTempModifier extends TempModifier
         double min = ConfigSettings.MIN_TEMP.get();
         double max = ConfigSettings.MAX_TEMP.get();
         double mid = (min + max) / 2;
-        double hearthStrength = ColdSweatConfig.getInstance().getHearthEffect();
+        double hearthStrength = WorldSettingsConfig.getInstance().getHearthStrength();
 
         int insulationStrength = this.getNBT().getInt("Strength");
 
