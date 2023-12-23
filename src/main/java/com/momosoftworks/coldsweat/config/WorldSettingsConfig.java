@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.config;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorldSettingsConfig
 {
@@ -32,6 +34,10 @@ public class WorldSettingsConfig
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps;
+
+    public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -244,6 +250,25 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
+        BUILDER.push("Hearth");
+        hearthEffect = BUILDER
+                .comment("How strong the hearth is")
+                .defineInRange("Hearth Strength", 0.5, 0, 1.0);
+        hearthSpreadWhitelist = BUILDER
+                .comment("List of additional blocks that the hearth can spread through",
+                         "Use this list if the hearth isn't spreading through particular blocks that it should")
+                .defineListAllowEmpty(Arrays.asList("Hearth Spread Whitelist"), () -> ListBuilder.begin(
+                                              "minecraft:iron_bars",
+                                              "#minecraft:leaves").build(),
+                                      o -> o instanceof String);
+        hearthSpreadBlacklist = BUILDER
+                .comment("List of additional blocks that the hearth cannot spread through",
+                         "Use this list if the hearth is spreading through particular blocks that it shouldn't")
+                .defineList("Hearth Spread Blacklist", Arrays.asList(
+                            ),
+                            o -> o instanceof String);
+        BUILDER.pop();
+
         /* Serene Seasons config */
         if (CompatManager.isSereneSeasonsLoaded())
         {
@@ -323,6 +348,16 @@ public class WorldSettingsConfig
     {   return caveInsulation.get();
     }
 
+    public double getHearthStrength()
+    {   return hearthEffect.get();
+    }
+    public List<String> getHearthSpreadWhitelist()
+    {   return (List<String>) hearthSpreadWhitelist.get();
+    }
+    public List<String> getHearthSpreadBlacklist()
+    {   return (List<String>) hearthSpreadBlacklist.get();
+    }
+
     public Double[] getSummerTemps()
     {   return summerTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
@@ -359,5 +394,12 @@ public class WorldSettingsConfig
     }
     public void setDimensionTempOffsets(List<? extends List<?>> offsets)
     {   dimensionOffsets.set(offsets);
+    }
+
+    public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
+    {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    }
+    public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
+    {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
     }
 }

@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -10,10 +9,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ColdSweatConfig
 {
@@ -37,10 +32,6 @@ public class ColdSweatConfig
 
     public static final ForgeConfigSpec.ConfigValue<Integer> gracePeriodLength;
     public static final ForgeConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
-
-    public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
 
@@ -146,26 +137,6 @@ public class ColdSweatConfig
                 .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
         BUILDER.pop();
 
-        BUILDER.push("Hearth");
-            hearthEffect = BUILDER
-                    .comment("How strong the hearth is")
-                    .defineInRange("Hearth Strength", defaultDiff.getOrDefault("hearth_strength", 0.5), 0, 1.0);
-            hearthSpreadWhitelist = BUILDER
-                    .comment("List of additional blocks that the hearth can spread through",
-                             "Use this list if the hearth isn't spreading through particular blocks that it should")
-                    .defineListAllowEmpty(Collections.singletonList("Hearth Spread Whitelist"), () -> Arrays.asList(
-                            "minecraft:iron_bars",
-                            "#minecraft:leaves"
-                    ),
-                    o -> o instanceof String);
-            hearthSpreadBlacklist = BUILDER
-                    .comment("List of additional blocks that the hearth cannot spread through",
-                             "Use this list if the hearth is spreading through particular blocks that it shouldn't")
-                    .defineListAllowEmpty(Collections.singletonList("Hearth Spread Blacklist"), () -> Arrays.asList(
-                    ),
-                    o -> o instanceof String);
-        BUILDER.pop();
-
         BUILDER.push("Cold Soul Fire");
         coldSoulFire = BUILDER
                 .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
@@ -242,16 +213,6 @@ public class ColdSweatConfig
 
     public boolean isSoulFireCold()
     {   return coldSoulFire.get();
-    }
-
-    public double getHearthEffect()
-    {   return hearthEffect.get();
-    }
-    public List<String> getHearthSpreadWhitelist()
-    {   return (List<String>) hearthSpreadWhitelist.get();
-    }
-    public List<String> getHearthSpreadBlacklist()
-    {   return (List<String>) hearthSpreadBlacklist.get();
     }
 
     public boolean isSleepChecked()
@@ -371,18 +332,6 @@ public class ColdSweatConfig
     public synchronized void setColdMovement(boolean movement)
     {   synchronized (coldMovement)
         {   coldMovement.set(movement);
-        }
-    }
-
-    public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {   synchronized (hearthSpreadWhitelist)
-        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
-        }
-    }
-    public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {
-        synchronized (hearthSpreadBlacklist)
-        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
         }
     }
 
