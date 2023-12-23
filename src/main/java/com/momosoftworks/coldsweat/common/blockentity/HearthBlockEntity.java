@@ -23,6 +23,7 @@ import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import net.minecraft.client.Minecraft;
@@ -160,7 +161,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         BlockPos pos = event.getPosition();
         Level level = event.getLevel();
         if (level == this.level
-        && CSMath.withinCube(pos, this.getBlockPos(), this.getMaxRange()) && pathLookup.contains(pos)
+        && CSMath.withinCube(pos, this.getBlockPos(), this.getMaxRange())
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {   this.sendBlockUpdate();
         }
@@ -266,7 +267,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         // Reset if a nearby block has been updated
         if (forceRebuild || (rebuildCooldown <= 0 && isRebuildQueued))
-        {   this.updateNotifiedPaths();
+        {   this.resetPaths();
         }
 
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
@@ -285,7 +286,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 }
 
                 if (paths.isEmpty())
-                    this.addPath(new SpreadPath(pos).setOrigin(pos));
+                {
+                    // If pipe is directly attached to top, spread directly through the pipe instead of outwards
+                    if (isPipe(level.getBlockState(pos.above(2))))
+                    {   this.addPath(new SpreadPath(pos.above(2)).setOrigin(pos.above(2)));
+                        pathLookup.add(pos.above());
+                    }
+                    // Spread normally
+                    else this.addPath(new SpreadPath(pos).setOrigin(pos));
+                }
 
                 // Mark as not spreading if all paths are frozen
                 if (this.frozenPaths >= paths.size())
@@ -380,8 +389,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                         SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                                         // If the BlockState is a pipe, check if the new path is following the direction of the pipe
-                                        if (this.canSpreadThroughPipes(tryPos, state, newPath, direction)
-                                        && !WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction))
+                                        if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
+                                        && this.isValidPipeAt(tryPos, state, newPath, direction))
                                         {   // Add the new path to the list
                                             paths.add(newPath);
                                         }
@@ -602,16 +611,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         });
     }
 
-    private boolean canSpreadThroughPipes(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
+    private boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
     {
         if (CREATE_LOADED)
         {
             Block block = fromState.getBlock();
-            if (!(block instanceof FluidPipeBlock) && !(block instanceof GlassFluidPipeBlock))
+            if (!(block instanceof FluidPipeBlock || block instanceof GlassFluidPipeBlock || block instanceof EncasedPipeBlock))
             {   return true;
             }
             if ((block instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction)))
-            || (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis()))
+            || (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis())
+            || (block instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction))))
             {   newPath.setOrigin(newPos);
                 return true;
             }
@@ -621,11 +631,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     private boolean isPipe(BlockState state)
-    {
-        return CREATE_LOADED && (state.getBlock() instanceof FluidPipeBlock || state.getBlock() instanceof GlassFluidPipeBlock);
+    {   return CREATE_LOADED && (state.getBlock() instanceof FluidPipeBlock || state.getBlock() instanceof GlassFluidPipeBlock || state.getBlock() instanceof EncasedPipeBlock);
     }
 
-    void updateNotifiedPaths()
+    void resetPaths()
     {
         // Reset cooldown
         this.rebuildCooldown = 100;
