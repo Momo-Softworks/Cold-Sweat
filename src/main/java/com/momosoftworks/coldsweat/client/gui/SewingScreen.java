@@ -22,7 +22,7 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
         super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table"));
         this.leftPos = 0;
         this.topPos = 0;
-        this.imageWidth = 175;
+        this.imageWidth = 176;
         this.imageHeight = 201;
     }
 
