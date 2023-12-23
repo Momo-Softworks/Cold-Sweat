@@ -474,7 +474,7 @@ public class WorldSettingsConfig
         hearthSpreadWhitelist = BUILDER
                 .comment("List of additional blocks that the hearth can spread through",
                          "Use this list if the hearth isn't spreading through particular blocks that it should")
-                .defineListAllowEmpty(List.of("Hearth Spread Whitelist"), ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Hearth Spread Whitelist"), () -> ListBuilder.begin(
                                               "minecraft:iron_bars",
                                               "#minecraft:leaves").build(),
                                       o -> o instanceof String);
