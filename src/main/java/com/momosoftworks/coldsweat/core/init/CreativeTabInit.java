@@ -29,11 +29,11 @@ public class CreativeTabInit
                         ModItems.MINECART_INSULATION.getDefaultInstance(),
                         ModItems.INSULATED_MINECART.getDefaultInstance(),
                         ObjectBuilder.build(() ->
-                                            {   ItemStack stack = ModItems.SOULSPRING_LAMP.getDefaultInstance();
-                                                stack.getOrCreateTag().putBoolean("isOn", true);
-                                                stack.getOrCreateTag().putDouble("fuel", 64);
-                                                return stack;
-                                            }),
+                        {   ItemStack stack = ModItems.SOULSPRING_LAMP.getDefaultInstance();
+                            stack.getOrCreateTag().putBoolean("isOn", true);
+                            stack.getOrCreateTag().putDouble("fuel", 64);
+                            return stack;
+                        }),
                         ModItems.SOUL_SPROUT.getDefaultInstance(),
                         ModItems.THERMOMETER.getDefaultInstance(),
                         ModItems.THERMOLITH.getDefaultInstance(),
