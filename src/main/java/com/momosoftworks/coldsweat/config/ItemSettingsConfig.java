@@ -68,14 +68,14 @@ public final class ItemSettingsConfig
 
         iceboxItems = BUILDER
                 .defineListAllowEmpty(Arrays.asList("Icebox"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:snowball",           -37),
-                                Arrays.asList("minecraft:clay_ball",          -37),
-                                Arrays.asList("minecraft:snow_block",         -333),
-                                Arrays.asList("minecraft:ice",                -333),
-                                Arrays.asList("minecraft:clay",               -333),
-                                Arrays.asList("minecraft:powder_snow_bucket", -333),
-                                Arrays.asList("minecraft:water_bucket",       -1000),
-                                Arrays.asList("minecraft:packed_ice",         -1000)
+                                Arrays.asList("minecraft:snowball",           37),
+                                Arrays.asList("minecraft:clay_ball",          37),
+                                Arrays.asList("minecraft:snow_block",         333),
+                                Arrays.asList("minecraft:ice",                333),
+                                Arrays.asList("minecraft:clay",               333),
+                                Arrays.asList("minecraft:powder_snow_bucket", 333),
+                                Arrays.asList("minecraft:water_bucket",       1000),
+                                Arrays.asList("minecraft:packed_ice",         1000)
                         ).build(),
                         it ->
                         {
