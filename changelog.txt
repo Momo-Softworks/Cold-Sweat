@@ -1687,3 +1687,77 @@ Technical Changes:
 Fixes:
 - (1.16) Fixed crash when paired with mods that change entity models (like Epic Fight)
 - (1.20) Fixed crash when taking burning/freezing damage
+- (1.19.4) Fixed crash due to mixin mapping issue
+- (1.19.4) Fixed tooltips not rendering
+
+Technical Changes:
+- (1.20) Changed to NeoForge
+- Added a ton of attributes for developers to use:
+      - cold_dampening: Slows the rate at which the player freezes. Negative values accelerate it.
+      - heat_dampening: Slows the rate at which the player overheats. Negative values accelerate it.
+      - burning_point_offset: Applies an offset to the player's maximum habitable world temperature.
+      - freezing_point_offset: Applies an offset to the player's minimum habitable world temperature.
+      - cold_resistance: A multiplier applied to incoming freezing damage (from 0 to 1, with 1 being full resistance).
+      - heat_resistance: A multiplier applied to incoming burning damage (from 0 to 1, with 1 being full resistance).
+      - core_temperature_offset: An offset applied to the player's core temperature every tick.
+      - base_temperature_offset: An offset that is added to the player's body temperature. This can be applied once and the offset is persistent.
+      - world_temperature_offset: Applies an offset to the player's perceived world temperature.
+      The following attributes are read-only values that mirror the player's temperatures:
+      - world_temperature: The player's current world temperature.
+      - burning_point: The player's maximum habitable world temperature.
+      - freezing_point: The player's minimum habitable world temperature.
+      - core_temperature: The player's core body temperature.
+      - base_temperature: The player's base body temperature.
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.3
+- Multiple hearth updates:
+      - Updated model to be more "Minecraft-y"
+      - Added standard fluid support:
+            - Water and lava can now be piped into the sides (except the face) or bottom of the block
+            - Water can be extracted from the sides (except the face), and lava can be extracted from the bottom
+      - Adjusted the fuel values of some cold items. Clay and water are now much more effective
+            ! 'item-settings.toml' will need to be deleted for this change to take effect
+- Curios can now be configured to provide insulation
+
+Fixes:
+- Fixed missing lang entries for custom attributes (Cadentem on Discord)
+- Fixed crash when porting existing worlds from Cold Sweat 2.1 to 2.2
+- (1.16) Fixed llama fur not growing after being sheared
+- Fixed issue when using the "getTemperatureAt()" method after the player has quit and re-joined a world
+- Fixed Create pipes still requiring a roof to transmit hearth air
+
+Technical Changes:
+- The default TempModifiers an entity gets upon spawning are now configurable via GatherDefaultTempModifiersEvent
+- Setting the cold_resistance or heat_resistance attributes to 100 will now cause that temperature to not affect the player at all, rather than just slowing its effect to 0
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.4
+- Changed the hearth recipe to better reflect its new design
+- Adjusted the protection & durability values for fur and hoglin armor to make them much more viable to actually wear
+      - New protection values (helmet, chest, legs, boots):
+            - Hoglin hide: 3 6 5 2
+            - Fur: 2 5 4 1
+      - Doubled durability
+- Further adjustments to default fuel items for icebox, boiler, and hearth:
+      - Added logs and planks to the list of burnable items
+      - Increased the effectiveness of clay and water
+- Improved functionality of the Hearth with Create pipes:
+      - Pipes can now be directly attached to the top of the hearth to extract the air without having to box it in
+      - Hearth spreading now works through encased pipes
+- Improved block update  detection for the hearth
+
+Fixes:
+- (1.16) Fixed insulator tooltips rendering the bar icon incorrectly
+- (1.19, 1.18, 1.16) Fixed chameleon appearing to float over the player's head when being carried
+- Fixed texture inconsistencies between the normal and frosted variants of the icebox
+
+Technical Changes:
+- Moved hearth spread settings to world-settings.toml
+      ! This will delete existing configs in main.toml. Back them up first!
+
+Translation Updates:
+- Updated Russian translation (by @rey_zex on Discord)
+- Updated Italian translation (by @sniper_foxy on Discord)
