@@ -5,10 +5,12 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.Property;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
@@ -17,6 +19,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ConfigHelper
@@ -177,6 +180,38 @@ public class ConfigHelper
             }
         }
         return map;
+    }
+
+    public static Map<String, Predicate<BlockState>> getBlockStatePredicates(Block block, String predicates)
+    {
+        Map<String, Predicate<BlockState>> blockPredicates = new HashMap<>();
+        // Separate comma-delineated predicates
+        String[] predicateList = predicates.split(",");
+
+        // Iterate predicates
+        for (String predicate : predicateList)
+        {
+            // Split predicate into key-value pairs separated by "="
+            String[] pair = predicate.split("=");
+            String key = pair[0];
+            String value = pair[1];
+
+            // Get the property with the given name
+            Property<?> property = block.getStateDefinition().getProperty(key);
+            if (property != null)
+            {
+                // Parse the desired value for this property
+                property.getValue(value).ifPresent(propertyValue ->
+                {
+                    // Add a new predicate to the list
+                    blockPredicates.put(predicate, state ->
+                    {   // If the value matches, this predicate returns true
+                        return state.getValue(property).equals(propertyValue);
+                    });
+                });
+            }
+        }
+        return blockPredicates;
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
