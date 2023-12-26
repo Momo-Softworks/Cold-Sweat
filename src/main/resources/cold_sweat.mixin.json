@@ -4,6 +4,7 @@
   "package": "com.momosoftworks.coldsweat.mixin",
   "minVersion": "0.8.5",
   "client": [
+    "MixinChatClicked",
     "MixinEffectsScreen",
     "MixinGoatModel",
     "MixinHeartRender",
