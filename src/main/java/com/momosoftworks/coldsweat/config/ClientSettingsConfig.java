@@ -19,14 +19,11 @@ public class ClientSettingsConfig
     private static final ForgeConfigSpec.BooleanValue celsius;
     private static final ForgeConfigSpec.IntValue tempOffset;
 
-    private static final ForgeConfigSpec.IntValue bodyIconX;
-    private static final ForgeConfigSpec.IntValue bodyIconY;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
 
-    private static final ForgeConfigSpec.IntValue bodyReadoutX;
-    private static final ForgeConfigSpec.IntValue bodyReadoutY;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
 
-    private static final ForgeConfigSpec.IntValue worldGaugeX;
-    private static final ForgeConfigSpec.IntValue worldGaugeY;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
 
     private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
     private static final ForgeConfigSpec.BooleanValue iconBobbing;
@@ -39,79 +36,64 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue highContrast;
 
+    private static final ForgeConfigSpec.BooleanValue enableCreativeWarning;
+
 
     static 
     {
-        showConfigButton = BUILDER
-                .comment("Show the config menu button in the Options menu")
-                .define("Enable In-Game Config", true);
-        configButtonPos = BUILDER
-                .comment("The position (offset) of the config button on the screen")
-                .defineList("Config Button Position", Arrays.asList(0, 0),
-                it -> it instanceof Integer);
-
         /*
          Temperature Display Preferences
          */
-        BUILDER.push("Temperature display preferences");
-        celsius = BUILDER
-                .comment("Sets all temperatures to be displayed in Celsius")
-                .define("Celsius", false);
-        tempOffset = BUILDER
-                .comment("Visually offsets the world temperature to better match the user's definition of \"hot\" and \"cold\"")
-                .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
-        BUILDER.pop();
-
-        /*
-         Body Temp Position
-         */
-        BUILDER.push("Position of the 'Steve Head' temperature icon above the hotbar");
-        bodyIconX = BUILDER
-                .comment("The x position of the icon relative to default")
-                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        bodyIconY = BUILDER
-                .comment("The y position of the icon relative to default")
-                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        BUILDER.pop();
-
-
-        BUILDER.push("Position of the temperature readout below the icon");
-        bodyReadoutX = BUILDER
-                .comment("The x position of the readout relative to default")
-                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        bodyReadoutY = BUILDER
-                .comment("The y position of the readout relative to default")
-                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        BUILDER.pop();
-
-        BUILDER.push("Position of the world temperature gauge beside the hotbar");
-        worldGaugeX = BUILDER
-                .comment("The x position of the gauge relative to default")
-                .defineInRange("X Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        worldGaugeY = BUILDER
-                .comment("The y position of the gauge relative to default")
-                .defineInRange("Y Offset", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        BUILDER.push("Temperature Preferences");
+            celsius = BUILDER
+                    .comment("Sets all temperatures to be displayed in Celsius")
+                    .define("Celsius", false);
+            tempOffset = BUILDER
+                    .comment("Visually offsets the world temperature to better match the user's definition of \"hot\" and \"cold\"")
+                    .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("UI Options");
-        customHotbarLayout = BUILDER
-            .define("Custom hotbar layout", true);
-        iconBobbing = BUILDER
-            .comment("Controls whether UI elements will shake when in critical conditions")
-            .define("Icon Bobbing", true);
+            customHotbarLayout = BUILDER
+                .define("Custom hotbar layout", true);
+            iconBobbing = BUILDER
+                .comment("Controls whether UI elements will shake when in critical conditions")
+                .define("Icon Bobbing", true);
+            bodyIconPos = BUILDER
+                    .comment("The position of the body temperature icon relative to default")
+                    .defineList("Body Temperature Icon Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
+            bodyReadoutPos = BUILDER
+                    .comment("The position of the body temperature readout relative to default")
+                    .defineList("Body Temperature Readout Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
+            worldGaugePos = BUILDER
+                    .comment("The position of the world temperature gauge relative to default")
+                    .defineList("World Temperature UI Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
         BUILDER.pop();
 
-        hearthDebug = BUILDER
-            .comment("Displays areas that the Hearth is affecting when the F3 debug menu is open")
-            .define("Hearth Debug", true);
+        BUILDER.push("Accessibility");
+            distortionEffects = BUILDER
+                    .comment("Enables visual distortion effects when the player is too hot or cold")
+                    .define("Distortion Effects", true);
+            highContrast = BUILDER
+                    .comment("Enables high contrast mode for UI elements")
+                    .define("High Contrast", false);
+        BUILDER.pop();
 
-        distortionEffects = BUILDER
-                .comment("Enables visual distortion effects when the player is too hot or cold")
-                .define("Distortion Effects", true);
-
-        highContrast = BUILDER
-                .comment("Enables high contrast mode for UI elements")
-                .define("High Contrast", false);
+        BUILDER.push("Misc");
+            showConfigButton = BUILDER
+                    .comment("Show the config menu button in the Options menu")
+                    .define("Enable In-Game Config", true);
+            configButtonPos = BUILDER
+                    .comment("The position (offset) of the config button on the screen")
+                    .defineList("Config Button Position", Arrays.asList(0, 0),
+                                it -> it instanceof Integer);
+            enableCreativeWarning = BUILDER
+                    .comment("Warns the player about a bug that clears armor insulation when in creative mode")
+                    .define("Enable Creative Mode Warning", true);
+            hearthDebug = BUILDER
+                    .comment("Displays areas that the Hearth is affecting when the F3 debug menu is open")
+                    .define("Hearth Debug", true);
+        BUILDER.pop();
 
         SPEC = BUILDER.build();
     }
@@ -154,24 +136,24 @@ public class ClientSettingsConfig
     }
 
     public int getBodyIconX()
-    {   return bodyIconX.get();
+    {   return bodyIconPos.get().get(0);
     }
     public int getBodyIconY()
-    {   return bodyIconY.get();
+    {   return bodyIconPos.get().get(1);
     }
 
     public int getBodyReadoutX()
-    {   return bodyReadoutX.get();
+    {   return bodyReadoutPos.get().get(0);
     }
     public int getBodyReadoutY()
-    {   return bodyReadoutY.get();
+    {   return bodyReadoutPos.get().get(1);
     }
 
     public int getWorldGaugeX()
-    {   return worldGaugeX.get();
+    {   return worldGaugePos.get().get(0);
     }
     public int getWorldGaugeY()
-    {   return worldGaugeY.get();
+    {   return worldGaugePos.get().get(1);
     }
 
     public boolean customHotbarEnabled()
@@ -184,6 +166,10 @@ public class ClientSettingsConfig
 
     public boolean isHearthDebugEnabled()
     {   return hearthDebug.get();
+    }
+
+    public boolean isCreativeWarningEnabled()
+    {   return enableCreativeWarning.get();
     }
 
     /*
@@ -199,24 +185,24 @@ public class ClientSettingsConfig
     }
 
     public void setBodyIconX(int pos)
-    {   bodyIconX.set(pos);
+    {   bodyIconPos.set(Arrays.asList(pos, getBodyIconY()));
     }
     public void setBodyIconY(int pos)
-    {   bodyIconY.set(pos);
+    {   bodyIconPos.set(Arrays.asList(getBodyIconX(), pos));
     }
 
     public void setBodyReadoutX(int pos)
-    {   bodyReadoutX.set(pos);
+    {   bodyReadoutPos.set(Arrays.asList(pos, getBodyReadoutY()));
     }
     public void setBodyReadoutY(int pos)
-    {   bodyReadoutY.set(pos);
+    {   bodyReadoutPos.set(Arrays.asList(getBodyReadoutX(), pos));
     }
 
     public void setWorldGaugeX(int pos)
-    {   worldGaugeX.set(pos);
+    {   worldGaugePos.set(Arrays.asList(pos, getWorldGaugeY()));
     }
     public void setWorldGaugeY(int pos)
-    {   worldGaugeY.set(pos);
+    {   worldGaugePos.set(Arrays.asList(getWorldGaugeX(), pos));
     }
 
     public void setCustomHotbar(boolean enabled)
@@ -242,10 +228,14 @@ public class ClientSettingsConfig
     }
 
     public boolean areDistortionsEnabled()
-    {   return ClientSettingsConfig.distortionEffects.get();
+    {   return distortionEffects.get();
     }
     public void setDistortionsEnabled(boolean sway)
-    {   ClientSettingsConfig.distortionEffects.set(sway);
+    {   distortionEffects.set(sway);
+    }
+
+    public void setCreativeWarningEnabled(boolean enabled)
+    {   enableCreativeWarning.set(enabled);
     }
 
 
