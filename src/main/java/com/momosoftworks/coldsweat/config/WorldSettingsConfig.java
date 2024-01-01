@@ -476,7 +476,10 @@ public class WorldSettingsConfig
                          "Use this list if the hearth isn't spreading through particular blocks that it should")
                 .defineListAllowEmpty(List.of("Hearth Spread Whitelist"), () -> ListBuilder.begin(
                                               "minecraft:iron_bars",
-                                              "#minecraft:leaves").build(),
+                                              "#minecraft:leaves")
+                                          .addIf(CompatManager.isCreateLoaded(),
+                                              () -> "create:encased_fluid_pipe")
+                                          .build(),
                                       o -> o instanceof String);
         hearthSpreadBlacklist = BUILDER
                 .comment("List of additional blocks that the hearth cannot spread through",
