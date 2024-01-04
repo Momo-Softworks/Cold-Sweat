@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -119,10 +120,10 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the button is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the button when hovered.
      */
-    protected void addButton(String id, Side side, Supplier<String> dynamicLabel, Consumer<Button> onClick,
-                             boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
+    protected void addButton(String id, Side side, Supplier<Component> dynamicLabel, Consumer<Button> onClick,
+                             boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
     {
-        String label = dynamicLabel.get();
+        Component label = dynamicLabel.get();
 
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
         int buttonX = this.width / 2;
@@ -132,10 +133,10 @@ public abstract class AbstractConfigPage extends Screen
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
         // Make the button
-        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, Component.literal(label), button1 ->
+        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, label, button1 ->
         {
             onClick.accept(button1);
-            button1.setMessage(Component.literal(dynamicLabel.get()));
+            button1.setMessage(dynamicLabel.get());
         })
         {
             @Override
@@ -153,9 +154,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+Component.translatable("cold_sweat.config.clientside_warning").getString()+"§r");
-            tooltip = tooltipList.toArray(new String[0]);
+        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip = tooltipList.toArray(new Component[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
@@ -181,7 +182,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param tooltip The tooltip of the input when hovered.
      */
     protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> onValueWrite, Consumer<EditBox> onInit,
-                                   boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
+                                   boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
         int xOffset = side == Side.LEFT ? -82 : 151;
@@ -245,9 +246,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+Component.translatable("cold_sweat.config.clientside_warning").getString()+"§r");
-            tooltip = tooltipList.toArray(new String[0]);
+        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip = tooltipList.toArray(new Component[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
@@ -275,7 +276,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param tooltip The tooltip of the panel when hovered.
      */
     protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
-                                     boolean requireOP, boolean setsCustomDifficulty, boolean clientside, String... tooltip)
+                                     boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
     {
         int xOffset = side == Side.LEFT ? -97 : 136;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
@@ -345,9 +346,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<String> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add("§8"+Component.translatable("cold_sweat.config.clientside_warning").getString()+"§r");
-            tooltip = tooltipList.toArray(new String[0]);
+        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip = tooltipList.toArray(new Component[0]);
         }
         // Assign the tooltip
         this.setTooltip(id, tooltip);
@@ -491,12 +492,11 @@ public abstract class AbstractConfigPage extends Screen
         return this.widgetBatches.get(id);
     }
 
-    protected void setTooltip(String id, String[] tooltip)
+    protected void setTooltip(String id, Component[] tooltip)
     {
         List<FormattedText> tooltipList = new ArrayList<>();
-        for (String string : tooltip)
-        {
-            tooltipList.addAll(font.getSplitter().splitLines(string, 300, Style.EMPTY));
+        for (Component text : tooltip)
+        {   tooltipList.addAll(font.getSplitter().splitLines(text, 300, Style.EMPTY));
         }
         this.tooltips.put(id, tooltipList);
     }
