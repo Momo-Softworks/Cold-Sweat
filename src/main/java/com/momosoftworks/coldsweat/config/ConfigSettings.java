@@ -88,6 +88,7 @@ public class ConfigSettings
     public static final ValueHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final ValueHolder<Map<ResourceLocation, Integer>> GOAT_BIOMES;
+    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -148,16 +149,16 @@ public class ConfigSettings
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
+
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
         encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
         decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
-                                                            {
-                                                                Temperature.Units units = entry.getValue().getC();
+                                                            {   Temperature.Units units = entry.getValue().getC();
                                                                 double min = Temperature.convertUnits(entry.getValue().getA(), Temperature.Units.MC, units, true);
                                                                 double max = Temperature.convertUnits(entry.getValue().getB(), Temperature.Units.MC, units, true);
-                                                                return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                                                return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
                                                             })
                                                             .collect(Collectors.toList())));
 
@@ -166,26 +167,33 @@ public class ConfigSettings
         decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
-                                                            {
-                                                                Temperature.Units units = entry.getValue().getC();
+                                                            {   Temperature.Units units = entry.getValue().getC();
                                                                 double min = Temperature.convertUnits(entry.getValue().getA(), Temperature.Units.MC, units, false);
                                                                 double max = Temperature.convertUnits(entry.getValue().getB(), Temperature.Units.MC, units, false);
-                                                                return Arrays.asList(entry.getKey().toString(), min, max, units);
+                                                                return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
                                                             })
                                                             .collect(Collectors.toList())));
 
-        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures()),
+        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true),
         encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionTemps"),
         decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionTemps"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
-                                                     .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
+                                                     .map(entry ->
+                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+                                                     })
                                                      .collect(Collectors.toList())));
 
-        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets()),
+        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false),
         encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionOffsets"),
         decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionOffsets"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
-                                                     .map(entry -> Arrays.asList(entry.getKey().toString(), entry.getValue().getFirst(), entry.getValue().getSecond().toString()))
+                                                     .map(entry ->
+                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+                                                     })
                                                      .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
