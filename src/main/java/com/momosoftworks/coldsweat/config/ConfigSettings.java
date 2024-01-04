@@ -89,6 +89,7 @@ public class ConfigSettings
     public static final ValueHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final ValueHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
+    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -487,6 +488,19 @@ public class ConfigSettings
             }
             return map;
         });
+
+        INSULATED_ENTITIES = addSetting("insulated_entities", () ->
+        EntitySettingsConfig.getInstance().getInsulatedEntities().stream().map(entry ->
+        {
+            String entityID = (String) entry.get(0);
+            double coldInsul = ((Number) entry.get(1)).doubleValue();
+            double hotInsul = entry.size() < 3
+                              ? coldInsul
+                              : ((Number) entry.get(2)).doubleValue();
+
+            return new AbstractMap.SimpleEntry<>(new ResourceLocation(entityID), Pair.of(coldInsul, hotInsul));
+        })
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
         encoder -> ConfigHelper.writeNBTInt(encoder, "BlockRange"),

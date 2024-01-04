@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class EntitySettingsConfig
@@ -34,8 +33,8 @@ public class EntitySettingsConfig
         insulatedEntities = BUILDER
                 .comment("List of entities that will insulate the player when riding them",
                          "The rate at which the player's temperature changes is divided by the resistance value",
-                         "Format: [\"entity_id\", coldResistance, hotResistance]")
-                .defineListAllowEmpty(Collections.singletonList("Insulated Mounts"), () -> Arrays.asList(
+                         "Format: [[\"entity_id\", coldResistance, hotResistance], [\"entity_id\", coldResistance, hotResistance], etc...]")
+                .defineListAllowEmpty(Arrays.asList("Insulated Mounts"), () -> Arrays.asList(
                 ),
                 it ->
                 {
