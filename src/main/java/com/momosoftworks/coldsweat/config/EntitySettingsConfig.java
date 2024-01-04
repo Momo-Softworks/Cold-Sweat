@@ -33,7 +33,7 @@ public class EntitySettingsConfig
         insulatedEntities = BUILDER
                 .comment("List of entities that will insulate the player when riding them",
                          "The rate at which the player's temperature changes is divided by the resistance value",
-                         "Format: [\"entity_id\", coldResistance, hotResistance]")
+                         "Format: [[\"entity_id\", coldResistance, hotResistance], [\"entity_id\", coldResistance, hotResistance], etc...]")
                 .defineListAllowEmpty(List.of("Insulated Mounts"), () -> Arrays.asList(
                 ),
                 it ->
