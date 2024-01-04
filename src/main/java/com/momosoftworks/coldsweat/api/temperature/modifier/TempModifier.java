@@ -54,14 +54,12 @@ public abstract class TempModifier
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
         MinecraftForge.EVENT_BUS.post(pre);
-
         if (pre.isCanceled()) return pre.getTemperature();
 
         this.function = this.calculate(entity, type);
 
         TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
-
         return post.getTemperature();
     }
 
