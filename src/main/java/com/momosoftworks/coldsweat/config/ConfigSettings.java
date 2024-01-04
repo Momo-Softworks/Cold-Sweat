@@ -487,6 +487,19 @@ public class ConfigSettings
             return map;
         });
 
+        INSULATED_ENTITIES = addSetting("insulated_entities", () ->
+        EntitySettingsConfig.getInstance().getInsulatedEntities().stream().map(entry ->
+        {
+            String entityID = (String) entry.get(0);
+            double coldInsul = ((Number) entry.get(1)).doubleValue();
+            double hotInsul = entry.size() < 3
+                              ? coldInsul
+                              : ((Number) entry.get(2)).doubleValue();
+
+            return Map.entry(new ResourceLocation(entityID), Pair.of(coldInsul, hotInsul));
+        })
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
         encoder -> ConfigHelper.writeNBTInt(encoder, "BlockRange"),
         decoder -> decoder.getInt("BlockRange"),

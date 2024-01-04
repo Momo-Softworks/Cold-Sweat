@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.capability;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -10,7 +11,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Mode;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Order;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.EntitySettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.*;
@@ -18,7 +18,6 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -405,7 +404,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void playerRiding(TickEvent.PlayerTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.tickCount % 5 == 0)
+        if (event.phase == TickEvent.Phase.START && !event.player.level.isClientSide() && event.player.tickCount % 5 == 0)
         {
             Player player = event.player;
             if (player.getVehicle() != null)
@@ -413,20 +412,15 @@ public class EntityTempManager
                 Entity mount = player.getVehicle();
                 // If insulated minecart
                 if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
-                {   Temperature.addModifier(player, new MountTempModifier(20, 20).expires(1), Temperature.Type.RATE, false);
+                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Type.RATE);
                 }
                 // If insulated entity (defined in config)
                 else
                 {
-                    EntitySettingsConfig.getInstance().getInsulatedEntities().stream().filter(entry ->
-                    entry.get(0).equals(ForgeRegistries.ENTITIES.getKey(mount.getType()).toString())).findFirst()
-                    .ifPresent(entry ->
-                    {   int warming = ((Number) entry.get(1)).intValue();
-                        int cooling = entry.size() < 3
-                                    ? warming
-                                    : ((Number) entry.get(2)).intValue();
-                        Temperature.addModifier(player, new MountTempModifier(warming, cooling).expires(5), Temperature.Type.RATE, false);
-                    });
+                    Pair<Double, Double> entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(ForgeRegistries.ENTITIES.getKey(mount.getType()));
+                    if (entityInsul != null)
+                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.getFirst(), entityInsul.getSecond()).tickRate(5).expires(5), Temperature.Type.RATE);
+                    }
                 }
             }
         }
