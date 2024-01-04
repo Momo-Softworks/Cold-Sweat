@@ -109,10 +109,17 @@ public class WorldHelper
         return posList;
     }
 
-    public static List<BlockPos> getPositionCube(BlockPos pos, int root, int interval)
+    /**
+     * Returns a cube of BlockPos of the specified size and density
+     * @param pos The center of the cube
+     * @param size The side length of the cube, in intervals
+     * @param interval The length of one interval (distance between each BlockPos)
+     * @return A list of BlockPos
+     */
+    public static List<BlockPos> getPositionCube(BlockPos pos, int size, int interval)
     {
         List<BlockPos> posList = new ArrayList<>();
-        int radius = (root * interval) / 2;
+        int radius = (size * interval) / 2;
 
         for (int x = -radius; x < radius; x += interval)
         {
