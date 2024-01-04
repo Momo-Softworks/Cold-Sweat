@@ -38,7 +38,7 @@ public class BiomeTempModifier extends TempModifier
             BlockPos entPos = entity.blockPosition();
 
             // In the case that the dimension temperature is overridden by config, use that and skip everything else
-            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(dimensionID);
+            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(level.dimension().location());
             if (dimTempOverride != null)
             {   return temp -> temp + Temperature.convertUnits(dimTempOverride.getFirst(), dimTempOverride.getSecond(), Temperature.Units.MC, true);
             }
@@ -85,7 +85,7 @@ public class BiomeTempModifier extends TempModifier
             worldTemp /= Math.max(1, biomeCount);
 
             // Add dimension offset, if present
-            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(dimensionID);
+            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(level.dimension().location());
             if (dimTempOffsetConf != null)
             {   worldTemp += Temperature.convertUnits(dimTempOffsetConf.getFirst(), dimTempOffsetConf.getSecond(), Temperature.Units.MC, false);
             }

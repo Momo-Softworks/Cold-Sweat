@@ -99,7 +99,7 @@ public class Temperature
      * @param entity the entity this modifier should use
      * @param modifiers the modifier(s) being applied to the {@code Temperature}
      */
-    public static double apply(double temp, @Nonnull LivingEntity entity, Type type, @Nonnull TempModifier... modifiers)
+    public static double apply(double temp, LivingEntity entity, Type type, TempModifier... modifiers)
     {
         double temp2 = temp;
         for (TempModifier modifier : modifiers)
@@ -121,7 +121,7 @@ public class Temperature
      * @param entity the entity this list of modifiers should use
      * @param modifiers the list of modifiers being applied to the player's temperature
      */
-    public static double apply(double temp, @Nonnull LivingEntity entity, Type type, @Nonnull Collection<TempModifier> modifiers)
+    public static double apply(double temp, LivingEntity entity, Type type, Collection<TempModifier> modifiers)
     {
         return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
     }
@@ -246,15 +246,12 @@ public class Temperature
                         if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID())) && !replace)
                         {   return;
                         }
-
                         // Get the start of the iterator & which direction it's going
                         int start = forward ? 0 : (modifiers.size() - 1);
-
                         // Iterate through the list (backwards if "forward" is false)
                         for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
                         {
                             TempModifier mod = modifiers.get(i);
-
                             // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
                             if (predicate.test(mod))
                             {
@@ -268,7 +265,6 @@ public class Temperature
                                 return;
                             }
                         }
-
                         // Add the modifier if the insertion check fails
                         if (params.mode != Addition.Mode.REPLACE)
                         {   modifiers.add(newMod);
