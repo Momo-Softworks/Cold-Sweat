@@ -163,7 +163,7 @@ public class ConfigHelper
         return map;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source)
+    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source, boolean absolute)
     {
         Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
         for (List<?> entry : source)
@@ -173,7 +173,7 @@ public class ConfigHelper
                 ResourceLocation dimensionID = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                map.put(dimensionID, Pair.of(temp, units));
+                map.put(dimensionID, Pair.of(Temperature.convertUnits(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
             {   ColdSweat.LOGGER.error("Error parsing dimension temp config: " + entry.toString() + ".");

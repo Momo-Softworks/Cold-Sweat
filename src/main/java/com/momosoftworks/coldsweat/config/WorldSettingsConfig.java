@@ -55,14 +55,16 @@ public class WorldSettingsConfig
             .defineList("Dimension Temperature Offsets", Arrays.asList(
                     Arrays.asList("minecraft:the_nether", 1.0),
                     Arrays.asList("minecraft:the_end", -0.1)
-            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number
+                  && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
 
         dimensionTemps = BUILDER
             .comment("Overrides existing dimension temperatures & offsets",
                      "Also overrides temperatures of all biomes in the dimension")
             .defineList("Dimension Temperatures", Arrays.asList(
                     // No default values
-            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number
+                  && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
 
         BUILDER.pop();
 
@@ -381,6 +383,13 @@ public class WorldSettingsConfig
     {   biomeOffsets.set(offsets);
     }
 
+    public void setDimensionTemperatures(List<? extends List<?>> temps)
+    {   dimensionTemps.set(temps);
+    }
+    public void setDimensionTempOffsets(List<? extends List<?>> offsets)
+    {   dimensionOffsets.set(offsets);
+    }
+
     public void setBlockTemps(List<? extends List<Object>> temps)
     {   blockTemps.set(temps);
     }
@@ -390,13 +399,6 @@ public class WorldSettingsConfig
 
     public void setCaveInsulation(double insulation)
     {   caveInsulation.set(insulation);
-    }
-
-    public void setDimensionTemperatures(List<? extends List<?>> temps)
-    {   dimensionTemps.set(temps);
-    }
-    public void setDimensionTempOffsets(List<? extends List<?>> offsets)
-    {   dimensionOffsets.set(offsets);
     }
 
     public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
