@@ -1761,3 +1761,10 @@ Technical Changes:
 Translation Updates:
 - Updated Russian translation (by @rey_zex on Discord)
 - Updated Italian translation (by @sniper_foxy on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.5
+
+Fixes:
+- (1.18) Fixed temperature not resetting to 0 on death
