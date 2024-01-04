@@ -100,14 +100,14 @@ public class ConfigPageDifficulty extends Screen
         };
     }
 
-    public static String getDifficultyName(int difficulty)
+    public static Component getDifficultyName(int difficulty)
     {
         return switch (difficulty)
-        {   case 0  -> Component.translatable("cold_sweat.config.difficulty.super_easy.name").getString();
-            case 1  -> Component.translatable("cold_sweat.config.difficulty.easy.name").getString();
-            case 2  -> Component.translatable("cold_sweat.config.difficulty.normal.name").getString();
-            case 3  -> Component.translatable("cold_sweat.config.difficulty.hard.name").getString();
-            default -> Component.translatable("cold_sweat.config.difficulty.custom.name").getString();
+        {   case 0  -> Component.translatable("cold_sweat.config.difficulty.super_easy.name");
+            case 1  -> Component.translatable("cold_sweat.config.difficulty.easy.name");
+            case 2  -> Component.translatable("cold_sweat.config.difficulty.normal.name");
+            case 3  -> Component.translatable("cold_sweat.config.difficulty.hard.name");
+            default -> Component.translatable("cold_sweat.config.difficulty.custom.name");
         };
     }
 
@@ -183,7 +183,7 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
-        String difficultyName = getDifficultyName(difficulty);
+        Component difficultyName = getDifficultyName(difficulty);
         this.font.drawShadow(poseStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
                              this.height / 2.0f - 84, getDifficultyColor(difficulty));
 
@@ -245,8 +245,7 @@ public class ConfigPageDifficulty extends Screen
             }
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
-            {
-                ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
+            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
             }
             ConfigSettings.DIFFICULTY.set(newDifficulty);
         }
