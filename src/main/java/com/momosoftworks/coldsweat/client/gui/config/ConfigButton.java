@@ -5,13 +5,14 @@ import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ConfigButton extends Button
 {
-    public ConfigButton(int x, int y, int width, int height, ITextComponent title, Button.IPressable pressedAction)
+    public ConfigButton(int x, int y, int width, int height, IFormattableTextComponent title, Button.IPressable pressedAction)
     {
         super(x, y, width, height, title, pressedAction);
     }

@@ -11,9 +11,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 
 import javax.annotation.Nonnull;
 import java.text.DecimalFormat;
@@ -101,14 +99,14 @@ public class ConfigPageDifficulty extends Screen
         }
     }
 
-    public static String getDifficultyName(int difficulty)
+    public static IFormattableTextComponent getDifficultyName(int difficulty)
     {
         switch (difficulty)
-        {   case 0  : return new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.name").getString();
-            case 1  : return new TranslationTextComponent("cold_sweat.config.difficulty.easy.name").getString();
-            case 2  : return new TranslationTextComponent("cold_sweat.config.difficulty.normal.name").getString();
-            case 3  : return new TranslationTextComponent("cold_sweat.config.difficulty.hard.name").getString();
-            default : return new TranslationTextComponent("cold_sweat.config.difficulty.custom.name").getString();
+        {   case 0  : return new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.name");
+            case 1  : return new TranslationTextComponent("cold_sweat.config.difficulty.easy.name");
+            case 2  : return new TranslationTextComponent("cold_sweat.config.difficulty.normal.name");
+            case 3  : return new TranslationTextComponent("cold_sweat.config.difficulty.hard.name");
+            default : return new TranslationTextComponent("cold_sweat.config.difficulty.custom.name");
         }
     }
 
@@ -184,7 +182,7 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
-        String difficultyName = getDifficultyName(difficulty);
+        IFormattableTextComponent difficultyName = getDifficultyName(difficulty);
         this.font.drawShadow(matrixStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
                              this.height / 2.0f - 84, getDifficultyColor(difficulty));
 
