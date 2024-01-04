@@ -169,8 +169,8 @@ public class PlayerTempCap implements ITemperatureCap
             ) * worldTempSign);
 
             // Apply cold/heat dampening to slow/increase the rate
-            if (changeBy < 0) changeBy = (coldDampening < 0 ? changeBy * -coldDampening : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
-            else              changeBy = (heatDampening < 0 ? changeBy * -heatDampening : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
+            if (changeBy < 0) changeBy = (coldDampening < 0 ? changeBy * -(1 + coldDampening) : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
+            else              changeBy = (heatDampening < 0 ? changeBy * -(1 + heatDampening) : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             newCoreTemp += Temperature.apply(changeBy, player, Type.RATE, getModifiers(Type.RATE));
         }
 
