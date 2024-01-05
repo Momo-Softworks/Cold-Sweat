@@ -63,7 +63,7 @@ public class ConfigPageOne extends AbstractConfigPage
         */
 
         // Celsius
-        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(clientConfig.isCelsius()
+        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(": ").append(clientConfig.isCelsius()
                                                    ? Component.translatable("cold_sweat.config.celsius.name")
                                                    : Component.translatable("cold_sweat.config.fahrenheit.name")),
         button ->
