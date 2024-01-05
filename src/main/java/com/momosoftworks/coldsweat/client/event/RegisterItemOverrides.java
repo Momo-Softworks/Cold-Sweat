@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.network.chat.TextComponent;
@@ -65,17 +66,17 @@ public class RegisterItemOverrides
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-                            String tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            ChatFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
-                                case 0 -> "§f";
-                                case 2,3 -> "§6";
-                                case 4 -> "§c";
-                                case -2,-3 -> "§b";
-                                case -4 -> "§9";
-                                default -> "§r";
+                                case 0 -> ChatFormatting.WHITE;
+                                case 2,3 -> ChatFormatting.GOLD;
+                                case 4 -> ChatFormatting.RED;
+                                case -2,-3 -> ChatFormatting.AQUA;
+                                case -4 -> ChatFormatting.BLUE;
+                                default -> ChatFormatting.RESET;
                             };
                             int convertedTemp = (int) Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
-                            frame.getItem().setHoverName(new TextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
+                            frame.getItem().setHoverName(new TextComponent(convertedTemp + " " + (celsius ? "C" : "F")).withStyle(tempColor));
                         }
                     }
 
