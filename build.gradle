@@ -10,7 +10,12 @@ buildscript {
 }
 
 plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'maven-publish'
+    id 'java-library'
+    id 'signing'
+    id 'idea'
+    id 'net.neoforged.gradle' version '[6.0.13, 6.2)'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -18,12 +23,14 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-group = 'com.momosoftworks'
-version = '2.2.4'
+group = group_id
+version = mod_version
 
 java {
-    archivesBaseName = 'ColdSweat'
+    archivesBaseName = mod_name
     toolchain.languageVersion = JavaLanguageVersion.of(17)
+    //withJavadocJar()
+    withSourcesJar()
 }
 
 minecraft {
@@ -142,6 +149,48 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:wythers-490686:4454950")
     runtimeOnly fg.deobf("curse.maven:smooth-boot-633412:4685317")
     runtimeOnly fg.deobf("curse.maven:modernfix-790626:4728404")
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'coldsweat'
+            pom {
+                name = 'Cold Sweat'
+                description = 'A Minecraft temperature mod with a powerful framework'
+                url = 'https://github.com/Momo-Softworks/Cold-Sweat'
+                licenses {
+                    license {
+                        name = 'GNU General Public License v3.0'
+                        url = 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'mikul'
+                        name = 'Mikul'
+                    }
+                }
+                /*scm = {
+                    connection = 'scm:git:git://github.com/Momo-Softworks/Cold-Sweat.git'
+                    developerConnection = 'scm:git:ssh://github.com/Momo-Softworks/Cold-Sweat.git'
+                    url = 'https://github.com/Momo-Softworks/Cold-Sweat'
+                }*/
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getenv("SONATYPE_USERNAME")
+                password = System.getenv("SONATYPE_PASSWORD")
+            }
+        }
+    }
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
