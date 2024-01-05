@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -130,7 +131,11 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(new TextComponent("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
+            source.sendSuccess(new TextComponent(CSMath.sigFigs(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
+                       .append(new TextComponent(" -> ").withStyle(ChatFormatting.WHITE))
+                       .append(new TextComponent(modifier.toString()).withStyle(ChatFormatting.GOLD))
+                       .append(new TextComponent(" -> ").withStyle(ChatFormatting.WHITE))
+                       .append(new TextComponent(CSMath.sigFigs(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
         }
         return Command.SINGLE_SUCCESS;
     }

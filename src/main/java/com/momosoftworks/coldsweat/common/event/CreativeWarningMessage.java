@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -17,11 +18,13 @@ public class CreativeWarningMessage
     public static void onPlayerEnterCreative(PlayerEvent.PlayerChangeGameModeEvent event)
     {
         if (event.getNewGameMode().isCreative() && ClientSettingsConfig.getInstance().isCreativeWarningEnabled())
-        {   event.getEntity().displayClientMessage(Component.literal("§d[Cold Sweat]: §c§lWarning! §7Entering the creative inventory will clear insulation from all armor items! ")
-                                           .append(Component.literal("(click to disable warning)")
-                                                           .withStyle(Style.EMPTY
-                                                           .withColor(ChatFormatting.LIGHT_PURPLE)
-                                                           .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
+        {   event.getPlayer().displayClientMessage(new TextComponent("[Cold Sweat]: ").withStyle(ChatFormatting.LIGHT_PURPLE)
+                                           .append(new TextComponent("Warning! ").withStyle(ChatFormatting.BOLD, ChatFormatting.RED))
+                                           .append(new TextComponent("Entering the creative inventory will clear insulation from all armor items! ").withStyle(ChatFormatting.GRAY))
+                                           .append(new TextComponent("(click to disable warning)")
+                                                            .withStyle(Style.EMPTY
+                                                            .withColor(ChatFormatting.LIGHT_PURPLE)
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
         }
     }
 
@@ -33,7 +36,8 @@ public class CreativeWarningMessage
         && event.getStyle().getClickEvent() != null && event.getStyle().getClickEvent().getValue().equals("cold sweat disable message"))
         {
             ClientSettingsConfig.getInstance().setCreativeWarningEnabled(false);
-            event.getPlayer().displayClientMessage(Component.literal("§d[Cold Sweat]: §7Warning message disabled."), false);
+            event.getPlayer().displayClientMessage(new TextComponent("[Cold Sweat]: ").withStyle(ChatFormatting.LIGHT_PURPLE)
+                                           .append(new TextComponent("Warning message disabled.").withStyle(ChatFormatting.GRAY)), false);
         }
     }
 }

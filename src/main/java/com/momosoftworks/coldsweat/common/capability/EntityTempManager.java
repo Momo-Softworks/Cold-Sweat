@@ -126,7 +126,7 @@ public class EntityTempManager
     }
 
     /**
-     * Add modifiers to the player & valid entities when they join the world
+     * Add modifiers to the player and valid entities when they join the world
      */
     @SubscribeEvent
     public static void initModifiersOnEntity(EntityJoinWorldEvent event)
@@ -151,7 +151,7 @@ public class EntityTempManager
     }
 
     /**
-     * Tick TempModifiers & update temperature for living entities
+     * Tick TempModifiers and update temperature for living entities
      */
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingUpdateEvent event)
@@ -209,7 +209,7 @@ public class EntityTempManager
     }
 
     /**
-     * Add default modifiers to players & temperature-enabled entities
+     * Add default modifiers to players and temperature-enabled entities
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
