@@ -1761,3 +1761,18 @@ Technical Changes:
 Translation Updates:
 - Updated Russian translation (by @rey_zex on Discord)
 - Updated Italian translation (by @sniper_foxy on Discord)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.5
+
+Fixes:
+- Fixed mounts not providing insulation effectively when configured to do so
+- Fixed hearth air still not being able to spread through Create encased pipes by default
+- Fixed dimension temperature configs not having proper support for non-MC units
+- (1.20) Fixed the hearth using the old recipe
+
+Technical Changes:
+- Unobfuscated mod source is now available on CurseForge
+- Added message when entering creative mode warning players about insulation being deleted when opening the creative menu
+- The "Insulated Entities" config setting now works on a scale of 0 to 1, with 1 being 100% insulation
