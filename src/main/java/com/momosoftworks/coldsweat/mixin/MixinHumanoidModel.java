@@ -30,10 +30,6 @@ public class MixinHumanoidModel
     @Shadow
     public ModelPart leftArm;
 
-    /**
-     * @author iMikul
-     * @reason Adds functions for the Soulfire Lamp
-     */
     @Inject(method = "poseRightArm",
             at = @At("TAIL"))
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)
@@ -62,10 +58,6 @@ public class MixinHumanoidModel
         }
     }
 
-    /**
-     * @author iMikul
-     * @reason Adds functions for the Soulfire Lamp
-     */
     @Inject(method = "poseLeftArm",
             at = @At("TAIL"))
     public void poseLeftArm(LivingEntity entity, CallbackInfo ci)

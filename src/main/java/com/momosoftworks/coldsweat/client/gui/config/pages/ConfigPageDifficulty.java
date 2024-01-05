@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -74,8 +75,8 @@ public class ConfigPageDifficulty extends Screen
     private static String getTemperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " °F / "
-             + color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " °C";
+        return color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " \u00B0F / "
+             + color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " \u00B0C";
     }
 
     private static Component getRateComponent(ConfigSettings.Difficulty difficulty)
@@ -150,7 +151,7 @@ public class ConfigPageDifficulty extends Screen
         for (Component text : getListFor(difficulty))
         {
             // Add the text and a new line to the list
-            Component descLine = Component.literal(" • " + text.getString() + " ");
+            Component descLine = Component.literal(" \u2022 " + text.getString() + " ");
             descLines.add(descLine);
             descLines.add(Component.literal(""));
 

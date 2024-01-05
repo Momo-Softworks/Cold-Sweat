@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,11 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Gui.class)
 public class MixinXPBar
 {
-    /**
-     * @author iMikul
-     * @reason Move XP bar number to make room for body temperature readout (2 methods needed)
-     */
-    @Inject(method = "renderExperienceBar(Lcom/mojang/blaze3d/vertex/PoseStack;I)V",
+    @Inject(method = "renderExperienceBar",
             at = @At
             (
                 value = "INVOKE",
@@ -53,8 +48,7 @@ public class MixinXPBar
     {
         // Render XP bar
         if (ClientSettingsConfig.getInstance().customHotbarEnabled())
-        {
-            poseStack.translate(0.0D, -4.0D, 0.0D);
+        {   poseStack.translate(0.0D, -4.0D, 0.0D);
         }
     }
 

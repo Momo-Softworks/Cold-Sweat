@@ -55,7 +55,7 @@ public class TooltipHandler
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
-            {   event.getTooltipElements().add(1, Either.left(Component.literal("§9? §8'Shift'")));
+            {   event.getTooltipElements().add(1, Either.left(Component.literal("? ").withStyle(ChatFormatting.BLUE).append(Component.literal("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
             }
             event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
