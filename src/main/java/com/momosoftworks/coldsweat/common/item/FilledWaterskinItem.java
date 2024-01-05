@@ -236,14 +236,16 @@ public class FilledWaterskinItem extends Item
 
         // Tooltip to display temperature
         boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-        String color = temp == 0 ? "7" : (temp < 0 ? "9" : "c");
+        ChatFormatting color = temp == 0 ? ChatFormatting.GRAY : (temp < 0 ? ChatFormatting.BLUE : ChatFormatting.RED);
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
         if (celsius) temp = Temperature.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += ClientSettingsConfig.getInstance().getTempOffset() / 2.0;
 
-        tooltip.add(1, Component.literal("§7" + Component.translatable(
-                "item.cold_sweat.waterskin.filled").getString() + " (§" + color + (int) temp + " °" + tempUnits + "§7)§r"));
+        tooltip.add(1, Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY)
+                       .append(" (")
+                       .append(Component.literal((int) temp + " \u00B0" + tempUnits).withStyle(color))
+                       .append(Component.literal(")").withStyle(ChatFormatting.GRAY)));
 
         super.appendHoverText(stack, level, tooltip, advanced);
     }

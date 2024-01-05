@@ -7,7 +7,7 @@ import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Fired when the {@link BlockTemp} registry is being built ({@link BlockTempRegistry}). <br>
- * The event is fired during {@link net.minecraftforge.event.world.WorldEvent.Load}. <br>
+ * The event is fired during {@link net.minecraftforge.event.level.LevelEvent.Load}. <br>
  * <br>
  * Use {@code BlockTempRegistry.flush()} if calling manually to prevent duplicates. <br>
  * (You probably shouldn't ever do that anyway) <br>

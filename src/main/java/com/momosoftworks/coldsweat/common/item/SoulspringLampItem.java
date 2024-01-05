@@ -202,7 +202,7 @@ public class SoulspringLampItem extends Item
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
     {
         if (advanced.isAdvanced())
-        {   tooltip.add(Component.literal("§fFuel: " + (int) stack.getOrCreateTag().getDouble("fuel") + " / " + 64));
+        {   tooltip.add(Component.literal("Fuel: " + (int) stack.getOrCreateTag().getDouble("fuel") + " / " + 64));
         }
         super.appendHoverText(stack, level, tooltip, advanced);
     }
