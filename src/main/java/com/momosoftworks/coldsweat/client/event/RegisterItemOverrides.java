@@ -16,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -66,18 +67,18 @@ public class RegisterItemOverrides
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-                            String tempColor;
+                            TextFormatting tempColor;
                             switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
-                                case 0 : tempColor = "§f"; break;
-                                case 2 : case 3 : tempColor = "§6"; break;
-                                case 4 : tempColor = "§c"; break;
-                                case -2 : case -3 : tempColor = "§b"; break;
-                                case -4 : tempColor = "§9"; break;
-                                default : tempColor = "§r"; break;
-                            };
+                                case 0 : tempColor = TextFormatting.WHITE; break;
+                                case 2 : case 3 : tempColor = TextFormatting.GOLD; break;
+                                case 4 : tempColor = TextFormatting.RED; break;
+                                case -2 : case -3 : tempColor = TextFormatting.AQUA; break;
+                                case -4 : tempColor = TextFormatting.BLUE; break;
+                                default : tempColor = TextFormatting.RESET; break;
+                            }
                             int convertedTemp = (int) Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
-                            frame.getItem().setHoverName(new StringTextComponent(tempColor + convertedTemp + " °" + (celsius ? "C" : "F")));
+                            frame.getItem().setHoverName(new StringTextComponent(convertedTemp + " \u00B0" + (celsius ? "C" : "F")).withStyle(tempColor));
                         }
                     }
 
