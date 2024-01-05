@@ -17,11 +17,13 @@ public class CreativeWarningMessage
     public static void onPlayerEnterCreative(PlayerEvent.PlayerChangeGameModeEvent event)
     {
         if (event.getNewGameMode().isCreative() && ClientSettingsConfig.getInstance().isCreativeWarningEnabled())
-        {   event.getPlayer().displayClientMessage(new StringTextComponent("§d[Cold Sweat]: §c§lWarning! §7Entering the creative inventory will clear insulation from all armor items! ")
+        {   event.getPlayer().displayClientMessage(new StringTextComponent("[Cold Sweat]: ").withStyle(TextFormatting.LIGHT_PURPLE)
+                                           .append(new StringTextComponent("Warning! ").withStyle(TextFormatting.BOLD, TextFormatting.RED))
+                                           .append(new StringTextComponent("Entering the creative inventory will clear insulation from all armor items! ").withStyle(TextFormatting.GRAY))
                                            .append(new StringTextComponent("(click to disable warning)")
-                                                           .withStyle(Style.EMPTY
-                                                           .withColor(TextFormatting.LIGHT_PURPLE)
-                                                           .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
+                                                            .withStyle(Style.EMPTY
+                                                            .withColor(TextFormatting.LIGHT_PURPLE)
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
         }
     }
 
@@ -33,7 +35,8 @@ public class CreativeWarningMessage
         && event.getStyle().getClickEvent() != null && event.getStyle().getClickEvent().getValue().equals("cold sweat disable message"))
         {
             ClientSettingsConfig.getInstance().setCreativeWarningEnabled(false);
-            event.getPlayer().displayClientMessage(new StringTextComponent("§d[Cold Sweat]: §7Warning message disabled."), false);
+            event.getPlayer().displayClientMessage(new StringTextComponent("[Cold Sweat]: ").withStyle(TextFormatting.LIGHT_PURPLE)
+                                           .append(new StringTextComponent("Warning message disabled.").withStyle(TextFormatting.GRAY)), false);
         }
     }
 }

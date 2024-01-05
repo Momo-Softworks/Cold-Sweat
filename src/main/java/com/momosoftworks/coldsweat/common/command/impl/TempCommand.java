@@ -15,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
@@ -123,7 +124,11 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(new StringTextComponent("§f" + CSMath.sigFigs(modifier.getLastInput(), 2) + "§f -> §6" + modifier + "§f -> §b" + CSMath.sigFigs(modifier.getLastOutput(), 2)), false);
+            source.sendSuccess(new StringTextComponent(CSMath.sigFigs(modifier.getLastInput(), 2)+"").withStyle(TextFormatting.WHITE)
+                       .append(new StringTextComponent(" -> ").withStyle(TextFormatting.WHITE))
+                       .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GOLD))
+                       .append(new StringTextComponent(" -> ").withStyle(TextFormatting.WHITE))
+                       .append(new StringTextComponent(CSMath.sigFigs(modifier.getLastOutput(), 2)+"").withStyle(TextFormatting.AQUA)), false);
         }
         return Command.SINGLE_SUCCESS;
     }

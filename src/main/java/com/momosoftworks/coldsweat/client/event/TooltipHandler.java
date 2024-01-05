@@ -50,7 +50,7 @@ public class TooltipHandler
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
-            {   event.getToolTip().add(1, new StringTextComponent("§9? §8'Shift'"));
+            {   event.getToolTip().add(1, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
                  {   event.getToolTip().add(1, new StringTextComponent(""));

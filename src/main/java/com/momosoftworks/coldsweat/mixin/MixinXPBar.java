@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import net.minecraft.client.gui.IngameGui;
 import org.spongepowered.asm.mixin.Mixin;
