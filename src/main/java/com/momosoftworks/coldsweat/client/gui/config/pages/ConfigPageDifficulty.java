@@ -1,10 +1,10 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -222,27 +222,7 @@ public class ConfigPageDifficulty extends Screen
         double y = ConfigScreen.MOUSE_Y;
         if (ConfigScreen.IS_MOUSE_DOWN && isMouseOverSlider(x, y))
         {
-            int newDifficulty = 0;
-            if (x < this.width / 2.0 - 76 + (19))
-            {
-                newDifficulty = 0;
-            }
-            else if (x < this.width / 2.0 - 76 + (19 * 3))
-            {
-                newDifficulty = 1;
-            }
-            else if (x < this.width / 2.0 - 76 + (19 * 5))
-            {
-                newDifficulty = 2;
-            }
-            else if (x < this.width / 2.0 - 76 + (19 * 7))
-            {
-                newDifficulty = 3;
-            }
-            else if (x < this.width / 2.0 - 76 + (19 * 9))
-            {
-                newDifficulty = 4;
-            }
+            int newDifficulty = (int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76));
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
             {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(new ResourceLocation("minecraft:block.note_block.hat"), 1.8f), 0.5f));
