@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -24,7 +23,7 @@ public class CreativeWarningMessage
                                            .append(new TextComponent("(click to disable warning)")
                                                             .withStyle(Style.EMPTY
                                                             .withColor(ChatFormatting.LIGHT_PURPLE)
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, "cold sweat disable message")))), false);
         }
     }
 
