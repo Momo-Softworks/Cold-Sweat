@@ -8,3 +8,9 @@ This project is completely open for reference and reproduction as per our GNU GP
 Documentation for 3rd-party integration with Cold Sweat can be found here (WIP, out-of-date for 2.2+):  
 https://mikul.gitbook.io/cold-sweat/  
 The current documentation is only designed for 1.18.2, but it should be useable for 1.16.5 and 1.19.2 as this mod aims for as much backend parity as possible.
+
+## Developing for CS
+1. Get [Cursemaven](https://www.cursemaven.com/)
+2. Go to the latest version on [CurseForge](https://legacy.curseforge.com/minecraft/mc-mods/cold-sweat/files) and add the ColdSweat-sources.jar file as a dependency
+
+(i.e. `implementation "curse.maven:cold-sweat-506194:5011469-sources-5011470"` gives you version 2.2.5 for 1.20 with the `sources` jar for your development environment)
