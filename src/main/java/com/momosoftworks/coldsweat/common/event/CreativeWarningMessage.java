@@ -23,7 +23,7 @@ public class CreativeWarningMessage
                                            .append(new StringTextComponent("(click to disable warning)")
                                                             .withStyle(Style.EMPTY
                                                             .withColor(TextFormatting.LIGHT_PURPLE)
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cold sweat disable message")))), false);
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, "cold sweat disable message")))), false);
         }
     }
 
