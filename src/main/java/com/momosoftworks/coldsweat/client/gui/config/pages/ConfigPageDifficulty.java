@@ -9,7 +9,6 @@ import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.*;
@@ -25,12 +24,12 @@ import static com.momosoftworks.coldsweat.config.ConfigSettings.Difficulty.*;
 
 public class ConfigPageDifficulty extends Screen
 {
-    private static final String BLUE = "§9";
-    private static final String RED = "§c";
-    private static final String YEL = "§e";
-    private static final String CLEAR = "§r";
-    private static final String BOLD = "§l";
-    private static final String U_LINE = "§n";
+    private static final String BLUE = TextFormatting.BLUE.toString();
+    private static final String RED = TextFormatting.RED.toString();
+    private static final String YEL = TextFormatting.YELLOW.toString();
+    private static final String CLEAR = TextFormatting.RESET.toString();
+    private static final String BOLD = TextFormatting.BOLD.toString();
+    private static final String U_LINE = TextFormatting.UNDERLINE.toString();
 
     private static final List<TextComponent> SUPER_EASY_DESCRIPTION = generateDescription(SUPER_EASY);
     private static final List<TextComponent> EASY_DESCRIPTION = generateDescription(EASY);
@@ -65,10 +64,13 @@ public class ConfigPageDifficulty extends Screen
         return Arrays.asList(
                 new TranslationTextComponent("cold_sweat.config.difficulty.description.min_temp", getTemperatureString(difficulty.getSetting("min_temp"), BLUE)),
                 new TranslationTextComponent("cold_sweat.config.difficulty.description.max_temp", getTemperatureString(difficulty.getSetting("max_temp"), RED)),
-                getRateComponent(difficulty),
-                new TranslationTextComponent("cold_sweat.config.difficulty.description.world_temp_" + (difficulty.getSetting("require_thermometer") ? "off" : "on"), BOLD + U_LINE, CLEAR),
-                new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_" + (difficulty.getSetting("damage_scaling") ? "on" : "off"), BOLD + U_LINE, CLEAR),
-                new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_" + (difficulty.getSetting("ice_resistance_enabled") ? "on" : "off"), BOLD + U_LINE, CLEAR));
+                new StringTextComponent(getRateComponent(difficulty).getString()),
+                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.description.world_temp_"
+                                                                  + (difficulty.getSetting("require_thermometer") ? "off" : "on"), BOLD + U_LINE, CLEAR).getString()),
+                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.description.scaling_"
+                                                                  + (difficulty.getSetting("damage_scaling") ? "on" : "off"), BOLD + U_LINE, CLEAR).getString()),
+                new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.description.potions_"
+                                                                  + (difficulty.getSetting("ice_resistance_enabled") ? "on" : "off"), BOLD + U_LINE, CLEAR).getString()));
     }
 
     private static String getTemperatureString(double temp, String color)
@@ -142,17 +144,17 @@ public class ConfigPageDifficulty extends Screen
         int difficulty = ConfigSettings.DIFFICULTY.get();
 
         // Get a list of TextComponents to render
-        List<IReorderingProcessor> descLines = new ArrayList<>();
-        descLines.add(IReorderingProcessor.forward("", Style.EMPTY));
+        List<IFormattableTextComponent> descLines = new ArrayList<>();
+        descLines.add(new StringTextComponent(""));
 
         // Get max text length (used to extend the text box if it's too wide)
         int longestLine = 0;
         for (TextComponent text : getListFor(difficulty))
         {
             // Add the text and a new line to the list
-            IReorderingProcessor descLine = IReorderingProcessor.forward(" \u2022 " + text.getString() + " ", Style.EMPTY);
+            IFormattableTextComponent descLine = new StringTextComponent(" \u2022 ").append(text).append(" ");
             descLines.add(descLine);
-            descLines.add(IReorderingProcessor.forward("", Style.EMPTY));
+            descLines.add(new StringTextComponent(""));
 
             int lineWidth = font.width(descLine);
             if (lineWidth > longestLine)
@@ -162,7 +164,7 @@ public class ConfigPageDifficulty extends Screen
         // Draw Text Box
         int middleX = this.width / 2;
         int middleY = this.height / 2;
-        this.renderTooltip(matrixStack, descLines, middleX - longestLine / 2 - 10, middleY - 16);
+        this.renderWrappedToolTip(matrixStack, descLines, middleX - longestLine / 2 - 10, middleY - 16, this.font);
 
         // Set the mouse's position for ConfigScreen (used for click events)
         ConfigScreen.MOUSE_X = mouseX;
