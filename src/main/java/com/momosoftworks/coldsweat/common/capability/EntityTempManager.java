@@ -434,7 +434,7 @@ public class EntityTempManager
     /**
      * Reset the player's temperature upon respawning
      */
-    //@SubscribeEvent
+    @SubscribeEvent
     public static void resetTempOnRespawn(PlayerEvent.PlayerRespawnEvent event)
     {
         if (!event.isEndConquered())
