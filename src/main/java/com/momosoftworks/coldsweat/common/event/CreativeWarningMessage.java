@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
