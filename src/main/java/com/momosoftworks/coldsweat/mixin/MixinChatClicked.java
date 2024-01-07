@@ -16,6 +16,6 @@ public class MixinChatClicked
 
     @Inject(method = "handleComponentClicked", at = @At("HEAD"))
     private void onChatComponentClicked(Style style, CallbackInfoReturnable<Boolean> ci)
-    {   MinecraftForge.EVENT_BUS.post(new ChatComponentClickedEvent(style, self.getMinecraft().player, self));
+    {   MinecraftForge.EVENT_BUS.post(new ChatComponentClickedEvent(style, self.getMinecraft().player));
     }
 }
