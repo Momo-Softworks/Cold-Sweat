@@ -1777,3 +1777,10 @@ Technical Changes:
 - Unobfuscated mod source is now available on CurseForge
 - Added message when entering creative mode warning players about insulation being deleted when opening the creative menu
 - The "Insulated Entities" config setting now works on a scale of 0 to 1, with 1 being 100% insulation
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.2.5.1
+
+Fixes:
+- Fixed server crash due to invalid class being loaded
