@@ -351,7 +351,7 @@ public class SewingContainer extends AbstractContainerMenu
                     Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
                     if (ench == null) return false;
 
-                    if (ench.canApplyAtEnchantingTable(wearableItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+                    if (ench.canEnchant(wearableItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
                     {   processed.enchant(ench, enchantTag.getInt("lvl"));
                         return true;
                     }
