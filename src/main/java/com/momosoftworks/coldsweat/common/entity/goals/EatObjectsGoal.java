@@ -55,7 +55,7 @@ public class EatObjectsGoal extends Goal
             && (this.entity.isPlayerTrusted(((ItemEntity) ent).getThrower()) || this.entity.isTamingItem(((ItemEntity) ent).getItem())))
             {
                 ItemEntity itemEntity = (ItemEntity) ent;
-                Item item = itemEntity.getItem().getItem();
+                ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
                 if (edible.isPresent())
                 {

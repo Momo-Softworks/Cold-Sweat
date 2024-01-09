@@ -422,7 +422,7 @@ public class ChameleonEntity extends AnimalEntity
                         }
                     }
                 }
-                ChameleonEdibles.getEdible(itemEntity.getItem().getItem()).ifPresent(edible ->
+                ChameleonEdibles.getEdible(itemEntity.getItem()).ifPresent(edible ->
                 {
                     if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
                     {   this.setCooldown(edible, edible.getCooldown());
