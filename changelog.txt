@@ -1784,3 +1784,4 @@ Technical Changes:
 
 Fixes:
 - Fixed server crash due to invalid class being loaded
+- Fixed some enchantments not transferring to from the insulation item to the armor when being sewn in some cases
