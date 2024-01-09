@@ -36,8 +36,11 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -54,7 +57,10 @@ public class TooltipHandler
         int tooltipIndex = Math.min(1, event.getToolTip().size() - 1);
         while (!event.getToolTip().get(tooltipIndex).equals(stack.getDisplayName()))
         {   tooltipIndex++;
-            if (tooltipIndex >= event.getToolTip().size()) return;
+            if (tooltipIndex >= event.getToolTip().size())
+            {   tooltipIndex = Math.min(1, event.getToolTip().size());
+                break;
+            }
         }
 
         Pair<Double, Double> itemInsul;
@@ -66,7 +72,7 @@ public class TooltipHandler
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
                  {   event.getToolTip().add(tooltipIndex, new StringTextComponent(""));
                  }
-            event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0---§r"));
+            event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
@@ -86,11 +92,11 @@ public class TooltipHandler
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(),
                               ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null
         && (itemInsul.getFirst() > 0 || itemInsul.getSecond() > 0))
-        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0--§r"));
+        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulatorTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         // Has insulation (armor)
         else if (stack.getItem() instanceof IArmorVanishable && ItemInsulationManager.getInsulationCap(stack).map(c -> !c.getInsulation().isEmpty()).orElse(false))
-        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0-§r"));
+        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
         }
     }
 
@@ -139,7 +145,7 @@ public class TooltipHandler
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
                 {
                     double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
-                    insulation.add(new ItemInsulationCap.Insulation(coldInsul, 0d));
+                    insulation.add(new Insulation(coldInsul, 0d));
                 }
 
                 // Neutral insulation
@@ -167,24 +173,23 @@ public class TooltipHandler
             }
         }
         // Find the empty line that this tooltip should fill
-        String lineToReplace = tooltip instanceof SoulspringTooltip ? " ---"
-                             : tooltip instanceof InsulatorTooltip ? " --"
-                             : tooltip instanceof InsulationTooltip ? " -" : null;
-        int y = event.getY();
-        if (lineToReplace != null)
+        if (tooltip != null)
         {
-            List<? extends ITextProperties> tooltipLines = event.getLines();
-            for (int i = 0; i < tooltipLines.size(); i++)
+            String lineToReplace = TOOLTIPS.get(tooltip.getClass());
+
+            int y = event.getY();
+            if (lineToReplace != null)
             {
-                if (lineToReplace.equals(TextFormatting.stripFormatting(tooltipLines.get(i).getString())))
-                {   y += 10 * (i - 1) + 1;
-                    break;
+                List<? extends ITextProperties> tooltipLines = event.getLines();
+                for (int i = 0; i < tooltipLines.size(); i++)
+                {
+                    if (lineToReplace.equals(TextFormatting.stripFormatting(tooltipLines.get(i).getString())))
+                    {   y += 10 * (i - 1) + 1;
+                        break;
+                    }
                 }
             }
-        }
-
-        if (tooltip != null)
-        {   tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+            tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             tooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
         }
     }
@@ -245,5 +250,33 @@ public class TooltipHandler
         if (event.phase == TickEvent.Phase.END)
         {   FUEL_FADE_TIMER++;
         }
+    }
+
+    private static final Map<Class<? extends Tooltip>, String> TOOLTIPS = new HashMap<>();
+    private static int TOOLTIP_REGISTRY_SIZE = 0;
+
+    private static void registerTooltip(Class<? extends Tooltip> tooltip)
+    {
+        if (!TOOLTIPS.containsKey(tooltip))
+        {
+            if ( TOOLTIP_REGISTRY_SIZE >= 32)
+            {   throw new RuntimeException("Too many tooltips registered!");
+            }
+            String code = Integer.toBinaryString(TOOLTIP_REGISTRY_SIZE);
+            while (code.length() < 5)
+            {   code = "0" + code;
+            }
+            code = code.replace("0", "-");
+            code = code.replace("1", "+");
+            TOOLTIPS.put(tooltip, code);
+            TOOLTIP_REGISTRY_SIZE++;
+        }
+    }
+
+    static
+    {
+        registerTooltip(InsulatorTooltip.class);
+        registerTooltip(InsulationTooltip.class);
+        registerTooltip(SoulspringTooltip.class);
     }
 }

@@ -50,11 +50,11 @@ public class SoulspringTooltip extends Tooltip
         if (Minecraft.getInstance().screen instanceof ContainerScreen<?>)
         {
             Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
-            AbstractGui.blit(poseStack, x, y, 0, 0, 0, 30, 8, 34, 30);
-            AbstractGui.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
+            AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 34, 30);
+            AbstractGui.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
             if (Screen.hasShiftDown())
             {
-                AbstractGui.blit(poseStack, x + 34, y, 0, 0, 24, 16, 10, 34, 30);
+                AbstractGui.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 34, 30);
 
                 int i = 0;
                 for (Item item : ConfigSettings.LAMP_FUEL_ITEMS.get().keySet())
