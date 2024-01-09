@@ -109,7 +109,7 @@ public class Overlays
                 int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
                 Minecraft.getInstance().font.draw(poseStack, (blendedTemp + CLIENT_CONFIG.getTempOffset())+"",
-                        /* X */ width / 2f + 105 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
+                        /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + CLIENT_CONFIG.getTempOffset()).length() * -3) + CLIENT_CONFIG.getWorldGaugeX(),
                         /* Y */ height - 15 - bob + CLIENT_CONFIG.getWorldGaugeY(), color);
                 poseStack.popPose();
             }
@@ -173,8 +173,8 @@ public class Overlays
                 int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
                 String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                float x = (scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX();
-                float y = scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY();
+                int x = (int) ((scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX());
+                int y = (int) (scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY());
 
                 // Draw the outline
                 font.draw(poseStack, s, x + 1, y, colorBG);
