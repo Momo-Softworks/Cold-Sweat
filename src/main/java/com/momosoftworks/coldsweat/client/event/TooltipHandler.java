@@ -3,7 +3,10 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.client.gui.tooltip.*;
+import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.Tooltip;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap.Insulation;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
@@ -46,16 +49,24 @@ public class TooltipHandler
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
+
+        // Get the index at which the tooltip should be inserted
+        int tooltipIndex = Math.min(1, event.getToolTip().size() - 1);
+        while (!event.getToolTip().get(tooltipIndex).equals(stack.getDisplayName()))
+        {   tooltipIndex++;
+            if (tooltipIndex >= event.getToolTip().size()) return;
+        }
+
         Pair<Double, Double> itemInsul;
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
-            {   event.getToolTip().add(1, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
+            {   event.getToolTip().add(tooltipIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.LAMP_FUEL_ITEMS.get().size() / 6d) + 1; i++)
-                 {   event.getToolTip().add(1, new StringTextComponent(""));
+                 {   event.getToolTip().add(tooltipIndex, new StringTextComponent(""));
                  }
-            event.getToolTip().add(1, new StringTextComponent(" §0---§r"));
+            event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0---§r"));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
@@ -75,11 +86,11 @@ public class TooltipHandler
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(stack.getItem(),
                               ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()))) != null
         && (itemInsul.getFirst() > 0 || itemInsul.getSecond() > 0))
-        {   event.getToolTip().add(1, new StringTextComponent(" §0--§r"));
+        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0--§r"));
         }
         // Has insulation (armor)
         else if (stack.getItem() instanceof IArmorVanishable && ItemInsulationManager.getInsulationCap(stack).map(c -> !c.getInsulation().isEmpty()).orElse(false))
-        {   event.getToolTip().add(1, new StringTextComponent(" §0-§r"));
+        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(" §0-§r"));
         }
     }
 
@@ -151,7 +162,7 @@ public class TooltipHandler
             ItemInsulationCap.sortInsulationList(insulation);
 
             // Calculate the number of slots and render the insulation bar
-            if (insulation.size() > 0)
+            if (!insulation.isEmpty())
             {   tooltip = new InsulationTooltip(insulation, stack);
             }
         }
