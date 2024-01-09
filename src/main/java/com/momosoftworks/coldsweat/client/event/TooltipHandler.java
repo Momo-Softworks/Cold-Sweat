@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -43,13 +45,22 @@ public class TooltipHandler
         Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
         if (stack.isEmpty()) return;
 
+        // Get the index at which the tooltip should be inserted
+        int tooltipIndex = Math.min(1, event.getTooltipElements().size() - 1);
+        Optional<FormattedText> line;
+        while ((line = event.getTooltipElements().get(tooltipIndex).left()).isPresent()
+        && !line.get().equals(stack.getDisplayName()))
+        {   tooltipIndex++;
+            if (tooltipIndex >= event.getTooltipElements().size()) return;
+        }
+
         Pair<Double, Double> itemInsul = null;
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
-            {   event.getTooltipElements().add(1, Either.left(Component.literal("? ").withStyle(ChatFormatting.BLUE).append(Component.literal("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
+            {   event.getTooltipElements().add(tooltipIndex, Either.left(Component.literal("? ").withStyle(ChatFormatting.BLUE).append(Component.literal("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
             }
-            event.getTooltipElements().add(1, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
+            event.getTooltipElements().add(tooltipIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"))));
         }
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
@@ -67,15 +78,15 @@ public class TooltipHandler
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.NORMAL)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.NORMAL)));
         }
         // If the item is an adaptive insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.ADAPTIVE)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.ADAPTIVE)));
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(1, Either.right(new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.CURIO)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.CURIO)));
         }
         // If the item is insulated armor
         Pair<Double, Double> armorInsul;
@@ -125,9 +136,8 @@ public class TooltipHandler
             // Sort the insulation values from cold to hot
             ItemInsulationCap.sortInsulationList(insulation);
 
-            // Calculate the number of slots and render the insulation bar
-            if (insulation.size() > 0)
-            {   event.getTooltipElements().add(1, Either.right(new InsulationTooltip(insulation, stack)));
+            if (!insulation.isEmpty())
+            {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(insulation, stack)));
             }
         }
     }
