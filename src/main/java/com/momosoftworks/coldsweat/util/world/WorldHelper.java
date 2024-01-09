@@ -303,6 +303,34 @@ public class WorldHelper
         }
     }
 
+    public static BlockPos raycastBlock(Vec3 from, Vec3 rotation, double distance, Level level)
+    {
+        Vec3 to = from.add(rotation.normalize().scale(distance));
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+        // Don't bother if the ray has no length
+        if (!from.equals(to))
+        {
+            Vec3 ray = to.subtract(from);
+            Vec3 normalRay = ray.normalize();
+
+            // Iterate over every block-long segment of the ray
+            for (int i = 0; i < ray.length(); i++)
+            {
+                // Get the position of the current segment
+                Vec3 vec = from.add(normalRay.scale(i));
+
+                // Skip if the position is the same as the last one
+                if (new BlockPos(vec).equals(pos)) continue;
+                pos.set(vec.x, vec.y, vec.z);
+
+                // Return the first non-air block in the current block, or continue if there is none
+                if (!level.getBlockState(pos).isAir()) return pos;
+            }
+        }
+        return pos;
+    }
+
     public static Entity raycastEntity(Vec3 from, Vec3 to, Level level, Predicate<Entity> filter)
     {
         // Don't bother if the ray has no length
