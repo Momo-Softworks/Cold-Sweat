@@ -27,22 +27,15 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Overlays
 {
-    public static final ResourceLocation BODY_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
-    public static final ResourceLocation BODY_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png");
-
     public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? BODY_TEMP_GAUGE_HC
-                                                                : BODY_TEMP_GAUGE;
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
     public static final Supplier<ResourceLocation> WORLD_TEMP_GAUGE_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? WORLD_TEMP_GAUGE_HC
-                                                                : WORLD_TEMP_GAUGE;
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
     public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? VAGUE_TEMP_GAUGE_HC
-                                                                : VAGUE_TEMP_GAUGE;
+            ClientSettingsConfig.getInstance().isHighContrast() ? new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png")
+                                                                : new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
 
     static ClientSettingsConfig CLIENT_CONFIG = ClientSettingsConfig.getInstance();
 
