@@ -25,8 +25,7 @@ public class BiomeTempModifier extends TempModifier
     }
 
     public BiomeTempModifier(int samples)
-    {
-        this.getNBT().putInt("Samples", samples);
+    {   this.getNBT().putInt("Samples", samples);
     }
 
     @Override
@@ -41,7 +40,7 @@ public class BiomeTempModifier extends TempModifier
             // In the case that the dimension temperature is overridden by config, use that and skip everything else
             Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(level.dimension().location());
             if (dimTempOverride != null)
-            {   return temp -> temp + Temperature.convertUnits(dimTempOverride.getFirst(), dimTempOverride.getSecond(), Temperature.Units.MC, true);
+            {   return temp -> temp + dimTempOverride.getFirst();
             }
 
             int biomeCount = 0;
@@ -91,7 +90,7 @@ public class BiomeTempModifier extends TempModifier
             // Add dimension offset, if present
             Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(level.dimension().location());
             if (dimTempOffsetConf != null)
-            {   worldTemp += Temperature.convertUnits(dimTempOffsetConf.getFirst(), dimTempOffsetConf.getSecond(), Temperature.Units.MC, false);
+            {   worldTemp += dimTempOffsetConf.getFirst();
             }
 
             double finalWorldTemp = worldTemp;
