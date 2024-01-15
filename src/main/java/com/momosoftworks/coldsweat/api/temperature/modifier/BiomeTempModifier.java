@@ -3,11 +3,13 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -77,9 +79,13 @@ public class BiomeTempModifier extends TempModifier
                     double altitude = entity.getY();
                     double mid = (min + max) / 2;
                     // Biome temp with time of day
-                    worldTemp += CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
+                    double biomeTemp = CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
                               // Altitude calculation
                                + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, level.getSeaLevel(), level.getMaxBuildHeight());
+                    if (CompatManager.isPrimalWinterLoaded())// && holder.is(BiomeTags.IS_OVERWORLD))
+                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
+                    }
+                    worldTemp += biomeTemp;
                 }
                 // If dimension has ceiling (don't use time or altitude)
                 else worldTemp += CSMath.average(max, min);

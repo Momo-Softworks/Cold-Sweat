@@ -41,6 +41,7 @@ public class CompatManager
     private static final boolean WEATHER_LOADED = modLoaded("weather2");
     private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
+    private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
 
     private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -109,6 +110,9 @@ public class CompatManager
     }
     public static boolean isLegendaryTooltipsLoaded()
     {   return TOOLTIPS_LOADED;
+    }
+    public static boolean isPrimalWinterLoaded()
+    {   return PRIMAL_WINTER_LOADED;
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
