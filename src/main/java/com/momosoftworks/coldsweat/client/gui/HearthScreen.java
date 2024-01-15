@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
@@ -20,10 +19,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.network.NetworkDirection;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer>
 {
@@ -116,8 +114,7 @@ public class HearthScreen extends EffectRenderingInventoryScreen<HearthContainer
     {
         super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
-        {
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new DisableHearthParticlesMessage(Minecraft.getInstance().player, HearthSaveDataHandler.serializeDisabledHearths()));
+        {   ColdSweatPacketHandler.INSTANCE.sendTo(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()), Minecraft.getInstance().getConnection().getConnection(), NetworkDirection.PLAY_TO_SERVER);
         }
     }
 }
