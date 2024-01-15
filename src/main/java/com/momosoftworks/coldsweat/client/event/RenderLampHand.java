@@ -61,16 +61,7 @@ public class RenderLampHand
             );
 
             ms.pushPose();
-
-            if (isRightHand)
-            {
-                ms.translate(0.75, -0.3, -0.36);
-            }
-            else
-            {
-                ms.translate(-0.75, -0.3, -0.36);
-            }
-
+            ms.translate(isRightHand ? 0.75 : -0.75, -0.3, -0.36);
             ms.scale(0.75f, 0.8f, 0.72f);
 
             RenderSystem.enableBlend();
