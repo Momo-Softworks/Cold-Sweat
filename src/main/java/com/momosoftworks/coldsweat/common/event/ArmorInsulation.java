@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
@@ -97,8 +98,11 @@ public class ArmorInsulation
                     }
 
                     // Add the armor's defense value to the insulation value.
-                    cold += armorItem.getDefense();
-                    hot += armorItem.getDefense();
+                    double armorAmount = armorStack.getAttributeModifiers(armorItem.getEquipmentSlot(armorStack)).entries().stream().filter(entry -> entry.getKey().equals(Attributes.ARMOR))
+                            .findFirst().map(entry -> entry.getValue().getAmount())
+                            .orElse(0d);
+                    cold += Math.min(armorAmount, 20);
+                    hot += Math.min(armorAmount, 20);
 
                 }
             }
