@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -13,6 +14,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -23,6 +25,9 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import top.theillusivec4.curios.api.CuriosApi;
+import weather2.ServerTickHandler;
+import weather2.weathersystem.WeatherManagerServer;
+import weather2.weathersystem.storm.StormObject;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -138,15 +143,14 @@ public class CompatManager
 
     public static boolean isWeather2RainingAt(Level level, BlockPos pos)
     {
-        return false;
-        /*if (!WEATHER_LOADED) return false;
+        if (!WEATHER_LOADED) return false;
         WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
         if (weatherManager == null) return false;
         StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
         if (rainStorm == null) return false;
 
         return WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
-            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();*/
+            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();
     }
 
     @SubscribeEvent
