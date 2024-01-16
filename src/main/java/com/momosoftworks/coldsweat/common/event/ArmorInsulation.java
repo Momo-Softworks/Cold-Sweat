@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -95,8 +96,11 @@ public class ArmorInsulation
                     }
 
                     // Add the armor's defense value to the insulation value.
-                    cold += armorItem.getDefense();
-                    hot += armorItem.getDefense();
+                    double armorAmount = armorStack.getAttributeModifiers(armorItem.getSlot()).entries().stream().filter(entry -> entry.getKey().equals(Attributes.ARMOR))
+                            .findFirst().map(entry -> entry.getValue().getAmount())
+                            .orElse(0d);
+                    cold += Math.min(armorAmount, 20);
+                    hot += Math.min(armorAmount, 20);
 
                 }
             }
