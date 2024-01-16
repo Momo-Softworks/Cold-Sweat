@@ -1,10 +1,10 @@
 {
 	"textures": {
-		"body": "cold_sweat:item/soulspring_lamp/soulspring_lamp_body_3",
-		"ornaments": "cold_sweat:item/soulspring_lamp/soulspring_lamp_ornaments",
-		"top": "cold_sweat:item/soulspring_lamp/soulspring_lamp_top",
-		"bottom_0": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_0",
-		"bottom_1": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_1"
+		"body": "cold_sweat:items/soulspring_lamp/soulspring_lamp_body_3",
+		"ornaments": "cold_sweat:items/soulspring_lamp/soulspring_lamp_ornaments",
+		"top": "cold_sweat:items/soulspring_lamp/soulspring_lamp_top",
+		"bottom_0": "cold_sweat:items/soulspring_lamp/soulspring_lamp_bottom_0",
+		"bottom_1": "cold_sweat:items/soulspring_lamp/soulspring_lamp_bottom_1"
 	},
 	"elements": [
 		{
