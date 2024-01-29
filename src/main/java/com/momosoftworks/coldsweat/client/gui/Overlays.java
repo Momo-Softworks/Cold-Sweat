@@ -255,7 +255,7 @@ public class Overlays
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 0.5 ? diff : diff / 4d;
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / 20d, 0.25 * CSMath.getSign(diff));
 
                     // Update max/min offset
                     MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);
