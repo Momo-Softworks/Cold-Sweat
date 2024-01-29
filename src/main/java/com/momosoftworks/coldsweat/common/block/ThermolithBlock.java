@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.tileentity.ThermolithTileEntity;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.common.blockentity.ThermolithTileEntity;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
@@ -113,7 +113,7 @@ public class ThermolithBlock extends Block
 
     @Override
     public ThermolithTileEntity createTileEntity(BlockState state, IBlockReader world)
-    {   return TileEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
+    {   return BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
     }
 
     @Override

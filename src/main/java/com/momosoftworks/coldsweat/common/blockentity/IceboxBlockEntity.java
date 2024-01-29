@@ -1,11 +1,12 @@
-package com.momosoftworks.coldsweat.common.tileentity;
+package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.common.block.BoilerBlock;
-import com.momosoftworks.coldsweat.common.container.BoilerContainer;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.common.block.IceboxBlock;
+import com.momosoftworks.coldsweat.common.container.IceboxContainer;
+import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.BlockState;
@@ -36,9 +37,10 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-public class BoilerTileEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
+public class IceboxBlockEntity extends LockableLootTileEntity implements ITickableTileEntity, ISidedInventory
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -55,15 +57,14 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     public int ticksExisted;
     int fuel;
 
-    public BoilerTileEntity()
-    {   super(ModBlockEntities.BOILER);
+    public IceboxBlockEntity()
+    {   super(ModBlockEntities.ICEBOX);
     }
 
     @Nonnull
     @Override
     public CompoundNBT getUpdateTag()
-    {
-        CompoundNBT tag = super.getUpdateTag();
+    {   CompoundNBT tag = super.getUpdateTag();
         tag.putInt("fuel", this.getFuel());
         return tag;
     }
@@ -75,18 +76,19 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
-    {   handleUpdateTag(null, pkt.getTag());
+    {
+        handleUpdateTag(null, pkt.getTag());
     }
 
     @Override
     public SUpdateTileEntityPacket getUpdatePacket()
-    {   return new SUpdateTileEntityPacket(this.getBlockPos(), 0, this.getUpdateTag());
+    {   return new SUpdateTileEntityPacket(this.worldPosition, 0, this.getUpdateTag());
     }
 
     private void sendUpdatePacket()
     {
         // Remove the players that aren't interacting with this block anymore
-        usingPlayers.removeIf(player -> !(player.containerMenu instanceof BoilerContainer && ((BoilerContainer) player.containerMenu).te == this));
+        usingPlayers.removeIf(player -> !(player.containerMenu instanceof IceboxContainer && ((IceboxContainer) player.containerMenu).te == this));
 
         // Send data to all players with this block's menu open
         ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).collect(Collectors.toList())),
@@ -95,12 +97,7 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
 
     @Override
     protected ITextComponent getDefaultName() {
-        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".boiler");
-    }
-
-    @Override
-    public ITextComponent getDisplayName() {
-        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".icebox");
     }
 
     @Override
@@ -111,62 +108,77 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
         BlockPos pos = this.getBlockPos();
         BlockState state = this.getBlockState();
 
-        if (getFuel() > 0)
+        if (!level.isClientSide)
         {
-            // Set state to lit
-            if (!state.getValue(BoilerBlock.LIT))
-                level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
-
-            // Warm up waterskins
-            if (ticksExisted % 20 == 0)
+            if (getFuel() > 0)
             {
-                boolean hasItemStacks = false;
-                for (int i = 1; i < 10; i++)
-                {
-                    ItemStack stack = getItem(i);
-                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+                // Set state to frosted
+                if (!state.getValue(IceboxBlock.FROSTED))
+                    level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
+                // Cool down waterskins
+                if (ticksExisted % 20 == 0)
+                {
+                    boolean hasItemStacks = false;
+                    for (int i = 1; i < 10; i++)
                     {
-                        hasItemStacks = true;
-                        stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                        ItemStack stack = getItem(i);
+                        int itemTemp = stack.getOrCreateTag().getInt("temperature");
+
+                        if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
+                        {
+                            hasItemStacks = true;
+                            stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
+                        }
+                    }
+                    if (hasItemStacks) setFuel(getFuel() - 1);
+                }
+            }
+            // if no fuel, set state to unfrosted
+            else if (state.getValue(IceboxBlock.FROSTED))
+            {
+                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+            }
+
+            // Input fuel
+            if (this.ticksExisted % 10 == 0)
+            {
+                ItemStack fuelStack = this.getItem(0);
+                int itemFuel = getItemFuel(fuelStack);
+
+                if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
+                {
+                    if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
+                    {
+                        this.setItem(0, fuelStack.getContainerItem());
+                        setFuel(this.getFuel() + itemFuel);
+                    }
+                    else
+                    {
+                        int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
+                        fuelStack.shrink(consumeCount);
+                        setFuel(this.getFuel() + itemFuel * consumeCount);
                     }
                 }
-                if (hasItemStacks) setFuel(getFuel() - 1);
             }
         }
-        // if no fuel, set state to unlit
-        else if (state.getValue(BoilerBlock.LIT))
-        {
-            level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
-        }
 
-        // Input fuel
-        if (this.ticksExisted % 10 == 0)
+        if (state.getValue(IceboxBlock.FROSTED) && ticksExisted % 3 == 0 && Math.random() < 0.5)
         {
-            ItemStack fuelStack = this.getItem(0);
-            int itemFuel = getItemFuel(fuelStack);
-
-            if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
-            {
-                if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
-                {
-                    this.setItem(0, fuelStack.getContainerItem());
-                    setFuel(this.getFuel() + itemFuel);
-                }
-                else
-                {
-                    int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
-                    fuelStack.shrink(consumeCount);
-                    setFuel(this.getFuel() + itemFuel * consumeCount);
-                }
-            }
+            double d0 = pos.getX() + 0.5;
+            double d1 = pos.getY();
+            double d2 = pos.getZ() + 0.5;
+            boolean side = new Random().nextBoolean();
+            double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            double d6 = Math.random() * 0.3;
+            double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+            level.addParticle(ParticleTypesInit.MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
         }
     }
 
     public int getItemFuel(ItemStack item)
     {
-        return ConfigSettings.BOILER_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
+        return ConfigSettings.ICEBOX_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
     }
 
     public int getFuel()
@@ -185,29 +197,28 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
 
     @Override
     protected Container createMenu(int id, PlayerInventory playerInv)
-    {
-        // Track the players using this block
+    {   // Track the players using this block
         if (playerInv.player instanceof ServerPlayerEntity)
         {   usingPlayers.add((ServerPlayerEntity) playerInv.player);
         }
-        return new BoilerContainer(id, playerInv, this);
+        return new IceboxContainer(id, playerInv, this);
     }
 
     @Override
     public void load(BlockState state, CompoundNBT tag)
     {
         super.load(state, tag);
+        this.setFuel(tag.getInt("fuel"));
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ItemStackHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("fuel"));
     }
 
     @Override
     public CompoundNBT save(CompoundNBT tag)
     {
         super.save(tag);
-        ItemStackHelper.saveAllItems(tag, this.items);
         tag.putInt("fuel", this.getFuel());
+        ItemStackHelper.saveAllItems(tag, this.items);
         return tag;
     }
 
@@ -230,6 +241,12 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     @Override
+    public void setItem(int slot, ItemStack itemstack)
+    {
+        items.set(slot, itemstack);
+    }
+
+    @Override
     public ItemStack removeItem(int slot, int count)
     {
         ItemStack itemstack = ItemStackHelper.removeItem(items, slot, count);
@@ -246,15 +263,8 @@ public class BoilerTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     @Override
-    public void setItem(int slot, ItemStack itemstack)
-    {
-        items.set(slot, itemstack);
-    }
-
-    @Override
     public boolean stillValid(PlayerEntity player)
-    {
-        return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
+    {   return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
     }
 
     @Override

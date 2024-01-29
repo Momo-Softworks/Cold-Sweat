@@ -37,8 +37,7 @@ public class HearthParticle extends SpriteTexturedParticle
 
     @Override
     public void tick()
-    {
-        super.tick();
+    {   super.tick();
         this.setSpriteFromAge(this.ageSprite);
 
         if (this.age < 10)

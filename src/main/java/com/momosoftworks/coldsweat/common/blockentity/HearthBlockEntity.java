@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.tileentity;
+package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
@@ -10,11 +10,12 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
+import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
@@ -73,7 +74,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class HearthTileEntity extends LockableLootTileEntity implements ITickableTileEntity
+public class HearthBlockEntity extends LockableLootTileEntity implements ITickableTileEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     List<SpreadPath> paths = new ArrayList<>();
@@ -83,24 +84,19 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     List<EffectInstance> effects = new ArrayList<>();
 
-    private static final int INSULATION_TIME = 1200;
-    public static final int MAX_FUEL = 1000;
-    public static final int SLOT_COUNT = 1;
-    private static final boolean CREATE_LOADED = CompatManager.isCreateLoaded();
-
     FluidStack coldFuel = new FluidStack(Fluids.WATER, 0);
     FluidStack hotFuel = new FluidStack(Fluids.LAVA, 0);
 
-    protected IFluidHandler bottomFuelHandler = new BottomFluidHandler();
-    private final LazyOptional<IFluidHandler> bottomFuelHolder = LazyOptional.of(() -> {
+    FluidHandler bottomFuelHandler = new BottomFluidHandler();
+    final LazyOptional<IFluidHandler> bottomFuelHolder = LazyOptional.of(() -> {
         return this.bottomFuelHandler;
     });
-    protected IFluidHandler sidesFuelHandler = new SidesFluidHandler();
-    private final LazyOptional<IFluidHandler> sidesFuelHolder = LazyOptional.of(() -> {
+    FluidHandler sidesFuelHandler = new SidesFluidHandler();
+    final LazyOptional<IFluidHandler> sidesFuelHolder = LazyOptional.of(() -> {
         return this.sidesFuelHandler;
     });
 
-    protected NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+    NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
     int x = 0;
     int y = 0;
@@ -121,7 +117,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     boolean isRebuildQueued = false;
     public int ticksExisted = 0;
 
-    private boolean registeredLocation = false;
+    boolean registeredLocation = false;
 
     boolean showParticles = true;
     int frozenPaths = 0;
@@ -129,7 +125,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     int smokestackHeight = 2;
 
-    private static final Direction[] DIRECTIONS = Direction.values();
+    static final Direction[] DIRECTIONS = Direction.values();
 
     static Method TICK_DOWN_EFFECT;
     static
@@ -141,8 +137,8 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         catch (Exception ignored) {}
     }
 
-    public HearthTileEntity()
-    {   super(TileEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get());
+    public HearthBlockEntity()
+    {   super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get());
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -172,8 +168,24 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   return 96;
     }
 
-    public int maxPaths()
+    public int getMaxPaths()
     {   return 9000;
+    }
+
+    public int getMaxFuel()
+    {   return 1000;
+    }
+
+    public int getInsulationTime()
+    {   return 1200;
+    }
+
+    public int getInsulationLevel()
+    {   return insulationLevel;
+    }
+
+    public int getMaxInsulationLevel()
+    {   return 10;
     }
 
     @Override
@@ -202,14 +214,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {
         BlockPos pos = this.getBlockPos();
         // Register the hearth's position to the global map
-        if (!this.registeredLocation)
-        {   levelPos = Pair.of(this.getBlockPos(), level.dimension().location());
-            HearthSaveDataHandler.HEARTH_POSITIONS.add(levelPos);
-            this.x = pos.getX();
-            this.y = pos.getY();
-            this.z = pos.getZ();
-            this.registeredLocation = true;
-        }
+        this.registerLocation();
 
         // Easy access to clientside testList::stream
         boolean isClient = level.isClientSide;
@@ -218,6 +223,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         if (rebuildCooldown > 0) rebuildCooldown--;
 
+        // Locate nearby players
         if (this.level != null && this.ticksExisted % 20 == 0)
         {
             this.isPlayerNearby = false;
@@ -225,26 +231,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             for (PlayerEntity player : this.level.players())
             {
                 if (player.blockPosition().closerThan(pos, this.getMaxRange()))
-                {
-                    players.add(player);
+                {   players.add(player);
                     this.isPlayerNearby = true;
                 }
             }
         }
 
         // Tick down the time for each effect
-        if (!effects.isEmpty())
-        {
-            effects.removeIf(effect ->
-            {
-                try
-                {
-                    TICK_DOWN_EFFECT.invoke(effect);
-                    if (effect.getDuration() <=0) return true;
-                } catch (Exception ignored) {}
-                return false;
-            });
-        }
+        this.tickPotionEffects();
 
         // Clear paths every 5 minutes to account for calculation errors
         if (this.ticksExisted % 6000 == 0)
@@ -259,12 +253,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
         {
             // Gradually increases insulation amount
-            if (insulationLevel < INSULATION_TIME)
-                insulationLevel++;
+            if (insulationLevel < this.getInsulationTime())
+            {   insulationLevel++;
+            }
 
             if (this.isPlayerNearby)
             {
-                if (this.ticksExisted % 10 == 0)
+                // Determine whether particles are enabled
+                if (this.ticksExisted % 20 == 0)
                 {
                     showParticles = isClient
                             && Minecraft.getInstance().options.particles == ParticleStatus.ALL
@@ -272,25 +268,20 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 }
 
                 if (paths.isEmpty())
-                {
-                    // If pipe is directly attached to top, spread directly through the pipe instead of outwards
-                    if (isPipe(level.getBlockState(pos.above(2))))
-                    {   this.addPath(new SpreadPath(pos.above(2)).setOrigin(pos.above(2)));
-                        pathLookup.add(pos.above());
-                    }
-                    // Spread normally
-                    else this.addPath(new SpreadPath(pos).setOrigin(pos));
+                {   this.addPath(new SpreadPath(pos.above(2)).setOrigin(pos.above(2)));
+                    pathLookup.add(pos.above());
                 }
 
                 // Mark as not spreading if all paths are frozen
                 if (this.frozenPaths >= paths.size())
-                    this.spreading = false;
+                {   this.spreading = false;
+                }
 
                 /*
                  Partition the points into logical "sub-maps" to be iterated over separately each tick
                 */
                 int pathCount = paths.size();
-                // Size of each partition (defaults to 1/30th of the total paths)
+                // Size of each partition (sub-list) of paths
                 int partSize = spreading ? CSMath.clamp(pathCount / 3, 100, 4000)
                                          : CSMath.clamp(pathCount / 20, 10, 100);
                 // Number of partitions
@@ -300,130 +291,14 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 // Index of the first point being worked on this tick
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
-                /*
-                 Iterate over the specified partition of paths
-                 */
-                for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
-                {   // This operation is really fast because it's an ArrayList
-                    SpreadPath spreadPath = paths.get(i);
-                    BlockPos pathPos = spreadPath.pos;
-                    if (spreadPath.origin == null)
-                        spreadPath.setOrigin(pos);
-
-                    int spX = spreadPath.x;
-                    int spY = spreadPath.y;
-                    int spZ = spreadPath.z;
-
-                    // Use try-finally because there's still stuff to do even if "continue;" skips the rest of the code
-                    try
-                    {   // Don't try to spread if the path is frozen
-                        if (spreadPath.frozen)
-                        {
-                            // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
-                            // The Hearth is "finished spreading" when all paths are frozen
-                            if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
-                            {   paths.remove(i);
-                                // Go back and reiterate over the new path at this index
-                                i--;
-                            }
-                            // Don't do anything else with this path
-                            continue;
-                        }
-
-                        /*
-                         Try to spread to new blocks
-                         */
-
-                        // The origin of the path is usually the hearth's position,
-                        // but if it's spreading through Create pipes then the origin is the end of the pipe
-                        if (pathCount < this.maxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
-                        && CSMath.withinCube(spreadPath.origin, pos, this.getMaxRange()))
-                        {
-                            /*
-                             Spreading algorithm
-                             */
-                            BlockState state = level.getBlockState(pathPos);
-
-                            // Build a map of what positions can see the sky
-                            Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
-                            Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
-                            boolean canSeeSky;
-                            if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
-                            {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
-                            }
-                            else
-                            {   canSeeSky = seeSkyState.getSecond();
-                            }
-
-                            if (!canSeeSky || isPipe(state))
-                            {
-                                // Try to spread in every direction from the current position
-                                for (int d = 0; d < DIRECTIONS.length; d++)
-                                {
-                                    Direction direction = DIRECTIONS[d];
-
-                                    // Don't try to spread backwards
-                                    Direction pathDir = spreadPath.direction;
-                                    if (direction.getAxis() == pathDir.getAxis() && direction != pathDir) continue;
-
-                                    BlockPos tryPos = pathPos.relative(direction);
-
-                                    // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
-                                    // .add() functions to both add the path and check if it's already in the list
-                                    if (pathLookup.add(tryPos))
-                                    {
-                                        SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
-
-                                        // If the BlockState is a pipe, check if the new path is following the direction of the pipe
-                                        if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
-                                        && this.isValidPipeAt(tryPos, state, newPath, direction))
-                                        {   // Add the new path to the list
-                                            paths.add(newPath);
-                                        }
-                                    }
-                                }
-                            }
-                            // Remove this path if it has skylight access
-                            else
-                            {   pathLookup.remove(pathPos);
-                                paths.remove(i);
-                                i--;
-                                continue;
-                            }
-                        }
-                        // Track frozen paths to know when the Hearth is done spreading
-                        spreadPath.frozen = true;
-                        this.frozenPaths++;
-                    }
-
-                    /*
-                     Give insulation & spawn particles
-                     */
-                    finally
-                    {
-                        // Air Particles
-                        if (isClient && showParticles)
-                        {
-                            Random rand = new Random();
-                            if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
-                            {   float xr = rand.nextFloat();
-                                float yr = rand.nextFloat();
-                                float zr = rand.nextFloat();
-                                float xm = rand.nextFloat() / 20 - 0.025f;
-                                float zm = rand.nextFloat() / 20 - 0.025f;
-
-                                level.addParticle(ParticleTypesInit.HEARTH_AIR.get(), false, spX + xr, spY + yr, spZ + zr, xm, 0, zm);
-                            }
-                        }
-                    }
-                }
+                // Spread to new blocks
+                this.trySpreading(pathCount, firstIndex, lastIndex);
 
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
                 {
                     for (int i = 0; i < players.size(); i++)
-                    {
-                        PlayerEntity player = players.get(i);
+                    {   PlayerEntity player = players.get(i);
                         if (player != null && pathLookup.contains(player.blockPosition()))
                         {   this.insulatePlayer(player);
                         }
@@ -432,62 +307,140 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 }
 
                 // Drain fuel
-                if (this.ticksExisted % 40 == 0)
-                {
-                    if (shouldUseColdFuel)
-                    {   this.setColdFuel(this.getColdFuel() - 1, true);
-                    }
-                    if (shouldUseHotFuel)
-                    {   this.setHotFuel(this.getHotFuel() - 1, true);
-                    }
-
-                    shouldUseColdFuel = false;
-                    shouldUseHotFuel = false;
-                }
+                this.tickDrainFuel();
             }
         }
+
         // Input fuel
-        if (this.ticksExisted % 100 == 0)
+        if (this.ticksExisted % 20 == 0)
         {   this.checkForFuel();
         }
 
         // Update fuel
-        if (Math.abs(this.getColdFuel() - lastColdFuel) >= MAX_FUEL/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= MAX_FUEL/36
-        || this.ticksExisted % 20 == 0)
+        if (this.isFuelChanged())
         {   this.updateFuelState();
-            this.lastColdFuel = this.getColdFuel();
-            this.lastHotFuel = this.getHotFuel();
         }
 
         // Particles
         if (isClient)
-        {
-            if (this.ticksExisted % 20 == 0)
-            {
-                this.smokestackHeight = 2;
-                for (; level.getBlockState(new BlockPos(pos.getX(), this.y + smokestackHeight, pos.getZ())).getBlock() instanceof WallBlock; smokestackHeight++)
-                {}
+        {   this.tickParticles();
+        }
+    }
+
+    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
+    {
+        for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
+        {   // This operation is really fast because it's an ArrayList
+            SpreadPath spreadPath = paths.get(i);
+            BlockPos pathPos = spreadPath.pos;
+            if (spreadPath.origin == null)
+            {   spreadPath.setOrigin(this.getBlockPos());
             }
 
-            Random rand = new Random();
-            if (rand.nextDouble() < this.getColdFuel() / 3000d)
-            {   double d0 = this.x + 0.5d;
-                double d1 = this.y + smokestackHeight;
-                double d2 = this.z + 0.5d;
-                double d3 = (rand.nextDouble() - 0.5) / 4;
-                double d4 = (rand.nextDouble() - 0.5) / 4;
-                double d5 = (rand.nextDouble() - 0.5) / 4;
-                level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+            int spX = spreadPath.x;
+            int spY = spreadPath.y;
+            int spZ = spreadPath.z;
+
+            // Use try-finally because there's still stuff to do even if {continue} skips the rest of the loop
+            try
+            {   // Don't try to spread if the path is frozen
+                if (spreadPath.frozen)
+                {
+                    // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
+                    // The Hearth is "finished spreading" when all paths are frozen
+                    if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
+                    {   paths.remove(i);
+                        // Go back and reiterate over the new path at this index
+                        i--;
+                    }
+                    // Don't do anything else with this path
+                    continue;
+                }
+
+                /*
+                 Try to spread to new blocks
+                 */
+
+                // The origin of the path is usually the hearth's position,
+                // but if it's spreading through Create pipes then the origin is the end of the pipe
+                if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
+                && CSMath.withinCube(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
+                {
+                    /*
+                     Spreading algorithm
+                     */
+                    BlockState state = level.getBlockState(pathPos);
+
+                    // Build a map of what positions can see the sky
+                    Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
+                    Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
+                    boolean canSeeSky;
+                    if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
+                    {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
+                    }
+                    else
+                    {   canSeeSky = seeSkyState.getSecond();
+                    }
+
+                    if (!canSeeSky || isPipe(state))
+                    {
+                        // Try to spread in every direction from the current position
+                        for (int d = 0; d < DIRECTIONS.length; d++)
+                        {
+                            Direction direction = DIRECTIONS[d];
+
+                            // Don't try to spread backwards
+                            Direction pathDir = spreadPath.direction;
+                            if (direction.getAxis() == pathDir.getAxis() && direction != pathDir) continue;
+
+                            BlockPos tryPos = pathPos.relative(direction);
+
+                            // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
+                            // .add() functions to both add the path and check if it's already in the list
+                            if (pathLookup.add(tryPos))
+                            {
+                                SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
+
+                                // If the BlockState is a pipe, check if the new path is following the direction of the pipe
+                                if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
+                                        && this.isValidPipeAt(tryPos, state, newPath, direction))
+                                {   // Add the new path to the list
+                                    paths.add(newPath);
+                                }
+                            }
+                        }
+                    }
+                    // Remove this path if it has skylight access
+                    else
+                    {   pathLookup.remove(pathPos);
+                        paths.remove(i);
+                        i--;
+                        continue;
+                    }
+                }
+                // Track frozen paths to know when the Hearth is done spreading
+                spreadPath.frozen = true;
+                this.frozenPaths++;
             }
-            if (rand.nextDouble() < this.getHotFuel() / 3000d)
-            {   double d0 = this.x + 0.5d;
-                double d1 = this.y + smokestackHeight;
-                double d2 = this.z + 0.5d;
-                double d3 = (rand.nextDouble() - 0.5) / 2;
-                double d4 = (rand.nextDouble() - 0.5) / 2;
-                double d5 = (rand.nextDouble() - 0.5) / 2;
-                BasicParticleType particle = Math.random() < 0.5 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE;
-                level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+
+            /*
+             Give insulation & spawn particles
+             */
+            finally
+            {
+                // Air Particles
+                if (this.getLevel().isClientSide && showParticles)
+                {   Random rand = new Random();
+                    if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
+                    {   float xr = rand.nextFloat();
+                        float yr = rand.nextFloat();
+                        float zr = rand.nextFloat();
+                        float xm = rand.nextFloat() / 20 - 0.025f;
+                        float zm = rand.nextFloat() / 20 - 0.025f;
+
+                        level.addParticle(this.getAirParticle(), false, spX + xr, spY + yr, spZ + zr, xm, 0, zm);
+                    }
+                }
             }
         }
     }
@@ -522,7 +475,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             else if (fuelStack.getItem() == Items.MILK_BUCKET && !effects.isEmpty())
             {
                 this.getItems().set(0, fuelStack.getContainerItem());
-                level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.WITCH_DRINK, SoundCategory.BLOCKS, 1, 1);
+                level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BUCKET_EMPTY, SoundCategory.BLOCKS, 1, 1);
                 effects.clear();
                 WorldHelper.syncBlockEntityData(this);
             }
@@ -533,10 +486,10 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 if (itemFuel != 0)
                 {
                     int fuel = itemFuel > 0 ? this.getHotFuel() : this.getColdFuel();
-                    if (fuel < MAX_FUEL - Math.abs(itemFuel) * 0.75)
+                    if (fuel < this.getMaxFuel() - Math.abs(itemFuel) * 0.75)
                     {
                         if (!fuelStack.hasContainerItem() || fuelStack.getCount() > 1)
-                        {   int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
+                        {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
                             fuelStack.shrink(consumeCount);
                             addFuel(itemFuel * consumeCount);
                         }
@@ -550,6 +503,32 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         }
     }
 
+    protected boolean isFuelChanged()
+    {
+        return Math.abs(this.getColdFuel() - lastColdFuel) >= this.getMaxFuel()/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= this.getMaxFuel()/36
+            || this.ticksExisted % 20 == 0;
+    }
+
+    protected void drainFuel()
+    {
+        if (shouldUseColdFuel)
+        {   this.setColdFuel(this.getColdFuel() - 1, true);
+        }
+        if (shouldUseHotFuel)
+        {   this.setHotFuel(this.getHotFuel() - 1, true);
+        }
+
+        shouldUseColdFuel = false;
+        shouldUseHotFuel = false;
+    }
+
+    protected void tickDrainFuel()
+    {
+        if (this.ticksExisted % 40 == 0)
+        {   this.drainFuel();
+        }
+    }
+
     void insulatePlayer(PlayerEntity player)
     {
         for (int i = 0; i < effects.size(); i++)
@@ -558,6 +537,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                                                    effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
         // Apply the insulation effect
+        if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
             double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
@@ -590,16 +570,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             // Tell the hearth to use cold fuel
             shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
 
-            if (shouldUseHotFuel || shouldUseColdFuel)
-            {   int effectLevel = Math.min(9, (insulationLevel / INSULATION_TIME) * 9);
-                player.addEffect(new EffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
-            }
         });
+        if (shouldUseHotFuel || shouldUseColdFuel)
+        {   int maxEffect = this.getMaxInsulationLevel() - 1;
+            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
+            player.addEffect(new EffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
+        }
     }
 
-    private boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
+    protected boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
     {
-        if (CREATE_LOADED)
+        if (CompatManager.isCreateLoaded())
         {
             Block block = fromState.getBlock();
             if (!(block instanceof FluidPipeBlock || block instanceof GlassFluidPipeBlock || block instanceof EncasedPipeBlock))
@@ -616,13 +597,42 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         return true;
     }
 
-    private boolean isPipe(BlockState state)
-    {   return CREATE_LOADED && (state.getBlock() instanceof FluidPipeBlock || state.getBlock() instanceof GlassFluidPipeBlock || state.getBlock() instanceof EncasedPipeBlock);
+    protected boolean isPipe(BlockState state)
+    {   return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
+                                               || state.getBlock() instanceof GlassFluidPipeBlock
+                                               || state.getBlock() instanceof EncasedPipeBlock);
+    }
+
+    protected void registerLocation()
+    {
+        if (!this.registeredLocation)
+        {   levelPos = Pair.of(this.getBlockPos(), level.dimension().location());
+            HearthSaveDataHandler.HEARTH_POSITIONS.add(levelPos);
+            this.x = this.getBlockPos().getX();
+            this.y = this.getBlockPos().getY();
+            this.z = this.getBlockPos().getZ();
+            this.registeredLocation = true;
+        }
+    }
+
+    protected void tickPotionEffects()
+    {
+        if (!effects.isEmpty())
+        {
+            effects.removeIf(effect ->
+            {
+                try
+                {   TICK_DOWN_EFFECT.invoke(effect);
+                    if (effect.getDuration() <=0) return true;
+                }
+                catch (Exception ignored) {}
+                return false;
+            });
+        }
     }
 
     void resetPaths()
-    {
-        // Reset cooldown
+    {   // Reset cooldown
         this.rebuildCooldown = 100;
 
         // Clear paths & lookup
@@ -645,7 +655,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     {   return effects;
     }
 
-    public static int getItemFuel(ItemStack item)
+    public int getItemFuel(ItemStack item)
     {   return ConfigSettings.HEARTH_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
     }
 
@@ -666,14 +676,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         if (amount == 0 && hasHotFuel)
         {   hasHotFuel = false;
-            level.playSound(null, this.getBlockPos(), ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            if (level != null)
+            {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            }
         }
         else hasHotFuel = true;
 
         if (update) this.updateFuelState();
     }
+
     public void setHotFuelAndUpdate(int amount)
-    {   setHotFuel(amount, true);
+    {   this.setHotFuel(amount, true);
     }
 
     public void setColdFuel(int amount, boolean update)
@@ -685,14 +698,17 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         if (amount <= 0 && hasColdFuel)
         {   hasColdFuel = false;
-            level.playSound(null, this.getBlockPos(), ModSounds.HEARTH_FUEL, SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            if (level != null)
+            {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+            }
         }
         else hasColdFuel = true;
 
         if (update) this.updateFuelState();
     }
+
     public void setColdFuelAndUpdate(int amount)
-    {   setColdFuel(amount, true);
+    {   this.setColdFuel(amount, true);
     }
 
     /**
@@ -700,32 +716,68 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
      */
     public void addFuel(int amount)
     {   if (amount > 0)
-        {   setHotFuelAndUpdate(this.getHotFuel() + amount);
+        {   this.setHotFuelAndUpdate(this.getHotFuel() + amount);
         }
         else if (amount < 0)
-        {   setColdFuelAndUpdate(this.getColdFuel() + Math.abs(amount));
+        {   this.setColdFuelAndUpdate(this.getColdFuel() + Math.abs(amount));
         }
     }
 
     public void updateFuelState()
     {
         if (level != null && !level.isClientSide)
-        {   BlockState state = level.getBlockState(this.getBlockPos());
-            int waterLevel = this.getColdFuel() == 0 ? 0 : (this.getColdFuel() < MAX_FUEL / 2 ? 1 : 2);
-            int lavaLevel = this.getHotFuel() == 0 ? 0 : (this.getHotFuel() < MAX_FUEL / 2 ? 1 : 2);
-
-            BlockState desiredState = state.setValue(HearthBottomBlock.WATER, waterLevel).setValue(HearthBottomBlock.LAVA, lavaLevel);
-            if (state.getValue(HearthBottomBlock.WATER) != waterLevel || state.getValue(HearthBottomBlock.LAVA) != lavaLevel)
-                level.setBlock(this.getBlockPos(), desiredState, 3);
-
-            this.setChanged();
+        {   this.setChanged();
             WorldHelper.syncBlockEntityData(this);
+            this.lastColdFuel = this.getColdFuel();
+            this.lastHotFuel = this.getHotFuel();
         }
+    }
+
+    protected SoundEvent getFuelDepleteSound()
+    {   return ModSounds.HEARTH_FUEL;
+    }
+
+    protected void tickParticles()
+    {
+        // Calculate the height of the smokestack (can be extended with walls)
+        if (this.ticksExisted % 20 == 0)
+        {   this.smokestackHeight = 2;
+            BlockState state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
+            while (state.getBlock() instanceof WallBlock || state.getBlock() instanceof SmokestackBlock)
+            {   smokestackHeight++;
+                state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
+            }
+        }
+
+        Random rand = new Random();
+        if (rand.nextDouble() < this.getColdFuel() / 3000d)
+        {   double d0 = this.x + 0.5d;
+            double d1 = this.y + smokestackHeight;
+            double d2 = this.z + 0.5d;
+            double d3 = (rand.nextDouble() - 0.5) / 4;
+            double d4 = (rand.nextDouble() - 0.5) / 4;
+            double d5 = (rand.nextDouble() - 0.5) / 4;
+            level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+        }
+        if (rand.nextDouble() < this.getHotFuel() / 3000d)
+        {   double d0 = this.x + 0.5d;
+            double d1 = this.y + smokestackHeight;
+            double d2 = this.z + 0.5d;
+            double d3 = (rand.nextDouble() - 0.5) / 2;
+            double d4 = (rand.nextDouble() - 0.5) / 2;
+            double d5 = (rand.nextDouble() - 0.5) / 2;
+            BasicParticleType particle = Math.random() < 0.5 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE;
+            level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+        }
+    }
+
+    public BasicParticleType getAirParticle()
+    {   return ParticleTypesInit.HEARTH_AIR.get();
     }
 
     @Override
     public int getContainerSize()
-    {   return SLOT_COUNT;
+    {   return 1;
     }
 
     @Override
@@ -755,7 +807,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
     void saveEffects(CompoundNBT tag)
     {
-        if (this.effects.size() > 0)
+        if (!this.effects.isEmpty())
         {   ListNBT list = new ListNBT();
             for (EffectInstance effect : this.effects)
             {   list.add(effect.save(new CompoundNBT()));
@@ -853,7 +905,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
     @Override
     public void setRemoved()
     {   super.setRemoved();
-        HearthSaveDataHandler.HEARTH_POSITIONS.remove(this.getBlockPos());
+        HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
         if (this.level.isClientSide)
         {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
         }
@@ -877,7 +929,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         @Override
         public int getTankCapacity(int tank)
-        {   return MAX_FUEL;
+        {   return HearthBlockEntity.this.getMaxFuel();
         }
 
         @Override
@@ -891,7 +943,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
         public int fill(FluidStack fluidStack, FluidAction fluidAction)
         {
             if (fluidStack.getFluid() == Fluids.WATER)
-            {   int amount = Math.min(fluidStack.getAmount(), MAX_FUEL - coldFuel.getAmount());
+            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(0) - coldFuel.getAmount());
                 if (fluidAction.execute())
                 {
                     if (coldFuel.isEmpty())
@@ -902,7 +954,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
                 return amount;
             }
             else if (fluidStack.getFluid() == Fluids.LAVA)
-            {   int amount = Math.min(fluidStack.getAmount(), MAX_FUEL - hotFuel.getAmount());
+            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(1) - hotFuel.getAmount());
                 if (fluidAction.execute())
                 {
                     if (hotFuel.isEmpty())
@@ -925,16 +977,6 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
 
         @Override
         public abstract FluidStack drain(int amount, FluidAction fluidAction);
-
-        public void writeToNBT(CompoundNBT tag)
-        {   tag.put("ColdFuel", coldFuel.writeToNBT(new CompoundNBT()));
-            tag.put("HotFuel", hotFuel.writeToNBT(new CompoundNBT()));
-        }
-
-        public void readFromNBT(CompoundNBT tag)
-        {   coldFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel"));
-            hotFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel"));
-        }
     }
 
     /**
@@ -951,8 +993,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             if (fluidAction.execute() && drained > 0)
             {   coldFuel.shrink(drained);
             }
-            HearthTileEntity.this.setChanged();
-            //WorldHelper.syncBlockEntityData(HearthBlockEntity.this);
+            HearthBlockEntity.this.setChanged();
 
             return stack;
         }
@@ -972,8 +1013,7 @@ public class HearthTileEntity extends LockableLootTileEntity implements ITickabl
             if (fluidAction.execute() && drained > 0)
             {   hotFuel.shrink(drained);
             }
-            HearthTileEntity.this.setChanged();
-            //WorldHelper.syncBlockEntityData(HearthBlockEntity.this);
+            HearthBlockEntity.this.setChanged();
 
             return stack;
         }

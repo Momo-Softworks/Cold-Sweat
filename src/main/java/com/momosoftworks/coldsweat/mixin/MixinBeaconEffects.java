@@ -1,10 +1,8 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
 import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,18 +10,24 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Mixin(BeaconTileEntity.class)
 public class MixinBeaconEffects
 {
-    @Final
-    @Shadow
-    public static final Effect[][] BEACON_EFFECTS = new Effect[][]
+    @Shadow @Final public static Effect[][] BEACON_EFFECTS;
+
+    static
     {
-        {Effects.MOVEMENT_SPEED, Effects.DIG_SPEED},
-        {Effects.DAMAGE_RESISTANCE, Effects.JUMP},
-        {Effects.DAMAGE_BOOST},
-        {Effects.REGENERATION, ModEffects.INSULATION}
-    };
+        // get the current top-level effects as a mutable list
+        List<Effect> effects = new ArrayList(Arrays.asList(BEACON_EFFECTS[3]));
+        // add the insulation effect
+        effects.add(ModEffects.INSULATION);
+        // set the top-level effects to the new list
+        BEACON_EFFECTS[3] = effects.toArray(new Effect[0]);
+    }
 
     @ModifyArg(method = "applyEffects()V",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addEffect(Lnet/minecraft/potion/EffectInstance;)Z", ordinal = 1),

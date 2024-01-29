@@ -7,7 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.event.client.RenderWorldEvent;
-import com.momosoftworks.coldsweat.common.tileentity.HearthTileEntity;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -193,9 +193,9 @@ public class HearthDebugRenderer
 
                 BlockPos pos = entry.getFirst();
                 TileEntity blockEntity = world.getBlockEntity(pos);
-                if (blockEntity instanceof HearthTileEntity)
+                if (blockEntity instanceof HearthBlockEntity)
                 {
-                    HearthTileEntity hearth = (HearthTileEntity) blockEntity;
+                    HearthBlockEntity hearth = (HearthBlockEntity) blockEntity;
                     Set<BlockPos> lookup = hearth.getPathLookup();
 
                     Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());

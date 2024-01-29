@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.tileentity.BoilerTileEntity;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
+import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -66,18 +68,23 @@ public class BoilerBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        if (!world.isClientSide)
+        ItemStack stack = player.getItemInHand(hand);
+        // If the player is trying to put a smokestack on top, don't do anything
+        if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
+        && level.getBlockState(pos.above()).isAir())
+        {   return ActionResultType.FAIL;
+        }
+        if (!level.isClientSide)
         {
-            TileEntity te = world.getBlockEntity(pos);
-            if (te instanceof BoilerTileEntity)
+            TileEntity te = level.getBlockEntity(pos);
+            if (te instanceof BoilerBlockEntity)
             {
-                BoilerTileEntity boiler = (BoilerTileEntity) te;
-                ItemStack stack = player.getItemInHand(hand);
-                int itemFuel = boiler.getItemFuel(stack);
+                BoilerBlockEntity blockEntity = (BoilerBlockEntity) te;
+                int itemFuel = blockEntity.getItemFuel(stack);
 
-                if (itemFuel != 0 && boiler.getFuel() + itemFuel * 0.75 <= BoilerTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && blockEntity.getFuel() + itemFuel * 0.75 < blockEntity.getMaxFuel())
                 {
                     if (!player.isCreative())
                     {
@@ -90,12 +97,12 @@ public class BoilerBlock extends Block
                         {   stack.shrink(1);
                         }
                     }
-                    boiler.setFuel(boiler.getFuel() + itemFuel);
+                    blockEntity.setFuel(blockEntity.getFuel() + itemFuel);
 
-                    world.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else
-                {   NetworkHooks.openGui((ServerPlayerEntity) player, boiler, pos);
+                {   NetworkHooks.openGui((ServerPlayerEntity) player, blockEntity, pos);
                 }
             }
         }
@@ -119,9 +126,9 @@ public class BoilerBlock extends Block
         if (state.getBlock() != newState.getBlock())
         {
             TileEntity te = world.getBlockEntity(pos);
-            if (te instanceof BoilerTileEntity)
+            if (te instanceof BoilerBlockEntity)
             {
-                BoilerTileEntity boiler = (BoilerTileEntity) te;
+                BoilerBlockEntity boiler = (BoilerBlockEntity) te;
                 InventoryHelper.dropContents(world, pos, boiler);
                 world.updateNeighborsAt(pos, this);
             }
@@ -158,7 +165,7 @@ public class BoilerBlock extends Block
 
             double d4 = rand.nextDouble() * 0.6D - 0.3D;
             double d5 = direction$axis == Direction.Axis.X ? (double)direction.getStepX() * 0.52D : d4;
-            double d6 = rand.nextDouble() * 6.0D / 16.0D + 0.2;
+            double d6 = rand.nextDouble() * 3.0D / 16.0D + 3 / 16.0;
             double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getStepZ() * 0.52D : d4;
             world.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
             world.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
@@ -172,6 +179,6 @@ public class BoilerBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {   return TileEntityInit.BOILER_BLOCK_ENTITY_TYPE.get().create();
+    {   return BlockEntityInit.BOILER_BLOCK_ENTITY_TYPE.get().create();
     }
 }

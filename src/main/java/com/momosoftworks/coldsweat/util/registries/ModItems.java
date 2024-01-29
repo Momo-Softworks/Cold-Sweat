@@ -29,4 +29,5 @@ public class ModItems
     public static final Item FUR_PARKA = ItemInit.FUR_PARKA.get();
     public static final Item FUR_PANTS = ItemInit.FUR_PANTS.get();
     public static final Item FUR_BOOTS = ItemInit.FUR_BOOTS.get();
+    public static final Item SMOKESTACK = ItemInit.SMOKESTACK.get();
 }

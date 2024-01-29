@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.container;
 
-import com.momosoftworks.coldsweat.common.tileentity.IceboxTileEntity;
+import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
 import com.momosoftworks.coldsweat.data.tags.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -17,9 +17,9 @@ import java.util.Objects;
 
 public class IceboxContainer extends Container
 {
-    public final IceboxTileEntity te;
+    public final IceboxBlockEntity te;
 
-    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxTileEntity te)
+    public IceboxContainer(final int windowId, final PlayerInventory playerInv, final IceboxBlockEntity te)
     {
         super(ContainerInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
@@ -72,14 +72,14 @@ public class IceboxContainer extends Container
     }
 
 
-    private static IceboxTileEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
+    private static IceboxBlockEntity getTileEntity(final PlayerInventory playerInv, final PacketBuffer data)
     {
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
-        if (te instanceof IceboxTileEntity)
+        if (te instanceof IceboxBlockEntity)
         {
-            return (IceboxTileEntity) te;
+            return (IceboxBlockEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }

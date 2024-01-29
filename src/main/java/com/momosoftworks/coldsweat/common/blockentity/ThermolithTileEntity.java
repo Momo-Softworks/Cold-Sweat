@@ -1,8 +1,8 @@
-package com.momosoftworks.coldsweat.common.tileentity;
+package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.ThermolithBlock;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.BlockState;
@@ -16,7 +16,7 @@ public class ThermolithTileEntity extends TileEntity implements ITickableTileEnt
 
     public ThermolithTileEntity()
     {
-        super(TileEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get());
+        super(BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get());
     }
 
     @Override

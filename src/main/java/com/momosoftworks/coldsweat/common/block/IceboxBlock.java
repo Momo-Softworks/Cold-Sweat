@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.tileentity.IceboxTileEntity;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -56,13 +56,13 @@ public class IceboxBlock extends Block
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        if (world.getBlockEntity(pos) instanceof IceboxTileEntity)
+        if (world.getBlockEntity(pos) instanceof IceboxBlockEntity)
         {
-            IceboxTileEntity te = (IceboxTileEntity) world.getBlockEntity(pos);
+            IceboxBlockEntity te = (IceboxBlockEntity) world.getBlockEntity(pos);
             ItemStack stack = player.getItemInHand(hand);
             int itemFuel = te.getItemFuel(stack);
 
-            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxTileEntity.MAX_FUEL)
+            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
             {
                 if (!player.isCreative())
                 {
@@ -96,7 +96,7 @@ public class IceboxBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {   return TileEntityInit.ICEBOX_BLOCK_ENTITY_TYPE.get().create();
+    {   return BlockEntityInit.ICEBOX_BLOCK_ENTITY_TYPE.get().create();
     }
 
     @SuppressWarnings("deprecation")
@@ -116,8 +116,8 @@ public class IceboxBlock extends Block
         if (state.getBlock() != newState.getBlock())
         {
             TileEntity te = world.getBlockEntity(pos);
-            if (te instanceof IceboxTileEntity)
-            {   IceboxTileEntity icebox = (IceboxTileEntity) te;
+            if (te instanceof IceboxBlockEntity)
+            {   IceboxBlockEntity icebox = (IceboxBlockEntity) te;
                 InventoryHelper.dropContents(world, pos, icebox);
                 world.updateNeighborsAt(pos, this);
             }

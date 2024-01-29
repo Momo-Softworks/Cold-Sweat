@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.tileentity.HearthTileEntity;
-import com.momosoftworks.coldsweat.core.init.TileEntityInit;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
@@ -22,9 +22,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
@@ -39,8 +37,6 @@ public class HearthBottomBlock extends Block
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty WATER = IntegerProperty.create("water", 0, 2);
     public static final IntegerProperty LAVA = IntegerProperty.create("lava", 0, 2);
-
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -62,14 +58,6 @@ public class HearthBottomBlock extends Block
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
-        calculateFacingShapes(Block.box(0, 0, 0, 16, 16, 16));
-    }
-
-    static void calculateFacingShapes(VoxelShape shape)
-    {
-        for (Direction direction : Direction.values())
-        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
-        }
     }
 
     @Override
@@ -78,11 +66,7 @@ public class HearthBottomBlock extends Block
         return true;
     }
 
-    @Override
-    public VoxelShape getShape(BlockState state, IBlockReader getter, BlockPos pos, ISelectionContext context)
-    {   return SHAPES.get(state.getValue(FACING));
-    }
-
+    @Nullable
     @Override
     public boolean hasTileEntity(BlockState state)
     {   return true;
@@ -90,7 +74,7 @@ public class HearthBottomBlock extends Block
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {   return TileEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get().create();
+    {   return BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get().create();
     }
 
     @SuppressWarnings("deprecation")
@@ -98,9 +82,9 @@ public class HearthBottomBlock extends Block
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
         TileEntity te = world.getBlockEntity(pos);
-        if (te instanceof HearthTileEntity)
+        if (te instanceof HearthBlockEntity)
         {
-            HearthTileEntity hearth = (HearthTileEntity) te;
+            HearthBlockEntity hearth = (HearthBlockEntity) te;
             ItemStack stack = player.getItemInHand(hand);
 
             // If the held item is a bucket, try to extract fluids
@@ -117,8 +101,8 @@ public class HearthBottomBlock extends Block
                 boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
                 Vector3d sidePos = isLava ? lavaSidePos : waterSidePos;
                 BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
-                                                 : ((BucketItem) Items.WATER_BUCKET);
-                int itemFuel = Math.abs(HearthTileEntity.getItemFuel(filledBucket.getDefaultInstance()));
+                                               : ((BucketItem) Items.WATER_BUCKET);
+                int itemFuel = Math.abs(hearth.getItemFuel(filledBucket.getDefaultInstance()));
                 int hearthFuel = isLava ? hearth.getHotFuel() : hearth.getColdFuel();
 
                 if (hearthFuel >= itemFuel * 0.99)
@@ -147,10 +131,10 @@ public class HearthBottomBlock extends Block
             else
             {
                 // If the held item is fuel, try to insert the fuel
-                int itemFuel = HearthTileEntity.getItemFuel(stack);
+                int itemFuel = hearth.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? hearth.getHotFuel() : hearth.getColdFuel();
 
-                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthTileEntity.MAX_FUEL)
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < hearth.getMaxFuel())
                 {
                     // Consume the item if not in creative
                     if (!player.isCreative())
@@ -217,8 +201,8 @@ public class HearthBottomBlock extends Block
             }
 
             TileEntity tileentity = world.getBlockEntity(pos);
-            if (tileentity instanceof HearthTileEntity)
-            {   InventoryHelper.dropContents(world, pos, (HearthTileEntity) tileentity);
+            if (tileentity instanceof HearthBlockEntity)
+            {   InventoryHelper.dropContents(world, pos, (HearthBlockEntity) tileentity);
                 world.updateNeighborsAt(pos, this);
             }
         }

@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.core.init.ItemInit;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,13 +21,11 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.List;
 
 public class HearthTopBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -44,14 +41,6 @@ public class HearthTopBlock extends Block
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
-        calculateFacingShapes(Block.box(4, 0, 4, 12, 16, 12));
-    }
-
-    static void calculateFacingShapes(VoxelShape shape)
-    {
-        for (Direction direction : Direction.values())
-        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
-        }
     }
 
     @Override
@@ -62,7 +51,7 @@ public class HearthTopBlock extends Block
 
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context)
-    {   return SHAPES.get(state.getValue(FACING));
+    {   return Block.box(4, 0, 4, 12, 16, 12);
     }
 
     @SuppressWarnings("deprecation")

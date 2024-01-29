@@ -49,7 +49,7 @@ public class ColdSweat
         BlockInit.BLOCKS.register(bus);
         ItemInit.ITEMS.register(bus);
         EntityInit.ENTITY_TYPES.register(bus);
-        TileEntityInit.BLOCK_ENTITY_TYPES.register(bus);
+        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
         ContainerInit.MENU_TYPES.register(bus);
         EffectInit.EFFECTS.register(bus);
         ParticleTypesInit.PARTICLES.register(bus);
