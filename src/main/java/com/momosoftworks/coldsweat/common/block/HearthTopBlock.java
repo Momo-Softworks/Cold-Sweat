@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.core.init.ItemInit;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,20 +19,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.*;
+import java.util.List;
 
 public class HearthTopBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -50,14 +45,6 @@ public class HearthTopBlock extends Block
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
-        calculateFacingShapes(Block.box(4, 0, 4, 12, 16, 12));
-    }
-
-    static void calculateFacingShapes(VoxelShape shape)
-    {
-        for (Direction direction : Direction.values())
-        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
-        }
     }
 
     @Override
@@ -68,7 +55,7 @@ public class HearthTopBlock extends Block
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
-    {   return SHAPES.get(state.getValue(FACING));
+    {   return Block.box(4, 0, 4, 12, 16, 12);
     }
 
     @SuppressWarnings("deprecation")

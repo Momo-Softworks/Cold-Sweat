@@ -13,4 +13,5 @@ public class ModBlocks
     public static final Block MINECART_INSULATION = BlockInit.MINECART_INSULATION.get();
     public static final Block THERMOLITH = BlockInit.THERMOLITH.get();
     public static final Block SOUL_STALK = BlockInit.SOUL_STALK.get();
+    public static final Block SMOKESTACK = BlockInit.SMOKESTACK.get();
 }

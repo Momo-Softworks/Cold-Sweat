@@ -1,12 +1,22 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
+import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
+import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,12 +29,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -39,26 +49,19 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer
+public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider, WorldlyContainer
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
 
-    public static int SLOTS = 10;
-    public static int MAX_FUEL = 1000;
-
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
-    protected NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
-
     List<ServerPlayer> usingPlayers = new ArrayList<>();
-    public int ticksExisted;
-    int fuel;
+    boolean hasSmokestack = false;
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
-    {
-        super(ModBlockEntities.BOILER, pos, state);
+    {   super(ModBlockEntities.BOILER, pos, state);
     }
 
     @Nonnull
@@ -66,14 +69,14 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public CompoundTag getUpdateTag()
     {
         CompoundTag tag = super.getUpdateTag();
-        tag.putInt("fuel", this.getFuel());
+        tag.putInt("Fuel", this.getFuel());
         return tag;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag)
     {
-        this.setFuel(tag.getInt("fuel"));
+        this.setHotFuel(tag.getInt("Fuel"), true);
     }
 
     @Override
@@ -111,14 +114,13 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
     {
         if (te instanceof BoilerBlockEntity boilerTE)
-        {
-            boilerTE.tick(level, state, pos);
+        {   boilerTE.tick(level, state, pos);
         }
     }
 
     public void tick(Level level, BlockState state, BlockPos pos)
     {
-        ticksExisted++;
+        super.tick(level, pos);
 
         if (getFuel() > 0)
         {
@@ -136,8 +138,7 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
-                    {
-                        hasItemStacks = true;
+                    {   hasItemStacks = true;
                         stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
                     }
                 }
@@ -146,138 +147,188 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
         }
         // if no fuel, set state to unlit
         else if (state.getValue(BoilerBlock.LIT))
-        {
-            level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+        {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
         }
 
-        // Input fuel
-        if (this.ticksExisted % 10 == 0)
-        {
-            ItemStack fuelStack = this.getItem(0);
-            int itemFuel = getItemFuel(fuelStack);
-
-            if (itemFuel != 0 && this.getFuel() < MAX_FUEL - itemFuel / 2)
-            {
-                if (fuelStack.hasCraftingRemainingItem() && fuelStack.getCount() == 1)
-                {
-                    this.setItem(0, fuelStack.getCraftingRemainingItem());
-                    setFuel(this.getFuel() + itemFuel);
+        // Check if the block has a smokestack on top
+        if (this.ticksExisted % 20 == 0)
+        {   boolean hadSmokestack = this.hasSmokestack;
+            this.hasSmokestack = level.getBlockState(pos.above()).getBlock() == ModBlocks.SMOKESTACK;
+            if (!this.hasSmokestack && hadSmokestack)
+            {   this.resetPaths();
+                HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+                if (this.level.isClientSide)
+                {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
                 }
-                else
-                {
-                    int consumeCount = Math.min((int) Math.floor((MAX_FUEL - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
-                    fuelStack.shrink(consumeCount);
-                    setFuel(this.getFuel() + itemFuel * consumeCount);
+            }
+            else if (this.hasSmokestack && !hadSmokestack)
+            {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+                if (this.level.isClientSide)
+                {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
                 }
             }
         }
     }
 
-    public int getItemFuel(ItemStack item)
-    {
-        return ConfigSettings.BOILER_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
+    @Override
+    public int getMaxPaths()
+    {   return 1500;
     }
 
-    public int getFuel()
-    {
-        return fuel;
+    @Override
+    public int getSpreadRange()
+    {   return 16;
     }
 
-    public void setFuel(int amount)
+    @Override
+    public int getMaxInsulationLevel()
+    {   return 5;
+    }
+
+    @Override
+    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
     {
-        fuel = Math.min(amount, MAX_FUEL);
-        if (this.level != null && !this.level.isClientSide)
-        {
-            this.sendUpdatePacket();
+        if (this.hasSmokestack)
+        {   super.trySpreading(pathCount, firstIndex, lastIndex);
         }
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
+    void insulatePlayer(Player player)
     {
-        // Track the players using this block
-        if (playerInv.player instanceof ServerPlayer serverPlayer)
+        // Apply the insulation effect
+        if (!shouldUseColdFuel || !shouldUseHotFuel)
+            EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
+            {   double temp = cap.getTemp(Temperature.Type.WORLD);
+                double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
+                double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+
+                // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
+                if (CSMath.isWithin(temp, min, max))
+                {
+                    // Find the player's HearthTempModifier
+                    TempModifier modifier = null;
+                    for (TempModifier tempModifier : cap.getModifiers(Temperature.Type.WORLD))
+                    {   if (tempModifier instanceof HearthTempModifier)
+                    {   modifier = tempModifier;
+                        break;
+                    }
+                    }
+                    // If they have one, refresh it
+                    if (modifier != null)
+                    {   if (modifier.getExpireTime() - modifier.getTicksExisted() > 20)
+                    {   return;
+                    }
+                        temp = modifier.getLastInput();
+                    }
+                    // This means the player is not insulated, and they are habitable without it
+                    else return;
+                }
+
+                // Tell the hearth to use hot fuel
+                shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
+            });
+        if (shouldUseHotFuel)
+        {   int maxEffect = this.getMaxInsulationLevel() - 1;
+            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
+            player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
+            player.displayClientMessage(Component.literal(insulationLevel+""), true);
+        }
+    }
+
+    @Override
+    public int getItemFuel(ItemStack item)
+    {   return ConfigSettings.BOILER_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
+    }
+
+    @Override
+    protected void drainFuel()
+    {
+        ItemStack fuelStack = this.getItem(0);
+        int itemFuel = getItemFuel(fuelStack);
+
+        if (itemFuel != 0 && this.getFuel() < this.getMaxFuel() - itemFuel / 2)
         {
-            usingPlayers.add(serverPlayer);
+            if (fuelStack.hasCraftingRemainingItem() && fuelStack.getCount() == 1)
+            {   this.setItem(0, fuelStack.getCraftingRemainingItem());
+                this.setFuel(this.getFuel() + itemFuel);
+            }
+            else
+            {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - this.getFuel()) / (double) Math.abs(itemFuel)), fuelStack.getCount());
+                fuelStack.shrink(consumeCount);
+                this.setFuel(this.getFuel() + itemFuel * consumeCount);
+            }
+        }
+    }
+
+    public int getFuel()
+    {   return this.getHotFuel();
+    }
+
+    public void setFuel(int amount)
+    {   this.setHotFuel(amount, true);
+    }
+
+    @Override
+    public void setHotFuel(int amount, boolean update)
+    {   super.setHotFuel(amount, update);
+        this.sendUpdatePacket();
+    }
+
+    @Override
+    protected boolean isFuelChanged()
+    {   return this.ticksExisted % 10 == 0;
+    }
+
+    @Override
+    protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
+    {   // Track the players using this block
+        if (playerInv.player instanceof ServerPlayer serverPlayer)
+        {   usingPlayers.add(serverPlayer);
         }
         return new BoilerContainer(id, playerInv, this);
     }
 
     @Override
-    public void load(CompoundTag tag)
+    protected void tickParticles()
     {
-        super.load(tag);
+        if (this.hasSmokestack)
+        {   super.tickParticles();
+        }
+    }
+
+    @Override
+    public void load(CompoundTag tag)
+    {   super.load(tag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("fuel"));
+        this.setFuel(tag.getInt("Fuel"));
     }
 
     @Override
     public void saveAdditional(CompoundTag tag)
-    {
-        super.saveAdditional(tag);
+    {   super.saveAdditional(tag);
         ContainerHelper.saveAllItems(tag, this.items);
-        tag.putInt("fuel", this.getFuel());
+        tag.putInt("Fuel", this.getFuel());
     }
 
     @Override
     public int getContainerSize()
-    {
-        return SLOTS;
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-        return items.isEmpty();
-    }
-
-    @Override
-    public ItemStack getItem(int slot)
-    {
-        return items.get(slot);
+    {   return 10;
     }
 
     @Override
     public ItemStack removeItem(int slot, int count)
-    {
-        ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
-
+    {   ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
         if (!itemstack.isEmpty())
-        {
-            this.setChanged();
+        {   this.setChanged();
         }
         return itemstack;
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int slot)
-    {
-        return ContainerHelper.removeItem(items, slot, items.get(slot).getCount());
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack itemstack)
-    {
-        items.set(slot, itemstack);
-    }
-
-    @Override
-    public boolean stillValid(Player player)
-    {
-        return player.distanceToSqr(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 0.5, this.getBlockPos().getZ() + 0.5) <= 64.0;
-    }
-
-    @Override
-    public void clearContent()
-    {
-        items.clear();
-    }
-
-    @Override
     public int[] getSlotsForFace(Direction dir)
-    {
-        return dir.getAxis() == Direction.Axis.Y ? WATERSKIN_SLOTS : FUEL_SLOT;
+    {   return dir.getAxis() == Direction.Axis.Y ? WATERSKIN_SLOTS : FUEL_SLOT;
     }
 
     @Override
@@ -290,19 +341,20 @@ public class BoilerBlockEntity extends BaseContainerBlockEntity implements MenuP
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
-    {
-        return true;
+    {   return true;
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-        if (!this.remove && facing != null && capability == ForgeCapabilities.ITEM_HANDLER) {
-            if (facing == Direction.UP)
-                return slotHandlers[0].cast();
-            else if (facing == Direction.DOWN)
-                return slotHandlers[1].cast();
-            else
-                return slotHandlers[2].cast();
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
+    {
+        if (!this.remove && facing != null && capability == ForgeCapabilities.ITEM_HANDLER)
+        {
+            return switch (facing)
+            {
+                case UP -> slotHandlers[0].cast();
+                case DOWN -> slotHandlers[1].cast();
+                default -> slotHandlers[2].cast();
+            };
         }
         return super.getCapability(capability, facing);
     }

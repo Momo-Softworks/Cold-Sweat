@@ -40,6 +40,7 @@ public class CreativeTabInit
                         ModItems.HEARTH.getDefaultInstance(),
                         ModItems.BOILER.getDefaultInstance(),
                         ModItems.ICEBOX.getDefaultInstance(),
+                        ModItems.SMOKESTACK.getDefaultInstance(),
                         ModItems.SEWING_TABLE.getDefaultInstance(),
                         ModItems.HOGLIN_HEADPIECE.getDefaultInstance(),
                         ModItems.HOGLIN_TUNIC.getDefaultInstance(),
