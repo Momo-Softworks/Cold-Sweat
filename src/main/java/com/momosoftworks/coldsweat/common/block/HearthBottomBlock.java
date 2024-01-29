@@ -75,25 +75,12 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
-        calculateFacingShapes(Block.box(0, 0, 0, 16, 16, 16));
-    }
-
-    static void calculateFacingShapes(VoxelShape shape)
-    {
-        for (Direction direction : Direction.values())
-        {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
-        }
     }
 
     @Override
     public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
     {
         return true;
-    }
-
-    @Override
-    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context)
-    {   return SHAPES.get(state.getValue(FACING));
     }
 
     @Nullable
@@ -131,7 +118,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 Vec3 sidePos = isLava ? lavaSidePos : waterSidePos;
                 BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
                                                : ((BucketItem) Items.WATER_BUCKET);
-                int itemFuel = Math.abs(HearthBlockEntity.getItemFuel(filledBucket.getDefaultInstance()));
+                int itemFuel = Math.abs(te.getItemFuel(filledBucket.getDefaultInstance()));
                 int hearthFuel = isLava ? te.getHotFuel() : te.getColdFuel();
 
                 if (hearthFuel >= itemFuel * 0.99)
@@ -160,10 +147,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
             else
             {
                 // If the held item is fuel, try to insert the fuel
-                int itemFuel = HearthBlockEntity.getItemFuel(stack);
+                int itemFuel = te.getItemFuel(stack);
                 int hearthFuel = itemFuel > 0 ? te.getHotFuel() : te.getColdFuel();
 
-                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < HearthBlockEntity.MAX_FUEL)
+                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < te.getMaxFuel())
                 {
                     // Consume the item if not in creative
                     if (!player.isCreative())

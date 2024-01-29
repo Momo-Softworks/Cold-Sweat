@@ -3,21 +3,21 @@
   {
     "facing=north":
     {
-      "model": "cold_sweat:block/hearth_top"
+      "model": "cold_sweat:block/smokestack"
     },
     "facing=east":
     {
-      "model": "cold_sweat:block/hearth_top",
+      "model": "cold_sweat:block/smokestack",
       "y": 90
     },
     "facing=south":
     {
-      "model": "cold_sweat:block/hearth_top",
+      "model": "cold_sweat:block/smokestack",
       "y": 180
     },
     "facing=west":
     {
-      "model": "cold_sweat:block/hearth_top",
+      "model": "cold_sweat:block/smokestack",
       "y": 270
     }
   }

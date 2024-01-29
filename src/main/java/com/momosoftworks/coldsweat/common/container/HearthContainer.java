@@ -35,10 +35,10 @@ public class HearthContainer extends AbstractContainerMenu
             @Override
             public boolean mayPlace(ItemStack stack)
             {
-                if (HearthBlockEntity.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
+                if (te.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
                 // Check if the potion is blacklisted
                 Collection< MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
-                return effects.size() > 0
+                return !effects.isEmpty()
                     && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect())));
             }
 

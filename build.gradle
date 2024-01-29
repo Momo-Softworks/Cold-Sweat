@@ -123,6 +123,9 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:tinkers-74072:4509008")
     runtimeOnly fg.deobf("curse.maven:mantle-74924:4509007")
     runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:3804257")
+    implementation fg.deobf("curse.maven:tinkers-construct-74072:4509008")
+    implementation fg.deobf("curse.maven:constructs-armory-1-18-2-port-867883:4559247")
+    implementation fg.deobf("curse.maven:mantle-74924:4509007")
 
     implementation fg.deobf("curse.maven:curios-309927:4418032")
     implementation fg.deobf("curse.maven:armorunderwear-310383:4502893")

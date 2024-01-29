@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,10 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -83,14 +81,19 @@ public class BoilerBlock extends Block implements EntityBlock
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
+        ItemStack stack = player.getItemInHand(hand);
+        // If the player is trying to put a smokestack on top, don't do anything
+        if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
+        && level.getBlockState(pos.above()).isAir())
+        {   return InteractionResult.FAIL;
+        }
         if (!level.isClientSide)
         {
             if (level.getBlockEntity(pos) instanceof BoilerBlockEntity blockEntity)
             {
-                ItemStack stack = player.getItemInHand(hand);
                 int itemFuel = blockEntity.getItemFuel(stack);
 
-                if (itemFuel != 0 && blockEntity.getFuel() + itemFuel * 0.75 < BoilerBlockEntity.MAX_FUEL)
+                if (itemFuel != 0 && blockEntity.getFuel() + itemFuel * 0.75 < blockEntity.getMaxFuel())
                 {
                     if (!player.isCreative())
                     {
@@ -173,7 +176,7 @@ public class BoilerBlock extends Block implements EntityBlock
 
             double d4 = rand.nextDouble() * 0.6D - 0.3D;
             double d5 = direction$axis == Direction.Axis.X ? (double)direction.getStepX() * 0.52D : d4;
-            double d6 = rand.nextDouble() * 6.0D / 16.0D + 0.2;
+            double d6 = rand.nextDouble() * 3.0D / 16.0D + 3 / 16.0;
             double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getStepZ() * 0.52D : d4;
             level.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
             level.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
@@ -183,7 +186,6 @@ public class BoilerBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
-        return new BoilerBlockEntity(pos, state);
+    {   return new BoilerBlockEntity(pos, state);
     }
 }

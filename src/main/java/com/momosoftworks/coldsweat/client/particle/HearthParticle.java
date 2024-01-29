@@ -30,14 +30,13 @@ public class HearthParticle extends TextureSheetParticle
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
+    public ParticleRenderType getRenderType()
+    {   return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
     }
 
     @Override
     public void tick()
-    {
-        super.tick();
+    {   super.tick();
         this.setSpriteFromAge(this.ageSprite);
 
         if (this.age < 10)

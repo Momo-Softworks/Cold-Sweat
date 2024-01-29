@@ -21,20 +21,20 @@ public class ParticleUtil
 {
     public static ParticleRenderType PARTICLE_SHEET_TRANSPARENT = new ParticleRenderType()
     {
-        public void begin(BufferBuilder builder, TextureManager textureManager) {
-            RenderSystem.depthMask(true);
+        public void begin(BufferBuilder builder, TextureManager textureManager)
+        {   RenderSystem.depthMask(true);
             RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
-        public void end(Tesselator tesselator) {
-            tesselator.end();
+        public void end(Tesselator tesselator)
+        {   tesselator.end();
         }
 
-        public String toString() {
-            return "PARTICLE_SHEET_TRANSPARENT";
+        public String toString()
+        {   return "PARTICLE_SHEET_TRANSPARENT";
         }
     };
 
