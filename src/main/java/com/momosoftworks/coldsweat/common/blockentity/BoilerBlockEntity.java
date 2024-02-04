@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -8,14 +7,12 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
-import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
-import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -60,10 +57,10 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
     List<ServerPlayer> usingPlayers = new ArrayList<>();
-    boolean hasSmokestack = false;
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.BOILER, pos, state);
+        TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
     @Nonnull
@@ -151,25 +148,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
         else if (state.getValue(BoilerBlock.LIT))
         {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
         }
-
-        // Check if the block has a smokestack on top
-        if (this.ticksExisted % 20 == 0)
-        {   boolean hadSmokestack = this.hasSmokestack;
-            this.hasSmokestack = level.getBlockState(pos.above()).getBlock() == ModBlocks.SMOKESTACK;
-            if (!this.hasSmokestack && hadSmokestack)
-            {   this.resetPaths();
-                HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
-                if (this.level.isClientSide)
-                {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
-                }
-            }
-            else if (this.hasSmokestack && !hadSmokestack)
-            {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
-                if (this.level.isClientSide)
-                {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
-                }
-            }
-        }
     }
 
     @Override
@@ -188,6 +166,11 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
+    public boolean hasSmokeStack()
+    {   return this.hasSmokestack;
+    }
+
+    @Override
     protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
@@ -199,37 +182,37 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     void insulatePlayer(Player player)
     {
         // Apply the insulation effect
-        if (!shouldUseColdFuel || !shouldUseHotFuel)
-            EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
-            {   double temp = cap.getTemp(Temperature.Type.WORLD);
-                double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-                double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+        if (!shouldUseHotFuel)
+        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
+        {   double temp = cap.getTemp(Temperature.Type.WORLD);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
 
-                // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-                if (CSMath.isWithin(temp, min, max))
-                {
-                    // Find the player's HearthTempModifier
-                    TempModifier modifier = null;
-                    for (TempModifier tempModifier : cap.getModifiers(Temperature.Type.WORLD))
-                    {   if (tempModifier instanceof HearthTempModifier)
-                    {   modifier = tempModifier;
-                        break;
-                    }
-                    }
-                    // If they have one, refresh it
-                    if (modifier != null)
-                    {   if (modifier.getExpireTime() - modifier.getTicksExisted() > 20)
-                    {   return;
-                    }
-                        temp = modifier.getLastInput();
-                    }
-                    // This means the player is not insulated, and they are habitable without it
-                    else return;
+            // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
+            if (CSMath.isWithin(temp, min, max))
+            {
+                // Find the player's HearthTempModifier
+                TempModifier modifier = null;
+                for (TempModifier tempModifier : cap.getModifiers(Temperature.Type.WORLD))
+                {   if (tempModifier instanceof HearthTempModifier)
+                {   modifier = tempModifier;
+                    break;
                 }
+                }
+                // If they have one, refresh it
+                if (modifier != null)
+                {   if (modifier.getExpireTime() - modifier.getTicksExisted() > 20)
+                {   return;
+                }
+                    temp = modifier.getLastInput();
+                }
+                // This means the player is not insulated, and they are habitable without it
+                else return;
+            }
 
-                // Tell the hearth to use hot fuel
-                shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
-            });
+            // Tell the hearth to use hot fuel
+            shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
+        });
         if (shouldUseHotFuel)
         {   int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);

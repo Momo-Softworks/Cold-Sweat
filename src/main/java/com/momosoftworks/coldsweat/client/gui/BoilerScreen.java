@@ -2,17 +2,22 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import net.minecraft.world.entity.player.Inventory;
 
-public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
+public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
+
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
 
     public BoilerScreen(BoilerContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -26,14 +31,15 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void init()
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+        super.init();
+        if (particleButton != null)
+        {   particleButton.x = leftPos + 151;
+            particleButton.y = topPos + 63;
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {

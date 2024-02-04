@@ -17,12 +17,16 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue celsius;
     private static final ForgeConfigSpec.IntValue tempOffset;
+    private static final ForgeConfigSpec.DoubleValue tempSmoothing;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
+    private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
+    private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
+    private static final ForgeConfigSpec.BooleanValue worldGaugeEnabled;
 
     private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
     private static final ForgeConfigSpec.BooleanValue iconBobbing;
@@ -43,30 +47,46 @@ public class ClientSettingsConfig
         /*
          Temperature Display Preferences
          */
-        BUILDER.push("Temperature Preferences");
+        BUILDER.push("Visual Preferences");
             celsius = BUILDER
                     .comment("Sets all temperatures to be displayed in Celsius")
                     .define("Celsius", false);
             tempOffset = BUILDER
                     .comment("Visually offsets the world temperature to better match the user's definition of \"hot\" and \"cold\"")
                     .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
+            tempSmoothing = BUILDER
+                    .comment("The amount of smoothing applied to gauges in the UI",
+                             "A value of 1 has no smoothing")
+                    .defineInRange("Temperature Smoothing", 20, 1.0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("UI Options");
             customHotbarLayout = BUILDER
-                .define("Custom hotbar layout", true);
+                    .define("Custom hotbar layout", true);
             iconBobbing = BUILDER
-                .comment("Controls whether UI elements will shake when in critical conditions")
-                .define("Icon Bobbing", true);
+                    .comment("Controls whether UI elements will shake when in critical conditions")
+                    .define("Icon Bobbing", true);
+
             bodyIconPos = BUILDER
                     .comment("The position of the body temperature icon relative to default")
                     .defineList("Body Temperature Icon Offset", List.of(0, 0), it -> it instanceof Integer);
+            bodyIconEnabled = BUILDER
+                    .comment("Enables the body temperature icon")
+                    .define("Body Temperature Icon Enabled", true);
+
             bodyReadoutPos = BUILDER
                     .comment("The position of the body temperature readout relative to default")
                     .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
+            bodyReadoutEnabled = BUILDER
+                    .comment("Enables the body temperature readout")
+                    .define("Body Temperature Readout Enabled", true);
+
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
                     .defineList("World Temperature UI Offset", List.of(0, 0), it -> it instanceof Integer);
+            worldGaugeEnabled = BUILDER
+                    .comment("Enables the world temperature gauge")
+                    .define("World Temperature UI Enabled", true);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
@@ -155,6 +175,10 @@ public class ClientSettingsConfig
     {   return worldGaugePos.get().get(1);
     }
 
+    public double getTempSmoothing()
+    {   return tempSmoothing.get();
+    }
+
     public boolean customHotbarEnabled()
     {   return customHotbarLayout.get();
     }
@@ -169,6 +193,16 @@ public class ClientSettingsConfig
 
     public boolean isCreativeWarningEnabled()
     {   return enableCreativeWarning.get();
+    }
+
+    public boolean isBodyIconEnabled()
+    {   return bodyIconEnabled.get();
+    }
+    public boolean isBodyReadoutEnabled()
+    {   return bodyReadoutEnabled.get();
+    }
+    public boolean isWorldGaugeEnabled()
+    {   return worldGaugeEnabled.get();
     }
 
     /*
@@ -235,6 +269,16 @@ public class ClientSettingsConfig
 
     public void setCreativeWarningEnabled(boolean enabled)
     {   enableCreativeWarning.set(enabled);
+    }
+
+    public void setBodyIconEnabled(boolean enabled)
+    {   bodyIconEnabled.set(enabled);
+    }
+    public void setBodyReadoutEnabled(boolean enabled)
+    {   bodyReadoutEnabled.set(enabled);
+    }
+    public void setWorldGaugeEnabled(boolean enabled)
+    {   worldGaugeEnabled.set(enabled);
     }
 
 

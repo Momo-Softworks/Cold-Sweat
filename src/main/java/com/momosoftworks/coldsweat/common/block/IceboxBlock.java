@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
+import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,10 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,12 +29,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Random;
 
 public class IceboxBlock extends Block implements EntityBlock
@@ -70,13 +68,17 @@ public class IceboxBlock extends Block implements EntityBlock
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity)
+        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
         {
-            IceboxBlockEntity te = (IceboxBlockEntity) level.getBlockEntity(pos);
             ItemStack stack = player.getItemInHand(hand);
-            int itemFuel = te.getItemFuel(stack);
+            // If the player is trying to put a smokestack on top, don't do anything
+            if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
+            && level.getBlockState(pos.above()).getBlock() instanceof AirBlock)
+            {   return InteractionResult.FAIL;
+            }
+            int itemFuel = icebox.getItemFuel(stack);
 
-            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < IceboxBlockEntity.MAX_FUEL)
+            if (itemFuel != 0 && icebox.getFuel() + itemFuel * 0.75 < icebox.getMaxFuel())
             {
                 if (!player.isCreative())
                 {
@@ -87,17 +89,15 @@ public class IceboxBlock extends Block implements EntityBlock
                         player.getInventory().add(container);
                     }
                     else
-                    {
-                        stack.shrink(1);
+                    {   stack.shrink(1);
                     }
                 }
-                te.setFuel(te.getFuel() + itemFuel);
+                icebox.setFuel(icebox.getFuel() + itemFuel);
 
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide)
-            {
-                NetworkHooks.openGui((ServerPlayer) player, te, pos);
+            {   NetworkHooks.openGui((ServerPlayer) player, icebox, pos);
             }
         }
         return InteractionResult.SUCCESS;
@@ -111,14 +111,13 @@ public class IceboxBlock extends Block implements EntityBlock
         return new IceboxBlockEntity(pos, state);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
+    {
+        if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
+        {   icebox.checkForSmokestack();
+        }
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @SuppressWarnings("deprecation")
@@ -151,5 +150,20 @@ public class IceboxBlock extends Block implements EntityBlock
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random rand)
+    {
+        if (!state.getValue(FROSTED)) return;
+
+        double d0 = pos.getX() + 0.5;
+        double d1 = pos.getY();
+        double d2 = pos.getZ() + 0.5;
+        boolean side = new Random().nextBoolean();
+        double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+        double d6 = Math.random() * 0.3;
+        double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
+        level.addParticle(ParticleTypesInit.GROUND_MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
     }
 }

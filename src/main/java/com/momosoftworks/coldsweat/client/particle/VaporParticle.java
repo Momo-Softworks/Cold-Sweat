@@ -5,6 +5,7 @@ import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -22,8 +23,9 @@ public class VaporParticle extends TextureSheetParticle
     private final boolean hasGravity;
     private boolean collidedY;
     private float maxAlpha;
+    VaporType type;
 
-    protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, boolean hasGravity)
+    protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, VaporType type)
     {
         super(world, x, y, z);
         this.ageSprite = spriteSet;
@@ -35,33 +37,39 @@ public class VaporParticle extends TextureSheetParticle
         this.hasPhysics = true;
         this.setParticleSpeed(vx, vy, vz);
         this.setSpriteFromAge(spriteSet);
-        this.hasGravity = hasGravity;
-        this.gravity = hasGravity ? 0.04f : -0.04f;
+        this.hasGravity = type == VaporType.GROUND_MIST;
+        this.type = type;
+        this.gravity = switch (type)
+        {
+            case STEAM -> -0.04f;
+            case GROUND_MIST -> 0.04f;
+            case MIST -> 0f;
+        };
+        if (type == VaporType.MIST)
+            this.maxAlpha = 0.2f;
     }
 
     @Nonnull
     @Override
     public ParticleRenderType getRenderType()
-    {
-        return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
+    {   return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
     }
 
     @Override
     public void tick()
     {
         if (Minecraft.getInstance().options.particles == ParticleStatus.MINIMAL)
-            this.remove();
+        {   this.remove();
+        }
 
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
         if (this.age++ >= this.lifetime)
-        {
-            this.remove();
+        {   this.remove();
         }
         else
-        {
-            this.yd -= 0.04D * gravity;
+        {   this.yd -= 0.04D * gravity;
             this.move(xd * (onGround ? 1 : 0.2), yd, zd * (onGround ? 1 : 0.2));
             this.xd *= 0.99;
             this.yd *= 0.99;
@@ -70,7 +78,7 @@ public class VaporParticle extends TextureSheetParticle
 
         this.setSpriteFromAge(ageSprite);
 
-        if (hasGravity)
+        if (type == VaporType.GROUND_MIST)
         {
             if (this.alpha < maxAlpha)
                 this.alpha += 0.02f;
@@ -82,12 +90,13 @@ public class VaporParticle extends TextureSheetParticle
         }
         else
         {
-            if (this.age < 10)
-                this.alpha += 0.07f;
-            else if (this.age > this.lifetime - this.alpha / 0.02f)
-                this.alpha -= 0.02f;
+            if (type == VaporType.MIST)
+            if (this.alpha < maxAlpha)
+                this.alpha += maxAlpha / 20;
+            else if (this.age > maxAlpha / (maxAlpha / 20))
+                this.alpha -= maxAlpha / 20;
 
-            if (this.alpha < 0.07  && this.age > 10)
+            if (this.alpha < 0.02 && this.age > 10)
                 this.remove();
         }
     }
@@ -127,6 +136,13 @@ public class VaporParticle extends TextureSheetParticle
         }
     }
 
+    public enum VaporType
+    {
+        STEAM,
+        GROUND_MIST,
+        MIST
+    }
+
     @OnlyIn(Dist.CLIENT)
     public static class SteamFactory implements ParticleProvider<SimpleParticleType>
     {
@@ -141,7 +157,28 @@ public class VaporParticle extends TextureSheetParticle
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.STEAM);
+            else
+                return null;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class GroundMistFactory implements ParticleProvider<SimpleParticleType>
+    {
+        private final SpriteSet sprite;
+
+        public GroundMistFactory(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Nullable
+        @Override
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        {
+            ParticleStatus status = Minecraft.getInstance().options.particles;
+            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, VaporType.GROUND_MIST);
             else
                 return null;
         }
@@ -152,17 +189,16 @@ public class VaporParticle extends TextureSheetParticle
     {
         private final SpriteSet sprite;
 
-        public MistFactory(SpriteSet spriteSet) {
-            this.sprite = spriteSet;
+        public MistFactory(SpriteSet spriteSet)
+        {   this.sprite = spriteSet;
         }
 
         @Nullable
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            ParticleStatus status = Minecraft.getInstance().options.particles;
-            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, true);
+            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.MIST);
             else
                 return null;
         }

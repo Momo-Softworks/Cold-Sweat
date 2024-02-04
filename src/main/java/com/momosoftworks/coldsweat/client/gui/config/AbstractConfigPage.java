@@ -16,9 +16,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -272,8 +274,8 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the panel is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the panel when hovered.
      */
-    protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset,
-                                     boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
+    protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> hide,
+                                     boolean requireOP, boolean setsCustomDifficulty, boolean clientside, boolean canHide, Component... tooltip)
     {
         int xOffset = side == Side.LEFT ? -97 : 136;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
@@ -285,61 +287,87 @@ public abstract class AbstractConfigPage extends Screen
                         ? labelWidth - 84
                         : 0;
 
+        List<GuiEventListener> widgetBatch = new ArrayList<>();
+
         // Left button
         ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
         {
             leftRightPressed.accept(-1);
-
             if (setsCustomDifficulty)
-                ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(4);
+            }
         });
         leftButton.active = shouldBeActive;
+        widgetBatch.add(leftButton);
 
         // Up button
         ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
         {
             upDownPressed.accept(-1);
-
             if (setsCustomDifficulty)
-                ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(4);
+            }
         });
         upButton.active = shouldBeActive;
+        widgetBatch.add(upButton);
 
         // Down button
         ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
         {
             upDownPressed.accept(1);
-
             if (setsCustomDifficulty)
-                ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(4);
+            }
         });
         downButton.active = shouldBeActive;
+        widgetBatch.add(downButton);
 
         // Right button
         ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
         {
             leftRightPressed.accept(1);
-
             if (setsCustomDifficulty)
-                ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(4);
+            }
         });
         rightButton.active = shouldBeActive;
+        widgetBatch.add(rightButton);
 
         // Reset button
-        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, 20, 48, 0, 20, TEXTURE, button ->
+        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, canHide ? 10 : 20, canHide ? 68 : 48, 0, 20, TEXTURE, button ->
         {
             reset.run();
-
             if (setsCustomDifficulty)
-                ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(4);
+            }
         });
         resetButton.active = shouldBeActive;
+        widgetBatch.add(resetButton);
+
+        // hide button, displayed directly under the reset button if canHide is true
+        if (canHide)
+        {
+            ImageButton hideButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 68, 10, 20, TEXTURE, button ->
+            {
+                if (setsCustomDifficulty)
+                {   ConfigSettings.DIFFICULTY.set(4);
+                }
+                setImageX((ImageButton) button, hide.get());
+                button.changeFocus(false);
+            });
+            hide.get();
+            setImageX(hideButton, hide.get());
+            hideButton.active = shouldBeActive;
+            widgetBatch.add(hideButton);
+        }
 
         // Add the option text
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-            this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        }
+        widgetBatch.add(configLabel);
 
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
@@ -350,7 +378,7 @@ public abstract class AbstractConfigPage extends Screen
         // Assign the tooltip
         this.setTooltip(id, tooltip);
 
-        this.addWidgetBatch(id, List.of(upButton, downButton, leftButton, rightButton, resetButton, configLabel));
+        this.addWidgetBatch(id, widgetBatch);
 
         // Add height to the list
         if (side == Side.LEFT)
@@ -449,23 +477,21 @@ public abstract class AbstractConfigPage extends Screen
                 break;
             }
         }
+        this.children().forEach(child -> child.changeFocus(false));
     }
 
     @Override
     public void tick()
-    {
-        super.tick();
+    {   super.tick();
     }
 
     @Override
     public boolean isPauseScreen()
-    {
-        return true;
+    {   return true;
     }
 
     public void close()
-    {
-        this.onClose();
+    {   this.onClose();
         Minecraft.getInstance().setScreen(this.parentScreen);
     }
 
@@ -497,5 +523,15 @@ public abstract class AbstractConfigPage extends Screen
         {   tooltipList.addAll(font.getSplitter().splitLines(text, 300, Style.EMPTY));
         }
         this.tooltips.put(id, tooltipList);
+    }
+
+    public static void setImageX(ImageButton button, boolean enabled)
+    {
+        Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
+        imageX.setAccessible(true);
+        try
+        {   imageX.set(button, enabled ? 68 : 88);
+        }
+        catch (Exception ignored) {}
     }
 }

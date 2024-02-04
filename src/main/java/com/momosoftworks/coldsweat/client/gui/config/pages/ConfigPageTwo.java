@@ -105,23 +105,44 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),
                 amount -> clientConfig.setBodyIconX(clientConfig.getBodyIconX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 amount -> clientConfig.setBodyIconY(clientConfig.getBodyIconY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                () -> { clientConfig.setBodyIconX(0); clientConfig.setBodyIconY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.temp_icon_location.desc"),
+                () ->
+                {   clientConfig.setBodyIconX(0);
+                    clientConfig.setBodyIconY(0);
+                },
+                () ->
+                {   clientConfig.setBodyIconEnabled(!clientConfig.isBodyIconEnabled());
+                    return clientConfig.isBodyIconEnabled();
+                },
+                false, false, true, true, new TranslatableComponent("cold_sweat.config.temp_icon_location.desc"),
                            new TranslatableComponent("cold_sweat.config.offset_shift.name"));
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_readout_location.name"),
                 amount -> clientConfig.setBodyReadoutX(clientConfig.getBodyReadoutX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 amount -> clientConfig.setBodyReadoutY(clientConfig.getBodyReadoutY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                () -> { clientConfig.setBodyReadoutX(0); clientConfig.setBodyReadoutY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.temp_readout_location.desc"),
+                () ->
+                {   clientConfig.setBodyReadoutX(0);
+                    clientConfig.setBodyReadoutY(0);
+                },
+                () ->
+                {   clientConfig.setBodyReadoutEnabled(!clientConfig.isBodyReadoutEnabled());
+                    return clientConfig.isBodyReadoutEnabled();
+                },
+                false, false, true, true, new TranslatableComponent("cold_sweat.config.temp_readout_location.desc"),
                            new TranslatableComponent("cold_sweat.config.offset_shift.name"));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.world_temp_location.name"),
                 amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
                 amount -> clientConfig.setWorldGaugeY(clientConfig.getWorldGaugeY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                () -> { clientConfig.setWorldGaugeX(0); clientConfig.setWorldGaugeY(0); },
-                false, false, true, new TranslatableComponent("cold_sweat.config.world_temp_location.desc"),
+                () ->
+                {   clientConfig.setWorldGaugeX(0);
+                    clientConfig.setWorldGaugeY(0);
+                },
+                () ->
+                {   clientConfig.setWorldGaugeEnabled(!clientConfig.isWorldGaugeEnabled());
+                    return clientConfig.isWorldGaugeEnabled();
+                },
+                false, false, true, true, new TranslatableComponent("cold_sweat.config.world_temp_location.desc"),
                            new TranslatableComponent("cold_sweat.config.offset_shift.name"));
 
         // Custom Hotbar
