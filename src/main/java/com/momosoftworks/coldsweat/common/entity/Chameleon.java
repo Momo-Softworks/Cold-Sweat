@@ -191,6 +191,7 @@ public class Chameleon extends Animal
             {   event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f));
             }
         }
+
     }
 
     public int getTimeToShed()

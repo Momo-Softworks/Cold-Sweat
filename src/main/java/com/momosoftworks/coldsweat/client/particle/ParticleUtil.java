@@ -41,6 +41,7 @@ public class ParticleUtil
     public static void registerParticles(RegisterParticleProvidersEvent event)
     {   event.registerSpriteSet(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
         event.registerSpriteSet(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
+        event.registerSpriteSet(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
         event.registerSpriteSet(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
     }
 }

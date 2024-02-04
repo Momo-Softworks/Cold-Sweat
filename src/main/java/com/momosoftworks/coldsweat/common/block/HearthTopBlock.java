@@ -95,12 +95,6 @@ public class HearthTopBlock extends Block
     {   return new ItemStack(ItemInit.HEARTH.get());
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder)
-    {   return ModBlocks.HEARTH_BOTTOM.getDrops(state, builder);
-    }
-
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
     {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
@@ -111,8 +105,8 @@ public class HearthTopBlock extends Block
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_48855_)
-    {   p_48855_.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {   builder.add(FACING);
     }
 
     @Override

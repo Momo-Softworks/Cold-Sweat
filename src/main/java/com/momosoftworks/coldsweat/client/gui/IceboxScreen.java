@@ -1,19 +1,23 @@
 package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import net.minecraft.world.entity.player.Inventory;
 
-public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
+public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
+
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
 
     public IceboxScreen(IceboxContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -34,7 +38,16 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
         this.renderTooltip(graphics, mouseX, mouseY);
     }
 
-    @SuppressWarnings("deprecation")
+    @Override
+    public void init()
+    {
+        super.init();
+        if (particleButton != null)
+        {   particleButton.setX(leftPos + 151);
+            particleButton.setY(topPos + 63);
+        }
+    }
+
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {

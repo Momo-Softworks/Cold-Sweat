@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -10,10 +11,16 @@ import net.minecraft.resources.ResourceLocation;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
+public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
+
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
 
     public BoilerScreen(BoilerContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -27,14 +34,15 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerContainer>
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+    public void init()
     {
-        this.renderBackground(graphics);
-        super.render(graphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(graphics, mouseX, mouseY);
+        super.init();
+        if (particleButton != null)
+        {   particleButton.setX(leftPos + 151);
+            particleButton.setY(topPos + 63);
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui;
 
+import ca.weblite.objc.Client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -65,7 +66,8 @@ public class Overlays
             PoseStack poseStack = graphics.pose();
             Font font = Minecraft.getInstance().font;
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
+            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !Minecraft.getInstance().options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 gui.setupOverlayRenderState(true, false);
 
@@ -154,33 +156,40 @@ public class Overlays
                 RenderSystem.defaultBlendFunc();
 
                 // Render old icon (if blending)
-                if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
-                {   graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
-                    RenderSystem.enableBlend();
-                    RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
+                if (ClientSettingsConfig.getInstance().isBodyIconEnabled())
+                {
+                    if (BODY_TRANSITION_PROGRESS < BODY_BLEND_TIME)
+                    {
+                        graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - PREV_BODY_ICON * 10, 10, 10, 10, 70);
+                        RenderSystem.enableBlend();
+                        RenderSystem.setShaderColor(1, 1, 1, (mc.getFrameTime() + BODY_TRANSITION_PROGRESS) / BODY_BLEND_TIME);
+                    }
+                    // Render new icon on top of old icon (if blending)
+                    // Otherwise this is just the regular icon
+                    graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
+                    RenderSystem.setShaderColor(1, 1, 1, 1);
                 }
-                // Render new icon on top of old icon (if blending)
-                // Otherwise this is just the regular icon
-                graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), (width / 2) - 5 + CLIENT_CONFIG.getBodyIconX(), height - 53 - threatOffset + CLIENT_CONFIG.getBodyIconY(), 0, 30 - BODY_ICON * 10, 10, 10, 10, 70);
-                RenderSystem.setShaderColor(1, 1, 1, 1);
 
                 // Render Readout
-                Font font = mc.font;
-                int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                int scaledHeight = mc.getWindow().getGuiScaledHeight();
+                if (ClientSettingsConfig.getInstance().isBodyReadoutEnabled())
+                {
+                    Font font = mc.font;
+                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
-                String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                int x = (scaledWidth - font.width(s)) / 2 + CLIENT_CONFIG.getBodyReadoutX();
-                int y = scaledHeight - 31 - 10 + CLIENT_CONFIG.getBodyReadoutY();
+                    String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                    int x = (scaledWidth - font.width(s)) / 2 + CLIENT_CONFIG.getBodyReadoutX();
+                    int y = scaledHeight - 31 - 10 + CLIENT_CONFIG.getBodyReadoutY();
 
-                // Draw the outline
-                graphics.drawString(font, s, x + 1, y, colorBG, false);
-                graphics.drawString(font, s, x - 1, y, colorBG, false);
-                graphics.drawString(font, s, x, y + 1, colorBG, false);
-                graphics.drawString(font, s, x, y - 1, colorBG, false);
+                    // Draw the outline
+                    graphics.drawString(font, s, x + 1, y, colorBG, false);
+                    graphics.drawString(font, s, x - 1, y, colorBG, false);
+                    graphics.drawString(font, s, x, y + 1, colorBG, false);
+                    graphics.drawString(font, s, x, y - 1, colorBG, false);
 
-                // Draw the readout
-                graphics.drawString(font, s, x, y, color, false);
+                    // Draw the readout
+                    graphics.drawString(font, s, x, y, color, false);
+                }
             }
         });
 
@@ -189,7 +198,8 @@ public class Overlays
             PoseStack poseStack = graphics.pose();
             Minecraft mc = Minecraft.getInstance();
             Player player = mc.player;
-            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR && !mc.options.hideGui)
+            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !mc.options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 gui.setupOverlayRenderState(true, false);
 
@@ -243,7 +253,7 @@ public class Overlays
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / 20d, 0.25 * CSMath.getSign(diff));
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ClientSettingsConfig.getInstance().getTempSmoothing(), 0.25 * CSMath.getSign(diff));
 
                     // Update max/min offset
                     MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);

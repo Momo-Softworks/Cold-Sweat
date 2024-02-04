@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -103,8 +106,7 @@ public class BoilerBlock extends Block implements EntityBlock
                             player.getInventory().add(container);
                         }
                         else
-                        {
-                            stack.shrink(1);
+                        {   stack.shrink(1);
                         }
                     }
                     blockEntity.setFuel(blockEntity.getFuel() + itemFuel);
@@ -112,22 +114,20 @@ public class BoilerBlock extends Block implements EntityBlock
                     level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else
-                {
-                    NetworkHooks.openScreen((ServerPlayer) player, blockEntity, pos);
+                {   NetworkHooks.openScreen((ServerPlayer) player, blockEntity, pos);
                 }
             }
         }
         return InteractionResult.SUCCESS;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
+    {
+        if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof BoilerBlockEntity boiler)
+        {   boiler.checkForSmokestack();
+        }
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @SuppressWarnings("deprecation")

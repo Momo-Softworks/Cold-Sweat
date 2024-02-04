@@ -3,17 +3,17 @@
   "pattern": [
     " # ",
     "BBB",
-    "BiB"
+    "BbB"
   ],
   "key": {
     "#": {
-      "tag": "forge:cobblestone"
+      "item": "cold_sweat:smokestack"
     },
     "B": {
-      "item": "minecraft:bricks"
+      "item": "minecraft:nether_bricks"
     },
-    "i": {
-      "tag": "forge:ingots/iron"
+    "b": {
+      "item": "minecraft:basalt"
     }
   },
   "result": {
