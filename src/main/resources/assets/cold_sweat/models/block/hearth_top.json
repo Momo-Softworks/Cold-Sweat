@@ -1,3 +1,7 @@
 {
-	"parent": "cold_sweat:block/smokestack"
+	"parent": "cold_sweat:block/generic_smokestack",
+	"textures": {
+		"smokestack": "cold_sweat:block/hearth_smokestack",
+		"particle": "cold_sweat:block/hearth_smokestack"
+	}
 }

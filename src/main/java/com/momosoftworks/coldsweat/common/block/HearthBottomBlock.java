@@ -182,16 +182,6 @@ public class HearthBottomBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
     public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
     {
         if (state.getBlock() != newState.getBlock())

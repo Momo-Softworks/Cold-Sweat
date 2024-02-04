@@ -2,19 +2,24 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 
-public class IceboxScreen extends ContainerScreen<IceboxContainer>
+public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
 
-    public IceboxScreen(IceboxContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
+
+    public IceboxScreen(IceboxContainer screenContainer, PlayerInventory inv, IFormattableTextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;
@@ -26,14 +31,23 @@ public class IceboxScreen extends ContainerScreen<IceboxContainer>
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(MatrixStack ps, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+        this.renderBackground(ps);
+        super.render(ps, mouseX, mouseY, partialTicks);
+        this.renderTooltip(ps, mouseX, mouseY);
     }
 
-    @SuppressWarnings("deprecation")
+    @Override
+    public void init()
+    {
+        super.init();
+        if (particleButton != null)
+        {   particleButton.x = leftPos + 151;
+            particleButton.y = topPos + 63;
+        }
+    }
+
     @Override
     protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {

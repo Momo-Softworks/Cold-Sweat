@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,54 +20,34 @@ import java.util.function.Supplier;
 public class DisableHearthParticlesMessage
 {
     CompoundNBT nbt;
-    int entityID;
-    String worldKey;
 
-    public DisableHearthParticlesMessage(PlayerEntity player, CompoundNBT nbt)
-    {
-        this.nbt = nbt;
-        this.entityID = player.getId();
-        this.worldKey = player.level.dimension().location().toString();
-    }
-
-    DisableHearthParticlesMessage(int entityID, String worldKey, CompoundNBT nbt)
-    {
-        this.nbt = nbt;
-        this.entityID = entityID;
-        this.worldKey = worldKey;
+    public DisableHearthParticlesMessage(CompoundNBT nbt)
+    {   this.nbt = nbt;
     }
 
     public static void encode(DisableHearthParticlesMessage message, PacketBuffer buffer)
-    {
-        buffer.writeInt(message.entityID);
-        buffer.writeUtf(message.worldKey);
-        buffer.writeNbt(message.nbt);
+    {   buffer.writeNbt(message.nbt);
     }
 
     public static DisableHearthParticlesMessage decode(PacketBuffer buffer)
-    {
-        return new DisableHearthParticlesMessage(buffer.readInt(), buffer.readUtf(), buffer.readNbt());
+    {   return new DisableHearthParticlesMessage(buffer.readNbt());
     }
 
     public static void handle(DisableHearthParticlesMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() ->
+        if (context.getSender() != null && context.getDirection().getReceptionSide() == LogicalSide.SERVER)
         {
-            try
-            {
-                World world = (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientWorld().dimension().location().toString().equals(message.worldKey))
-                        ? ClientOnlyHelper.getClientWorld()
-                        : ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getLevel(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(message.worldKey)));
-                if (world != null)
-                {
-                    Entity entity = world.getEntity(message.entityID);
-                    if (entity instanceof PlayerEntity)
-                    {   entity.getPersistentData().put("disabledHearths", message.nbt);
-                    }
-                }
-            } catch (Exception ignored) {}
-        });
+            context.enqueueWork(() ->
+            {   context.getSender().getPersistentData().put("DisabledHearths", message.nbt);
+            });
+        }
+        else if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT)
+        {
+            context.enqueueWork(() ->
+            {   HearthSaveDataHandler.deserializeDisabledHearths(message.nbt);
+            });
+        }
         context.setPacketHandled(true);
     }
 }

@@ -26,12 +26,12 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-import java.util.List;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
@@ -109,14 +109,14 @@ public class BoilerBlock extends Block
         return ActionResultType.SUCCESS;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, IWorld level, BlockPos pos, BlockPos neighborPos)
+    {
+        TileEntity te = level.getBlockEntity(pos);
+        if (neighborPos.equals(pos.above()) && te instanceof BoilerBlockEntity)
+        {   ((BoilerBlockEntity) te).checkForSmokestack();
+        }
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @SuppressWarnings("deprecation")
@@ -138,18 +138,17 @@ public class BoilerBlock extends Block
 
     @Override
     public BlockState rotate(BlockState state, Rotation direction)
-    {
-        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
+    {   return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LIT);
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+    {   builder.add(FACING, LIT);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
+    public BlockState getStateForPlacement(BlockItemUseContext context)
+    {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
     }
 
     @OnlyIn(Dist.CLIENT)

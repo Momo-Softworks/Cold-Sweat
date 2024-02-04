@@ -23,6 +23,7 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
@@ -123,6 +124,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     int frozenPaths = 0;
     boolean spreading = true;
 
+    boolean hasSmokestack = false;
     int smokestackHeight = 2;
 
     static final Direction[] DIRECTIONS = Direction.values();
@@ -188,6 +190,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return 10;
     }
 
+    public boolean hasSmokeStack()
+    {   return true;
+    }
+
     @Override
     protected ITextComponent getDefaultName()
     {   return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".hearth");
@@ -199,14 +205,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     }
 
     @Override
-    protected NonNullList<ItemStack> getItems() {
-        return this.items;
+    protected NonNullList<ItemStack> getItems()
+    {   return this.items;
     }
 
     @Override
     protected void setItems(NonNullList<ItemStack> itemsIn)
-    {
-        this.items = itemsIn;
+    {   this.items = itemsIn;
     }
 
     @Override
@@ -431,14 +436,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 // Air Particles
                 if (this.getLevel().isClientSide && showParticles)
                 {   Random rand = new Random();
-                    if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()) && rand.nextFloat() < (spreading ? 0.016f : 0.032f))
-                    {   float xr = rand.nextFloat();
-                        float yr = rand.nextFloat();
-                        float zr = rand.nextFloat();
-                        float xm = rand.nextFloat() / 20 - 0.025f;
-                        float zm = rand.nextFloat() / 20 - 0.025f;
-
-                        level.addParticle(this.getAirParticle(), false, spX + xr, spY + yr, spZ + zr, xm, 0, zm);
+                    if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()))
+                    {   this.spawnAirParticle(spX, spY, spZ, rand);
                     }
                 }
             }
@@ -737,6 +736,27 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return ModSounds.HEARTH_FUEL;
     }
 
+    public void checkForSmokestack()
+    {
+        if (level == null) return;
+
+        boolean hadSmokestack = this.hasSmokestack;
+        this.hasSmokestack = level.getBlockState(this.getBlockPos().above()).getBlock() == ModBlocks.SMOKESTACK;
+        if (!this.hasSmokestack && hadSmokestack)
+        {   this.resetPaths();
+            HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+            if (this.level.isClientSide)
+            {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
+            }
+        }
+        else if (this.hasSmokestack && !hadSmokestack)
+        {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+            if (this.level.isClientSide)
+            {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
+            }
+        }
+    }
+
     protected void tickParticles()
     {
         // Calculate the height of the smokestack (can be extended with walls)
@@ -773,6 +793,19 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
     public BasicParticleType getAirParticle()
     {   return ParticleTypesInit.HEARTH_AIR.get();
+    }
+
+    public void spawnAirParticle(int x, int y, int z, Random rand)
+    {
+        if (rand.nextFloat() > (spreading ? 0.016f : 0.032f)) return;
+
+        float xr = rand.nextFloat();
+        float yr = rand.nextFloat();
+        float zr = rand.nextFloat();
+        float xm = rand.nextFloat() / 20 - 0.025f;
+        float zm = rand.nextFloat() / 20 - 0.025f;
+
+        level.addParticle(this.getAirParticle(), false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override

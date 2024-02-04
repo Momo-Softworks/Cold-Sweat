@@ -73,7 +73,8 @@ public class Overlays
             int width = event.getWindow().getGuiScaledWidth();
             int height = event.getWindow().getGuiScaledHeight();
 
-            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
+            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !Minecraft.getInstance().options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 double min = ConfigSettings.MIN_TEMP.get();
                 double max = ConfigSettings.MAX_TEMP.get();
@@ -180,22 +181,25 @@ public class Overlays
                 RenderSystem.color4f(1, 1, 1, 1);
 
                 // Render Readout
-                FontRenderer font = mc.font;
-                int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                int scaledHeight = mc.getWindow().getGuiScaledHeight();
+                if (ClientSettingsConfig.getInstance().isBodyReadoutEnabled())
+                {
+                    FontRenderer font = mc.font;
+                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
-                String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                int x = (int) ((scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX());
-                int y = (int) (scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY());
+                    String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                    int x = (int) ((scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX());
+                    int y = (int) (scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY());
 
-                // Draw the outline
-                font.draw(poseStack, s, x + 1, y, colorBG);
-                font.draw(poseStack, s, x - 1, y, colorBG);
-                font.draw(poseStack, s, x, y + 1, colorBG);
-                font.draw(poseStack, s, x, y - 1, colorBG);
+                    // Draw the outline
+                    font.draw(poseStack, s, x + 1, y, colorBG);
+                    font.draw(poseStack, s, x - 1, y, colorBG);
+                    font.draw(poseStack, s, x, y + 1, colorBG);
+                    font.draw(poseStack, s, x, y - 1, colorBG);
 
-                // Draw the readout
-                font.draw(poseStack, s, x, y, color);
+                    // Draw the readout
+                    font.draw(poseStack, s, x, y, color);
+                }
             }
         }
     }
@@ -207,11 +211,12 @@ public class Overlays
         {
             Minecraft mc = Minecraft.getInstance();
             PlayerEntity player = mc.player;
-            MatrixStack matrixStack = event.getMatrixStack();
+            MatrixStack poseStack = event.getMatrixStack();
             int width = event.getWindow().getGuiScaledWidth();
             int height = event.getWindow().getGuiScaledHeight();
 
-            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR && !mc.options.hideGui)
+            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !mc.options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 double min = ConfigSettings.MIN_TEMP.get();
                 double max = ConfigSettings.MAX_TEMP.get();
@@ -222,7 +227,7 @@ public class Overlays
                 int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
                 int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
-                matrixStack.pushPose();
+                poseStack.pushPose();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.enableBlend();
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -231,9 +236,9 @@ public class Overlays
                 mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
 
                 // Render icon
-                AbstractGui.blit(matrixStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
+                AbstractGui.blit(poseStack, (width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(), height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
 
-                matrixStack.popPose();
+                poseStack.popPose();
             }
         }
     }
@@ -263,7 +268,7 @@ public class Overlays
                 // Calculate the blended world temp for this tick
                 double diff = realTemp - WORLD_TEMP;
                 PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / 20d, 0.25 * CSMath.getSign(diff));
+                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ClientSettingsConfig.getInstance().getTempSmoothing(), 0.25 * CSMath.getSign(diff));
 
                 // Update max/min offset
                 MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);

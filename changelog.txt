@@ -835,7 +835,7 @@ Fixes:
 - Fixed goats trying to ram players in creative mode
 
 Technical Changes:
-- TempModifiers now have a full CompoundTag attached to each instance
+- TempModifiers now have a full CompoundNBT attached to each instance
       - This can be used to store any custom data that needs to be saved
       - Replaces the old "arguments" system
 
@@ -1571,7 +1571,7 @@ Technical Changes:
       - All instances of Temperature have been replaced by double values
       - Replaced "with()" with the static method "Temperature.apply()"
       - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
-- TempModifiers now have a full CompoundTag attached to each instance
+- TempModifiers now have a full CompoundNBT attached to each instance
       - This can be used to store any custom data that needs to be saved
       - Replaces the old "arguments" system
 - TempModifier registration is now done using suppliers of TempModifiers

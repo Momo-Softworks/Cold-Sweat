@@ -294,7 +294,7 @@ public class SewingContainer extends Container
             {
                 ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
                 {
-                    if (cap.getInsulation().size() > 0)
+                    if (!cap.getInsulation().isEmpty())
                     {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
                 });

@@ -2,19 +2,24 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 
-public class BoilerScreen extends ContainerScreen<BoilerContainer>
+public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
 
-    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
+
+    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, IFormattableTextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;
@@ -26,14 +31,15 @@ public class BoilerScreen extends ContainerScreen<BoilerContainer>
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void init()
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+        super.init();
+        if (particleButton != null)
+        {   particleButton.x = leftPos + 151;
+            particleButton.y = topPos + 63;
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {

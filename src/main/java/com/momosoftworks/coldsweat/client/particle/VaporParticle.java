@@ -23,8 +23,9 @@ public class VaporParticle extends SpriteTexturedParticle
     private final boolean hasGravity;
     private boolean collidedY;
     private float maxAlpha;
+    VaporType type;
 
-    protected VaporParticle(ClientWorld world, double x, double y, double z, double vx, double vy, double vz, IAnimatedSprite spriteSet, boolean hasGravity)
+    protected VaporParticle(ClientWorld world, double x, double y, double z, double vx, double vy, double vz, IAnimatedSprite spriteSet, VaporType type)
     {
         super(world, x, y, z);
         this.ageSprite = spriteSet;
@@ -34,12 +35,17 @@ public class VaporParticle extends SpriteTexturedParticle
         this.setSize(quadSize / 10f, quadSize / 10f);
         this.lifetime = 40 + (int) (Math.random() * 20 - 10);
         this.hasPhysics = true;
-        this.xd = vx;
-        this.yd = vy;
-        this.zd = vz;
-        this.hasGravity = hasGravity;
-        this.gravity = hasGravity ? 0.04f : -0.04f;
         this.setSpriteFromAge(spriteSet);
+        this.hasGravity = type == VaporType.GROUND_MIST;
+        this.type = type;
+        switch (type)
+        {
+            case STEAM : gravity = -0.04f; break;
+            case GROUND_MIST : gravity = 0.04f; break;
+            case MIST : gravity = 0f; break;
+        }
+        if (type == VaporType.MIST)
+            this.maxAlpha = 0.2f;
     }
 
     @Nonnull
@@ -52,18 +58,17 @@ public class VaporParticle extends SpriteTexturedParticle
     public void tick()
     {
         if (Minecraft.getInstance().options.particles == ParticleStatus.MINIMAL)
-            this.remove();
+        {   this.remove();
+        }
 
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
         if (this.age++ >= this.lifetime)
-        {
-            this.remove();
+        {   this.remove();
         }
         else
-        {
-            this.yd -= 0.04D * gravity;
+        {   this.yd -= 0.04D * gravity;
             this.move(xd * (onGround ? 1 : 0.2), yd, zd * (onGround ? 1 : 0.2));
             this.xd *= 0.99;
             this.yd *= 0.99;
@@ -72,7 +77,7 @@ public class VaporParticle extends SpriteTexturedParticle
 
         this.setSpriteFromAge(ageSprite);
 
-        if (hasGravity)
+        if (type == VaporType.GROUND_MIST)
         {
             if (this.alpha < maxAlpha)
                 this.alpha += 0.02f;
@@ -84,12 +89,13 @@ public class VaporParticle extends SpriteTexturedParticle
         }
         else
         {
-            if (this.age < 10)
-                this.alpha += 0.07f;
-            else if (this.age > this.lifetime - this.alpha / 0.02f)
-                this.alpha -= 0.02f;
+            if (type == VaporType.MIST)
+            if (this.alpha < maxAlpha)
+                this.alpha += maxAlpha / 20;
+            else if (this.age > maxAlpha / (maxAlpha / 20))
+                this.alpha -= maxAlpha / 20;
 
-            if (this.alpha < 0.07  && this.age > 10)
+            if (this.alpha < 0.02 && this.age > 10)
                 this.remove();
         }
     }
@@ -129,6 +135,13 @@ public class VaporParticle extends SpriteTexturedParticle
         }
     }
 
+    public enum VaporType
+    {
+        STEAM,
+        GROUND_MIST,
+        MIST
+    }
+
     @OnlyIn(Dist.CLIENT)
     public static class SteamFactory implements IParticleFactory<BasicParticleType>
     {
@@ -142,7 +155,27 @@ public class VaporParticle extends SpriteTexturedParticle
         public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, false);
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.STEAM);
+            else
+                return null;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class GroundMistFactory implements IParticleFactory<BasicParticleType>
+    {
+        private final IAnimatedSprite sprite;
+
+        public GroundMistFactory(IAnimatedSprite spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        {
+            ParticleStatus status = Minecraft.getInstance().options.particles;
+            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, VaporType.GROUND_MIST);
             else
                 return null;
         }
@@ -153,16 +186,15 @@ public class VaporParticle extends SpriteTexturedParticle
     {
         private final IAnimatedSprite sprite;
 
-        public MistFactory(IAnimatedSprite spriteSet) {
-            this.sprite = spriteSet;
+        public MistFactory(IAnimatedSprite spriteSet)
+        {   this.sprite = spriteSet;
         }
 
         @Override
         public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            ParticleStatus status = Minecraft.getInstance().options.particles;
-            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, true);
+            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.MIST);
             else
                 return null;
         }

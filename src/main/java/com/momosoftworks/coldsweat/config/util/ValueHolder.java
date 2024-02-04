@@ -37,8 +37,8 @@ public class ValueHolder<T>
     /**
      * Creates a value holder that can be synced between the server and client.
      * @param valueCreator A supplier that returns the holder's value.
-     * @param encoder Writes the value to a CompoundTag.
-     * @param decoder Reads the value from a CompoundTag.
+     * @param encoder Writes the value to a CompoundNBT.
+     * @param decoder Reads the value from a CompoundNBT.
      * @param saver Writes the value to a config file. This may be either on the server or client.
      * @return A synced value holder.
      * @param <V> The type of the value.
