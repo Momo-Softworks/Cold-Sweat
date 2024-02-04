@@ -70,7 +70,8 @@ public class Overlays
         event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "world_temp", (gui, poseStack, partialTick, width, height) ->
         {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR && !Minecraft.getInstance().options.hideGui)
+            if (player != null && ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !Minecraft.getInstance().options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 gui.setupOverlayRenderState(true, false);
 
@@ -175,22 +176,25 @@ public class Overlays
                 RenderSystem.setShaderColor(1, 1, 1, 1);
 
                 // Render Readout
-                Font font = mc.font;
-                int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                int scaledHeight = mc.getWindow().getGuiScaledHeight();
+                if (ClientSettingsConfig.getInstance().isBodyReadoutEnabled())
+                {
+                    Font font = mc.font;
+                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
-                String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                int x = (int) ((scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX());
-                int y = (int) (scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY());
+                    String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                    int x = (int) ((scaledWidth - font.width(s)) / 2f + CLIENT_CONFIG.getBodyReadoutX());
+                    int y = (int) (scaledHeight - 31f - 10f + CLIENT_CONFIG.getBodyReadoutY());
 
-                // Draw the outline
-                font.draw(poseStack, s, x + 1, y, colorBG);
-                font.draw(poseStack, s, x - 1, y, colorBG);
-                font.draw(poseStack, s, x, y + 1, colorBG);
-                font.draw(poseStack, s, x, y - 1, colorBG);
+                    // Draw the outline
+                    font.draw(poseStack, s, x + 1, y, colorBG);
+                    font.draw(poseStack, s, x - 1, y, colorBG);
+                    font.draw(poseStack, s, x, y + 1, colorBG);
+                    font.draw(poseStack, s, x, y - 1, colorBG);
 
-                // Draw the readout
-                font.draw(poseStack, s, x, y, color);
+                    // Draw the readout
+                    font.draw(poseStack, s, x, y, color);
+                }
             }
         });
 
@@ -198,7 +202,8 @@ public class Overlays
         {
             Minecraft mc = Minecraft.getInstance();
             Player player = mc.player;
-            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR && !mc.options.hideGui)
+            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
+            && !mc.options.hideGui && ClientSettingsConfig.getInstance().isWorldGaugeEnabled())
             {
                 gui.setupOverlayRenderState(true, false);
 
@@ -255,7 +260,7 @@ public class Overlays
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / 20d, 0.25 * CSMath.getSign(diff));
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ClientSettingsConfig.getInstance().getTempSmoothing(), 0.25 * CSMath.getSign(diff));
 
                     // Update max/min offset
                     MAX_OFFSET = cap.getTemp(Temperature.Type.FREEZING_POINT);

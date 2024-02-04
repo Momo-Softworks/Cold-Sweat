@@ -53,8 +53,7 @@ public class TaskScheduler
      * @param delay The delay in ticks
      */
     public static void scheduleServer(Runnable task, int delay)
-    {
-        SERVER_SCHEDULE.add(new QueueEntry(task, delay));
+    {   SERVER_SCHEDULE.add(new QueueEntry(task, delay));
     }
 
     /**
@@ -63,8 +62,12 @@ public class TaskScheduler
      * @param delay The delay in ticks
      */
     public static void scheduleClient(Runnable task, int delay)
-    {
-        CLIENT_SCHEDULE.add(new QueueEntry(task, delay));
+    {   CLIENT_SCHEDULE.add(new QueueEntry(task, delay));
+    }
+
+    public static void schedule(Runnable task, int delay)
+    {   scheduleServer(task, delay);
+        scheduleClient(task, delay);
     }
 
     static class QueueEntry

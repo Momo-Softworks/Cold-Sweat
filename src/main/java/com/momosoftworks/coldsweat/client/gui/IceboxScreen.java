@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -10,9 +11,14 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import net.minecraft.world.entity.player.Inventory;
 
-public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
+public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
+
+    @Override
+    HearthBlockEntity getBlockEntity()
+    {   return this.menu.te;
+    }
 
     public IceboxScreen(IceboxContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -26,14 +32,23 @@ public class IceboxScreen extends AbstractContainerScreen<IceboxContainer>
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(PoseStack ps, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+        this.renderBackground(ps);
+        super.render(ps, mouseX, mouseY, partialTicks);
+        this.renderTooltip(ps, mouseX, mouseY);
     }
 
-    @SuppressWarnings("deprecation")
+    @Override
+    public void init()
+    {
+        super.init();
+        if (particleButton != null)
+        {   particleButton.x = leftPos + 151;
+            particleButton.y = topPos + 63;
+        }
+    }
+
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {

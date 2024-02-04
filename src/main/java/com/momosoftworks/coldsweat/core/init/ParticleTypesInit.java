@@ -13,5 +13,6 @@ public class ParticleTypesInit
 
     public static final RegistryObject<SimpleParticleType> HEARTH_AIR = PARTICLES.register("hearth_air", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> STEAM = PARTICLES.register("steam", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> GROUND_MIST = PARTICLES.register("ground_mist", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> MIST = PARTICLES.register("mist", () -> new SimpleParticleType(true));
 }

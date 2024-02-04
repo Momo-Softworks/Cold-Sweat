@@ -39,9 +39,9 @@ public class ParticleUtil
 
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event)
-    {
-        event.register(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
+    {   event.register(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
         event.register(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
+        event.register(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
         event.register(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
     }
 }

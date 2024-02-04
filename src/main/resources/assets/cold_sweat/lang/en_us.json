@@ -5,6 +5,7 @@
   "block.cold_sweat.icebox":            "Icebox",
   "block.cold_sweat.sewing_table":      "Sewing Table",
   "block.cold_sweat.thermolith":        "Thermolith",
+  "block.cold_sweat.smokestack":        "Smokestack",
 
 
   "item.cold_sweat.minecart_insulation": "Minecart Insulation",
@@ -217,5 +218,12 @@
   "attribute.world_temperature": "World Temperature",
   "attribute.world_temperature.desc": "The player's current world temperature",
   "attribute.world_temperature_offset": "World Temperature Offset",
-  "attribute.world_temperature_offset.desc": "Applies an offset to the player's perceived world temperature"
+  "attribute.world_temperature_offset.desc": "Applies an offset to the player's perceived world temperature",
+
+
+  "message.cold_sweat.mod_name": "Cold Sweat",
+  "message.cold_sweat.warning": "Warning!",
+  "message.cold_sweat.disable": "click to disable",
+  "message.cold_sweat.disable_feedback": "Message disabled.",
+  "message.cold_sweat.creative_warning_message": "Due to a Minecraft bug, entering the creative inventory will clear insulation from all armor items!"
 }
