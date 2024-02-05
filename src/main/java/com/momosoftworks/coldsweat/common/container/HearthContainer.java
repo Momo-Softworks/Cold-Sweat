@@ -53,31 +53,26 @@ public class HearthContainer extends AbstractContainerMenu
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
-            {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
+            {   this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
             }
         }
 
         // Player hotbar
         for (int col = 0; col < 9; col++)
-        {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
+        {   this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
     }
 
     public HearthContainer(final int windowId, final Inventory playerInv, final FriendlyByteBuf data)
-    {
-        this(windowId, playerInv, getTileEntity(playerInv, data));
+    {   this(windowId, playerInv, getTileEntity(playerInv, data));
     }
 
     public int getHotFuel()
-    {
-        return te.getHotFuel();
+    {   return te.getHotFuel();
     }
 
     public int getColdFuel()
-    {
-        return te.getColdFuel();
+    {   return te.getColdFuel();
     }
 
     private static HearthBlockEntity getTileEntity(final Inventory playerInv, final FriendlyByteBuf data)
@@ -86,16 +81,14 @@ public class HearthContainer extends AbstractContainerMenu
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final BlockEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
         if (te instanceof HearthBlockEntity hearth)
-        {
-            return hearth;
+        {   return hearth;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
     public boolean stillValid(Player playerIn)
-    {
-        return playerIn.distanceToSqr(Vec3.atCenterOf(te.getBlockPos())) <= 64.0D;
+    {   return playerIn.distanceToSqr(Vec3.atCenterOf(te.getBlockPos())) <= 64.0D;
     }
 
     @Override
@@ -103,15 +96,14 @@ public class HearthContainer extends AbstractContainerMenu
     {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
-        if (slot != null && slot.hasItem())
+        if (slot.hasItem())
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             if (index == 0)
             {
                 if (!this.moveItemStackTo(itemstack1, 1, 37, true))
-                {
-                    return ItemStack.EMPTY;
+                {   return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
@@ -121,23 +113,20 @@ public class HearthContainer extends AbstractContainerMenu
                 if (this.getSlot(0).mayPlace(itemstack))
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
-                    {
-                        return ItemStack.EMPTY;
+                    {   return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.isWithin(index, slots.size() - 9, slots.size() - 1))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, slots.size() - 10, false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
                 else if (CSMath.isWithin(index, 1, slots.size() - 10))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
-                    {
-                        slot.onQuickCraft(itemstack1, itemstack);
+                    {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
@@ -145,17 +134,12 @@ public class HearthContainer extends AbstractContainerMenu
             }
 
             if (itemstack1.isEmpty())
-            {
-                slot.set(ItemStack.EMPTY);
+            {   slot.set(ItemStack.EMPTY);
             }
-            else
-            {
-                slot.setChanged();
-            }
+            else slot.setChanged();
 
             if (itemstack1.getCount() == itemstack.getCount())
-            {
-                return ItemStack.EMPTY;
+            {   return ItemStack.EMPTY;
             }
 
             slot.onTake(player, itemstack1);

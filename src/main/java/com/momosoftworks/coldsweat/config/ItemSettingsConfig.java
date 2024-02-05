@@ -96,7 +96,7 @@ public final class ItemSettingsConfig
         blacklistedPotions = BUILDER
                 .comment("Potions containing any of these effects will not be allowed in the hearth",
                          "Format: [\"effect_id\", \"effect_id\", ...etc]")
-                .defineListAllowEmpty(List.of("Blacklisted Potion Effects"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Blacklisted Hearth Potions"), () -> ListBuilder.begin(
                                 "minecraft:instant_damage",
                                 "minecraft:poison",
                                 "minecraft:wither",
