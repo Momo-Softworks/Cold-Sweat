@@ -57,21 +57,18 @@ public class SewingContainer extends AbstractContainerMenu
 
         @Override
         public int getContainerSize()
-        {
-            return 3;
+        {   return 3;
         }
 
         @Override
         public boolean isEmpty()
-        {
-            return !stackList.stream().anyMatch(stack -> !stack.isEmpty());
+        {   return !stackList.stream().anyMatch(stack -> !stack.isEmpty());
         }
 
         @Nonnull
         @Override
         public ItemStack getItem(int index)
-        {
-            return stackList.get(index);
+        {   return stackList.get(index);
         }
 
         @Nonnull
@@ -79,8 +76,8 @@ public class SewingContainer extends AbstractContainerMenu
         public ItemStack removeItem(int index, int count)
         {
             ItemStack itemstack = ContainerHelper.removeItem(this.stackList, index, count);
-            if (!itemstack.isEmpty()) {
-                this.menu.slotsChanged(this);
+            if (!itemstack.isEmpty())
+            {   this.menu.slotsChanged(this);
             }
 
             return itemstack;
@@ -89,14 +86,12 @@ public class SewingContainer extends AbstractContainerMenu
         @Nonnull
         @Override
         public ItemStack removeItemNoUpdate(int index)
-        {
-            return ContainerHelper.takeItem(this.stackList, index);
+        {   return ContainerHelper.takeItem(this.stackList, index);
         }
 
         @Override
         public void setItem(int index, ItemStack stack)
-        {
-            this.stackList.set(index, stack);
+        {   this.stackList.set(index, stack);
             this.menu.slotsChanged(this);
         }
 
@@ -105,14 +100,12 @@ public class SewingContainer extends AbstractContainerMenu
 
         @Override
         public boolean stillValid(Player player)
-        {
-            return true;
+        {   return true;
         }
 
         @Override
         public void clearContent()
-        {
-            stackList.clear();
+        {   stackList.clear();
         }
     }
 
@@ -128,22 +121,19 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
+            {   Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
                     && insulation.getFirst() == 0 && insulation.getSecond() == 0;
             }
             @Override
             public void onTake(Player player, ItemStack stack)
-            {
-                super.onTake(player, stack);
+            {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
             }
             @Override
             public void setChanged()
-            {
-                super.setChanged();
-                SewingContainer.this.testForRecipe();
+            {   super.setChanged();
+                TaskScheduler.schedule(SewingContainer.this::testForRecipe, 0);
             }
         });
 
@@ -152,21 +142,18 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
+            {   Pair<Double, Double> insulation = ItemInsulationManager.getItemInsulation(stack);
                 return insulation.getFirst() != 0 || insulation.getSecond() != 0 || stack.getItem() instanceof ShearsItem;
             }
             @Override
             public void onTake(Player player, ItemStack stack)
-            {
-                super.onTake(player, stack);
+            {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
             }
             @Override
             public void setChanged()
-            {
-                super.setChanged();
-                SewingContainer.this.testForRecipe();
+            {   super.setChanged();
+                TaskScheduler.schedule(SewingContainer.this::testForRecipe, 0);
             }
         });
 
@@ -175,8 +162,7 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                return false;
+            {   return false;
             }
 
             @Override
@@ -186,7 +172,7 @@ public class SewingContainer extends AbstractContainerMenu
                 SewingContainer.this.takeOutput(stack);
 
                 if (!SewingContainer.this.playerInventory.player.level().isClientSide)
-                    TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
+                    TaskScheduler.scheduleServer(() -> testForRecipe(), 0);
             }
         });
 
@@ -194,52 +180,46 @@ public class SewingContainer extends AbstractContainerMenu
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
-            {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
+            {   this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
             }
         }
 
         // Player Hotbar
         for (int col = 0; col < 9; col++)
-        {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
+        {   this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
     }
 
     public SewingContainer(int i, Inventory inventory, FriendlyByteBuf friendlyByteBuf)
     {
         this(i, inventory);
-        try {
-            this.pos = BlockPos.of(friendlyByteBuf.readLong());
-        } catch (Exception ignored) {}
+        try
+        {   this.pos = BlockPos.of(friendlyByteBuf.readLong());
+        }
+        catch (Exception ignored) {}
     }
 
     public void setItem(int index, ItemStack stack)
-    {
-        this.sewingInventory.setItem(index, stack);
+    {   this.sewingInventory.setItem(index, stack);
         this.setRemoteSlot(index, stack);
     }
 
     public void growItem(int index, int amount)
-    {
-        ItemStack stack = this.sewingInventory.getItem(index);
+    {   ItemStack stack = this.sewingInventory.getItem(index);
         stack.grow(amount);
         this.sewingInventory.setItem(index, stack);
         this.setRemoteSlot(index, stack);
     }
 
     public ItemStack getItem(int index)
-    {
-        return this.sewingInventory.getItem(index);
+    {   return this.sewingInventory.getItem(index);
     }
 
     private void takeInput()
-    {
-        this.sewingInventory.setItem(2, ItemStack.EMPTY);
+    {   this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
     private void takeOutput(ItemStack stack)
-    {
-        Player player = this.playerInventory.player;
+    {   Player player = this.playerInventory.player;
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
@@ -285,9 +265,7 @@ public class SewingContainer extends AbstractContainerMenu
     static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
     {
         if (iCap instanceof ItemInsulationCap cap)
-        {
-            CompoundTag tag = cap.serializeSimple(stack);
-
+        {   CompoundTag tag = cap.serializeSimple(stack);
             // Remove "Insulation" tag if armor has no insulation left
             if (iCap.getInsulation().isEmpty())
             {   tag.remove("Insulation");
@@ -363,19 +341,17 @@ public class SewingContainer extends AbstractContainerMenu
                 this.setItem(2, processed);
             }
         }
+        this.broadcastChanges();
     }
 
     public SewingContainer(final int windowId, final Player playerInv, BlockPos pos)
-    {
-        this(windowId, playerInv.getInventory());
+    {   this(windowId, playerInv.getInventory());
         this.pos = pos;
     }
 
     @Override
     public void removed(Player player)
-    {
-        super.removed(player);
-
+    {   super.removed(player);
         // Drop the contents of the input slots
         if (player instanceof ServerPlayer)
         {
@@ -398,7 +374,8 @@ public class SewingContainer extends AbstractContainerMenu
     public boolean stillValid(Player playerIn)
     {
         if (this.pos != null)
-            return playerIn.distanceToSqr(Vec3.atCenterOf(this.pos)) <= 64.0D;
+        {   return playerIn.distanceToSqr(Vec3.atCenterOf(this.pos)) <= 64.0D;
+        }
         else return true;
     }
 
@@ -409,14 +386,12 @@ public class SewingContainer extends AbstractContainerMenu
         Slot slot = this.slots.get(index);
 
         if (slot.hasItem())
-        {
-            ItemStack slotItem = slot.getItem();
+        {   ItemStack slotItem = slot.getItem();
             newStack = slotItem.copy();
             if (CSMath.isWithin(index, 0, 2))
             {
                 if (this.moveItemStackTo(slotItem, 3, 39, true))
-                {
-                    slot.onTake(player, newStack);
+                {   slot.onTake(player, newStack);
                 }
                 else return ItemStack.EMPTY;
             }
