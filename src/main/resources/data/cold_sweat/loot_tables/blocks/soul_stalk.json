@@ -5,65 +5,65 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:alternatives",
-          "children": [
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "functions": [
             {
-              "type": "minecraft:item",
-              "name": "minecraft:stick",
-              "functions": [
-                {
-                  "function": "minecraft:set_count",
-                  "count": {
-                    "min": 0,
-                    "max": 2
-                  }
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 0,
+                "max": 2
+              }
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:inverted",
+              "term": {
+                "condition": "minecraft:block_state_property",
+                "block": "cold_sweat:soul_stalk",
+                "properties": {
+                  "section": "0"
                 }
-              ],
-              "conditions": [
+              }
+            },
+            {
+              "condition": "minecraft:inverted",
+              "term": {
+                "condition": "minecraft:block_state_property",
+                "block": "cold_sweat:soul_stalk",
+                "properties": {
+                  "section": "3"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "cold_sweat:soul_sprout",
+          "conditions": [
+            {
+              "condition": "minecraft:alternative",
+              "terms": [
                 {
-                  "condition": "minecraft:inverted",
-                  "term": {
-                    "condition": "minecraft:block_state_property",
-                    "block": "cold_sweat:soul_stalk",
-                    "properties": {
-                      "section": "0"
-                    }
+                  "condition": "minecraft:block_state_property",
+                  "block": "cold_sweat:soul_stalk",
+                  "properties": {
+                    "section": "2"
                   }
                 },
                 {
-                  "condition": "minecraft:inverted",
-                  "term": {
-                    "condition": "minecraft:block_state_property",
-                    "block": "cold_sweat:soul_stalk",
-                    "properties": {
-                      "section": "3"
-                    }
+                  "condition": "minecraft:block_state_property",
+                  "block": "cold_sweat:soul_stalk",
+                  "properties": {
+                    "section": "3"
                   }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "cold_sweat:soul_sprout",
-              "conditions": [
-                {
-                  "condition": "minecraft:alternative",
-                  "terms": [
-                    {
-                      "condition": "minecraft:block_state_property",
-                      "block": "cold_sweat:soul_stalk",
-                      "properties": {
-                        "section": "2"
-                      }
-                    },
-                    {
-                      "condition": "minecraft:block_state_property",
-                      "block": "cold_sweat:soul_stalk",
-                      "properties": {
-                        "section": "3"
-                      }
-                    }
-                  ]
                 }
               ]
             }
