@@ -90,7 +90,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isBodyIconEnabled();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_icon_location.desc"),
-                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_readout_location.name"),
@@ -105,7 +105,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isBodyReadoutEnabled();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_readout_location.desc"),
-                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.world_temp_location.name"),
                 amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
@@ -119,7 +119,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isWorldGaugeEnabled();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.world_temp_location.desc"),
-                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").append(": ").append(clientConfig.customHotbarEnabled() ? ON : OFF),
