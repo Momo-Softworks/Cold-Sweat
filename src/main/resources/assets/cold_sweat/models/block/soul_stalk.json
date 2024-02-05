@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "cold_sweat:block/soul_stalk"
-  }
+  },
+  "render_type": "cutout"
 }
