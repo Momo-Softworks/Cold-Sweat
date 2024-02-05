@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -11,20 +12,17 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import org.jline.reader.Widget;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public abstract class AbstractConfigPage extends Screen
@@ -32,23 +30,25 @@ public abstract class AbstractConfigPage extends Screen
     // Count how many ticks the mouse has been still for
     static int MOUSE_STILL_TIMER = 0;
     static int TOOLTIP_DELAY = 5;
+
+    public final String ON = CommonComponents.OPTION_ON.getString();
+    public final String OFF = CommonComponents.OPTION_OFF.getString();
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
-    {
-        MOUSE_STILL_TIMER++;
+    {   MOUSE_STILL_TIMER++;
     }
 
     @Override
     public void mouseMoved(double mouseX, double mouseY)
-    {
-        MOUSE_STILL_TIMER = 0;
+    {   MOUSE_STILL_TIMER = 0;
         super.mouseMoved(mouseX, mouseY);
     }
 
     private final Screen parentScreen;
 
     public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
-    public Map<String, List<FormattedText>> tooltips = new HashMap<>();
+    public Map<String, List<Component>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
     protected int leftSideLength = 0;
@@ -69,25 +69,21 @@ public abstract class AbstractConfigPage extends Screen
     public abstract Component sectionTwoTitle();
 
     public AbstractConfigPage(Screen parentScreen)
-    {
-        super(Component.translatable("cold_sweat.config.title"));
+    {   super(Component.translatable("cold_sweat.config.title"));
         this.parentScreen = parentScreen;
-    }
-
-    public int index()
-    {
-        return 0;
     }
 
     /**
      * Adds an empty block to the list on the given side. One unit is the height of a button.
      */
-    protected void addEmptySpace(Side side, double units)
+    protected void addEmptySpace(Side side, double height)
     {
         if (side == Side.LEFT)
-            this.leftSideLength += ConfigScreen.OPTION_SIZE * units;
+        {   this.leftSideLength += (int) (ConfigScreen.OPTION_SIZE * height);
+        }
         else
-            this.rightSideLength += ConfigScreen.OPTION_SIZE * units;
+        {   this.rightSideLength += (int) (ConfigScreen.OPTION_SIZE * height);
+        }
     }
 
     /**
@@ -103,14 +99,15 @@ public abstract class AbstractConfigPage extends Screen
         this.addWidgetBatch(id, List.of(label));
 
         if (side == Side.LEFT)
-            this.leftSideLength += font.lineHeight + 4;
+        {   this.leftSideLength += font.lineHeight + 4;
+        }
         else
-            this.rightSideLength += font.lineHeight + 4;
+        {   this.rightSideLength += font.lineHeight + 4;
+        }
     }
 
     protected void addLabel(String id, Side side, String text)
-    {
-        this.addLabel(id, side, text, 16777215);
+    {   this.addLabel(id, side, text, 16777215);
     }
 
     /**
@@ -124,7 +121,8 @@ public abstract class AbstractConfigPage extends Screen
      * @param tooltip The tooltip of the button when hovered.
      */
     protected void addButton(String id, Side side, Supplier<Component> dynamicLabel, Consumer<Button> onClick,
-                             boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
+                             boolean requireOP, boolean setsCustomDifficulty, boolean clientside,
+                             Component... tooltip)
     {
         Component label = dynamicLabel.get();
 
@@ -155,14 +153,13 @@ public abstract class AbstractConfigPage extends Screen
         {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
         }
 
+        List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip = tooltipList.toArray(new Component[0]);
+        {   tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
         }
         // Assign the tooltip
-        this.setTooltip(id, tooltip);
+        this.setTooltip(id, tooltipList);
 
         this.addWidgetBatch(id, List.of(button));
 
@@ -177,15 +174,16 @@ public abstract class AbstractConfigPage extends Screen
      * Adds an input that accepts decimal numbers to the list on the given side.
      * @param id The internal id of the input. This widget can be accessed by this id.
      * @param label The label text of the input.
-     * @param onValueWrite The action to perform when the input is changed.
-     * @param onInit The action to perform when the input is initialized.
+     * @param onEdited The action to perform when the input is changed.
+     * @param onInit The action to perform when the input is initialized (when the screen is created).
      * @param requireOP Whether the input should be disabled if the player is not OP.
      * @param setsCustomDifficulty Sets Cold Sweat's difficulty to custom when edited, if true.
-     * @param clientside Whether the input is clientside only (renders the clientside icon).
+     * @param clientside Whether the input is clientside only.
      * @param tooltip The tooltip of the input when hovered.
      */
-    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> onValueWrite, Consumer<EditBox> onInit,
-                                   boolean requireOP, boolean setsCustomDifficulty, boolean clientside, Component... tooltip)
+    protected void addDecimalInput(String id, Side side, Component label, Consumer<Double> onEdited, Consumer<EditBox> onInit,
+                                   boolean requireOP, boolean setsCustomDifficulty, boolean clientside,
+                                   Component... tooltip)
     {
         boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
         int xOffset = side == Side.LEFT ? -82 : 151;
@@ -204,7 +202,7 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         ConfigSettings.DIFFICULTY.set(4);
-                    onValueWrite.accept(Double.parseDouble(this.getValue()));
+                    onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
             @Override
@@ -215,7 +213,7 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         ConfigSettings.DIFFICULTY.set(4);
-                    onValueWrite.accept(Double.parseDouble(this.getValue()));
+                    onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
             @Override
@@ -226,7 +224,7 @@ public abstract class AbstractConfigPage extends Screen
                 {
                     if (setsCustomDifficulty)
                         ConfigSettings.DIFFICULTY.set(4);
-                    onValueWrite.accept(Double.parseDouble(this.getValue()));
+                    onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
         };
@@ -247,14 +245,13 @@ public abstract class AbstractConfigPage extends Screen
         {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
         }
 
+        List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip = tooltipList.toArray(new Component[0]);
+        {   tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
         }
         // Assign the tooltip
-        this.setTooltip(id, tooltip);
+        this.setTooltip(id, tooltipList);
 
         // Add the widget
         this.addWidgetBatch(id, List.of(textBox, configLabel));
@@ -373,14 +370,13 @@ public abstract class AbstractConfigPage extends Screen
         }
         widgetBatch.add(configLabel);
 
+        List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
         // Add the client disclaimer if the setting is marked clientside
         if (clientside)
-        {   List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
-            tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
-            tooltip = tooltipList.toArray(new Component[0]);
+        {   tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
         }
         // Assign the tooltip
-        this.setTooltip(id, tooltip);
+        this.setTooltip(id, tooltipList);
 
         this.addWidgetBatch(id, widgetBatch);
 
@@ -408,13 +404,19 @@ public abstract class AbstractConfigPage extends Screen
 
         // Navigation
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
-                button -> mc.setScreen(ConfigScreen.getPage(this.index() + 1, parentScreen)));
-        if (this.index() < ConfigScreen.LAST_PAGE)
+                button ->
+                {   ConfigScreen.CURRENT_PAGE++;
+                    mc.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                });
+        if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
             this.addRenderableWidget(nextNavButton);
 
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
-                button -> mc.setScreen(ConfigScreen.getPage(this.index() - 1, parentScreen)));
-        if (this.index() > ConfigScreen.FIRST_PAGE)
+                button ->
+                {   ConfigScreen.CURRENT_PAGE--;
+                    mc.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                });
+        if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
             this.addRenderableWidget(prevNavButton);
     }
 
@@ -428,7 +430,7 @@ public abstract class AbstractConfigPage extends Screen
         graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        graphics.drawString(this.font, Component.literal(this.index() + 1 + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215, true);
+        graphics.drawString(this.font, Component.literal((ConfigScreen.CURRENT_PAGE + 1) + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215, true);
 
         // Section 1 Title
         graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);
@@ -471,16 +473,19 @@ public abstract class AbstractConfigPage extends Screen
             // if the mouse is hovering over any of the widgets in the batch, show the corresponding tooltip
             if (CSMath.isWithin(mouseX, minX, maxX) && CSMath.isWithin(mouseY, minY, maxY))
             {
-                List<FormattedText> tooltipList = this.tooltips.get(id);
+                List<Component> tooltipList = this.tooltips.get(id);
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
-                    List<Component> tooltip = this.tooltips.get(id).stream().map(text -> Component.literal(text.getString())).collect(Collectors.toList());
-                    graphics.renderTooltip(font, tooltip, Optional.empty(), mouseX, mouseY);
+                    graphics.renderTooltip(font, tooltipList, Optional.empty(), mouseX, mouseY);
                 }
                 break;
             }
         }
-        this.children().forEach(child -> child.setFocused(false));
+        this.children().forEach(child ->
+        {
+            if (!(child instanceof EditBox))
+                child.setFocused(false);
+        });
     }
 
     @Override
@@ -519,13 +524,16 @@ public abstract class AbstractConfigPage extends Screen
         return this.widgetBatches.get(id);
     }
 
-    protected void setTooltip(String id, Component[] tooltip)
+    protected void setTooltip(String id, List<Component> tooltip)
     {
-        List<FormattedText> tooltipList = new ArrayList<>();
-        for (Component text : tooltip)
-        {   tooltipList.addAll(font.getSplitter().splitLines(text, 300, Style.EMPTY));
+        List<Component> wrappedTooltip = new ArrayList<>();
+        for (Component component : tooltip)
+        {  // wrap lines at 300 px
+           List<FormattedText> wrappedText = font.getSplitter().splitLines(component, 300, component.getStyle());
+           // convert FormattedText back to styled Components
+           wrappedTooltip.addAll(wrappedText.stream().map(text -> Component.literal(text.getString()).withStyle(component.getStyle())).toList());
         }
-        this.tooltips.put(id, tooltipList);
+        this.tooltips.put(id, wrappedTooltip);
     }
 
     public static void setImageX(ImageButton button, boolean enabled)

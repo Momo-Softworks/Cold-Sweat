@@ -16,37 +16,24 @@ import net.minecraft.world.entity.player.Player;
 public class ConfigPageOne extends AbstractConfigPage
 {
     Screen parentScreen;
-    private final String on;
-    private final String off;
 
     public ConfigPageOne(Screen parentScreen)
     {
         super(parentScreen);
         if (parentScreen == null)
-        {
-            parentScreen = Minecraft.getInstance().screen;
+        {   parentScreen = Minecraft.getInstance().screen;
         }
         this.parentScreen = parentScreen;
-        on = Component.translatable("options.on").getString();
-        off = Component.translatable("options.off").getString();
-    }
-
-    @Override
-    public int index()
-    {
-        return 0;
     }
 
     @Override
     public Component sectionOneTitle()
-    {
-        return Component.translatable("cold_sweat.config.section.temperature_details");
+    {   return Component.translatable("cold_sweat.config.section.temperature_details");
     }
 
     @Override
     public Component sectionTwoTitle()
-    {
-        return Component.translatable("cold_sweat.config.section.difficulty.name");
+    {   return Component.translatable("cold_sweat.config.section.difficulty.name");
     }
 
     @Override
@@ -55,7 +42,6 @@ public class ConfigPageOne extends AbstractConfigPage
         super.init();
 
         ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
-
         Temperature.Units[] properUnits = {clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F};
 
         /*
@@ -101,13 +87,13 @@ public class ConfigPageOne extends AbstractConfigPage
         this.addDecimalInput("temp_damage", Side.LEFT, Component.translatable("cold_sweat.config.temp_damage.name"),
                 value -> ConfigSettings.TEMP_DAMAGE.set(value),
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_DAMAGE.get())),
-                true, false, false, Component.translatable("cold_sweat.config.temp_damage.desc"));
+                true, true, false, Component.translatable("cold_sweat.config.temp_damage.desc"));
 
         // Rate Multiplier
         this.addDecimalInput("rate", Side.LEFT, Component.translatable("cold_sweat.config.temperature_rate.name"),
                 value -> ConfigSettings.TEMP_RATE.set(value),
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_RATE.get())),
-                true, false, false, Component.translatable("cold_sweat.config.temperature_rate.desc"));
+                true, true, false, Component.translatable("cold_sweat.config.temperature_rate.desc"));
 
         // Difficulty button
         this.addButton("difficulty", Side.RIGHT, () -> Component.translatable("cold_sweat.config.difficulty.name").append(
@@ -120,30 +106,29 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Misc. Temp Effects
         this.addButton("ice_resistance", Side.RIGHT,
-                () -> Component.translatable("cold_sweat.config.ice_resistance.name").append(": ").append(ConfigSettings.ICE_RESISTANCE_ENABLED.get() ? on : off),
+                () -> Component.translatable("cold_sweat.config.ice_resistance.name").append(": ").append(ConfigSettings.ICE_RESISTANCE_ENABLED.get() ? ON : OFF),
                 button -> ConfigSettings.ICE_RESISTANCE_ENABLED.set(!ConfigSettings.ICE_RESISTANCE_ENABLED.get()),
                 true, true, false, Component.translatable("cold_sweat.config.ice_resistance.desc"));
 
         this.addButton("fire_resistance", Side.RIGHT,
-                () -> Component.translatable("cold_sweat.config.fire_resistance.name").append(": ").append(ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? on : off),
+                () -> Component.translatable("cold_sweat.config.fire_resistance.name").append(": ").append(ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? ON : OFF),
                 button -> ConfigSettings.FIRE_RESISTANCE_ENABLED.set(!ConfigSettings.FIRE_RESISTANCE_ENABLED.get()),
                 true, true, false, Component.translatable("cold_sweat.config.fire_resistance.desc"));
 
         this.addButton("require_thermometer", Side.RIGHT,
-                () -> Component.translatable("cold_sweat.config.require_thermometer.name").append(": ").append(ConfigSettings.REQUIRE_THERMOMETER.get() ? on : off),
+                () -> Component.translatable("cold_sweat.config.require_thermometer.name").append(": ").append(ConfigSettings.REQUIRE_THERMOMETER.get() ? ON : OFF),
                 button -> ConfigSettings.REQUIRE_THERMOMETER.set(!ConfigSettings.REQUIRE_THERMOMETER.get()),
                 true, true, false, Component.translatable("cold_sweat.config.require_thermometer.desc"));
 
         this.addButton("damage_scaling", Side.RIGHT,
-                () -> Component.translatable("cold_sweat.config.damage_scaling.name").append(": ").append(ConfigSettings.DAMAGE_SCALING.get() ? on : off),
+                () -> Component.translatable("cold_sweat.config.damage_scaling.name").append(": ").append(ConfigSettings.DAMAGE_SCALING.get() ? ON : OFF),
                 button -> ConfigSettings.DAMAGE_SCALING.set(!ConfigSettings.DAMAGE_SCALING.get()),
                 true, true, false, Component.translatable("cold_sweat.config.damage_scaling.desc"));
     }
 
     @Override
     public void onClose()
-    {
-        ConfigScreen.saveConfig();
+    {   ConfigScreen.saveConfig();
         super.onClose();
     }
 }
