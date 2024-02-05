@@ -148,22 +148,4 @@ public class SoulStalkBlock extends Block implements IPlantable
     {   BlockState below = level.getBlockState(pos.below());
         return below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) || below.getBlock() == this;
     }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-        {   return drops;
-        }
-
-        int section = state.getValue(SECTION);
-        if (section == 2 || section == 3)
-        {   drops.add(new ItemStack(ModItems.SOUL_SPROUT, 1));
-        }
-        if (section != 0 && section != 3)
-        {   drops.add(new ItemStack(Items.STICK, new Random().nextInt(3)));
-        }
-        return drops;
-    }
 }

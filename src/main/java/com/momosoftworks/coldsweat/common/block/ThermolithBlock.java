@@ -73,15 +73,6 @@ public class ThermolithBlock extends Block implements EntityBlock
     {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(64);
     }
 
-    @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
-    }
-
     static void calculateFacingShapes(VoxelShape shape)
     {   for (Direction direction : Direction.values())
         {   SHAPES.put(direction, CSMath.rotateShape(direction, shape));
