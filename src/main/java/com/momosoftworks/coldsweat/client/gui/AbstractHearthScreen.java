@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -98,7 +99,11 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   this.renderBackground(ps);
         super.render(ps, mouseX, mouseY, partialTicks);
         this.renderTooltip(ps, mouseX, mouseY);
-        this.children().forEach(child -> child.changeFocus(false));
+        this.children().forEach(child ->
+        {
+            if (child instanceof AbstractWidget widget)
+                widget.setFocused(false);
+        });
     }
 
     @Override

@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,6 +44,19 @@ public abstract class AbstractConfigPage extends Screen
     public void mouseMoved(double mouseX, double mouseY)
     {   MOUSE_STILL_TIMER = 0;
         super.mouseMoved(mouseX, mouseY);
+    }
+
+    @SubscribeEvent
+    public static void onMouseClicked(ScreenEvent.MouseButtonPressed event)
+    {
+        if (Minecraft.getInstance().screen instanceof AbstractConfigPage screen)
+        {   screen.children().forEach(child ->
+            {
+                if (child instanceof AbstractWidget widget && !widget.isMouseOver(event.getMouseX(), event.getMouseY()))
+                {   widget.setFocused(false);
+                }
+            });
+        }
     }
 
     private final Screen parentScreen;
@@ -354,7 +368,7 @@ public abstract class AbstractConfigPage extends Screen
                 {   ConfigSettings.DIFFICULTY.set(4);
                 }
                 setImageX((ImageButton) button, hide.get());
-                button.changeFocus(false);
+                button.setFocused(false);
             });
             hide.get();
             setImageX(hideButton, hide.get());
@@ -483,8 +497,8 @@ public abstract class AbstractConfigPage extends Screen
         }
         this.children().forEach(child ->
         {
-            if (!(child instanceof EditBox))
-                child.changeFocus(false);
+            if (!(child instanceof EditBox) && child instanceof AbstractWidget widget)
+                widget.setFocused(false);
         });
     }
 
