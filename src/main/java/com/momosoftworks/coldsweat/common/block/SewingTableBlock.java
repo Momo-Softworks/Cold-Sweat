@@ -60,16 +60,6 @@ public class SewingTableBlock extends Block implements MenuProvider
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
-    {   List<ItemStack> drops = super.getDrops(state, builder);
-        if (!drops.isEmpty())
-            return drops;
-        drops.add(new ItemStack(this, 1));
-        return drops;
-    }
-
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState();
