@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
@@ -31,8 +32,7 @@ public class SmokestackBlock extends Block
 
     @Override
     public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
-    {
-        return true;
+    {   return true;
     }
 
     @Override
@@ -41,6 +41,6 @@ public class SmokestackBlock extends Block
     }
 
     public static Item.Properties getItemProperties()
-    {   return new Item.Properties();
+    {   return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
     }
 }

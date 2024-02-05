@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,19 +27,12 @@ public class MinecartInsulationBlock extends Block
                 .strength(0f, 0f);
     }
 
-    public static Item.Properties getItemProperties()
-    {
-        return new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT);
-    }
-
     public Item asItem()
-    {
-        return ModItems.MINECART_INSULATION;
+    {   return ModItems.MINECART_INSULATION;
     }
 
     public MinecartInsulationBlock(Block.Properties properties)
-    {
-        super(properties);
+    {   super(properties);
         this.registerDefaultState(this.defaultBlockState());
     }
 
@@ -50,13 +42,12 @@ public class MinecartInsulationBlock extends Block
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState();
+    public BlockState getStateForPlacement(BlockPlaceContext context)
+    {   return this.defaultBlockState();
     }
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos blockPos, BlockPos otherBlockPos)
-    {
-        return Blocks.AIR.defaultBlockState();
+    {   return Blocks.AIR.defaultBlockState();
     }
 }
