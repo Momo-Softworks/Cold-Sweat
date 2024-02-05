@@ -31,6 +31,7 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     @Override
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {   RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.setShaderTexture(0, HEARTH_GUI);
         int x = (this.width - this.getXSize()) / 2;
         int y = (this.height - this.getYSize()) / 2;
         this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
