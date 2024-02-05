@@ -35,6 +35,7 @@ public class ColdSweatGroup extends ItemGroup
         ModItems.HEARTH.fillItemCategory(this, items);
         ModItems.BOILER.fillItemCategory(this, items);
         ModItems.ICEBOX.fillItemCategory(this, items);
+        ModItems.SMOKESTACK.fillItemCategory(this, items);
         ModItems.SEWING_TABLE.fillItemCategory(this, items);
         ModItems.HOGLIN_HEADPIECE.fillItemCategory(this, items);
         ModItems.HOGLIN_TUNIC.fillItemCategory(this, items);
