@@ -1,12 +1,12 @@
 {
 	"textures": {
-		"side": "cold_sweat:blocks/thermolith_side",
-		"back": "cold_sweat:blocks/thermolith_back_on",
-		"top": "cold_sweat:blocks/thermolith_top_on",
-		"front": "cold_sweat:blocks/thermolith_front_on",
-		"bottom": "cold_sweat:blocks/thermolith_bottom",
-		"head": "cold_sweat:blocks/thermolith_head_on",
-		"particle": "cold_sweat:blocks/thermolith_side"
+		"side": "cold_sweat:block/thermolith_side",
+		"back": "cold_sweat:block/thermolith_back_on",
+		"top": "cold_sweat:block/thermolith_top_on",
+		"front": "cold_sweat:block/thermolith_front_on",
+		"bottom": "cold_sweat:block/thermolith_bottom",
+		"head": "cold_sweat:block/thermolith_head_on",
+		"particle": "cold_sweat:block/thermolith_side"
 	},
 	"elements": [
 		{

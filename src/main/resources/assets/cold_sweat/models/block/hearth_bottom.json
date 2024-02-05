@@ -1,12 +1,12 @@
 {
 	"texture_size": [64, 64],
 	"textures": {
-		"2": "cold_sweat:blocks/hearth_side",
-		"3": "cold_sweat:blocks/hearth_top",
-		"4": "cold_sweat:blocks/hearth_front",
-		"5": "cold_sweat:blocks/hearth_bottom",
-		"hearth_grate": "cold_sweat:blocks/hearth_grate",
-		"particle": "cold_sweat:blocks/hearth_front"
+		"2": "cold_sweat:block/hearth_side",
+		"3": "cold_sweat:block/hearth_top",
+		"4": "cold_sweat:block/hearth_front",
+		"5": "cold_sweat:block/hearth_bottom",
+		"hearth_grate": "cold_sweat:block/hearth_grate",
+		"particle": "cold_sweat:block/hearth_front"
 	},
 	"elements": [
 		{

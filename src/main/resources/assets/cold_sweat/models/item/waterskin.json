@@ -2,6 +2,6 @@
   "parent": "item/generated",
   "textures":
   {
-    "layer0": "cold_sweat:items/waterskin"
+    "layer0": "cold_sweat:item/waterskin"
   }
 }

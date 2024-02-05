@@ -1,10 +1,10 @@
 {
 	"ambientocclusion": false,
 	"textures": {
-		"0": "cold_sweat:blocks/soul_stalk_bud",
-		"1": "cold_sweat:blocks/soul_stalk_bud_inner",
-		"2": "cold_sweat:blocks/soul_stalk",
-		"particle": "cold_sweat:blocks/soul_stalk_bud"
+		"0": "cold_sweat:block/soul_stalk_bud",
+		"1": "cold_sweat:block/soul_stalk_bud_inner",
+		"2": "cold_sweat:block/soul_stalk",
+		"particle": "cold_sweat:block/soul_stalk_bud"
 	},
 	"elements": [
 		{

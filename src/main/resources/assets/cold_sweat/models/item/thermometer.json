@@ -2,9 +2,9 @@
   "parent": "item/generated",
   "textures":
   {
-    "layer0": "cold_sweat:items/thermometer/thermometer",
-    "layer1": "cold_sweat:items/thermometer/thermometer_level_0",
-    "layer2": "cold_sweat:items/thermometer/thermometer_frozen_3"
+    "layer0": "cold_sweat:item/thermometer/thermometer",
+    "layer1": "cold_sweat:item/thermometer/thermometer_level_0",
+    "layer2": "cold_sweat:item/thermometer/thermometer_frozen_3"
   },
   "overrides":
   [

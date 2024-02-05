@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cross",
   "textures": {
-    "cross": "cold_sweat:blocks/soul_stalk_sprouts"
+    "cross": "cold_sweat:block/soul_stalk_sprouts"
   },
   "render_type": "cutout"
 }
