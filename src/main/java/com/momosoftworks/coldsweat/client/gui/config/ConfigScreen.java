@@ -2,9 +2,11 @@ package com.momosoftworks.coldsweat.client.gui.config;
 
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
+import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageThree;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageTwo;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,8 +16,10 @@ import net.minecraftforge.fml.common.Mod;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
@@ -34,24 +38,15 @@ public class ConfigScreen
     public static int MOUSE_X = 0;
     public static int MOUSE_Y = 0;
 
-    static List<Class<? extends AbstractConfigPage>> PAGES = Arrays.asList(ConfigPageOne.class, ConfigPageTwo.class);
+    static List<Function<Screen, AbstractConfigPage>> PAGES = new ArrayList<>(Arrays.asList(ConfigPageOne::new, ConfigPageTwo::new, ConfigPageThree::new));
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = PAGES.size() - 1;
+    public static int CURRENT_PAGE = 0;
 
     public static final Supplier<Integer> SHIFT_AMOUNT = () -> Screen.hasShiftDown() && Screen.hasControlDown() ? 100 : Screen.hasShiftDown() ? 10 : 1;
 
     public static Screen getPage(int index, Screen parentScreen)
-    {
-        index = Math.max(FIRST_PAGE, Math.min(LAST_PAGE, index));
-        try
-        {
-            return PAGES.get(index).getConstructor(Screen.class).newInstance(parentScreen);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
+    {   return PAGES.get(CSMath.clamp(index, FIRST_PAGE, LAST_PAGE)).apply(parentScreen);
     }
 
     public static void saveConfig()

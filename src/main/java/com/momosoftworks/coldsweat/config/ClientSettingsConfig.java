@@ -57,7 +57,7 @@ public class ClientSettingsConfig
             tempSmoothing = BUILDER
                     .comment("The amount of smoothing applied to gauges in the UI",
                              "A value of 1 has no smoothing")
-                    .defineInRange("Temperature Smoothing", 20, 1.0, Integer.MAX_VALUE);
+                    .defineInRange("Temperature Smoothing", 10, 1.0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("UI Options");
@@ -279,6 +279,10 @@ public class ClientSettingsConfig
     }
     public void setWorldGaugeEnabled(boolean enabled)
     {   worldGaugeEnabled.set(enabled);
+    }
+
+    public void setTempSmoothing(double smoothing)
+    {   tempSmoothing.set(smoothing);
     }
 
 
