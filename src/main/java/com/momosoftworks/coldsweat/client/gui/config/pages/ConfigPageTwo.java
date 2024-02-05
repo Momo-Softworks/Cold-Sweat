@@ -86,7 +86,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isBodyIconEnabled();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.temp_icon_location.desc"),
-                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.DARK_GRAY));
+                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_readout_location.name"),
@@ -101,7 +101,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isBodyReadoutEnabled();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.temp_readout_location.desc"),
-                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.DARK_GRAY));
+                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, Component.translatable("cold_sweat.config.world_temp_location.name"),
                 amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
@@ -115,7 +115,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isWorldGaugeEnabled();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.world_temp_location.desc"),
-                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.DARK_GRAY));
+                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> Component.translatable("cold_sweat.config.custom_hotbar.name").append(": ").append(clientConfig.customHotbarEnabled() ? ON : OFF),
