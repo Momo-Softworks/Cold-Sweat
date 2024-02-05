@@ -137,10 +137,9 @@ public class InsulationTooltip extends Tooltip
 
         if (slots > 0)
         {
+            // background
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
-            {
-                // background
-                AbstractGui.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 24, 32);
+            {   AbstractGui.blit(poseStack, x + 7 + i*6, y + 1, 401, 0, 0, 6, 4, 32, 24);
             }
 
             for (int i = 0; i < slots; i++)
@@ -197,9 +196,9 @@ public class InsulationTooltip extends Tooltip
             if (drawSign)
             {
                 if (isNegative)
-                    AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 24, 32);
-                else
-                    AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
+                {   AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 24, 32);
+                }
+                else AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
             }
         }
     }

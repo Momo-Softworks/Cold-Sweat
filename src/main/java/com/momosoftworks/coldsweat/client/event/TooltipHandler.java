@@ -24,10 +24,7 @@ import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
@@ -36,10 +33,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -55,8 +49,11 @@ public class TooltipHandler
 
         // Get the index at which the tooltip should be inserted
         int tooltipIndex = Math.min(1, event.getToolTip().size() - 1);
-        while (!event.getToolTip().get(tooltipIndex).equals(stack.getDisplayName()))
-        {   tooltipIndex++;
+        ITextComponent line;
+        while (!(line = event.getToolTip().get(tooltipIndex)).getString().isEmpty()
+        && !line.getString().equals(stack.getHoverName().getString()))
+        {
+            tooltipIndex++;
             if (tooltipIndex >= event.getToolTip().size())
             {   tooltipIndex = Math.min(1, event.getToolTip().size());
                 break;
