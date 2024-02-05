@@ -82,7 +82,7 @@ public class BiomeTempModifier extends TempModifier
                     double biomeTemp = CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
                               // Altitude calculation
                                + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, level.getSeaLevel(), level.getMaxBuildHeight());
-                    if (CompatManager.isPrimalWinterLoaded())// && holder.is(BiomeTags.IS_OVERWORLD))
+                    if (CompatManager.isPrimalWinterLoaded() && holder.is(BiomeTags.IS_OVERWORLD))
                     {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
                     }
                     worldTemp += biomeTemp;
