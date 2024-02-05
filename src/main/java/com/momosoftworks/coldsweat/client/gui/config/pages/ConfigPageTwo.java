@@ -17,26 +17,14 @@ import javax.annotation.Nullable;
 
 public class ConfigPageTwo extends AbstractConfigPage
 {
-    private final String ON;
-    private final String OFF;
-
     public ConfigPageTwo(Screen parentScreen)
-    {
-        super(parentScreen);
-        ON = DialogTexts.OPTION_ON.getString();
-        OFF = DialogTexts.OPTION_OFF.getString();
-    }
-
-    @Override
-    public int index()
-    {
-        return 1;
+    {   super(parentScreen);
     }
 
     @Override
     public ITextComponent sectionOneTitle()
     {
-        return new TranslationTextComponent("cold_sweat.config.section.other");
+        return new TranslationTextComponent("cold_sweat.config.section.preference");
     }
 
     @Nullable
@@ -59,23 +47,11 @@ public class ConfigPageTwo extends AbstractConfigPage
                              input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
                              false, false, true, new TranslationTextComponent("cold_sweat.config.temp_offset.desc"));
 
-        // Enable Grace Period
-        this.addButton("grace_toggle", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.grace_period.name").append(": ").append(ConfigSettings.GRACE_ENABLED.get() ? ON : OFF),
-                button ->
-                {
-                    ConfigSettings.GRACE_ENABLED.set(!ConfigSettings.GRACE_ENABLED.get());
-
-                    button.setMessage(new StringTextComponent(new TranslationTextComponent("cold_sweat.config.grace_period.name").getString() + ": "
-                            + (ConfigSettings.GRACE_ENABLED.get() ? ON : OFF)));
-                },
-                true, false, false, new TranslationTextComponent("cold_sweat.config.grace_period.desc"));
-
-        // Grace Period Length
-        this.addDecimalInput("grace_length", Side.LEFT, new TranslationTextComponent("cold_sweat.config.grace_period_length.name"),
-                value -> ConfigSettings.GRACE_LENGTH.set(value.intValue()),
-                input -> input.setValue(ConfigSettings.GRACE_LENGTH.get() + ""),
-                true, false, false, new TranslationTextComponent("cold_sweat.config.grace_period_length.desc_1"),
-                            new TranslationTextComponent("cold_sweat.config.grace_period_length.desc_2").withStyle(TextFormatting.DARK_GRAY));
+        // Temp Smoothing
+        this.addDecimalInput("temp_smoothing", Side.LEFT, new TranslationTextComponent("cold_sweat.config.temp_smoothing.name"),
+                             value -> clientConfig.setTempSmoothing(value),
+                             input -> input.setValue(String.valueOf(clientConfig.getTempSmoothing())),
+                             false, false, true, new TranslationTextComponent("cold_sweat.config.temp_smoothing.desc"));
 
         // Hearth Debug
         this.addButton("hearth_debug", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.hearth_debug.name").append(": ").append(clientConfig.isHearthDebugEnabled() ? ON : OFF),
@@ -114,7 +90,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isBodyIconEnabled();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_icon_location.desc"),
-                           new TranslationTextComponent("cold_sweat.config.offset_shift.name"));
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_readout_location.name"),
@@ -128,8 +104,8 @@ public class ConfigPageTwo extends AbstractConfigPage
                 {   clientConfig.setBodyReadoutEnabled(!clientConfig.isBodyReadoutEnabled());
                     return clientConfig.isBodyReadoutEnabled();
                 },
-                    false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_readout_location.desc"),
-                           new TranslationTextComponent("cold_sweat.config.offset_shift.name"));
+                false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_readout_location.desc"),
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.world_temp_location.name"),
                 amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
@@ -143,7 +119,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                     return clientConfig.isWorldGaugeEnabled();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.world_temp_location.desc"),
-                           new TranslationTextComponent("cold_sweat.config.offset_shift.name"));
+                                          new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.DARK_GRAY));
 
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").append(": ").append(clientConfig.customHotbarEnabled() ? ON : OFF),
