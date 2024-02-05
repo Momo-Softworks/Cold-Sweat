@@ -58,9 +58,13 @@ public class TooltipHandler
         int tooltipIndex = Math.min(1, event.getTooltipElements().size() - 1);
         Optional<FormattedText> line;
         while ((line = event.getTooltipElements().get(tooltipIndex).left()).isPresent()
-        && !line.get().equals(stack.getDisplayName()))
-        {   tooltipIndex++;
-            if (tooltipIndex >= event.getTooltipElements().size()) return;
+        && !line.get().getString().equals(stack.getHoverName().getString()))
+        {
+            tooltipIndex++;
+            if (tooltipIndex >= event.getTooltipElements().size())
+            {   tooltipIndex = Math.min(1, event.getTooltipElements().size());
+                break;
+            }
         }
 
         Pair<Double, Double> itemInsul = null;

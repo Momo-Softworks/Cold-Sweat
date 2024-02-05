@@ -135,10 +135,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         if (slots > 0)
         {
+            // background
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
-            {
-                // background
-                GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 0, 0, 0, 6, 4, 32, 24);
+            {   GuiComponent.blit(poseStack, x + 7 + i*6, y + 1, 401, 0, 0, 6, 4, 32, 24);
             }
 
             for (int i = 0; i < slots; i++)
@@ -157,13 +156,13 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     cellU = factor < 0 ? 6 : 18;
 
                     // Draw base green underneath
-                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 12, cellV, 6, 4, 32, 24);
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 401, 12, cellV, 6, 4, 32, 24);
 
                     // Draw either hot/cold texture ontop with alpha
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 401, cellU, cellV, 6, 4, 32, 24);
                     RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                     RenderSystem.disableBlend();
                 }
@@ -176,17 +175,17 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                             : Math.abs(cold) > Math.abs(hot) ? 12
                             // hot
                             : 18;
-                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, cellU, cellV, 6, 4, 32, 24);
+                    GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 401, cellU, cellV, 6, 4, 32, 24);
                 }
             }
 
             // border
             for (int i = 0; i < Math.max(armorSlots, slots); i++)
             {   boolean end = i == Math.max(armorSlots, slots) - 1;
-                GuiComponent.blit(poseStack, x + 7 + i*6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+                GuiComponent.blit(poseStack, x + 7 + i*6, y, 401, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
             }
             // icon
-            GuiComponent.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 24);
+            GuiComponent.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 32, 24);
 
             this.width += slots * 6 + 12;
 
@@ -194,9 +193,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             if (drawSign)
             {
                 if (isNegative)
-                    GuiComponent.blit(poseStack, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
-                else
-                    GuiComponent.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+                {   GuiComponent.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 32, 24);
+                }
+                else GuiComponent.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 32, 24);
             }
         }
     }

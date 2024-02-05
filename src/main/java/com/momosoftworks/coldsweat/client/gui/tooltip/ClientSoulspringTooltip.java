@@ -47,11 +47,11 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
-        GuiComponent.blit(poseStack, x, y, 0, 0, 0, 30, 8, 30, 34);
-        GuiComponent.blit(poseStack, x, y, 0, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y, 401, 0, 0, 30, 8, 30, 34);
+        GuiComponent.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
         if (Screen.hasShiftDown())
         {
-            GuiComponent.blit(poseStack, x + 34, y, 0, 0, 24, 16, 10, 30, 34);
+            GuiComponent.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 30, 34);
 
             int i = 0;
             for (Item item : ConfigSettings.LAMP_FUEL_ITEMS.get().keySet())
