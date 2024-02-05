@@ -368,7 +368,6 @@ public abstract class AbstractConfigPage extends Screen
                 {   ConfigSettings.DIFFICULTY.set(4);
                 }
                 setImageX((ImageButton) button, hide.get());
-                button.setFocused(false);
             });
             hide.get();
             setImageX(hideButton, hide.get());
@@ -495,11 +494,6 @@ public abstract class AbstractConfigPage extends Screen
                 break;
             }
         }
-        this.children().forEach(child ->
-        {
-            if (!(child instanceof EditBox) && child instanceof AbstractWidget widget)
-                widget.setFocused(false);
-        });
     }
 
     @Override
