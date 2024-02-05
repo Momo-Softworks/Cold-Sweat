@@ -54,7 +54,7 @@ public class SewingContainer extends Container
         }
 
         public boolean isEmpty()
-        {   return stackList.stream().allMatch(ItemStack::isEmpty);
+        {   return !stackList.stream().anyMatch(stack -> !stack.isEmpty());
         }
 
         public ItemStack getItem(int index)
@@ -118,13 +118,14 @@ public class SewingContainer extends Container
             public ItemStack onTake(PlayerEntity player, ItemStack stack)
             {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
+
                 return stack;
             }
 
             @Override
             public void setChanged()
             {   super.setChanged();
-                SewingContainer.this.testForRecipe();
+                TaskScheduler.schedule(SewingContainer.this::testForRecipe, 0);
             }
         });
 
@@ -141,13 +142,14 @@ public class SewingContainer extends Container
             public ItemStack onTake(PlayerEntity player, ItemStack stack)
             {   super.onTake(player, stack);
                 SewingContainer.this.takeInput();
+
                 return stack;
             }
 
             @Override
             public void setChanged()
             {   super.setChanged();
-                SewingContainer.this.testForRecipe();
+                TaskScheduler.schedule(SewingContainer.this::testForRecipe, 0);
             }
         });
 
@@ -156,8 +158,7 @@ public class SewingContainer extends Container
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {
-                return false;
+            {   return false;
             }
 
             @Override
@@ -167,7 +168,7 @@ public class SewingContainer extends Container
                 SewingContainer.this.takeOutput(stack);
 
                 if (!SewingContainer.this.playerInventory.player.level.isClientSide)
-                {   TaskScheduler.scheduleServer(() -> testForRecipe(), 1);
+                {   TaskScheduler.schedule(SewingContainer.this::testForRecipe, 0);
                 }
                 return stack;
             }
@@ -177,52 +178,48 @@ public class SewingContainer extends Container
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
-            {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
+            {   this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 166 - (4 - row) * 18 - 10));
             }
         }
 
         // Player Hotbar
         for (int col = 0; col < 9; col++)
-        {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
+        {   this.addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
     }
 
     public SewingContainer(int i, PlayerInventory inventory, PacketBuffer friendlyByteBuf)
     {
         this(i, inventory);
-        try {
-            this.pos = BlockPos.of(friendlyByteBuf.readLong());
-        } catch (Exception ignored) {}
+        try
+        {   this.pos = BlockPos.of(friendlyByteBuf.readLong());
+        }
+        catch (Exception ignored) {}
     }
 
     public void setItem(int index, ItemStack stack)
     {
         if (index >= sewingInventory.stackList.size())
-            return;
+        {   return;
+        }
         this.sewingInventory.setItem(index, stack);
     }
 
     public void growItem(int index, int amount)
-    {
-        ItemStack stack = this.sewingInventory.getItem(index);
+    {   ItemStack stack = this.sewingInventory.getItem(index);
         stack.grow(amount);
         this.sewingInventory.setItem(index, stack);
     }
 
     public ItemStack getItem(int index)
-    {
-        return this.sewingInventory.getItem(index);
+    {   return this.sewingInventory.getItem(index);
     }
 
     private void takeInput()
-    {
-        this.sewingInventory.setItem(2, ItemStack.EMPTY);
+    {   this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
     private void takeOutput(ItemStack stack)
-    {
-        PlayerEntity player = this.playerInventory.player;
+    {   PlayerEntity player = this.playerInventory.player;
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
@@ -273,7 +270,6 @@ public class SewingContainer extends Container
         {
             ItemInsulationCap cap = (ItemInsulationCap) iCap;
             CompoundNBT tag = cap.serializeSimple(stack);
-
             // Remove "Insulation" tag if armor has no insulation left
             if (iCap.getInsulation().isEmpty())
             {   tag.remove("Insulation");
@@ -295,7 +291,9 @@ public class SewingContainer extends Container
                 ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
                 {
                     if (!cap.getInsulation().isEmpty())
-                    {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
+                    {
+                        System.out.println(cap.getInsulationItem(cap.getInsulation().size() - 1));
+                        this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
                 });
             }
@@ -351,18 +349,17 @@ public class SewingContainer extends Container
                 this.setItem(2, processed);
             }
         }
+        this.broadcastChanges();
     }
 
-    public SewingContainer(final int windowId, final PlayerEntity player, BlockPos pos)
-    {   this(windowId, player.inventory);
+    public SewingContainer(final int windowId, final PlayerEntity playerInv, BlockPos pos)
+    {   this(windowId, playerInv.inventory);
         this.pos = pos;
     }
 
     @Override
     public void removed(PlayerEntity player)
-    {
-        super.removed(player);
-
+    {   super.removed(player);
         // Drop the contents of the input slots
         if (player instanceof ServerPlayerEntity)
         {
@@ -396,8 +393,7 @@ public class SewingContainer extends Container
         Slot slot = this.slots.get(index);
 
         if (slot.hasItem())
-        {
-            ItemStack slotItem = slot.getItem();
+        {   ItemStack slotItem = slot.getItem();
             newStack = slotItem.copy();
             if (CSMath.isWithin(index, 0, 2))
             {

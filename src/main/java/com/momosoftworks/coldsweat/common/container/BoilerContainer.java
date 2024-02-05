@@ -28,8 +28,8 @@ public class BoilerContainer extends Container
         this.addSlot(new Slot(te, 0, 80, 62)
         {
             @Override
-            public boolean mayPlace(ItemStack stack) {
-                return te.getItemFuel(stack) > 0;
+            public boolean mayPlace(ItemStack stack)
+            {   return te.getItemFuel(stack) > 0;
             }
         });
 
@@ -49,26 +49,22 @@ public class BoilerContainer extends Container
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 9; col++)
-            {
-                this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 163 - (4 - row) * 18));
+            {   this.addSlot(new Slot(playerInv, col + (9 * row) + 9, 8 + col * 18, 163 - (4 - row) * 18));
             }
         }
 
         // Player Hotbar
         for (int col = 0; col < 9; col++)
-        {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
+        {   this.addSlot(new Slot(playerInv, col, 8 + col * 18, 149));
         }
     }
 
     public BoilerContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data)
-    {
-        this(windowId, playerInv, getTileEntity(playerInv, data));
+    {   this(windowId, playerInv, getTileEntity(playerInv, data));
     }
 
     public int getFuel()
-    {
-        return this.te.getFuel();
+    {   return this.te.getFuel();
     }
 
 
@@ -77,17 +73,16 @@ public class BoilerContainer extends Container
         Objects.requireNonNull(playerInv, "Player inventory cannot be null");
         Objects.requireNonNull(data, "PacketBuffer inventory cannot be null");
         final TileEntity te = playerInv.player.level.getBlockEntity(data.readBlockPos());
+
         if (te instanceof BoilerBlockEntity)
-        {
-            return (BoilerBlockEntity) te;
+        {   return (BoilerBlockEntity) te;
         }
         throw new IllegalStateException("Tile Entity is not correct");
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player)
-    {
-        return player.distanceToSqr(Vector3d.atCenterOf(te.getBlockPos())) <= 64.0D;
+    public boolean stillValid(PlayerEntity playerIn)
+    {   return playerIn.distanceToSqr(this.te.getBlockPos().getX(), this.te.getBlockPos().getY(), this.te.getBlockPos().getZ()) <= 64.0D;
     }
 
     @Override
@@ -144,9 +139,7 @@ public class BoilerContainer extends Container
             if (itemstack1.isEmpty())
             {   slot.set(ItemStack.EMPTY);
             }
-            else
-            {   slot.setChanged();
-            }
+            else slot.setChanged();
 
             slot.onTake(player, itemstack1);
         }
