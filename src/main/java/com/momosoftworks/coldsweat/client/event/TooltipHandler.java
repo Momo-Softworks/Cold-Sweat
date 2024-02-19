@@ -221,7 +221,7 @@ public class TooltipHandler
             if (player != null && inventoryScreen.getSlotUnderMouse() != null
                     && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
             {
-                float fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getFloat("fuel");
+                double fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
                 ItemStack carriedStack = player.inventory.getCarried();
 
                 if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
