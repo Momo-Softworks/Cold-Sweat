@@ -470,7 +470,7 @@ public class WorldSettingsConfig
         BUILDER.push("Hearth");
         hearthEffect = BUILDER
                 .comment("How strong the hearth is")
-                .defineInRange("Hearth Strength", 0.5, 0, 1.0);
+                .defineInRange("Hearth Strength", 0.75, 0, 1.0);
         hearthSpreadWhitelist = BUILDER
                 .comment("List of additional blocks that the hearth can spread through",
                          "Use this list if the hearth isn't spreading through particular blocks that it should")
