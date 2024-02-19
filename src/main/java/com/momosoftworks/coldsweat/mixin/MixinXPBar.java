@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,7 +26,7 @@ public class MixinXPBar
     public void renderExperienceBar1(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   poseStack.translate(0.0D, 4.0D, 0.0D);
         }
     }
@@ -42,7 +43,7 @@ public class MixinXPBar
     public void renderExperienceBar2(PoseStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   poseStack.translate(0.0D, -4.0D, 0.0D);
         }
     }
@@ -58,7 +59,7 @@ public class MixinXPBar
                 ))
         public void renderItemNamePre(PoseStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   matrixStack.translate(0, -4, 0);
             }
         }
@@ -71,7 +72,7 @@ public class MixinXPBar
                 ))
         public void renderItemNamePost(PoseStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   matrixStack.translate(0, 4, 0);
             }
         }

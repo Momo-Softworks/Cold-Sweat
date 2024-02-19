@@ -65,19 +65,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
-    @Nonnull
-    @Override
-    public CompoundTag getUpdateTag()
-    {   CompoundTag tag = super.getUpdateTag();
-        tag.putInt("Fuel", this.getFuel());
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag)
-    {   this.setFuel(tag.getInt("Fuel"));
-    }
-
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
     {   handleUpdateTag(pkt.getTag());
@@ -126,7 +113,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
             // Cool down waterskins
-            if (ticksExisted % 20 == 0)
+            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
                 for (int i = 1; i < 10; i++)
@@ -135,8 +122,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
-                    {
-                        hasItemStacks = true;
+                    {   hasItemStacks = true;
                         stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
                     }
                 }
@@ -184,8 +170,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
         if (!shouldUseColdFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.isWithin(temp, min, max))
@@ -301,32 +287,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    public void load(CompoundTag tag)
-    {   super.load(tag);
-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("Fuel"));
-    }
-
-    @Override
-    public void saveAdditional(CompoundTag tag)
-    {   super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, this.items);
-        tag.putInt("Fuel", this.getFuel());
-    }
-
-    @Override
     public int getContainerSize()
     {   return 10;
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int count)
-    {   ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
-        if (!itemstack.isEmpty())
-        {   this.setChanged();
-        }
-        return itemstack;
     }
 
     @Override

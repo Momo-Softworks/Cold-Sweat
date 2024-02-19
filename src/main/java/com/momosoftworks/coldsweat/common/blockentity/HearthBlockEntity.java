@@ -11,7 +11,6 @@ import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
@@ -165,7 +164,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         BlockPos pos = event.getPosition();
         Level level = event.getLevel();
         if (level == this.level
-        && CSMath.withinCube(pos, this.getBlockPos(), this.getMaxRange())
+        && CSMath.withinCubeDistance(pos, this.getBlockPos(), this.getMaxRange())
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {   this.sendBlockUpdate();
         }
@@ -389,7 +388,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // The origin of the path is usually the hearth's position,
                 // but if it's spreading through Create pipes then the origin is the end of the pipe
                 if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
-                && CSMath.withinCube(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
+                && CSMath.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
                 {
                     /*
                      Spreading algorithm
@@ -842,19 +841,21 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     public void load(CompoundTag tag)
     {   super.load(tag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        this.handleUpdateTag(tag);
         ContainerHelper.loadAllItems(tag, this.items);
+        this.loadEffects(tag);
         this.coldFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel"));
         this.hotFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel"));
+        this.insulationLevel = tag.getInt("InsulationLevel");
     }
 
     @Override
     public void saveAdditional(CompoundTag tag)
     {   super.saveAdditional(tag);
-        tag.merge(this.getUpdateTag());
         ContainerHelper.saveAllItems(tag, this.items);
+        saveEffects(tag);
         tag.put("ColdFuel", this.coldFuel.writeToNBT(new CompoundTag()));
         tag.put("HotFuel", this.hotFuel.writeToNBT(new CompoundTag()));
+        tag.putInt("InsulationLevel", this.insulationLevel);
     }
 
     void saveEffects(CompoundTag tag)
