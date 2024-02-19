@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "#cold_sweat:boiler_valid",
+    "minecraft:potion",
+    {
+      "id": "thirst:terracotta_water_bowl",
+      "required": false
+    },
+    {
+      "id": "toughasnails:water_canteen",
+      "required": false
+    },
+    {
+      "id": "toughasnails:dirty_water_canteen",
+      "required": false
+    },
+    {
+      "id": "toughasnails:purified_water_canteen",
+      "required": false
+    },
+    {
+      "id": "toughasnails:dirty_water_bottle",
+      "required": false
+    },
+    {
+      "id": "toughasnails:purified_water_bottle",
+      "required": false
+    }
+  ]
+}

@@ -11,21 +11,20 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -44,7 +43,6 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,31 +61,14 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
-    @Nonnull
-    @Override
-    public CompoundTag getUpdateTag()
-    {
-        CompoundTag tag = super.getUpdateTag();
-        tag.putInt("Fuel", this.getFuel());
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag)
-    {
-        this.setHotFuel(tag.getInt("Fuel"), true);
-    }
-
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
-    {
-        handleUpdateTag(pkt.getTag());
+    {   handleUpdateTag(pkt.getTag());
     }
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket()
-    {
-        return ClientboundBlockEntityDataPacket.create(this);
+    {   return ClientboundBlockEntityDataPacket.create(this);
     }
 
     private void sendUpdatePacket()
@@ -125,20 +106,35 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
         {
             // Set state to lit
             if (!state.getValue(BoilerBlock.LIT))
-                level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+            }
 
             // Warm up waterskins
-            if (ticksExisted % 20 == 0)
+            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
+
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
-                    {   hasItemStacks = true;
-                        stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                    if (stack.is(ModItemTags.BOILER_VALID) || stack.is(ModItemTags.BOILER_PURIFIABLE))
+                    {
+                        // If item is a filled waterskin not at max temp yet
+                        if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
+                        {
+                            hasItemStacks = true;
+                            stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                        }
+                        // If item is valid for the boiler, but doesn't need to be heated and can be purified
+                        else if (ticksExisted % (200 / ConfigSettings.TEMP_RATE.get()) == 0
+                        && stack.is(ModItemTags.BOILER_PURIFIABLE)
+                        && CompatManager.isThirstLoaded() && CompatManager.getWaterPurity(stack) < 3)
+                        {
+                            hasItemStacks = true;
+                            CompatManager.setWaterPurity(stack, CompatManager.getWaterPurity(stack) + 1);
+                        }
                     }
                 }
                 if (hasItemStacks) setFuel(getFuel() - 1);
@@ -185,8 +181,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
         if (!shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.isWithin(temp, min, max))
@@ -283,32 +279,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    public void load(CompoundTag tag)
-    {   super.load(tag);
-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("Fuel"));
-    }
-
-    @Override
-    public void saveAdditional(CompoundTag tag)
-    {   super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, this.items);
-        tag.putInt("Fuel", this.getFuel());
-    }
-
-    @Override
     public int getContainerSize()
     {   return 10;
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int count)
-    {   ItemStack itemstack = ContainerHelper.removeItem(items, slot, count);
-        if (!itemstack.isEmpty())
-        {   this.setChanged();
-        }
-        return itemstack;
     }
 
     @Override

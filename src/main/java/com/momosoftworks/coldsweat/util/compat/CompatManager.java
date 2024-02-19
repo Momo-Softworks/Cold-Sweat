@@ -4,10 +4,15 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
+import dev.ghen.thirst.api.ThirstHelper;
+import dev.ghen.thirst.content.purity.ContainerWithPurity;
+import dev.ghen.thirst.content.purity.WaterPurity;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -23,6 +28,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.api.combat.Armory;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -40,13 +46,15 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean ARMOR_UNDERWEAR_LOADED = modLoaded("armorunder");
     private static final boolean BYG_LOADED = modLoaded("byg");
-    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
+    private static final boolean CREATE_LOADED = modLoaded("create", 0, 5, 1);
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
     private static final boolean WEATHER_LOADED = modLoaded("weather2");
     private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
+    private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
+    private static final boolean THIRST_LOADED = modLoaded("thirst");
 
     private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -68,11 +76,6 @@ public class CompatManager
             }
         }
         else return ModList.get().isLoaded(modID);
-    }
-
-    private static boolean modLoaded(String modID, String ver)
-    {   String[] version = ver.split("\\.");
-        return modLoaded(modID, Integer.parseInt(version[0]), Integer.parseInt(version[1]), Integer.parseInt(version[2]));
     }
 
     private static boolean modLoaded(String modID)
@@ -120,6 +123,12 @@ public class CompatManager
     }
     public static boolean isLegendaryTooltipsLoaded()
     {   return TOOLTIPS_LOADED;
+    }
+    public static boolean isPrimalWinterLoaded()
+    {   return PRIMAL_WINTER_LOADED;
+    }
+    public static boolean isThirstLoaded()
+    {   return THIRST_LOADED;
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
@@ -186,6 +195,30 @@ public class CompatManager
         }
     }
 
+    public static int getWaterPurity(ItemStack stack)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.getPurity(stack);
+        }
+        return 0;
+    }
+
+    public static ItemStack setWaterPurity(ItemStack stack, int purity)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.addPurity(stack, purity);
+        }
+        return stack;
+    }
+
+    public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.addPurity(item, pos, level);
+        }
+        return item;
+    }
+
     @SubscribeEvent
     public static void tickCurios(TickEvent.PlayerTickEvent event)
     {
@@ -208,6 +241,20 @@ public class CompatManager
                     }
                 });
             });
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ModEvents
+    {
+        @SubscribeEvent
+        public static void addThirstDrinks(FMLCommonSetupEvent event)
+        {
+            if (isThirstLoaded())
+            {   ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN, 6, 12);
+                WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
+                                                                 ModItems.FILLED_WATERSKIN.getDefaultInstance()));
+            }
         }
     }
 }
