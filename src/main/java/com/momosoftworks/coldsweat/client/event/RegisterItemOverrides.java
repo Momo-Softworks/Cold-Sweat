@@ -32,10 +32,10 @@ public class RegisterItemOverrides
         {
             ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
             {
-                if (stack.getOrCreateTag().getBoolean("isOn"))
+                if (stack.getOrCreateTag().getBoolean("Lit"))
                 {
-                    return stack.getOrCreateTag().getInt("fuel") > 43 ? 3 :
-                           stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
+                    return stack.getOrCreateTag().getInt("Fuel") > 43 ? 3 :
+                           stack.getOrCreateTag().getInt("Fuel") > 22 ? 2 : 1;
                 }
                 return 0;
             });
@@ -65,7 +65,7 @@ public class RegisterItemOverrides
                     {
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
-                            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
+                            boolean celsius = ConfigSettings.CELSIUS.get();
                             ChatFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
                                 case 0 -> ChatFormatting.WHITE;

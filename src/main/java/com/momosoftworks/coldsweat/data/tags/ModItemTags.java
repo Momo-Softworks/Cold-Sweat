@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 public class ModItemTags
 {
     public static final TagKey<Item> BOILER_VALID = createTag("boiler_valid");
+    public static final TagKey<Item> BOILER_PURIFIABLE = createTag("compat/boiler_purifiable");
     public static final TagKey<Item> ICEBOX_VALID = createTag("icebox_valid");
     public static final TagKey<Item> CHAMELEON_TAMING = createTag("chameleon/taming");
     public static final TagKey<Item> CHAMELEON_HOT = createTag("chameleon/find_hot_biomes");

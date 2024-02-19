@@ -46,8 +46,8 @@ public class ArmorInsulation
             double cold = 0;
             double hot = 0;
             double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-            double minTemp = Temperature.get(player, Temperature.Type.BURNING_POINT);
-            double maxTemp = Temperature.get(player, Temperature.Type.FREEZING_POINT);
+            double minTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
+            double maxTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
             for (ItemStack armorStack : player.getArmorSlots())
             {
                 if (armorStack.getItem() instanceof ArmorItem armorItem)

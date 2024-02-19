@@ -29,7 +29,7 @@
     "item": "cold_sweat:soulspring_lamp",
     "count": 1,
     "nbt": {
-      "fuel": 64
+      "Fuel": 64
     }
   }
 }

@@ -12,7 +12,7 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
@@ -53,7 +53,7 @@ public class HearthDebugRenderer
     public static void onLevelRendered(RenderLevelStageEvent event)
     {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES
-        && Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
+        && Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get())
         {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -194,7 +194,7 @@ public class HearthDebugRenderer
         ClientLevel level = Minecraft.getInstance().level;
         if (event.phase == TickEvent.Phase.END && level != null
         && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
-        && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
+        && ConfigSettings.HEARTH_DEBUG.get())
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {

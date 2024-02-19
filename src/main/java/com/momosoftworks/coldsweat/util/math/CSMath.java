@@ -15,9 +15,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CSMath
 {
@@ -175,6 +177,7 @@ public class CSMath
     public static double blend(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
         // as factor goes from rangeMin to rangeMax, the result goes from blendFrom to blendTo
+        // it should not matter which is greater, rangeMin or rangeMax. Same with blendFrom and blendTo
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
@@ -346,10 +349,18 @@ public class CSMath
     public static void tryCatch(Runnable runnable)
     {
         try
-        {
-            runnable.run();
+        {   runnable.run();
         }
         catch (Throwable ignored) {}
+    }
+
+    public static <T> T tryCatch(Supplier<T> supplier)
+    {
+        try
+        {   return supplier.get();
+        }
+        catch (Throwable ignored) {}
+        return null;
     }
 
     /**
@@ -387,6 +398,19 @@ public class CSMath
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    // Round the value to the nearest multiple of the given number
+    public static double roundNearest(double value, double multipleOf)
+    {   return Math.round(value / multipleOf) * multipleOf;
+    }
+
+    public static double roundDownNearest(double value, double multipleOf)
+    {   return Math.floor(value / multipleOf) * multipleOf;
+    }
+
+    public static double roundUpNearest(double value, double multipleOf)
+    {   return Math.ceil(value / multipleOf) * multipleOf;
     }
 
     public static int blendColors(int color1, int color2, float ratio)
@@ -486,8 +510,7 @@ public class CSMath
      * @return A Vec3 at the center of the given BlockPos.
      */
     public static Vec3 getCenterPos(BlockPos pos)
-    {
-        return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    {   return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
     /**
@@ -539,10 +562,19 @@ public class CSMath
         return shapeHolder[1];
     }
 
-    public static boolean withinCube(BlockPos pos1, BlockPos pos2, double maxDistance)
+    public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
     {
         return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
             && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
             && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    /**
+     * Returns an optional containing the value. If the value is NaN or null, the returned optional is empty
+     */
+    public static Optional<Double> safeDouble(Double value)
+    {   return value == null || Double.isNaN(value)
+               ? Optional.empty()
+               : Optional.of(value);
     }
 }
