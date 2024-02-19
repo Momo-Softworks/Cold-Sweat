@@ -455,7 +455,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // Air Particles
                 if (this.getLevel().isClientSide && showParticles)
                 {   Random rand = new Random();
-                    if (!(Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled()))
+                    if (!(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
                     {   this.spawnAirParticle(spX, spY, spZ, rand);
                     }
                 }
@@ -558,8 +558,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.isWithin(temp, min, max))
