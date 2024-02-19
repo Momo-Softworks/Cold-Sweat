@@ -10,7 +10,7 @@
   {
     "C":
     {
-      "item": "minecraft:cobblestone"
+      "tag": "forge:cobblestone/normal"
     },
     "S":
     {
