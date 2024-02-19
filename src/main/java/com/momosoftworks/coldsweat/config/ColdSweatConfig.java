@@ -244,81 +244,55 @@ public class ColdSweatConfig
      * Safe set methods for config values
      */
     public synchronized void setDifficulty(int value)
-    {   synchronized (difficulty)
-        {   difficulty.set(value);
-        }
+    {   difficulty.set(value);
     }
 
     public synchronized void setMaxHabitable(double temp)
-    {   synchronized (maxHabitable)
-        {   maxHabitable.set(temp);
-        }
+    {   maxHabitable.set(temp);
     }
 
     public synchronized void setMinHabitable(double temp)
-    {   synchronized (minHabitable)
-        {   minHabitable.set(temp);
-        }
+    {   minHabitable.set(temp);
     }
 
     public synchronized void setRateMultiplier(double rate)
-    {   synchronized (rateMultiplier)
-        {   rateMultiplier.set(rate);
-        }
+    {   rateMultiplier.set(rate);
     }
 
     public synchronized void setFireResistanceEnabled(boolean isEffective)
-    {   synchronized (fireResistanceEffect)
-        {   fireResistanceEffect.set(isEffective);
-        }
+    {   fireResistanceEffect.set(isEffective);
     }
 
     public synchronized void setIceResistanceEnabled(boolean isEffective)
-    {   synchronized (iceResistanceEffect)
-        {   iceResistanceEffect.set(isEffective);
-        }
+    {   iceResistanceEffect.set(isEffective);
     }
 
     public synchronized void setRequireThermometer(boolean required)
-    {   synchronized (requireThermometer)
-        {   requireThermometer.set(required);
-        }
+    {   requireThermometer.set(required);
     }
 
     public synchronized void setDamageScaling(boolean enabled)
-    {   synchronized (damageScaling)
-        {   damageScaling.set(enabled);
-        }
+    {   damageScaling.set(enabled);
     }
 
     public synchronized void setTempDamage(double damage)
-    {   synchronized (tempDamage)
-        {   tempDamage.set(damage);
-        }
+    {   tempDamage.set(damage);
     }
 
     public synchronized void setGracePeriodLength(int ticks)
-    {   synchronized (gracePeriodLength)
-        {   gracePeriodLength.set(ticks);
-        }
+    {   gracePeriodLength.set(ticks);
     }
 
     public synchronized void setGracePeriodEnabled(boolean enabled)
-    {   synchronized (gracePeriodEnabled)
-        {   gracePeriodEnabled.set(enabled);
-        }
+    {   gracePeriodEnabled.set(enabled);
     }
 
     public synchronized void setHeatstrokeFog(boolean fog)
-    {   synchronized (heatstrokeFog)
-        {   heatstrokeFog.set(fog);
-        }
+    {   heatstrokeFog.set(fog);
     }
 
     public synchronized void setFreezingHearts(boolean hearts)
-    {   synchronized (freezingHearts)
-        {   freezingHearts.set(hearts);
-        }
+    {   freezingHearts.set(hearts);
     }
 
     public synchronized void setColdKnockback(boolean knockback)

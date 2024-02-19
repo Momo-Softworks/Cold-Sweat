@@ -21,18 +21,15 @@ public class SyncConfigSettingsMessage
     UUID menuOpener;
 
     public SyncConfigSettingsMessage()
-    {
-        this(EMPTY_UUID);
+    {   this(EMPTY_UUID);
     }
 
     public SyncConfigSettingsMessage(UUID menuOpener)
-    {
-        this(ConfigSettings.encode(), menuOpener);
+    {   this(ConfigSettings.encode(), menuOpener);
     }
 
     private SyncConfigSettingsMessage(Map<String, CompoundTag> values, UUID menuOpener)
-    {
-        this.configValues = values;
+    {   this.configValues = values;
         this.menuOpener = menuOpener;
     }
 
@@ -40,19 +37,18 @@ public class SyncConfigSettingsMessage
     {
         buffer.writeUUID(message.menuOpener);
         buffer.writeInt(message.configValues.size());
+
         for (Map.Entry<String, CompoundTag> entry : message.configValues.entrySet())
-        {
-            buffer.writeUtf(entry.getKey());
+        {   buffer.writeUtf(entry.getKey());
             buffer.writeNbt(entry.getValue());
         }
     }
 
     public static SyncConfigSettingsMessage decode(FriendlyByteBuf buffer)
-    {
-        UUID openMenu = buffer.readUUID();
-
+    {   UUID openMenu = buffer.readUUID();
         int size = buffer.readInt();
         Map<String, CompoundTag> values = new HashMap<>();
+
         for (int i = 0; i < size; i++)
         {   values.put(buffer.readUtf(), buffer.readNbt());
         }

@@ -1,11 +1,14 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageThree;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageTwo;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -56,8 +59,10 @@ public class ConfigScreen
             if (!MC.isLocalServer())
                 ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
             else ConfigSettings.saveValues();
+            ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         }
         else ConfigSettings.saveValues();
+        ClientSettingsConfig.getInstance().writeAndSave();
     }
 
     @SubscribeEvent

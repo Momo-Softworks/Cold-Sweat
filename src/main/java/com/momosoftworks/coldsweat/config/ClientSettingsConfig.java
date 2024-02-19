@@ -71,22 +71,22 @@ public class ClientSettingsConfig
                     .comment("The position of the body temperature icon relative to default")
                     .defineList("Body Temperature Icon Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyIconEnabled = BUILDER
-                    .comment("Enables the body temperature icon")
-                    .define("Body Temperature Icon Enabled", true);
+                    .comment("Enables the body temperature icon above the hotbar")
+                    .define("Show Body Temperature Icon", true);
 
             bodyReadoutPos = BUILDER
                     .comment("The position of the body temperature readout relative to default")
                     .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyReadoutEnabled = BUILDER
-                    .comment("Enables the body temperature readout")
-                    .define("Body Temperature Readout Enabled", true);
+                    .comment("Enables the body temperature readout above the hotbar")
+                    .define("Show Body Temperature Readout", false);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
                     .defineList("World Temperature UI Offset", List.of(0, 0), it -> it instanceof Integer);
             worldGaugeEnabled = BUILDER
-                    .comment("Enables the world temperature gauge")
-                    .define("World Temperature UI Enabled", true);
+                    .comment("Enables the world temperature gauge next to the hotbar")
+                    .define("Show World Temperature Gauge", true);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
@@ -179,19 +179,19 @@ public class ClientSettingsConfig
     {   return tempSmoothing.get();
     }
 
-    public boolean customHotbarEnabled()
+    public boolean isCustomHotbarLayout()
     {   return customHotbarLayout.get();
     }
 
-    public boolean isIconBobbingEnabled()
+    public boolean isIconBobbing()
     {   return iconBobbing.get();
     }
 
-    public boolean isHearthDebugEnabled()
+    public boolean isHearthDebug()
     {   return hearthDebug.get();
     }
 
-    public boolean isCreativeWarningEnabled()
+    public boolean showCreativeWarning()
     {   return enableCreativeWarning.get();
     }
 
@@ -250,7 +250,7 @@ public class ClientSettingsConfig
     {   hearthDebug.set(enabled);
     }
 
-    public boolean isConfigButtonEnabled()
+    public boolean showConfigButton()
     {   return showConfigButton.get();
     }
     public List<? extends Integer> getConfigButtonPos()
@@ -263,8 +263,8 @@ public class ClientSettingsConfig
     public boolean areDistortionsEnabled()
     {   return distortionEffects.get();
     }
-    public void setDistortionsEnabled(boolean sway)
-    {   distortionEffects.set(sway);
+    public void setDistortionsEnabled(boolean enabled)
+    {   distortionEffects.set(enabled);
     }
 
     public void setCreativeWarningEnabled(boolean enabled)
@@ -285,8 +285,31 @@ public class ClientSettingsConfig
     {   tempSmoothing.set(smoothing);
     }
 
+    public synchronized void writeAndSave()
+    {   this.setCelsius(ConfigSettings.CELSIUS.get());
+        this.setTempOffset(ConfigSettings.TEMP_OFFSET.get());
+        this.setTempSmoothing(ConfigSettings.TEMP_SMOOTHING.get());
+        this.setBodyIconX(ConfigSettings.BODY_ICON_POS.get().getFirst());
+        this.setBodyIconY(ConfigSettings.BODY_ICON_POS.get().getSecond());
+        this.setBodyReadoutX(ConfigSettings.BODY_READOUT_POS.get().getFirst());
+        this.setBodyReadoutY(ConfigSettings.BODY_READOUT_POS.get().getSecond());
+        this.setWorldGaugeX(ConfigSettings.WORLD_GAUGE_POS.get().getFirst());
+        this.setWorldGaugeY(ConfigSettings.WORLD_GAUGE_POS.get().getSecond());
+        this.setCustomHotbar(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get());
+        this.setIconBobbing(ConfigSettings.ICON_BOBBING.get());
+        this.setHearthDebug(ConfigSettings.HEARTH_DEBUG.get());
+        this.setCreativeWarningEnabled(ConfigSettings.SHOW_CREATIVE_WARNING.get());
+        this.setBodyIconEnabled(ConfigSettings.BODY_ICON_ENABLED.get());
+        this.setBodyReadoutEnabled(ConfigSettings.BODY_READOUT_ENABLED.get());
+        this.setWorldGaugeEnabled(ConfigSettings.WORLD_GAUGE_ENABLED.get());
+        this.setDistortionsEnabled(ConfigSettings.DISTORTION_EFFECTS.get());
+        this.setHighContrast(ConfigSettings.HIGH_CONTRAST.get());
+        this.setConfigButtonPos(List.of(ConfigSettings.CONFIG_BUTTON_POS.get().getFirst(),
+                                        ConfigSettings.CONFIG_BUTTON_POS.get().getSecond()));
+        this.save();
+    }
 
-    public void save()
+    public synchronized void save()
     {   SPEC.save();
     }
 }
