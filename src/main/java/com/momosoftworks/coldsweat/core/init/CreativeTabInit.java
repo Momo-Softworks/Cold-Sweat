@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.registries.Registries;
@@ -22,7 +23,11 @@ public class CreativeTabInit
             {
                 list.acceptAll(List.of(
                         ModItems.WATERSKIN.getDefaultInstance(),
-                        ModItems.FILLED_WATERSKIN.getDefaultInstance(),
+                        ObjectBuilder.build(() ->
+                        {   ItemStack stack = ModItems.FILLED_WATERSKIN.getDefaultInstance();
+                            stack = CompatManager.setWaterPurity(stack, 3);
+                            return stack;
+                        }),
                         ModItems.FUR.getDefaultInstance(),
                         ModItems.HOGLIN_HIDE.getDefaultInstance(),
                         ModItems.CHAMELEON_MOLT.getDefaultInstance(),
