@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.util;
 
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
@@ -17,6 +18,7 @@ import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,7 +26,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -76,20 +77,25 @@ public class Temperature
      * Returns the player's temperature of the specified type.
      */
     public static double get(LivingEntity entity, Type type)
-    {
-        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
+    }
+
+    public static double get(LivingEntity entity, Ability type)
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getAbility(type)).orElse(0.0);
     }
 
     public static void set(LivingEntity entity, Type type, double value)
-    {
-        EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
+    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
+    }
+
+    public static void set(LivingEntity entity, Ability type, double value)
+    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setAbility(type, value);
     }
 
     public static void add(LivingEntity entity, double value, Type type)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-        {
-            cap.setTemp(type, value + cap.getTemp(type));
+        {   cap.setTemp(type, value + cap.getTemp(type));
         });
     }
 
@@ -383,7 +389,7 @@ public class Temperature
             ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
                             ? PacketDistributor.PLAYER.with(() -> player)
                             : PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-            new TemperatureSyncMessage(entity, cap.serializeTemps(), instant));
+            new TemperatureSyncMessage(entity, cap.serializeTemps().merge(cap.serializeAbilities()), instant));
         }
     }
 
@@ -407,43 +413,86 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
-     * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * <br>
      * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
      * {@link #BODY}: The sum of the player's core and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
      */
-    public enum Type
+    public enum Type implements StringRepresentable
     {
         WORLD("world"),
-        FREEZING_POINT("freezing_point"),
-        BURNING_POINT("burning_point"),
         CORE("core"),
         BASE("base"),
         BODY("body"),
         RATE("rate");
 
+        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values, Type::fromID);
+
         private final String id;
 
         Type(String id)
-        {
-            this.id = id;
+        {   this.id = id;
         }
 
-        public String getID()
-        {
-            return id;
-        }
         public static Type fromID(String id)
         {
             for (Type type : values())
             {
-                if (type.getID().equals(id))
+                if (type.getSerializedName().equals(id))
                     return type;
             }
             return null;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return id;
+        }
+    }
+
+    /**
+     * Defines all extra temperature-related abilities in Cold Sweat. <br>
+     * These are different from {@link Temperature.Type} because they do not get TempModifiers. These are mainly used for third-party stuff.
+     * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
+     * <br>
+     * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
+     * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
+     * {@link #COLD_RESISTANCE}: Resistance to cold temperature-related damage. <br>
+     * {@link #HEAT_RESISTANCE}: Resistance to heat temperature-related damage. <br>
+     * {@link #COLD_DAMPENING}: Resistance to cold temperature-related status effects. <br>
+     * {@link #HEAT_DAMPENING}: Resistance to heat temperature-related status effects. <br>
+     */
+    public enum Ability implements StringRepresentable
+    {
+        FREEZING_POINT("freezing_point"),
+        BURNING_POINT("burning_point"),
+        COLD_RESISTANCE("cold_resistance"),
+        HEAT_RESISTANCE("heat_resistance"),
+        COLD_DAMPENING("cold_dampening"),
+        HEAT_DAMPENING("heat_dampening");
+
+        public static final Codec<Ability> CODEC = StringRepresentable.fromEnum(Ability::values, Ability::fromID);
+
+        private final String id;
+
+        Ability(String id)
+        {   this.id = id;
+        }
+
+        public static Ability fromID(String id)
+        {
+            for (Ability ability : values())
+            {
+                if (ability.getSerializedName().equals(id))
+                    return ability;
+            }
+            return null;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return id;
         }
     }
 
@@ -451,11 +500,22 @@ public class Temperature
      * Units of measurement used by Cold Sweat.<br>
      * Most calculations are done in MC units, then converted to C or F when they are displayed.<br>
      */
-    public enum Units
+    public enum Units implements StringRepresentable
     {
-        F,
-        C,
-        MC
+        F("°F"),
+        C("°C"),
+        MC("MC");
+
+        private final String name;
+
+        Units(String identifier)
+        {   this.name = identifier;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
     }
 
     public record Addition(Mode mode, Order order, Predicate<TempModifier> predicate)

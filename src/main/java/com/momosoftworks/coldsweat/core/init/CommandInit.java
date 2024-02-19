@@ -1,10 +1,14 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
+import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TemperatureTypeArgument;
 import com.momosoftworks.coldsweat.common.command.impl.TempCommand;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -29,5 +33,9 @@ public class CommandInit
             {   dispatcher.register(command.getBuilder());
             }
         });
+
+        ArgumentTypes.register("temperature", TemperatureTypeArgument.class, new TemperatureTypeArgument.Serializer());
+        ArgumentTypes.register("temp_attribute", AbilityOrTempTypeArgument.class, new AbilityOrTempTypeArgument.Serializer());
+        ArgumentTypes.register("temp_modifier", TempModifierTypeArgument.class, new TempModifierTypeArgument.Serializer());
     }
 }

@@ -94,26 +94,6 @@ public class NBTHelper
     }
 
     /**
-     * Used for storing TempModifiers in the player's persistent data (NBT). <br>
-     * <br>
-     * @param type The type of TempModifier to be stored
-     * @return The NBT tag name for the given type
-     */
-    public static String getModifierTag(Temperature.Type type)
-    {
-        return switch (type)
-        {
-            case CORE  -> "coreTempModifiers";
-            case WORLD -> "worldTempModifiers";
-            case BASE  -> "baseTempModifiers";
-            case RATE  -> "rateTempModifiers";
-            case FREEZING_POINT -> "maxTempModifiers";
-            case BURNING_POINT -> "minTempModifiers";
-            default -> throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
-        };
-    }
-
-    /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
      * @param type The type of Temperature to be stored. ({@link Temperature.Type#WORLD} should only be stored when needed to prevent lag)
@@ -123,12 +103,24 @@ public class NBTHelper
     {
         return switch (type)
         {
-            case CORE  -> "coreTemp";
-            case WORLD -> "worldTemp";
-            case BASE  -> "baseTemp";
-            case FREEZING_POINT -> "maxWorldTemp";
-            case BURNING_POINT -> "minWorldTemp";
+            case CORE  -> "Core";
+            case WORLD -> "World";
+            case BASE  -> "Base";
+            case RATE  -> "Rate";
             default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
+        };
+    }
+
+    public static String getAbilityTag(Temperature.Ability ability)
+    {
+        return switch (ability)
+        {
+            case FREEZING_POINT -> "FreezingPoint";
+            case BURNING_POINT -> "BurningPoint";
+            case COLD_RESISTANCE -> "ColdResistance";
+            case HEAT_RESISTANCE -> "HeatResistance";
+            case COLD_DAMPENING -> "ColdDampening";
+            case HEAT_DAMPENING -> "HeatDampening";
         };
     }
 }

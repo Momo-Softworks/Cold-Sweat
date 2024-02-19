@@ -57,6 +57,7 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
+        CommandInit.ARGUMENTS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
@@ -95,8 +96,7 @@ public class ColdSweat
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)
-    {
-        event.register(PlayerTempCap.class);
+    {   event.register(PlayerTempCap.class);
         event.register(EntityTempCap.class);
         event.register(ItemInsulationCap.class);
         event.register(ShearableFurCap.class);

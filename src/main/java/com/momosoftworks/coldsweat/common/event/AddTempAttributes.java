@@ -26,21 +26,15 @@ public class AddTempAttributes
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) continue;
             }
             TEMPERATURE_ENABLED_ENTITIES.add(type);
-            event.add(type, ModAttributes.COLD_DAMPENING, 0.0);
-            event.add(type, ModAttributes.HEAT_DAMPENING, 0.0);
-            event.add(type, ModAttributes.BURNING_POINT_OFFSET, 0.0);
-            event.add(type, ModAttributes.FREEZING_POINT_OFFSET, 0.0);
-            event.add(type, ModAttributes.COLD_RESISTANCE, 0.0);
-            event.add(type, ModAttributes.HEAT_RESISTANCE, 0.0);
-            event.add(type, ModAttributes.CORE_BODY_TEMPERATURE_OFFSET, 0.0);
-            event.add(type, ModAttributes.BASE_BODY_TEMPERATURE_OFFSET, 0.0);
-            event.add(type, ModAttributes.WORLD_TEMPERATURE_OFFSET, 0.0);
-            // Read-only
-            event.add(type, ModAttributes.BURNING_POINT, 0.0);
-            event.add(type, ModAttributes.FREEZING_POINT, 0.0);
-            event.add(type, ModAttributes.CORE_BODY_TEMPERATURE, 0.0);
-            event.add(type, ModAttributes.BASE_BODY_TEMPERATURE, 0.0);
-            event.add(type, ModAttributes.WORLD_TEMPERATURE, 0.0);
+
+            event.add(type, ModAttributes.COLD_DAMPENING, Double.NaN);
+            event.add(type, ModAttributes.HEAT_DAMPENING, Double.NaN);
+            event.add(type, ModAttributes.COLD_RESISTANCE, Double.NaN);
+            event.add(type, ModAttributes.HEAT_RESISTANCE, Double.NaN);
+            event.add(type, ModAttributes.BURNING_POINT, Double.NaN);
+            event.add(type, ModAttributes.FREEZING_POINT, Double.NaN);
+            event.add(type, ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
+            event.add(type, ModAttributes.WORLD_TEMPERATURE, Double.NaN);
         }
     }
 
