@@ -70,7 +70,7 @@ public abstract class AbstractConfigPage extends Screen
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
-    public static Minecraft mc = Minecraft.getInstance();
+    public static Minecraft MINECRAFT = Minecraft.getInstance();
 
     static ResourceLocation TEXTURE = new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png");
 
@@ -140,7 +140,7 @@ public abstract class AbstractConfigPage extends Screen
     {
         Component label = dynamicLabel.get();
 
-        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
         int buttonX = this.width / 2;
         int xOffset = side == Side.LEFT ? -179 : 56;
         int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
@@ -199,7 +199,7 @@ public abstract class AbstractConfigPage extends Screen
                                    boolean requireOP, boolean setsCustomDifficulty, boolean clientside,
                                    Component... tooltip)
     {
-        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
         int xOffset = side == Side.LEFT ? -82 : 151;
         int yOffset = (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
         int labelOffset = font.width(label.getString()) > 90 ?
@@ -295,7 +295,7 @@ public abstract class AbstractConfigPage extends Screen
         int xOffset = side == Side.LEFT ? -97 : 136;
         int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
 
-        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
 
         int labelWidth = font.width(label.getString());
         int labelOffset = labelWidth > 84
@@ -408,7 +408,7 @@ public abstract class AbstractConfigPage extends Screen
 
         this.addRenderableWidget(new Button.Builder(
                 Component.translatable("gui.done"),
-                button -> this.close())
+                button -> this.onClose())
             .pos(this.width / 2 - BOTTOM_BUTTON_WIDTH / 2, this.height - BOTTOM_BUTTON_HEIGHT_OFFSET)
             .size(BOTTOM_BUTTON_WIDTH, 20)
             .createNarration(button -> MutableComponent.create(button.get().getContents()))
@@ -419,7 +419,7 @@ public abstract class AbstractConfigPage extends Screen
         nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE++;
-                    mc.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                    MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                 });
         if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
             this.addRenderableWidget(nextNavButton);
@@ -427,7 +427,7 @@ public abstract class AbstractConfigPage extends Screen
         prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE--;
-                    mc.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                    MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                 });
         if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
             this.addRenderableWidget(prevNavButton);
@@ -496,21 +496,6 @@ public abstract class AbstractConfigPage extends Screen
         }
     }
 
-    @Override
-    public void tick()
-    {   super.tick();
-    }
-
-    @Override
-    public boolean isPauseScreen()
-    {   return true;
-    }
-
-    public void close()
-    {   this.onClose();
-        Minecraft.getInstance().setScreen(this.parentScreen);
-    }
-
     public enum Side
     {
         LEFT,
@@ -552,5 +537,11 @@ public abstract class AbstractConfigPage extends Screen
         {   imageX.set(button, enabled ? 68 : 88);
         }
         catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onClose()
+    {   MINECRAFT.setScreen(this.parentScreen);
+        ConfigScreen.saveConfig();
     }
 }

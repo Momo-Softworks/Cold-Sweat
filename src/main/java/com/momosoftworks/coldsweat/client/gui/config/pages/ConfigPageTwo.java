@@ -1,14 +1,13 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.DrawConfigButton;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
@@ -35,112 +34,98 @@ public class ConfigPageTwo extends AbstractConfigPage
     {
         super.init();
 
-        ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
-
         // Temp Offset
         this.addDecimalInput("temp_offset", Side.LEFT, Component.translatable("cold_sweat.config.temp_offset.name"),
-                             value -> clientConfig.setTempOffset(value.intValue()),
-                             input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
+                             value -> ConfigSettings.TEMP_OFFSET.set(value.intValue()),
+                             input -> input.setValue(String.valueOf(ConfigSettings.TEMP_OFFSET.get())),
                              false, false, true, Component.translatable("cold_sweat.config.temp_offset.desc"));
 
         // Temp Smoothing
         this.addDecimalInput("temp_smoothing", Side.LEFT, Component.translatable("cold_sweat.config.temp_smoothing.name"),
-                             value -> clientConfig.setTempSmoothing(value),
-                             input -> input.setValue(String.valueOf(clientConfig.getTempSmoothing())),
+                             value -> ConfigSettings.TEMP_SMOOTHING.set(Math.max(1, value)),
+                             input -> input.setValue(String.valueOf(ConfigSettings.TEMP_SMOOTHING.get())),
                              false, false, true, Component.translatable("cold_sweat.config.temp_smoothing.desc"));
 
-        // Hearth Debug
-        this.addButton("hearth_debug", Side.LEFT, () -> Component.translatable("cold_sweat.config.hearth_debug.name").append(": ").append(clientConfig.isHearthDebugEnabled() ? ON : OFF),
+        // Distortion Effects
+        this.addButton("distortion_effects", Side.LEFT, () -> Component.translatable("cold_sweat.config.distortion.name").append(": ").append(ConfigSettings.DISTORTION_EFFECTS.get() ? ON : OFF),
                 button ->
-                {
-                    clientConfig.setHearthDebug(!clientConfig.isHearthDebugEnabled());
-                },
-                false, false, true, Component.translatable("cold_sweat.config.hearth_debug.desc"));
-
-        // Camera Sway
-        this.addButton("camera_sway", Side.LEFT, () -> Component.translatable("cold_sweat.config.distortion.name").append(": ").append(clientConfig.areDistortionsEnabled() ? ON : OFF),
-                button ->
-                {
-                    clientConfig.setDistortionsEnabled(!clientConfig.areDistortionsEnabled());
+                {   ConfigSettings.DISTORTION_EFFECTS.set(!ConfigSettings.DISTORTION_EFFECTS.get());
                 },
                 false, false, true, Component.translatable("cold_sweat.config.distortion.desc"));
 
+        // Icon Bobbing
+        this.addButton("icon_bobbing", Side.LEFT, () -> Component.translatable("cold_sweat.config.icon_bobbing.name").append(": ").append(ConfigSettings.ICON_BOBBING.get() ? ON : OFF),
+                button -> ConfigSettings.ICON_BOBBING.set(!ConfigSettings.ICON_BOBBING.get()),
+                false, false, true, Component.translatable("cold_sweat.config.icon_bobbing.desc"));
+
         // High Contrast
-        this.addButton("high_contrast", Side.LEFT, () -> Component.translatable("cold_sweat.config.high_contrast.name").append(": ").append(clientConfig.isHighContrast() ? ON : OFF),
-                button ->
-                {
-                    clientConfig.setHighContrast(!clientConfig.isHighContrast());
-                },
+        this.addButton("high_contrast", Side.LEFT, () -> Component.translatable("cold_sweat.config.high_contrast.name").append(": ").append(ConfigSettings.HIGH_CONTRAST.get() ? ON : OFF),
+                button -> ConfigSettings.HIGH_CONTRAST.set(!ConfigSettings.HIGH_CONTRAST.get()),
                 false, false, true, Component.translatable("cold_sweat.config.high_contrast.desc"));
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
+                       button ->
+                       {    DrawConfigButton.EDIT_MODE = true;
+                            this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                       },
+                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
-                amount -> clientConfig.setBodyIconX(clientConfig.getBodyIconX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setBodyIconY(clientConfig.getBodyIconY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                   ConfigSettings.BODY_ICON_POS.get().getSecond())),
+                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().getFirst(),
+                                                                   ConfigSettings.BODY_ICON_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setBodyIconX(0);
-                    clientConfig.setBodyIconY(0);
+                {   ConfigSettings.BODY_ICON_POS.set(Pair.of(0, 0));
                 },
                 () ->
-                {   clientConfig.setBodyIconEnabled(!clientConfig.isBodyIconEnabled());
-                    return clientConfig.isBodyIconEnabled();
+                {   ConfigSettings.BODY_ICON_ENABLED.set(!ConfigSettings.BODY_ICON_ENABLED.get());
+                    return ConfigSettings.BODY_ICON_ENABLED.get();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.temp_icon_location.desc"),
                                           Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_readout_location.name"),
-                amount -> clientConfig.setBodyReadoutX(clientConfig.getBodyReadoutX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setBodyReadoutY(clientConfig.getBodyReadoutY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().getSecond())),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().getFirst(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setBodyReadoutX(0);
-                    clientConfig.setBodyReadoutY(0);
+                {   ConfigSettings.BODY_READOUT_POS.set(Pair.of(0, 0));
                 },
                 () ->
-                {   clientConfig.setBodyReadoutEnabled(!clientConfig.isBodyReadoutEnabled());
-                    return clientConfig.isBodyReadoutEnabled();
+                {   ConfigSettings.BODY_READOUT_ENABLED.set(!ConfigSettings.BODY_READOUT_ENABLED.get());
+                    return ConfigSettings.BODY_READOUT_ENABLED.get();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.temp_readout_location.desc"),
-                                          Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
+                                              Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, Component.translatable("cold_sweat.config.world_temp_location.name"),
-                amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setWorldGaugeY(clientConfig.getWorldGaugeY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().getSecond())),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setWorldGaugeX(0);
-                    clientConfig.setWorldGaugeY(0);
+                {   ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(0, 0));
                 },
                 () ->
-                {   clientConfig.setWorldGaugeEnabled(!clientConfig.isWorldGaugeEnabled());
-                    return clientConfig.isWorldGaugeEnabled();
+                {   ConfigSettings.WORLD_GAUGE_ENABLED.set(!ConfigSettings.WORLD_GAUGE_ENABLED.get());
+                    return ConfigSettings.WORLD_GAUGE_ENABLED.get();
                 },
                 false, false, true, true, Component.translatable("cold_sweat.config.world_temp_location.desc"),
                                           Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         // Custom Hotbar
-        this.addButton("custom_hotbar", Side.RIGHT, () -> Component.translatable("cold_sweat.config.custom_hotbar.name").append(": ").append(clientConfig.customHotbarEnabled() ? ON : OFF),
-                button -> clientConfig.setCustomHotbar(!clientConfig.customHotbarEnabled()),
+        this.addButton("custom_hotbar", Side.RIGHT, () -> Component.translatable("cold_sweat.config.custom_hotbar.name").append(": ").append(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get() ? ON : OFF),
+                button -> ConfigSettings.CUSTOM_HOTBAR_LAYOUT.set(!ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get()),
                 false, false, true, Component.translatable("cold_sweat.config.custom_hotbar.desc"));
 
-        // Icon Bobbing
-        this.addButton("icon_bobbing", Side.RIGHT, () -> Component.translatable("cold_sweat.config.icon_bobbing.name").append(": ").append(clientConfig.isIconBobbingEnabled() ? ON : OFF),
-                button -> clientConfig.setIconBobbing(!clientConfig.isIconBobbingEnabled()),
-                false, false, true, Component.translatable("cold_sweat.config.icon_bobbing.desc"));
-
-        // Config Button Repositioning Screen
-        this.addButton("button_position", Side.RIGHT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
-                       button ->
-                       {
-                           DrawConfigButton.DRAW_CONTROLS = true;
-                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-                       },
-                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
-    }
-
-    @Override
-    public void onClose()
-    {
-        super.onClose();
-        ConfigScreen.saveConfig();
+        // Hearth Debug
+        this.addButton("hearth_debug", Side.RIGHT, () -> Component.translatable("cold_sweat.config.hearth_debug.name").append(": ").append(ConfigSettings.HEARTH_DEBUG.get() ? ON : OFF),
+                       button -> ConfigSettings.HEARTH_DEBUG.set(!ConfigSettings.HEARTH_DEBUG.get()),
+                       false, false, true, Component.translatable("cold_sweat.config.hearth_debug.desc"));
     }
 }

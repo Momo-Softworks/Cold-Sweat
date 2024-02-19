@@ -41,27 +41,26 @@ public class ConfigPageOne extends AbstractConfigPage
     {
         super.init();
 
-        ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
-        Temperature.Units[] properUnits = {clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F};
+        Temperature.Units[] properUnits = {ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F};
 
         /*
          The Options
         */
 
         // Celsius
-        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(": ").append(clientConfig.isCelsius()
+        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(": ").append(ConfigSettings.CELSIUS.get()
                                                    ? Component.translatable("cold_sweat.config.celsius.name")
                                                    : Component.translatable("cold_sweat.config.fahrenheit.name")),
         button ->
         {
             Player player = Minecraft.getInstance().player;
 
-            clientConfig.setCelsius(!clientConfig.isCelsius());
+            ConfigSettings.CELSIUS.set(!ConfigSettings.CELSIUS.get());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
                 Overlays.WORLD_TEMP = Temperature.convertUnits(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
-            properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
+            properUnits[0] = ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F;
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
@@ -91,14 +90,14 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Rate Multiplier
         this.addDecimalInput("rate", Side.LEFT, Component.translatable("cold_sweat.config.temperature_rate.name"),
-                value -> ConfigSettings.TEMP_RATE.set(value),
+                value -> ConfigSettings.TEMP_RATE.set(Math.max(0, value)),
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_RATE.get())),
                 true, true, false, Component.translatable("cold_sweat.config.temperature_rate.desc"));
 
         // Difficulty button
         this.addButton("difficulty", Side.RIGHT, () -> Component.translatable("cold_sweat.config.difficulty.name").append(
                         " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
-                button -> mc.setScreen(new ConfigPageDifficulty(this)),
+                button -> MINECRAFT.setScreen(new ConfigPageDifficulty(this)),
                 true, false, false, Component.translatable("cold_sweat.config.difficulty.desc"));
 
         this.addEmptySpace(Side.RIGHT, 1);
@@ -124,11 +123,5 @@ public class ConfigPageOne extends AbstractConfigPage
                 () -> Component.translatable("cold_sweat.config.damage_scaling.name").append(": ").append(ConfigSettings.DAMAGE_SCALING.get() ? ON : OFF),
                 button -> ConfigSettings.DAMAGE_SCALING.set(!ConfigSettings.DAMAGE_SCALING.get()),
                 true, true, false, Component.translatable("cold_sweat.config.damage_scaling.desc"));
-    }
-
-    @Override
-    public void onClose()
-    {   ConfigScreen.saveConfig();
-        super.onClose();
     }
 }

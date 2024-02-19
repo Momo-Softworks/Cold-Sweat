@@ -1,7 +1,8 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
@@ -17,7 +18,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -25,17 +25,17 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class DrawConfigButton
 {
-    public static boolean DRAW_CONTROLS = false;
+    public static boolean EDIT_MODE = false;
 
     @SubscribeEvent
     public static void eventHandler(ScreenEvent.Init.Post event)
     {
-        if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
+        if (event.getScreen() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();
-            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().get(0));
-            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().get(1));
+            Supplier<Pair<Integer, Integer>> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().getFirst());
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().getSecond());
             int buttonX = event.getScreen().width / 2 - 183;
             int buttonY = event.getScreen().height / 6 + 110;
             int screenWidth = event.getScreen().width;
@@ -44,8 +44,7 @@ public class DrawConfigButton
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
             {   xOffset.set(0);
                 yOffset.set(0);
-                ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(0, 0));
-                ClientSettingsConfig.getInstance().save();
+                ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(0, 0));
             }
 
             // Main config button
@@ -64,7 +63,7 @@ public class DrawConfigButton
             event.addListener(mainButton);
 
             // Reconfigure the options screen with controls for the position of the config button
-            if (DRAW_CONTROLS)
+            if (EDIT_MODE)
             {
                 int buttonStartX = event.getScreen().width / 2 - 183;
                 int buttonStartY = event.getScreen().height / 6 + 110;
@@ -72,8 +71,7 @@ public class DrawConfigButton
                 {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
                     yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
                     mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
-                    ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(xOffset.get(), yOffset.get()));
-                    ClientSettingsConfig.getInstance().save();
+                    ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(xOffset.get(), yOffset.get()));
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
@@ -151,7 +149,7 @@ public class DrawConfigButton
                 // Add reset button
                 event.addListener(resetButton);
 
-                TaskScheduler.scheduleClient(() -> DRAW_CONTROLS = false, 1);
+                TaskScheduler.scheduleClient(() -> EDIT_MODE = false, 1);
             }
         }
     }

@@ -49,10 +49,4 @@ public class ConfigPageThree extends AbstractConfigPage
                              true, false, false, Component.translatable("cold_sweat.config.grace_period_length.desc_1"),
                              Component.translatable("cold_sweat.config.grace_period_length.desc_2").withStyle(ChatFormatting.DARK_GRAY));
     }
-
-    @Override
-    public void onClose()
-    {   super.onClose();
-        ConfigScreen.saveConfig();
-    }
 }
