@@ -1,6 +1,9 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
+import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
+import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;

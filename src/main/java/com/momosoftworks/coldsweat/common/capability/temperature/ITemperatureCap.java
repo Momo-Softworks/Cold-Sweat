@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;

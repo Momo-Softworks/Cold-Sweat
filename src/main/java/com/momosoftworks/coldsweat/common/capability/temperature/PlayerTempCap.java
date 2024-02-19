@@ -1,5 +1,6 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.momosoftworks.coldsweat.common.capability.temperature.AbstractTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
