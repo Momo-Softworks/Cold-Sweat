@@ -2,6 +2,8 @@ package com.momosoftworks.coldsweat.common.capability;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import net.minecraft.enchantment.IArmorVanishable;

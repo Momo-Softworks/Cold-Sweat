@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.common.capability;
 
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 

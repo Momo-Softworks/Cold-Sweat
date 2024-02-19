@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.capability.shearing;
 
 import net.minecraft.nbt.CompoundNBT;
 

@@ -2,6 +2,12 @@ package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.common.capability.*;
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
+import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;

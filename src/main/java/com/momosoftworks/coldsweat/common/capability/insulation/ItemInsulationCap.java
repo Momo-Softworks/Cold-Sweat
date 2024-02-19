@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.capability.insulation;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.config.ConfigSettings;

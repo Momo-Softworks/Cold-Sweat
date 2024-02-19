@@ -7,9 +7,9 @@ import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.Tooltip;
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap.Insulation;
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap.InsulationPair;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.Insulation;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.InsulationPair;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -34,7 +34,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler

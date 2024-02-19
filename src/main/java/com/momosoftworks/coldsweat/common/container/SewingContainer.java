@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.common.container;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.common.capability.IInsulatableCap;
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
