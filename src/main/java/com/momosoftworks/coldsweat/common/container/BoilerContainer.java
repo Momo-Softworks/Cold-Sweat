@@ -39,7 +39,7 @@ public class BoilerContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModItemTags.BOILER_VALID);
+                {   return stack.is(ModItemTags.BOILER_VALID) || stack.is(ModItemTags.BOILER_PURIFIABLE);
                 }
             });
         }
