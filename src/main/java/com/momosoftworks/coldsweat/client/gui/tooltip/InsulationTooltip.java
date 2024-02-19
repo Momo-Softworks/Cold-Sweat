@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 

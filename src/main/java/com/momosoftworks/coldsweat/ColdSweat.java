@@ -1,7 +1,10 @@
 package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.common.capability.*;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;

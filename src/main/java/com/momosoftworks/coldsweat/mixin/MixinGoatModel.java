@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.common.capability.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.event.ShearableFurManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.GoatModel;
