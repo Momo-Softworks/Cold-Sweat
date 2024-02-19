@@ -255,7 +255,9 @@ public class FilledWaterskinItem extends Item
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Type.CORE, true);
-        return this.getCraftingRemainingItem(stack);
+        return entity instanceof Player player && player.isCreative()
+               ? stack
+               : this.getCraftingRemainingItem(stack);
     }
 
     public static ItemStack getEmpty(ItemStack stack)
