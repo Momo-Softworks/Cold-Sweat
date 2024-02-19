@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
-import com.momosoftworks.coldsweat.common.capability.PlayerTempCap;
+import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

@@ -9,7 +9,7 @@ import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
+import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
 import com.momosoftworks.coldsweat.util.math.CSMath;
