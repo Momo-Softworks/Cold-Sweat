@@ -9,7 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.event.client.RenderWorldEvent;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
@@ -46,7 +46,7 @@ public class HearthDebugRenderer
     @SubscribeEvent
     public static void onLevelRendered(RenderWorldEvent event)
     {
-        if (Minecraft.getInstance().options.renderDebug && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
+        if (Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get())
         {
             PlayerEntity player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -182,10 +182,10 @@ public class HearthDebugRenderer
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        ClientWorld world = Minecraft.getInstance().level;
-        if (event.phase == TickEvent.Phase.END && world != null
-        && world.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
-        && ClientSettingsConfig.getInstance().isHearthDebugEnabled())
+        ClientWorld level = Minecraft.getInstance().level;
+        if (event.phase == TickEvent.Phase.END && level != null
+        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
+        && ConfigSettings.HEARTH_DEBUG.get())
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {

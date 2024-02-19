@@ -835,7 +835,7 @@ Fixes:
 - Fixed goats trying to ram players in creative mode
 
 Technical Changes:
-- TempModifiers now have a full CompoundNBT attached to each instance
+- TempModifiers now have a full CompoundTag attached to each instance
       - This can be used to store any custom data that needs to be saved
       - Replaces the old "arguments" system
 
@@ -1571,7 +1571,7 @@ Technical Changes:
       - All instances of Temperature have been replaced by double values
       - Replaced "with()" with the static method "Temperature.apply()"
       - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
-- TempModifiers now have a full CompoundNBT attached to each instance
+- TempModifiers now have a full CompoundTag attached to each instance
       - This can be used to store any custom data that needs to be saved
       - Replaces the old "arguments" system
 - TempModifier registration is now done using suppliers of TempModifiers
@@ -1784,4 +1784,72 @@ Technical Changes:
 
 Fixes:
 - Fixed server crash due to invalid class being loaded
-- Fixed some enchantments not transferring to from the insulation item to the armor when being sewn in some cases
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b01a
+- Added hearth-like functionality to the boiler and icebox:
+      - Added new block: Smokestack
+      - A smokestack can be placed on top of these blocks to make them act like a half-power hearth
+            - They give up to Insulation V and can only heat or cool, respectively
+            - They have about 60% of the radius and much less maximum volume
+      - They now produce ambient air particles when fueled and have a smokestack
+            - Added a new button to their GUIs to toggle this effect
+      - Lava/water can be piped into them, similar to the hearth
+- The hearth has been altered to be a post-Nether block
+      - Crafted with nether bricks and basalt, as well as the new smokestack block
+      - The texture has been changed accordingly
+      - All other functionality is the same. This block is now an "upgrade" to the smokestack/boiler/icebox
+- Added new config option to smooth out how rapidly changing temperatures are represented by the world temperature gauge
+      - In other words, the gauge won't jitter as much when the player is moving around near heat sources
+      - This option is defaulted to 10, double the smoothing of previous versions
+- Added option to hide individual UI elements in the config menu
+- Altered/touched up the config screen in a few other areas
+- Added Primal Winter support by default
+- (1.20) Added Weather, Storms & Tornadoes (Weather2) support
+
+
+Fixes:
+- Fixed insulation tooltips not showing when Legendary Tooltips is installed
+- (1.19.2) Fixed resulting item being invisible when shearing insulation from armor
+- Fixed dimension temperature configs not being converted correctly internally, resulting in unpredictable behavior
+- Fixed text in certain HUD elements not scaling correctly at some resolutions
+- Fixed armor attributes not being taken into account when calculating its built-in insulation
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b02a
+- The "vague" temperature gauge (world temperature gauge without a thermometer) has been turned into a frame around the body temperature icon
+      - Functionality is the same; these UI elements have just been combined to make the UI less cluttered. It look pretty good, too!
+      - The exact world temperature readout will still be shown as normal when the player has a thermometer
+- The body temperature readout is now hidden by default
+      - This UI element may or may not be staying. It might possibly be locked behind the thermometer in future versions
+      - It can be turned back on in the config menu
+- The temperature rate config setting now affects how fast waterskins heat/cool in the boiler and icebox
+- Added support for Thirst Was Taken:
+      - Waterskins are now drinkable via right-click
+      - Their normal (pour) behavior has been changed to left-click
+      - Purity defaults to "Slightly Dirty"
+      - Can be purified by the same means as water bottles (furnace, campfire)
+            - This does not affect the temperature of the waterskin, only its purification level
+      - Drinkable items can now be purified in the boiler:
+            - When a waterskin is up to max temperature (120 F / 48 C), it will purify by one level every 10 seconds
+            - Other drinkable items don't need to heat up. They will start purifying immediately
+            - Purification rate is also affected by the configured temperature rate
+- Waterskins can now be filled by Create components (250mb of water)
+- The hearth-like blocks now protect against temperature 50% more effectively
+      - This should provide a needed buff to the icebox/boiler and make the hearth more worth it
+
+Fixes:
+- Fixed world temperature changing slightly when sitting in a minecart due to the player's hitbox being in the ground
+- Fixed boiler/icebox not saving insulation strength upon world reload
+
+Technical Changes:
+- Major changes to attributes:
+      - The read-only attributes can now be written to
+            - If an attribute is set, it will override the player's temperature type that corresponds to that attribute
+            - For example, setting the player's cold_sweat:world_temperature to 0 will make the player's world temperature 0 until the attribute is removed
+      - Previous "offset" attributes have been removed
+      - Core temperature attribute has been removed
+- Added new sub-command for /temperature: "modify"
+      - Allows for changing the player's temperature attributes

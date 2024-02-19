@@ -32,10 +32,10 @@ public class RegisterItemOverrides
         {
             ItemModelsProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity) ->
             {
-                if (stack.getOrCreateTag().getBoolean("isOn"))
+                if (stack.getOrCreateTag().getBoolean("Lit"))
                 {
-                    return stack.getOrCreateTag().getInt("fuel") > 43 ? 3 :
-                           stack.getOrCreateTag().getInt("fuel") > 22 ? 2 : 1;
+                    return stack.getOrCreateTag().getInt("Fuel") > 43 ? 3 :
+                           stack.getOrCreateTag().getInt("Fuel") > 22 ? 2 : 1;
                 }
                 return 0;
             });
@@ -66,9 +66,8 @@ public class RegisterItemOverrides
                         ItemFrameEntity frame = (ItemFrameEntity) entity;
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
-                            boolean celsius = ClientSettingsConfig.getInstance().isCelsius();
-                            TextFormatting tempColor;
-                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            boolean celsius = ConfigSettings.CELSIUS.get();
+                            TextFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
                                 case 0 : tempColor = TextFormatting.WHITE; break;
                                 case 2 : case 3 : tempColor = TextFormatting.GOLD; break;
@@ -76,7 +75,7 @@ public class RegisterItemOverrides
                                 case -2 : case -3 : tempColor = TextFormatting.AQUA; break;
                                 case -4 : tempColor = TextFormatting.BLUE; break;
                                 default : tempColor = TextFormatting.RESET; break;
-                            }
+                            };
                             int convertedTemp = (int) Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
                             frame.getItem().setHoverName(new StringTextComponent(convertedTemp + " \u00B0" + (celsius ? "C" : "F")).withStyle(tempColor));
                         }

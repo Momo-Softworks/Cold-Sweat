@@ -66,19 +66,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
-    @Nonnull
-    @Override
-    public CompoundNBT getUpdateTag()
-    {   CompoundNBT tag = super.getUpdateTag();
-        tag.putInt("Fuel", this.getFuel());
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag)
-    {   this.setFuel(tag.getInt("Fuel"));
-    }
-
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
     {   handleUpdateTag(null, pkt.getTag());
@@ -123,7 +110,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
                 level.setBlock(this.worldPosition, state.setValue(IceboxBlock.FROSTED, true), 3);
 
             // Cool down waterskins
-            if (ticksExisted % 20 == 0)
+            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
                 for (int i = 1; i < 10; i++)
@@ -132,8 +119,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
-                    {
-                        hasItemStacks = true;
+                    {   hasItemStacks = true;
                         stack.getOrCreateTag().putInt("temperature", itemTemp - 1);
                     }
                 }
@@ -181,8 +167,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
         if (!shouldUseColdFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.isWithin(temp, min, max))
@@ -297,34 +283,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT tag)
-    {   super.load(state, tag);
-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("Fuel"));
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT tag)
-    {   CompoundNBT saved = super.save(tag);
-        ItemStackHelper.saveAllItems(saved, this.items);
-        saved.putInt("Fuel", this.getFuel());
-
-        return saved;
-    }
-
-    @Override
     public int getContainerSize()
     {   return 10;
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int count)
-    {   ItemStack itemstack = ItemStackHelper.removeItem(items, slot, count);
-        if (!itemstack.isEmpty())
-        {   this.setChanged();
-        }
-        return itemstack;
     }
 
     @Override

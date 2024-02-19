@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.mixin;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import net.minecraft.client.gui.IngameGui;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,7 +28,7 @@ public class MixinXPBar
     public void moveXPNumberDown(MatrixStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   poseStack.translate(0.0D, 4.0D, 0.0D);
         }
     }
@@ -37,7 +38,7 @@ public class MixinXPBar
     public void renderXPNumberPost(MatrixStack poseStack, int xPos, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   poseStack.translate(0.0D, -4.0D, 0.0D);
         }
     }
@@ -49,7 +50,7 @@ public class MixinXPBar
                 at = @At(value = "HEAD"))
         public void moveItemNameUp(MatrixStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   matrixStack.translate(0, -4, 0);
             }
         }
@@ -58,7 +59,7 @@ public class MixinXPBar
                 at = @At(value = "TAIL"))
         public void renderItemNamePost(MatrixStack matrixStack, CallbackInfo ci)
         {
-            if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   matrixStack.translate(0, 4, 0);
             }
         }

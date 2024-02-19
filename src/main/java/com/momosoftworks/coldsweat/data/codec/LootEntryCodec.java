@@ -38,11 +38,11 @@ public class LootEntryCodec implements Codec<LootEntryCodec.LootEntry>
     @Override
     public <T> DataResult<T> encode(LootEntryCodec.LootEntry input, DynamicOps<T> ops, T prefix)
     {
-        return itemID.decode(ops, prefix).flatMap(itemID ->
-               tag.decode(ops, prefix).flatMap(tag ->
-               count.decode(ops, prefix).flatMap(count ->
-               weight.decode(ops, prefix).map(weight ->
-               Pair.of(new LootEntry(itemID.getFirst(), tag.getFirst(), count.getFirst(), weight.getFirst()), prefix)).map(Pair::getSecond))));
+        return itemID.encode(input.itemID, ops, prefix).flatMap(itemID ->
+               tag.encode(input.tag, ops, prefix).flatMap(tag ->
+               count.encode(input.count, ops, prefix).flatMap(count ->
+               weight.encode(input.weight, ops, prefix).map(weight ->
+               prefix))));
     }
 
     @Override

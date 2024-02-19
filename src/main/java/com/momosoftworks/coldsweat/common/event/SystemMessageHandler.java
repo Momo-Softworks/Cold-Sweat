@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.multiplayer.PlayerController;
@@ -20,8 +20,8 @@ public class SystemMessageHandler
     @SubscribeEvent
     public static void onPlayerEnterCreative(TickEvent.PlayerTickEvent event)
     {
-        if (event.player instanceof ClientPlayerEntity && Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative() && ClientSettingsConfig.getInstance().isCreativeWarningEnabled()
-        && !Minecraft.getInstance().isLocalServer())
+        if (event.player instanceof ClientPlayerEntity player && Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative()
+        && ConfigSettings.SHOW_CREATIVE_WARNING.get() && !Minecraft.getInstance().isLocalServer())
         {
             event.player.displayClientMessage(getSystemPrefix()
                                 .append(new TranslationTextComponent("message.cold_sweat.warning").append(" ").withStyle(TextFormatting.BOLD, TextFormatting.RED))
@@ -38,10 +38,10 @@ public class SystemMessageHandler
     //called when a player clicks a clickable chat message
     public static void onPlayerClickChatMessage(ChatComponentClickedEvent event)
     {
-        if (ClientSettingsConfig.getInstance().isCreativeWarningEnabled()
+        if (ConfigSettings.SHOW_CREATIVE_WARNING.get()
         && event.getStyle().getClickEvent() != null && event.getStyle().getClickEvent().getValue().equals("cold sweat disable message"))
         {
-            ClientSettingsConfig.getInstance().setCreativeWarningEnabled(false);
+            ConfigSettings.SHOW_CREATIVE_WARNING.set(false);
             event.getPlayer().displayClientMessage(getSystemPrefix()
                                            .append(new TranslationTextComponent("message.cold_sweat.disable_feedback").withStyle(TextFormatting.GRAY)), false);
         }
