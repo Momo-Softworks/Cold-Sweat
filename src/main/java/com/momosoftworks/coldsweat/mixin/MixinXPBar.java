@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +26,7 @@ public class MixinXPBar
     public void renderExperienceBar1(GuiGraphics graphics, int x, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   graphics.pose().translate(0.0D, 4.0D, 0.0D);
         }
     }
@@ -43,7 +43,7 @@ public class MixinXPBar
     public void renderExperienceBar2(GuiGraphics graphics, int px, CallbackInfo ci)
     {
         // Render XP bar
-        if (ClientSettingsConfig.getInstance().customHotbarEnabled())
+        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
         {   graphics.pose().translate(0.0D, -4.0D, 0.0D);
         }
     }
@@ -58,7 +58,7 @@ public class MixinXPBar
                 at = @At(value = "HEAD"))
         public void renderItemNamePre(GuiGraphics graphics, CallbackInfo ci)
         {
-            if (!MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (!MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, -4, 0);
                 MOVED_UP = true;
             }
@@ -68,7 +68,7 @@ public class MixinXPBar
                 at = @At(value = "HEAD"))
         public void renderItemNamePre(GuiGraphics graphics, int height, CallbackInfo ci)
         {
-            if (!MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (!MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, -4, 0);
                 MOVED_UP = true;
             }
@@ -79,7 +79,7 @@ public class MixinXPBar
                 at = @At("TAIL"))
         public void renderItemNamePost(GuiGraphics graphics, CallbackInfo ci)
         {
-            if (MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, 4, 0);
                 MOVED_UP = false;
             }
@@ -89,7 +89,7 @@ public class MixinXPBar
                 at = @At("TAIL"))
         public void renderItemNamePost(GuiGraphics graphics, int height, CallbackInfo ci)
         {
-            if (MOVED_UP && ClientSettingsConfig.getInstance().customHotbarEnabled())
+            if (MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, 4, 0);
                 MOVED_UP = false;
             }

@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
@@ -12,7 +13,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -50,20 +50,16 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public class WorldHelper
+public abstract class WorldHelper
 {
-    private WorldHelper() {}
-
     /**
      * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
      * Ignores minecraft:cave_air<br>
      * This is different from {@code level.getHeight()} because it attempts to ignore floating blocks
      */
     public static int getHeight(BlockPos pos, Level level)
-    {
-        // If Minecraft's height calculation is good enough, use that
+    {   // If Minecraft's height calculation is good enough, use that
         int seaLevel = level.getSeaLevel();
-
         // If chunk isn't loaded, return sea level
         if (!level.isLoaded(pos)) return seaLevel;
 
@@ -74,16 +70,16 @@ public class WorldHelper
     }
 
     public static ResourceLocation getBiomeID(Biome biome)
-    {
-        ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
+    {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
         if (biomeID == null) biomeID = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
+
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
-    {
-        Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
+    {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
         if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).get(biomeID);
+
         return biome;
     }
 
@@ -142,11 +138,11 @@ public class WorldHelper
      * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
      */
     public static boolean canSeeSky(LevelAccessor level, BlockPos pos, int maxDistance)
-    {
-        BlockPos.MutableBlockPos pos2 = pos.mutable();
+    {   BlockPos.MutableBlockPos pos2 = pos.mutable();
         int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
         ChunkAccess chunk = getChunk(level, pos);
         if (chunk == null) return true;
+
         for (int i = 0; i < iterations; i++)
         {
             BlockState state = chunk.getBlockState(pos2);
@@ -156,9 +152,9 @@ public class WorldHelper
             if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
             {   return false;
             }
-
             pos2.move(0, 1, 0);
         }
+
         return true;
     }
 
@@ -213,6 +209,7 @@ public class WorldHelper
 
     public static LevelChunkSection getChunkSection(ChunkAccess chunk, int y)
     {   LevelChunkSection[] sections = chunk.getSections();
+
         return sections[CSMath.clamp(chunk.getSectionIndex(y), 0, sections.length - 1)];
     }
 
@@ -232,25 +229,25 @@ public class WorldHelper
             {   ClientOnlyHelper.playEntitySound(sound, source, volume, pitch, entity);
             }
             else
-            {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
                         new PlaySoundMessage(ForgeRegistries.SOUND_EVENTS.getKey(sound).toString(), source, volume, pitch, entity.getId()));
             }
         }
     }
 
     public static boolean isInWater(Entity entity)
-    {
-        BlockPos pos = entity.blockPosition();
+    {   BlockPos pos = entity.blockPosition();
         ChunkAccess chunk = WorldHelper.getChunk(entity.level(), pos);
         if (chunk == null) return false;
+
         return entity.isInWater() || chunk.getBlockState(pos).getBlock() == Blocks.BUBBLE_COLUMN;
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
-    {
-        Biome biome = level.getBiomeManager().getBiome(pos).value();
-        return level.isRaining() && biome.getPrecipitationAt(pos) == Biome.Precipitation.RAIN && biome.warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
+    {   var biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos).value());
+
+        return level.isRaining() && biome.get().getPrecipitationAt(pos) == Biome.Precipitation.RAIN
+            && biome.get().warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
             || CompatManager.isWeather2RainingAt(level, pos);
     }
 
@@ -287,9 +284,10 @@ public class WorldHelper
                 if (state == null)
                 {   // Set new workingChunk if the ray travels outside the current one
                     if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
-                        workingChunk = getChunk(level, pos);
-
+                    {   workingChunk = getChunk(level, pos);
+                    }
                     if (workingChunk == null) continue;
+
                     state = workingChunk.getBlockState(pos);
                     stateCache.put(pos.immutable(), state);
                 }

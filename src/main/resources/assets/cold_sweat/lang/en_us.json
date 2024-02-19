@@ -166,10 +166,19 @@
   "cold_sweat.message.sleep.world.cold":   "You may not rest now; It is freezing outside.",
 
 
-  "commands.cold_sweat.temperature.set.single.result": "Set the temperature of %d to %d",
-  "commands.cold_sweat.temperature.set.many.result":   "Set the temperature of %d players to %d",
-  "commands.cold_sweat.temperature.get.result":        "%d's body temperature is %d",
-  "commands.cold_sweat.temperature.invalid":           "The selector includes entities that do not have temperature",
+  "commands.cold_sweat.temperature.set.single.result":    "Set the temperature of %d to %d",
+  "commands.cold_sweat.temperature.set.many.result":      "Set the temperature of %d players to %d",
+  "commands.cold_sweat.temperature.get.result":           "%d's body temperature is %d",
+  "commands.cold_sweat.temperature.get.world.result":     "The temperature at %d, %d, %d is %d %d",
+  "commands.cold_sweat.temperature.invalid":              "The selector includes entities that do not have temperature",
+  "commands.cold_sweat.temperature.modify.set.single.result": "Set temperature property \"%d\" for %d to %d",
+  "commands.cold_sweat.temperature.modify.set.many.result":   "Set temperature property \"%d\" for %d entities to %d",
+  "commands.cold_sweat.temperature.modify.add_modifier.single.result": "Added modifier to temperature property \"%d\" for %d",
+  "commands.cold_sweat.temperature.modify.add_modifier.many.result":   "Added modifier to temperature property \"%d\" for %d entities",
+  "commands.cold_sweat.temperature.clear.single.result":  "Cleared temperature property \"%d\" for %d",
+  "commands.cold_sweat.temperature.clear.many.result":    "Cleared temperature property \"%d\" for %d entities",
+  "commands.cold_sweat.temperature.clear.all.single.result":  "Cleared all temperature properties for %d",
+  "commands.cold_sweat.temperature.clear.all.many.result":    "Cleared all temperature properties for %d entities",
 
 
   "advancements.cold_sweat.root.title": "Cold Sweat",

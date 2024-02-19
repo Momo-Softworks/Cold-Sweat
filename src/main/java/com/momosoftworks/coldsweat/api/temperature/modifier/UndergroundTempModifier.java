@@ -27,7 +27,7 @@ public class UndergroundTempModifier extends TempModifier
         if (entity.level().dimensionType().hasCeiling()) return temp -> temp;
 
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
-        BlockPos playerPos = entity.blockPosition();
+        BlockPos playerPos = BlockPos.containing(entity.getEyePosition());
         Level level = entity.level();
 
         List<Pair<Double, Double>> depthTable = new ArrayList<>();

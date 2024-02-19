@@ -10,8 +10,8 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
@@ -64,7 +64,7 @@ public class TempEffectsClient
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
 
-            if (ClientSettingsConfig.getInstance().areDistortionsEnabled())
+            if (ConfigSettings.DISTORTION_EFFECTS.get())
             {
                 // Camera "shivers" when temp is < -50
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
@@ -220,7 +220,7 @@ public class TempEffectsClient
             try
             {
                 float playerTemp = (float) Overlays.BODY_TEMP;
-                if (ClientSettingsConfig.getInstance().areDistortionsEnabled() && playerTemp >= 50 && HOT_IMMUNITY < 4)
+                if (ConfigSettings.DISTORTION_EFFECTS.get() && playerTemp >= 50 && HOT_IMMUNITY < 4)
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
                     if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))

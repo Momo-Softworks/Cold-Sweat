@@ -91,10 +91,10 @@ public class SoulspringLampItem extends Item
                 CompoundTag itemTag = stack.getOrCreateTag();
                 // If the conditions are not met, turn off the lamp
                 if (itemTag.getInt("stateChangeTimer") <= 0
-                && itemTag.getBoolean("isOn") != shouldBeOn)
+                && itemTag.getBoolean("Lit") != shouldBeOn)
                 {
                     itemTag.putInt("stateChangeTimer", 2);
-                    itemTag.putBoolean("isOn", shouldBeOn);
+                    itemTag.putBoolean("Lit", shouldBeOn);
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
@@ -111,33 +111,27 @@ public class SoulspringLampItem extends Item
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {
-        return slotChanged;
+    {   return slotChanged;
     }
 
     private static void setFuel(ItemStack stack, double fuel)
-    {
-        stack.getOrCreateTag().putDouble("fuel", fuel);
+    {   stack.getOrCreateTag().putDouble("Fuel", fuel);
     }
 
     private static void addFuel(ItemStack stack, double amount)
-    {
-        setFuel(stack, Math.min(64, getFuel(stack) + amount));
+    {   setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
 
     private static void addFuel(ItemStack stack, ItemStack fuelStack)
-    {
-        addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
+    {   addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
     }
 
     private static double getFuel(ItemStack stack)
-    {
-        return stack.getOrCreateTag().getDouble("fuel");
+    {   return stack.getOrCreateTag().getDouble("Fuel");
     }
 
     public static int getFuelForStack(ItemStack fuelStack)
-    {
-        return ConfigSettings.LAMP_FUEL_ITEMS.get().getOrDefault(fuelStack.getItem(), 0);
+    {   return ConfigSettings.LAMP_FUEL_ITEMS.get().getOrDefault(fuelStack.getItem(), 0);
     }
 
     // Restore fuel if player hits an enemy
@@ -181,15 +175,15 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player) {
-        return !player.isCreative();
+    public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player)
+    {   return !player.isCreative();
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
     {
         if (advanced.isAdvanced())
-        {   tooltip.add(Component.literal("Fuel: " + (int) stack.getOrCreateTag().getDouble("fuel") + " / " + 64));
+        {   tooltip.add(Component.literal("Fuel: " + (int) stack.getOrCreateTag().getDouble("Fuel") + " / " + 64));
         }
         super.appendHoverText(stack, level, tooltip, advanced);
     }

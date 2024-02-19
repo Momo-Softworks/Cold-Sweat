@@ -35,8 +35,8 @@ public class CreativeTabInit
                         ModItems.INSULATED_MINECART.getDefaultInstance(),
                         ObjectBuilder.build(() ->
                         {   ItemStack stack = ModItems.SOULSPRING_LAMP.getDefaultInstance();
-                            stack.getOrCreateTag().putBoolean("isOn", true);
-                            stack.getOrCreateTag().putDouble("fuel", 64);
+                            stack.getOrCreateTag().putBoolean("Lit", true);
+                            stack.getOrCreateTag().putDouble("Fuel", 64);
                             return stack;
                         }),
                         ModItems.SOUL_SPROUT.getDefaultInstance(),

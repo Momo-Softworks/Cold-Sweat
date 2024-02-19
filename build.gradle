@@ -2,17 +2,6 @@ buildscript {
     repositories {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "Modrinth"
-                    url = "https://api.modrinth.com/maven"
-                }
-            }
-            filter {
-                includeGroup "maven.modrinth"
-            }
-        }
         mavenCentral()
     }
     dependencies {
@@ -33,6 +22,8 @@ apply plugin: 'net.neoforged.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
+
+jarJar.enable()
 
 group = group_id
 version = mod_version
@@ -128,8 +119,9 @@ dependencies {
   //compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
     //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
 
-    implementation fg.deobf("curse.maven:create-328085:4762216")
+    compileOnly fg.deobf("curse.maven:create-328085:4762216")
     implementation fg.deobf("curse.maven:curios-309927:4780205")
+    implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     //runtimeOnly fg.deobf("curse.maven:legendary-tooltips-532127:4662781")
@@ -137,6 +129,10 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:prism-lib-638111:4650325")
     runtimeOnly fg.deobf("curse.maven:alexs-mobs-426558:4959531")
     runtimeOnly fg.deobf("curse.maven:citadel-331936:5075402")
+    runtimeOnly fg.deobf("curse.maven:irons-spells-855414:5061897")
+    runtimeOnly fg.deobf("curse.maven:geckolib-388172:5060426")
+    runtimeOnly fg.deobf("curse.maven:playeranimator-658587:4587214")
+    runtimeOnly fg.deobf("curse.maven:caelus-308989:4581481")
 
     //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
     //runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4037228")

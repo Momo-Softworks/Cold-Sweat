@@ -26,8 +26,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     public static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
     public static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
     public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
-                                                                : TOOLTIP;
+            ConfigSettings.HIGH_CONTRAST.get() ? TOOLTIP_HC
+                                               : TOOLTIP;
 
     List<ItemInsulationCap.InsulationPair> insulation;
     ItemStack stack;
