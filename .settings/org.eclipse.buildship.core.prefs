@@ -1,11 +1,11 @@
-arguments=
+arguments=--init-script /home/michael/.eclipse/2139989682_linux_gtk_x86_64/configuration/org.eclipse.osgi/148/0/.cp/gradle/init/init.gradle
 auto.sync=false
 build.scans.enabled=false
 connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
 connection.project.dir=
 eclipse.preferences.version=1
 gradle.user.home=
-java.home=C\:/Program Files/Eclipse Foundation/jdk-11.0.12.7-hotspot
+java.home=/usr/lib/jvm/java-17-openjdk
 jvm.arguments=
 offline.mode=false
 override.workspace.settings=true
