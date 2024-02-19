@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.config.util.ValueHolder;
+import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.block.Block;
@@ -26,70 +26,70 @@ import java.util.stream.Collectors;
  */
 public class ConfigSettings
 {
-    public static final Map<String, ValueHolder<?>> CONFIG_SETTINGS = new ConcurrentHashMap<>();
+    public static final Map<String, DynamicHolder<?>> CONFIG_SETTINGS = new ConcurrentHashMap<>();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
     // Settings visible in the config screen
-    public static final ValueHolder<Integer> DIFFICULTY;
-    public static final ValueHolder<Double> MAX_TEMP;
-    public static final ValueHolder<Double> MIN_TEMP;
-    public static final ValueHolder<Double> TEMP_RATE;
-    public static final ValueHolder<Double> TEMP_DAMAGE;
-    public static final ValueHolder<Boolean> FIRE_RESISTANCE_ENABLED;
-    public static final ValueHolder<Boolean> ICE_RESISTANCE_ENABLED;
-    public static final ValueHolder<Boolean> DAMAGE_SCALING;
-    public static final ValueHolder<Boolean> REQUIRE_THERMOMETER;
-    public static final ValueHolder<Integer> GRACE_LENGTH;
-    public static final ValueHolder<Boolean> GRACE_ENABLED;
+    public static final DynamicHolder<Integer> DIFFICULTY;
+    public static final DynamicHolder<Double> MAX_TEMP;
+    public static final DynamicHolder<Double> MIN_TEMP;
+    public static final DynamicHolder<Double> TEMP_RATE;
+    public static final DynamicHolder<Double> TEMP_DAMAGE;
+    public static final DynamicHolder<Boolean> FIRE_RESISTANCE_ENABLED;
+    public static final DynamicHolder<Boolean> ICE_RESISTANCE_ENABLED;
+    public static final DynamicHolder<Boolean> DAMAGE_SCALING;
+    public static final DynamicHolder<Boolean> REQUIRE_THERMOMETER;
+    public static final DynamicHolder<Integer> GRACE_LENGTH;
+    public static final DynamicHolder<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
-    public static final ValueHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
-    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
-    public static final ValueHolder<Double> CAVE_INSULATION;
-    public static final ValueHolder<Double[]> SUMMER_TEMPS;
-    public static final ValueHolder<Double[]> AUTUMN_TEMPS;
-    public static final ValueHolder<Double[]> WINTER_TEMPS;
-    public static final ValueHolder<Double[]> SPRING_TEMPS;
+    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
+    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
+    public static final DynamicHolder<Double> CAVE_INSULATION;
+    public static final DynamicHolder<Double[]> SUMMER_TEMPS;
+    public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
+    public static final DynamicHolder<Double[]> WINTER_TEMPS;
+    public static final DynamicHolder<Double[]> SPRING_TEMPS;
 
     // Block settings
-    public static final ValueHolder<Integer> BLOCK_RANGE;
-    public static final ValueHolder<Boolean> COLD_SOUL_FIRE;
-    public static final ValueHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
-    public static final ValueHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
-    public static final ValueHolder<Double> HEARTH_STRENGTH;
+    public static final DynamicHolder<Integer> BLOCK_RANGE;
+    public static final DynamicHolder<Boolean> COLD_SOUL_FIRE;
+    public static final DynamicHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
+    public static final DynamicHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
+    public static final DynamicHolder<Double> HEARTH_STRENGTH;
 
     // Item settings
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
-    public static final ValueHolder<Map<Item, Pair<Double, Double>>> INSULATING_CURIOS;
-    public static final ValueHolder<Integer[]> INSULATION_SLOTS;
-    public static final ValueHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
+    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
+    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
+    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
+    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATING_CURIOS;
+    public static final DynamicHolder<Integer[]> INSULATION_SLOTS;
+    public static final DynamicHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
-    public static final ValueHolder<Boolean> CHECK_SLEEP_CONDITIONS;
+    public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final ValueHolder<Map<Item, Double>> FOOD_TEMPERATURES;
+    public static final DynamicHolder<Map<Item, Double>> FOOD_TEMPERATURES;
 
-    public static final ValueHolder<Integer> WATERSKIN_STRENGTH;
+    public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
-    public static final ValueHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS;
+    public static final DynamicHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS;
 
-    public static final ValueHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
+    public static final DynamicHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final ValueHolder<Map<Item, Double>> BOILER_FUEL;
-    public static final ValueHolder<Map<Item, Double>> ICEBOX_FUEL;
-    public static final ValueHolder<Map<Item, Double>> HEARTH_FUEL;
-    public static final ValueHolder<Boolean> HEARTH_POTIONS_ENABLED;
-    public static final ValueHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
+    public static final DynamicHolder<Map<Item, Double>> BOILER_FUEL;
+    public static final DynamicHolder<Map<Item, Double>> ICEBOX_FUEL;
+    public static final DynamicHolder<Map<Item, Double>> HEARTH_FUEL;
+    public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
+    public static final DynamicHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
     // Entity Settings
-    public static final ValueHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
-    public static final ValueHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
-    public static final ValueHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
-    public static final ValueHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
+    public static final DynamicHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
+    public static final DynamicHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
+    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -622,14 +622,14 @@ public class ConfigSettings
         }
     }
 
-    public static <T> ValueHolder<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundNBT> writer, Function<CompoundNBT, T> reader, Consumer<T> saver)
-    {   ValueHolder<T> loader = ValueHolder.synced(supplier, writer, reader, saver);
+    public static <T> DynamicHolder<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundNBT> writer, Function<CompoundNBT, T> reader, Consumer<T> saver)
+    {   DynamicHolder<T> loader = DynamicHolder.createSynced(supplier, writer, reader, saver);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
 
-    public static <T> ValueHolder<T> addSetting(String id, Supplier<T> supplier)
-    {   ValueHolder<T> loader = ValueHolder.simple(supplier);
+    public static <T> DynamicHolder<T> addSetting(String id, Supplier<T> supplier)
+    {   DynamicHolder<T> loader = DynamicHolder.create(supplier);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
@@ -663,6 +663,6 @@ public class ConfigSettings
     }
 
     public static void load()
-    {   CONFIG_SETTINGS.values().forEach(ValueHolder::load);
+    {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
     }
 }

@@ -37,7 +37,7 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean ARMOR_UNDERWEAR_LOADED = modLoaded("armorunder");
     private static final boolean BYG_LOADED = modLoaded("byg");
-    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
+    private static final boolean CREATE_LOADED = modLoaded("create", 0, 5, 1);
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
@@ -68,11 +68,6 @@ public class CompatManager
             }
         }
         else return ModList.get().isLoaded(modID);
-    }
-
-    private static boolean modLoaded(String modID, String ver)
-    {   String[] version = ver.split("\\.");
-        return modLoaded(modID, Integer.parseInt(version[0]), Integer.parseInt(version[1]), Integer.parseInt(version[2]));
     }
 
     private static boolean modLoaded(String modID)

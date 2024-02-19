@@ -11,8 +11,9 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.BlockState;
@@ -20,16 +21,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -41,7 +39,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,21 +56,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     public BoilerBlockEntity()
     {   super();
         TaskScheduler.schedule(this::checkForSmokestack, 5);
-    }
-
-    @Nonnull
-    @Override
-    public CompoundNBT getUpdateTag()
-    {
-        CompoundNBT tag = super.getUpdateTag();
-        tag.putInt("Fuel", this.getFuel());
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag)
-    {
-        this.setHotFuel(tag.getInt("Fuel"), true);
     }
 
     @Override
@@ -118,20 +100,27 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
         {
             // Set state to lit
             if (!state.getValue(BoilerBlock.LIT))
-                level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
+            }
 
             // Warm up waterskins
-            if (ticksExisted % 20 == 0)
+            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
+
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
                     int itemTemp = stack.getOrCreateTag().getInt("temperature");
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
-                    {   hasItemStacks = true;
-                        stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                    if (ModItemTags.BOILER_VALID.contains(stack.getItem()))
+                    {
+                        // If item is a filled waterskin not at max temp yet
+                        if (itemTemp < 50 && stack.getItem() == ModItems.FILLED_WATERSKIN)
+                        {
+                            hasItemStacks = true;
+                            stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                        }
                     }
                 }
                 if (hasItemStacks) setFuel(getFuel() - 1);
@@ -178,8 +167,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
         if (!shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTemp(Temperature.Type.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTemp(Temperature.Type.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.isWithin(temp, min, max))
@@ -277,34 +266,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT tag)
-    {   super.load(state, tag);
-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(tag, this.items);
-        this.setFuel(tag.getInt("Fuel"));
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT tag)
-    {
-        super.save(tag);
-        ItemStackHelper.saveAllItems(tag, this.items);
-        tag.putInt("Fuel", this.getFuel());
-        return tag;
-    }
-
-    @Override
     public int getContainerSize()
     {   return 10;
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int count)
-    {   ItemStack itemstack = ItemStackHelper.removeItem(items, slot, count);
-        if (!itemstack.isEmpty())
-        {   this.setChanged();
-        }
-        return itemstack;
     }
 
     @Override

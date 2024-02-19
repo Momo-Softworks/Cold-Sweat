@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -15,11 +15,11 @@ public class SyncPreferredUnitsMessage
     {   this.units = units;
     }
 
-    public static void encode(SyncPreferredUnitsMessage message, FriendlyByteBuf buffer)
+    public static void encode(SyncPreferredUnitsMessage message, PacketBuffer buffer)
     {   buffer.writeEnum(message.units);
     }
 
-    public static SyncPreferredUnitsMessage decode(FriendlyByteBuf buffer)
+    public static SyncPreferredUnitsMessage decode(PacketBuffer buffer)
     {    return new SyncPreferredUnitsMessage(buffer.readEnum(Temperature.Units.class));
     }
 
