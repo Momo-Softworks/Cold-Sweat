@@ -10,22 +10,19 @@ public class BaseCommand
     boolean enabled;
 
     public BaseCommand(String name, int permissionLevel, boolean enabled)
-    {
-        this.builder = Commands.literal(name).requires(source -> source.hasPermission(permissionLevel));
+    {   this.builder = Commands.literal(name).requires(source -> source.hasPermission(permissionLevel));
         this.enabled = enabled;
     }
 
     public LiteralArgumentBuilder<CommandSource> getBuilder()
-    {
-        return builder;
+    {   return builder;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isEnabled()
+    {   return enabled;
     }
 
     public LiteralArgumentBuilder<CommandSource> setExecution()
-    {
-        return null;
+    {   return null;
     }
 }

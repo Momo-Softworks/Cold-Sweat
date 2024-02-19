@@ -448,11 +448,10 @@ public class EntityTempManager
     public static Set<ModifiableAttributeInstance> getModifiableTempAttributes(LivingEntity entity)
     {
         return ImmutableSet.<ModifiableAttributeInstance>builder()
-                .add(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE_OFFSET))
-                .add(entity.getAttribute(ModAttributes.CORE_BODY_TEMPERATURE_OFFSET))
-                .add(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE_OFFSET))
-                .add(entity.getAttribute(ModAttributes.BURNING_POINT_OFFSET))
-                .add(entity.getAttribute(ModAttributes.FREEZING_POINT_OFFSET))
+                .add(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE))
+                .add(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE))
+                .add(entity.getAttribute(ModAttributes.BURNING_POINT))
+                .add(entity.getAttribute(ModAttributes.FREEZING_POINT))
                 .add(entity.getAttribute(ModAttributes.COLD_DAMPENING))
                 .add(entity.getAttribute(ModAttributes.HEAT_DAMPENING))
                 .add(entity.getAttribute(ModAttributes.COLD_RESISTANCE))
@@ -484,7 +483,6 @@ public class EntityTempManager
         }
 
         CSMath.doIfNotNull(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[0]));
-        CSMath.doIfNotNull(entity.getAttribute(ModAttributes.CORE_BODY_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[1]));
         CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE), attribute -> attribute.setBaseValue(tempsCopy[2]));
         CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BURNING_POINT), attribute -> attribute.setBaseValue(tempsCopy[3] + ConfigSettings.MAX_TEMP.get()));
         CSMath.doIfNotNull(entity.getAttribute(ModAttributes.FREEZING_POINT), attribute -> attribute.setBaseValue(tempsCopy[4] + ConfigSettings.MIN_TEMP.get()));
