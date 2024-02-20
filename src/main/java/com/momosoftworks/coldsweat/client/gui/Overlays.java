@@ -100,8 +100,8 @@ public class Overlays
 
             // Render frame
             graphics.blit(WORLD_TEMP_GAUGE_LOCATION.get(),
-                          (width / 2) + 92 + ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
-                          height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().getSecond(), 0, 64 - severity * 16, 25, 16, 25, 144);
+                          (width / 2) + 92 + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                          height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             RenderSystem.disableBlend();
 
@@ -112,8 +112,8 @@ public class Overlays
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
             graphics.drawString(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
-                    /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
-                    /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().getSecond(), color, false);
+                    /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                    /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color, false);
             poseStack.popPose();
         }
     };
@@ -146,17 +146,14 @@ public class Overlays
 
             // Get the outer border color when readout is > 100
             int colorBG = BLEND_BODY_TEMP < 0 ? 1122643
-                                              : BLEND_BODY_TEMP > 0 ? 5376516
-                                                                    : 0;
+                        : BLEND_BODY_TEMP > 0 ? 5376516
+                        : 0;
 
             int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
-            int threatOffset = !ConfigSettings.ICON_BOBBING.get()
-                               ? 0
-                               : bobLevel == 2
-                                 ? ICON_BOB
-                                 : bobLevel == 3
-                                   ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                                   : 0;
+            int threatOffset = !ConfigSettings.ICON_BOBBING.get() ? 0
+                             : bobLevel == 2 ? ICON_BOB
+                             : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                             : 0;
 
             RenderSystem.defaultBlendFunc();
 
@@ -165,16 +162,21 @@ public class Overlays
             {
                 int icon = Math.abs(BLEND_BODY_TEMP) >= 100 ? BLEND_BODY_TEMP <= -100 ? -4 : 4 : BODY_ICON;
                 graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(),
-                              (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                              height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond(), 0, 40 - icon * 10, 10, 10, 10, 90);
+                              (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                              height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
                 if (Math.abs(BLEND_BODY_TEMP) < 100)
                 {
                     // render new icon over old icon
                     double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
                     graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(),
-                                  (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                  height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond() + 10 - CSMath.ceil(blend),
-                                  0, 40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend), 10, CSMath.ceil(blend), 10, 90);
+                                  // X position
+                                  (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                  // Y position
+                                  height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
+                                  0, 
+                                  // UV Y-coordinate for the icon in this stage
+                                  40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend), 
+                                  10, CSMath.ceil(blend), 10, 90);
                 }
             }
 
@@ -186,8 +188,8 @@ public class Overlays
                 int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
                 String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().getFirst();
-                int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().getSecond();
+                int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
+                int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
 
                 // Draw the outline
                 graphics.drawString(font, s, x + 1, y, colorBG, false);
@@ -239,8 +241,8 @@ public class Overlays
             graphics.blit(VAGUE_TEMP_GAUGE_LOCATION.get(),
                           //(width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(),
                           //height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset,
-                          (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                          height - 56 + ConfigSettings.BODY_ICON_POS.get().getSecond() - renderOffset - threatOffset,
+                          (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
+                          height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
                           0, 64 - severity * 16, 16, 16, 16, 144);
 
             RenderSystem.disableBlend();
