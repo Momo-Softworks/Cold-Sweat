@@ -10,12 +10,14 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.core.network.message.UseFilledWaterskinMessage;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -321,5 +323,15 @@ public class FilledWaterskinItem extends Item
 
     public String getDescriptionId()
     {   return Component.translatable("item.cold_sweat.waterskin").getString();
+    }
+
+    @Override
+    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
+    {
+        if (this.allowedIn(tab))
+        {   ItemStack stack = new ItemStack(this);
+            stack = CompatManager.setWaterPurity(stack, 3);
+            itemList.add(stack);
+        }
     }
 }
