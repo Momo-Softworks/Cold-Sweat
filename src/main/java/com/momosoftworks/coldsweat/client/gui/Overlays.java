@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
+import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -55,8 +55,6 @@ public class Overlays
     static double PREV_BODY_TEMP = 0;
     static int BLEND_BODY_TEMP = 0;
     static int ICON_BOB = 0;
-    static int BODY_ICON = 0;
-    static int PREV_BODY_ICON = 0;
     static double BODY_TEMP_SEVERITY = 0;
 
     public static void registerOverlays()
@@ -160,22 +158,31 @@ public class Overlays
                                        : 0;
 
                 RenderSystem.defaultBlendFunc();
+                RenderSystem.setShaderTexture(0, BODY_TEMP_GAUGE_LOCATION.get());
 
-                // Render old icon (if blending)
                 if (ConfigSettings.BODY_ICON_ENABLED.get())
                 {
-                    int icon = Math.abs(BLEND_BODY_TEMP) >= 100 ? BLEND_BODY_TEMP <= -100 ? -4 : 4 : BODY_ICON;
+                    int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.getSign(BODY_TEMP_SEVERITY);
+                    int newIcon = CSMath.ceil(BODY_TEMP_SEVERITY);
+
+                    // Render icon
                     GuiComponent.blit(poseStack,
                                       (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                  height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond(), 0, 40 - icon * 10, 10, 10, 10, 90);
-                    if (Math.abs(BLEND_BODY_TEMP) < 100)
+                                      height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond(), 0, 40 - icon * 10, 10, 10, 10, 90);
+
+                    // Render new icon if temperature changing
+                    if (CSMath.isBetween(Math.abs(BLEND_BODY_TEMP), 0, 100))
                     {
-                        // render new icon over old icon
+                        // Map current temp severity to filling up the icon
                         double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
                         GuiComponent.blit(poseStack,
                                           (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
                                           height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond() + 10 - CSMath.ceil(blend),
-                                          0, 40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend), 10, CSMath.ceil(blend), 10, 90);
+                                          0,
+                                          // V coordinate of the new icon
+                                          50 - newIcon * 10 - CSMath.ceil(blend), 10,
+                                          // Height of the new icon
+                                          CSMath.ceil(blend), 10, 90);
                     }
                 }
 
@@ -300,10 +307,8 @@ public class Overlays
                 // Get the icon to be displayed
                 int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
 
-                // Start transition
-                if (BODY_ICON != neededIcon)
-                {   BODY_ICON = neededIcon;
-                }
+                // Get the severity of the player's body temperature
+                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
             });
         }
     }
@@ -316,16 +321,15 @@ public class Overlays
     {   int sign = CSMath.getSign(temp);
         int absTemp = Math.abs(temp);
 
-        return absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100) * sign
-                             : CSMath.blend(3d, 7d, absTemp, 100, 150) * sign;
+        return (absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100)
+                             : CSMath.blend(3d, 7d, absTemp, 100, 150))
+                * sign;
     }
 
     public static void setBodyTempInstant(double temp)
     {   BODY_TEMP = temp;
         PREV_BODY_TEMP = temp;
         BLEND_BODY_TEMP = (int) temp;
-        BODY_ICON = CSMath.clamp(((int) getBodySeverity(BLEND_BODY_TEMP)), -3, 3);
-        PREV_BODY_ICON = BODY_ICON;
     }
 
     public static void setWorldTempInstant(double temp)
