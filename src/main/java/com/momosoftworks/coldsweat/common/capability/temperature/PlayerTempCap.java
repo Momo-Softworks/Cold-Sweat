@@ -1,13 +1,9 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
-import com.momosoftworks.coldsweat.common.capability.temperature.AbstractTempCap;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -29,8 +25,14 @@ public class PlayerTempCap extends AbstractTempCap
     public void tick(LivingEntity entity)
     {
         super.tick(entity);
-        if (entity.tickCount % 20 == 0 && entity instanceof Player player)
-        {   calculateHudVisibility(player);
+        if (entity instanceof Player player)
+        {
+            if (player.tickCount % 20 == 0)
+            {   calculateHudVisibility(player);
+            }
+            if (player.isCreative())
+            {   this.setTemp(Temperature.Type.CORE, 0);
+            }
         }
     }
 
