@@ -1,9 +1,11 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import top.theillusivec4.curios.api.CuriosApi;
 
 /**
@@ -14,7 +16,7 @@ public class PlayerTempCap extends AbstractTempCap
     @Override
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
     {
-        if ((!(entity instanceof Player player) || !player.isCreative()) && !entity.isSpectator())
+        if ((!(entity instanceof PlayerEntity) || !((PlayerEntity) entity).isCreative()) && !entity.isSpectator())
         {   super.tickHurting(entity, heatResistance, coldResistance);
         }
     }
@@ -23,8 +25,15 @@ public class PlayerTempCap extends AbstractTempCap
     public void tick(LivingEntity entity)
     {
         super.tick(entity);
-        if (entity.tickCount % 20 == 0 && entity instanceof Player player)
-        {   calculateHudVisibility(player);
+        if (entity instanceof PlayerEntity)
+        {
+            PlayerEntity player = ((PlayerEntity) entity);
+            if (player.tickCount % 20 == 0)
+            {   calculateHudVisibility(player);
+            }
+            if (player.isCreative())
+            {   this.setTemp(Temperature.Type.CORE, 0);
+            }
         }
     }
 
@@ -32,12 +41,12 @@ public class PlayerTempCap extends AbstractTempCap
     public void tickDummy(LivingEntity entity)
     {
         super.tickDummy(entity);
-        if (entity.tickCount % 20 == 0 && entity instanceof Player player)
-        {   calculateHudVisibility(player);
+        if (entity.tickCount % 20 == 0 && entity instanceof PlayerEntity)
+        {   calculateHudVisibility(((PlayerEntity) entity));
         }
     }
 
-    public void calculateHudVisibility(Player player)
+    public void calculateHudVisibility(PlayerEntity player)
     {
         showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
                 || player.inventory.items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
