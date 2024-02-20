@@ -1853,3 +1853,4 @@ Technical Changes:
       - Core temperature attribute has been removed
 - Added new sub-command for /temperature: "modify"
       - Allows for changing the player's temperature attributes
+      - Attributes can also be set to be "permanent", meaning they persist through death

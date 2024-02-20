@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -95,13 +96,13 @@ public class ConfigSettings
     public static final DynamicHolder<Integer> TEMP_OFFSET;
     public static final DynamicHolder<Double> TEMP_SMOOTHING;
 
-    public static final DynamicHolder<Pair<Integer, Integer>> BODY_ICON_POS;
+    public static final DynamicHolder<Vec2i> BODY_ICON_POS;
     public static final DynamicHolder<Boolean> BODY_ICON_ENABLED;
 
-    public static final DynamicHolder<Pair<Integer, Integer>> BODY_READOUT_POS;
+    public static final DynamicHolder<Vec2i> BODY_READOUT_POS;
     public static final DynamicHolder<Boolean> BODY_READOUT_ENABLED;
 
-    public static final DynamicHolder<Pair<Integer, Integer>> WORLD_GAUGE_POS;
+    public static final DynamicHolder<Vec2i> WORLD_GAUGE_POS;
     public static final DynamicHolder<Boolean> WORLD_GAUGE_ENABLED;
 
     public static final DynamicHolder<Boolean> CUSTOM_HOTBAR_LAYOUT;
@@ -110,7 +111,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> HEARTH_DEBUG;
 
     public static final DynamicHolder<Boolean> SHOW_CONFIG_BUTTON;
-    public static final DynamicHolder<Pair<Integer, Integer>> CONFIG_BUTTON_POS;
+    public static final DynamicHolder<Vec2i> CONFIG_BUTTON_POS;
 
     public static final DynamicHolder<Boolean> DISTORTION_EFFECTS;
 
@@ -585,15 +586,15 @@ public class ConfigSettings
 
         TEMP_SMOOTHING = addSetting("temp_smoothing", () -> ClientSettingsConfig.getInstance().getTempSmoothing());
 
-        BODY_ICON_POS = addSetting("body_icon_pos", () -> Pair.of(ClientSettingsConfig.getInstance().getBodyIconX(),
+        BODY_ICON_POS = addSetting("body_icon_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
                                                                   ClientSettingsConfig.getInstance().getBodyIconY()));
         BODY_ICON_ENABLED = addSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
 
-        BODY_READOUT_POS = addSetting("body_readout_pos", () -> Pair.of(ClientSettingsConfig.getInstance().getBodyReadoutX(),
+        BODY_READOUT_POS = addSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
                                                                       ClientSettingsConfig.getInstance().getBodyReadoutY()));
         BODY_READOUT_ENABLED = addSetting("body_readout_enabled", () -> ClientSettingsConfig.getInstance().isBodyReadoutEnabled());
 
-        WORLD_GAUGE_POS = addSetting("world_gauge_pos", () -> Pair.of(ClientSettingsConfig.getInstance().getWorldGaugeX(),
+        WORLD_GAUGE_POS = addSetting("world_gauge_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
                                                                     ClientSettingsConfig.getInstance().getWorldGaugeY()));
         WORLD_GAUGE_ENABLED = addSetting("world_gauge_enabled", () -> ClientSettingsConfig.getInstance().isWorldGaugeEnabled());
 
@@ -603,7 +604,7 @@ public class ConfigSettings
         HEARTH_DEBUG = addSetting("hearth_debug", () -> ClientSettingsConfig.getInstance().isHearthDebug());
 
         SHOW_CONFIG_BUTTON = addSetting("show_config_button", () -> ClientSettingsConfig.getInstance().showConfigButton());
-        CONFIG_BUTTON_POS = addSetting("config_button_pos", () -> Pair.of(ClientSettingsConfig.getInstance().getConfigButtonPos().get(0),
+        CONFIG_BUTTON_POS = addSetting("config_button_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getConfigButtonPos().get(0),
                                                                           ClientSettingsConfig.getInstance().getConfigButtonPos().get(1)));
 
         DISTORTION_EFFECTS = addSetting("distortion_effects", () -> ClientSettingsConfig.getInstance().areDistortionsEnabled());

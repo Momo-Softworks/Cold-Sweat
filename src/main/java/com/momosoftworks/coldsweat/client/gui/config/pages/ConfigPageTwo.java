@@ -73,10 +73,10 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
-                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
-                                                                   ConfigSettings.BODY_ICON_POS.get().getSecond())),
-                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                                                   ConfigSettings.BODY_ICON_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
+                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                   ConfigSettings.BODY_ICON_POS.get().y())),
+                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().x(),
+                                                                   ConfigSettings.BODY_ICON_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
                 {   ConfigSettings.BODY_ICON_POS.set(Pair.of(0, 0));
                 },
@@ -89,10 +89,10 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_readout_location.name"),
-                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
-                                                                      ConfigSettings.BODY_READOUT_POS.get().getSecond())),
-                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().getFirst(),
-                                                                      ConfigSettings.BODY_READOUT_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().y())),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().x(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
                 {   ConfigSettings.BODY_READOUT_POS.set(Pair.of(0, 0));
                 },
@@ -104,10 +104,10 @@ public class ConfigPageTwo extends AbstractConfigPage
                                               Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, Component.translatable("cold_sweat.config.world_temp_location.name"),
-                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().getFirst() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
-                                                                     ConfigSettings.WORLD_GAUGE_POS.get().getSecond())),
-                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
-                                                                     ConfigSettings.WORLD_GAUGE_POS.get().getSecond() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().y())),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
                 {   ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(0, 0));
                 },

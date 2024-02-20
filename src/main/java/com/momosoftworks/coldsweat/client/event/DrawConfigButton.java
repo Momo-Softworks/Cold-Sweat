@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -33,9 +34,9 @@ public class DrawConfigButton
         if (event.getScreen() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<Pair<Integer, Integer>> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
-            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().getFirst());
-            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().getSecond());
+            Supplier<Vec2i> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().x());
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().y());
             int buttonX = event.getScreen().width / 2 - 183;
             int buttonY = event.getScreen().height / 6 + 110;
             int screenWidth = event.getScreen().width;
