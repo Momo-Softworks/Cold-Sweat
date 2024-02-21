@@ -79,11 +79,12 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_icon_location.name"),
-                amount -> clientConfig.setBodyIconX(clientConfig.getBodyIconX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setBodyIconY(clientConfig.getBodyIconY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                   ConfigSettings.BODY_ICON_POS.get().y())),
+                amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x(),
+                                                                     ConfigSettings.BODY_ICON_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setBodyIconX(0);
-                    clientConfig.setBodyIconY(0);
+                {   ConfigSettings.BODY_ICON_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   clientConfig.setBodyIconEnabled(!clientConfig.isBodyIconEnabled());
@@ -94,11 +95,12 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_readout_location.name"),
-                amount -> clientConfig.setBodyReadoutX(clientConfig.getBodyReadoutX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setBodyReadoutY(clientConfig.getBodyReadoutY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().y())),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x(),
+                                                                      ConfigSettings.BODY_READOUT_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setBodyReadoutX(0);
-                    clientConfig.setBodyReadoutY(0);
+                {   ConfigSettings.BODY_READOUT_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   clientConfig.setBodyReadoutEnabled(!clientConfig.isBodyReadoutEnabled());
@@ -108,11 +110,12 @@ public class ConfigPageTwo extends AbstractConfigPage
                                           new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.world_temp_location.name"),
-                amount -> clientConfig.setWorldGaugeX(clientConfig.getWorldGaugeX() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
-                amount -> clientConfig.setWorldGaugeY(clientConfig.getWorldGaugeY() + amount * ConfigScreen.SHIFT_AMOUNT.get()),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(ConfigSettings.WORLD_GAUGE_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().y())),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                                                                     ConfigSettings.WORLD_GAUGE_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   clientConfig.setWorldGaugeX(0);
-                    clientConfig.setWorldGaugeY(0);
+                {   ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   clientConfig.setWorldGaugeEnabled(!clientConfig.isWorldGaugeEnabled());

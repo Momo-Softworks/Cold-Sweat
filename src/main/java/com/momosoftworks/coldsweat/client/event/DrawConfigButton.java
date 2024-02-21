@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class DrawConfigButton
 {
-    public static boolean DRAW_CONTROLS = false;
+    public static boolean EDIT_MODE = false;
 
     @SubscribeEvent
     public static void eventHandler(GuiScreenEvent.InitGuiEvent event)
@@ -47,8 +48,7 @@ public class DrawConfigButton
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
             {   xOffset.set(0);
                 yOffset.set(0);
-                ClientSettingsConfig.getInstance().setConfigButtonPos(Arrays.asList(0, 0));
-                ClientSettingsConfig.getInstance().save();
+                ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(0, 0));
             }
 
             // Main config button
@@ -67,7 +67,7 @@ public class DrawConfigButton
             event.addWidget(mainButton);
 
             // Reconfigure the options screen with controls for the position of the config button
-            if (DRAW_CONTROLS)
+            if (EDIT_MODE)
             {
                 int buttonStartX = event.getGui().width / 2 - 183;
                 int buttonStartY = event.getGui().height / 6 + 110;
@@ -75,8 +75,7 @@ public class DrawConfigButton
                 {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
                     yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
                     mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
-                    ClientSettingsConfig.getInstance().setConfigButtonPos(Arrays.asList(xOffset.get(), yOffset.get()));
-                    ClientSettingsConfig.getInstance().save();
+                    ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(xOffset.get(), yOffset.get()));
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
@@ -155,7 +154,7 @@ public class DrawConfigButton
                 // Add reset button
                 event.addWidget(resetButton);
 
-                TaskScheduler.scheduleClient(() -> DRAW_CONTROLS = false, 1);
+                TaskScheduler.scheduleClient(() -> EDIT_MODE = false, 1);
             }
         }
     }
