@@ -250,11 +250,11 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(Component.literal(CSMath.sigFigs(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
+            source.sendSuccess(Component.literal(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                        .append(Component.literal(modifier.toString()).withStyle(ChatFormatting.GOLD))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(Component.literal(CSMath.sigFigs(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
+                       .append(Component.literal(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
         }
         return Command.SINGLE_SUCCESS;
     }
