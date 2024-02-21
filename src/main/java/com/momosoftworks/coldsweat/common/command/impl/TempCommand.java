@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.ITemperatureCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
@@ -250,11 +251,11 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(new TextComponent(CSMath.sigFigs(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
+            source.sendSuccess(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
                        .append(new TextComponent(modifier.toString()).withStyle(ChatFormatting.GOLD))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(new TextComponent(CSMath.sigFigs(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
+                       .append(new TextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
         }
         return Command.SINGLE_SUCCESS;
     }

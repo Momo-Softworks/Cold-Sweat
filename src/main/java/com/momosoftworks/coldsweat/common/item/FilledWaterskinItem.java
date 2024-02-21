@@ -286,8 +286,8 @@ public class FilledWaterskinItem extends Item
         tooltip.add(new TextComponent(""));
         tooltip.add(new TranslatableComponent("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
         tooltip.add(new TranslatableComponent("tooltip.cold_sweat.temperature_effect",
-                                                 (CSMath.getSign(temp) >= 0 ? "+" : "-")
-                                               + (temp != 0 ? EFFECT_RATE * ConfigSettings.TEMP_RATE.get() : 0))
+                                           (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                           + (temp != 0 ? CSMath.truncate(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2) : 0))
                             .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : ChatFormatting.WHITE));
 
         // Tooltip to display temperature
@@ -330,7 +330,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
     {
-        if (this.allowedIn(tab))
+        if (this.allowdedIn(tab))
         {   ItemStack stack = new ItemStack(this);
             stack = CompatManager.setWaterPurity(stack, 3);
             itemList.add(stack);
