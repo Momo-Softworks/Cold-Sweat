@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -9,7 +8,9 @@ import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Vector2i;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,9 +35,9 @@ public class DrawConfigButton
         if (event.getScreen() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<Pair<Integer, Integer>> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
-            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().getFirst());
-            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().getSecond());
+            Supplier<Vector2i> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().x());
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().y());
             int buttonX = event.getScreen().width / 2 - 183;
             int buttonY = event.getScreen().height / 6 + 110;
             int screenWidth = event.getScreen().width;
@@ -44,7 +46,7 @@ public class DrawConfigButton
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
             {   xOffset.set(0);
                 yOffset.set(0);
-                ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(0, 0));
+                ConfigSettings.CONFIG_BUTTON_POS.set(new Vector2i(0, 0));
             }
 
             // Main config button
@@ -71,7 +73,7 @@ public class DrawConfigButton
                 {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
                     yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
                     mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
-                    ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(xOffset.get(), yOffset.get()));
+                    ConfigSettings.CONFIG_BUTTON_POS.set(new Vector2i(xOffset.get(), yOffset.get()));
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
