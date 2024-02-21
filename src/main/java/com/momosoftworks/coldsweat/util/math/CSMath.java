@@ -392,7 +392,7 @@ public class CSMath
      * @param sigFigs The amount of decimal places to limit to.
      * @return The value with the decimal places limited.
      */
-    public static double sigFigs(double value, int sigFigs)
+    public static double truncate(double value, int sigFigs)
     {
         return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
     }
