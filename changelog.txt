@@ -1841,6 +1841,7 @@ Fixes:
       - This should provide a needed buff to the icebox/boiler and make the hearth more worth it
 
 Fixes:
+- Fixed the smokestack not having a recipe
 - Fixed world temperature changing slightly when sitting in a minecart due to the player's hitbox being in the ground
 - Fixed boiler/icebox not saving insulation strength upon world reload
 
