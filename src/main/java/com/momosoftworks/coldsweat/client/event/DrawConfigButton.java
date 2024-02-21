@@ -8,7 +8,9 @@ import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +27,7 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class DrawConfigButton
 {
-    public static boolean DRAW_CONTROLS = false;
+    public static boolean EDIT_MODE = false;
 
     @SubscribeEvent
     public static void eventHandler(ScreenEvent.InitScreenEvent event)
@@ -44,8 +46,7 @@ public class DrawConfigButton
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
             {   xOffset.set(0);
                 yOffset.set(0);
-                ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(0, 0));
-                ClientSettingsConfig.getInstance().save();
+                ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(0, 0));
             }
 
             // Main config button
@@ -64,7 +65,7 @@ public class DrawConfigButton
             event.addListener(mainButton);
 
             // Reconfigure the options screen with controls for the position of the config button
-            if (DRAW_CONTROLS)
+            if (EDIT_MODE)
             {
                 int buttonStartX = event.getScreen().width / 2 - 183;
                 int buttonStartY = event.getScreen().height / 6 + 110;
@@ -72,8 +73,7 @@ public class DrawConfigButton
                 {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
                     yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
                     mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
-                    ClientSettingsConfig.getInstance().setConfigButtonPos(List.of(xOffset.get(), yOffset.get()));
-                    ClientSettingsConfig.getInstance().save();
+                    ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(xOffset.get(), yOffset.get()));
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
@@ -151,7 +151,7 @@ public class DrawConfigButton
                 // Add reset button
                 event.addListener(resetButton);
 
-                TaskScheduler.scheduleClient(() -> DRAW_CONTROLS = false, 1);
+                TaskScheduler.scheduleClient(() -> EDIT_MODE = false, 1);
             }
         }
     }
