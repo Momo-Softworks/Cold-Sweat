@@ -1,10 +1,10 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.DrawConfigButton;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -73,12 +73,12 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
-                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
                                                                    ConfigSettings.BODY_ICON_POS.get().y())),
-                amount -> ConfigSettings.BODY_ICON_POS.set(Pair.of(ConfigSettings.BODY_ICON_POS.get().x(),
-                                                                   ConfigSettings.BODY_ICON_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
+                amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x(),
+                                                                     ConfigSettings.BODY_ICON_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   ConfigSettings.BODY_ICON_POS.set(Pair.of(0, 0));
+                {   ConfigSettings.BODY_ICON_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   ConfigSettings.BODY_ICON_ENABLED.set(!ConfigSettings.BODY_ICON_ENABLED.get());
@@ -89,12 +89,12 @@ public class ConfigPageTwo extends AbstractConfigPage
 
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_readout_location.name"),
-                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
                                                                       ConfigSettings.BODY_READOUT_POS.get().y())),
-                amount -> ConfigSettings.BODY_READOUT_POS.set(Pair.of(ConfigSettings.BODY_READOUT_POS.get().x(),
+                amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x(),
                                                                       ConfigSettings.BODY_READOUT_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   ConfigSettings.BODY_READOUT_POS.set(Pair.of(0, 0));
+                {   ConfigSettings.BODY_READOUT_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   ConfigSettings.BODY_READOUT_ENABLED.set(!ConfigSettings.BODY_READOUT_ENABLED.get());
@@ -104,12 +104,12 @@ public class ConfigPageTwo extends AbstractConfigPage
                                               Component.translatable("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
         this.addDirectionPanel("gauge_directions", Side.RIGHT, Component.translatable("cold_sweat.config.world_temp_location.name"),
-                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(ConfigSettings.WORLD_GAUGE_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
                                                                      ConfigSettings.WORLD_GAUGE_POS.get().y())),
-                amount -> ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                amount -> ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(ConfigSettings.WORLD_GAUGE_POS.get().x(),
                                                                      ConfigSettings.WORLD_GAUGE_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
-                {   ConfigSettings.WORLD_GAUGE_POS.set(Pair.of(0, 0));
+                {   ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(0, 0));
                 },
                 () ->
                 {   ConfigSettings.WORLD_GAUGE_ENABLED.set(!ConfigSettings.WORLD_GAUGE_ENABLED.get());

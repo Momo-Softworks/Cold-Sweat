@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -10,7 +9,9 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +46,7 @@ public class DrawConfigButton
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
             {   xOffset.set(0);
                 yOffset.set(0);
-                ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(0, 0));
+                ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(0, 0));
             }
 
             // Main config button
@@ -72,7 +73,7 @@ public class DrawConfigButton
                 {   xOffset.set(CSMath.clamp(xOffset.get(), -buttonStartX, screenWidth - mainButton.getWidth() - buttonStartX));
                     yOffset.set(CSMath.clamp(yOffset.get(), -buttonStartY, screenHeight - mainButton.getHeight() - buttonStartY));
                     mainButton.setPosition(buttonStartX + xOffset.get(), buttonStartY + yOffset.get());
-                    ConfigSettings.CONFIG_BUTTON_POS.set(Pair.of(xOffset.get(), yOffset.get()));
+                    ConfigSettings.CONFIG_BUTTON_POS.set(new Vec2i(xOffset.get(), yOffset.get()));
                 };
 
                 AtomicReference<AbstractButton> doneButtonAtomic = new AtomicReference<>(null);
