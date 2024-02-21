@@ -282,8 +282,8 @@ public class FilledWaterskinItem extends Item
         tooltip.add(new StringTextComponent(""));
         tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
         tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.temperature_effect",
-                                                 (CSMath.getSign(temp) >= 0 ? "+" : "-")
-                                               + (temp != 0 ? EFFECT_RATE * ConfigSettings.TEMP_RATE.get() : 0))
+                                           (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                           + (temp != 0 ? CSMath.truncate(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2) : 0))
                             .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : TextFormatting.WHITE));
 
         // Tooltip to display temperature

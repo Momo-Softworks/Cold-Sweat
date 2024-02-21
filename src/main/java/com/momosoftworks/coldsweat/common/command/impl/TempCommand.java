@@ -251,11 +251,11 @@ public class TempCommand extends BaseCommand
         }
         for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
         {
-            source.sendSuccess(new StringTextComponent(CSMath.sigFigs(modifier.getLastInput(), 2)+"").withStyle(TextFormatting.WHITE)
+            source.sendSuccess(new StringTextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(TextFormatting.WHITE)
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
                        .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GOLD))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
-                       .append(new StringTextComponent(CSMath.sigFigs(modifier.getLastOutput(), 2)+"").withStyle(TextFormatting.AQUA)), false);
+                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(TextFormatting.AQUA)), false);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -265,8 +265,9 @@ public class TempCommand extends BaseCommand
     {
         for (Entity entity : entities)
         {
-            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
+            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity)
             {
+                LivingEntity livingEntity = ((LivingEntity) entity);
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                     if (instance == null) return;
