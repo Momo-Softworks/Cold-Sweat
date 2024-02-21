@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.config;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -11,6 +12,8 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.*;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -90,6 +93,34 @@ public class ConfigSettings
     public static final DynamicHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final DynamicHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
     public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
+
+    // Client Settings **NULL ON THE SERVER**
+    public static final DynamicHolder<Boolean> CELSIUS;
+    public static final DynamicHolder<Integer> TEMP_OFFSET;
+    public static final DynamicHolder<Double> TEMP_SMOOTHING;
+
+    public static final DynamicHolder<Vec2i> BODY_ICON_POS;
+    public static final DynamicHolder<Boolean> BODY_ICON_ENABLED;
+
+    public static final DynamicHolder<Vec2i> BODY_READOUT_POS;
+    public static final DynamicHolder<Boolean> BODY_READOUT_ENABLED;
+
+    public static final DynamicHolder<Vec2i> WORLD_GAUGE_POS;
+    public static final DynamicHolder<Boolean> WORLD_GAUGE_ENABLED;
+
+    public static final DynamicHolder<Boolean> CUSTOM_HOTBAR_LAYOUT;
+    public static final DynamicHolder<Boolean> ICON_BOBBING;
+
+    public static final DynamicHolder<Boolean> HEARTH_DEBUG;
+
+    public static final DynamicHolder<Boolean> SHOW_CONFIG_BUTTON;
+    public static final DynamicHolder<Vec2i> CONFIG_BUTTON_POS;
+
+    public static final DynamicHolder<Boolean> DISTORTION_EFFECTS;
+
+    public static final DynamicHolder<Boolean> HIGH_CONTRAST;
+
+    public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -553,6 +584,39 @@ public class ConfigSettings
 
         HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthStrength());
 
+        CELSIUS = addClientSetting("celsius", () -> ClientSettingsConfig.getInstance().isCelsius());
+
+        TEMP_OFFSET = addClientSetting("temp_offset", () -> ClientSettingsConfig.getInstance().getTempOffset());
+
+        TEMP_SMOOTHING = addClientSetting("temp_smoothing", () -> ClientSettingsConfig.getInstance().getTempSmoothing());
+
+        BODY_ICON_POS = addClientSetting("body_icon_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
+                                                                  ClientSettingsConfig.getInstance().getBodyIconY()));
+        BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
+
+        BODY_READOUT_POS = addClientSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
+                                                                      ClientSettingsConfig.getInstance().getBodyReadoutY()));
+        BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", () -> ClientSettingsConfig.getInstance().isBodyReadoutEnabled());
+
+        WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
+                                                                    ClientSettingsConfig.getInstance().getWorldGaugeY()));
+        WORLD_GAUGE_ENABLED = addClientSetting("world_gauge_enabled", () -> ClientSettingsConfig.getInstance().isWorldGaugeEnabled());
+
+        CUSTOM_HOTBAR_LAYOUT = addClientSetting("custom_hotbar_layout", () -> ClientSettingsConfig.getInstance().customHotbarEnabled());
+        ICON_BOBBING = addClientSetting("icon_bobbing", () -> ClientSettingsConfig.getInstance().isIconBobbingEnabled());
+
+        HEARTH_DEBUG = addClientSetting("hearth_debug", () -> ClientSettingsConfig.getInstance().isHearthDebugEnabled());
+
+        SHOW_CONFIG_BUTTON = addClientSetting("show_config_button", () -> ClientSettingsConfig.getInstance().isConfigButtonEnabled());
+        CONFIG_BUTTON_POS = addClientSetting("config_button_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getConfigButtonPos().get(0),
+                                                                          ClientSettingsConfig.getInstance().getConfigButtonPos().get(1)));
+
+        DISTORTION_EFFECTS = addClientSetting("distortion_effects", () -> ClientSettingsConfig.getInstance().areDistortionsEnabled());
+
+        HIGH_CONTRAST = addClientSetting("high_contrast", () -> ClientSettingsConfig.getInstance().isHighContrast());
+
+        SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", () -> ClientSettingsConfig.getInstance().isCreativeWarningEnabled());
+
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
         AUTUMN_TEMPS = addSetting("autumn_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getAutumnTemps() : () -> new Double[3]);
@@ -605,6 +669,7 @@ public class ConfigSettings
         CUSTOM(CSMath.mapOf());
 
         private final Map<String, Supplier<?>> settings;
+
         Difficulty(Map<String, Supplier<?>> settings)
         {   this.settings = settings;
         }
@@ -632,6 +697,13 @@ public class ConfigSettings
     {   DynamicHolder<T> loader = DynamicHolder.create(supplier);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
+    }
+
+    public static <T> DynamicHolder<T> addClientSetting(String id, Supplier<T> supplier)
+    {
+        return FMLEnvironment.dist == Dist.CLIENT
+             ? addSetting(id, supplier)
+             : new DynamicHolder<>(() -> null);
     }
 
     public static Map<String, CompoundNBT> encode()
