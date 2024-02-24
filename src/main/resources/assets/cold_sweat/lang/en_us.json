@@ -55,6 +55,7 @@
 
 
   "itemGroup.cold_sweat": "Cold Sweat",
+  "itemGroup.cs_insulation_items": "Cold Sweat: Insulators",
 
 
   "death.attack.cold_sweat:cold":          "%1$s froze to death",
