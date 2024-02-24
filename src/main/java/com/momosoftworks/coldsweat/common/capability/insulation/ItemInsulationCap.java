@@ -1,12 +1,12 @@
 package com.momosoftworks.coldsweat.common.capability.insulation;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -53,21 +53,21 @@ public class ItemInsulationCap implements IInsulatableCap
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
                 {
-                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2 * CSMath.getSign(cold));
+                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2 * CSMath.sign(cold));
                     newValues.add(new Insulation(coldInsul, 0d));
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
                 {
-                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), CSMath.getSign(neutral));
+                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), CSMath.sign(neutral));
                     newValues.add(new Insulation(neutralInsul, neutralInsul));
                 }
 
                 // Hot insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(hot) / 2); i++)
                 {
-                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2 * CSMath.getSign(hot));
+                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2 * CSMath.sign(hot));
                     newValues.add(new Insulation(0d, hotInsul));
                 }
             }
@@ -79,7 +79,7 @@ public class ItemInsulationCap implements IInsulatableCap
                 double insulValue = insulation.getFirst();
                 for (int i = 0; i < CSMath.ceil(Math.abs(insulValue) / 2); i++)
                 {
-                    newValues.add(new AdaptiveInsulation(CSMath.minAbs(CSMath.shrink(insulValue, i * 2), 2 * CSMath.getSign(insulValue)),
+                    newValues.add(new AdaptiveInsulation(CSMath.minAbs(CSMath.shrink(insulValue, i * 2), 2 * CSMath.sign(insulValue)),
                                                          adaptiveInsulation.getFactor(), adaptiveInsulation.getSpeed()));
                 }
             }
@@ -170,25 +170,7 @@ public class ItemInsulationCap implements IInsulatableCap
             // Store ItemStack data
             entryNBT.put("Item", entry.getFirst().save(new CompoundTag()));
 
-            ListTag pairListNBT = new ListTag();
-            // Store insulation values for the item
-            for (InsulationPair pair : pairList)
-            {
-                CompoundTag pairTag = new CompoundTag();
-                if (pair instanceof Insulation insul)
-                {
-                    pairTag.putDouble("Cold", insul.getCold());
-                    pairTag.putDouble("Hot", insul.getHot());
-                }
-                else if (pair instanceof AdaptiveInsulation insul)
-                {
-                    pairTag.putDouble("Amount", insul.getInsulation());
-                    pairTag.putDouble("Factor", insul.getFactor());
-                    pairTag.putDouble("Speed", insul.getSpeed());
-                }
-                // Add the value to the pair list
-                pairListNBT.add(pairTag);
-            }
+            ListTag pairListNBT = serializeInsulation(pairList);
             entryNBT.put("Values", pairListNBT);
             // Add the item to the list
             insulNBT.add(entryNBT);
@@ -200,6 +182,31 @@ public class ItemInsulationCap implements IInsulatableCap
         saveCooldown = 400;
         savedTag = tag;
         return tag;
+    }
+
+    @NotNull
+    private static ListTag serializeInsulation(List<InsulationPair> pairList)
+    {
+        ListTag pairListNBT = new ListTag();
+        // Store insulation values for the item
+        for (InsulationPair pair : pairList)
+        {
+            CompoundTag pairTag = new CompoundTag();
+            if (pair instanceof Insulation insul)
+            {
+                pairTag.putDouble("Cold", insul.getCold());
+                pairTag.putDouble("Hot", insul.getHot());
+            }
+            else if (pair instanceof AdaptiveInsulation insul)
+            {
+                pairTag.putDouble("Amount", insul.getInsulation());
+                pairTag.putDouble("Factor", insul.getFactor());
+                pairTag.putDouble("Speed", insul.getSpeed());
+            }
+            // Add the value to the pair list
+            pairListNBT.add(pairTag);
+        }
+        return pairListNBT;
     }
 
     @Override

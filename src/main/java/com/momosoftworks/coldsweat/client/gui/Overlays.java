@@ -239,8 +239,6 @@ public class Overlays
 
             // Render frame
             graphics.blit(VAGUE_TEMP_GAUGE_LOCATION.get(),
-                          //(width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(),
-                          //height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset,
                           (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
                           height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
                           0, 64 - severity * 16, 16, 16, 16, 144);
@@ -282,7 +280,7 @@ public class Overlays
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.getSign(diff));
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                     // Update max/min offset
                     MAX_OFFSET = cap.getAbility(Temperature.Ability.FREEZING_POINT);
@@ -320,7 +318,7 @@ public class Overlays
     }
 
     static double getBodySeverity(int temp)
-    {   int sign = CSMath.getSign(temp);
+    {   int sign = CSMath.sign(temp);
         int absTemp = Math.abs(temp);
 
         return absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100) * sign

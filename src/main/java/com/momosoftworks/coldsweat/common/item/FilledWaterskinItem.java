@@ -154,7 +154,7 @@ public class FilledWaterskinItem extends Item
                 double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
                 itemstack.getOrCreateTag().putDouble("temperature", newTemp);
-                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.getSign(itemTemp)).expires(5), Temperature.Type.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Type.CORE, true);
             }
         }
     }
@@ -281,7 +281,7 @@ public class FilledWaterskinItem extends Item
         tooltip.add(Component.empty());
         tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.cold_sweat.temperature_effect",
-                                           (CSMath.getSign(temp) >= 0 ? "+" : "-")
+                                           (CSMath.sign(temp) >= 0 ? "+" : "-")
                                            + (temp != 0 ? CSMath.truncate(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2) : 0))
                             .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : ChatFormatting.WHITE));
 

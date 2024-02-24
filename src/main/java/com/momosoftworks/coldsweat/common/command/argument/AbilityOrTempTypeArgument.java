@@ -49,7 +49,7 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
 
     private AbilityOrTempTypeArgument()
     {   this.codec = TEMPERATURES_CODEC;
-        this.values = () -> (Either<Temperature.Type, Temperature.Ability>[]) EntityTempManager.VALID_ATTRIBUTES;
+        this.values = () -> (Either<Temperature.Type, Temperature.Ability>[]) EntityTempManager.VALID_ATTRIBUTE_TYPES;
     }
 
     public static AbilityOrTempTypeArgument type()

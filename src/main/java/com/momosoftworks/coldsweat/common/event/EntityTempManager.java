@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
@@ -73,7 +74,7 @@ public class EntityTempManager
 
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.WORLD};
 
-    public static final Either<Temperature.Type, Temperature.Ability>[] VALID_ATTRIBUTES = new Either[]
+    public static final Either<Temperature.Type, Temperature.Ability>[] VALID_ATTRIBUTE_TYPES = new Either[]
     {
         Either.left(Temperature.Type.WORLD),
         Either.left(Temperature.Type.BASE),
@@ -167,6 +168,26 @@ public class EntityTempManager
                     });
                 }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void initAttributesFromOldCap(EntityJoinLevelEvent event)
+    {
+        if (event.getEntity() instanceof LivingEntity living
+        && getEntitiesWithTemperature().contains(living.getType())
+        && !living.getPersistentData().contains("PersistentAttributes"))
+        {
+            TaskScheduler.schedule(() ->
+            {
+                for (Either<Temperature.Type, Temperature.Ability> type : VALID_ATTRIBUTE_TYPES)
+                {   AttributeInstance attribute = getAttribute(type, living);
+                    if (attribute == null) continue;
+                    attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
+                    attribute.removeModifiers();
+                }
+                living.getPersistentData().put("PersistentAttributes", new CompoundTag());
+            }, 1);
         }
     }
 
