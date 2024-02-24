@@ -1,17 +1,21 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.List;
+import java.util.*;
 
 public class CreativeTabInit
 {
@@ -60,4 +64,29 @@ public class CreativeTabInit
             })
             .title(Component.translatable("itemGroup.cold_sweat"))
             .build());
+
+    public static RegistryObject<CreativeModeTab> INSULATION_ITEMS_TAB = ITEM_GROUPS.register("cs_insulation_items", () -> CreativeModeTab.builder()
+            .icon(() -> ModItems.CHAMELEON_MOLT.getDefaultInstance())
+            .displayItems((params, list) ->
+            {
+                list.acceptAll(sort(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().keySet()));
+                list.acceptAll(sort(ConfigSettings.INSULATION_ITEMS.get().keySet()));
+                list.acceptAll(sort(ConfigSettings.INSULATING_ARMORS.get().keySet()));
+                list.acceptAll(sort(ConfigSettings.INSULATING_CURIOS.get().keySet()));
+            })
+            .title(Component.translatable("itemGroup.cs_insulation_items"))
+            .build());
+
+    private static List<ItemStack> sort(Set<Item> items)
+    {   List<ItemStack> list = new ArrayList<>(items.stream().map(Item::getDefaultInstance).toList());
+        // Sort by name first
+        list.sort(Comparator.comparing(item -> item.getDisplayName().getString()));
+        // Sort by tags the items are in
+        list.sort(Comparator.comparing(item -> ForgeRegistries.ITEMS.tags().getReverseTag(item.getItem()).orElse(null).getTagKeys().sequential().map(tag -> tag.location().toString()).reduce("", (a, b) -> a + b)));
+        // Sort by armor material and slot
+        list.sort(Comparator.comparing(item -> item.getItem() instanceof ArmorItem armor
+                                               ? armor.getMaterial().getName() + (3 - armor.getEquipmentSlot().getIndex())
+                                               : ""));
+        return list;
+    }
 }
