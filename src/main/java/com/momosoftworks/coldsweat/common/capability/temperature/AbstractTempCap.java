@@ -224,8 +224,7 @@ public class AbstractTempCap implements ITemperatureCap
         boolean isFullyHeatDampened = worldTempSign > 0 && heatDampening >= 1;
 
         // Don't change player temperature if they're in creative/spectator mode
-        if (worldTempSign != 0 && (!(entity instanceof PlayerEntity) || !((PlayerEntity) entity).isCreative()) && !entity.isSpectator()
-        && !(isFullyColdDampened || isFullyHeatDampened))
+        if (worldTempSign != 0 && (!(entity instanceof PlayerEntity) || !((PlayerEntity) entity).isCreative()) && !entity.isSpectator())
         {
             // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
@@ -239,32 +238,46 @@ public class AbstractTempCap implements ITemperatureCap
             // If it's hot or cold
             ) * worldTempSign);
 
-            // Apply cold/heat dampening to slow/increase the rate
+            // Temp is decreasing; apply cold dampening
             if (changeBy < 0)
-            {   changeBy = (coldDampening < 0 ? changeBy * -(1 + coldDampening) : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
+            {   changeBy = (coldDampening < 0
+                            // Cold dampening is negative; increase the change by the dampening
+                            ? changeBy * (1 + Math.abs(coldDampening))
+                            // Cold dampening is positive; apply the change as a percentage of the dampening
+                            : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
             }
-            else
-            {   changeBy = (heatDampening < 0 ? changeBy * -(1 + heatDampening) : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
+            // Temp is increasing; apply heat dampening
+            else if (changeBy > 0)
+            {   changeBy = (heatDampening < 0
+                            // Heat dampening is negative; increase the change by the dampening
+                            ? changeBy * (1 + Math.abs(heatDampening))
+                            // Heat dampening is positive; apply the change as a percentage of the dampening
+                            : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             }
             newCoreTemp += Temperature.apply(changeBy, entity, Type.RATE, this.getModifiers(Type.RATE));
         }
 
-        // If the player's temperature and world temperature are not both hot or both cold, return to neutral
-        int coreTempSign = CSMath.getSign(newCoreTemp);
+        // Get the sign of the player's core temperature (-1, 0, or 1)
+        int coreTempSign = CSMath.sign(newCoreTemp);
+        // If needed, blend the player's temperature back to 0
         if (this.getModifiers(Type.CORE).isEmpty())
         {
-            double factor = 0;
+            double amount = 0;
+            // Player is fully cold dampened & body is cold
             if (isFullyColdDampened && coreTempSign < 0)
-            {   factor = ConfigSettings.TEMP_RATE.get() / 10d;
+            {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
             }
+            // Player is fully heat dampened & body is hot
             else if (isFullyHeatDampened && coreTempSign > 0)
-            {   factor = ConfigSettings.TEMP_RATE.get() / -10d;
+            {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
             }
+            // Else if the player's core temp is not the same as the world temp
             else if (coreTempSign != 0 && coreTempSign != worldTempSign)
-            {   factor = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
+            {   amount = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
             }
-            if (factor != 0)
-            {   double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
+            // Blend back to 0
+            if (amount != 0)
+            {   double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
                 newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Type.CORE));
             }
         }
