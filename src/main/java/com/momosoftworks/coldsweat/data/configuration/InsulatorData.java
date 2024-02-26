@@ -19,11 +19,31 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public record InsulatorData(Optional<Either<Item, List<Item>>> item, Optional<TagKey<Item>> tag, InsulationType type,
+public record InsulatorData(List<Either<TagKey<Item>, Item>> items, Optional<TagKey<Item>> tag, InsulationType type,
                             Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundTag> nbt) implements IForgeRegistryEntry<InsulatorData>
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(ForgeRegistries.ITEMS.getCodec(), ForgeRegistries.ITEMS.getCodec().listOf()).optionalFieldOf("item").forGetter(InsulatorData::item),
+            Codec.STRING.xmap(
+            // Convert from a string to a TagKey
+            string ->
+            {
+                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                if (tagLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(tagLocation));
+
+                return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, tagLocation));
+            },
+            // Convert from a TagKey to a string
+            tag ->
+            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
+                String result = tag.left().isPresent()
+                                ? "#" + tag.left().get().location()
+                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
+                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+                return result;
+            })
+            .listOf()
+            .fieldOf("items").forGetter(InsulatorData::items),
             TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("tag").forGetter(InsulatorData::tag),
             InsulationType.CODEC.fieldOf("type").forGetter(InsulatorData::type),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).fieldOf("insulation").forGetter(InsulatorData::insulation),
