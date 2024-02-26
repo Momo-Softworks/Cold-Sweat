@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.entity.data.edible;
 
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
-import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.TagKey;

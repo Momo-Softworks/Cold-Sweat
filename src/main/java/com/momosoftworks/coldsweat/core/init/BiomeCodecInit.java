@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.data.biome_modifiers.AddSpawnsBiomeModifier;
+import com.momosoftworks.coldsweat.data.biome_modifier.AddSpawnsBiomeModifier;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

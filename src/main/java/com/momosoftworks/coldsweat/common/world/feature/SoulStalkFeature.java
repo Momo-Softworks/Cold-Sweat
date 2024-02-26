@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.world.feature;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.common.block.SoulStalkBlock;
-import com.momosoftworks.coldsweat.data.tags.ModBlockTags;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;

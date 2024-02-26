@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.tags;
+package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.core.Registry;
