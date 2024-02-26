@@ -13,7 +13,7 @@ import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
@@ -22,23 +22,20 @@ import java.util.Optional;
 
 public class InsulatorData implements IForgeRegistryEntry<InsulatorData>
 {
-    Optional<Either<Item, List<Item>>> item;
-    Optional<ITag<Item>> tag;
+    List<Either<ITag<Item>, Item>> items;
     InsulationType type;
     Either<StaticInsulation, AdaptiveInsulation> insulation;
     Optional<CompoundNBT> nbt;
 
-    public InsulatorData(Optional<Either<Item, List<Item>>> itemId, Optional<ITag<Item>> itemTag, InsulationType type, Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundNBT> nbt)
-    {   this.item = itemId;
-        this.tag = itemTag;
+    public InsulatorData(List<Either<ITag<Item>, Item>> items, InsulationType type, Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundNBT> nbt)
+    {   this.items = items;
         this.type = type;
         this.insulation = insulation;
         this.nbt = nbt;
     }
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(Registry.ITEM, Registry.ITEM.listOf()).optionalFieldOf("item").forGetter(insulator -> insulator.item),
-            ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(insulator -> insulator.tag),
+            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().fieldOf("item").forGetter(insulator -> insulator.items),
             InsulationType.CODEC.fieldOf("type").forGetter(insulator -> insulator.type),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).fieldOf("insulation").forGetter(insulator -> insulator.insulation),
             CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(insulator -> insulator.nbt)

@@ -10,24 +10,25 @@ import net.minecraft.world.DimensionType;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
 {
-    ResourceLocation dimension;
+    List<ResourceLocation> dimensions;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
 
-    public DimensionTempData(ResourceLocation dimension, double temperature, Temperature.Units units, boolean isOffset)
+    public DimensionTempData(List<ResourceLocation> dimensions, double temperature, Temperature.Units units, boolean isOffset)
     {
-        this.dimension = dimension;
+        this.dimensions = dimensions;
         this.temperature = temperature;
         this.units = units;
         this.isOffset = isOffset;
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("dimension").forGetter(data -> data.dimension),
+            ResourceLocation.CODEC.listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             com.momosoftworks.coldsweat.api.util.Temperature.Units.CODEC.optionalFieldOf("units", com.momosoftworks.coldsweat.api.util.Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset)

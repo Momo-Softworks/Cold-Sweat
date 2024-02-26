@@ -7,17 +7,19 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import java.util.List;
+
 public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
 {
-    ResourceLocation biome;
+    List<ResourceLocation> biomes;
     double min;
     double max;
     Temperature.Units units;
     boolean isOffset;
 
-    public BiomeTempData(ResourceLocation biome, double min, double max, Temperature.Units units, boolean isOffset)
+    public BiomeTempData(List<ResourceLocation> biomes, double min, double max, Temperature.Units units, boolean isOffset)
     {
-        this.biome = biome;
+        this.biomes = biomes;
         this.min = min;
         this.max = max;
         this.units = units;
@@ -25,7 +27,7 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
     }
 
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("dimension").forGetter(data -> data.biome),
+            ResourceLocation.CODEC.listOf().fieldOf("dimension").forGetter(data -> data.biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     {

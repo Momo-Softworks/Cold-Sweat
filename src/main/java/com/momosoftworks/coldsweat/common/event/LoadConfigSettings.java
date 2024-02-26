@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
@@ -47,20 +48,23 @@ public class LoadConfigSettings
         {
             InsulatorData insulatorData = holder.value();
             Insulation insulation = insulatorData.getInsulation();
-            CompoundNBT nbt = insulatorData.nbt().orElse(new CompoundNBT());
-            // If the item is defined, add it to the appropriate map
-            insulatorData.item().ifPresent(itemOrList ->
+            CompoundTag nbt = insulatorData.nbt().orElse(new CompoundTag());
+            // If the items is defined, add it to the appropriate map
+            for (Either<TagKey<Item>, Item> either : insulatorData.items())
             {
                 // If the item is single, write the insulation value
-                itemOrList.ifLeft(item -> addItemConfig(item, insulation, insulatorData.type(), nbt));
-                // If the item is a list, write the insulation value for each item
-                itemOrList.ifRight(list ->
+                either.ifLeft(tagKey ->
                 {
-                    for (Item item : list)
-                    {   addItemConfig(item, insulation, insulatorData.type(), nbt);
-                    }
+                    registries.registryOrThrow(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream()
+                    .forEach(item ->
+                    {   addItemConfig(item.value(), insulation, insulatorData.type(), nbt);
+                    });
                 });
-            });
+                // If the item is a list, write the insulation value for each item
+                either.ifRight(item ->
+                {   addItemConfig(item, insulation, insulatorData.type(), nbt);
+                });
+            }
             // If the tag is defined, add all items in the tag to the appropriate map
             insulatorData.tag().ifPresent(tag ->
             {
@@ -82,7 +86,7 @@ public class LoadConfigSettings
                 final double maxEffect = blockTempData.maxEffect();
                 final boolean fade = blockTempData.fade();
                 final List<BlockPredicate> conditions = blockTempData.conditions();
-                final Optional<CompoundTag> tag = blockTempData.tag();
+                final CompoundTag tag = blockTempData.tag().orElse(null);
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
@@ -96,15 +100,15 @@ public class LoadConfigSettings
                             }
                         }
                     }
-                    if (tag.isPresent())
+                    if (tag != null)
                     {
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity != null)
                         {
                             CompoundTag blockTag = blockEntity.saveWithFullMetadata();
-                            for (String key : tag.get().getAllKeys())
+                            for (String key : tag.getAllKeys())
                             {
-                                if (!tag.get().get(key).equals(blockTag.get(key)))
+                                if (!tag.get(key).equals(blockTag.get(key)))
                                 {   return 0;
                                 }
                             }
@@ -133,18 +137,25 @@ public class LoadConfigSettings
         .holders()
         .forEach(holder ->
         {
-            // If the dimension is a tag, add the temperature to all biomes in the tag
             BiomeTempData biomeTempData = holder.value();
-            biomeTempData.biome().ifLeft(tag ->
+            Registry<Biome> biomesRegistry = registries.registryOrThrow(Registry.BIOME_REGISTRY);
+
+            for (Either<TagKey<Biome>, ResourceLocation> either : biomeTempData.biomes())
             {
-                ForgeRegistries.BIOMES.tags().getTag(tag).stream().map(ForgeRegistries.BIOMES::getKey).forEach(biome ->
-                {    addBiomeTempConfig(biome, biomeTempData);
+                // If the dimension is a tag, add the temperature to all dimensions in the tag
+                either.ifLeft(tag ->
+                {
+                    biomesRegistry.getTag(tag).orElseThrow()
+                    .stream().map(biome -> biomesRegistry.getKey(biome.value()))
+                    .forEach(location ->
+                    {   addBiomeTempConfig(location, biomeTempData);
+                    });
                 });
-            });
-            // If the dimension is a single dimension, add the temperature to the dimension
-            biomeTempData.biome().ifRight(location ->
-            {   addBiomeTempConfig(location, biomeTempData);
-            });
+                // If the dimension is a single dimension, add the temperature to the dimension
+                either.ifRight(location ->
+                {   addBiomeTempConfig(location, biomeTempData);
+                });
+            }
         });
 
         // Load JSON data-driven dimension temperatures
@@ -154,18 +165,22 @@ public class LoadConfigSettings
         {
             // If the dimension is a tag, add the temperature to all biomes in the tag
             DimensionTempData dimensionTempData = holder.value();
-            dimensionTempData.dimension().ifLeft(tag ->
+            Registry<DimensionType> dimensionRegistry = registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            for (Either<TagKey<DimensionType>, ResourceLocation> either : dimensionTempData.dimensions())
             {
-                Registry<DimensionType> dimensions = registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-
-                dimensions.getTag(tag).orElseThrow().stream().map(dim -> dimensions.getKey(dim.value())).forEach(location ->
+                either.ifLeft(tag ->
+                {
+                    dimensionRegistry.getTag(tag).orElseThrow()
+                    .stream().map(dimension -> dimensionRegistry.getKey(dimension.value()))
+                    .forEach(location ->
+                    {   addDimensionTempConfig(location, dimensionTempData);
+                    });
+                });
+                // If the dimension is a single dimension, add the temperature to the dimension
+                either.ifRight(location ->
                 {   addDimensionTempConfig(location, dimensionTempData);
                 });
-            });
-            // If the dimension is a single dimension, add the temperature to the dimension
-            dimensionTempData.dimension().ifRight(location ->
-            {   addDimensionTempConfig(location, dimensionTempData);
-            });
+            }
         });
     }
 

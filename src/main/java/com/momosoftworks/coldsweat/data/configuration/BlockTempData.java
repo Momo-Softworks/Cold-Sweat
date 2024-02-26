@@ -1,11 +1,14 @@
 package com.momosoftworks.coldsweat.data.configuration;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ITag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -17,14 +20,14 @@ import java.util.Optional;
 
 public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
 {
-    List<Block> blocks;
+    List<Either<ITag<Block>, Block>> blocks;
     double temperature;
     double maxEffect;
     boolean fade;
     List<BlockState> conditions;
     Optional<CompoundNBT> tag;
 
-    public BlockTempData(List<Block> blocks, double temperature, double maxEffect, boolean fade, List<BlockState> conditions, Optional<CompoundNBT> tag)
+    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade, List<BlockState> conditions, Optional<CompoundNBT> tag)
     {
         this.blocks = blocks;
         this.temperature = temperature;
@@ -35,7 +38,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Registry.BLOCK.listOf().fieldOf("blocks").forGetter(data -> data.blocks),
+            Codec.either(ITag.codec(BlockTags::getAllTags), Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
