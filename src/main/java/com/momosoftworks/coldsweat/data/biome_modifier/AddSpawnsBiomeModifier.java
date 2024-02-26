@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.biome_modifiers;
+package com.momosoftworks.coldsweat.data.biome_modifier;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.core.init.BiomeCodecInit;

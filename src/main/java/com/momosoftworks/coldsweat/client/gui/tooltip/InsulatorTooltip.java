@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 public class InsulatorTooltip implements TooltipComponent
@@ -21,12 +22,5 @@ public class InsulatorTooltip implements TooltipComponent
 
     public InsulationType getType()
     {   return type;
-    }
-
-    public enum InsulationType
-    {
-        NORMAL,
-        ADAPTIVE,
-        CURIO
     }
 }

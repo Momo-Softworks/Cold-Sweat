@@ -1,7 +1,6 @@
-package com.momosoftworks.coldsweat.data.tags;
+package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;

@@ -9,6 +9,8 @@ import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.configuration.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -23,6 +25,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -68,6 +71,11 @@ public class ColdSweat
         ColdSweatConfig.setup();
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
+
+        // Setup JSON data-driven handlers
+        bus.addListener((DataPackRegistryEvent.NewRegistry event) -> {
+            event.dataPackRegistry(ModRegistries.INSULATOR, Insulator.CODEC);
+        });
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
@@ -81,8 +89,12 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
+
         // Load configs to memory
         ConfigSettings.load();
+
+        // Load JSON data-driven handlers
+
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
@@ -89,15 +90,15 @@ public class TooltipHandler
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.NORMAL)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ITEM)));
         }
         // If the item is an adaptive insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.ADAPTIVE)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ADAPTIVE)));
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.CURIO)));
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulationType.CURIO)));
         }
         // If the item is insulated armor
         Pair<Double, Double> armorInsul;
