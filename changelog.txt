@@ -1869,6 +1869,7 @@ Technical Changes:
 - The inside of naturally-generated igloos is now habitable
 - Increased hoglin hide drop rate to 1-3 per hoglin killed
 - Changed the hearth item texture to better match the block texture
+- Chameleon molt dropped from chameleons now lasts 20 minutes before despawning
 
 Fixes:
 - Fixed invalid fuel item configs defaulting to "air"

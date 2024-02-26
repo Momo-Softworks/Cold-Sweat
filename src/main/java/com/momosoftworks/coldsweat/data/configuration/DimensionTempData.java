@@ -9,7 +9,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public record DimensionTempData(Either<TagKey<DimensionType>, ResourceLocation> dimension, double temperature, Temperature.Units units, boolean isOffset)
+import java.util.List;
+
+public record DimensionTempData(List<Either<TagKey<DimensionType>, ResourceLocation>> dimensions, double temperature, Temperature.Units units, boolean isOffset)
 {
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -31,7 +33,8 @@ public record DimensionTempData(Either<TagKey<DimensionType>, ResourceLocation> 
                 if (result.isEmpty()) throw new IllegalArgumentException("Dimension field is not a tag or valid ID");
                 return result;
             })
-            .fieldOf("dimension").forGetter(DimensionTempData::dimension),
+            .listOf()
+            .fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset)

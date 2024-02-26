@@ -9,7 +9,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 
-public record BiomeTempData(Either<TagKey<Biome>, ResourceLocation> biome, double min, double max, Temperature.Units units, boolean isOffset)
+import java.util.List;
+
+public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes, double min, double max, Temperature.Units units, boolean isOffset)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -31,7 +33,8 @@ public record BiomeTempData(Either<TagKey<Biome>, ResourceLocation> biome, doubl
                 if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
                 return result;
             })
-            .fieldOf("biome").forGetter(BiomeTempData::biome),
+            .listOf()
+            .fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     {
