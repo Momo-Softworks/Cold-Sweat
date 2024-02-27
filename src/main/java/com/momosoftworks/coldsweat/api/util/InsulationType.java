@@ -6,7 +6,6 @@ import net.minecraft.util.StringRepresentable;
 public enum InsulationType implements StringRepresentable
 {
     ITEM("item"),
-    ADAPTIVE("adaptive"),
     CURIO("curio"),
     ARMOR("armor");
 

@@ -28,7 +28,6 @@ public final class ItemSettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> adaptiveInsulatingItems;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
     private static final ForgeConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
 
@@ -138,50 +137,53 @@ public final class ItemSettingsConfig
         BUILDER.push("Insulation");
         insulatingItems = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
-                        "Format: [[\"item_id\", cold, hot], [\"item_id\", cold, hot], ...etc]",
-                        "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
-                        "\"cold\": The amount of cold insulation the item provides.",
-                        "\"hot\": The amount of heat insulation the item provides.")
+                         "Format: [[\"item_id\", cold, hot, \"static\", *nbt], [\"item_id\", amount, adapt-speed, \"adaptive\", *nbt], ...etc]",
+                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
+                         "",
+                         "Adaptive Insulation: ",
+                         "\"amount\": The amount of insulation the item provides.",
+                         "\"adapt-speed\": The speed at which the insulation adapts to the environment.",
+                         "*\"type\": Optional. Either \"static\" or \"adaptive\". Defines the insulation type. Defaults to static.",
+                         "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag.",
+                         "",
+                         "Static Insulation: ",
+                         "\"cold\": The amount of cold insulation the item provides.",
+                         "\"hot\": The amount of heat insulation the item provides.",
+                         "*\"type\": Optional. Either \"static\" or \"adaptive\". Defines the insulation type. Defaults to static.",
+                         "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag."
+                )
                 .defineListAllowEmpty(List.of("Insulation Ingredients"), () -> ListBuilder.begin(
                                 List.of("minecraft:leather_helmet",     4,  4),
                                 List.of("minecraft:leather_chestplate", 6,  6),
                                 List.of("minecraft:leather_leggings",   5,  5),
                                 List.of("minecraft:leather_boots",      4,  4),
                                 List.of("minecraft:leather",            1,  1),
+                                List.of("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 List.of("cold_sweat:hoglin_hide",       0,  2),
-                                List.of("cold_sweat:fur",          2,  0),
-                                List.of("#minecraft:wool",             1.5, 0),
+                                List.of("cold_sweat:fur",               2,  0),
+                                List.of("#minecraft:wool",              1.5, 0),
                                 List.of("minecraft:rabbit_hide",        0,  1.5),
                                 List.of("cold_sweat:hoglin_headpiece",  0,  8),
                                 List.of("cold_sweat:hoglin_tunic",      0,  12),
                                 List.of("cold_sweat:hoglin_trousers",   0,  10),
                                 List.of("cold_sweat:hoglin_hooves",     0,  8),
-                                List.of("cold_sweat:fur_cap",      8,  0),
-                                List.of("cold_sweat:fur_parka",    12, 0),
-                                List.of("cold_sweat:fur_pants",    10, 0),
-                                List.of("cold_sweat:fur_boots",    8,  0))
+                                List.of("cold_sweat:fur_cap",           8,  0),
+                                List.of("cold_sweat:fur_parka",         12, 0),
+                                List.of("cold_sweat:fur_pants",         10, 0),
+                                List.of("cold_sweat:fur_boots",         8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_hair", 1.5, -1)
                         ).build(),
-                        it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
-
-         adaptiveInsulatingItems = BUILDER
-                .comment("Defines insulation items that have the special \"chameleon molt\" effect",
-                         "Format: [[\"item_id\", insulation, adaptSpeed], [\"item_id\", insulation, adaptSpeed], ...etc]",
-                        "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
-                        "\"insulation\": The amount of insulation the item provides. Will adjust to hot/cold based on the environment.",
-                        "\"adaptSpeed\": The speed at which the item adapts to the current temperature. Higher values mean faster adaptation (from 0 to 1).")
-                 .defineListAllowEmpty(List.of("Adaptive Insulation Ingredients"), () -> ListBuilder.begin(
-                                List.of("cold_sweat:chameleon_molt", 2, 0.0085)
-                            ).build(),
-                        it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() >= 3
+                                && list.get(0) instanceof String
+                                && list.get(1) instanceof Number
+                                && list.get(2) instanceof Number
+                                && (list.size() < 4 || list.get(3) instanceof String)
+                                && (list.size() < 5 || list.get(4) instanceof String));
 
         insulatingArmor = BUILDER
                 .comment("Defines the items that provide insulation when worn",
-                        "Format: [[\"item_id\", cold, hot], [\"item_id\", cold, hot], ...etc]",
-                         "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
-                         "\"cold\": The amount of cold insulation the item provides.",
-                         "\"hot\": The amount of heat insulation the item provides.")
+                        "See Insulation Ingredients for formatting")
                 .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.begin(
                                 List.of("minecraft:leather_helmet",      4,  4),
                                 List.of("minecraft:leather_chestplate",  6,  6),
@@ -198,18 +200,27 @@ public final class ItemSettingsConfig
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_pants", 7.5, -5)
                         ).build(),
-                        it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() >= 3
+                                && list.get(0) instanceof String
+                                && list.get(1) instanceof Number
+                                && list.get(2) instanceof Number
+                                && (list.size() < 4 || list.get(3) instanceof String)
+                                && (list.size() < 5 || list.get(4) instanceof String));
 
         if (CompatManager.isCuriosLoaded())
         {
             insulatingCurios = BUILDER
                     .comment("Defines the items that provide insulation when worn in a curio slot",
-                             "Format: [[\"item_id\", cold, hot], [\"item_id\", cold, hot], ...etc]",
-                             "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
-                             "\"cold\": The amount of cold insulation the item provides.",
-                             "\"hot\": The amount of heat insulation the item provides.")
-                    .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(),
-                                          it -> it instanceof List<?> list && list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+                             "See Insulation Ingredients for formatting")
+                    .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(
+                            // Nothing defined
+                        ),
+                        it -> it instanceof List<?> list && list.size() >= 3
+                                && list.get(0) instanceof String
+                                && list.get(1) instanceof Number
+                                && list.get(2) instanceof Number
+                                && (list.size() < 4 || list.get(3) instanceof String)
+                                && (list.size() < 5 || list.get(4) instanceof String));
         }
 
         insulationSlots = BUILDER
@@ -236,8 +247,12 @@ public final class ItemSettingsConfig
                         "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
                         "Negative values are cold foods, positive values are hot foods")
                 .defineListAllowEmpty(List.of("Temperature-Affecting Foods"), () -> Arrays.asList(
+                        // Nothing defined
                 ),
-                it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number);
+                it -> it instanceof List<?> list && list.size() >= 2
+                        && list.get(0) instanceof String
+                        && list.get(1) instanceof Number
+                        && (list.size() < 3 || list.get(2) instanceof String));
         waterskinStrength = BUILDER
                 .comment("Defines how much a waterskin will change the player's body temperature by when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
@@ -278,10 +293,6 @@ public final class ItemSettingsConfig
 
     public List<? extends List<?>> getInsulationItems()
     {   return insulatingItems.get();
-    }
-
-    public List<? extends List<?>> getAdaptiveInsulationItems()
-    {   return adaptiveInsulatingItems.get();
     }
 
     public List<? extends List<?>> getInsulatingArmorItems()
@@ -338,10 +349,6 @@ public final class ItemSettingsConfig
 
     public synchronized void setInsulationItems(List<? extends List<?>> items)
     {   insulatingItems.set(items);
-    }
-
-    public synchronized void setAdaptiveInsulationItems(List<? extends List<?>> items)
-    {   adaptiveInsulatingItems.set(items);
     }
 
     public synchronized void setInsulatingArmorItems(List<? extends List<?>> itemMap)
