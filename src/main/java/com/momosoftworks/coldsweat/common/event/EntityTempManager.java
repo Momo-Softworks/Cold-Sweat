@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -317,8 +318,7 @@ public class EntityTempManager
                     if (!(slot instanceof ResultSlot))
                     {
                         if (slot.container == player.getInventory()
-                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
-                        || ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(stack.getItem())))
+                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack))))
                         {   player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
                         }
                     }
@@ -470,7 +470,7 @@ public class EntityTempManager
         && !event.getEntity().level.isClientSide)
         {
             // If food item defined in config
-            float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(event.getItem().getItem(), 0d).floatValue();
+            float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(ItemData.of(event.getItem()), 0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
             }

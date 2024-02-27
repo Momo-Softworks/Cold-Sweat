@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.block.IceboxBlock;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -203,7 +204,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return ConfigSettings.ICEBOX_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
+    {   return ConfigSettings.ICEBOX_FUEL.get().getOrDefault(ItemData.of(item), 0d).intValue();
     }
 
     @Override

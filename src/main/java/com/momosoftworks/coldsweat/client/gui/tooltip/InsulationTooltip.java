@@ -1,30 +1,26 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class InsulationTooltip implements TooltipComponent
 {
-    List<ItemInsulationCap.InsulationPair> insulation;
-    ItemStack stack;
-    int size;
+    List<Insulation> insulation;
+    InsulationType type;
 
-    public InsulationTooltip(List<ItemInsulationCap.InsulationPair> insulation, ItemStack stack)
-    {
-        this.insulation = insulation;
-        this.stack = stack;
+    public InsulationTooltip(List<Insulation> insulation, InsulationType type)
+    {   this.insulation = insulation;
+        this.type = type;
     }
 
-    public List<ItemInsulationCap.InsulationPair> getInsulation()
-    {
-        return insulation;
+    public List<Insulation> getInsulation()
+    {   return insulation;
     }
 
-    public ItemStack getStack()
-    {
-        return stack;
+    public InsulationType getType()
+    {   return type;
     }
 }

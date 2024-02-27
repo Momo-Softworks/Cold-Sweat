@@ -1,12 +1,12 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -58,8 +58,8 @@ public class InsulationItemsGroup extends CreativeModeTab
         }
     }
 
-    private static List<ItemStack> sort(Set<Item> items)
-    {   List<ItemStack> list = new ArrayList<>(items.stream().map(Item::getDefaultInstance).toList());
+    private static List<ItemStack> sort(Set<ItemData> items)
+    {   List<ItemStack> list = new ArrayList<>(items.stream().map(data -> new ItemStack(data.getItem())).toList());
         // Sort by name first
         list.sort(Comparator.comparing(item -> item.getDisplayName().getString()));
         // Sort by tags the items are in

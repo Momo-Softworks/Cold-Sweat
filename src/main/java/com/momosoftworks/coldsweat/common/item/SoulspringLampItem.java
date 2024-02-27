@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.item;
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -134,8 +135,8 @@ public class SoulspringLampItem extends Item
     {   return stack.getOrCreateTag().getDouble("Fuel");
     }
 
-    public static int getFuelForStack(ItemStack fuelStack)
-    {   return ConfigSettings.LAMP_FUEL_ITEMS.get().getOrDefault(fuelStack.getItem(), 0);
+    public static double getFuelForStack(ItemStack fuelStack)
+    {   return ConfigSettings.SOULSPRING_LAMP_FUEL.get().getOrDefault(ItemData.of(fuelStack), 0d);
     }
 
     // Restore fuel if player hits an enemy
@@ -205,11 +206,11 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack fuelStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
     {
-        if (ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(fuelStack.getItem()) && getFuel(thisStack) < 64)
+        if (ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(ItemData.of(fuelStack)) != null && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
             addFuel(thisStack, fuelStack);
-            fuelStack.shrink((64 - (int) currentFuel) / getFuelForStack(fuelStack));
+            fuelStack.shrink((int) ((64 - currentFuel) / getFuelForStack(fuelStack)));
 
             if (player instanceof ServerPlayer serverPlayer)
                 ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);

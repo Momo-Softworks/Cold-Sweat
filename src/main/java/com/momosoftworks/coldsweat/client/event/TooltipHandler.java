@@ -3,20 +3,17 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
-import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.Insulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.InsulationPair;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.event.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -52,23 +49,22 @@ public class TooltipHandler
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
-        Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
+        ItemData itemData = ItemData.of(stack);
         if (stack.isEmpty()) return;
 
         // Get the index at which the tooltip should be inserted
         int tooltipIndex = Math.min(1, event.getTooltipElements().size() - 1);
         Optional<FormattedText> line;
         while ((line = event.getTooltipElements().get(tooltipIndex).left()).isPresent()
-        && !line.get().getString().equals(stack.getHoverName().getString()))
-        {
-            tooltipIndex++;
+        && !line.get().equals(stack.getDisplayName()))
+        {   tooltipIndex++;
             if (tooltipIndex >= event.getTooltipElements().size())
             {   tooltipIndex = Math.min(1, event.getTooltipElements().size());
                 break;
             }
         }
 
-        Pair<Double, Double> itemInsul = null;
+        Insulation itemInsul = null;
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
@@ -78,7 +74,7 @@ public class TooltipHandler
         }
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
-            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(event.getItemStack().getItem(), (item, temp) ->
+            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(ItemData.of(event.getItemStack()), (item, temp) ->
             {
                 int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getTooltipElements().size() - 1 : event.getTooltipElements().size();
                 event.getTooltipElements().add(index, Either.left(
@@ -91,67 +87,41 @@ public class TooltipHandler
             });
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ITEM)));
-        }
-        // If the item is an adaptive insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ADAPTIVE)));
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM)));
         }
         // If the item is an insulating curio, add the tooltip
-        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulationType.CURIO)));
+        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO)));
         }
         // If the item is insulated armor
-        Pair<Double, Double> armorInsul;
-        if (stack.getItem() instanceof Wearable && (!Objects.equals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())), itemInsul) || armorInsul == null))
+        Insulation armorInsul;
+        if (stack.getItem() instanceof Wearable && (!Objects.equals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(itemData)), itemInsul) || armorInsul == null))
         {
             // Create the list of insulation pairs from NBT
-            List<InsulationPair> insulation = ItemInsulationManager.getInsulationCap(stack)
+            List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
             .map(c ->
             {
                 if (c instanceof ItemInsulationCap cap)
                 {   return cap;
                 }
                 return new ItemInsulationCap();
-            }).map(cap -> cap.deserializeSimple(stack)).orElse(new ArrayList<>());
+            }).map(cap -> cap.getInsulationValues().stream().map(Insulation::split).reduce(new ArrayList<>(), (list, insul) ->
+            {   list.addAll(insul);
+                return list;
+            })).orElse(new ArrayList<>());
 
             // If the armor has intrinsic insulation due to configs, add it to the list
-            ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(stack.getItem(), (item, pair) ->
-            {
-                double cold = pair.getFirst();
-                double hot = pair.getSecond();
-                double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
-                if (cold == neutral) cold = 0;
-                if (hot == neutral) hot = 0;
-                // Cold insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
-                {
-                    double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
-                    insulation.add(new ItemInsulationCap.Insulation(coldInsul, 0d));
-                }
-
-                // Neutral insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-                {
-                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
-                    insulation.add(new Insulation(neutralInsul, neutralInsul));
-                }
-
-                // Hot insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
-                {
-                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
-                    insulation.add(new Insulation(0d, hotInsul));
-                }
+            ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(itemData, (item, pair) ->
+            {   insulation.addAll(pair.split());
                 return pair;
             });
 
             // Sort the insulation values from cold to hot
-            ItemInsulationCap.sortInsulationList(insulation);
+            Insulation.sort(insulation);
 
             if (!insulation.isEmpty())
-            {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(insulation, stack)));
+            {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(insulation, InsulationType.ARMOR)));
             }
         }
     }
@@ -168,9 +138,10 @@ public class TooltipHandler
                 double fuel = screen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
-                if (!carriedStack.isEmpty() && ConfigSettings.LAMP_FUEL_ITEMS.get().containsKey(carriedStack.getItem()))
+                Double itemFuel;
+                if (!carriedStack.isEmpty() && (itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(ItemData.of(carriedStack))) != null)
                 {
-                    int fuelValue = screen.getMenu().getCarried().getCount() * ConfigSettings.LAMP_FUEL_ITEMS.get().get(carriedStack.getItem());
+                    double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel;
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 
