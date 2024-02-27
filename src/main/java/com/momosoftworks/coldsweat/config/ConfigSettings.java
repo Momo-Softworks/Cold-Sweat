@@ -51,6 +51,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
     public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
     public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
+    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
@@ -225,6 +226,17 @@ public class ConfigSettings
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
                                                          double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+                                                     })
+                                                     .collect(Collectors.toList())));
+
+        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
+        encoder -> ConfigHelper.writeDimensionTemps(encoder, "StructureTemperatures"),
+        decoder -> ConfigHelper.readDimensionTemps(decoder, "StructureTemperatures"),
+        saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
+                                                     .map(entry ->
+                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
                                                          return Arrays.asList(entry.getKey().toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));

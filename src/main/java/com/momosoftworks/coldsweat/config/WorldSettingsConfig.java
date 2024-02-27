@@ -24,6 +24,7 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureTemps;
 
     public static final ForgeConfigSpec.ConfigValue<Double> caveInsulation;
 
@@ -55,16 +56,30 @@ public class WorldSettingsConfig
             .defineList("Dimension Temperature Offsets", Arrays.asList(
                     Arrays.asList("minecraft:the_nether", 1.0),
                     Arrays.asList("minecraft:the_end", -0.1)
-            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number
-                  && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
+            ), it -> it instanceof List<?>
+                    && ((List<?>) it).get(0) instanceof String
+                    && ((List<?>) it).get(1) instanceof Number
+                    && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
 
         dimensionTemps = BUILDER
             .comment("Overrides existing dimension temperatures & offsets",
                      "Also overrides temperatures of all biomes in the dimension")
             .defineList("Dimension Temperatures", Arrays.asList(
                     // No default values
-            ), it -> it instanceof List && ((List<?>) it).get(0) instanceof String && ((List<?>) it).get(1) instanceof Number
-                  && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
+            ), it -> it instanceof List<?>
+                    && ((List<?>) it).get(0) instanceof String
+                    && ((List<?>) it).get(1) instanceof Number
+                    && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
+
+        structureTemps = BUILDER
+            .comment("Overrides the world temperature when the player is within this structure",
+                     "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]")
+            .defineList("Structure Temperatures", Arrays.asList(
+                    Arrays.asList("minecraft:igloo", 70, "F")
+            ), it -> it instanceof List<?>
+                    && ((List<?>) it).get(0) instanceof String
+                    && ((List<?>) it).get(1) instanceof Number
+                    && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
 
         BUILDER.pop();
 
@@ -342,6 +357,10 @@ public class WorldSettingsConfig
     {   return dimensionTemps.get();
     }
 
+    public List<? extends List<?>> getStructureTemperatures()
+    {   return structureTemps.get();
+    }
+
     public List<? extends List<Object>> getBlockTemps()
     {   return blockTemps.get();
     }
@@ -388,6 +407,10 @@ public class WorldSettingsConfig
     }
     public void setDimensionTempOffsets(List<? extends List<?>> offsets)
     {   dimensionOffsets.set(offsets);
+    }
+
+    public void setStructureTemperatures(List<? extends List<?>> temps)
+    {   structureTemps.set(temps);
     }
 
     public void setBlockTemps(List<? extends List<Object>> temps)
