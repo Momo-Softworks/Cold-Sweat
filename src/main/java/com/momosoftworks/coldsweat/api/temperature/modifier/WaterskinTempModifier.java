@@ -8,18 +8,16 @@ import java.util.function.Function;
 public class WaterskinTempModifier extends TempModifier
 {
     public WaterskinTempModifier()
-    {
-        this(0.0);
+    {   this(0.0);
     }
 
     public WaterskinTempModifier(double temp)
-    {
-        this.getNBT().putDouble("temperature", temp);
+    {   this.getNBT().putDouble("Temperature", temp);
     }
 
     @Override
     public Function<Double, Double>  calculate(LivingEntity entity, Temperature.Type type)
-    {   return temp -> temp + this.getNBT().getDouble("temperature");
+    {   return temp -> temp + this.getNBT().getDouble("Temperature");
     }
 
     public String getID()
