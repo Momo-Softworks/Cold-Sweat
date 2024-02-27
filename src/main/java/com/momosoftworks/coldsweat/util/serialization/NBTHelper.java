@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.entity.LivingEntity;
@@ -123,5 +124,16 @@ public class NBTHelper
             case HEAT_DAMPENING : return "HeatDampening";
         }
         return null;
+    }
+
+    public static CompoundNBT parseCompoundNbt(String tag)
+    {
+        try
+        {   return JsonToNBT.parseTag(tag);
+        }
+        catch (Exception e)
+        {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
+            return new CompoundNBT();
+        }
     }
 }

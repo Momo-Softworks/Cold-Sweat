@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.api.insulation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class AdaptiveInsulation extends Insulation
     {   return CSMath.blend(insulation * 0.75, 0, factor, -1, 1);
     }
 
-    public double getHeat()
+    public double getHot()
     {   return CSMath.blend(0, insulation * 0.75, factor, -1, 1);
     }
 
@@ -62,6 +62,7 @@ public class AdaptiveInsulation extends Insulation
     public List<Insulation> split()
     {
         List<Insulation> insulation = new ArrayList<>();
+        // Cold insulation
         for (int i = 0; i < CSMath.ceil(Math.abs(this.insulation)) / 2; i++)
         {   double insul = CSMath.minAbs(CSMath.shrink(this.insulation, i * 2), 2);
             insulation.add(new AdaptiveInsulation(insul, factor, speed));
@@ -78,23 +79,27 @@ public class AdaptiveInsulation extends Insulation
     public boolean equals(Object obj)
     {
         if (this == obj) return true;
-        return obj instanceof AdaptiveInsulation insul
-            && insulation == insul.insulation
-            && factor == insul.factor
-            && speed == insul.speed;
+        if (obj instanceof AdaptiveInsulation)
+        {
+            AdaptiveInsulation insul = ((AdaptiveInsulation) obj);
+            return insulation == insul.insulation
+                && factor == insul.factor
+                && speed == insul.speed;
+        }
+        return false;
     }
 
     @Override
-    public CompoundTag serialize()
+    public CompoundNBT serialize()
     {
-        CompoundTag tag = new CompoundTag();
+        CompoundNBT tag = new CompoundNBT();
         tag.putDouble("insulation", insulation);
         tag.putDouble("factor", factor);
         tag.putDouble("speed", speed);
         return tag;
     }
 
-    public static AdaptiveInsulation deserialize(CompoundTag tag)
+    public static AdaptiveInsulation deserialize(CompoundNBT tag)
     {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("factor"), tag.getDouble("speed"));
     }
 }

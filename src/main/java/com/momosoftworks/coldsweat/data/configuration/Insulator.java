@@ -8,46 +8,39 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 public class Insulator implements IForgeRegistryEntry<Insulator>
 {
-    public final Optional<ResourceLocation> itemId;
-    public final Optional<ITag<Item>> itemTag;
-    public final InsulationType type;
-    public final Insulation insulation;
+    Optional<Either<Item, List<Item>>> item;
+    Optional<ITag<Item>> tag;
+    InsulationType type;
+    Either<StaticInsulation, AdaptiveInsulation> insulation;
+    Optional<CompoundNBT> nbt;
 
-    public Insulator(Optional<ResourceLocation> itemId, Optional<ITag<Item>> itemTag, InsulationType type, Insulation insulation)
-    {   this.itemId = itemId;
-        this.itemTag = itemTag;
+    public Insulator(Optional<Either<Item, List<Item>>> itemId, Optional<ITag<Item>> itemTag, InsulationType type, Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundNBT> nbt)
+    {   this.item = itemId;
+        this.tag = itemTag;
         this.type = type;
         this.insulation = insulation;
+        this.nbt = nbt;
     }
 
     public static final Codec<Insulator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("item").forGetter(insulator -> insulator.itemId),
-            ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(insulator -> insulator.itemTag),
+            Codec.either(ForgeRegistries.ITEMS.getCodec(), ForgeRegistries.ITEMS.getCodec().listOf()).optionalFieldOf("item").forGetter(Insulator::item),
+            ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(insulator -> insulator.tag),
             InsulationType.CODEC.fieldOf("type").forGetter(insulator -> insulator.type),
-            Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
-            {
-                return either.left().isPresent() ? either.left().get() : either.right().get();
-            },
-            insulation ->
-            {
-                if (insulation instanceof StaticInsulation)
-                {   return Either.<StaticInsulation, AdaptiveInsulation>left((StaticInsulation) insulation);
-                }
-                if (insulation instanceof AdaptiveInsulation)
-                {   return Either.<StaticInsulation, AdaptiveInsulation>right((AdaptiveInsulation) insulation);
-                }
-                return null;
-            })
-            .fieldOf("insulation").forGetter(insulator -> insulator.insulation)
+            Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).fieldOf("insulation").forGetter(insulator -> insulator.insulation),
+            CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(insulator -> insulator.nbt)
     ).apply(instance, Insulator::new));
 
     @Override
@@ -56,6 +49,7 @@ public class Insulator implements IForgeRegistryEntry<Insulator>
         return null;
     }
 
+    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {
@@ -65,5 +59,13 @@ public class Insulator implements IForgeRegistryEntry<Insulator>
     @Override
     public Class<Insulator> getRegistryType()
     {   return Insulator.class;
+    }
+
+    public Insulation getInsulation()
+    {
+        if (insulation.left().isPresent())
+        {   return insulation.left().get();
+        }
+        return insulation.right().get();
     }
 }

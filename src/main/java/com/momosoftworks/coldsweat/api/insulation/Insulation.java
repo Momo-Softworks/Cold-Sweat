@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.api.insulation;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.StringRepresentable;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,10 +23,10 @@ public abstract class Insulation implements NbtSerializable
     public abstract List<Insulation> split();
 
     public abstract double getCold();
-    public abstract double getHeat();
+    public abstract double getHot();
 
     /**
-     * Sort the list of insulation items, starting with cold insulation, then neutral, then heat, then adaptive.<br>
+     * Sort the list of insulation items, starting with cold insulation, then neutral, then hot, then adaptive.<br>
      * This method does not modify the input list
      * @return A sorted list of insulation items.
      */
@@ -35,12 +35,16 @@ public abstract class Insulation implements NbtSerializable
         List<Insulation> newPairs = new ArrayList<>(pairs);
         newPairs.sort(Comparator.comparingDouble(pair ->
         {
-            if (pair instanceof AdaptiveInsulation insul)
-                return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
-            else if (pair instanceof StaticInsulation insul)
+            if (pair instanceof AdaptiveInsulation)
             {
+                AdaptiveInsulation insul = ((AdaptiveInsulation) pair);
+                return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
+            }
+            else if (pair instanceof StaticInsulation)
+            {
+                StaticInsulation insul = ((StaticInsulation) pair);
                 double absCold = Math.abs(insul.getCold());
-                double absHot = Math.abs(insul.getHeat());
+                double absHot = Math.abs(insul.getHot());
                 if (absCold >= 2 && absHot >= 2)
                     return 2;
                 else if (absCold >= 2)
@@ -61,7 +65,7 @@ public abstract class Insulation implements NbtSerializable
         return newPairs;
     }
 
-    public static Insulation deserialize(CompoundTag tag)
+    public static Insulation deserialize(CompoundNBT tag)
     {
         if (tag.contains("cold") && tag.contains("heat"))
         {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));

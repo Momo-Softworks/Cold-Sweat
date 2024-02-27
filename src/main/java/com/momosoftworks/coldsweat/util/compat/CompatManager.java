@@ -2,9 +2,11 @@ package com.momosoftworks.coldsweat.util.compat;
 
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -209,11 +211,11 @@ public class CompatManager
                     for (int i = 0; i < curioStackHandler.getStacks().getSlots(); i++)
                     {
                         ItemStack stack = curioStackHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty() && ConfigSettings.INSULATING_CURIOS.get().containsKey(stack.getItem()))
+                        if (!stack.isEmpty() && ConfigSettings.INSULATING_CURIOS.get().containsKey(ItemData.of(stack)))
                         {
-                            Pair<Double, Double> insulation = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
-                            double cold = insulation.getFirst();
-                            double hot = insulation.getSecond();
+                            Insulation insulation = ConfigSettings.INSULATING_CURIOS.get().get(ItemData.of(stack));
+                            double cold = insulation.getCold();
+                            double hot = insulation.getHot();
                             Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
                         }
                     }

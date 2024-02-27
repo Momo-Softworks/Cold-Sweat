@@ -1,16 +1,15 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.AdaptiveInsulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.Insulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.InsulationPair;
 import com.momosoftworks.coldsweat.common.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
@@ -29,7 +28,8 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class ArmorInsulation
@@ -40,14 +40,14 @@ public class ArmorInsulation
         PlayerEntity player = event.player;
         if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
         {
-            Map<Item, Pair<Double, Double>> insulatingArmors = ConfigSettings.INSULATING_ARMORS.get();
-
             int fullyInsulated = 0;
             double cold = 0;
             double hot = 0;
+
             double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
             double minTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
             double maxTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
+
             for (ItemStack armorStack : player.getArmorSlots())
             {
                 if (armorStack.getItem() instanceof ArmorItem)
@@ -55,30 +55,31 @@ public class ArmorInsulation
                     ArmorItem armorItem = (ArmorItem) armorStack.getItem();
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
-                    Pair<Double, Double> insulationValue = insulatingArmors.get(armorStack.getItem());
+                    Insulation insulationValue = ConfigSettings.INSULATING_ARMORS.get().get(ItemData.of(armorStack));
                     if (insulationValue != null)
                     {
-                        cold += insulationValue.getFirst();
-                        hot += insulationValue.getSecond();
+                        cold += insulationValue.getCold();
+                        hot += insulationValue.getHot();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
                         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<InsulationPair> insulation = iCap.map(cap ->
+                        List<Insulation> insulation = iCap.map(cap ->
                         {
                             if (cap instanceof ItemInsulationCap)
                             {   ItemInsulationCap cap1 = (ItemInsulationCap) cap;
                                 cap1.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
                                 return cap1.getInsulationValues();
                             }
-                            return new ArrayList<InsulationPair>();
+                            return new ArrayList<Insulation>();
                         }).orElse(new ArrayList<>());
 
                         // Get the armor's insulation values
-                        for (InsulationPair value : insulation)
+                        for (Insulation value : insulation)
                         {
-                            if (value instanceof Insulation)
-                            {   Insulation insul = (Insulation) value;
+                            if (value instanceof StaticInsulation)
+                            {
+                                StaticInsulation insul = ((StaticInsulation) value);
                                 cold += insul.getCold();
                                 hot += insul.getHot();
                             }

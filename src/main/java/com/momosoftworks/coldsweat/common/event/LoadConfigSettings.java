@@ -1,80 +1,71 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.configuration.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class LoadConfigSettings
 {
     @SubscribeEvent
     public static void onServerStarted(FMLServerStartingEvent event)
-    {   ConfigSettings.load();
+    {
+        ConfigSettings.load();
 
         // Load JSON data-driven insulators
-        ModRegistries.INSULATOR.getEntries()
-        .forEach(entry ->
+        RegistryAccess registries = event.getServer().registryAccess();
+        registries.registryOrThrow(ModRegistries.INSULATOR)
+        .holders()
+        .forEach(holder ->
+        {
+            Insulator insulator = holder.value();
+            Insulation insulation = insulator.getInsulation();
+            CompoundNBT nbt = insulator.nbt().orElse(new CompoundNBT());
+            // If the item is defined, add it to the appropriate map
+            insulator.item().ifPresent(itemOrList ->
+            {
+                // If the item is single, write the insulation value
+                itemOrList.ifLeft(item -> addItemConfig(item, insulation, insulator.type(), nbt));
+                // If the item is a list, write the insulation value for each item
+                itemOrList.ifRight(list ->
                 {
-                    Insulator settings = entry.getValue();
-                    Insulation insulation = settings.insulation;
-                    AtomicBoolean isTag = new AtomicBoolean(false);
-                    settings.itemTag.ifPresent(tag ->
-                    {
-                        isTag.set(true);
-                        ForgeRegistries.ITEMS.tags().getTag(tag).stream().forEach(item ->
-                        {
-                            switch (settings.type)
-                            {
-                                case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, Pair.of(insulation.getCold(), insulation.getHeat()));
-                                case ADAPTIVE -> ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().put(item, Pair.of(insulation.value(), insulation.adaptSpeed().orElse(0d)));
-                                case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, Pair.of(insulation.cold().orElse(0d), insulation.hot().orElse(0d)));
-                                case CURIO ->
-                                {
-                                    if (CompatManager.isCuriosLoaded())
-                                    {   ConfigSettings.INSULATING_CURIOS.get().put(item, Pair.of(insulation.cold().get(), insulation.hot().get()));
-                                    }
-                                    else ColdSweat.LOGGER.error("Tried to register curio insulation \"" + item + "\" but Curios is not loaded!");
-                                }
-                            }
-                        });
-                    });
-                    // If the modifier defines a tag, don't look for an item
-                    if (isTag.get()) return;
-
-                    settings.itemId.ifPresent(itemId ->
-                    {
-                        Item item = ForgeRegistries.ITEMS.getValue(itemId);
-                        if (item == null || item == Items.AIR)
-                        {   ColdSweat.LOGGER.error("Tried to register insulator \"" + itemId + "\" but the item does not exist!");
-                            return;
-                        }
-                        switch (settings.type())
-                        {
-                            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, Pair.of(insulation.cold().orElse(0d), insulation.hot().orElse(0d)));
-                            case ADAPTIVE -> ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().put(item, Pair.of(insulation.value().orElse(0d), insulation.adaptSpeed().orElse(0d)));
-                            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, Pair.of(insulation.cold().orElse(0d), insulation.hot().orElse(0d)));
-                            case CURIO ->
-                            {
-                                if (CompatManager.isCuriosLoaded())
-                                {   ConfigSettings.INSULATING_CURIOS.get().put(item, Pair.of(insulation.cold().orElse(0d), insulation.hot().orElse(0d)));
-                                }
-                                else ColdSweat.LOGGER.error("Tried to register curio insulation \"" + item + "\" but Curios is not loaded!");
-                            }
-                        }
-                    });
+                    for (Item item : list)
+                    {   addItemConfig(item, insulation, insulator.type(), nbt);
+                    }
                 });
+            });
+            // If the tag is defined, add all items in the tag to the appropriate map
+            insulator.tag().ifPresent(tag ->
+            {
+                ForgeRegistries.ITEMS.tags().getTag(tag).stream().forEach(item ->
+                {   addItemConfig(item, insulation, insulator.type(), nbt);
+                });
+            });
+        });
+    }
+
+    private static void addItemConfig(Item item, Insulation insulation, InsulationType type, CompoundNBT nbt)
+    {
+        switch (type)
+        {
+            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(new ItemData(item, nbt), insulation);
+            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(new ItemData(item, nbt), insulation);
+            case CURIO ->
+            {
+                if (CompatManager.isCuriosLoaded())
+                {   ConfigSettings.INSULATING_CURIOS.get().put(new ItemData(item, nbt), insulation);
+                }
+            }
+        }
     }
 }
