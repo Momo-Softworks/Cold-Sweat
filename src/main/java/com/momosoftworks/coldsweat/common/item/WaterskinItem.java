@@ -80,7 +80,7 @@ public class WaterskinItem extends Item
         // copy NBT to new item
         filledWaterskin.setTag(stack.getTag());
         // Set temperature based on temperature of the biome
-        filledWaterskin.getOrCreateTag().putDouble("temperature",
+        filledWaterskin.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
                                                    CSMath.clamp((Temperature.getTemperatureAt(pos, level)
                                                            - (CSMath.average(ConfigSettings.MAX_TEMP.get(), ConfigSettings.MIN_TEMP.get()))) * 15, -50, 50));
         // Set purity of water based on water source, if Thirst Was Taken is loaded
