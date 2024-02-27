@@ -1,34 +1,48 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.InsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.AdaptiveInsulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.Insulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap.InsulationPair;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber
 public class ArmorInsulation
@@ -39,41 +53,41 @@ public class ArmorInsulation
         Player player = event.player;
         if (event.phase == TickEvent.Phase.END && !player.level().isClientSide() && player.tickCount % 10 == 0)
         {
-            Map<Item, Pair<Double, Double>> insulatingArmors = ConfigSettings.INSULATING_ARMORS.get();
-
             int fullyInsulated = 0;
             double cold = 0;
             double hot = 0;
+
             double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
             double minTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
             double maxTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
+
             for (ItemStack armorStack : player.getArmorSlots())
             {
                 if (armorStack.getItem() instanceof ArmorItem armorItem)
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
-                    Pair<Double, Double> insulationValue = insulatingArmors.get(armorStack.getItem());
+                    Insulation insulationValue = ConfigSettings.INSULATING_ARMORS.get().get(ItemData.of(armorStack));
                     if (insulationValue != null)
                     {
-                        cold += insulationValue.getFirst();
-                        hot += insulationValue.getSecond();
+                        cold += insulationValue.getCold();
+                        hot += insulationValue.getHot();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
                         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<InsulationPair> insulation = iCap.map(cap ->
+                        List<Insulation> insulation = iCap.map(cap ->
                         {
                             if (cap instanceof ItemInsulationCap cap1)
                             {   return cap1.getInsulationValues();
                             }
-                            return new ArrayList<InsulationPair>();
+                            return new ArrayList<Insulation>();
                         }).orElse(new ArrayList<>());
 
                         // Get the armor's insulation values
-                        for (InsulationPair value : insulation)
+                        for (Insulation value : insulation)
                         {
-                            if (value instanceof Insulation insul)
+                            if (value instanceof StaticInsulation insul)
                             {
                                 cold += insul.getCold();
                                 hot += insul.getHot();

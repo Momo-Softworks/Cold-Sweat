@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
@@ -216,7 +217,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return ConfigSettings.BOILER_FUEL.get().getOrDefault(item.getItem(), 0d).intValue();
+    {   return ConfigSettings.BOILER_FUEL.get().getOrDefault(ItemData.of(item), 0d).intValue();
     }
 
     @Override

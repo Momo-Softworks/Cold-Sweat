@@ -1,12 +1,12 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -131,22 +131,6 @@ public class ItemInsulationManager
         }
     }
 
-    public static Pair<Double, Double> getItemInsulation(ItemStack item)
-    {
-        Pair<Double, Double> insulation = ConfigSettings.INSULATION_ITEMS.get().get(item.getItem());
-        if (insulation != null)
-        {   return insulation;
-        }
-        else
-        {
-            insulation = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(item.getItem());
-            if (insulation != null)
-            {   return insulation;
-            }
-        }
-        return new Pair<>(0.0, 0.0);
-    }
-
     public static int getInsulationSlots(ItemStack item)
     {
         List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
@@ -162,9 +146,7 @@ public class ItemInsulationManager
 
     public static boolean isInsulatable(ItemStack stack)
     {
-        Item item = stack.getItem();
-        return item instanceof Equipable
-            && !ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().containsKey(item)
-            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(item);
+        return stack.getItem() instanceof Equipable
+            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack));
     }
 }

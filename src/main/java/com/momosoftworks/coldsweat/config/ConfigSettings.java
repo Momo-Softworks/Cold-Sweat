@@ -1,13 +1,14 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
+import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -65,26 +66,25 @@ public class ConfigSettings
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
 
     // Item settings
-    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATION_ITEMS;
-    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> ADAPTIVE_INSULATION_ITEMS;
-    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATING_ARMORS;
-    public static final DynamicHolder<Map<Item, Pair<Double, Double>>> INSULATING_CURIOS;
+    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATION_ITEMS;
+    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATING_ARMORS;
+    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATING_CURIOS;
     public static final DynamicHolder<Integer[]> INSULATION_SLOTS;
     public static final DynamicHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final DynamicHolder<Map<Item, Double>> FOOD_TEMPERATURES;
+    public static final DynamicHolder<Map<ItemData, Double>> FOOD_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
-    public static final DynamicHolder<Map<Item, Integer>> LAMP_FUEL_ITEMS;
-
     public static final DynamicHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final DynamicHolder<Map<Item, Double>> BOILER_FUEL;
-    public static final DynamicHolder<Map<Item, Double>> ICEBOX_FUEL;
-    public static final DynamicHolder<Map<Item, Double>> HEARTH_FUEL;
+    public static final DynamicHolder<Map<ItemData, Double>> BOILER_FUEL;
+    public static final DynamicHolder<Map<ItemData, Double>> ICEBOX_FUEL;
+    public static final DynamicHolder<Map<ItemData, Double>> HEARTH_FUEL;
+    public static final DynamicHolder<Map<ItemData, Double>> SOULSPRING_LAMP_FUEL;
+
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
     public static final DynamicHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
 
@@ -127,64 +127,64 @@ public class ConfigSettings
     static
     {
         DIFFICULTY = addSyncedSetting("difficulty", () -> ColdSweatConfig.getInstance().getDifficulty(),
-        encoder -> ConfigHelper.writeNBTInt(encoder, "Difficulty"),
+        encoder -> ConfigHelper.serializeNbtInt(encoder, "Difficulty"),
         decoder -> decoder.getInt("Difficulty"),
         saver -> ColdSweatConfig.getInstance().setDifficulty(saver));
 
         MAX_TEMP = addSyncedSetting("max_temp", () -> ColdSweatConfig.getInstance().getMaxTempHabitable(),
-        encoder -> ConfigHelper.writeNBTDouble(encoder, "MaxTemp"),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
         decoder -> decoder.getDouble("MaxTemp"),
         saver -> ColdSweatConfig.getInstance().setMaxHabitable(saver));
 
         MIN_TEMP = addSyncedSetting("min_temp", () -> ColdSweatConfig.getInstance().getMinTempHabitable(),
-        encoder -> ConfigHelper.writeNBTDouble(encoder, "MinTemp"),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
         decoder -> decoder.getDouble("MinTemp"),
         saver -> ColdSweatConfig.getInstance().setMinHabitable(saver));
 
         TEMP_RATE = addSyncedSetting("temp_rate", () -> ColdSweatConfig.getInstance().getRateMultiplier(),
-        encoder -> ConfigHelper.writeNBTDouble(encoder, "TempRate"),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
         decoder -> decoder.getDouble("TempRate"),
         saver -> ColdSweatConfig.getInstance().setRateMultiplier(saver));
 
         TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> ColdSweatConfig.getInstance().getTempDamage(),
-        encoder -> ConfigHelper.writeNBTDouble(encoder, "TempDamage"),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
         decoder -> decoder.getDouble("TempDamage"),
         saver -> ColdSweatConfig.getInstance().setTempDamage(saver));
 
         FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> ColdSweatConfig.getInstance().isFireResistanceEnabled(),
-        encoder -> ConfigHelper.writeNBTBoolean(encoder, "FireResistanceEnabled"),
+        encoder -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
         decoder -> decoder.getBoolean("FireResistanceEnabled"),
         saver -> ColdSweatConfig.getInstance().setFireResistanceEnabled(saver));
 
         ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> ColdSweatConfig.getInstance().isIceResistanceEnabled(),
-        encoder -> ConfigHelper.writeNBTBoolean(encoder, "IceResistanceEnabled"),
+        encoder -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
         decoder -> decoder.getBoolean("IceResistanceEnabled"),
         saver -> ColdSweatConfig.getInstance().setIceResistanceEnabled(saver));
 
         DAMAGE_SCALING = addSyncedSetting("damage_scaling", () -> ColdSweatConfig.getInstance().doDamageScaling(),
-        encoder -> ConfigHelper.writeNBTBoolean( encoder, "DamageScaling"),
+        encoder -> ConfigHelper.serializeNbtBool(encoder, "DamageScaling"),
         decoder -> decoder.getBoolean("DamageScaling"),
         saver -> ColdSweatConfig.getInstance().setDamageScaling(saver));
 
         REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> ColdSweatConfig.getInstance().thermometerRequired(),
-        encoder -> ConfigHelper.writeNBTBoolean(encoder, "RequireThermometer"),
+        encoder -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
         decoder -> decoder.getBoolean("RequireThermometer"),
         saver -> ColdSweatConfig.getInstance().setRequireThermometer(saver));
 
         GRACE_LENGTH = addSyncedSetting("grace_length", () -> ColdSweatConfig.getInstance().getGracePeriodLength(),
-        encoder -> ConfigHelper.writeNBTInt(encoder, "GraceLength"),
+        encoder -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
         decoder -> decoder.getInt("GraceLength"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodLength(saver));
 
         GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> ColdSweatConfig.getInstance().isGracePeriodEnabled(),
-        encoder -> ConfigHelper.writeNBTBoolean(encoder, "GraceEnabled"),
+        encoder -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
 
 
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
-        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeTemps"),
-        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeTemps"),
+        encoder -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeTemps"),
+        decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {   Temperature.Units units = entry.getValue().getC();
@@ -195,8 +195,8 @@ public class ConfigSettings
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
-        encoder -> ConfigHelper.writeBiomeTemps(encoder, "BiomeOffsets"),
-        decoder -> ConfigHelper.readBiomeTemps(decoder, "BiomeOffsets"),
+        encoder -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeOffsets"),
+        decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {   Temperature.Units units = entry.getValue().getC();
@@ -207,8 +207,8 @@ public class ConfigSettings
                                                             .collect(Collectors.toList())));
 
         DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true),
-        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionTemps"),
-        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionTemps"),
+        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionTemps"),
+        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionTemps"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
@@ -218,8 +218,8 @@ public class ConfigSettings
                                                      .collect(Collectors.toList())));
 
         DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false),
-        encoder -> ConfigHelper.writeDimensionTemps(encoder, "DimensionOffsets"),
-        decoder -> ConfigHelper.readDimensionTemps(decoder, "DimensionOffsets"),
+        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionOffsets"),
+        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionOffsets"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
@@ -240,7 +240,7 @@ public class ConfigSettings
                                                      .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
-                                           encoder -> ConfigHelper.writeNBTDouble(encoder, "CaveInsulation"),
+                                           encoder -> ConfigHelper.serializeNbtDouble(encoder, "CaveInsulation"),
                                            decoder -> decoder.getDouble("CaveInsulation"),
                                            saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
@@ -248,112 +248,34 @@ public class ConfigSettings
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
         HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getHearthFuelItems()));
 
+        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems()),
+        encoder -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems"),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems"),
+        saver -> ConfigHelper.writeItemMap(saver, list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list)));
+
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
 
-        INSULATION_ITEMS = addSyncedSetting("insulation_items", () ->
-        {
-            Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulationItems())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
-                }
-            }
-            return map;
-        },
-        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulationItems"),
-        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulationItems"),
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
-                }
-            }
-            ItemSettingsConfig.getInstance().setInsulationItems(list);
-        });
+        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems()),
+        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
+        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
+        saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
 
-        ADAPTIVE_INSULATION_ITEMS = addSyncedSetting("adaptive_insulation_items", () ->
-        {
-            Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().getAdaptiveInsulationItems())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
-                }
-            }
-            return map;
-        },
-        encoder -> ConfigHelper.writeNBTItemMap(encoder, "AdaptiveInsulationItems"),
-        decoder -> ConfigHelper.readNBTItemMap(decoder, "AdaptiveInsulationItems"),
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {
-                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
-                }
-            }
-            ItemSettingsConfig.getInstance().setAdaptiveInsulationItems(list);
-        });
-
-        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () ->
-        {
-            Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulatingArmorItems())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
-                }
-            }
-            return map;
-        },
-        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulatingArmors"),
-        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulatingArmors"),
-        saver ->
-        {   List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
-                }
-            }
-            ItemSettingsConfig.getInstance().setInsulatingArmorItems(list);
-        });
+        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems()),
+        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
+        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
+        saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
         INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
-        {
-            if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
-
-            Map<Item, Pair<Double, Double>> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().getInsulatingCurios())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {   map.put(item, Pair.of(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
-                }
-            }
-            return map;
+        {   if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
+            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios());
         },
-        encoder -> ConfigHelper.writeNBTItemMap(encoder, "InsulatingCurios"),
-        decoder -> ConfigHelper.readNBTItemMap(decoder, "InsulatingCurios"),
+        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
+        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),
         saver ->
-        {   List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Pair<Double, Double>> entry : saver.entrySet())
-            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue().getFirst(), entry.getValue().getSecond()));
-                }
+        {   if (CompatManager.isCuriosLoaded())
+            {   ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingCurios(list));
             }
-            ItemSettingsConfig.getInstance().setInsulatingCurios(list);
         });
 
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
@@ -369,144 +291,44 @@ public class ConfigSettings
             tag.putInt("Feet", encoder[3]);
             return tag;
         },
-        decoder ->
-        {   return new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") };
-        },
-        saver ->
-        {   ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3]));
-        });
+        decoder -> new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") },
+        saver -> ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3])));
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).toList());
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> ColdSweatConfig.getInstance().isSleepChecked());
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () ->
-        {
-            Map<Item, Double> map = new HashMap<>();
-            for (List<?> entry : ItemSettingsConfig.getInstance().getFoodTemperatures())
-            {
-                String itemID = (String) entry.get(0);
-                for (Item item : ConfigHelper.getItems(itemID))
-                {   map.put(item, ((Number) entry.get(1)).doubleValue());
-                }
-            }
-            return map;
-        },
-        encoder ->
-        {
-            CompoundTag tag = new CompoundTag();
-            CompoundTag mapTag = new CompoundTag();
-            for (Map.Entry<Item, Double> entry : encoder.entrySet())
-            {
-                CompoundTag itemTag = new CompoundTag();
-                itemTag.putDouble("Value", entry.getValue());
-
-                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   mapTag.put(itemID.toString(), itemTag);
-                }
-            }
-            tag.put("FoodTemperatures", mapTag);
-            return tag;
-        },
-        decoder ->
-        {
-            Map<Item, Double> map = new HashMap<>();
-            CompoundTag mapTag = decoder.getCompound("FoodTemperatures");
-            for (String key : mapTag.getAllKeys())
-            {
-                CompoundTag itemTag = mapTag.getCompound(key);
-                map.put(ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), itemTag.getDouble("Value"));
-            }
-            return map;
-        },
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Double> entry : saver.entrySet())
-            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue()));
-                }
-            }
-            ItemSettingsConfig.getInstance().setFoodTemperatures(list);
-        });
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures()),
+        encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures"),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures"),
+        saver -> ConfigHelper.writeItemMap(saver, list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list)));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
-
-        LAMP_FUEL_ITEMS = addSyncedSetting("lamp_fuel_items", () ->
-        {
-            Map<Item, Integer> list = new HashMap<>();
-            for (List<?> item : ItemSettingsConfig.getInstance().getSoulLampFuelItems())
-            {
-                ConfigHelper.getItems((String) item.get(0)).forEach(i -> list.put(i, (Integer) item.get(1)));
-            }
-            return list;
-        },
-        encoder ->
-        {
-            CompoundTag tag = new CompoundTag();
-            for (Map.Entry<Item, Integer> entry : encoder.entrySet())
-            {
-                ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   tag.putInt(itemID.toString(), entry.getValue());
-                }
-            }
-            return tag;
-        },
-        decoder ->
-        {
-            Map<Item, Integer> map = new HashMap<>();
-            for (String key : decoder.getAllKeys())
-            {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(key));
-                if (item != null)
-                {   map.put(item, decoder.getInt(key));
-                }
-            }
-            return map;
-        },
-        saver ->
-        {
-            List<List<?>> list = new ArrayList<>();
-            for (Map.Entry<Item, Integer> entry : saver.entrySet())
-            {   ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(entry.getKey());
-                if (itemID != null)
-                {   list.add(Arrays.asList(itemID.toString(), entry.getValue()));
-                }
-            }
-            ItemSettingsConfig.getInstance().setSoulLampFuelItems(list);
-        });
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
 
         FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
-        {
-            List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
+        {   List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         },
-        triplet ->
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.put("Interval", IntTag.valueOf(triplet.getA()));
-            tag.put("Cooldown", IntTag.valueOf(triplet.getB()));
-            tag.put("Chance", DoubleTag.valueOf(triplet.getC()));
+        encoder ->
+        {   CompoundTag tag = new CompoundTag();
+            tag.put("Interval", IntTag.valueOf(encoder.getA()));
+            tag.put("Cooldown", IntTag.valueOf(encoder.getB()));
+            tag.put("Chance", DoubleTag.valueOf(encoder.getC()));
             return tag;
         },
-                                       tag ->
-        {
-            int interval = tag.getInt("Interval");
-            int cooldown = tag.getInt("Cooldown");
-            double chance = tag.getDouble("Chance");
+        decoder ->
+        {   int interval = decoder.getInt("Interval");
+            int cooldown = decoder.getInt("Cooldown");
+            double chance = decoder.getDouble("Chance");
             return new Triplet<>(interval, cooldown, chance);
         },
-                                       triplet ->
-        {
-            List<Number> list = new ArrayList<>();
-            list.add(triplet.getA());
-            list.add(triplet.getB());
-            list.add(triplet.getC());
+        saver ->
+        {   List<Number> list = new ArrayList<>();
+            list.add(saver.getA());
+            list.add(saver.getB());
+            list.add(saver.getC());
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
@@ -544,7 +366,7 @@ public class ConfigSettings
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
-        encoder -> ConfigHelper.writeNBTInt(encoder, "BlockRange"),
+        encoder -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
         decoder -> decoder.getInt("BlockRange"),
         saver -> WorldSettingsConfig.getInstance().setBlockRange(saver));
 
