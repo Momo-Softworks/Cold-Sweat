@@ -47,6 +47,7 @@ import java.util.Random;
 public class FilledWaterskinItem extends Item
 {
     public static final double EFFECT_RATE = 0.4;
+    public static final String NBT_TEMPERATURE = "Temperature";
 
     public FilledWaterskinItem()
     {
@@ -57,7 +58,7 @@ public class FilledWaterskinItem extends Item
             BlockPos pos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
             Level level = source.getLevel();
             ChunkAccess chunk = WorldHelper.getChunk(level, pos);
-            double itemTemp = stack.getOrCreateTag().getDouble("temperature");
+            double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
             if (chunk == null) return stack;
 
@@ -147,13 +148,13 @@ public class FilledWaterskinItem extends Item
         super.inventoryTick(itemstack, world, entity, slot, isSelected);
         if (entity.tickCount % 5 == 0 && entity instanceof Player player)
         {
-            double itemTemp = itemstack.getOrCreateTag().getDouble("temperature");
+            double itemTemp = itemstack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
                 double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get();
                 double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
-                itemstack.getOrCreateTag().putDouble("temperature", newTemp);
+                itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
                 Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Type.CORE, true);
             }
         }
@@ -192,7 +193,7 @@ public class FilledWaterskinItem extends Item
         if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN))) return false;
 
         Level level = player.level();
-        double amount = stack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+        double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Type.CORE, true);
 
         // Play empty sound
@@ -252,7 +253,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
-    {   double amount = stack.getOrCreateTag().getDouble("temperature") * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+    {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Type.CORE, true);
         return entity instanceof Player player && player.isCreative()
                ? stack
@@ -267,7 +268,7 @@ public class FilledWaterskinItem extends Item
 
             // Preserve NBT (except temperature)
             emptyWaterskin.setTag(stack.getTag());
-            emptyWaterskin.removeTagKey("temperature");
+            emptyWaterskin.removeTagKey(FilledWaterskinItem.NBT_TEMPERATURE);
             return emptyWaterskin;
         }
         return stack;
@@ -276,7 +277,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
     {
-        double temp = stack.getOrCreateTag().getDouble("temperature");
+        double temp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
         // Info tooltip for hotbar functionality
         tooltip.add(Component.empty());
         tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));

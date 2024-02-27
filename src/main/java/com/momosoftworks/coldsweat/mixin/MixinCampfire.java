@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -31,12 +32,12 @@ public class MixinCampfire
             if (stack.is(ModItems.FILLED_WATERSKIN) && (level.getGameTime() & 4) == 0)
             {
                 CompoundTag tag = stack.getOrCreateTag();
-                double temperature = tag.getDouble("temperature");
-                if (state.is(ModBlockTags.SOUL_CAMPFIRES) && tag.getDouble("temperature") > -waterskinStrength * 0.6)
-                {   tag.putDouble("temperature", temperature + tempRate * 0.1 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
+                double temperature = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                if (state.is(ModBlockTags.SOUL_CAMPFIRES) && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) > -waterskinStrength * 0.6)
+                {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, temperature + tempRate * 0.1 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
                 }
-                else if (state.is(ModBlockTags.CAMPFIRES) && tag.getDouble("temperature") < waterskinStrength * 0.6)
-                {   tag.putDouble("temperature", temperature + tempRate * 0.1);
+                else if (state.is(ModBlockTags.CAMPFIRES) && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) < waterskinStrength * 0.6)
+                {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, temperature + tempRate * 0.1);
                 }
             }
         }
@@ -53,10 +54,10 @@ public class MixinCampfire
             CompoundTag tag = result.getOrCreateTag();
             BlockState state = level.getBlockState(BlockPos.containing(x, y, z));
             if (state.is(ModBlockTags.SOUL_CAMPFIRES))
-            {   tag.putDouble("temperature", waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
+            {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
             }
             else if (state.is(ModBlockTags.CAMPFIRES))
-            {   tag.putDouble("temperature", waterskinStrength * 0.6);
+            {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, waterskinStrength * 0.6);
             }
         }
         return result;
