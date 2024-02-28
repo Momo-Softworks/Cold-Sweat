@@ -204,15 +204,12 @@ public class AbstractTempCap implements ITemperatureCap
         double newCoreTemp  = Temperature.apply(getTemp(Type.CORE), entity, Type.CORE, getModifiers(Type.CORE));
 
         // Get abilities
-        double newMaxOffset   = this.modifyFromAttribute(entity, Ability.BURNING_POINT, () -> 0d);
-        double newMinOffset   = this.modifyFromAttribute(entity, Ability.FREEZING_POINT, () -> 0d);
-        double coldDampening  = this.modifyFromAttribute(entity, Ability.COLD_DAMPENING, () -> 0d);
-        double heatDampening  = this.modifyFromAttribute(entity, Ability.HEAT_DAMPENING, () -> 0d);
-        double coldResistance = this.modifyFromAttribute(entity, Ability.COLD_RESISTANCE, () -> 0d);
-        double heatResistance = this.modifyFromAttribute(entity, Ability.HEAT_RESISTANCE, () -> 0d);
-
-        double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
-        double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
+        double maxTemp = this.modifyFromAttribute(entity, Ability.BURNING_POINT, () -> ConfigSettings.MAX_TEMP.get());
+        double minTemp = this.modifyFromAttribute(entity, Ability.FREEZING_POINT, () -> ConfigSettings.MIN_TEMP.get());
+        double coldDampening   = this.modifyFromAttribute(entity, Ability.COLD_DAMPENING, () -> 0d);
+        double heatDampening   = this.modifyFromAttribute(entity, Ability.HEAT_DAMPENING, () -> 0d);
+        double coldResistance  = this.modifyFromAttribute(entity, Ability.COLD_RESISTANCE, () -> 0d);
+        double heatResistance  = this.modifyFromAttribute(entity, Ability.HEAT_RESISTANCE, () -> 0d);
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
@@ -284,8 +281,8 @@ public class AbstractTempCap implements ITemperatureCap
         this.setTemp(Type.BASE, CSMath.clamp(newBaseTemp, -150, 150), entity);
         this.setTemp(Type.WORLD, newWorldTemp, entity);
         // Write the new ability values
-        this.setAbility(Ability.FREEZING_POINT, newMaxOffset);
-        this.setAbility(Ability.BURNING_POINT, newMinOffset);
+        this.setAbility(Ability.FREEZING_POINT, maxTemp);
+        this.setAbility(Ability.BURNING_POINT, minTemp);
         this.setAbility(Ability.COLD_RESISTANCE, coldResistance);
         this.setAbility(Ability.HEAT_RESISTANCE, heatResistance);
         this.setAbility(Ability.COLD_DAMPENING, coldDampening);
