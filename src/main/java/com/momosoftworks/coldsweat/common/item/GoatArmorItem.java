@@ -39,12 +39,8 @@ public class GoatArmorItem extends ArmorItem
                         GoatParkaModel<?> model = RegisterModels.GOAT_PARKA_MODEL;
                         ModelPart fluff = model.body.getChild("fluff");
                         float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getFrameTime());
-                        float headYaw = CSMath.blend(entityLiving.yRotO, entityLiving.getYRot(), Minecraft.getInstance().getFrameTime(), 0, 1);
-                        float bodyYaw = entityLiving.yBodyRot;
-                        float netHeadYaw = CSMath.clamp(headYaw - bodyYaw, -30, 30);
 
                         fluff.xRot = CSMath.toRadians(CSMath.clamp(headPitch, 0, 60f)) / 2;
-                        fluff.zRot = -CSMath.toRadians(netHeadYaw) * fluff.xRot / 2;
                         fluff.x = fluff.zRot * 2;
                         yield model;
                     }
