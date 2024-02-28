@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -112,7 +113,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+                    double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (ModItemTags.BOILER_VALID.contains(stack.getItem()))
                     {
@@ -120,7 +121,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                         if (itemTemp < 50 && stack.getItem() == ModItems.FILLED_WATERSKIN)
                         {
                             hasItemStacks = true;
-                            stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                            stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
                         }
                     }
                 }
