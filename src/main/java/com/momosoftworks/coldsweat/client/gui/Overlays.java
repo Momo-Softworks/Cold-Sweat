@@ -48,8 +48,8 @@ public class Overlays
     public static double WORLD_TEMP = 0;
     static boolean ADVANCED_WORLD_TEMP = false;
     static double PREV_WORLD_TEMP = 0;
-    static double MAX_OFFSET = 0;
-    static double MIN_OFFSET = 0;
+    static double MAX_TEMP = 0;
+    static double MIN_TEMP = 0;
 
     // Stuff for body temperature
     public static double BODY_TEMP = 0;
@@ -68,14 +68,11 @@ public class Overlays
         {
             gui.setupOverlayRenderState(true, false);
 
-            double min = ConfigSettings.MIN_TEMP.get();
-            double max = ConfigSettings.MAX_TEMP.get();
-
             // Get player world temperature
             double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Get the temperature severity
-            int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
+            int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
 
             // Set text color
             int color = switch (severity)
@@ -105,7 +102,7 @@ public class Overlays
             RenderSystem.disableBlend();
 
             // Sets the text bobbing offset (or none if disabled)
-            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.isWithin(temp, min + MIN_OFFSET, max + MAX_OFFSET) && player.tickCount % 2 == 0 ? 1 : 0;
+            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.isWithin(temp, MIN_TEMP, MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
 
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -124,7 +121,7 @@ public class Overlays
 
         if (gui.shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
         {
-            // Blend body temp (per frame)
+            // Blend body temperature (per frame)
             BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
             // Get text color
@@ -215,13 +212,10 @@ public class Overlays
         {
             gui.setupOverlayRenderState(true, false);
 
-            double min = ConfigSettings.MIN_TEMP.get();
-            double max = ConfigSettings.MAX_TEMP.get();
-
             // Get player world temperature
             double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             // Get the temperature severity
-            int severity = getWorldSeverity(temp, min, max, MIN_OFFSET, MAX_OFFSET);
+            int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
             int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
             poseStack.pushPose();
@@ -284,14 +278,14 @@ public class Overlays
                     boolean celsius = ConfigSettings.CELSIUS.get();
                     double worldTemp = cap.getTemp(Temperature.Type.WORLD);
                     double realTemp = Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                    // Calculate the blended world temp for this tick
+                    // Calculate the blended world temperature for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
                     WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                     // Update max/min offset
-                    MAX_OFFSET = cap.getAbility(Temperature.Ability.FREEZING_POINT);
-                    MIN_OFFSET = cap.getAbility(Temperature.Ability.BURNING_POINT);
+                    MAX_TEMP = cap.getAbility(Temperature.Ability.FREEZING_POINT);
+                    MIN_TEMP = cap.getAbility(Temperature.Ability.BURNING_POINT);
 
 
                     /* Body Temp */
@@ -312,8 +306,8 @@ public class Overlays
         }
     }
 
-    public static int getWorldSeverity(double temp, double min, double max, double offsMin, double offsMax)
-    {   return (int) CSMath.blend(-4, 4, temp, min + offsMin, max + offsMax);
+    public static int getWorldSeverity(double temp, double min, double max)
+    {   return (int) CSMath.blend(-4, 4, temp, min, max);
     }
 
     static double getBodySeverity(int temp)
