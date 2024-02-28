@@ -66,7 +66,7 @@ public class RegisterItemOverrides
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ConfigSettings.CELSIUS.get();
-                            ChatFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            ChatFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp))
                             {
                                 case 0 -> ChatFormatting.WHITE;
                                 case 2,3 -> ChatFormatting.GOLD;
