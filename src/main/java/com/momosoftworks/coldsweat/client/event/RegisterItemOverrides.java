@@ -68,7 +68,7 @@ public class RegisterItemOverrides
                         {
                             boolean celsius = ConfigSettings.CELSIUS.get();
                             TextFormatting tempColor;
-                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp))
                             {
                                 case 0 : tempColor = TextFormatting.WHITE; break;
                                 case 2 : case 3 : tempColor = TextFormatting.GOLD; break;
