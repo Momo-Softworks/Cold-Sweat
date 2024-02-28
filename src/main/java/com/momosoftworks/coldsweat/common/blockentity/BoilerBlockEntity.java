@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -118,15 +119,14 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    int itemTemp = stack.getOrCreateTag().getInt("temperature");
+                    double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.is(ModItemTags.BOILER_VALID) || stack.is(ModItemTags.BOILER_PURIFIABLE))
                     {
                         // If item is a filled waterskin not at max temp yet
                         if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
-                        {
-                            hasItemStacks = true;
-                            stack.getOrCreateTag().putInt("temperature", itemTemp + 1);
+                        {   hasItemStacks = true;
+                            stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
                         }
                         // If item is valid for the boiler, but doesn't need to be heated and can be purified
                         else if (ticksExisted % (200 / ConfigSettings.TEMP_RATE.get()) == 0
