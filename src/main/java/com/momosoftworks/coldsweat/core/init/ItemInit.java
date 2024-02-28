@@ -46,13 +46,13 @@ public class ItemInit
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     public static final RegistryObject<Item> FUR_CAP = ITEMS.register("fur_cap", () ->
-            new LlamaArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> FUR_PARKA = ITEMS.register("fur_parka", () ->
-            new LlamaArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> FUR_PANTS = ITEMS.register("fur_pants", () ->
-            new LlamaArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
     public static final RegistryObject<Item> FUR_BOOTS = ITEMS.register("fur_boots", () ->
-            new LlamaArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.FUR, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     // Block Items
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
