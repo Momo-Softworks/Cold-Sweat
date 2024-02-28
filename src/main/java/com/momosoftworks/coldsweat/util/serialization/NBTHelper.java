@@ -3,14 +3,21 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class NBTHelper
 {
@@ -134,6 +141,34 @@ public class NBTHelper
         catch (Exception e)
         {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
             return new CompoundNBT();
+        }
+    }
+
+    @SubscribeEvent
+    public static void convertTagsInContainer(PlayerContainerEvent.Open event)
+    {   updateItemTags(event.getContainer().slots.stream().map(Slot::getItem).collect(Collectors.toList()));
+    }
+
+    private static void updateItemTags(Collection<ItemStack> items)
+    {
+        for (ItemStack stack : items)
+        {
+            Item item = stack.getItem();
+            CompoundNBT tag = stack.getOrCreateTag();
+            if (item == ModItems.SOULSPRING_LAMP)
+            {
+                if (tag.contains("fuel"))
+                {   tag.putDouble("Fuel", tag.getDouble("fuel"));
+                    tag.remove("fuel");
+                }
+            }
+            else if (item == ModItems.FILLED_WATERSKIN)
+            {
+                if (tag.contains("temperature"))
+                {   tag.putDouble("Temperature", tag.getDouble("temperature"));
+                    tag.remove("temperature");
+                }
+            }
         }
     }
 }
