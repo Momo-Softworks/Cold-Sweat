@@ -162,11 +162,11 @@ public class BiomeTempModifier extends TempModifier
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
                                                            new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
                                                              new Triplet<>(0d, 0d, Temperature.Units.MC));
-        return CSMath.addPairs(Pair.of(cTemp.getFirst(), cTemp.getSecond()), Pair.of(cOffset.getFirst(), cOffset.getSecond()));
+        return CSMath.addPairs(Pair.of(configTemp.getFirst(), configTemp.getSecond()), Pair.of(configOffset.getFirst(), configOffset.getSecond()));
     }
 
     public String getID()

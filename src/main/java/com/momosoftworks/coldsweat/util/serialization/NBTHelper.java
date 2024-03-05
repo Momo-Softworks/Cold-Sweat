@@ -133,17 +133,6 @@ public class NBTHelper
         return null;
     }
 
-    public static CompoundNBT parseCompoundNbt(String tag)
-    {
-        try
-        {   return JsonToNBT.parseTag(tag);
-        }
-        catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
-            return new CompoundNBT();
-        }
-    }
-
     @SubscribeEvent
     public static void convertTagsInContainer(PlayerContainerEvent.Open event)
     {   updateItemTags(event.getContainer().slots.stream().map(Slot::getItem).collect(Collectors.toList()));
@@ -169,6 +158,17 @@ public class NBTHelper
                     tag.remove("temperature");
                 }
             }
+        }
+    }
+
+    public static CompoundNBT parseCompoundNbt(String tag)
+    {
+        try
+        {   return JsonToNBT.parseTag(tag);
+        }
+        catch (Exception e)
+        {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
+            return new CompoundNBT();
         }
     }
 }

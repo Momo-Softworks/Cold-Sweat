@@ -11,10 +11,13 @@ import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.Property;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -60,38 +63,60 @@ public class TempModifierInit
             {
                 // Get IDs associated with this config entry
                 String[] blockIDs = ((String) effectBuilder.get(0)).split(",");
-                // Temp of block
-                final double blockTemp = ((Number) effectBuilder.get(1)).doubleValue();
-                // Range of effect
-                final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
-
-                // Weakens over distance?
-                final boolean weaken = effectBuilder.size() < 4 || (Boolean) effectBuilder.get(3);
-
-                // Get min/max effect
-                final double maxChange = effectBuilder.size() == 5 && effectBuilder.get(4) instanceof Number
-                        ? ((Number) effectBuilder.get(4)).doubleValue()
-                        : Double.MAX_VALUE;
-
-                final double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
-                final double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
 
                 // Parse block IDs into blocks
                 Block[] effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toArray(Block[]::new);
 
                 // Get block predicate
-                Map<String, Predicate<BlockState>> blockPredicates = effectBuilder.size() < 6 || !(effectBuilder.get(5) instanceof String)
-                                                                   ? new HashMap<>()
-                                                                   : ConfigHelper.getBlockStatePredicates(effectBlocks[0], (String) effectBuilder.get(5));
+                Map<String, Predicate<BlockState>> blockPredicates = effectBuilder.size() >= 6 && effectBuilder.get(5) instanceof String
+                                                                     ? ConfigHelper.getBlockStatePredicates(effectBlocks[0], (String) effectBuilder.get(5))
+                                                                     : new HashMap<>();
 
                 event.register(new BlockTempConfig(blockPredicates, effectBlocks)
                 {
+                    // Temp of block
+                    final double blockTemp = ((Number) effectBuilder.get(1)).doubleValue();
+                    // Range of effect
+                    final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
+
+                    // Weakens over distance?
+                    final boolean weaken = effectBuilder.size() > 3 && effectBuilder.get(3) instanceof Boolean
+                                          ? (Boolean) effectBuilder.get(3)
+                                          : true;
+
+                    // Get min/max effect
+                    final double maxChange = effectBuilder.size() > 4 && effectBuilder.get(4) instanceof Number
+                                             ? ((Number) effectBuilder.get(4)).doubleValue()
+                                             : Double.MAX_VALUE;
+
+                    final Optional<CompoundNBT> tag = effectBuilder.size() > 6 && effectBuilder.get(6) instanceof String
+                                                      ? Optional.of(NBTHelper.parseCompoundNbt((String) effectBuilder.get(5)))
+                                                      : Optional.empty();
+
+                    final double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
+                    final double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
+
                     @Override
-                    public double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance)
+                    public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                     {
                         // Check the list of predicates first
                         if (blockPredicates.isEmpty() || this.testPredicates(state))
-                        {   return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
+                        {
+                            if (tag.isPresent())
+                            {
+                                TileEntity blockEntity = level.getBlockEntity(pos);
+                                if (blockEntity != null)
+                                {
+                                    CompoundNBT blockTag = blockEntity.save(new CompoundNBT());
+                                    for (String key : tag.get().getAllKeys())
+                                    {
+                                        if (!tag.get().get(key).equals(blockTag.get(key)))
+                                        {   return 0;
+                                        }
+                                    }
+                                }
+                            }
+                            return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
                         }
                         return  0;
                     }

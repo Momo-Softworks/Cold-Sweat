@@ -114,10 +114,10 @@ public class TooltipHandler
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.isEmpty())
-        {   tooltip = new InsulationTooltip(stack, ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM);
+        {   tooltip = new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM);
         }
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.isEmpty())
-        {   tooltip = new InsulationTooltip(stack, ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO);
+        {   tooltip = new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO);
         }
 
         // If the item is insulated armor
@@ -148,7 +148,7 @@ public class TooltipHandler
 
             // Calculate the number of slots and render the insulation bar
             if (!insulation.isEmpty())
-            {   tooltip = new InsulationTooltip(stack, insulation, InsulationType.ARMOR);
+            {   tooltip = new InsulationTooltip(insulation, InsulationType.ARMOR);
             }
         }
         // Find the empty line that this tooltip should fill
