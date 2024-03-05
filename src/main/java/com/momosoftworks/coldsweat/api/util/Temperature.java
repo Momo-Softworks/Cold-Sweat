@@ -502,19 +502,37 @@ public class Temperature
      */
     public enum Units implements StringRepresentable
     {
-        F("°F"),
-        C("°C"),
-        MC("MC");
+        F("°F", "f"),
+        C("°C", "c"),
+        MC("MC", "mc");
+
+        public static final Codec<Units> CODEC = StringRepresentable.fromEnum(Units::values);
 
         private final String name;
+        private final String id;
 
-        Units(String identifier)
-        {   this.name = identifier;
+        Units(String name, String id)
+        {   this.name = name;
+            this.id = id;
+        }
+
+        public static Units fromID(String id)
+        {
+            for (Units unit : values())
+            {
+                if (unit.getSerializedName().equals(id))
+                    return unit;
+            }
+            return null;
+        }
+
+        public String getFormattedName()
+        {   return name;
         }
 
         @Override
         public String getSerializedName()
-        {   return name;
+        {   return id;
         }
     }
 

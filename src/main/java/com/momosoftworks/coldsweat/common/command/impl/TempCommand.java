@@ -237,7 +237,7 @@ public class TempCommand extends BaseCommand
                                                                                                                ? level
                                                                                                                : source.getLevel()),
                                                            Temperature.Units.MC, cap.getPreferredUnits(), true);
-            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getSerializedName()), true);
+            source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getFormattedName()), true);
         });
         return Command.SINGLE_SUCCESS;
     }
