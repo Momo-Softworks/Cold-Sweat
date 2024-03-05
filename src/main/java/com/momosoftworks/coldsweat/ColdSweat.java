@@ -10,7 +10,10 @@ import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTrigge
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.Insulator;
+import com.momosoftworks.coldsweat.data.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.data.configuration.BlockTempData;
+import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
+import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -73,8 +76,11 @@ public class ColdSweat
         EntitySettingsConfig.setup();
 
         // Setup JSON data-driven handlers
-        bus.addListener((DataPackRegistryEvent.NewRegistry event) -> {
-            event.dataPackRegistry(ModRegistries.INSULATOR, Insulator.CODEC);
+        bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
+        {   event.dataPackRegistry(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC);
+            event.dataPackRegistry(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC);
+            event.dataPackRegistry(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC);
+            event.dataPackRegistry(ModRegistries.DIMENSION_TEMP_DATA, DimensionTempData.CODEC);
         });
     }
 
@@ -92,9 +98,6 @@ public class ColdSweat
 
         // Load configs to memory
         ConfigSettings.load();
-
-        // Load JSON data-driven handlers
-
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)

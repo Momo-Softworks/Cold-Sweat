@@ -467,6 +467,9 @@ public class ConfigHelper
                 item.add(insulation.getInsulation());
                 item.add(insulation.getSpeed());
             }
+            if (entry.getValue() instanceof AdaptiveInsulation)
+            {   item.add("adaptive");
+            }
 
             if (!stack.getTag().isEmpty())
             {   item.add(stack.getTag().toString());
