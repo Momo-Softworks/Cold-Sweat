@@ -46,19 +46,6 @@ public abstract class AbstractConfigPage extends Screen
         super.mouseMoved(mouseX, mouseY);
     }
 
-    @SubscribeEvent
-    public static void onMouseClicked(ScreenEvent.MouseButtonPressed event)
-    {
-        if (Minecraft.getInstance().screen instanceof AbstractConfigPage screen)
-        {   screen.children().forEach(child ->
-            {
-                if (child instanceof AbstractWidget widget && !widget.isMouseOver(event.getMouseX(), event.getMouseY()))
-                {   widget.setFocused(false);
-                }
-            });
-        }
-    }
-
     private final Screen parentScreen;
 
     public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
