@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
+import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
@@ -71,17 +72,23 @@ public class ColdSweat
 
     public void commonSetup(final FMLCommonSetupEvent event)
     {
-        // Setup packets
-        ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
-        {   // Register advancement triggers
+        {
+            // Setup packets
+            ColdSweatPacketHandler.init();
+
+            // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
+
+            // Load configs to memory
+            ConfigSettings.load();
+
+            // Register insulation items tab
+            InsulationItemsGroup.INSULATION_ITEMS.register();
         });
-        // Load configs to memory
-        ConfigSettings.load();
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)
