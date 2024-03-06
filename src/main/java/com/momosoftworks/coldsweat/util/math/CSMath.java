@@ -112,7 +112,7 @@ public class CSMath
         {   return (int) Math.ceil(value);
         }
         else
-        {   int sign = getSign(value);
+        {   int sign = sign(value);
             double abs = Math.abs(value);
             return (int) Math.ceil(abs) * sign;
         }
@@ -124,7 +124,7 @@ public class CSMath
         {   return (int) Math.floor(value);
         }
         else
-        {   int sign = getSign(value);
+        {   int sign = sign(value);
             double abs = Math.abs(value);
             return (int) Math.floor(abs) * sign;
         }
@@ -366,7 +366,7 @@ public class CSMath
     /**
      * @return 1 if the given value is positive, -1 if it is negative, and 0 if it is 0.
      */
-    public static int getSign(double value)
+    public static int sign(double value)
     {
         if (value == 0) return 0;
         return value < 0 ? -1 : 1;
@@ -488,7 +488,7 @@ public class CSMath
      * Lowers the absolute value of the given number by [amount].
      */
     public static double shrink(double value, double amount)
-    {   return Math.max(0, Math.abs(value) - amount) * getSign(value);
+    {   return Math.max(0, Math.abs(value) - amount) * sign(value);
     }
 
     public static double grow(double value, double amount)
@@ -499,7 +499,7 @@ public class CSMath
      * Integer overload for {@link #shrink(double, double)}
      */
     public static int shrink(int value, int amount)
-    {   return Math.max(0, Math.abs(value) - amount) * getSign(value);
+    {   return Math.max(0, Math.abs(value) - amount) * sign(value);
     }
 
     public static int grow(int value, int amount)

@@ -159,7 +159,7 @@ public class Overlays
 
             if (ConfigSettings.BODY_ICON_ENABLED.get())
             {
-                int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.getSign(BODY_TEMP_SEVERITY);
+                int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
                 int newIcon = CSMath.ceil(BODY_TEMP_SEVERITY);
 
                 // Render icon
@@ -287,7 +287,7 @@ public class Overlays
                     // Calculate the blended world temp for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.getSign(diff));
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                     // Update max/min offset
                     MAX_OFFSET = cap.getAbility(Temperature.Ability.FREEZING_POINT);
@@ -317,7 +317,7 @@ public class Overlays
     }
 
     static double getBodySeverity(int temp)
-    {   int sign = CSMath.getSign(temp);
+    {   int sign = CSMath.sign(temp);
         int absTemp = Math.abs(temp);
 
         return (absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100)
