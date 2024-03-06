@@ -20,8 +20,4 @@ public class AttributeInit
     public static final RegistryObject<Attribute> COLD_RESISTANCE = ATTRIBUTES.register("cold_resistance", () -> new RangedAttribute("attribute.cold_resistance", 0.0, 0d, 1d).setSyncable(true));
     public static final RegistryObject<Attribute> HEAT_DAMPENING = ATTRIBUTES.register("heat_dampening", () -> new RangedAttribute("attribute.heat_dampening", 0.0, Double.NEGATIVE_INFINITY, 1d).setSyncable(true));
     public static final RegistryObject<Attribute> COLD_DAMPENING = ATTRIBUTES.register("cold_dampening", () -> new RangedAttribute("attribute.cold_dampening", 0.0, Double.NEGATIVE_INFINITY, 1d).setSyncable(true));
-
-    // Read-only attributes for getting temperature values
-    public static final RegistryObject<Attribute> WORLD_TEMP_IMMUTABLE = ATTRIBUTES.register("world_temp_immutable", () -> new RangedAttribute("attribute.world_temp_immutable", Double.NaN, Double.NaN, Double.POSITIVE_INFINITY).setSyncable(true));
-    public static final RegistryObject<Attribute> BODY_TEMP_IMMUTABLE = ATTRIBUTES.register("body_temp_immutable", () -> new RangedAttribute("attribute.body_temp_immutable", Double.NaN, Double.NaN, Double.POSITIVE_INFINITY).setSyncable(true));
 }
