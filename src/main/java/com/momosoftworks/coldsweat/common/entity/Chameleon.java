@@ -127,7 +127,7 @@ public class Chameleon extends Animal
         this.entityData.define(TRUSTED_PLAYERS, new CompoundTag());
         this.entityData.define(TRACKING_POS, BlockPos.ZERO);
         this.entityData.define(EAT_TIMESTAMP, 0);
-        this.entityData.define(TEMPERATURE, 0f);
+        this.entityData.define(TEMPERATURE, (float) CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()));
         this.entityData.define(EDIBLE_COOLDOWNS, new CompoundTag());
         this.entityData.define(SEARCHING, false);
         this.entityData.define(AGE_SECS, 0);
