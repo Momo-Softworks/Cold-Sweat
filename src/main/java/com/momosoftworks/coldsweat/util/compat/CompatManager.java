@@ -50,7 +50,7 @@ public class CompatManager
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
 
-    private static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
+    public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
         if (minMajorVer > 0 || minMinorVer > 0 || minPatchVer > 0)
         {
@@ -72,7 +72,7 @@ public class CompatManager
         else return ModList.get().isLoaded(modID);
     }
 
-    private static boolean modLoaded(String modID)
+    public static boolean modLoaded(String modID)
     {   return modLoaded(modID, 0, 0, 0);
     }
 
