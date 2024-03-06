@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
-import com.momosoftworks.coldsweat.common.event.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.event.capability.ShearableFurManager;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;

@@ -4,7 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Ability;
 import com.momosoftworks.coldsweat.api.util.Temperature.Type;
-import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -32,8 +32,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static com.momosoftworks.coldsweat.common.event.EntityTempManager.VALID_MODIFIER_TYPES;
-import static com.momosoftworks.coldsweat.common.event.EntityTempManager.VALID_TEMPERATURE_TYPES;
+import static com.momosoftworks.coldsweat.common.event.capability.EntityTempManager.VALID_MODIFIER_TYPES;
+import static com.momosoftworks.coldsweat.common.event.capability.EntityTempManager.VALID_TEMPERATURE_TYPES;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
