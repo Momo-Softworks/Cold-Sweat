@@ -1825,6 +1825,7 @@ Fixes:
 - The body temperature readout is now hidden by default
       - This UI element may or may not be staying. It might possibly be locked behind the thermometer in future versions
       - It can be turned back on in the config menu
+      - Instead, the body temperature icon will now gradually fill up as the player's temperature increases/decreases
 - The temperature rate config setting now affects how fast waterskins heat/cool in the boiler and icebox
 - Added support for Thirst Was Taken:
       - Waterskins are now drinkable via right-click
@@ -1841,8 +1842,13 @@ Fixes:
       - This should provide a needed buff to the icebox/boiler and make the hearth more worth it
 
 Fixes:
+- Fixed the smokestack not having a recipe
+- Fixed clientside settings attempting to load on dedicated servers
+- (1.20) Fixed soul stalk not dropping items when broken
 - Fixed world temperature changing slightly when sitting in a minecart due to the player's hitbox being in the ground
 - Fixed boiler/icebox not saving insulation strength upon world reload
+- Fixed filled waterskin having a very long tooltip when the temperature rate is set to certain values
+- Fixed boiler not being craftable with modded cobblestone-like blocks
 
 Technical Changes:
 - Major changes to attributes:
@@ -1853,3 +1859,38 @@ Technical Changes:
       - Core temperature attribute has been removed
 - Added new sub-command for /temperature: "modify"
       - Allows for changing the player's temperature attributes
+      - Also allows for attributes to be marked as "persistent", meaning they will not be removed upon death
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b02b
+- Added "Cold Sweat: Insulators" creative tab
+        - Contains all items that can be used as insulation, or provide insulation when worn
+- The inside of naturally-generated igloos is now habitable
+- Increased hoglin hide drop rate to 1-3 per hoglin killed
+- Changed the hearth item texture to better match the block texture
+
+Fixes:
+- Fixed invalid fuel item configs defaulting to "air"
+- Fixed the chameleon showing as cold when first spawned
+- Fixed temperature attributes breaking when updating to 2.3-b02a
+      - This fix will not apply if you've already updated to 2.3-b02a.
+      - In worlds on 2.3-b02a with broken attributes, run "/temp modify @s clear" to reset your attributes
+- Fixed the soulspring lamp losing its fuel when updating from existing pre-2.3 worlds
+- Fixed negative heat/cold dampening values not working properly
+
+Technical Changes:
+- Added support for adding item insulation, block temperature, and biome temperature using JSON
+      - These are a more modular way of configuring things, without having to add them to the config files
+      - These can be defined by developers or via datapacks:
+            - Insulation: resources/data/<yourmod>/cold_sweat/insulatorData
+            - Block Temps: resources/data/<yourmod>/cold_sweat/block_temp
+            - Biome Temps: resources/data/<yourmod>/cold_sweat/biome_temp
+            - Dimension Temps: resources/data/<yourmod>/cold_sweat/dimension_temp
+- Added config option for setting the temperature of natural structures
+      - This controls the world temperature when the player is inside the structure
+- Added config option to allow certain blocks to be slept on regardless of the outside temperature
+- Most item configs now support defining NBT tags (i.e. {Color:"blue"}).
+      - Item configs with NBT tags defined will require the specified NBT data to be present on the item
+- Moved the "Cold Soul Fire" and "Check Sleep Conditions" settings to world-settings.toml
+- Renamed some too-verbose config settings/sections
