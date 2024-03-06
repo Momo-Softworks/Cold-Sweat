@@ -81,7 +81,6 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                     {
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.STONE_BUTTON_CLICK_ON, !hideParticles ? 1.5f : 1.9f, 0.75f));
                         this.onClick(mouseX, mouseY);
-                        this.setFocused(false);
                         return true;
                     }
                     return false;
@@ -100,11 +99,6 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   this.renderBackground(ps);
         super.render(ps, mouseX, mouseY, partialTicks);
         this.renderTooltip(ps, mouseX, mouseY);
-        this.children().forEach(child ->
-        {
-            if (child instanceof AbstractWidget widget)
-                widget.setFocused(false);
-        });
     }
 
     @Override
