@@ -269,14 +269,14 @@ public class TempCommand extends BaseCommand
             {
                 LivingEntity livingEntity = ((LivingEntity) entity);
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, ((LivingEntity) entity));
                     if (instance == null) return;
                     if (operation != null)
                     {   AttributeModifier modifier = EntityTempManager.makeAttributeModifier(attribute, amount, operation);
                         instance.addPermanentModifier(modifier);
                     }
                     else
-                    {   EntityTempManager.getAttribute(attribute, living).setBaseValue(amount);
+                    {   EntityTempManager.getAttribute(attribute, ((LivingEntity) entity)).setBaseValue(amount);
                     }
                     if (permanent)
                     {   cap.markPersistentAttribute(instance.getAttribute());
@@ -324,13 +324,13 @@ public class TempCommand extends BaseCommand
     {
         for (Entity entity : entities)
         {
-            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
+            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity)
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, ((LivingEntity) entity));
                     if (instance == null) return;
                     instance.removeModifiers();
-                    EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                    EntityTempManager.getAttribute(attribute, ((LivingEntity) entity)).setBaseValue(Double.NaN);
                     cap.clearPersistentAttribute(instance.getAttribute());
                 });
             }
@@ -360,16 +360,16 @@ public class TempCommand extends BaseCommand
     {
         for (Entity entity : entities)
         {
-            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
+            if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity)
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    for (Either<Temperature.Type, Temperature.Ability> attribute : EntityTempManager.VALID_ATTRIBUTES)
+                    for (Either<Temperature.Type, Temperature.Ability> attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
                     {
-                        ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                        ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, ((LivingEntity) entity));
                         if (instance == null) continue;
                         instance.removeModifiers();
-                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                        EntityTempManager.getAttribute(attribute, ((LivingEntity) entity)).setBaseValue(Double.NaN);
                         cap.clearPersistentAttribute(instance.getAttribute());
                     }
                 });

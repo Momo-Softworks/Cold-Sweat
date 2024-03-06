@@ -78,20 +78,22 @@ public class ConfigHelper
     public static List<Item> getItems(String... ids)
     {
         List<Item> items = new ArrayList<>();
-        for (String id : ids)
+        for (String itemId : ids)
         {
-            if (id.startsWith("#"))
+            if (itemId.startsWith("#"))
             {
-                final String tagID = id.replace("#", "");
+                final String tagID = itemId.replace("#", "");
                 ITag<Item> itemTag = ItemTags.getAllTags().getTag(new ResourceLocation(tagID));
                 if (itemTag != null)
                 {   items.addAll(itemTag.getValues());
                 }
             }
             else
-            {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
-                if (item != Items.AIR)
-                    items.add(item);
+            {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
+                if (item != null && item != Items.AIR)
+                {   items.add(item);
+                }
+                else ColdSweat.LOGGER.error("Error parsing item config: item \"" + itemId + "\" does not exist");
             }
         }
         return items;
@@ -102,11 +104,11 @@ public class ConfigHelper
         Map<Item, Double> map = new HashMap<>();
         for (List<?> entry : source)
         {
-            String itemID = (String) entry.get(0);
+            String itemId = (String) entry.get(0);
 
-            if (itemID.startsWith("#"))
+            if (itemId.startsWith("#"))
             {
-                final String tagID = itemID.replace("#", "");
+                final String tagID = itemId.replace("#", "");
                 ITag<Item> itemTag = ItemTags.getAllTags().getTag(new ResourceLocation(tagID));
                 if (itemTag != null)
                 {
@@ -117,9 +119,11 @@ public class ConfigHelper
             }
             else
             {
-                Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
-
-                if (newItem != null) map.put(newItem, ((Number) entry.get(1)).doubleValue());
+                Item newItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
+                if (newItem != null && newItem != Items.AIR)
+                {   map.put(newItem, ((Number) entry.get(1)).doubleValue());
+                }
+                else ColdSweat.LOGGER.error("Error parsing item config: item \"" + itemId + "\" does not exist");
             }
         }
         return map;
@@ -157,7 +161,7 @@ public class ConfigHelper
                 map.put(biomeID, new Triplet<>(min, max, units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing biome temp config: " + entry.toString() + ". The biome may not be loaded yet or the mod is not present.");
+            {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"" + entry.toString() + "\" does not exist or is not loaded yet.");
             }
         }
         return map;
@@ -176,7 +180,7 @@ public class ConfigHelper
                 map.put(dimensionID, Pair.of(Temperature.convertUnits(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing dimension temp config: " + entry.toString() + ".");
+            {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"" + entry.toString() + "\" does not exist or is not loaded yet");
             }
         }
         return map;
