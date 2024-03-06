@@ -64,6 +64,7 @@ public class ConfigSettings
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
+    public static final DynamicHolder<List<Block>> SLEEP_CHECK_OVERRIDE_BLOCKS;
 
     // Item settings
     public static final DynamicHolder<Map<ItemData, Insulation>> INSULATION_ITEMS;
@@ -296,7 +297,9 @@ public class ConfigSettings
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).toList());
 
-        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> ColdSweatConfig.getInstance().isSleepChecked());
+        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
+
+        SLEEP_CHECK_OVERRIDE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
 
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures()),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures"),
@@ -370,7 +373,7 @@ public class ConfigSettings
         decoder -> decoder.getInt("BlockRange"),
         saver -> WorldSettingsConfig.getInstance().setBlockRange(saver));
 
-        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> ColdSweatConfig.getInstance().isSoulFireCold());
+        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> WorldSettingsConfig.getInstance().isSoulFireCold());
 
         HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
         encoder ->
