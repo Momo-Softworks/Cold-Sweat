@@ -99,8 +99,8 @@ public class Overlays
             RenderSystem.setShaderTexture(0, WORLD_TEMP_GAUGE_LOCATION.get());
 
             // Render frame
-            GuiComponent.blit(poseStack, (width / 2) + 92 + ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
-                              height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().getSecond(), 0, 64 - severity * 16, 25, 16, 25, 144);
+            GuiComponent.blit(poseStack, (width / 2) + 92 + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                              height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             RenderSystem.disableBlend();
 
@@ -111,11 +111,11 @@ public class Overlays
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
                 Minecraft.getInstance().font.draw(poseStack, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
-                        /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().getFirst(),
-                        /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().getSecond(), color);
+                        /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                        /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color);
                 poseStack.popPose();
             }
-        };
+        });
 
         OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "body_temp", (gui, poseStack, partialTick, width, height) ->
         {
@@ -149,26 +149,23 @@ public class Overlays
                             : 0;
 
                 int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
-                int threatOffset = !ConfigSettings.ICON_BOBBING.get()
-                                   ? 0
-                                   : bobLevel == 2
-                                     ? ICON_BOB
-                                     : bobLevel == 3
-                                       ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                                       : 0;
+                int threatOffset = !ConfigSettings.ICON_BOBBING.get() ? 0
+                                 : bobLevel == 2 ? ICON_BOB
+                                 : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                 : 0;
 
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.setShaderTexture(0, BODY_TEMP_GAUGE_LOCATION.get());
 
                 if (ConfigSettings.BODY_ICON_ENABLED.get())
                 {
-                    int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.getSign(BODY_TEMP_SEVERITY);
+                    int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
                     int newIcon = CSMath.ceil(BODY_TEMP_SEVERITY);
 
                     // Render icon
                     GuiComponent.blit(poseStack,
-                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                      height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond(), 0, 40 - icon * 10, 10, 10, 10, 90);
+                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                      height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
 
                     // Render new icon if temperature changing
                     if (CSMath.isBetween(Math.abs(BLEND_BODY_TEMP), 0, 100))
@@ -176,8 +173,8 @@ public class Overlays
                         // Map current temp severity to filling up the icon
                         double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
                         GuiComponent.blit(poseStack,
-                                          (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                          height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().getSecond() + 10 - CSMath.ceil(blend),
+                                          (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                          height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
                                           0,
                                           // V coordinate of the new icon
                                           50 - newIcon * 10 - CSMath.ceil(blend), 10,
@@ -194,8 +191,8 @@ public class Overlays
                     int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
                     String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                    int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().getFirst();
-                    int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().getSecond();
+                    int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
+                    int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
 
                     // Draw the outline
                     font.draw(poseStack, s, x + 1, y, colorBG);
@@ -249,8 +246,8 @@ public class Overlays
                 GuiComponent.blit(poseStack,
                                   //(width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(),
                                   //height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset,
-                                  (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().getFirst(),
-                                  height - 56 + ConfigSettings.BODY_ICON_POS.get().getSecond() - renderOffset - threatOffset,
+                                  (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                  height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
                                   0, 64 - severity * 16, 16, 16, 16, 144);
 
                 RenderSystem.disableBlend();
@@ -270,7 +267,6 @@ public class Overlays
             {
                 if (!(icap instanceof PlayerTempCap cap)) return;
 
-                cap.calculateVisibility(player);
                 ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
 
 
@@ -283,7 +279,7 @@ public class Overlays
                 // Calculate the blended world temp for this tick
                 double diff = realTemp - WORLD_TEMP;
                 PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.getSign(diff));
+                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                 // Update max/min offset
                 MAX_OFFSET = cap.getAbility(Temperature.Ability.FREEZING_POINT);
@@ -304,9 +300,6 @@ public class Overlays
                 // Get the severity of the player's body temperature
                 BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
 
-                // Get the icon to be displayed
-                int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
-
                 // Get the severity of the player's body temperature
                 BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
             });
@@ -318,7 +311,7 @@ public class Overlays
     }
 
     static double getBodySeverity(int temp)
-    {   int sign = CSMath.getSign(temp);
+    {   int sign = CSMath.sign(temp);
         int absTemp = Math.abs(temp);
 
         return (absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100)
