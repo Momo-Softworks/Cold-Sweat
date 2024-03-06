@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -11,8 +9,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ColdSweatConfig
 {
@@ -32,12 +28,9 @@ public class ColdSweatConfig
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> damageScaling;
     public static final ForgeConfigSpec.ConfigValue<Boolean> requireThermometer;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> checkSleep;
 
     public static final ForgeConfigSpec.ConfigValue<Integer> gracePeriodLength;
     public static final ForgeConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
-
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> heatstrokeFog;
     public static final ForgeConfigSpec.ConfigValue<Boolean> freezingHearts;
@@ -50,58 +43,57 @@ public class ColdSweatConfig
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
 
         /*
-         Difficulty
-         */
-        difficulty = BUILDER
-                .comment("Overrides all other config options for easy difficulty management",
-                        "This value is changed by the in-game config. It does nothing otherwise.")
-                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
-
-        /*
          Details about how the player is affected by temperature
          */
-        BUILDER.push("Details about how the player is affected by temperature");
+        BUILDER.push("Difficulty");
+
+        difficulty = BUILDER
+                .comment("Overrides all other config options for easy difficulty management",
+                         "This value is changed by the in-game config. It does nothing otherwise.")
+                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
+
         minHabitable = BUILDER
                 .comment("Defines the minimum habitable temperature")
                 .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
         maxHabitable = BUILDER
                 .comment("Defines the maximum habitable temperature")
-                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
         rateMultiplier = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
+
         tempDamage = BUILDER
                 .comment("Damage dealt to the player when they are too hot or too cold")
                 .defineInRange("Temperature Damage", defaultDiff.getOrDefault("temp_damage", 2d), 0d, Double.POSITIVE_INFINITY);
+
+        damageScaling = BUILDER
+                .comment("Sets whether damage scales with difficulty")
+                .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
+
         BUILDER.pop();
+
 
         /*
          Potion effects affecting the player's temperature
          */
-        BUILDER.push("Item settings");
+        BUILDER.push("Items");
+
         fireResistanceEffect = BUILDER
                 .comment("Allow fire resistance to block overheating damage")
                 .define("Fire Resistance Immunity", defaultDiff.getOrDefault("fire_resistance_enabled", true));
+
         iceResistanceEffect = BUILDER
                 .comment("Allow ice resistance to block freezing damage")
                 .define("Ice Resistance Immunity", defaultDiff.getOrDefault("ice_resistance_enabled", true));
+
         requireThermometer = BUILDER
             .comment("Thermometer item is required to see detailed world temperature")
             .define("Require Thermometer", defaultDiff.getOrDefault("require_thermometer", true));
-        BUILDER.pop();
 
-        /*
-         Misc. things that are affected by temperature
-         */
-        BUILDER.push("Misc temperature-related things");
-        damageScaling = BUILDER
-            .comment("Sets whether damage scales with difficulty")
-            .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
-        checkSleep = BUILDER
-            .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
-            .define("Prevent Sleep When in Danger", defaultDiff.getOrDefault("check_sleep_conditions", true));
         BUILDER.pop();
 
 
@@ -110,42 +102,45 @@ public class ColdSweatConfig
          */
         BUILDER.push("Temperature Effects");
             BUILDER.push("Hot");
+
             heatstrokeFog = BUILDER
                 .comment("When set to true, the player's view distance will decrease when they are too hot")
                 .define("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", true));
+
             BUILDER.pop();
 
             BUILDER.push("Cold");
+
             freezingHearts = BUILDER
                 .comment("When set to true, some of the player's hearts will freeze when they are too cold, preventing regeneration")
                 .define("Freezing Hearts", defaultDiff.getOrDefault("freezing_hearts", true));
+
             coldKnockback = BUILDER
                 .comment("When set to true, the player's attack knockback will be reduced when they are too cold")
                 .define("Cold Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", true));
+
             coldMovement = BUILDER
                 .comment("When set to true, the player's movement speed will be reduced when they are too cold")
                 .define("Cold Slowness", defaultDiff.getOrDefault("cold_slowness", true));
+
             coldMining = BUILDER
                 .comment("When set to true, the player's mining speed will be reduced when they are too cold")
                 .define("Cold Mining Fatigue", defaultDiff.getOrDefault("cold_break_speed", true));
+
             BUILDER.pop();
         BUILDER.pop();
 
 
-        BUILDER.push("Grace Period Details");
+        BUILDER.push("Grace Period");
+
                 gracePeriodLength = BUILDER
                 .comment("The number of ticks after the player spawns during which they are immune to temperature effects")
                 .defineInRange("Grace Period Length", defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE);
+
                 gracePeriodEnabled = BUILDER
                 .comment("Enables the grace period")
                 .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
-        BUILDER.pop();
 
-        BUILDER.push("Cold Soul Fire");
-        coldSoulFire = BUILDER
-                .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
-                         "Does not affect the block's temperature")
-                .define("Cold Soul Fire", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -213,14 +208,6 @@ public class ColdSweatConfig
 
     public boolean isGracePeriodEnabled()
     {   return gracePeriodEnabled.get();
-    }
-
-    public boolean isSoulFireCold()
-    {   return coldSoulFire.get();
-    }
-
-    public boolean isSleepChecked()
-    {   return checkSleep.get();
     }
 
     public boolean heatstrokeFog()

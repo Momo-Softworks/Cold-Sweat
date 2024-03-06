@@ -31,6 +31,8 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
     public static final ForgeConfigSpec.IntValue blockRange;
 
+    public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
+
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
@@ -39,6 +41,9 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
+
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> sleepingOverrideBlocks;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> checkSleep;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -66,16 +71,6 @@ public class WorldSettingsConfig
                      "Also overrides temperatures of all biomes in the dimension")
             .defineList("Dimension Temperatures", List.of(
                     // No default values
-            ), it -> it instanceof List<?> list
-                    && list.get(0) instanceof String
-                    && list.get(1) instanceof Number
-                    && (list.size() < 3 || list.get(2) instanceof String));
-
-        structureTemps = BUILDER
-            .comment("Overrides the world temperature when the player is within this structure",
-                     "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]")
-            .defineList("Structure Temperatures", List.of(
-                    List.of("minecraft:igloo", 70, "F")
             ), it -> it instanceof List<?> list
                     && list.get(0) instanceof String
                     && list.get(1) instanceof Number
@@ -443,7 +438,9 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
+
         BUILDER.push("Block Temperature");
+
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
@@ -468,12 +465,15 @@ public class WorldSettingsConfig
                                             Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
                                     ),
                             it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+
         blockRange = BUILDER
                 .comment("The maximum range of blocks' area of effect",
                          "Note: This will not change anything unless blocks are configured to utilize the expanded range",
                           "This value is capped at 16 for performance reasons")
                 .defineInRange("Block Range", 7, 1, 16);
+
         BUILDER.pop();
+
 
         BUILDER.push("Misc");
 
@@ -482,12 +482,43 @@ public class WorldSettingsConfig
                          "0.0 = no insulation, 1.0 = full insulation")
                 .defineInRange("Cave Insulation Strength", 1.0, 0.0, 1.0);
 
+        structureTemps = BUILDER
+                .comment("Overrides the world temperature when the player is within this structure",
+                         "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]")
+                .defineList("Structure Temperatures", List.of(
+                        List.of("minecraft:igloo", 65, "F")
+                ), it -> it instanceof List<?> list
+                        && list.get(0) instanceof String
+                        && list.get(1) instanceof Number
+                        && (list.size() < 3 || list.get(2) instanceof String));
+
+        sleepingOverrideBlocks = BUILDER
+                .comment("List of blocks that will allow the player to sleep on them, regardless of the \"Prevent Sleep When in Danger\" setting",
+                         "Use this list if the player is not getting the temperature effect from sleeping on particular blocks")
+                .defineList("Sleep Check Override Blocks", ListBuilder.<String>begin()
+                        .addIf(CompatManager.modLoaded("comforts"),
+                                () -> "#comforts:sleeping_bags")
+                        .build(),
+                it -> it instanceof String);
+
+        checkSleep = BUILDER
+                .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
+                .define("Prevent Sleep When in Danger", true);
+
+        coldSoulFire = BUILDER
+                .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
+                         "Does not affect the block's temperature")
+                .define("Cold Soul Fire", true);
+
         BUILDER.pop();
 
+
         BUILDER.push("Hearth");
+
         hearthEffect = BUILDER
-                .comment("How strong the hearth is")
+                .comment("How effective the hearth is at normalizing temperature")
                 .defineInRange("Hearth Strength", 0.75, 0, 1.0);
+
         hearthSpreadWhitelist = BUILDER
                 .comment("List of additional blocks that the hearth can spread through",
                          "Use this list if the hearth isn't spreading through particular blocks that it should")
@@ -498,13 +529,16 @@ public class WorldSettingsConfig
                                               () -> "create:encased_fluid_pipe")
                                           .build(),
                                       o -> o instanceof String);
+
         hearthSpreadBlacklist = BUILDER
                 .comment("List of additional blocks that the hearth cannot spread through",
                          "Use this list if the hearth is spreading through particular blocks that it shouldn't")
                 .defineList("Hearth Spread Blacklist", List.of(
                             ),
                             o -> o instanceof String);
+
         BUILDER.pop();
+
 
         /* Serene Seasons config */
         if (CompatManager.isSereneSeasonsLoaded())
@@ -610,6 +644,18 @@ public class WorldSettingsConfig
     }
     public Double[] getSpringTemps()
     {   return springTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    }
+
+    public boolean isSoulFireCold()
+    {   return coldSoulFire.get();
+    }
+
+    public boolean isSleepChecked()
+    {   return checkSleep.get();
+    }
+
+    public List<? extends String> getSleepOverrideBlocks()
+    {   return sleepingOverrideBlocks.get();
     }
 
     public void setBiomeTemperatures(List<? extends List<?>> temps)
