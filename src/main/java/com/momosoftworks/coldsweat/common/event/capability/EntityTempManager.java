@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event;
+package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;

@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
-import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;

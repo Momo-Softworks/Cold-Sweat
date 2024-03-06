@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 
-import static com.momosoftworks.coldsweat.common.event.EntityTempManager.TEMPERATURE_ENABLED_ENTITIES;
+import static com.momosoftworks.coldsweat.common.event.capability.EntityTempManager.TEMPERATURE_ENABLED_ENTITIES;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class AddTempAttributes
