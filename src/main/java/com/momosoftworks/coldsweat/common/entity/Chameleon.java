@@ -302,7 +302,7 @@ public class Chameleon extends Animal
 
             if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
             {
-                WorldHelper.entityDropItem(this, new ItemStack(ModItems.CHAMELEON_MOLT, this.random.nextInt(3) + 1));
+                WorldHelper.entityDropItem(this, new ItemStack(ModItems.CHAMELEON_MOLT, this.random.nextInt(3) + 1), 20*60*20); // Item lasts 20 minutes
                 WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
                 this.setLastShed(this.getAgeSecs() * 20);
                 this.setShedding(false);

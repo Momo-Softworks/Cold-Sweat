@@ -38,11 +38,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -374,11 +376,23 @@ public abstract class WorldHelper
     }
 
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
+    {   return entityDropItem(entity, stack, 6000);
+    }
+
+    public static ItemEntity entityDropItem(Entity entity, ItemStack stack, int lifeTime)
     {
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "age");
+            age.setAccessible(true);
+            try
+            {   age.set(item, 6000 - lifeTime);
+            }
+            catch (IllegalAccessException e)
+            {   e.printStackTrace();
+            }
         }
         return item;
     }
