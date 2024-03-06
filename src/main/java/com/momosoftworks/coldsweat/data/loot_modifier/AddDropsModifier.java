@@ -18,6 +18,7 @@ public class AddDropsModifier extends LootModifier
             .and(ResourceLocation.CODEC.fieldOf("addition").forGetter(o -> o.addition))
             .and(Codec.pair(Codec.INT.fieldOf("min").codec(), Codec.INT.fieldOf("max").codec()).fieldOf("count").forGetter(o -> o.count))
             .apply(inst, AddDropsModifier::new));
+
     private final ResourceLocation addition;
     private final Pair<Integer, Integer> count;
 
@@ -32,15 +33,17 @@ public class AddDropsModifier extends LootModifier
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
-        int multiplier = count.getSecond() - count.getFirst() + 1;
+        int countMin = count.getFirst();
+        int countMax = count.getSecond();
+        int countRange = countMax - countMin + 1;
         generatedLoot.add(new ItemStack(ForgeRegistries.ITEMS.getValue(addition),
-                                        context.getRandom().nextInt(multiplier) + count.getFirst()
-                                        + context.getRandom().nextInt(multiplier * context.getLootingModifier() + 1)));
+                                        context.getRandom().nextIntBetweenInclusive(countMin, countMax)
+                                        + context.getRandom().nextInt(countRange * context.getLootingModifier() + 1)));
         return generatedLoot;
     }
 
     @Override
-    public Codec<AddDropsModifier> codec() {
-        return CODEC;
+    public Codec<AddDropsModifier> codec()
+    {   return CODEC;
     }
 }
