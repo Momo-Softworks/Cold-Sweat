@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event;
+package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.core.init.EntityInit;

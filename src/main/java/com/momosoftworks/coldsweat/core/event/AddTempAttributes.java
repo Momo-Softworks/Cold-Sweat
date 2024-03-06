@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event;
+package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.api.event.common.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;

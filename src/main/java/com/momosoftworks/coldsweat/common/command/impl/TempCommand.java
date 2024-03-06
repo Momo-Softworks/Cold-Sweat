@@ -362,7 +362,7 @@ public class TempCommand extends BaseCommand
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    for (Either<Temperature.Type, Temperature.Ability> attribute : EntityTempManager.VALID_ATTRIBUTES)
+                    for (Either<Temperature.Type, Temperature.Ability> attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
                     {
                         AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                         if (instance == null) continue;

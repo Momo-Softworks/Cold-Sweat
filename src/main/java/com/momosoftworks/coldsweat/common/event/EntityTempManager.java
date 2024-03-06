@@ -26,7 +26,6 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -76,7 +75,7 @@ public class EntityTempManager
 
     public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.WORLD};
 
-    public static final Either<Temperature.Type, Temperature.Ability>[] VALID_ATTRIBUTES = new Either[]
+    public static final Either<Temperature.Type, Temperature.Ability>[] VALID_ATTRIBUTE_TYPES = new Either[]
     {
         Either.left(Temperature.Type.WORLD),
         Either.left(Temperature.Type.BASE),
