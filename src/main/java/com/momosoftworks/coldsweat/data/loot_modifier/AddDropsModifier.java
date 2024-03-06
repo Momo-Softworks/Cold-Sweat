@@ -30,10 +30,12 @@ public class AddDropsModifier extends LootModifier
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
-        int multiplier = count.getSecond() - count.getFirst() + 1;
+        int countMin = count.getFirst();
+        int countMax = count.getSecond();
+        int countRange = countMax - countMin + 1;
         generatedLoot.add(new ItemStack(addition,
-                                        context.getRandom().nextInt(multiplier) + count.getFirst()
-                                      + context.getRandom().nextInt(multiplier * context.getLootingModifier() + 1)));
+                                        context.getRandom().nextInt(countMin, countMax + 1)
+                                        + context.getRandom().nextInt(countRange * context.getLootingModifier() + 1)));
         return generatedLoot;
     }
 
