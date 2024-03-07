@@ -31,7 +31,7 @@ public record BiomeTempData(Either<TagKey<Biome>, ResourceLocation> biome, doubl
                 if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
                 return result;
             })
-            .fieldOf("dimension").forGetter(BiomeTempData::biome),
+            .fieldOf("biome").forGetter(BiomeTempData::biome),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     {
