@@ -31,6 +31,8 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class LoadConfigSettings
@@ -80,7 +82,10 @@ public class LoadConfigSettings
         .forEach(holder ->
         {
             BlockTempData blockTempData = holder.value();
-            BlockTemp blockTemp = new BlockTemp(blockTempData.blocks().toArray(new Block[0]))
+            Block[] blocks = blockTempData.blocks().stream()
+            .map(either -> either.left().isPresent() ? registries.registryOrThrow(Registry.BLOCK_REGISTRY).getTag(either.left().get()).orElseThrow().stream().map(Holder::value).toArray(Block[]::new)
+                                                     : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
+            BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature();
                 final double maxEffect = blockTempData.maxEffect();
