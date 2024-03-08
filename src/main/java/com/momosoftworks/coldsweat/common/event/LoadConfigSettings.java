@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -40,6 +41,7 @@ import oshi.util.tuples.Triplet;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
 public class LoadConfigSettings
@@ -89,7 +91,10 @@ public class LoadConfigSettings
         .forEach(holder ->
         {
             BlockTempData blockTempData = holder.get();
-            BlockTemp blockTemp = new BlockTemp(blockTempData.blocks().toArray(new Block[0]))
+            Block[] blocks = blockTempData.blocks().stream()
+            .map(either -> either.left().isPresent() ? registries.registryOrThrow(Registry.BLOCK_REGISTRY).getTag(either.left().get()).orElseThrow().stream().map(Holder::get).toArray(Block[]::new)
+                                                     : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
+            BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature();
                 final double maxEffect = blockTempData.maxEffect();
