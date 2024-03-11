@@ -36,21 +36,21 @@ public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes
             .listOf()
             .fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
-                    either ->
-                    {
-                        if (either.left().isPresent()) return either.left().get();
-                        if (either.right().isPresent()) return either.right().get();
-                        throw new IllegalArgumentException("Biome temperature min is not defined!");
-                    },
-                    Either::right).forGetter(BiomeTempData::min),
+            either ->
+            {
+                if (either.left().isPresent()) return either.left().get();
+                if (either.right().isPresent()) return either.right().get();
+                throw new IllegalArgumentException("Biome temperature min is not defined!");
+            },
+            Either::right).forGetter(BiomeTempData::min),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("max_temp")).xmap(
-                    either ->
-                    {
-                        if (either.left().isPresent()) return either.left().get();
-                        if (either.right().isPresent()) return either.right().get();
-                        throw new IllegalArgumentException("Biome temperature min is not defined!");
-                    },
-                    Either::right).forGetter(BiomeTempData::max),
+            either ->
+            {
+                if (either.left().isPresent()) return either.left().get();
+                if (either.right().isPresent()) return either.right().get();
+                throw new IllegalArgumentException("Biome temperature min is not defined!");
+            },
+            Either::right).forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset)
     ).apply(instance, BiomeTempData::new));
