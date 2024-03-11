@@ -30,6 +30,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
 import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
@@ -151,16 +152,27 @@ public class CompatManager
         return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
-    public static boolean isWeather2RainingAt(Level level, BlockPos pos)
+    public static boolean isRainingAt(Level level, BlockPos pos)
     {
-        if (!WEATHER_LOADED) return false;
-        WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
-        if (weatherManager == null) return false;
-        StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
-        if (rainStorm == null) return false;
+        // Get if it's raining from serene seasons
+        if (SEASONS_LOADED && SeasonHooks.isRainingAtHook(level, pos)
+        && !SeasonHooks.shouldSnowHook(level.getBiome(pos).get(), level, pos))
+        {   return true;
+        }
+        // Get if it's raining from weather2
+        if (WEATHER_LOADED)
+        {   WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+            if (weatherManager == null) return false;
+            StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
+            if (rainStorm == null) return false;
 
-        return WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
-            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();
+            if (WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
+            && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize())
+            {   return true;
+            }
+        }
+        // No mods are adding custom rain conditions
+        return false;
     }
 
     @SubscribeEvent
