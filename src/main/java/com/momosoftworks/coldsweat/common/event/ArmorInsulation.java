@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -34,7 +35,7 @@ import java.util.List;
 public class ArmorInsulation
 {
     @SubscribeEvent
-    public static void addArmorModifiers(TickEvent.PlayerTickEvent event)
+    public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
         if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
@@ -49,7 +50,7 @@ public class ArmorInsulation
 
             for (ItemStack armorStack : player.getArmorSlots())
             {
-                if (armorStack.getItem() instanceof ArmorItem armorItem)
+                if (armorStack.getItem() instanceof ArmorItem)
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
@@ -62,14 +63,11 @@ public class ArmorInsulation
                     else
                     {   // Add the armor's insulation value from the Sewing Table
                         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<Insulation> insulation = iCap.map(cap ->
-                        {
-                            if (cap instanceof ItemInsulationCap cap1)
-                            {   cap1.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
-                                return cap1.getInsulationValues();
-                            }
-                            return new ArrayList<Insulation>();
-                        }).orElse(new ArrayList<>());
+                        List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
+                                                      .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
+                                                      .stream()
+                                                      .map(pair -> pair.getSecond())
+                                                      .flatMap(List::stream).toList();
 
                         // Get the armor's insulation values
                         for (Insulation value : insulation)
@@ -90,12 +88,17 @@ public class ArmorInsulation
                         if ((cold + hot) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
                         {   fullyInsulated++;
                         }
+
+                        if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
+                        {   cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+                        }
                     }
 
                     // Add the armor's defense value to the insulation value.
-                    double armorAmount = armorStack.getAttributeModifiers(armorItem.getSlot()).entries().stream().filter(entry -> entry.getKey().equals(Attributes.ARMOR))
-                            .findFirst().map(entry -> entry.getValue().getAmount())
-                            .orElse(0d);
+                    double armorAmount = armorStack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(armorStack)).entries()
+                                         .stream().filter(entry -> entry.getKey().equals(Attributes.ARMOR))
+                                         .map(entry -> entry.getValue().getAmount())
+                                         .mapToDouble(Double::doubleValue).sum();
                     cold += Math.min(armorAmount, 20);
                     hot += Math.min(armorAmount, 20);
 
