@@ -248,7 +248,7 @@ public abstract class WorldHelper
 
         return level.isRaining() && biome.get().getPrecipitation() == Biome.RainType.RAIN
             && biome.get().getTemperature(pos) >= 0.15F && canSeeSky(level, pos.above(), 256)
-            || CompatManager.isWeather2RainingAt(level, pos);
+            || CompatManager.isRainingAt(level, pos);
     }
 
     /**
