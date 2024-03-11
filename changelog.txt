@@ -1887,6 +1887,7 @@ Technical Changes:
             - Block Temps: resources/data/<yourmod>/cold_sweat/block_temp
             - Biome Temps: resources/data/<yourmod>/cold_sweat/biome_temp
             - Dimension Temps: resources/data/<yourmod>/cold_sweat/dimension_temp
+            - Documentation on this feature will be available soon
 - Added config option for setting the temperature of natural structures
       - This controls the world temperature when the player is inside the structure
 - Added config option to allow certain blocks to be slept on regardless of the outside temperature
