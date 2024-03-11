@@ -150,7 +150,7 @@ public class CompatManager
         return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
-    public static boolean isWeather2RainingAt(Level level, BlockPos pos)
+    public static boolean isRainingAt(Level level, BlockPos pos)
     {
         if (!WEATHER_LOADED) return false;
         WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
