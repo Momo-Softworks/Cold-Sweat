@@ -134,7 +134,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:comforts-276951:5068863")
 
     //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
-    //runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4037228")
+    implementation fg.deobf("curse.maven:serene-seasons-291874:4761603")
     //runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
     //runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
     //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")

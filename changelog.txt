@@ -1885,9 +1885,10 @@ Technical Changes:
       - These are a more modular way of configuring things, without having to add them to the config files
       - These can be defined by developers or via datapacks:
             - Insulation: resources/data/<yourmod>/cold_sweat/insulatorData
-            - Block Temps: resources/data/<yourmod>/cold_sweat/block_temp
-            - Biome Temps: resources/data/<yourmod>/cold_sweat/biome_temp
-            - Dimension Temps: resources/data/<yourmod>/cold_sweat/dimension_temp
+            - Block Temps: .../block_temp
+            - Biome Temps: .../biome_temp
+            - Dimension Temps: .../dimension_temp
+            - More datapack support is planned for future versions.
 - Added config option for setting the temperature of natural structures
       - This controls the world temperature when the player is inside the structure
 - Added config option to allow certain blocks to be slept on regardless of the outside temperature
