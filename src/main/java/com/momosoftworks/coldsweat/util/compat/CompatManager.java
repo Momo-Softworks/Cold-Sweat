@@ -132,24 +132,20 @@ public class CompatManager
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
-    {
-        return false;
+    {   return false;
         //return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.TEMPERATURE_REGULATOR);
     }
     public static boolean hasOttoLiner(ItemStack stack)
-    {
-        return false;
+    {   return false;
         //return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIFREEZE_SHIELD);
     }
     public static boolean hasOllieLiner(ItemStack stack)
-    {
-        return false;
+    {   return false;
         //return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIBURN_SHIELD);
     }
 
     public static boolean isWerewolf(Player player)
-    {
-        return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
+    {   return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
