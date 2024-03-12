@@ -143,7 +143,8 @@ public class NBTHelper
         for (ItemStack stack : items)
         {
             Item item = stack.getItem();
-            CompoundNBT tag = stack.getOrCreateTag();
+            CompoundNBT tag = stack.getTag();
+            if (tag == null || tag.isEmpty()) continue;
             if (item == ModItems.SOULSPRING_LAMP)
             {
                 if (tag.contains("fuel"))

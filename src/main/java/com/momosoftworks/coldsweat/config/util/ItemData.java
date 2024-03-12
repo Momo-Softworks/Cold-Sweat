@@ -56,7 +56,7 @@ public class ItemData
     }
 
     public static ItemData of(ItemStack stack)
-    {   return new ItemData(stack.getItem(), stack.getOrCreateTag());
+    {   return new ItemData(stack.getItem(), stack.getTag() != null ? stack.getTag().copy() : new CompoundNBT());
     }
 
     @Override
