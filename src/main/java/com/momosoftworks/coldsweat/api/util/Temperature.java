@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.core.network.message.TemperatureSyncMessage;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -146,7 +147,7 @@ public class Temperature
             addModifiers(dummy, event.getModifiers(), Type.WORLD, true);
         }
         // Move the dummy to the position being tested
-        dummy.setPos(CSMath.getCenterPos(pos));
+        dummy.setPos(WorldHelper.centerOf(pos));
         return apply(0, dummy, Type.WORLD, getModifiers(dummy, Type.WORLD));
     }
 

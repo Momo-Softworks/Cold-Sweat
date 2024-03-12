@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -83,6 +84,15 @@ public abstract class WorldHelper
         return biome;
     }
 
+    public static ResourceLocation getDimensionTypeID(DimensionType dimType)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimType);
+    }
+
+    public static DimensionType getDimensionType(ResourceLocation dimID)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(dimID);
+    }
+
+
     /**
      * Returns all block positions in a grid of the specified size<br>
      * Search area scales with the number of samples
@@ -97,8 +107,7 @@ public abstract class WorldHelper
         int radius = (sampleRoot * interval) / 2;
 
         for (int x = -radius; x < radius; x += interval)
-        {
-            for (int z = -radius; z < radius; z += interval)
+        {   for (int z = -radius; z < radius; z += interval)
             {   posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
             }
         }
@@ -119,10 +128,8 @@ public abstract class WorldHelper
         int radius = (size * interval) / 2;
 
         for (int x = -radius; x < radius; x += interval)
-        {
-            for (int y = -radius; y < radius; y += interval)
-            {
-                for (int z = -radius; z < radius; z += interval)
+        {   for (int y = -radius; y < radius; y += interval)
+            {   for (int z = -radius; z < radius; z += interval)
                 {   posList.add(pos.offset(x + interval / 2, y + interval / 2, z + interval / 2));
                 }
             }
@@ -144,9 +151,9 @@ public abstract class WorldHelper
         if (chunk == null) return true;
 
         for (int i = 0; i < iterations; i++)
-        {
-            BlockState state = chunk.getBlockState(pos2);
+        {   BlockState state = chunk.getBlockState(pos2);
             VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
+
             if (Block.isShapeFullBlock(shape)) return false;
 
             if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
@@ -398,5 +405,19 @@ public abstract class WorldHelper
         if (ichunk instanceof LevelChunk chunk)
         {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), new BlockDataUpdateMessage(be));
         }
+    }
+
+    public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
+    {
+        return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
+            && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
+            && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    /**
+     * @return A Vec3 at the center of the given BlockPos.
+     */
+    public static Vec3 centerOf(BlockPos pos)
+    {   return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 }
