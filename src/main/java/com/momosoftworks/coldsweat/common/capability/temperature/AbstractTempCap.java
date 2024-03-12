@@ -215,7 +215,7 @@ public class AbstractTempCap implements ITemperatureCap
         double heatResistance  = this.modifyFromAttribute(entity, Ability.HEAT_RESISTANCE, () -> 0d);
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
-        int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
+        int worldTempSign = CSMath.signForRange(newWorldTemp, minTemp, maxTemp);
 
         boolean isFullyColdDampened = worldTempSign < 0 && coldDampening >= 1;
         boolean isFullyHeatDampened = worldTempSign > 0 && heatDampening >= 1;

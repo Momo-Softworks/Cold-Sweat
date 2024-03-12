@@ -17,6 +17,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 
 public class ColdBiomeEdible extends Edible

@@ -151,7 +151,7 @@ public class LoadConfigSettings
                 either.ifLeft(tag ->
                 {
                     biomesRegistry.getTag(tag).orElseThrow()
-                    .stream().map(biome -> biomesRegistry.getKey(biome.value()))
+                    .stream().map(biome -> biome.getRegistryName())
                     .forEach(location ->
                     {   addBiomeTempConfig(location, biomeTempData);
                     });

@@ -31,6 +31,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -83,6 +84,15 @@ public abstract class WorldHelper
         return biome;
     }
 
+    public static ResourceLocation getDimensionTypeID(DimensionType dimType)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimType);
+    }
+
+    public static DimensionType getDimensionType(ResourceLocation dimID)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(dimID);
+    }
+
+
     /**
      * Returns all block positions in a grid of the specified size<br>
      * Search area scales with the number of samples
@@ -97,8 +107,7 @@ public abstract class WorldHelper
         int radius = (sampleRoot * interval) / 2;
 
         for (int x = -radius; x < radius; x += interval)
-        {
-            for (int z = -radius; z < radius; z += interval)
+        {   for (int z = -radius; z < radius; z += interval)
             {   posList.add(pos.offset(x + interval / 2, 0, z + interval / 2));
             }
         }
@@ -119,10 +128,8 @@ public abstract class WorldHelper
         int radius = (size * interval) / 2;
 
         for (int x = -radius; x < radius; x += interval)
-        {
-            for (int y = -radius; y < radius; y += interval)
-            {
-                for (int z = -radius; z < radius; z += interval)
+        {   for (int y = -radius; y < radius; y += interval)
+            {   for (int z = -radius; z < radius; z += interval)
                 {   posList.add(pos.offset(x + interval / 2, y + interval / 2, z + interval / 2));
                 }
             }
@@ -398,5 +405,19 @@ public abstract class WorldHelper
         if (ichunk instanceof Chunk)
         {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> ((Chunk) ichunk)), new BlockDataUpdateMessage(te));
         }
+    }
+
+    public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
+    {
+        return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
+            && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
+            && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    /**
+     * @return A Vec3 at the center of the given BlockPos.
+     */
+    public static Vector3d centerOf(BlockPos pos)
+    {   return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 }

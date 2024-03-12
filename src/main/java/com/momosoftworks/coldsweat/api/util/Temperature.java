@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -148,7 +149,7 @@ public class Temperature
             addModifiers(dummy, event.getModifiers(), Type.WORLD, true);
         }
         // Move the dummy to the position being tested
-        Vector3d centerPos = CSMath.getCenterPos(pos);
+        Vector3d centerPos = WorldHelper.centerOf(pos);
         dummy.setPos(centerPos.x, centerPos.y, centerPos.z);
         return apply(0, dummy, Type.WORLD, getModifiers(dummy, Type.WORLD));
     }

@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -93,10 +94,10 @@ public class HearthBottomBlock extends Block
                 Vector3d clickedPos = rayTraceResult.getLocation();
 
                 Vector3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
-                Vector3d lavaSidePos = CSMath.getCenterPos(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
+                Vector3d lavaSidePos = WorldHelper.centerOf(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
 
                 Vector3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
-                Vector3d waterSidePos = CSMath.getCenterPos(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
+                Vector3d waterSidePos = WorldHelper.centerOf(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
 
                 boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
                 Vector3d sidePos = isLava ? lavaSidePos : waterSidePos;
