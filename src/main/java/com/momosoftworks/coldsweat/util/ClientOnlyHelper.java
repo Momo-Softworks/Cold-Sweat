@@ -43,8 +43,4 @@ public class ClientOnlyHelper
     public static Player getClientPlayer()
     {   return Minecraft.getInstance().player;
     }
-
-    public static void sendPacketToServer(ServerboundSetCreativeModeSlotPacket packet)
-    {   Minecraft.getInstance().getConnection().send(packet);
-    }
 }

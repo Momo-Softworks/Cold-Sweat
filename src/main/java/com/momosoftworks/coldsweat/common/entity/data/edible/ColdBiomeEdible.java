@@ -39,7 +39,7 @@ public class ColdBiomeEdible extends Edible
             Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(holder ->
             {
                 Biome biome = holder.value();
-                ResourceLocation biomeName = biome.getRegistryName();
+                ResourceLocation biomeName = WorldHelper.getBiomeID(biome);
 
                 Triplet<Double, Double, Temperature.Units> tempConfig = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeName,
                                                                                                                       ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeName,

@@ -165,7 +165,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         BlockPos pos = event.getPosition();
         Level level = event.getLevel();
         if (level == this.level
-        && CSMath.withinCubeDistance(pos, this.getBlockPos(), this.getMaxRange())
+        && WorldHelper.withinCubeDistance(pos, this.getBlockPos(), this.getMaxRange())
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {   this.sendBlockUpdate();
         }
@@ -389,7 +389,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // The origin of the path is usually the hearth's position,
                 // but if it's spreading through Create pipes then the origin is the end of the pipe
                 if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
-                && CSMath.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
+                && WorldHelper.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
                 {
                     /*
                      Spreading algorithm

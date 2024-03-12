@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -160,7 +161,7 @@ public class LoadConfigSettings
                 either.ifLeft(tag ->
                 {
                     biomesRegistry.getTag(tag).orElseThrow()
-                    .stream().map(biome -> biomesRegistry.getKey(biome.value()))
+                    .stream().map(biome -> WorldHelper.getBiomeID(biome.value()))
                     .forEach(location ->
                     {   addBiomeTempConfig(location, biomeTempData);
                     });

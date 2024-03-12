@@ -229,7 +229,7 @@ public class ConfigHelper
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
-    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).toList();
+    {   return ids.stream().map(id -> WorldHelper.getBiome(new ResourceLocation(id))).toList();
     }
 
     public static CompoundTag serializeNbtBool(boolean value, String key)

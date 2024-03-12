@@ -11,7 +11,6 @@ public class ModDimensionTags
     public static final TagKey<DimensionType> SOUL_LAMP_VALID = createTag("soulspring_lamp_valid");
 
     private static TagKey<DimensionType> createTag(String name)
-    {
-        return TagKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(ColdSweat.MOD_ID, name));
+    {   return TagKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(ColdSweat.MOD_ID, name));
     }
 }
