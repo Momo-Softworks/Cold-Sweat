@@ -147,7 +147,7 @@ public class Temperature
             addModifiers(dummy, event.getModifiers(), Type.WORLD, true);
         }
         // Move the dummy to the position being tested
-        dummy.setPos(WorldHelper.centerOf(pos));
+        dummy.setPos(CSMath.getCenterPos(pos));
         return apply(0, dummy, Type.WORLD, getModifiers(dummy, Type.WORLD));
     }
 
