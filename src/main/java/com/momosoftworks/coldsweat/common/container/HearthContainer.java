@@ -116,14 +116,14 @@ public class HearthContainer extends AbstractContainerMenu
                     {   return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isWithin(index, slots.size() - 9, slots.size() - 1))
+                else if (CSMath.betweenInclusive(index, slots.size() - 9, slots.size() - 1))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, slots.size() - 10, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isWithin(index, 1, slots.size() - 10))
+                else if (CSMath.betweenInclusive(index, 1, slots.size() - 10))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {   slot.onQuickCraft(itemstack1, itemstack);

@@ -171,7 +171,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
             double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-            if (CSMath.isWithin(temp, min, max))
+            if (CSMath.betweenInclusive(temp, min, max))
             {
                 // Find the player's HearthTempModifier
                 TempModifier modifier = null;

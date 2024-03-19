@@ -88,7 +88,7 @@ public class BlockTempModifier extends TempModifier
                             {   BlockTemp key = entry.getKey();
                                 Double value = entry.getValue();
 
-                                if (!blockTemps.contains(key) || CSMath.isWithin(value, key.minEffect(), key.maxEffect()))
+                                if (!blockTemps.contains(key) || CSMath.betweenInclusive(value, key.minEffect(), key.maxEffect()))
                                 {   isInTempRange = true;
                                     break;
                                 }
@@ -163,7 +163,7 @@ public class BlockTempModifier extends TempModifier
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
-                if (!CSMath.isWithin(temp, min, max)) continue;
+                if (!CSMath.betweenInclusive(temp, min, max)) continue;
                 temp = CSMath.clamp(temp + effect.getValue(), min, max);
             }
             return temp;
