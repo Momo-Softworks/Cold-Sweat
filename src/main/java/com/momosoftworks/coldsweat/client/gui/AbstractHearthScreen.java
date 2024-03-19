@@ -90,7 +90,6 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                 {   AbstractHearthScreen.this.renderComponentTooltip(poseStack, List.of(Component.translatable("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY, font);
                 }
             });
-            particleButton.setTooltip(Tooltip.create(Component.translatable("cold_sweat.screen.hearth.show_particles")));
         }
     }
 
