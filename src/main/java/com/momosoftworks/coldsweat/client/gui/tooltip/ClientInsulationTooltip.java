@@ -123,7 +123,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                       // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
                       ? (rounded - i * 2 >= 2 ? 16 : 20)
                       : (rounded - i * 2 >= 2 ? 8 : 12);
-            GuiComponent.blit(poseStack, x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
+            GuiComponent.blit(poseStack, x + i*6, y, 401, uvX, uvY, 6, 4, 32, 24);
         }
     }
 
@@ -133,7 +133,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         // background
         for (int i = 0; i < insulations.size(); i++)
-        {   GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
+        {   GuiComponent.blit(poseStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 32, 24);
         }
 
         // slots
@@ -202,26 +202,26 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         for (int i = 0; i < insulations.size(); i++)
         {
             boolean end = i == insulations.size() - 1;
-            GuiComponent.blit(poseStack, x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+            GuiComponent.blit(poseStack, x + 7 + i * 6, y, 401, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
         }
 
         // icon
         switch (type)
         {
-            case CURIO -> GuiComponent.blit(poseStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24);
-            case ITEM -> GuiComponent.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24);
-            case ARMOR -> GuiComponent.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 24);
+            case CURIO -> GuiComponent.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 32, 24);
+            case ITEM -> GuiComponent.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 32, 24);
+            case ARMOR -> GuiComponent.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 32, 24);
         }
 
         if (showSign)
         {
             if (isNegative)
             {   // negative sign
-                GuiComponent.blit(poseStack, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
+                GuiComponent.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 32, 24);
             }
             else
             {   // positive sign
-                GuiComponent.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+                GuiComponent.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 32, 24);
             }
         }
     }
