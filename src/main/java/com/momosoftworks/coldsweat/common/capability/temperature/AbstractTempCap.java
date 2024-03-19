@@ -284,8 +284,8 @@ public class AbstractTempCap implements ITemperatureCap
         this.setTemp(Type.BASE, CSMath.clamp(newBaseTemp, -150, 150), entity);
         this.setTemp(Type.WORLD, newWorldTemp, entity);
         // Write the new ability values
-        this.setAbility(Ability.FREEZING_POINT, maxTemp);
-        this.setAbility(Ability.BURNING_POINT, minTemp);
+        this.setAbility(Ability.BURNING_POINT, maxTemp);
+        this.setAbility(Ability.FREEZING_POINT, minTemp);
         this.setAbility(Ability.COLD_RESISTANCE, coldResistance);
         this.setAbility(Ability.HEAT_RESISTANCE, heatResistance);
         this.setAbility(Ability.COLD_DAMPENING, coldDampening);

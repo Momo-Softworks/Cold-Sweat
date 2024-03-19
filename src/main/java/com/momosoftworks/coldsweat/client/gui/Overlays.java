@@ -277,8 +277,8 @@ public class Overlays
                     WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                     // Update max/min offset
-                    MAX_TEMP = cap.getAbility(Temperature.Ability.FREEZING_POINT);
-                    MIN_TEMP = cap.getAbility(Temperature.Ability.BURNING_POINT);
+                    MAX_TEMP = cap.getAbility(Temperature.Ability.BURNING_POINT);
+                    MIN_TEMP = cap.getAbility(Temperature.Ability.FREEZING_POINT);
 
 
                     /* Body Temp */
