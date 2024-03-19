@@ -45,17 +45,23 @@ public class TooltipHandler
     {
         ItemStack stack = event.getItemStack();
         ItemData itemData = ItemData.of(stack);
+        List<ITextComponent> elements = event.getToolTip();
         if (stack.isEmpty()) return;
 
+        String hoverName = stack.getHoverName().getString().trim();
+
         // Get the index at which the tooltip should be inserted
-        int tooltipIndex = Math.min(1, event.getToolTip().size() - 1);
-        ITextComponent line;
-        while (!(line = event.getToolTip().get(tooltipIndex)).getString().isEmpty()
-        && !line.getString().equals(stack.getHoverName().getString()))
+        // Insert the tooltip at the first non-blank line under the item's name
+        int tooltipIndex;
+        for (tooltipIndex = 0; tooltipIndex < elements.size(); tooltipIndex++)
         {
-            tooltipIndex++;
-            if (tooltipIndex >= event.getToolTip().size())
-            {   tooltipIndex = Math.min(1, event.getToolTip().size());
+            if (elements.get(tooltipIndex).getString().trim().equals(hoverName))
+            {
+                do
+                {   tooltipIndex++;
+                } 
+                while (tooltipIndex < elements.size()
+                   && (elements.get(tooltipIndex).getString().isEmpty()));
                 break;
             }
         }
@@ -64,35 +70,35 @@ public class TooltipHandler
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
-            {   event.getToolTip().add(tooltipIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
+            {   elements.add(tooltipIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
-                 {   event.getToolTip().add(tooltipIndex, new StringTextComponent(""));
+                 {   elements.add(tooltipIndex, new StringTextComponent(""));
                  }
-            event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
+            elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
             ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(itemData, (item, temp) ->
             {
-                int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getToolTip().size() - 1 : event.getToolTip().size();
-                event.getToolTip().add(index,
+                int index = Minecraft.getInstance().options.advancedItemTooltips ? elements.size() - 1 : elements.size();
+                elements.add(index,
                         temp > 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
                                  : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
                 );
-                event.getToolTip().add(index, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-                event.getToolTip().add(index, new StringTextComponent(""));
+                elements.add(index, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+                elements.add(index, new StringTextComponent(""));
                 return temp;
             });
         }
         // Is insulation item
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null
         && !itemInsul.isEmpty())
-        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+        {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         // Has insulation (armor)
         else if (stack.getItem() instanceof IArmorVanishable && ItemInsulationManager.getInsulationCap(stack).map(c -> !c.getInsulation().isEmpty()).orElse(false))
-        {   event.getToolTip().add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+        {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
         }
     }
 
