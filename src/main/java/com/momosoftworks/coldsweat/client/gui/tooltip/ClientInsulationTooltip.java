@@ -6,13 +6,13 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,10 +31,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                                                : TOOLTIP;
 
     List<Insulation> insulation;
-    InsulationType type;
+    InsulationSlot type;
     int width = 0;
 
-    public ClientInsulationTooltip(List<Insulation> insulation, InsulationType type)
+    public ClientInsulationTooltip(List<Insulation> insulation, InsulationSlot type)
     {   this.insulation = insulation;
         this.type = type;
     }
@@ -113,32 +113,103 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         poseStack.popPose();
     }
 
-    static void renderCells(GuiGraphics graphics, int x, int y, int slots, double insulation, int uvX, boolean isAdaptive)
+    static void renderCell(GuiGraphics graphics, int x, int y, double insulation, int uvX, boolean isAdaptive)
     {
         double rounded = CSMath.roundNearest(Math.abs(insulation), 0.25);
-        for (int i = 0; i < slots; i++)
-        {
-            int uvY = isAdaptive
-                      // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
-                      ? (rounded - i * 2 >= 2 ? 16 : 20)
-                      : (rounded - i * 2 >= 2 ? 8 : 12);
-            graphics.blit(TOOLTIP_LOCATION.get(), x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
-        }
+        int uvY = isAdaptive
+                  // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
+                  ? (rounded >= 2 ? 16 : 20)
+                  : (rounded >= 2 ? 8 : 12);
+        graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, uvX, uvY, 6, 4, 32, 24);
     }
 
-    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, InsulationType type, boolean showSign, boolean isNegative)
+    static int renderOverloadCell(GuiGraphics graphics, Font font, int x, int y, double insulation, int textColor, InsulationType type)
+    {
+        Number insul = CSMath.truncate(insulation / 2, 2);
+        if (CSMath.isInteger(insul)) insul = insul.intValue();
+        String text = "x" + insul;
+        int uvX = switch (type)
+        {   case COLD -> 12;
+            case HEAT -> 18;
+            case NEUTRAL -> 6;
+            case ADAPTIVE -> 12;
+        };
+
+        renderCell(graphics, x + 7, y + 1, insulation, uvX, type == InsulationType.ADAPTIVE);
+        graphics.blit(TOOLTIP_LOCATION.get(),
+                      x + 6, y,
+                      0, /*z*/
+                      11 /*u*/, 0 /*v*/,
+                      8 /*uWidth*/, 6 /*vHeight*/,
+                      32, 24);
+        graphics.drawString(font, text, x + 15, y - 1, textColor);
+        // Return the width of the cell and text
+        return 12 + font.width(text);
+    }
+
+    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, InsulationSlot type, boolean showSign, boolean isNegative)
     {
         PoseStack poseStack = graphics.pose();
+        Font font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
+        boolean overflow = sortedInsulation.size() >= 10;
 
         // background
-        for (int i = 0; i < insulations.size(); i++)
+        for (int i = 0; i < insulations.size() && !overflow; i++)
         {   graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
         }
 
         // slots
         poseStack.pushPose();
-        for (Insulation insulation : sortedInsulation)
+
+        // If there's too much insulation, render a compact version of the tooltip
+        if (overflow)
+        {
+            // tally up the insulation from the sorted list into cold, hot, neutral, and adaptive
+            double cold = 0;
+            double hot = 0;
+            double neutral = 0;
+            double adaptive = 0;
+            for (Insulation insulation : sortedInsulation)
+            {
+                if (insulation instanceof StaticInsulation staticInsulation)
+                {
+                    if (staticInsulation.getCold() > staticInsulation.getHot())
+                        cold += staticInsulation.getCold();
+                    else if (staticInsulation.getHot() > staticInsulation.getCold())
+                        hot += staticInsulation.getHot();
+                    else
+                        neutral += staticInsulation.getCold() * 2;
+                }
+                else if (insulation instanceof AdaptiveInsulation adaptiveInsulation)
+                {   adaptive += adaptiveInsulation.getInsulation();
+                }
+            }
+            int textColor = 10526880;
+
+            poseStack.pushPose();
+            poseStack.translate(2, 0, 0);
+            // Render cold insulation
+            if (cold > 0)
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, cold, textColor, InsulationType.COLD);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (hot > 0)
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, hot, textColor, InsulationType.HEAT);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (neutral > 0)
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, neutral, textColor, InsulationType.NEUTRAL);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (adaptive > 0)
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, adaptive, textColor, InsulationType.ADAPTIVE);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            poseStack.popPose();
+        }
+        // Insulation is small enough to represent traditionally
+        else for (Insulation insulation : sortedInsulation)
         {
             if (insulation instanceof AdaptiveInsulation adaptive)
             {
@@ -147,8 +218,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 for (int i = 0; i < CSMath.ceil(Math.abs(value)) / 2; i++)
                 {
                     double insul = CSMath.minAbs(CSMath.shrink(value, i * 2), 2);
-                    // adaptive cells base
-                    renderCells(graphics, x + 7, y + 1, 1, insul, 12, true);
+                    // adaptive cells base color
+                    renderCell(graphics, x + 7, y + 1, insul, 12, true);
 
                     // adaptive cells overlay
                     double blend = Math.abs(adaptive.getFactor());
@@ -159,7 +230,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     };
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, (float) blend);
-                    renderCells(graphics, x + 7, y + 1, 1, insul, overlayU, true);
+                    renderCell(graphics, x + 7, y + 1, insul, overlayU, true);
                     RenderSystem.disableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, 1f);
 
@@ -177,21 +248,23 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
                 {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
-                    renderCells(graphics, x + 7, y + 1, 1, coldInsul, 12, false); // cold cells
+                    renderCell(graphics, x + 7, y + 1, coldInsul, 12, false); // cold cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-                {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1) * 2;
-                    renderCells(graphics, x + 7, y + 1, 1, neutralInsul, 6, false); // neutral cells
+                {
+                    double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1) * 2;
+                    renderCell(graphics, x + 7, y + 1, neutralInsul, 6, false); // neutral cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Hot insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
-                {   double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
-                    renderCells(graphics, x + 7, y + 1, 1, hotInsul, 18, false); // hot cells
+                {
+                    double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
+                    renderCell(graphics, x + 7, y + 1, hotInsul, 18, false); // hot cells
                     poseStack.translate(6, 0, 0);
                 }
             }
@@ -199,10 +272,48 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         poseStack.popPose();
 
         // border
-        for (int i = 0; i < insulations.size(); i++)
+        for (int i = 0; i < insulations.size() && !overflow; i++)
         {
             boolean end = i == insulations.size() - 1;
-            graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+            if (end)
+            {
+                graphics.blit(TOOLTIP_LOCATION.get(),
+                              x + 7 + i * 6, //x
+                              y, //y
+                              5, //width
+                              6, //height
+                              6, //u
+                              0, //v
+                              3, //uWidth
+                              6, //vHeight
+                              32,
+                              24);
+                graphics.blit(TOOLTIP_LOCATION.get(),
+                              x + 7 + i * 6 + 4, //x
+                              y, //y
+                              3, //width
+                              6, //height
+                              8, //u
+                              0, //v
+                              3, //uWidth
+                              6, //vHeight
+                              32,
+                              24);
+            }
+            else
+            {
+                graphics.blit(TOOLTIP_LOCATION.get(),
+                              x + 7 + i * 6, //x
+                              y, //y
+                              6, //width
+                              6, //height
+                              6, //u
+                              0, //v
+                              3, //uWidth
+                              6, //vHeight
+                              32,
+                              24);
+            }
         }
 
         // icon
