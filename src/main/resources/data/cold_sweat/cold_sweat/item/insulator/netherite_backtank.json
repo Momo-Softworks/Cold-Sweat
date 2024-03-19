@@ -1,0 +1,40 @@
+{
+  "required_mods": [
+    "create"
+  ],
+  "type": "armor",
+  "items": [
+    "create:netherite_backtank"
+  ],
+  "insulation": {
+    "hot": 1998,
+    "cold": 0
+  },
+  "predicate": {
+    "equipment": {
+      "feet": {
+        "items": [
+          "create:netherite_diving_boots"
+        ]
+      },
+      "head": {
+        "items": [
+          "create:netherite_diving_helmet"
+        ]
+      },
+      "chest": {
+        "items": [
+          "create:netherite_backtank"
+        ],
+        "nbt": {
+          "Air": "1-9999"
+        }
+      },
+      "legs": {
+        "items": [
+          "minecraft:netherite_leggings"
+        ]
+      }
+    }
+  }
+}
