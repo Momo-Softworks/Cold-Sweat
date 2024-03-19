@@ -6,7 +6,9 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.simibubi.create.content.equipment.armor.BacktankItem;
+import com.simibubi.create.content.equipment.armor.BacktankUtil;
+import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -17,6 +19,7 @@ import dev.ghen.thirst.content.purity.WaterPurity;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -162,6 +165,30 @@ public class CompatManager
             && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize();
     }
 
+    public static int getWaterPurity(ItemStack stack)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.getPurity(stack);
+        }
+        return 0;
+    }
+
+    public static ItemStack setWaterPurity(ItemStack stack, int purity)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.addPurity(stack, purity);
+        }
+        return stack;
+    }
+
+    public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.addPurity(item, pos, level);
+        }
+        return item;
+    }
+
     @SubscribeEvent
     public static void onLivingTempDamage(LivingEvent event)
     {
@@ -196,28 +223,52 @@ public class CompatManager
         }
     }
 
-    public static int getWaterPurity(ItemStack stack)
-    {
-        if (THIRST_LOADED)
-        {   return WaterPurity.getPurity(stack);
-        }
-        return 0;
-    }
+    public static boolean USING_BACKTANK = false;
 
-    public static ItemStack setWaterPurity(ItemStack stack, int purity)
+    @SubscribeEvent
+    public static void drainCreateBacktank(TickEvent.PlayerTickEvent event)
     {
-        if (THIRST_LOADED)
-        {   return WaterPurity.addPurity(stack, purity);
-        }
-        return stack;
-    }
+        Player player = event.player;
+        if (!CompatManager.isCreateLoaded()) return;
+        ItemStack backTank = player.getItemBySlot(EquipmentSlot.CHEST);
 
-    public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
-    {
-        if (THIRST_LOADED)
-        {   return WaterPurity.addPurity(item, pos, level);
+        // Somehow this makes the indicator render. I have no idea
+        if (USING_BACKTANK && player.level.isClientSide)
+        {   player.getPersistentData().putInt("VisualBacktankAir", Math.round(BacktankUtil.getAir(backTank)) - 1);
         }
-        return item;
+
+        if (player.tickCount % 20 != 0 || event.phase == TickEvent.Phase.START)
+        {   return;
+        }
+
+        if (!player.isCreative() && !player.isInLava()
+        && backTank.getItem() instanceof BacktankItem
+        && backTank.getItem().isFireResistant()
+        && Temperature.get(player, Temperature.Type.WORLD) > Temperature.get(player, Temperature.Ability.BURNING_POINT))
+        {
+            // Ensure player is wearing a full set of fire-resistant armor
+            ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
+            if (!helmet.getItem().isFireResistant() || !(helmet.getItem() instanceof DivingHelmetItem)) return;
+            ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
+            if (!boots.getItem().isFireResistant()) return;
+            ItemStack pants = player.getItemBySlot(EquipmentSlot.LEGS);
+            if (!pants.getItem().isFireResistant()) return;
+
+            if (player.level.isClientSide)
+                USING_BACKTANK = true;
+
+            if (CSMath.getIfNotNull(backTank.getTag(), tag -> tag.getInt("Air"), 0) > 0)
+            {   // Drain air
+                BacktankUtil.consumeAir(player, backTank, 1);
+                //Update backtank air status
+                if (player.level.isClientSide)
+                {   player.getPersistentData().putInt("VisualBacktankAir", Math.round(BacktankUtil.getAir(backTank)) - 1);
+                }
+            }
+        }
+        else if (player.level.isClientSide)
+        {   USING_BACKTANK = false;
+        }
     }
 
     @SubscribeEvent
