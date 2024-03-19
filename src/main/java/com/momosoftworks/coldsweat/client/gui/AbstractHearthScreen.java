@@ -88,8 +88,8 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                     return false;
                 }
             });
+            particleButton.setTooltip(Tooltip.create(Component.translatable("cold_sweat.screen.hearth.show_particles")));
         }
-        particleButton.setTooltip(Tooltip.create(Component.translatable("cold_sweat.screen.hearth.show_particles")));
     }
 
     @Override
