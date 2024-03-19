@@ -4,9 +4,9 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -15,8 +15,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -74,31 +76,26 @@ public class NBTHelper
     }
 
     public static void incrementTag(Object owner, String key, int amount)
-    {
-        incrementTag(owner, key, amount, (tag) -> true);
+    {   incrementTag(owner, key, amount, (tag) -> true);
     }
 
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
         CompoundTag tag;
         if (owner instanceof LivingEntity entity)
-        {
-            tag = entity.getPersistentData();
+        {   tag = entity.getPersistentData();
         }
         else if (owner instanceof ItemStack stack)
-        {
-            tag = stack.getOrCreateTag();
+        {   tag = stack.getOrCreateTag();
         }
         else if (owner instanceof BlockEntity blockEntity)
-        {
-            tag = blockEntity.getPersistentData();
+        {   tag = blockEntity.getPersistentData();
         }
         else return 0;
 
         int value = tag.getInt(key);
         if (predicate.test(value))
-        {
-            tag.putInt(key, value + amount);
+        {   tag.putInt(key, value + amount);
         }
         return value + amount;
     }
@@ -172,5 +169,85 @@ public class NBTHelper
         {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
             return new CompoundTag();
         }
+    }
+
+    public static EntityRequirement readEntityPredicate(CompoundTag tag)
+    {   return EntityRequirement.deserialize(tag);
+    }
+
+    public static CompoundTag writeEntityRequirement(EntityRequirement predicate)
+    {   return predicate.serialize();
+    }
+
+    public static ListTag listTagOf(List<?> list)
+    {
+        ListTag tag = new ListTag();
+        for (Object obj : list)
+        {   tag.add(writeValue(obj));
+        }
+        return tag;
+    }
+
+    @Nullable
+    public static Object getValue(Tag tag)
+    {
+        if (tag instanceof IntTag integer)
+        {   return integer.getAsInt();
+        }
+        else if (tag instanceof FloatTag floating)
+        {   return floating.getAsFloat();
+        }
+        else if (tag instanceof DoubleTag doubleTag)
+        {   return doubleTag.getAsDouble();
+        }
+        else if (tag instanceof LongTag longTag)
+        {   return longTag.getAsLong();
+        }
+        else if (tag instanceof ShortTag shortTag)
+        {   return shortTag.getAsShort();
+        }
+        else if (tag instanceof ByteTag byteTag)
+        {   return byteTag.getAsByte();
+        }
+        else if (tag instanceof ByteArrayTag byteArray)
+        {   return byteArray.getAsString();
+        }
+        else if (tag instanceof IntArrayTag intArray)
+        {   return intArray.getAsIntArray();
+        }
+        else if (tag instanceof LongArrayTag longArray)
+        {   return longArray.getAsLongArray();
+        }
+        else if (tag instanceof StringTag string)
+        {   return string.getAsString();
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Tag writeValue(Object obj)
+    {
+        if (obj instanceof Integer integer)
+        {   return IntTag.valueOf(integer);
+        }
+        else if (obj instanceof Float floating)
+        {   return FloatTag.valueOf(floating);
+        }
+        else if (obj instanceof Double doubleTag)
+        {   return DoubleTag.valueOf(doubleTag);
+        }
+        else if (obj instanceof Long longTag)
+        {   return LongTag.valueOf(longTag);
+        }
+        else if (obj instanceof Short shortTag)
+        {   return ShortTag.valueOf(shortTag);
+        }
+        else if (obj instanceof Byte byteTag)
+        {   return ByteTag.valueOf(byteTag);
+        }
+        else if (obj instanceof String string)
+        {   return StringTag.valueOf(string);
+        }
+        return null;
     }
 }

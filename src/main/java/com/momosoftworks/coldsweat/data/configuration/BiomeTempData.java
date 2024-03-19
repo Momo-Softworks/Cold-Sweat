@@ -10,8 +10,10 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 
 import java.util.List;
+import java.util.Optional;
 
-public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes, double min, double max, Temperature.Units units, boolean isOffset)
+public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes, double min, double max,
+                            Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -52,6 +54,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes
                     },
                     Either::right).forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset)
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(BiomeTempData::requiredMods)
     ).apply(instance, BiomeTempData::new));
 }

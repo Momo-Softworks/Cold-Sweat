@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -42,5 +43,13 @@ public class ClientOnlyHelper
 
     public static Player getClientPlayer()
     {   return Minecraft.getInstance().player;
+    }
+
+    public static void sendPacketToServer(ServerboundSetCreativeModeSlotPacket packet)
+    {   Minecraft.getInstance().getConnection().send(packet);
+    }
+
+    public static GameType getGameMode()
+    {   return Minecraft.getInstance().gameMode.getPlayerMode();
     }
 }

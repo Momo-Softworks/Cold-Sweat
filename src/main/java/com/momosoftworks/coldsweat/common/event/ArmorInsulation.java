@@ -35,10 +35,10 @@ import java.util.List;
 public class ArmorInsulation
 {
     @SubscribeEvent
-    public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
+    public static void applyArmorInsulation(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
+        if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer && player.tickCount % 20 == 0)
         {
             int fullyInsulated = 0;
             double cold = 0;
@@ -57,6 +57,11 @@ public class ArmorInsulation
                     Insulation insulationValue = ConfigSettings.INSULATING_ARMORS.get().get(ItemData.of(armorStack));
                     if (insulationValue != null)
                     {
+                        // Check if the player meets the predicate for the insulation
+                        ItemData data = CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), ItemData.of(armorStack));
+                        if (data == null || !data.testEntity(serverPlayer))
+                        {   continue;
+                        }
                         cold += insulationValue.getCold();
                         hot += insulationValue.getHot();
                     }
@@ -66,6 +71,7 @@ public class ArmorInsulation
                         List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
                                                       .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                                                       .stream()
+                                                      .filter(pair -> CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), ItemData.of(pair.getFirst())).testEntity(serverPlayer))
                                                       .map(pair -> pair.getSecond())
                                                       .flatMap(List::stream).toList();
 
@@ -73,13 +79,11 @@ public class ArmorInsulation
                         for (Insulation value : insulation)
                         {
                             if (value instanceof StaticInsulation insul)
-                            {
-                                cold += insul.getCold();
+                            {   cold += insul.getCold();
                                 hot += insul.getHot();
                             }
                             else if (value instanceof AdaptiveInsulation insul)
-                            {
-                                cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
+                            {   cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
                                 hot += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
                             }
                         }
@@ -111,7 +115,7 @@ public class ArmorInsulation
                 Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
 
             // Award advancement for full insulation
-            if (fullyInsulated >= 4 && player instanceof ServerPlayer serverPlayer)
+            if (fullyInsulated >= 4)
             {
                 if (serverPlayer.getServer() != null)
                 {

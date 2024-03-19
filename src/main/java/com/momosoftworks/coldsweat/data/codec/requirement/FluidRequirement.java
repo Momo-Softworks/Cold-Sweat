@@ -1,0 +1,106 @@
+package com.momosoftworks.coldsweat.data.codec.requirement;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Fluid>> tag, Optional<BlockRequirement.StateRequirement> state, Optional<NbtRequirement> nbt)
+{
+    public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ForgeRegistries.FLUIDS.getCodec().listOf().optionalFieldOf("fluids").forGetter(predicate -> predicate.fluids),
+            TagKey.codec(Registry.FLUID_REGISTRY).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
+            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
+            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+    ).apply(instance, FluidRequirement::new));
+
+    public boolean test(Level pLevel, BlockPos pPos)
+    {
+        if (!pLevel.isLoaded(pPos))
+        {   return false;
+        }
+        else
+        {   FluidState lState = pLevel.getFluidState(pPos);
+            return this.test(lState);
+        }
+    }
+
+    public boolean test(FluidState pState)
+    {
+        if (this.tag.isPresent() && !pState.is(this.tag.get()))
+        {   return false;
+        }
+        else if (this.fluids.isPresent() && !fluids.get().contains(pState.getType()))
+        {   return false;
+        }
+        else
+        {   return this.state.isPresent() && state.get().matches(pState);
+        }
+    }
+
+    public CompoundTag serialize()
+    {
+        CompoundTag lTag = new CompoundTag();
+        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(ForgeRegistries.FLUIDS::getKey).map(Object::toString).collect(Collectors.toList()))));
+        this.tag.ifPresent(tag -> lTag.putString("tag", tag.toString()));
+        this.state.ifPresent(state -> lTag.put("state", state.serialize()));
+        this.nbt.ifPresent(nbt -> lTag.put("nbt", nbt.serialize()));
+        return lTag;
+    }
+
+    public static FluidRequirement deserialize(CompoundTag pTag)
+    {
+        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> ForgeRegistries.FLUIDS.getValue(ResourceLocation.tryParse(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
+        Optional<TagKey<Fluid>> lTag = pTag.contains("tag") ? Optional.of(TagKey.create(Registry.FLUID_REGISTRY, new net.minecraft.resources.ResourceLocation(pTag.getString("tag")))) : Optional.empty();
+        Optional<BlockRequirement.StateRequirement> lState = pTag.contains("state") ? Optional.of(BlockRequirement.StateRequirement.deserialize(pTag.getCompound("state"))) : Optional.empty();
+        Optional<NbtRequirement> lNbt = pTag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(pTag.getCompound("nbt"))) : Optional.empty();
+        return new FluidRequirement(lFluids, lTag, lState, lNbt);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {   return true;
+        }
+        if (obj == null || getClass() != obj.getClass())
+        {   return false;
+        }
+
+        FluidRequirement that = (FluidRequirement) obj;
+
+        if (!fluids.equals(that.fluids))
+        {   return false;
+        }
+        if (!tag.equals(that.tag))
+        {   return false;
+        }
+        if (!state.equals(that.state))
+        {   return false;
+        }
+        return nbt.equals(that.nbt);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Fluid{" +
+                "fluids=" + fluids +
+                ", tag=" + tag +
+                ", state=" + state +
+                ", nbt=" + nbt +
+                '}';
+    }
+}
