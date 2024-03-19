@@ -10,8 +10,10 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.List;
+import java.util.Optional;
 
-public record DimensionTempData(List<Either<TagKey<DimensionType>, ResourceLocation>> dimensions, double temperature, Temperature.Units units, boolean isOffset)
+public record DimensionTempData(List<Either<TagKey<DimensionType>, ResourceLocation>> dimensions, double temperature,
+                                Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -37,6 +39,7 @@ public record DimensionTempData(List<Either<TagKey<DimensionType>, ResourceLocat
             .fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset)
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(DimensionTempData::requiredMods)
     ).apply(instance, DimensionTempData::new));
 }

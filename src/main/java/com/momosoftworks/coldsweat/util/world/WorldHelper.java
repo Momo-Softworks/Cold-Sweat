@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -385,12 +386,12 @@ public abstract class WorldHelper
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
-            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "age");
+            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
             age.setAccessible(true);
             try
             {   age.set(item, 6000 - lifeTime);
             }
-            catch (IllegalAccessException e)
+            catch (Exception e)
             {   e.printStackTrace();
             }
         }
@@ -412,5 +413,12 @@ public abstract class WorldHelper
         if (ichunk instanceof LevelChunk chunk)
         {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), new BlockDataUpdateMessage(be));
         }
+    }
+
+    /**
+     * Allows the server world to be accessed from any thread
+     */
+    public static ServerLevel getServerLevel(Level level)
+    {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 }

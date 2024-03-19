@@ -5,17 +5,19 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.configuration.BlockTempData;
 import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -59,31 +61,34 @@ public class LoadConfigSettings
         .forEach(holder ->
         {
             InsulatorData insulatorData = holder.get();
+            // Check if the required mods are loaded
+            if (insulatorData.requiredMods().isPresent())
+            {
+                List<String> requiredMods = insulatorData.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
             Insulation insulation = insulatorData.getInsulation();
             CompoundTag nbt = insulatorData.nbt().orElse(new CompoundTag());
-            // If the items is defined, add it to the appropriate map
+            EntityRequirement predicate = insulatorData.predicate().orElse(null);
+
+            // Add listed items as insulators
             for (Either<TagKey<Item>, Item> either : insulatorData.items())
             {
-                // If the item is single, write the insulation value
+                // If the item is a tag, write the insulation value for each item in the tag
                 either.ifLeft(tagKey ->
                 {
                     registries.registryOrThrow(Registries.ITEM).getTag(tagKey).orElseThrow().stream()
                     .forEach(item ->
-                    {   addItemConfig(item.get(), insulation, insulatorData.type(), nbt);
+                    {   addItemConfig(item.get(), insulation, insulatorData.type(), nbt, predicate);
                     });
                 });
-                // If the item is a list, write the insulation value for each item
+                // If the item is a single item, write the insulation value for the item
                 either.ifRight(item ->
-                {   addItemConfig(item, insulation, insulatorData.type(), nbt);
+                {   addItemConfig(item, insulation, insulatorData.type(), nbt, predicate);
                 });
             }
-            // If the tag is defined, add all items in the tag to the appropriate map
-            insulatorData.tag().ifPresent(tag ->
-            {
-                ForgeRegistries.ITEMS.tags().getTag(tag).stream().forEach(item ->
-                {   addItemConfig(item, insulation, insulatorData.type(), nbt);
-                });
-            });
         });
 
         // Load JSON data-driven block temperatures
@@ -92,6 +97,14 @@ public class LoadConfigSettings
         .forEach(holder ->
         {
             BlockTempData blockTempData = holder.get();
+            // Check if the required mods are loaded
+            if (blockTempData.requiredMods().isPresent())
+            {
+                List<String> requiredMods = blockTempData.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
             Block[] blocks = blockTempData.blocks().stream()
             .map(either -> either.left().isPresent() ? registries.registryOrThrow(Registries.BLOCK).getTag(either.left().get()).orElseThrow().stream().map(Holder::get).toArray(Block[]::new)
                                                      : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
@@ -108,9 +121,9 @@ public class LoadConfigSettings
                 {
                     if (level instanceof ServerLevel serverLevel)
                     {
-                        for (int i = 0; i < conditions.size(); i++)
+                        for (BlockPredicate condition : conditions)
                         {
-                            if (!conditions.get(i).test(serverLevel, pos))
+                            if (!condition.test(serverLevel, pos))
                             {   return 0;
                             }
                         }
@@ -153,6 +166,14 @@ public class LoadConfigSettings
         .forEach(holder ->
         {
             BiomeTempData biomeTempData = holder.get();
+            // Check if the required mods are loaded
+            if (biomeTempData.requiredMods().isPresent())
+            {
+                List<String> requiredMods = biomeTempData.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
             Registry<Biome> biomesRegistry = registries.registryOrThrow(Registries.BIOME);
 
             for (Either<TagKey<Biome>, ResourceLocation> either : biomeTempData.biomes())
@@ -180,6 +201,14 @@ public class LoadConfigSettings
         {
             // If the dimension is a tag, add the temperature to all biomes in the tag
             DimensionTempData dimensionTempData = holder.get();
+            // Check if the required mods are loaded
+            if (dimensionTempData.requiredMods().isPresent())
+            {
+                List<String> requiredMods = dimensionTempData.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
             Registry<DimensionType> dimensionRegistry = registries.registryOrThrow(Registries.DIMENSION_TYPE);
             for (Either<TagKey<DimensionType>, ResourceLocation> either : dimensionTempData.dimensions())
             {
@@ -199,16 +228,16 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addItemConfig(Item item, Insulation insulation, InsulationType type, CompoundTag nbt)
+    private static void addItemConfig(Item item, Insulation insulation, InsulationSlot type, CompoundTag nbt, EntityRequirement predicate)
     {
         switch (type)
         {
-            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(new ItemData(item, nbt), insulation);
-            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(new ItemData(item, nbt), insulation);
+            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(new ItemData(item, nbt, predicate), insulation);
+            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(new ItemData(item, nbt, predicate), insulation);
             case CURIO ->
             {
                 if (CompatManager.isCuriosLoaded())
-                {   ConfigSettings.INSULATING_CURIOS.get().put(new ItemData(item, nbt), insulation);
+                {   ConfigSettings.INSULATING_CURIOS.get().put(new ItemData(item, nbt, predicate), insulation);
                 }
             }
         }
