@@ -13,9 +13,9 @@ import java.util.function.Function;
 /**
  * Special TempModifier class for Weather 2
  */
-public class Weather2StormTempModifier extends TempModifier
+public class StormTempModifier extends TempModifier
 {
-    public Weather2StormTempModifier() {}
+    public StormTempModifier() {}
 
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
