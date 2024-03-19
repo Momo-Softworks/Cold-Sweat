@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -16,7 +17,9 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,12 +34,32 @@ public class InsulationTooltip extends Tooltip
                                                                 : TOOLTIP;
 
     List<Insulation> insulation;
-    InsulationType type;
-     int width = 0;
+    InsulationSlot slot;
+    int width = 0;
 
-    public InsulationTooltip(List<Insulation> insulation, InsulationType type)
+    private static final Method INNER_BLIT = ObfuscationReflectionHelper.findMethod(AbstractGui.class, "func_238469_a_",
+                                                                                    MatrixStack.class, int.class, int.class, int.class,
+                                                                                    int.class, int.class, int.class, int.class,
+                                                                                    float.class, float.class, int.class, int.class);
+    static
+    {   INNER_BLIT.setAccessible(true);
+    }
+
+    public static void innerBlit(MatrixStack poseStack, int x1, int x2, int y1, int y2, int zOffset, int uWidth, int vHeight, float uOffset, float vOffset, int textureWidth, int textureHeight)
+    {   try
+    {   INNER_BLIT.invoke(null, poseStack, x1, x2, y1, y2, zOffset, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
+    }
+    catch (Exception e)
+    {   e.printStackTrace();
+    }
+    }
+    public static void blit(MatrixStack poseStack, int x, int y, int zOffset, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight)
+    {   innerBlit(poseStack, x, x + width, y, y + height, zOffset, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
+    }
+
+    public InsulationTooltip(List<Insulation> insulation, InsulationSlot type)
     {   this.insulation = insulation;
-        this.type = type;
+        this.slot = type;
     }
 
     @Override
@@ -104,44 +127,128 @@ public class InsulationTooltip extends Tooltip
 
         // Positive insulation bar
         if (!posInsulation.isEmpty())
-        {   renderBar(matrixStack, x, y, posInsulation, type, !negInsulation.isEmpty(), false);
+        {   renderBar(matrixStack, x, y, posInsulation, slot, !negInsulation.isEmpty(), false);
             matrixStack.translate(posInsulation.size() * 6 + 12, 0, 0);
             width += posInsulation.size() * 6 + 12;
         }
 
         // Negative insulation bar
         if (!negInsulation.isEmpty())
-        {   renderBar(matrixStack, x + width, y, negInsulation, type, true, true);
+        {   renderBar(matrixStack, x + width, y, negInsulation, slot, true, true);
             width += negInsulation.size() * 6 + 12;
         }
         matrixStack.popPose();
     }
 
-    static void renderCells(MatrixStack poseStack, int x, int y, int slots, double insulation, int uvX, boolean isAdaptive)
+    static void renderCell(MatrixStack poseStack, int x, int y, double insulation, int uvX, boolean isAdaptive)
     {
+        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         double rounded = CSMath.roundNearest(Math.abs(insulation), 0.25);
-        for (int i = 0; i < slots; i++)
-        {
-            int uvY = isAdaptive
-                      // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
-                      ? (rounded - i * 2 >= 2 ? 16 : 20)
-                      : (rounded - i * 2 >= 2 ? 8 : 12);
-            AbstractGui.blit(poseStack, x + i*6, y, 0, uvX, uvY, 6, 4, 32, 24);
-        }
+        int uvY = isAdaptive
+                  // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
+                  ? (rounded >= 2 ? 16 : 20)
+                  : (rounded >= 2 ? 8 : 12);
+        AbstractGui.blit(poseStack, x, y, 401, uvX, uvY, 6, 4, 32, 24);
     }
 
-    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, InsulationType type, boolean showSign, boolean isNegative)
+    static int renderOverloadCell(MatrixStack poseStack, FontRenderer font, int x, int y, double insulation, int textColor, InsulationType type)
     {
+        Number insul = CSMath.truncate(insulation / 2, 2);
+        if (CSMath.isInteger(insul)) insul = insul.intValue();
+        String text = "x" + insul;
+        int uvX = 0;
+        switch (type)
+        {   
+            case COLD : uvX = 12; break;
+            case HEAT : uvX = 18; break;
+            case NEUTRAL : uvX = 6; break;
+            case ADAPTIVE : uvX = 12; break;
+        }
+
+        poseStack.pushPose();
+        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
+        renderCell(poseStack, x + 7, y + 1, insulation, uvX, type == InsulationType.ADAPTIVE);
+        AbstractGui.blit(poseStack,
+                          x + 6, y,
+                          401, /*z*/
+                          11 /*u*/, 0 /*v*/,
+                          8 /*uWidth*/, 6 /*vHeight*/,
+                          32, 24);
+        //set the shader texture to the font atlas
+        poseStack.translate(0, 0, 400);
+        font.drawShadow(poseStack, text, x + 15, y - 1, textColor);
+        poseStack.popPose();
+
+        // Return the width of the cell and text
+        return 12 + font.width(text);
+    }
+
+    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, InsulationSlot type, boolean showSign, boolean isNegative)
+    {
+        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
+        FontRenderer font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
+        boolean overflow = sortedInsulation.size() >= 10;
 
         // background
-        for (int i = 0; i < insulations.size(); i++)
-        {   AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
+        for (int i = 0; i < insulations.size() && !overflow; i++)
+        {   AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 32, 24);
         }
 
         // slots
         poseStack.pushPose();
-        for (Insulation insulation : sortedInsulation)
+
+        // If there's too much insulation, render a compact version of the tooltip
+        if (overflow)
+        {
+            // tally up the insulation from the sorted list into cold, hot, neutral, and adaptive
+            double cold = 0;
+            double hot = 0;
+            double neutral = 0;
+            double adaptive = 0;
+            for (Insulation insulation : sortedInsulation)
+            {
+                if (insulation instanceof StaticInsulation)
+                {
+                    StaticInsulation staticInsulation = (StaticInsulation) insulation;
+                    if (staticInsulation.getCold() > staticInsulation.getHot())
+                        cold += staticInsulation.getCold();
+                    else if (staticInsulation.getHot() > staticInsulation.getCold())
+                        hot += staticInsulation.getHot();
+                    else
+                        neutral += staticInsulation.getCold() * 2;
+                }
+                else if (insulation instanceof AdaptiveInsulation)
+                {
+                    AdaptiveInsulation adaptiveInsulation = (AdaptiveInsulation) insulation;
+                    adaptive += adaptiveInsulation.getInsulation();
+                }
+            }
+            int textColor = 10526880;
+
+            poseStack.pushPose();
+            poseStack.translate(2, 0, 0);
+            // Render cold insulation
+            if (cold > 0)
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, InsulationType.COLD);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (hot > 0)
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, InsulationType.HEAT);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (neutral > 0)
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, InsulationType.NEUTRAL);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            if (adaptive > 0)
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, InsulationType.ADAPTIVE);
+                poseStack.translate(xOffs, 0, 0);
+            }
+            poseStack.popPose();
+        }
+        // Insulation is small enough to represent traditionally
+        else for (Insulation insulation : sortedInsulation)
         {
             if (insulation instanceof AdaptiveInsulation)
             {
@@ -151,20 +258,21 @@ public class InsulationTooltip extends Tooltip
                 for (int i = 0; i < CSMath.ceil(Math.abs(value)) / 2; i++)
                 {
                     double insul = CSMath.minAbs(CSMath.shrink(value, i * 2), 2);
-                    // adaptive cells base
-                    renderCells(poseStack, x + 7, y + 1, 1, insul, 12, true);
+                    // adaptive cells base color
+                    renderCell(poseStack, x + 7, y + 1, insul, 12, true);
 
                     // adaptive cells overlay
                     double blend = Math.abs(adaptive.getFactor());
-                    int overlayU;
+                    int overlayU = 0;
                     switch (CSMath.sign(adaptive.getFactor()))
-                    {   case -1 : overlayU = 6; break;
+                    {
+                        case -1 : overlayU = 6; break;
                         case 1  : overlayU = 18; break;
                         default : overlayU = 12; break;
                     };
                     RenderSystem.enableBlend();
                     RenderSystem.color4f(1, 1, 1, (float) blend);
-                    renderCells(poseStack, x + 7, y + 1, 1, insul, overlayU, true);
+                    renderCell(poseStack, x + 7, y + 1, insul, overlayU, true);
                     RenderSystem.disableBlend();
                     RenderSystem.color4f(1, 1, 1, 1f);
 
@@ -183,21 +291,21 @@ public class InsulationTooltip extends Tooltip
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
                 {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
-                    renderCells(poseStack, x + 7, y + 1, 1, coldInsul, 12, false); // cold cells
+                    renderCell(poseStack, x + 7, y + 1, coldInsul, 12, false); // cold cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
                 {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1) * 2;
-                    renderCells(poseStack, x + 7, y + 1, 1, neutralInsul, 6, false); // neutral cells
+                    renderCell(poseStack, x + 7, y + 1, neutralInsul, 6, false); // neutral cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Hot insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
                 {   double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
-                    renderCells(poseStack, x + 7, y + 1, 1, hotInsul, 18, false); // hot cells
+                    renderCell(poseStack, x + 7, y + 1, hotInsul, 18, false); // hot cells
                     poseStack.translate(6, 0, 0);
                 }
             }
@@ -205,29 +313,70 @@ public class InsulationTooltip extends Tooltip
         poseStack.popPose();
 
         // border
-        for (int i = 0; i < insulations.size(); i++)
+        for (int i = 0; i < insulations.size() && !overflow; i++)
         {
             boolean end = i == insulations.size() - 1;
-            AbstractGui.blit(poseStack, x + 7 + i * 6, y, 0, (end ? 12 : 6), 0, (end ? 7 : 6), 6, 32, 24);
+            if (end)
+            {
+                blit(poseStack,
+                     x + 7 + i * 6, //x
+                     y, //y
+                     401, //z
+                     5, //width
+                     6, //height
+                     6, //u
+                     0, //v
+                     3, //uWidth
+                     6, //vHeight
+                     32,
+                     24);
+                blit(poseStack,
+                     x + 7 + i * 6 + 4, //x
+                     y, //y
+                     401, //z
+                     3, //width
+                     6, //height
+                     8, //u
+                     0, //v
+                     3, //uWidth
+                     6, //vHeight
+                     32,
+                     24);
+            }
+            else
+            {
+                blit(poseStack,
+                     x + 7 + i * 6, //x
+                     y, //y
+                     401, //z
+                     6, //width
+                     6, //height
+                     6, //u
+                     0, //v
+                     3, //uWidth
+                     6, //vHeight
+                     32,
+                     24);
+            }
         }
 
         // icon
         switch (type)
         {
-            case CURIO : AbstractGui.blit(poseStack, x, y - 1, 0, 24, 16, 8, 8, 32, 24); break;
-            case ITEM  : AbstractGui.blit(poseStack, x, y - 1, 0, 24, 0, 8, 8, 32, 24); break;
-            case ARMOR : AbstractGui.blit(poseStack, x, y - 1, 0, 24, 8, 8, 8, 32, 24); break;
+            case CURIO : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 32, 24); break;
+            case ITEM  : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 32, 24); break;
+            case ARMOR : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 32, 24); break;
         }
 
         if (showSign)
         {
             if (isNegative)
             {   // negative sign
-                AbstractGui.blit(poseStack, x + 3, y + 3, 0, 19, 5, 5, 3, 32, 24);
+                AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 32, 24);
             }
             else
             {   // positive sign
-                AbstractGui.blit(poseStack, x + 3, y + 2, 0, 19, 0, 5, 5, 32, 24);
+                AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 32, 24);
             }
         }
     }
