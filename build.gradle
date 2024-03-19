@@ -117,9 +117,13 @@ dependencies {
   //compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
     //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
 
-    compileOnly fg.deobf("curse.maven:create-328085:4762216")
+    implementation fg.deobf("curse.maven:create-328085:4762216")
     implementation fg.deobf("curse.maven:curios-309927:4780205")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
+    runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180049")
+    runtimeOnly fg.deobf("curse.maven:placebo-283644:5098182")
+    runtimeOnly fg.deobf("curse.maven:patchouli-306770:4966125")
+    runtimeOnly fg.deobf("curse.maven:apothic-attributes-898963:5182713")
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     //runtimeOnly fg.deobf("curse.maven:legendary-tooltips-532127:4662781")
