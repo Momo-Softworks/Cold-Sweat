@@ -35,9 +35,9 @@ public class ChameleonEntityRenderer<T extends Chameleon> extends MobRenderer<Ch
             float playerHeadPitch = player.getViewXRot(partialTick);
             float ridingOffset = (float) entity.getMyRidingOffset();
             ps.translate(0, -(ridingOffset - 0.05), 0);
-            ps.mulPose(CSMath.getQuaternion(CSMath.toRadians(playerHeadPitch), -CSMath.toRadians(playerHeadYaw), 0));
+            ps.mulPose(CSMath.toQuaternion(CSMath.toRadians(playerHeadPitch), -CSMath.toRadians(playerHeadYaw), 0));
             ps.translate(0, ridingOffset, 0);
-            ps.mulPose(CSMath.getQuaternion(0, CSMath.toRadians(playerHeadYaw), 0));
+            ps.mulPose(CSMath.toQuaternion(0, CSMath.toRadians(playerHeadYaw), 0));
             ps.translate(0, -1.45, 0);
         }
         super.render(entity, p_115456_, partialTick, ps, buffer, light);

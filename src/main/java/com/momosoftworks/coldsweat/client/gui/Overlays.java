@@ -102,7 +102,7 @@ public class Overlays
             RenderSystem.disableBlend();
 
             // Sets the text bobbing offset (or none if disabled)
-            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.isWithin(temp, MIN_TEMP, MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
+            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, MIN_TEMP, MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
 
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -165,7 +165,7 @@ public class Overlays
                                   height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
 
                 // Render new icon if temperature changing
-                if (CSMath.isBetween(Math.abs(BLEND_BODY_TEMP), 0, 100))
+                if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
                 {
                     // Map current temp severity to filling up the icon
                     double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));

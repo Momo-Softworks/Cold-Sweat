@@ -385,7 +385,7 @@ public class SewingContainer extends AbstractContainerMenu
         if (slot.hasItem())
         {   ItemStack slotItem = slot.getItem();
             newStack = slotItem.copy();
-            if (CSMath.isWithin(index, 0, 2))
+            if (CSMath.betweenInclusive(index, 0, 2))
             {
                 if (this.moveItemStackTo(slotItem, 3, 39, true))
                 {   slot.onTake(player, newStack);
@@ -411,7 +411,7 @@ public class SewingContainer extends AbstractContainerMenu
                     else return ItemStack.EMPTY;
                 }
                 // Item is in hotbar
-                else if (CSMath.isWithin(index, slots.size() - 9, slots.size()))
+                else if (CSMath.betweenInclusive(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(slotItem, 3, 29, false))
                     {   slot.onQuickCraft(slotItem, newStack);
@@ -419,7 +419,7 @@ public class SewingContainer extends AbstractContainerMenu
                     else return ItemStack.EMPTY;
                 }
                 // Item is in inventory
-                else if (CSMath.isWithin(index, 3, slots.size() - 9))
+                else if (CSMath.betweenInclusive(index, 3, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(slotItem, slots.size() - 9, slots.size(), false))
                     {   slot.onQuickCraft(slotItem, newStack);

@@ -43,7 +43,7 @@ public class MixinGoatModel extends QuadrupedModel<Goat>
             body.getChild("body2").visible = !cap.isSheared();
         });
         // smooth out head ramming animation
-        if (CSMath.isBetween(goat.getRammingXHeadRot(), 0f, 0.523f))
+        if (CSMath.betweenExclusive(goat.getRammingXHeadRot(), 0f, 0.523f))
         {
             head.xRot += CSMath.toRadians(Minecraft.getInstance().getFrameTime());
         }
