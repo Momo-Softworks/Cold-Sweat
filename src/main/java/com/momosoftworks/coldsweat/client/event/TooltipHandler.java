@@ -3,12 +3,12 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -37,7 +37,6 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -50,16 +49,25 @@ public class TooltipHandler
     {
         ItemStack stack = event.getItemStack();
         ItemData itemData = ItemData.of(stack);
+        var elements = event.getTooltipElements();
         if (stack.isEmpty()) return;
 
+        String hoverName = stack.getHoverName().getString().strip();
+
         // Get the index at which the tooltip should be inserted
-        int tooltipIndex = Math.min(1, event.getTooltipElements().size() - 1);
-        Optional<FormattedText> line;
-        while ((line = event.getTooltipElements().get(tooltipIndex).left()).isPresent()
-        && !line.get().equals(stack.getDisplayName()))
-        {   tooltipIndex++;
-            if (tooltipIndex >= event.getTooltipElements().size())
-            {   tooltipIndex = Math.min(1, event.getTooltipElements().size());
+        // Insert the tooltip at the first non-blank line under the item's name
+        int tooltipIndex;
+        for (tooltipIndex = 0; tooltipIndex < elements.size(); tooltipIndex++)
+        {
+            if (elements.get(tooltipIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
+            {
+                tooltipIndex++;
+                while (tooltipIndex < elements.size()
+                && (elements.get(tooltipIndex).left().map(text -> text.getString().isBlank()).orElse(true)
+                || elements.get(tooltipIndex).right().isPresent()))
+                {
+                    tooltipIndex++;
+                }
                 break;
             }
         }
@@ -68,31 +76,31 @@ public class TooltipHandler
         // Add the armor insulation tooltip if the armor has insulation
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
-            {   event.getTooltipElements().add(tooltipIndex, Either.left(new TextComponent("? ").withStyle(ChatFormatting.BLUE).append(new TextComponent("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
+            {   elements.add(tooltipIndex, Either.left(new TextComponent("? ").withStyle(ChatFormatting.BLUE).append(new TextComponent("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
             }
-            event.getTooltipElements().add(tooltipIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
+            elements.add(tooltipIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
         }
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
             ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(ItemData.of(event.getItemStack()), (item, temp) ->
             {
-                int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getTooltipElements().size() - 1 : event.getTooltipElements().size();
-                event.getTooltipElements().add(index, Either.left(
+                int index = Minecraft.getInstance().options.advancedItemTooltips ? elements.size() - 1 : elements.size();
+                elements.add(index, Either.left(
                         temp > 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
                                  : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
                         ));
-                event.getTooltipElements().add(index, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                event.getTooltipElements().add(index, Either.left(new TextComponent("")));
+                elements.add(index, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
+                elements.add(index, Either.left(new TextComponent("")));
                 return temp;
             });
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null && !itemInsul.isEmpty())
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM)));
+        {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM)));
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(itemData)) != null && !itemInsul.isEmpty())
-        {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO)));
+        {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO)));
         }
         // If the item is insulated armor
         Insulation armorInsul;
@@ -121,7 +129,7 @@ public class TooltipHandler
             Insulation.sort(insulation);
 
             if (!insulation.isEmpty())
-            {   event.getTooltipElements().add(tooltipIndex, Either.right(new InsulationTooltip(insulation, InsulationType.ARMOR)));
+            {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(insulation, InsulationType.ARMOR)));
             }
         }
     }
