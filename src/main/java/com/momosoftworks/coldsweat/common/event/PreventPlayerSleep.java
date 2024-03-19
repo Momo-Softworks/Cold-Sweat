@@ -29,7 +29,7 @@ public class PreventPlayerSleep
         double maxTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
 
         // If the player's body temperature is critical
-        if (!CSMath.isBetween(bodyTemp, -100, 100))
+        if (!CSMath.betweenExclusive(bodyTemp, -100, 100))
         {   // Let the player sleep if they're resistant to damage
             if (TempEffectsCommon.getTempResistance(event.getPlayer(), bodyTemp < 100) >= 4)
             {   return;
@@ -39,7 +39,7 @@ public class PreventPlayerSleep
             event.setResult(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }
         // If the player's world temperature is critical
-        else if (!CSMath.isBetween(worldTemp, minTemp, maxTemp))
+        else if (!CSMath.betweenExclusive(worldTemp, minTemp, maxTemp))
         {   // Let the player sleep if they're resistant to damage
             if (TempEffectsCommon.getTempResistance(event.getPlayer(), minTemp > worldTemp) >= 4)
             {   return;

@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.container;
 
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
-import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -95,7 +95,7 @@ public class BoilerContainer extends Container
         {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            if (CSMath.isWithin(index, 0, 9))
+            if (CSMath.betweenInclusive(index, 0, 9))
             {
                 if (!this.moveItemStackTo(itemstack1, 10, 46, true))
                 {   return ItemStack.EMPTY;
@@ -119,14 +119,14 @@ public class BoilerContainer extends Container
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isWithin(index, slots.size() - 9, slots.size()))
+                else if (CSMath.betweenInclusive(index, slots.size() - 9, slots.size()))
                 {
                     if (!this.moveItemStackTo(itemstack1, 10, 36, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (CSMath.isWithin(index, 10, slots.size() - 9))
+                else if (CSMath.betweenInclusive(index, 10, slots.size() - 9))
                 {
                     if (!this.moveItemStackTo(itemstack1, slots.size() - 9, slots.size(), false))
                     {   slot.onQuickCraft(itemstack1, itemstack);

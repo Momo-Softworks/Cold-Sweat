@@ -31,8 +31,12 @@ public class CSMath
     {   if (object != null) run.accept(object);
     }
 
-    public static <T, R> R getIfNotNull(T object, Function<T, R> run, R defaultValue)
-    {   if (object != null) return run.apply(object);
+    /**
+     * Runs the function if the given object is not null, and returns the result. <br>
+     * Otherwise, returns the default value.
+     */
+    public static <T, R> R getIfNotNull(T object, Function<T, R> valueGetter, R defaultValue)
+    {   if (object != null) return valueGetter.apply(object);
         return defaultValue;
     }
 
@@ -48,7 +52,11 @@ public class CSMath
     {   return input * (float) (180 / Math.PI);
     }
 
-    public static Vector3d getEulerAngles(Quaternion quat)
+    /**
+     * Converts the given Quaternion to a set of pitch-yaw-roll angles.
+     * @return The converted rotation.
+     */
+    public static Vector3d toEulerAngles(Quaternion quat)
     {   double ysqr = quat.i() * quat.i();
 
         // roll (x-axis rotation)
@@ -70,7 +78,7 @@ public class CSMath
         return new Vector3d(roll, pitch, yaw);
     }
 
-    public static Quaternion getQuaternion(double x, double y, double z)
+    public static Quaternion toQuaternion(double x, double y, double z)
     {   double cy = Math.cos(z * 0.5);
         double sy = Math.sin(z * 0.5);
         double cp = Math.cos(y * 0.5);
@@ -85,50 +93,86 @@ public class CSMath
             (float) (cr * cp * cy + sr * sp * sy));
     }
 
+    /**
+     * Clamps the given value to be between {@code min} and {@code max}.
+     * @return A value within the given bounds.
+     */
     public static double clamp(double value, double min, double max)
     {   if (value < min) return min;
         if (value > max) return max;
         return value;
     }
 
+    /**
+     * Floating-point overload for {@link #clamp(double, double, double)}.
+     */
     public static float clamp(float value, float min, float max)
     {   if (value < min) return min;
         if (value > max) return max;
         return value;
     }
 
+    /**
+     * Integer overload for {@link #clamp(double, double, double)}.
+     */
     public static int clamp(int value, int min, int max)
     {   if (value < min) return min;
         if (value > max) return max;
         return value;
     }
 
+    /**
+     * An "absolute" floor method that has inverted behavior for negative numbers. <br>
+     * <br>
+     * This is more logical in some cases, when the floor of the number should be the integer farther from 0, rather than the technically larger one. <br>
+     * Ex: {@code Math.ceil(-2.5) = -2}, but {@code CSMath.ceil(-2.5) = -3}
+     * @return The adjusted floor of the given value as an integer.
+     */
     public static int ceil(double value)
-    {   if (value >= 0)
+    {
+        if (value >= 0)
         {   return (int) Math.ceil(value);
         }
-        else
-        {   int sign = sign(value);
-            double abs = Math.abs(value);
-            return (int) Math.ceil(abs) * sign;
-        }
+        else return (int) Math.floor(value);
     }
 
+    /**
+     * An "absolute" floor method that has inverted behavior for negative numbers. <br>
+     * <br>
+     * This is more logical in some cases, when the floor of the number should be the integer closer to 0, rather than the technically smaller one. <br>
+     * Ex: {@code Math.floor(-2.5) = -3}, but {@code CSMath.floor(-2.5) = -2}
+     * @return The adjusted floor of the given value as an integer.
+     */
     public static int floor(double value)
-    {   if (value >= 0)
+    {
+        if (value >= 0)
         {   return (int) Math.floor(value);
         }
-        else
-        {   int sign = sign(value);
-            double abs = Math.abs(value);
-            return (int) Math.floor(abs) * sign;
-        }
+        else return (int) Math.ceil(value);
     }
 
-    public static double max(double... values)
-    {   double max = values[0];
-        for (double value : values)
-        {   if (value > max) max = value;
+    /**
+     * A generalized min function that works with any set of comparable objects.
+     * @return The smallest value according to the object's {@code compareTo} method.
+     */
+    @SafeVarargs
+    public static <T extends Comparable<T>> T min(T... values)
+    {   T min = values[0];
+        for (T value : values)
+        {   if (value.compareTo(min) < 0) min = value;
+        }
+        return min;
+    }
+
+    /**
+     * A generalized max function that works with any set of comparable objects.
+     * @return The largest value according to the object's {@code compareTo} method.
+     */
+    @SafeVarargs
+    public static <T extends Comparable<T>> T max(T... values)
+    {   T max = values[0];
+        for (T value : values)
+        {   if (value.compareTo(max) > 0) max = value;
         }
         return max;
     }
@@ -141,17 +185,25 @@ public class CSMath
         return min;
     }
 
+    public static double max(double... values)
+    {   double max = values[0];
+        for (double value : values)
+        {   if (value > max) max = value;
+        }
+        return max;
+    }
+
     /**
      * Calculates if the given value is between two values (inclusive)
      */
-    public static boolean isWithin(double value, double min, double max)
+    public static boolean betweenInclusive(double value, double min, double max)
     {   return value >= min && value <= max;
     }
 
     /**
      * Calculates if the given value is between two values (exclusive)
      */
-    public static boolean isBetween(double value, double min, double max)
+    public static boolean betweenExclusive(double value, double min, double max)
     {   return value > min && value < max;
     }
 
@@ -166,7 +218,8 @@ public class CSMath
      * @return The interpolated value.
      */
     public static double blend(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
-    {   if (factor <= rangeMin) return blendFrom;
+    {
+        if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
     }
@@ -175,27 +228,44 @@ public class CSMath
      * Floating-point overload for {@link #blend(double, double, double, double, double)}.
      */
     public static float blend(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
-    {   if (factor <= rangeMin) return blendFrom;
+    {
+        if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
     }
 
+    /**
+     * A blend function with a logarithmic curve (starts fast, then slows down).<br>
+     * @return The interpolated value.
+     */
     public static double blendLog(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
-    {   if (factor <= rangeMin) return blendFrom;
+    {
+        if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / Math.sqrt(rangeMax - rangeMin) * Math.sqrt(factor - rangeMin) + blendFrom;
     }
 
+    /**
+     * Floating-point overload for {@link #blendLog(double, double, double, double, double)}.
+     */
     public static float blendLog(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
-    {   if (factor <= rangeMin) return blendFrom;
+    {
+        if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (float) Math.sqrt(rangeMax - rangeMin) * (float) Math.sqrt(factor - rangeMin) + blendFrom;
     }
 
+    /**
+     * Gets the average of two numbers contained within a {@link Pair}.
+     */
     public static double averagePair(Pair<? extends Number, ? extends Number> pair)
     {   return (pair.getFirst().doubleValue() + pair.getSecond().doubleValue()) / 2;
     }
 
+    /**
+     * Adds the values of the given pairs together.
+     * @return A pair containing the sum of all the left values and of all the right values.
+     */
     @SafeVarargs
     public static Pair<Double, Double> addPairs(Pair<? extends Number, ? extends Number>... pairs)
     {   double first = 0;
@@ -207,10 +277,10 @@ public class CSMath
         return Pair.of(first, second);
     }
 
-    public static double getDistance(Entity entity, Vector3d pos)
-    {   return getDistance(entity, pos.x, pos.y, pos.z);
-    }
-
+    /**
+     * Gets the squared distance between two 3D points.
+     * @return The distance, squared.
+     */
     public static double getDistanceSqr(double x1, double y1, double z1, double x2, double y2, double z2)
     {   double xDistance = Math.abs(x1 - x2);
         double yDistance = Math.abs(y1 - y2);
@@ -218,10 +288,26 @@ public class CSMath
         return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
     }
 
+    /**
+     * Gets the distance between an entity and a {@link Vector3d} 3D point.
+     * @return The distance.
+     */
+    public static double getDistance(Entity entity, Vector3d pos)
+    {   return getDistance(entity, pos.x, pos.y, pos.z);
+    }
+
+    /**
+     * Gets the distance between two 3D points (not squared).
+     * @return The distance.
+     */
     public static double getDistance(double x1, double y1, double z1, double x2, double y2, double z2)
     {   return Math.sqrt(getDistanceSqr(x1, y1, z1, x2, y2, z2));
     }
 
+    /**
+     * Returns the distance between two {@link Vector3d} 3D coordinates.
+     * @return The distance.
+     */
     public static double getDistance(Vector3d pos1, Vector3d pos2)
     {   return getDistance(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
     }
@@ -231,16 +317,13 @@ public class CSMath
     }
 
     public static double getDistance(Vector3i pos1, Vector3i pos2)
-    {
-        return Math.sqrt(pos1.distSqr(pos2));
+    {   return Math.sqrt(pos1.distSqr(pos2));
     }
 
     public static double average(Number... values)
-    {
-        double sum = 0;
+    {   double sum = 0;
         for (Number value : values)
-        {
-            sum += value.doubleValue();
+        {   sum += value.doubleValue();
         }
         return sum / values.length;
     }
@@ -264,8 +347,7 @@ public class CSMath
      * @return The average of the values in the given array.
      */
     public static <A extends Number, B extends Number> double weightedAverage(List<Pair<A, B>> values)
-    {
-        double sum = 0;
+    {   double sum = 0;
         double weightSum = 0;
         for (Pair<A, B> entry : values)
         {
@@ -285,8 +367,7 @@ public class CSMath
      * @return The direction.
      */
     public static Direction getDirectionFrom(double x, double y, double z)
-    {
-        Direction direction = Direction.NORTH;
+    {   Direction direction = Direction.NORTH;
         double f = Float.MIN_VALUE;
 
         for (Direction direction1 : Direction.values())
@@ -319,14 +400,16 @@ public class CSMath
      * @param runnable The code to run upon success.
      */
     public static void tryCatch(Runnable runnable)
-    {   try
+    {
+        try
         {   runnable.run();
         }
         catch (Throwable ignored) {}
     }
 
     public static <T> T tryCatch(Supplier<T> supplier)
-    {   try
+    {
+        try
         {   return supplier.get();
         }
         catch (Throwable ignored) {}
@@ -358,6 +441,10 @@ public class CSMath
     {   return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
     }
 
+    public static boolean isInteger(Number value)
+    {   return Math.abs(value.doubleValue() - value.intValue()) < 0.0001;
+    }
+
     public static double round(double value, int places)
     {
         if (places < 0) throw new IllegalArgumentException("The number of decimal places must be positive.");
@@ -368,15 +455,26 @@ public class CSMath
         return bd.doubleValue();
     }
 
-    // Round the value to the nearest multiple of the given number
+    /**
+     * Rounds the given value to the nearest multiple of the given number.
+     * @return The rounded value.
+     */
     public static double roundNearest(double value, double multipleOf)
     {   return Math.round(value / multipleOf) * multipleOf;
     }
 
+    /**
+     * Rounds down the given value to the nearest multiple of the given number.
+     * @return The rounded value.
+     */
     public static double roundDownNearest(double value, double multipleOf)
     {   return Math.floor(value / multipleOf) * multipleOf;
     }
 
+    /**
+     * Rounds up the given value to the nearest multiple of the given number.
+     * @return The rounded value.
+     */
     public static double roundUpNearest(double value, double multipleOf)
     {   return Math.ceil(value / multipleOf) * multipleOf;
     }
@@ -396,17 +494,36 @@ public class CSMath
     }
 
     /**
-     * @return The value that is farther from 0.
+     * Calculates the number that is farthest from zero.
+     * @return The absolute maximum value.
      */
     public static double maxAbs(double... values)
-    {   return Arrays.stream(values).reduce((a, b) -> Math.abs(a) > Math.abs(b) ? a : b).orElse(0);
+    {
+        double mostExtreme = 0;
+        for (double value : values)
+        {
+            if (Math.abs(value) > Math.abs(mostExtreme))
+            {   mostExtreme = value;
+            }
+        }
+        return mostExtreme;
     }
 
     /**
-     * @return The value that is closer to 0.
+     * Calculates the number that is closest to zero.
+     * @return The absolute minimum value.
      */
     public static double minAbs(double... values)
-    {   return Arrays.stream(values).reduce((a, b) -> Math.abs(a) < Math.abs(b) ? a : b).orElse(0);
+    {
+        double smallest = values[0];
+        for (double value : values)
+        {
+            if (Math.abs(value) < Math.abs(smallest))
+            {
+                smallest = value;
+            }
+        }
+        return smallest;
     }
 
     public static boolean equalAbs(double value1, double value2)
@@ -430,25 +547,38 @@ public class CSMath
     }
 
     /**
-     * Lowers the absolute value of the given number by [amount].
+     * Lowers the absolute value of the given number by {@code amount}.
      */
     public static double shrink(double value, double amount)
     {   return Math.max(0, Math.abs(value) - amount) * sign(value);
     }
 
+    /**
+     * Raises the absolute value of the given number by {@code amount}.
+     */
     public static double grow(double value, double amount)
-    {   return value >= 0 ? value + amount : value - amount;
+    {   return Math.abs(value) + amount * sign(value);
     }
 
     /**
      * Integer overload for {@link #shrink(double, double)}
      */
     public static int shrink(int value, int amount)
-    {   return Math.max(0, Math.abs(value) - amount) * sign(value);
+    {   return value > 0 ? Math.max(0, value - amount) : Math.min(0, value + amount);
     }
 
+    /**
+     * Integer overload for {@link #grow(double, double)}
+     */
     public static int grow(int value, int amount)
-    {   return value >= 0 ? value + amount : value - amount;
+    {   return value > 0 ? value + amount : value - amount;
+    }
+
+    /**
+     * @return A Vec3 at the center of the given BlockPos.
+     */
+    public static Vector3d getCenterPos(BlockPos pos)
+    {   return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
     /**
@@ -508,11 +638,35 @@ public class CSMath
         return shapeHolder[1];
     }
 
+    /**
+     * Checks if a cube with size {@code [size * 2]} centered at {@code pos1} contains the position {@code pos2}.
+     * @return Whether the position is contained within the cube.
+     */
     public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
     {
         return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
             && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
             && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    /**
+     * Returns an optional containing the value. <br>
+     * If the value is NaN or null, the returned optional is empty
+     * @return An Optional containing the value, or empty if the value is invalid.
+     */
+    public static Optional<Double> safeDouble(Double value)
+    {   return value == null || Double.isNaN(value)
+               ? Optional.empty()
+               : Optional.of(value);
+    }
+
+    /**
+     * Returns the exact object used as the key for this map entry.
+     * @return The map's key object.
+     */
+    @Nullable
+    public static <Key> Key getExactKey(Map<Key, ?> map, Key key)
+    {   return map.keySet().stream().filter(key::equals).findFirst().orElse(null);
     }
 
     /**
@@ -523,18 +677,35 @@ public class CSMath
     @Nullable
     public static <T> T orElse(T... values)
     {   for (T value : values)
-    {   if (value != null) return value;
-    }
+        {   if (value != null) return value;
+        }
         return null;
     }
 
-    /**
-     * Returns an optional containing the value. If the value is NaN or null, the returned optional is empty
-     */
-    public static Optional<Double> safeDouble(Double value)
-    {   return value == null || Double.isNaN(value)
-               ? Optional.empty()
-               : Optional.of(value);
+    public static Class<?> getCallerClass(int depth)
+    {
+        StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+        String callerClassName = null;
+        for (int i = 1 + depth; i < stElements.length; i++)
+        {
+            StackTraceElement ste = stElements[i];
+            if (ste.getClassName().indexOf("java.lang.Thread") != 0)
+            {
+                if (callerClassName == null)
+                {   callerClassName = ste.getClassName();
+                }
+                else if (!callerClassName.equals(ste.getClassName()))
+                {   try
+                    {   return Class.forName(ste.getClassName());
+                    }
+                    catch (ClassNotFoundException e)
+                    {   return null;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static <K, V> Map<K, V> mapOf()
