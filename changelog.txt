@@ -1896,3 +1896,28 @@ Technical Changes:
       - Item configs with NBT tags defined will require the specified NBT data to be present on the item
 - Moved the "Cold Soul Fire" and "Check Sleep Conditions" settings to world-settings.toml
 - Renamed some too-verbose config settings/sections
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b02c
+- Added new "compact" view for insulation tooltips with 10 bars of insulation or more
+- Added better support for netherite diving gear from Create
+      - When wearing a full diving set with a filled backtank, the armor will provide 999 heat insulation per piece (near-immunity)
+      - This leverages the new entity predicate system added in this update
+      - The backtank will now drain air (and show the time indicator) when the player is in a hot environment
+
+Fixes:
+- Fixed items not being stackable after opening an inventory screen
+- Fixed crash when opening an icebox or boiler without a smokestack on top
+- Fixed crash due to null item slots with some mod combinations
+- Fixed crash when a chameleon molts in some cases
+- Fixed broken compat with Weather, Storms, and Tornadoes (Weather2)
+- Fixed snowfall causing the player to become wet if Serene Seasons is installed
+- Fixed references to burning_point and freezing_point being swapped in some cases
+- Fixed the burning_point attribute not having a description
+
+Technical Changes:
+- Added support for checking player data to conditionally enable insulation
+      - Insulation items with this predicate will only provide insulation if the player has the specified data
+      - Deactivated insulation items can still be equipped, but will not provide insulation or show in the tooltip
+      - This is a brand new system, but is structured like a Vanilla entity predicates with some slight tweaks
