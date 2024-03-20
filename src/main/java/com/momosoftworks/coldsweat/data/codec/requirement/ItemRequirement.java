@@ -6,11 +6,13 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
@@ -32,7 +34,7 @@ public class ItemRequirement
     private final Optional<List<EnchantmentRequirement>> storedEnchantments;
     private final Optional<Potion> potion;
     private final Optional<NbtRequirement> nbt;
-    
+
     public ItemRequirement(Optional<ITag<Item>> tag, Optional<List<Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments, Optional<List<EnchantmentRequirement>> storedEnchantments,
@@ -47,7 +49,7 @@ public class ItemRequirement
         this.potion = potion;
         this.nbt = nbt;
     }
-    
+
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             Registry.ITEM.listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
@@ -73,7 +75,7 @@ public class ItemRequirement
         else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
-        else if (potion.isPresent() && !potion.get().equals(stack.getItem()))
+        else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
         {   return false;
         }
         else if (nbt.isPresent() && !nbt.get().test(stack.getTag()))
@@ -81,23 +83,19 @@ public class ItemRequirement
         }
         else if (enchantments.isPresent())
         {
-            for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(stack).entrySet())
-            {
-                for (EnchantmentRequirement enchantment : enchantments.get())
-                {   if (enchantment.test(entry.getKey(), entry.getValue()))
-                    {   return true;
-                    }
+            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
+            for (EnchantmentRequirement enchantment : enchantments.get())
+            {   if (!enchantment.test(stackEnchantments))
+                {   return false;
                 }
             }
         }
         else if (storedEnchantments.isPresent())
         {
-            for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(stack).entrySet())
-            {
-                for (EnchantmentRequirement enchantment : storedEnchantments.get())
-                {   if (enchantment.test(entry.getKey(), entry.getValue()))
-                    {   return true;
-                    }
+            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(stack));
+            for (EnchantmentRequirement enchantment : storedEnchantments.get())
+            {   if (!enchantment.test(stackEnchantments))
+                {   return false;
                 }
             }
         }
