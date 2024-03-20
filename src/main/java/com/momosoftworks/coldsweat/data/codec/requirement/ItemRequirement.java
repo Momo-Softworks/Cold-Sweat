@@ -1,9 +1,6 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
-import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -61,14 +58,6 @@ public class ItemRequirement
             Registry.POTION.optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
-
-    static
-    {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putString("Air", "1-9999");
-        DataResult<JsonElement> nbtr = NbtRequirement.CODEC.encodeStart(JsonOps.INSTANCE, new NbtRequirement(tag));
-        System.out.println("How to format NBT: " + nbtr.result().get());
-    }
 
     public boolean test(ItemStack stack)
     {
