@@ -24,6 +24,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.potion.EffectInstance;
@@ -112,15 +113,15 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                    CompoundNBT tag = CSMath.orElse(stack.getTag(), new CompoundNBT());
+                    double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (ModItemTags.BOILER_VALID.contains(stack.getItem()))
                     {
                         // If item is a filled waterskin not at max temp yet
                         if (itemTemp < 50 && stack.getItem() == ModItems.FILLED_WATERSKIN)
-                        {
-                            hasItemStacks = true;
-                            stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
+                        {   hasItemStacks = true;
+                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
                         }
                     }
                 }

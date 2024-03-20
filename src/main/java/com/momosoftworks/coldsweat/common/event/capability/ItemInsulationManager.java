@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -83,7 +84,7 @@ public class ItemInsulationManager
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
 
             // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundNBT stackNBT = stack.getOrCreateTag();
+            CompoundNBT stackNBT = CSMath.orElse(stack.getTag(), new CompoundNBT());
             if (stack.getItem() instanceof ArmorItem)
             {
                 ArmorItem armor = (ArmorItem) stack.getItem();

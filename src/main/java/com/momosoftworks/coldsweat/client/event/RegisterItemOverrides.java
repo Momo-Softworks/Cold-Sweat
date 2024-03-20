@@ -14,6 +14,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemModelsProperties;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -32,10 +33,11 @@ public class RegisterItemOverrides
         {
             ItemModelsProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity) ->
             {
-                if (stack.getOrCreateTag().getBoolean("Lit"))
+                CompoundNBT tag = stack.getOrCreateTag();
+                if (tag.getBoolean("Lit"))
                 {
-                    return stack.getOrCreateTag().getInt("Fuel") > 43 ? 3 :
-                           stack.getOrCreateTag().getInt("Fuel") > 22 ? 2 : 1;
+                    return tag.getInt("Fuel") > 43 ? 3 :
+                           tag.getInt("Fuel") > 22 ? 2 : 1;
                 }
                 return 0;
             });

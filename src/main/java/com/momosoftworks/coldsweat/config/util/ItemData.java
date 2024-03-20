@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.config.util;
 
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -82,7 +83,7 @@ public class ItemData
     }
 
     public static ItemData of(ItemStack stack)
-    {   return new ItemData(stack.getItem(), stack.getTag() != null ? stack.getTag().copy() : new CompoundNBT());
+    {   return new ItemData(stack.getItem(), CSMath.orElse(stack.getTag(), new CompoundNBT()).copy(), null);
     }
 
     @Override
