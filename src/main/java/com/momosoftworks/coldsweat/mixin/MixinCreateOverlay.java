@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.simibubi.create.content.equipment.armor.RemainingAirOverlay;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,8 +14,14 @@ public class MixinCreateOverlay
     @Inject(method = "isInLava", at = @At("HEAD"), cancellable = true)
     private void isInLava(CallbackInfoReturnable<Boolean> cir)
     {
-        if (CSMath.getCallerClass(1) == RemainingAirOverlay.class)
-        {   cir.setReturnValue(true);
+        if (!CompatManager.isCreateLoaded()) return;
+        try
+        {
+            Class<?> createClass = Class.forName("com.simibubi.create.content.equipment.armor.RemainingAirOverlay");
+            if (CSMath.getCallerClass(1) == createClass && CompatManager.USING_BACKTANK)
+            {   cir.setReturnValue(true);
+            }
         }
+        catch (ClassNotFoundException ignored) {}
     }
 }
