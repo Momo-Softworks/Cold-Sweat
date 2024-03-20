@@ -253,9 +253,9 @@ public class Overlays
 
             // Render frame
             AbstractGui.blit(poseStack,
-                              (width / 2) - 9 + ConfigSettings.BODY_ICON_POS.get().x(),
-                              height - 57 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
-                              0, 72 - severity * 18, 18, 18, 18, 162);
+                              (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
+                              height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
+                              0, 64 - severity * 16, 16, 16, 16, 144);
 
                 poseStack.popPose();
             }
