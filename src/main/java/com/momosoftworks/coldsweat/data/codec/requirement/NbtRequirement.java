@@ -30,7 +30,7 @@ public record NbtRequirement(CompoundTag tag)
         {   return this.tag().isEmpty();
         }
         else
-        {   return this.tag == null || compareNbt(this.tag, pTag, true);
+        {   return compareNbt(this.tag, pTag, true);
         }
     }
 

@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -32,10 +33,11 @@ public class RegisterItemOverrides
         {
             ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
             {
-                if (stack.getOrCreateTag().getBoolean("Lit"))
+                CompoundTag tag = stack.getOrCreateTag();
+                if (tag.getBoolean("Lit"))
                 {
-                    return stack.getOrCreateTag().getInt("Fuel") > 43 ? 3 :
-                           stack.getOrCreateTag().getInt("Fuel") > 22 ? 2 : 1;
+                    return tag.getInt("Fuel") > 43 ? 3 :
+                           tag.getInt("Fuel") > 22 ? 2 : 1;
                 }
                 return 0;
             });
