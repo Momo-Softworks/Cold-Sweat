@@ -41,14 +41,6 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
-    static
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Air", "1-9999");
-        DataResult<JsonElement> nbtr = NbtRequirement.CODEC.encodeStart(JsonOps.INSTANCE, new NbtRequirement(tag));
-        System.out.println("How to format NBT: " + nbtr.result().get());
-    }
-
     public boolean test(ItemStack stack)
     {
         if (tag.isPresent() && !stack.is(tag.get()))
