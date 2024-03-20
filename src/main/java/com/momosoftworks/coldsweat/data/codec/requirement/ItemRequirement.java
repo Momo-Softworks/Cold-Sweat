@@ -12,9 +12,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -55,7 +57,7 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
         else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
-        else if (potion.isPresent() && !potion.get().equals(stack.getItem()))
+        else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
         {   return false;
         }
         else if (nbt.isPresent() && !nbt.get().test(stack.getTag()))
@@ -63,23 +65,19 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
         }
         else if (enchantments.isPresent())
         {
-            for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(stack).entrySet())
-            {
-                for (EnchantmentRequirement enchantment : enchantments.get())
-                {   if (enchantment.test(entry.getKey(), entry.getValue()))
-                    {   return true;
-                    }
+            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
+            for (EnchantmentRequirement enchantment : enchantments.get())
+            {   if (!enchantment.test(stackEnchantments))
+                {   return false;
                 }
             }
         }
         else if (storedEnchantments.isPresent())
         {
-            for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(stack).entrySet())
-            {
-                for (EnchantmentRequirement enchantment : storedEnchantments.get())
-                {   if (enchantment.test(entry.getKey(), entry.getValue()))
-                    {   return true;
-                    }
+            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(stack));
+            for (EnchantmentRequirement enchantment : storedEnchantments.get())
+            {   if (!enchantment.test(stackEnchantments))
+                {   return false;
                 }
             }
         }
