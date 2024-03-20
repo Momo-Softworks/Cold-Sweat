@@ -364,13 +364,13 @@ public class ConfigHelper
         List<List<?>> list = new ArrayList<>();
         for (Map.Entry<ItemData, Double> entry : items.entrySet())
         {
-            ItemData stack = entry.getKey();
-            if (stack.getPredicate() != null) continue;
+            ItemData itemData = entry.getKey();
+            if (itemData.getPredicate() != null) continue;
             List<Object> item = new ArrayList<>();
-            item.add(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+            item.add(ForgeRegistries.ITEMS.getKey(itemData.getItem()).toString());
             item.add(entry.getValue());
-            if (!stack.getTag().isEmpty())
-            {   item.add(stack.getTag().toString());
+            if (!itemData.getTag().isEmpty())
+            {   item.add(itemData.getTag().toString());
             }
             list.add(item);
         }
@@ -455,9 +455,9 @@ public class ConfigHelper
         List<List<?>> list = new ArrayList<>();
         for (Map.Entry<ItemData, Insulation> entry : items.entrySet())
         {
-            ItemData stack = entry.getKey();
+            ItemData itemData = entry.getKey();
             List<Object> item = new ArrayList<>();
-            item.add(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+            item.add(ForgeRegistries.ITEMS.getKey(itemData.getItem()).toString());
 
             if (entry.getValue() instanceof StaticInsulation insulation)
             {   item.add(insulation.getCold());
@@ -472,8 +472,8 @@ public class ConfigHelper
             {   item.add("adaptive");
             }
 
-            if (!stack.getTag().isEmpty())
-            {   item.add(stack.getTag().toString());
+            if (!itemData.getTag().isEmpty())
+            {   item.add(itemData.getTag().toString());
             }
 
             list.add(item);

@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.*;
 import net.minecraft.world.entity.LivingEntity;
@@ -141,7 +142,7 @@ public class NBTHelper
         for (ItemStack stack : items)
         {
             Item item = stack.getItem();
-            CompoundTag tag = stack.getOrCreateTag();
+            CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
             if (item == ModItems.SOULSPRING_LAMP)
             {
                 if (tag.contains("fuel"))
