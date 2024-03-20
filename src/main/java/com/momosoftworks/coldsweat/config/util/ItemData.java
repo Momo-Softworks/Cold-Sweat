@@ -83,7 +83,7 @@ public class ItemData
     }
 
     public static ItemData of(ItemStack stack)
-    {   return new ItemData(stack.getItem(), CSMath.orElse(stack.getTag(), new CompoundTag()), null);
+    {   return new ItemData(stack.getItem(), CSMath.orElse(stack.getTag(), new CompoundTag()).copy(), null);
     }
 
     @Override
