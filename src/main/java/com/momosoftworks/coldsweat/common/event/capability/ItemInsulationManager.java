@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -75,7 +76,7 @@ public class ItemInsulationManager
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
 
             // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundTag stackNBT = stack.getOrCreateTag();
+            CompoundTag stackNBT = CSMath.orElse(stack.getTag(), new CompoundTag());
             if (stack.getItem() instanceof ArmorItem armor)
             {
                 if (stackNBT.getBoolean("insulated"))

@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -116,11 +117,12 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                    CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
+                    double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
                     {   hasItemStacks = true;
-                        stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp - 1);
+                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp - 1);
                     }
                 }
                 if (hasItemStacks) setFuel(getFuel() - 1);

@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -117,14 +118,15 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                    CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
+                    double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.is(ModItemTags.BOILER_VALID) || stack.is(ModItemTags.BOILER_PURIFIABLE))
                     {
                         // If item is a filled waterskin not at max temp yet
                         if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
                         {   hasItemStacks = true;
-                            stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
+                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
                         }
                         // If item is valid for the boiler, but doesn't need to be heated and can be purified
                         else if (ticksExisted % (200 / ConfigSettings.TEMP_RATE.get()) == 0
