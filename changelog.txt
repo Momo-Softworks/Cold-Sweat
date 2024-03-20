@@ -1921,3 +1921,11 @@ Technical Changes:
       - Insulation items with this predicate will only provide insulation if the player has the specified data
       - Deactivated insulation items can still be equipped, but will not provide insulation or show in the tooltip
       - This is a brand new system, but is structured like a Vanilla entity predicates with some slight tweaks
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b02d
+
+Fixes:
+- Fixed crash when Create is not installed
+- Fixed item still not stacking properly in some cases
