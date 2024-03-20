@@ -238,11 +238,9 @@ public class Overlays
 
             // Render frame
             GuiComponent.blit(poseStack,
-                              //(width / 2) + 96 + CLIENT_CONFIG.getWorldGaugeX(),
-                              //height - 19 + CLIENT_CONFIG.getWorldGaugeY() - renderOffset,
-                              (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
-                              height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
-                              0, 64 - severity * 16, 16, 16, 16, 144);
+                              (width / 2) - 9 + ConfigSettings.BODY_ICON_POS.get().x(),
+                              height - 57 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
+                              0, 72 - severity * 18, 18, 18, 18, 162);
 
             RenderSystem.disableBlend();
             poseStack.popPose();
@@ -315,7 +313,7 @@ public class Overlays
         int absTemp = Math.abs(temp);
 
         return (absTemp < 100 ? CSMath.blend(0d, 3d, absTemp, 0, 100)
-                             : CSMath.blend(3d, 7d, absTemp, 100, 150))
+                              : CSMath.blend(3d, 7d, absTemp, 100, 150))
                 * sign;
     }
 
