@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat.data.loot;
 
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +23,8 @@ public class ModLootTables
     public static List<ItemStack> getDropsLootTable(Entity entity, @Nullable Player player, ResourceLocation lootTable)
     {   LootContext lootContext = new LootContext.Builder(((ServerLevel) entity.level))
             .withParameter(LootContextParams.THIS_ENTITY, entity)
+            .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.GENERIC)
+            .withParameter(LootContextParams.ORIGIN, entity.position())
             .withLuck(CSMath.getIfNotNull(player, Player::getLuck, 0f))
             .withRandom(entity.level.random)
             .create(LootContextParamSets.ENTITY);
