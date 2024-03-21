@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -302,7 +303,9 @@ public class Chameleon extends Animal
 
             if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
             {
-                WorldHelper.entityDropItem(this, new ItemStack(ModItems.CHAMELEON_MOLT, this.random.nextInt(3) + 1), 20*60*20); // Item lasts 20 minutes
+                for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
+                {   WorldHelper.entityDropItem(this, stack, 40000);
+                }
                 WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
                 this.setLastShed(this.getAgeSecs() * 20);
                 this.setShedding(false);

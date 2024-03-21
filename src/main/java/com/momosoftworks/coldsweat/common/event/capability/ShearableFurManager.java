@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -126,8 +126,10 @@ public class ShearableFurManager
                 // Play sound
                 goat.level().playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
-                // Spawn item
-                WorldHelper.entityDropItem(goat, new ItemStack(ModItems.FUR));
+                // Spawn item(s)
+                for (ItemStack item : ModLootTables.getDropsLootTable(goat, player, ModLootTables.GOAT_SHEARING))
+                {   WorldHelper.entityDropItem(goat, item);
+                }
 
                 // Random chance to ram the player when sheared
                 if (!player.isCreative() && goat.level().getDifficulty() != Difficulty.PEACEFUL
