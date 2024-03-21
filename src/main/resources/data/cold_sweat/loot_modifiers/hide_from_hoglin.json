@@ -5,11 +5,16 @@
       "loot_table_id": "minecraft:entities/hoglin"
     }
   ],
-  "addition": "cold_sweat:hoglin_hide",
-  "count":
-  {
-    "min": 1,
-    "max": 3
-  },
+  "additions": [
+    {
+      "item": "cold_sweat:hoglin_hide",
+      "count":
+      {
+        "min": 1,
+        "max": 3
+      },
+      "weight": 1
+    }
+  ],
   "type": "cold_sweat:mob_drops"
 }
