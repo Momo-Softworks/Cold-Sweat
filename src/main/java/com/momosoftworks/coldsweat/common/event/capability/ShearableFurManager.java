@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
@@ -152,7 +153,10 @@ public class ShearableFurManager
                 // Play sound
                 entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
                 // Spawn item
-                WorldHelper.entityDropItem(entity, new ItemStack(ModItems.FUR));
+                // Spawn item(s)
+                for (ItemStack item : ModLootTables.getDropsLootTable(entity, player, ModLootTables.GOAT_SHEARING))
+                {   WorldHelper.entityDropItem(entity, item);
+                }
                 // Set sheared
                 cap.setSheared(true);
                 cap.setLastSheared(entity.tickCount);

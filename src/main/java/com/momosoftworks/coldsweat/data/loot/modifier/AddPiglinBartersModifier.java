@@ -1,11 +1,12 @@
-package com.momosoftworks.coldsweat.data.loot_modifier;
+package com.momosoftworks.coldsweat.data.loot.modifier;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import com.momosoftworks.coldsweat.data.codec.LootEntryCodec;
+import com.momosoftworks.coldsweat.data.codec.LootEntry;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.JsonHelper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -31,14 +32,11 @@ import java.util.function.Consumer;
 
 public class AddPiglinBartersModifier extends LootModifier
 {
-    private final List<LootEntryCodec.LootEntry> additions;
-    private final boolean replace;
+    private final List<LootEntry> additions;
 
-    protected AddPiglinBartersModifier(ILootCondition[] conditionsIn, List<LootEntryCodec.LootEntry> additions, boolean replace)
-    {
-        super(conditionsIn);
+    protected AddPiglinBartersModifier(ILootCondition[] conditions, List<LootEntry> additions)
+    {   super(conditions);
         this.additions = additions;
-        this.replace = replace;
     }
 
     static ResourceLocation PIGLIN_BARTER_LOCATION = new ResourceLocation("gameplay/piglin_bartering");
@@ -59,41 +57,34 @@ public class AddPiglinBartersModifier extends LootModifier
         {
             List<ILootGenerator> entries = new ArrayList<>();
             MutableInt totalWeight = new MutableInt();
-            if (!replace)
+            // Build vanilla items
+            for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLootTable(PIGLIN_BARTER_LOCATION))))
             {
-                // Build vanilla items
-                for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLootTable(PIGLIN_BARTER_LOCATION))))
+                for (net.minecraft.loot.LootEntry container : ((net.minecraft.loot.LootEntry[]) ENTRIES.get(pool)))
                 {
-                    for (LootEntry container : ((LootEntry[]) ENTRIES.get(pool)))
-                    {
-                        container.expand(context, entry ->
-                        {   entries.add(entry);
-                            totalWeight.add(entry.getWeight(context.getLuck()));
-                        });
-                    }
+                    container.expand(context, entry ->
+                    {   entries.add(entry);
+                        totalWeight.add(entry.getWeight(context.getLuck()));
+                    });
                 }
             }
 
             // Build added items
-            for (LootEntryCodec.LootEntry addition : additions)
+            for (LootEntry addition : additions)
             {
-                Item item = ForgeRegistries.ITEMS.getValue(addition.getItemID());
-                if (item == null) continue;
                 entries.add(new ILootGenerator()
                 {
                     @Override
                     public int getWeight(float luck)
-                    {   return CSMath.floor(addition.getWeight() * (1 + context.getLuck()));
+                    {   return CSMath.floor(addition.weight * (1 + context.getLuck()));
                     }
 
                     @Override
                     public void createItemStack(Consumer<ItemStack> consumer, LootContext context1)
-                    {   int minCount = addition.getCount().getFirst();
-                        int maxCount = addition.getCount().getSecond();
-                        consumer.accept(new ItemStack(item, context.getRandom().nextInt(maxCount + 1 - minCount) + minCount));
+                    {   consumer.accept(new ItemStack(addition.item, context.getRandom().nextInt(addition.count.max + 1) + addition.count.min));
                     }
                 });
-                totalWeight.add(addition.getWeight());
+                totalWeight.add(addition.weight);
             }
 
             AtomicReference<ItemStack> stack = new AtomicReference<>(ItemStack.EMPTY);
@@ -116,38 +107,38 @@ public class AddPiglinBartersModifier extends LootModifier
         @Override
         public AddPiglinBartersModifier read(@Nonnull ResourceLocation location, JsonObject object, ILootCondition[] conditionsIn)
         {
-            List<LootEntryCodec.LootEntry> additions = new ArrayList<>();
+            List<LootEntry> additions = new ArrayList<>();
             for (JsonElement addition : JsonHelper.getAsJsonArray(object, "additions", new JsonArray()))
             {
                 JsonObject additionObject = addition.getAsJsonObject();
                 Optional<CompoundNBT> tag = additionObject.has("tag") ? Optional.of(CompoundNBT.CODEC.parse(JsonOps.INSTANCE, additionObject.get("tag")).getOrThrow(false, s -> {})) : Optional.empty();
                 JsonObject count = JsonHelper.getAsJsonObject(additionObject, "count", new JsonObject());
 
-                additions.add(new LootEntryCodec.LootEntry(
-                        new ResourceLocation(JsonHelper.getAsString(additionObject, "item")), tag,
-                        Pair.of(JsonHelper.getAsInt(count, "min", 1), JsonHelper.getAsInt(count, "max", 1)),
+                additions.add(new LootEntry(
+                        ForgeRegistries.ITEMS.getValue(new ResourceLocation(JsonHelper.getAsString(additionObject, "item"))), tag,
+                        // read "min" and "max" from the pair called "count"
+                        new IntegerBounds(JsonHelper.getAsInt(count, "min", 1), JsonHelper.getAsInt(count, "max", 1)),
                         JsonHelper.getAsInt(additionObject, "weight", 1)
                 ));
             }
-            return new AddPiglinBartersModifier(conditionsIn, additions, JsonHelper.getAsBoolean(object, "replace", false));
+            return new AddPiglinBartersModifier(conditionsIn, additions);
         }
 
         @Override
         public JsonObject write(AddPiglinBartersModifier instance)
         {
             JsonObject object = new JsonObject();
-            object.addProperty("replace", instance.replace);
             JsonArray additions = new JsonArray();
-            for (LootEntryCodec.LootEntry addition : instance.additions)
+            for (LootEntry addition : instance.additions)
             {
                 JsonObject additionObject = new JsonObject();
-                additionObject.addProperty("item", addition.getItemID().toString());
+                additionObject.addProperty("item", ForgeRegistries.ITEMS.getKey(addition.item).toString());
                 JsonObject count = new JsonObject();
-                count.addProperty("min", addition.getCount().getFirst());
-                count.addProperty("max", addition.getCount().getSecond());
+                count.addProperty("min", addition.count.min);
+                count.addProperty("max", addition.count.max);
                 additionObject.add("count", count);
-                additionObject.addProperty("weight", addition.getWeight());
-                addition.getTag().ifPresent(tag -> additionObject.add("nbt", CompoundNBT.CODEC.encodeStart(JsonOps.INSTANCE, tag).result().orElseThrow(RuntimeException::new)));
+                additionObject.addProperty("weight", addition.weight);
+                addition.tag.ifPresent(tag -> additionObject.add("nbt", CompoundNBT.CODEC.encodeStart(JsonOps.INSTANCE, tag).result().orElseThrow(RuntimeException::new)));
                 additions.add(additionObject);
             }
             object.add("additions", additions);
