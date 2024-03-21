@@ -22,6 +22,8 @@ public class ModLootTables
     public static List<ItemStack> getDropsLootTable(Entity entity, @Nullable Player player, ResourceLocation lootTable)
     {   LootParams lootContext = new LootParams.Builder(((ServerLevel) entity.level()))
             .withParameter(LootContextParams.THIS_ENTITY, entity)
+            .withParameter(LootContextParams.ORIGIN, entity.position())
+            .withParameter(LootContextParams.DAMAGE_SOURCE, entity.damageSources().generic())
             .withLuck(CSMath.getIfNotNull(player, Player::getLuck, 0f))
             .create(LootContextParamSets.ENTITY);
 
