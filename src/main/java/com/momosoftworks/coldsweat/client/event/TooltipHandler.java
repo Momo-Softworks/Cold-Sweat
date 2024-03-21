@@ -64,11 +64,9 @@ public class TooltipHandler
             if (elements.get(tooltipIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
             {
                 tooltipIndex++;
-                while (tooltipIndex < elements.size()
-                && (elements.get(tooltipIndex).left().map(text -> text.getString().isBlank()).orElse(true)
-                || elements.get(tooltipIndex).right().isPresent()))
-                {
-                    tooltipIndex++;
+                if (elements.size() > tooltipIndex + 1
+                && (elements.get(tooltipIndex).left().map(FormattedText::getString).orElse("").isBlank() && elements.get(tooltipIndex+1).right().isPresent()))
+                {   tooltipIndex++;
                 }
                 break;
             }
