@@ -274,8 +274,8 @@ public class Overlays
                 if (!(icap instanceof PlayerTempCap)) return;
                 PlayerTempCap cap = (PlayerTempCap) icap;
 
+                cap.calculateHudVisibility(player);
                 ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
-
 
                 /* World Temp */
 
