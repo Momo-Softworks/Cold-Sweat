@@ -262,8 +262,8 @@ public class Overlays
                 {
                     if (!(icap instanceof PlayerTempCap cap)) return;
 
+                    cap.calculateHudVisibility(player);
                     ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
-
 
                     /* World Temp */
 
@@ -323,8 +323,6 @@ public class Overlays
     {   BODY_TEMP = temp;
         PREV_BODY_TEMP = temp;
         BLEND_BODY_TEMP = (int) temp;
-        BODY_ICON = CSMath.clamp(((int) getBodySeverity(BLEND_BODY_TEMP)), -3, 3);
-        PREV_BODY_ICON = BODY_ICON;
     }
 
     public static void setWorldTempInstant(double temp)
