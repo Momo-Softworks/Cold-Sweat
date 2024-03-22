@@ -40,9 +40,6 @@ public class PlayerTempCap extends AbstractTempCap
     public void tickDummy(LivingEntity entity)
     {
         super.tickDummy(entity);
-        if (entity.tickCount % 20 == 0 && entity instanceof Player player)
-        {   calculateHudVisibility(player);
-        }
     }
 
     public void calculateHudVisibility(Player player)
