@@ -558,8 +558,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.betweenInclusive(temp, min, max))
