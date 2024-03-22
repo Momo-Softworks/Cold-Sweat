@@ -60,11 +60,10 @@ public class Overlays
 
     public static IGuiOverlay WORLD_TEMP_OVERLAY = (gui, poseStack, partialTick, width, height) ->
     {
-        Font font = Minecraft.getInstance().font;
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null && (ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
-        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get()
-        || player.isCreative()))
+        if (player != null && ADVANCED_WORLD_TEMP
+        && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get())
         {
             gui.setupOverlayRenderState(true, false);
 
