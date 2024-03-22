@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -36,6 +37,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.CuriosCapability;
 import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
@@ -133,6 +135,10 @@ public class CompatManager
     }
     public static boolean isThirstLoaded()
     {   return THIRST_LOADED;
+    }
+
+    public static boolean hasCurio(Player player, Item curio)
+    {   return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).isPresent();
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)

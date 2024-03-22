@@ -14,7 +14,6 @@ import com.momosoftworks.coldsweat.data.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.configuration.BlockTempData;
 import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -23,17 +22,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.SlotTypeMessage;
-import top.theillusivec4.curios.api.SlotTypePreset;
 
 @Mod(ColdSweat.MOD_ID)
 public class ColdSweat
@@ -50,7 +44,6 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::spawnPlacements);
         bus.addListener(this::registerCaps);
-        if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         // Register stuff
         BlockInit.BLOCKS.register(bus);
@@ -111,13 +104,5 @@ public class ColdSweat
         event.register(EntityTempCap.class);
         event.register(ItemInsulationCap.class);
         event.register(ShearableFurCap.class);
-    }
-
-    public void registerCurioSlots(InterModEnqueueEvent event)
-    {
-        event.enqueueWork(() ->
-        {   InterModComms.sendTo(ColdSweat.MOD_ID, CuriosApi.MODID, SlotTypeMessage.REGISTER_TYPE,
-                                 () -> SlotTypePreset.CHARM.getMessageBuilder().build());
-        });
     }
 }

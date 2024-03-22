@@ -118,7 +118,7 @@ dependencies {
     //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
 
     implementation fg.deobf("curse.maven:create-328085:4762216")
-    implementation fg.deobf("curse.maven:curios-309927:4780205")
+    implementation fg.deobf("curse.maven:curios-309927:4780205-sources-5175957")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
     runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180049")
     runtimeOnly fg.deobf("curse.maven:placebo-283644:5098182")

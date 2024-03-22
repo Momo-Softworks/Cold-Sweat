@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
-import com.momosoftworks.coldsweat.common.capability.temperature.AbstractTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import top.theillusivec4.curios.api.CuriosApi;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
@@ -45,7 +43,7 @@ public class PlayerTempCap extends AbstractTempCap
                 || player.isCreative()
                 || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
                 || player.getOffhandItem().getItem() == ModItems.THERMOMETER
-                || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
+                || CompatManager.hasCurio(player, ModItems.THERMOMETER);
         showBodyTemp = !player.isCreative() && !player.isSpectator();
     }
 }
