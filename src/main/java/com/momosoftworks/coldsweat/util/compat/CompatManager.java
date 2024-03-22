@@ -42,6 +42,8 @@ import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
 
+import java.util.Optional;
+
 @Mod.EventBusSubscriber
 public class CompatManager
 {
@@ -138,7 +140,7 @@ public class CompatManager
     }
 
     public static boolean hasCurio(Player player, Item curio)
-    {   return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).isPresent();
+    {   return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
