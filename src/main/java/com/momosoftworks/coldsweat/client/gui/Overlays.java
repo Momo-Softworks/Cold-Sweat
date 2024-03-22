@@ -65,9 +65,9 @@ public class Overlays
         PoseStack poseStack = graphics.pose();
         Font font = Minecraft.getInstance().font;
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null && (ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
-        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get()
-        || player.isCreative()))
+        if (player != null && ADVANCED_WORLD_TEMP
+        && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get())
         {
             gui.setupOverlayRenderState(true, false);
 
@@ -170,9 +170,9 @@ public class Overlays
                                   (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
                                   // Y position
                                   height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
-                                  0, 
+                                  0,
                                   // UV Y-coordinate for the icon in this stage
-                                  40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend), 
+                                  40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
                                   10, CSMath.ceil(blend), 10, 90);
                 }
             }

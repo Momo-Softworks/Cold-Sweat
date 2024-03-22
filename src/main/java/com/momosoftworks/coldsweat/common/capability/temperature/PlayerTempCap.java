@@ -42,6 +42,7 @@ public class PlayerTempCap extends AbstractTempCap
     public void calculateHudVisibility(Player player)
     {
         showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
+                || player.isCreative()
                 || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
                 || player.getOffhandItem().getItem() == ModItems.THERMOMETER
                 || CompatManager.isCuriosLoaded() && CuriosApi.getCuriosHelper().findFirstCurio(player, ModItems.THERMOMETER).isPresent();
