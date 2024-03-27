@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
@@ -56,16 +56,15 @@ public class ArmorInsulation
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
-                    Insulation insulationValue = ConfigSettings.INSULATING_ARMORS.get().get(ItemData.of(armorStack));
-                    if (insulationValue != null)
+                    Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
+                    if (armorInsulator != null)
                     {
                         // Check if the player meets the predicate for the insulation
-                        ItemData data = CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), ItemData.of(armorStack));
-                        if (data == null || !data.testEntity(serverPlayer))
+                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.nbt().test(armorStack))
                         {   continue;
                         }
-                        cold += insulationValue.getCold();
-                        hot += insulationValue.getHot();
+                        cold += armorInsulator.insulation().getCold();
+                        hot += armorInsulator.insulation().getHot();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
@@ -73,7 +72,7 @@ public class ArmorInsulation
                         List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
                                                       .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                                                       .stream()
-                                                      .filter(pair -> CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), ItemData.of(pair.getFirst())).testEntity(serverPlayer))
+                                                      .filter(pair -> ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()).test(serverPlayer, pair.getFirst()))
                                                       .map(pair -> pair.getSecond())
                                                       .flatMap(List::stream).toList();
 

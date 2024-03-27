@@ -183,7 +183,10 @@ public class NBTHelper
     {
         ListTag tag = new ListTag();
         for (Object obj : list)
-        {   tag.add(writeValue(obj));
+        {   if (obj instanceof Tag tg)
+            {   tag.add(tg);
+            }
+            else tag.add(writeValue(obj));
         }
         return tag;
     }

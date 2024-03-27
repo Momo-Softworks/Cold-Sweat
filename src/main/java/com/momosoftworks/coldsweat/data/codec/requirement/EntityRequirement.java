@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -67,6 +69,12 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
 
     public boolean test(Entity entity)
     {
+        if (entity == null)
+        {   return true;
+        }
+        if (Objects.equals(this, ANY))
+        {   return true;
+        }
         if (type.isPresent() && !type.get().equals(entity.getType()))
         {   return false;
         }
@@ -99,10 +107,9 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         }
         if (target.isPresent())
         {
-            if (!(entity instanceof Monster))
+            if (!(entity instanceof Monster monster))
             {   return false;
             }
-            Monster monster = (Monster) entity;
             if (!target.get().test(monster.getTarget()))
             {   return false;
             }
@@ -112,35 +119,48 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
 
     public CompoundTag serialize()
     {
-        CompoundTag tag = new CompoundTag();
-        type.ifPresent(type -> tag.putString("type", ForgeRegistries.ENTITIES.getKey(type).toString()));
-        location.ifPresent(location -> tag.put("location", location.serialize()));
-        standingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
-        effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
-        nbt.ifPresent(nbt -> tag.put("nbt", nbt.serialize()));
-        flags.ifPresent(flags -> tag.put("flags", flags.serialize()));
-        equipment.ifPresent(equipment -> tag.put("equipment", equipment.serialize()));
-        playerData.ifPresent(playerData -> tag.put("player_data", playerData.serialize()));
-        vehicle.ifPresent(vehicle -> tag.put("vehicle", vehicle.serialize()));
-        passenger.ifPresent(passenger -> tag.put("passenger", passenger.serialize()));
-        target.ifPresent(target -> tag.put("target", target.serialize()));
-        return tag;
+        try
+        {   CompoundTag tag = new CompoundTag();
+            type.ifPresent(type -> tag.putString("type", ForgeRegistries.ENTITIES.getKey(type).toString()));
+            location.ifPresent(location -> tag.put("location", location.serialize()));
+            standingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
+            effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
+            nbt.ifPresent(nbt -> tag.put("nbt", nbt.serialize()));
+            flags.ifPresent(flags -> tag.put("flags", flags.serialize()));
+            equipment.ifPresent(equipment -> tag.put("equipment", equipment.serialize()));
+            playerData.ifPresent(playerData -> tag.put("player_data", playerData.serialize()));
+            vehicle.ifPresent(vehicle -> tag.put("vehicle", vehicle.serialize()));
+            passenger.ifPresent(passenger -> tag.put("passenger", passenger.serialize()));
+            target.ifPresent(target -> tag.put("target", target.serialize()));
+            return tag;
+        }
+        catch (Exception e)
+        {   ColdSweat.LOGGER.error("Error serializing entity requirement: " + e.getMessage());
+            return new CompoundTag();
+        }
     }
 
     public static EntityRequirement deserialize(CompoundTag tag)
     {
-        Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("type")))) : Optional.empty();
-        Optional<LocationRequirement> location = tag.contains("location") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("location"))) : Optional.empty();
-        Optional<LocationRequirement> standingOn = tag.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("standing_on"))) : Optional.empty();
-        Optional<EffectsRequirement> effects = tag.contains("effects") ? Optional.of(EffectsRequirement.deserialize(tag.getCompound("effects"))) : Optional.empty();
-        Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
-        Optional<EntityFlagsRequirement> flags = tag.contains("flags") ? Optional.of(EntityFlagsRequirement.deserialize(tag.getCompound("flags"))) : Optional.empty();
-        Optional<EquipmentRequirement> equipment = tag.contains("equipment") ? Optional.of(EquipmentRequirement.deserialize(tag.getCompound("equipment"))) : Optional.empty();
-        Optional<PlayerDataRequirement> playerData = tag.contains("player_data") ? Optional.of(PlayerDataRequirement.deserialize(tag.getCompound("player_data"))) : Optional.empty();
-        Optional<EntityRequirement> vehicle = tag.contains("vehicle") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("vehicle"))) : Optional.empty();
-        Optional<EntityRequirement> passenger = tag.contains("passenger") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("passenger"))) : Optional.empty();
-        Optional<EntityRequirement> target = tag.contains("target") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("target"))) : Optional.empty();
-        return new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
+        try
+        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("type")))) : Optional.empty();
+            Optional<LocationRequirement> location = tag.contains("location") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("location"))) : Optional.empty();
+            Optional<LocationRequirement> standingOn = tag.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("standing_on"))) : Optional.empty();
+            Optional<EffectsRequirement> effects = tag.contains("effects") ? Optional.of(EffectsRequirement.deserialize(tag.getCompound("effects"))) : Optional.empty();
+            Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
+            Optional<EntityFlagsRequirement> flags = tag.contains("flags") ? Optional.of(EntityFlagsRequirement.deserialize(tag.getCompound("flags"))) : Optional.empty();
+            Optional<EquipmentRequirement> equipment = tag.contains("equipment") ? Optional.of(EquipmentRequirement.deserialize(tag.getCompound("equipment"))) : Optional.empty();
+            Optional<PlayerDataRequirement> playerData = tag.contains("player_data") ? Optional.of(PlayerDataRequirement.deserialize(tag.getCompound("player_data"))) : Optional.empty();
+            Optional<EntityRequirement> vehicle = tag.contains("vehicle") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("vehicle"))) : Optional.empty();
+            Optional<EntityRequirement> passenger = tag.contains("passenger") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("passenger"))) : Optional.empty();
+            Optional<EntityRequirement> target = tag.contains("target") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("target"))) : Optional.empty();
+
+            return new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
+        }
+        catch (Exception e)
+        {   ColdSweat.LOGGER.error("Error deserializing entity requirement: " + e.getMessage());
+            return ANY;
+        }
     }
 
     @Override

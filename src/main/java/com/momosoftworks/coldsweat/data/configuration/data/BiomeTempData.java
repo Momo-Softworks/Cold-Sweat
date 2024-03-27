@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration;
+package com.momosoftworks.coldsweat.data.configuration.data;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

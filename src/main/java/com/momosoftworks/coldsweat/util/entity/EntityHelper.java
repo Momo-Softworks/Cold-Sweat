@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.entity;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -10,8 +11,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.common.util.LogicalSidedProvider;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.lang.reflect.Field;
 
@@ -49,6 +51,6 @@ public class EntityHelper
     }
 
     public static ServerPlayer getServerPlayer(Player player)
-    {   return ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(player.getUUID());
+    {   return ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getPlayerList().getPlayer(player.getUUID());
     }
 }

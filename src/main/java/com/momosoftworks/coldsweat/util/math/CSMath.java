@@ -14,14 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 
 public class CSMath
 {
@@ -160,7 +154,8 @@ public class CSMath
      */
     @SafeVarargs
     public static <T extends Comparable<T>> T min(T... values)
-    {   T min = values[0];
+    {
+        T min = values[0];
         for (T value : values)
         {   if (value.compareTo(min) < 0) min = value;
         }
@@ -173,7 +168,8 @@ public class CSMath
      */
     @SafeVarargs
     public static <T extends Comparable<T>> T max(T... values)
-    {   T max = values[0];
+    {
+        T max = values[0];
         for (T value : values)
         {   if (value.compareTo(max) > 0) max = value;
         }
@@ -181,7 +177,8 @@ public class CSMath
     }
 
     public static double min(double... values)
-    {   double min = values[0];
+    {
+        double min = values[0];
         for (double value : values)
         {   if (value < min) min = value;
         }
@@ -189,7 +186,8 @@ public class CSMath
     }
 
     public static double max(double... values)
-    {   double max = values[0];
+    {
+        double max = values[0];
         for (double value : values)
         {   if (value > max) max = value;
         }
@@ -271,7 +269,8 @@ public class CSMath
      */
     @SafeVarargs
     public static Pair<Double, Double> addPairs(Pair<? extends Number, ? extends Number>... pairs)
-    {   double first = 0;
+    {
+        double first = 0;
         double second = 0;
         for (Pair<? extends Number, ? extends Number> pair : pairs)
         {   first += pair.getFirst().doubleValue();
@@ -285,7 +284,8 @@ public class CSMath
      * @return The distance, squared.
      */
     public static double getDistanceSqr(double x1, double y1, double z1, double x2, double y2, double z2)
-    {   double xDistance = Math.abs(x1 - x2);
+    {
+        double xDistance = Math.abs(x1 - x2);
         double yDistance = Math.abs(y1 - y2);
         double zDistance = Math.abs(z1 - z2);
         return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
@@ -324,7 +324,8 @@ public class CSMath
     }
 
     public static double average(Number... values)
-    {   double sum = 0;
+    {
+        double sum = 0;
         for (Number value : values)
         {   sum += value.doubleValue();
         }
@@ -350,7 +351,8 @@ public class CSMath
      * @return The average of the values in the given array.
      */
     public static <A extends Number, B extends Number> double weightedAverage(List<Pair<A, B>> values)
-    {   double sum = 0;
+    {
+        double sum = 0;
         double weightSum = 0;
         for (Pair<A, B> entry : values)
         {
@@ -370,7 +372,8 @@ public class CSMath
      * @return The direction.
      */
     public static Direction getDirectionFrom(double x, double y, double z)
-    {   Direction direction = Direction.NORTH;
+    {
+        Direction direction = Direction.NORTH;
         double f = Float.MIN_VALUE;
 
         for (Direction direction1 : Direction.values())
@@ -378,7 +381,8 @@ public class CSMath
             double f1 = x * direction1.getStepX() + y * direction1.getStepY() + z * direction1.getStepZ();
 
             if (f1 > f)
-            {   f = f1;
+            {
+                f = f1;
                 direction = direction1;
             }
         }
@@ -423,15 +427,17 @@ public class CSMath
      * @return 1 if the given value is positive, -1 if it is negative, and 0 if it is 0.
      */
     public static int sign(double value)
-    {   if (value == 0) return 0;
+    {
+        if (value == 0) return 0;
         return value < 0 ? -1 : 1;
     }
 
     /**
      * @return 1 if the given value is above the range, -1 if it is below the range, and 0 if it is within the range.
      */
-    public static int signForRange(double value, double min, double max)
-    {   return value > max ? 1 : value < min ? -1 : 0;
+    public static int getSignForRange(double value, double min, double max)
+    {
+        return value > max ? 1 : value < min ? -1 : 0;
     }
 
     /**
@@ -441,7 +447,8 @@ public class CSMath
      * @return The value with the decimal places limited.
      */
     public static double truncate(double value, int sigFigs)
-    {   return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
+    {
+        return (int) (value * Math.pow(10.0, sigFigs)) / Math.pow(10.0, sigFigs);
     }
 
     public static boolean isInteger(Number value)
@@ -450,7 +457,8 @@ public class CSMath
 
     public static double round(double value, int places)
     {
-        if (places < 0) throw new IllegalArgumentException("The number of decimal places must be positive.");
+        if (places < 0) throw new IllegalArgumentException();
+        if (isInteger(value)) return value;
 
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(places, RoundingMode.HALF_UP);
@@ -650,11 +658,11 @@ public class CSMath
 
     /**
      * Returns an optional containing the value. <br>
-     * If the value is NaN or null, the returned optional is empty
+     * If the value is a non-usable (NaN, null, or infinite), the returned optional is empty
      * @return An Optional containing the value, or empty if the value is invalid.
      */
     public static Optional<Double> safeDouble(Double value)
-    {   return value == null || Double.isNaN(value)
+    {   return value == null || Double.isNaN(value) || Double.isInfinite(value)
                ? Optional.empty()
                : Optional.of(value);
     }
@@ -705,5 +713,59 @@ public class CSMath
         }
 
         return null;
+    }
+
+    public static Class<?> getClass(String className)
+    {
+        try
+        {   return Class.forName(className);
+        }
+        catch (ClassNotFoundException e)
+        {   return null;
+        }
+    }
+
+    public static <T> int getIndexOf(T o, List<T> list, BiPredicate<T, T> equals)
+    {
+        T[] es = list.toArray((T[]) new Object[0]);
+        int size = list.size();
+        if (o == null)
+        {
+            for (int i = 0; i < size - 1; i++)
+            {
+                if (es[i] == null)
+                {   return i;
+                }
+            }
+        }
+        else for (int i = 0; i < size - 1; i++)
+        {
+            if (equals.test(o, es[i]))
+            {   return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static String formatDoubleOrInt(double value)
+    {   return isInteger(value) ? String.valueOf((int) value) : String.valueOf(value);
+    }
+
+    @SafeVarargs
+    public static <T> boolean containsAny(List<T> list, T... values)
+    {
+        for (T value : values)
+        {   if (list.contains(value)) return true;
+        }
+        return false;
+    }
+
+    public static boolean containsAny(String string, String... values)
+    {
+        for (String value : values)
+        {   if (string.contains(value)) return true;
+        }
+        return false;
     }
 }
