@@ -14,14 +14,8 @@ import org.joml.Vector3d;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 
 public class CSMath
 {
@@ -475,6 +469,7 @@ public class CSMath
     public static double round(double value, int places)
     {
         if (places < 0) throw new IllegalArgumentException();
+        if (isInteger(value)) return value;
 
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(places, RoundingMode.HALF_UP);
@@ -669,11 +664,11 @@ public class CSMath
 
     /**
      * Returns an optional containing the value. <br>
-     * If the value is NaN or null, the returned optional is empty
+     * If the value is a non-usable (NaN, null, or infinite), the returned optional is empty
      * @return An Optional containing the value, or empty if the value is invalid.
      */
     public static Optional<Double> safeDouble(Double value)
-    {   return value == null || Double.isNaN(value)
+    {   return value == null || Double.isNaN(value) || Double.isInfinite(value)
                ? Optional.empty()
                : Optional.of(value);
     }
@@ -724,5 +719,59 @@ public class CSMath
         }
 
         return null;
+    }
+
+    public static Class<?> getClass(String className)
+    {
+        try
+        {   return Class.forName(className);
+        }
+        catch (ClassNotFoundException e)
+        {   return null;
+        }
+    }
+
+    public static <T> int getIndexOf(T o, List<T> list, BiPredicate<T, T> equals)
+    {
+        T[] es = list.toArray((T[]) new Object[0]);
+        int size = list.size();
+        if (o == null)
+        {
+            for (int i = 0; i < size - 1; i++)
+            {
+                if (es[i] == null)
+                {   return i;
+                }
+            }
+        }
+        else for (int i = 0; i < size - 1; i++)
+        {
+            if (equals.test(o, es[i]))
+            {   return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static String formatDoubleOrInt(double value)
+    {   return isInteger(value) ? String.valueOf((int) value) : String.valueOf(value);
+    }
+
+    @SafeVarargs
+    public static <T> boolean containsAny(List<T> list, T... values)
+    {
+        for (T value : values)
+        {   if (list.contains(value)) return true;
+        }
+        return false;
+    }
+
+    public static boolean containsAny(String string, String... values)
+    {
+        for (String value : values)
+        {   if (string.contains(value)) return true;
+        }
+        return false;
     }
 }

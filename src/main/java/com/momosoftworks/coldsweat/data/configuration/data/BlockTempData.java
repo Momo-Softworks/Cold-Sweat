@@ -1,9 +1,8 @@
-package com.momosoftworks.coldsweat.data.configuration;
+package com.momosoftworks.coldsweat.data.configuration.data;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

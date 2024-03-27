@@ -42,6 +42,8 @@
   "tooltip.cold_sweat.consumed": "When Consumed:",
   "tooltip.cold_sweat.temperature_effect": "%d Temperature",
 
+  "item.modifiers.insulation": "When Applied to Armor:",
+
 
   "effect.cold_sweat.insulated":            "Insulation",
   "effect.cold_sweat.ice_resistance":       "Ice Resistance",
@@ -216,8 +218,6 @@
   "attribute.cold_dampening.desc": "Slows the rate at which the player freezes (negative values accelerate it)",
   "attribute.cold_resistance": "Cold Resistance",
   "attribute.cold_resistance.desc": "A multiplier applied to freezing damage and effects (1 means fully resistant)",
-  "attribute.core_temperature": "Core Temperature",
-  "attribute.core_temperature.desc": "The player's core body temperature",
   "attribute.freezing_point": "Freezing Point",
   "attribute.freezing_point.desc": "The player's minimum habitable world temperature",
   "attribute.heat_dampening": "Heat Dampening",
@@ -227,10 +227,24 @@
   "attribute.world_temperature": "World Temperature",
   "attribute.world_temperature.desc": "The player's current world temperature",
 
+  "attribute.cold_sweat.modifier.add.burning_point":      "%d° Heat Tolerance",
+  "attribute.cold_sweat.modifier.multiply.burning_point": "%d Heat Tolerance",
+  "attribute.cold_sweat.modifier.add.cold_dampening":      "%d Cold Dampening",
+  "attribute.cold_sweat.modifier.multiply.cold_dampening": "%d Cold Dampening",
+  "attribute.cold_sweat.modifier.add.cold_resistance":      "%d Freezing Resistance",
+  "attribute.cold_sweat.modifier.multiply.cold_resistance": "%d Freezing Resistance",
+  "attribute.cold_sweat.modifier.add.freezing_point":      "%d° Cold Tolerance",
+  "attribute.cold_sweat.modifier.multiply.freezing_point": "%d Cold Tolerance",
+  "attribute.cold_sweat.modifier.add.heat_dampening":      "%d Heat Dampening",
+  "attribute.cold_sweat.modifier.multiply.heat_dampening": "%d Heat Dampening",
+  "attribute.cold_sweat.modifier.add.heat_resistance":      "%d Heatstroke Resistance",
+  "attribute.cold_sweat.modifier.multiply.heat_resistance": "%d Heatstroke Resistance",
+  "attribute.cold_sweat.modifier.add.world_temperature":      "%d° Environment Temperature",
+  "attribute.cold_sweat.modifier.multiply.world_temperature": "%d Environment Temperature",
 
   "message.cold_sweat.mod_name": "Cold Sweat",
   "message.cold_sweat.warning": "Warning!",
   "message.cold_sweat.disable": "click to disable",
   "message.cold_sweat.disable_feedback": "Message disabled.",
-  "message.cold_sweat.creative_warning_message": "Due to a Minecraft bug, entering the creative inventory will clear insulation from all armor items!"
+  "message.cold_sweat.creative_warning_message": "Entering the creative inventory on a server will clear insulation from all armor items!"
 }

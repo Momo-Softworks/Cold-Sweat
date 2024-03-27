@@ -96,10 +96,6 @@ public class AbstractTempCap implements ITemperatureCap
     public void setTemp(Type type, double value)
     {
         // Throw exception if this temperature type is not supported
-        if (temperatures.replace(type, value) == null)
-        {   throw new IllegalArgumentException("Invalid temperature type: " + type);
-        }
-        temperatures.put(type, value);
         changed |= switch (type)
         {
             case CORE  -> ((int) value) != ((int) getTemp(Type.CORE));
@@ -107,6 +103,9 @@ public class AbstractTempCap implements ITemperatureCap
             case WORLD -> Math.abs(value - getTemp(Type.WORLD)) >= 0.02;
             default -> false;
         };
+        if (temperatures.replace(type, value) == null)
+        {   throw new IllegalArgumentException("Invalid temperature type: " + type);
+        }
     }
 
     public void setTemp(Type type, double value, Entity entity)
@@ -121,10 +120,10 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void setAbility(Ability type, double value)
     {   // Throw exception if this ability type is not supported
+        changed |= value != getAbility(type);
         if (abilities.replace(type, value) == null)
         {   throw new IllegalArgumentException("Invalid ability type: " + type);
         }
-        changed |= value != getAbility(type);
     }
 
     @Override
@@ -312,38 +311,29 @@ public class AbstractTempCap implements ITemperatureCap
         {   return defaultValue.get();
         }
         // If base attribute is unset
-        if (Double.isNaN(attribute.getBaseValue()))
-        {
-            // If also doesn't have modifiers, return the default value
-            if (attribute.getModifiers().isEmpty())
-            {   return defaultValue.get();
-            }
-            // If has modifiers, apply the modifiers to the default value
-            else
-            {
-                double value = defaultValue.get();
-
-                for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
-                {   value += mod.getAmount();
-                }
-                double base = value;
-                for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE))
-                {   base += value * mod.getAmount();
-                }
-                for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))
-                {   base *= 1.0D + mod.getAmount();
-                }
-                return base;
-            }
-        }
-        // If attribute is set, return the attribute value
         else
-        {   return CSMath.safeDouble(attribute.getValue()).orElse(defaultValue.get());
+        {
+            double value = CSMath.safeDouble(attribute.getValue()).orElse(defaultValue.get());
+            Collection<AttributeModifier> modifiers = EntityTempManager.getAttributeModifiers(entity, attribute, null);
+
+            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION).toList())
+            {   value += mod.getAmount();
+            }
+            double base = value;
+            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE).toList())
+            {   base += value * mod.getAmount();
+            }
+            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL).toList())
+            {   base *= 1.0D + mod.getAmount();
+            }
+            return base;
         }
     }
 
     public void syncValues(LivingEntity entity)
     {   Temperature.updateTemperature(entity, this, false);
+        changed = false;
+        syncTimer = 5;
     }
 
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)

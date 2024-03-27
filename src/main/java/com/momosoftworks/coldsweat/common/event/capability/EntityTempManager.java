@@ -11,14 +11,14 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Mode;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Order;
+import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -30,7 +30,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -62,10 +64,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
@@ -246,7 +245,8 @@ public class EntityTempManager
                 {   getTemperatureCap(oldPlayer).ifPresent(cap::copy);
                 });
             }
-            getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>()).forEach(attr ->
+            getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
+            .forEach(attr ->
             {   event.getEntity().getAttribute(attr).setBaseValue(oldPlayer.getAttribute(attr).getBaseValue());
             });
             oldPlayer.invalidateCaps();
@@ -312,7 +312,7 @@ public class EntityTempManager
                     if (!(slot instanceof ResultSlot))
                     {
                         if (slot.container == player.getInventory()
-                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack))))
+                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())))
                         {   player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
                         }
                     }
@@ -463,7 +463,9 @@ public class EntityTempManager
         && !event.getEntity().level().isClientSide)
         {
             // If food item defined in config
-            float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(ItemData.of(event.getItem()), 0d).floatValue();
+            float foodTemp = CSMath.getIfNotNull(ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()),
+                                                 food -> food.test(event.getItem()) ? food.value() : 0,
+                                                 0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
             }
@@ -561,6 +563,22 @@ public class EntityTempManager
         throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + param + "\" is not a valid type or ability!"));
     }
 
+    public static Collection<AttributeModifier> getAttributeModifiers(LivingEntity entity, AttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
+    {
+        Collection<AttributeModifier> modifiers = new ArrayList<>(operation == null
+                                                                  ? attribute.getModifiers()
+                                                                  : attribute.getModifiers(operation));
+        for (EquipmentSlot slot : EquipmentSlot.values())
+        {
+            if (!slot.isArmor()) continue;
+            ItemStack stack = entity.getItemBySlot(slot);
+            if (!stack.isEmpty())
+            {   modifiers.addAll(ItemInsulationManager.getAttributeModifiers(stack, attribute.getAttribute(), slot, operation, entity));
+            }
+        }
+        return modifiers;
+    }
+
     public static AttributeModifier makeAttributeModifier(Either<Temperature.Type, Temperature.Ability> param, double value, AttributeModifier.Operation operation)
     {
         return param.map(
@@ -579,5 +597,17 @@ public class EntityTempManager
             case HEAT_DAMPENING  -> new AttributeModifier("Heat Dampening Modifier", value, operation);
             case COLD_DAMPENING  -> new AttributeModifier("Cold Dampening Modifier", value, operation);
         });
+    }
+
+    public static boolean isTemperatureAttribute(Attribute attribute)
+    {
+        return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
+                                  Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                                        .map(e ->
+                                        {
+                                            return e.left().isPresent()
+                                                   ? e.left().get().getSerializedName()
+                                                   : e.right().get().getSerializedName();
+                                        }).toArray(String[]::new));
     }
 }

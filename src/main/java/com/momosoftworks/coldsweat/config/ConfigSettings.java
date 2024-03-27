@@ -67,9 +67,9 @@ public class ConfigSettings
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_OVERRIDE_BLOCKS;
 
     // Item settings
-    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATION_ITEMS;
-    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATING_ARMORS;
-    public static final DynamicHolder<Map<ItemData, Insulation>> INSULATING_CURIOS;
+    public static final DynamicHolder<Map<Item, Insulator>> INSULATION_ITEMS;
+    public static final DynamicHolder<Map<Item, Insulator>> INSULATING_ARMORS;
+    public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<Integer[]> INSULATION_SLOTS;
     public static final DynamicHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
 
@@ -257,19 +257,19 @@ public class ConfigSettings
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
 
-        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems()),
+        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), InsulationSlot.ITEM),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
         saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
 
-        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems()),
+        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), InsulationSlot.ARMOR),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
         saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
         INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
         {   if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
-            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios());
+            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), InsulationSlot.CURIO);
         },
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),

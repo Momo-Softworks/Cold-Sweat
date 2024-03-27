@@ -8,16 +8,17 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.configuration.BiomeTempData;
-import com.momosoftworks.coldsweat.data.configuration.BlockTempData;
-import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
-import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.configuration.data.BiomeTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.BlockTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.DimensionTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.InsulatorData;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -39,11 +40,10 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
@@ -69,9 +69,10 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            Insulation insulation = insulatorData.getInsulation();
-            CompoundTag nbt = insulatorData.nbt().orElse(new CompoundTag());
-            EntityRequirement predicate = insulatorData.predicate().orElse(null);
+            Insulation insulation = insulatorData.insulation();
+            NbtRequirement nbt = insulatorData.nbt();
+            EntityRequirement predicate = insulatorData.predicate();
+            AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
             for (Either<TagKey<Item>, Item> either : insulatorData.items())
@@ -81,12 +82,12 @@ public class LoadConfigSettings
                 {
                     registries.registryOrThrow(Registries.ITEM).getTag(tagKey).orElseThrow().stream()
                     .forEach(item ->
-                    {   addItemConfig(item.get(), insulation, insulatorData.type(), nbt, predicate);
+                    {   addItemConfig(item.get(), insulation, insulatorData.slot(), nbt, predicate, attributeModifiers);
                     });
                 });
                 // If the item is a single item, write the insulation value for the item
                 either.ifRight(item ->
-                {   addItemConfig(item, insulation, insulatorData.type(), nbt, predicate);
+                {   addItemConfig(item, insulation, insulatorData.slot(), nbt, predicate, attributeModifiers);
                 });
             }
         });
@@ -105,9 +106,11 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            Block[] blocks = blockTempData.blocks().stream()
-            .map(either -> either.left().isPresent() ? registries.registryOrThrow(Registries.BLOCK).getTag(either.left().get()).orElseThrow().stream().map(Holder::get).toArray(Block[]::new)
-                                                     : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
+            Block[] blocks = blockTempData.blocks()
+                             .stream()
+                             .map(either -> either.left().isPresent()
+                                            ? registries.registryOrThrow(Registries.BLOCK).getTag(either.left().get()).orElseThrow().stream().map(Holder::get).toArray(Block[]::new)
+                                            : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature();
@@ -136,7 +139,7 @@ public class LoadConfigSettings
                             CompoundTag blockTag = blockEntity.saveWithFullMetadata();
                             for (String key : tag.getAllKeys())
                             {
-                                if (!tag.get(key).equals(blockTag.get(key)))
+                                if (!Objects.equals(tag.get(key), blockTag.get(key)))
                                 {   return 0;
                                 }
                             }
@@ -228,16 +231,17 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addItemConfig(Item item, Insulation insulation, InsulationSlot type, CompoundTag nbt, EntityRequirement predicate)
+    private static void addItemConfig(Item item, Insulation insulation, InsulationSlot slot, NbtRequirement nbt, EntityRequirement predicate, AttributeModifierMap attributeModifiers)
     {
-        switch (type)
+        Insulator insulator = new Insulator(insulation, slot, nbt, predicate, attributeModifiers);
+        switch (slot)
         {
-            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(new ItemData(item, nbt, predicate), insulation);
-            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(new ItemData(item, nbt, predicate), insulation);
+            case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
+            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
             case CURIO ->
             {
                 if (CompatManager.isCuriosLoaded())
-                {   ConfigSettings.INSULATING_CURIOS.get().put(new ItemData(item, nbt, predicate), insulation);
+                {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
                 }
             }
         }

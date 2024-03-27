@@ -5,16 +5,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.InsulationSlot;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.configuration.value.ItemValue;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,10 +26,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Equipable;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -35,10 +39,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -46,11 +47,72 @@ public class TooltipHandler
     public static final ChatFormatting COLD = ChatFormatting.BLUE;
     public static final ChatFormatting HOT = ChatFormatting.RED;
 
+    public static void addModifierTooltipLines(List<Component> tooltip, AttributeModifierMap map)
+    {
+        map.getMap().asMap().forEach((attribute, modifiers) ->
+        {
+            for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
+            {
+                double value = 0;
+                for (AttributeModifier modifier : modifiers.stream().filter(mod -> mod.getOperation() == operation).toList())
+                {   value += modifier.getAmount();
+                }
+                if (value != 0)
+                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
+                }
+            }
+        });
+    }
+
+    public static MutableComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation)
+    {
+        if (attribute == null) return Component.empty();
+        double value = amount;
+        String attributeName = attribute.getDescriptionId().replace("attribute.", "");
+
+        if (operation == AttributeModifier.Operation.ADDITION
+        && (attribute == ModAttributes.FREEZING_POINT
+        || attribute == ModAttributes.BURNING_POINT
+        || attribute == ModAttributes.WORLD_TEMPERATURE
+        || attribute == ModAttributes.BASE_BODY_TEMPERATURE))
+        {
+            value = Temperature.convertUnits(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
+        }
+        String operationString = operation == AttributeModifier.Operation.ADDITION ? "add" : "multiply";
+        ChatFormatting color;
+        String sign;
+        if (value >= 0)
+        {
+            color = ChatFormatting.BLUE;
+            sign = "+";
+        }
+        else
+        {   color = ChatFormatting.RED;
+            sign = "";
+        }
+        String percent;
+        if (operation != AttributeModifier.Operation.ADDITION
+        || attribute == ModAttributes.HEAT_RESISTANCE
+        || attribute == ModAttributes.COLD_RESISTANCE
+        || attribute == ModAttributes.HEAT_DAMPENING
+        || attribute == ModAttributes.COLD_DAMPENING)
+        {   percent = "%";
+            value *= 100;
+        }
+        else
+        {   percent = "";
+        }
+        return Component.translatable(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName),
+                                      sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2))
+                                           + percent)
+                        .withStyle(color);
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
-        ItemData itemData = ItemData.of(stack);
+        Item item = stack.getItem();
         var elements = event.getTooltipElements();
         if (stack.isEmpty()) return;
 
@@ -65,14 +127,15 @@ public class TooltipHandler
             {
                 tooltipIndex++;
                 if (elements.size() > tooltipIndex + 1
-                && (elements.get(tooltipIndex).left().map(FormattedText::getString).orElse("").isBlank() && elements.get(tooltipIndex+1).right().isPresent()))
+                && elements.get(tooltipIndex).left().map(FormattedText::getString).orElse("").isBlank()
+                && elements.get(tooltipIndex+1).right().isPresent())
                 {   tooltipIndex++;
                 }
                 break;
             }
         }
 
-        Insulation itemInsul = null;
+        Insulator itemInsul = null;
         Player player = Minecraft.getInstance().player;
 
         // If the item is a Soulspring Lamp
@@ -85,12 +148,13 @@ public class TooltipHandler
         // If the item is edible
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
-            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(ItemData.of(event.getItemStack()), (item, temp) ->
+            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(item, (it, temp) ->
             {
+                if (!temp.test(stack)) return temp;
                 int index = Minecraft.getInstance().options.advancedItemTooltips ? elements.size() - 1 : elements.size();
                 elements.add(index, Either.left(
-                        temp > 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
-                                 : Component.translatable("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
+                        temp.value() > 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
+                                         : Component.translatable("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
                         ));
                 elements.add(index, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
                 elements.add(index, Either.left(Component.empty()));
@@ -98,47 +162,51 @@ public class TooltipHandler
             });
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
-            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), itemData), itemData);
-            if (itemData.testEntity(player))
-            {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(itemInsul.split(), InsulationSlot.ITEM)));
+            if (itemInsul.predicate().test(player) && itemInsul.nbt().test(stack.getTag()))
+            {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), InsulationSlot.ITEM)));
             }
         }
         // If the item is an insulating curio, add the tooltip
-        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
-            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATING_CURIOS.get(), itemData), itemData);
-            if (itemData.testEntity(EntityHelper.getServerPlayer(player)))
-            {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(itemInsul.split(), InsulationSlot.CURIO)));
+            if (itemInsul.predicate().test(player) && itemInsul.nbt().test(stack.getTag()))
+            {   elements.add(tooltipIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), InsulationSlot.CURIO)));
             }
         }
         // If the item is insulated armor
-        Insulation armorInsul;
-        if (stack.getItem() instanceof Equipable && (!Objects.equals((armorInsul = ConfigSettings.INSULATING_ARMORS.get().get(itemData)), itemInsul) || armorInsul == null))
+        Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
+        if (stack.getItem() instanceof Equipable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
             // Create the list of insulation pairs from NBT
             List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
                                           // Get insulation values
                                           .map(cap -> cap.getInsulation().stream()
                                           // Filter out insulation that doesn't match the player's predicate
-                                          .filter(pair -> CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), ItemData.of(pair.getFirst()))
-                                                                  .testEntity(EntityHelper.getServerPlayer(player)))
+                                          .filter(pair ->
+                                          {
+                                              ItemStack stack1 = pair.getFirst();
+                                              return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                                         insulator -> insulator.predicate().test(player) && insulator.nbt().test(stack1.getTag()),
+                                                                         false);
+                                          })
                                           // Flat map the insulation values
                                           .map(pair -> pair.getSecond()).reduce(new ArrayList<>(), (list, insul) ->
-                                          {   list.addAll(insul);
+                                          {
+                                              list.addAll(insul);
                                               return list;
-                                          })).orElse(new ArrayList<>());
-            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), itemData), itemData);
-
+                                          }))
+                                          .orElse(new ArrayList<>());
             // If the armor has intrinsic insulation due to configs, add it to the list
-            ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(itemData, (item, pair) ->
-            {   ItemData data = CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), item);
-                if (data != null && data.testEntity(EntityHelper.getServerPlayer(player)))
-                {   insulation.addAll(pair.split());
+            if (armorInsulator != null)
+            {
+                if (armorInsulator.predicate().test(player)
+                && armorInsulator.nbt().test(stack.getTag()))
+                {
+                    insulation.addAll(armorInsulator.insulation().split());
                 }
-                return pair;
-            });
+            }
 
             // Sort the insulation values from cold to hot
             Insulation.sort(insulation);
@@ -161,10 +229,12 @@ public class TooltipHandler
                 double fuel = screen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
-                Double itemFuel;
-                if (!carriedStack.isEmpty() && (itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(ItemData.of(carriedStack))) != null)
+                ItemValue itemFuel;
+                if (!carriedStack.isEmpty()
+                && (itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(carriedStack.getItem())) != null
+                && itemFuel.test(carriedStack))
                 {
-                    double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel;
+                    double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel.value();
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 

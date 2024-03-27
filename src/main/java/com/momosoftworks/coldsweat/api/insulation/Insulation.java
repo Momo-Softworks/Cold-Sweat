@@ -1,10 +1,13 @@
 package com.momosoftworks.coldsweat.api.insulation;
 
+import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import net.minecraft.nbt.CompoundTag;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class Insulation
+public abstract class Insulation implements NbtSerializable
 {
     /**
      * @return True if this insulation has no value.
@@ -54,5 +57,16 @@ public abstract class Insulation
             return 0;
         }));
         return newPairs;
+    }
+
+    public static Insulation deserialize(CompoundTag tag)
+    {
+        if (tag.contains("cold") && tag.contains("hot"))
+        {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("hot"));
+        }
+        else if (tag.contains("insulation"))
+        {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("speed"));
+        }
+        return null;
     }
 }
