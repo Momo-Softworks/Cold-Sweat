@@ -12,7 +12,6 @@ import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -674,7 +673,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public int getItemFuel(ItemStack item)
-    {   return ConfigSettings.HEARTH_FUEL.get().getOrDefault(ItemData.of(item), 0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+                                   fuel -> fuel.test(item) ? fuel.value() : 0,
+                                   0).intValue();
     }
 
     public int getHotFuel()

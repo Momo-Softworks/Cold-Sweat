@@ -1,14 +1,18 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.configuration.value.ItemValue;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -75,16 +79,16 @@ public class ConfigSettings
 
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final DynamicHolder<Map<ItemData, Double>> FOOD_TEMPERATURES;
+    public static final DynamicHolder<Map<Item, ItemValue>> FOOD_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
     public static final DynamicHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final DynamicHolder<Map<ItemData, Double>> BOILER_FUEL;
-    public static final DynamicHolder<Map<ItemData, Double>> ICEBOX_FUEL;
-    public static final DynamicHolder<Map<ItemData, Double>> HEARTH_FUEL;
-    public static final DynamicHolder<Map<ItemData, Double>> SOULSPRING_LAMP_FUEL;
+    public static final DynamicHolder<Map<Item, ItemValue>> BOILER_FUEL;
+    public static final DynamicHolder<Map<Item, ItemValue>> ICEBOX_FUEL;
+    public static final DynamicHolder<Map<Item, ItemValue>> HEARTH_FUEL;
+    public static final DynamicHolder<Map<Item, ItemValue>> SOULSPRING_LAMP_FUEL;
 
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
     public static final DynamicHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
@@ -245,14 +249,26 @@ public class ConfigSettings
                                            decoder -> decoder.getDouble("CaveInsulation"),
                                            saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
-        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getBoilerFuelItems()));
-        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getIceboxFuelItems()));
-        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.getItemsWithValues(ItemSettingsConfig.getInstance().getHearthFuelItems()));
+        Function<List<?>, ItemValue> fuelMapper = args ->
+        {
+            double fuel = ((Number) args.get(0)).doubleValue();
+            NbtRequirement nbtRequirement;
+            if (args.size() > 2)
+            {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)));
+            }
+            else nbtRequirement = new NbtRequirement(new CompoundTag());
+            return new ItemValue(fuel, nbtRequirement);
+        };
+        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
+        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
+        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper));
 
-        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems()),
-        encoder -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems"),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems"),
-        saver -> ConfigHelper.writeItemMap(saver, list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list)));
+        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
+        encoder -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> ItemValue.deserialize(nbt)),
+        saver -> ConfigHelper.writeItemMap(saver,
+                                           list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
+                                           fuel -> List.of(fuel.value(), fuel.nbt().tag().toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).toList());
@@ -301,10 +317,18 @@ public class ConfigSettings
 
         SLEEP_CHECK_OVERRIDE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures()),
-        encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures"),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures"),
-        saver -> ConfigHelper.writeItemMap(saver, list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list)));
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), args ->
+        {
+            NbtRequirement nbtRequirement = args.size() > 2
+                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
+                                            : new NbtRequirement(new CompoundTag());
+            return new ItemValue(((Number) args.get(0)).doubleValue(), nbtRequirement);
+        }),
+        encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> ItemValue.deserialize(nbt)),
+        saver -> ConfigHelper.writeItemMap(saver,
+                                           list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
+                                           food -> List.of(food.value(), food.nbt().tag().toString())));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 

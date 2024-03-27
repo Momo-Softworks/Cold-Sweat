@@ -60,6 +60,5 @@ public class HearthSaveDataHandler
             CompoundTag hearthData = disabledHearths.getCompound(key);
             DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("Pos")), new ResourceLocation(hearthData.getString("Level"))));
         }
-        System.out.println("Loaded disabled hearths: " + DISABLED_HEARTHS);
     }
 }
