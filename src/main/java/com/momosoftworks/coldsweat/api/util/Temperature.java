@@ -461,8 +461,8 @@ public class Temperature
      * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * {@link #COLD_RESISTANCE}: Resistance to cold temperature-related damage. <br>
      * {@link #HEAT_RESISTANCE}: Resistance to heat temperature-related damage. <br>
-     * {@link #COLD_DAMPENING}: Resistance to cold temperature-related status effects. <br>
-     * {@link #HEAT_DAMPENING}: Resistance to heat temperature-related status effects. <br>
+     * {@link #COLD_DAMPENING}: Changes the rate of body temperature increase. <br>
+     * {@link #HEAT_DAMPENING}: Changes the rate of body temperature decrease. <br>
      */
     public enum Ability implements StringRepresentable
     {

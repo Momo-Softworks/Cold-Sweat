@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,5 +83,18 @@ public class StaticInsulation extends Insulation
         return obj instanceof StaticInsulation insul
             && cold == insul.cold
             && hot == insul.hot;
+    }
+
+    @Override
+    public CompoundTag serialize()
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble("cold", cold);
+        tag.putDouble("hot", hot);
+        return tag;
+    }
+
+    public static StaticInsulation deserialize(CompoundTag tag)
+    {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("hot"));
     }
 }

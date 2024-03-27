@@ -1,10 +1,9 @@
 package com.momosoftworks.coldsweat.util.compat;
 
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
@@ -280,11 +279,13 @@ public class CompatManager
                     for (int i = 0; i < curioStackHandler.getStacks().getSlots(); i++)
                     {
                         ItemStack stack = curioStackHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty() && ConfigSettings.INSULATING_CURIOS.get().containsKey(ItemData.of(stack)))
+                        if (!stack.isEmpty())
                         {
-                            Insulation insulation = ConfigSettings.INSULATING_CURIOS.get().get(ItemData.of(stack));
-                            double cold = insulation.getCold();
-                            double hot = insulation.getHot();
+                            Insulator insulator = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
+                            if (insulator == null) continue;
+
+                            double cold = insulator.insulation().getCold();
+                            double hot = insulator.insulation().getHot();
                             Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
                         }
                     }

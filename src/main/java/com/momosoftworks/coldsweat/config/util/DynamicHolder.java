@@ -76,21 +76,36 @@ public class DynamicHolder<T>
     {   if (!synced)
         {  throw new RuntimeException("Tried to encode non-synced DynamicHolder for type " + this.value.getClass());
         }
-        return encoder.apply(value);
+        try
+        {   return encoder.apply(this.get());
+        }
+        catch (Exception e)
+        {   throw new RuntimeException("Failed to encode DynamicHolder for type " + this.value.getClass(), e);
+        }
     }
 
     public void decode(CompoundTag tag)
     {   if (!synced)
         {  throw new RuntimeException("Tried to decode non-synced DynamicHolder for type " + this.value.getClass());
         }
-        this.value = decoder.apply(tag);
+        try
+        {   this.value = decoder.apply(tag);
+        }
+        catch (Exception e)
+        {   throw new RuntimeException("Failed to decode DynamicHolder for type " + this.value.getClass(), e);
+        }
     }
 
     public void save()
     {   if (!synced)
         {  throw new RuntimeException("Tried to save non-synced DynamicHolder for type " + this.value.getClass());
         }
-        saver.accept(value);
+        try
+        {   saver.accept(this.get());
+        }
+        catch (Exception e)
+        {   throw new RuntimeException("Failed to save DynamicHolder for type " + this.value.getClass(), e);
+        }
     }
 
     public boolean isSynced()

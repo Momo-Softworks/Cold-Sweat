@@ -1,12 +1,11 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
-import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
@@ -21,20 +20,39 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.io.FileWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> items,
+public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                               Optional<List<EnchantmentRequirement>> enchantments, Optional<List<EnchantmentRequirement>> storedEnchantments,
                               Optional<Potion> potion, Optional<NbtRequirement> nbt)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
-            ForgeRegistries.ITEMS.getCodec().listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            Codec.STRING.xmap(
+            // Convert from a string to a TagKey
+            string ->
+            {
+                ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
+
+                return Either.<TagKey<Item>, Item>left(TagKey.create(DefaultedRegistry.ITEM_REGISTRY, itemLocation));
+            },
+            // Convert from a TagKey to a string
+            tag ->
+            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
+                String result = tag.left().isPresent()
+                                ? "#" + tag.left().get().location()
+                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
+                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+
+                return result;
+            })
+            .listOf()
+            .fieldOf("items").forGetter(ItemRequirement::items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -45,13 +63,19 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
 
     public boolean test(ItemStack stack)
     {
-        if (tag.isPresent() && !stack.is(tag.get()))
-        {   return false;
+        for (int i = 0; i < items.size(); i++)
+        {
+            Either<TagKey<Item>, Item> either = items.get(i);
+            if (either.left().isPresent() && stack.is(either.left().get())
+            || either.right().isPresent() && stack.is(either.right().get()))
+            {
+                break;
+            }
+            if (i == items.size() - 1)
+            {   return false;
+            }
         }
-        else if (items.isPresent() && !items.get().contains(stack.getItem()))
-        {   return false;
-        }
-        else if (count.isPresent() && !count.get().test(stack.getCount()))
+        if (count.isPresent() && !count.get().test(stack.getCount()))
         {   return false;
         }
         else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
@@ -87,8 +111,9 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
     public CompoundTag serialize()
     {
         CompoundTag nbt = new CompoundTag();
-        tag.ifPresent(tag -> nbt.putString("tag", tag.location().toString()));
-        items.ifPresent(items -> nbt.put("items", NBTHelper.listTagOf(items.stream().map(item -> StringTag.valueOf(ForgeRegistries.ITEMS.getKey(item).toString())).collect(Collectors.toList()))));
+        nbt.put("items", NBTHelper.listTagOf(items.stream().map(either -> StringTag.valueOf(either.map(tag -> "#" + tag.location(),
+                                                                                                       item -> ForgeRegistries.ITEMS.getKey(item).toString())))
+                                                           .collect(Collectors.toList())));
         count.ifPresent(count -> nbt.put("count", count.serialize()));
         durability.ifPresent(durability -> nbt.put("durability", durability.serialize()));
         enchantments.ifPresent(enchantments -> nbt.put("enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
@@ -100,14 +125,20 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
 
     public static ItemRequirement deserialize(CompoundTag nbt)
     {
-        Optional<TagKey<Item>> tag = nbt.contains("tag") ? Optional.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(nbt.getString("tag"))))
-                                                         : Optional.empty();
+        List<Either<TagKey<Item>, Item>> items = nbt.getList("items", 8)
+                                                     .stream()
+                                                     .map(tg ->
+                                                     {
+                                                           String string = tg.getAsString();
+                                                           ResourceLocation location = ResourceLocation.tryParse(string.replace("#", ""));
+                                                           if (location == null) throw new IllegalArgumentException("Item tag or ID is null");
+                                                           if (!string.contains("#"))
+                                                           {   return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
+                                                           }
 
-        Optional<List<Item>> items = nbt.contains("items") ? Optional.of(nbt.getList("items", 10)
-                                                                         .stream()
-                                                                         .map(tg -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(tg.getAsString())))
-                                                                         .toList())
-                                                           : Optional.empty();
+                                                           return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, location));
+                                                     })
+                                                     .toList();
 
         Optional<IntegerBounds> count = nbt.contains("count") ? Optional.of(IntegerBounds.deserialize(nbt.getCompound("count")))
                                                               : Optional.empty();
@@ -133,7 +164,7 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
         Optional<NbtRequirement> compound = nbt.contains("nbt") ? Optional.of(NbtRequirement.deserialize(nbt.getCompound("nbt")))
                                                                 : Optional.empty();
 
-        return new ItemRequirement(tag, items, count, durability, enchantments, storedEnchantments, potion, compound);
+        return new ItemRequirement(items, count, durability, enchantments, storedEnchantments, potion, compound);
     }
 
     @Override
@@ -148,9 +179,6 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
 
         ItemRequirement that = (ItemRequirement) obj;
 
-        if (!tag.equals(that.tag))
-        {   return false;
-        }
         if (!items.equals(that.items))
         {   return false;
         }
@@ -176,7 +204,7 @@ public record ItemRequirement(Optional<TagKey<Item>> tag, Optional<List<Item>> i
     public String toString()
     {
         return "Item{" +
-                "tag=" + tag +
+                "tag=" + items +
                 ", items=" + items +
                 ", count=" + count +
                 ", durability=" + durability +
