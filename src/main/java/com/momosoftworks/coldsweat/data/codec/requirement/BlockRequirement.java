@@ -14,8 +14,6 @@ import net.minecraft.state.StateContainer;
 import net.minecraft.state.StateHolder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.TagRegistry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -29,10 +27,10 @@ import java.util.stream.Collectors;
 
 public class BlockRequirement
 {
-    private final Optional<List<Block>> blocks;
-    private final Optional<ITag<Block>> tag;
-    private final Optional<StateRequirement> state;
-    private final Optional<NbtRequirement> nbt;
+    public final Optional<List<Block>> blocks;
+    public final Optional<ITag<Block>> tag;
+    public final Optional<StateRequirement> state;
+    public final Optional<NbtRequirement> nbt;
     
     public BlockRequirement(Optional<List<Block>> blocks, Optional<ITag<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
     {

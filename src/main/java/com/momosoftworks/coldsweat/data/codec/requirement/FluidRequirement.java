@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 
 public class FluidRequirement
 {
-    private final Optional<List<Fluid>> fluids;
-    private final Optional<ITag<Fluid>> tag;
-    private final Optional<BlockRequirement.StateRequirement> state;
-    private final Optional<NbtRequirement> nbt;
+    public final Optional<List<Fluid>> fluids;
+    public final Optional<ITag<Fluid>> tag;
+    public final Optional<BlockRequirement.StateRequirement> state;
+    public final Optional<NbtRequirement> nbt;
 
     public FluidRequirement(Optional<List<Fluid>> fluids, Optional<ITag<Fluid>> tag, Optional<BlockRequirement.StateRequirement> state, Optional<NbtRequirement> nbt)
     {

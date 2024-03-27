@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class EffectsRequirement
 {
-    private final Map<Effect, Instance> effects;
+    public final Map<Effect, Instance> effects;
     
     public EffectsRequirement(Map<Effect, Instance> effects)
     {

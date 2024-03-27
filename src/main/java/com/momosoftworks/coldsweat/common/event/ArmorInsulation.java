@@ -60,11 +60,11 @@ public class ArmorInsulation
                     if (armorInsulator != null)
                     {
                         // Check if the player meets the predicate for the insulation
-                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.nbt().test(armorStack))
+                        if (!armorInsulator.predicate.test(serverPlayer) || !armorInsulator.nbt.test(armorStack))
                         {   continue;
                         }
-                        cold += armorInsulator.insulation().getCold();
-                        hot += armorInsulator.insulation().getHot();
+                        cold += armorInsulator.insulation.getCold();
+                        hot += armorInsulator.insulation.getHot();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table

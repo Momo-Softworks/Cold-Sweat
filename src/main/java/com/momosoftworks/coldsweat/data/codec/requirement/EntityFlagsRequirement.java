@@ -10,13 +10,13 @@ import java.util.Optional;
 
 public class EntityFlagsRequirement
 {
-    private final Optional<Boolean> onFire;
-    private final Optional<Boolean> sneaking;
-    private final Optional<Boolean> sprinting;
-    private final Optional<Boolean> swimming;
-    private final Optional<Boolean> invisible;
-    private final Optional<Boolean> glowing;
-    private final Optional<Boolean> baby;
+    public final Optional<Boolean> onFire;
+    public final Optional<Boolean> sneaking;
+    public final Optional<Boolean> sprinting;
+    public final Optional<Boolean> swimming;
+    public final Optional<Boolean> invisible;
+    public final Optional<Boolean> glowing;
+    public final Optional<Boolean> baby;
     
     public EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean> sneaking, Optional<Boolean> sprinting, 
                                   Optional<Boolean> swimming, Optional<Boolean> invisible, Optional<Boolean> glowing, Optional<Boolean> baby)

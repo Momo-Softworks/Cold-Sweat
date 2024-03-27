@@ -4,13 +4,14 @@ import com.momosoftworks.coldsweat.api.event.common.ItemSwappedInInventoryEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -138,8 +139,10 @@ public class SoulspringLampItem extends Item
     {   return stack.getOrCreateTag().getDouble("Fuel");
     }
 
-    public static double getFuelForStack(ItemStack fuelStack)
-    {   return ConfigSettings.SOULSPRING_LAMP_FUEL.get().getOrDefault(ItemData.of(fuelStack), 0d);
+    public static double getFuelForStack(ItemStack item)
+    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+                                   fuel -> fuel.test(item) ? fuel.value : 0,
+                                   0).intValue();
     }
 
     // Restore fuel if player hits an enemy
@@ -214,7 +217,7 @@ public class SoulspringLampItem extends Item
         ItemStack thisStack = event.getSlotItem();
         ItemStack fuelStack = event.getHeldItem();
         PlayerEntity player = event.getPlayer();
-        if (ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(ItemData.of(fuelStack)) != null && getFuel(thisStack) < 64)
+        if (ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem()) != null && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
             addFuel(thisStack, fuelStack);

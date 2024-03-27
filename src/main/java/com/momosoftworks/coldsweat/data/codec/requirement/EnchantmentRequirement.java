@@ -14,8 +14,8 @@ import java.util.Optional;
 
 public class EnchantmentRequirement
 {
-    private final Enchantment enchantment;
-    private final Optional<IntegerBounds> level;
+    public final Enchantment enchantment;
+    public final Optional<IntegerBounds> level;
     
     public EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBounds> level)
     {

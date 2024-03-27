@@ -14,7 +14,7 @@ import static net.minecraft.advancements.criterion.NBTPredicate.getEntityTagToCo
 
 public class NbtRequirement
 {
-    private final CompoundNBT tag;
+    public final CompoundNBT tag;
     
     public NbtRequirement(CompoundNBT tag)
     {   this.tag = tag;

@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.data;
 
-import com.momosoftworks.coldsweat.data.configuration.BiomeTempData;
-import com.momosoftworks.coldsweat.data.configuration.BlockTempData;
-import com.momosoftworks.coldsweat.data.configuration.DimensionTempData;
-import com.momosoftworks.coldsweat.data.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.configuration.data.BiomeTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.BlockTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.DimensionTempData;
+import com.momosoftworks.coldsweat.data.configuration.data.InsulatorData;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ModRegistries

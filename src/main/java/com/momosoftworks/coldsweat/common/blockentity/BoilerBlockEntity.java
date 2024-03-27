@@ -5,11 +5,10 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
-import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
@@ -207,7 +206,9 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return ConfigSettings.BOILER_FUEL.get().getOrDefault(ItemData.of(item), 0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+                                   fuel -> fuel.test(item) ? fuel.value : 0,
+                                   0).intValue();
     }
 
     @Override

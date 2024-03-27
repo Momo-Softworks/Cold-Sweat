@@ -11,12 +11,12 @@ import java.util.Optional;
 
 public class EquipmentRequirement
 {
-    private final Optional<ItemRequirement> head;
-    private final Optional<ItemRequirement> chest;
-    private final Optional<ItemRequirement> legs;
-    private final Optional<ItemRequirement> feet;
-    private final Optional<ItemRequirement> mainHand;
-    private final Optional<ItemRequirement> offHand;
+    public final Optional<ItemRequirement> head;
+    public final Optional<ItemRequirement> chest;
+    public final Optional<ItemRequirement> legs;
+    public final Optional<ItemRequirement> feet;
+    public final Optional<ItemRequirement> mainHand;
+    public final Optional<ItemRequirement> offHand;
     
     public EquipmentRequirement(Optional<ItemRequirement> head, Optional<ItemRequirement> chest,
                                 Optional<ItemRequirement> legs, Optional<ItemRequirement> feet,

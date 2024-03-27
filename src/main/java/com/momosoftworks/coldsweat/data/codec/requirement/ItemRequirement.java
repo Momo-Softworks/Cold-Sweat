@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 
 public class ItemRequirement
 {
-    private final List<Either<ITag<Item>, Item>> items;
-    private final Optional<IntegerBounds> count;
-    private final Optional<IntegerBounds> durability;
-    private final Optional<List<EnchantmentRequirement>> enchantments;
-    private final Optional<List<EnchantmentRequirement>> storedEnchantments;
-    private final Optional<Potion> potion;
-    private final Optional<NbtRequirement> nbt;
+    public final List<Either<ITag<Item>, Item>> items;
+    public final Optional<IntegerBounds> count;
+    public final Optional<IntegerBounds> durability;
+    public final Optional<List<EnchantmentRequirement>> enchantments;
+    public final Optional<List<EnchantmentRequirement>> storedEnchantments;
+    public final Optional<Potion> potion;
+    public final Optional<NbtRequirement> nbt;
 
     public ItemRequirement(List<Either<ITag<Item>, Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,

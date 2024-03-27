@@ -448,7 +448,7 @@ public class EntityTempManager
             PlayerEntity player = (PlayerEntity) event.getEntity();
             // If food item defined in config
             float foodTemp = CSMath.getIfNotNull(ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()),
-                                                 food -> food.test(event.getItem()) ? food.value() : 0,
+                                                 food -> food.test(event.getItem()) ? food.value : 0,
                                                  0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);

@@ -2,7 +2,7 @@
   "required": true,
   "compatibilityLevel": "JAVA_8",
   "package": "com.momosoftworks.coldsweat.mixin",
-  "minVersion": "0.8",
+  "minVersion": "0.8.5",
   "client": [
     "MixinChatClicked",
     "MixinEffectsScreen",
@@ -10,13 +10,10 @@
     "MixinHeartRender",
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
-    "MixinLlamaDecorLayer",
-    "MixinLlamaRender$ChangeTexture",
-    "MixinLlamaRender$RemapModel",
-    "MixinMultiplayerHack",
-    "MixinWorldRender",
+    "MixinItemTooltip",
     "MixinXPBar",
-    "MixinXPBar$MixinItemLabel"
+    "MixinXPBar$MixinItemLabel",
+    "compat.MixinCreateOverlay"
   ],
   "mixins": [
     "ItemSwapMixin",

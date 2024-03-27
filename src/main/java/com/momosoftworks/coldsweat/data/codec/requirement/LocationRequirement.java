@@ -20,15 +20,15 @@ import java.util.Optional;
 
 public class LocationRequirement
 {
-    private final Optional<Integer> x;
-    private final Optional<Integer> y;
-    private final Optional<Integer> z;
-    private final Optional<RegistryKey<Biome>> biome;
-    private final Optional<RegistryKey<Structure<?>>> structure;
-    private final Optional<RegistryKey<World>> dimension;
-    private final Optional<IntegerBounds> light;
-    private final Optional<BlockRequirement> block;
-    private final Optional<FluidRequirement> fluid;
+    public final Optional<Integer> x;
+    public final Optional<Integer> y;
+    public final Optional<Integer> z;
+    public final Optional<RegistryKey<Biome>> biome;
+    public final Optional<RegistryKey<Structure<?>>> structure;
+    public final Optional<RegistryKey<World>> dimension;
+    public final Optional<IntegerBounds> light;
+    public final Optional<BlockRequirement> block;
+    public final Optional<FluidRequirement> fluid;
 
     public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z, Optional<RegistryKey<Biome>> biome,
                                Optional<RegistryKey<Structure<?>>> structure, Optional<RegistryKey<World>> dimension,
