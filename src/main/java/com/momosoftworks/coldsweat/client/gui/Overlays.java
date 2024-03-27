@@ -160,7 +160,7 @@ public class Overlays
                 int icon = Math.abs(BLEND_BODY_TEMP) >= 100 ? BLEND_BODY_TEMP <= -100 ? -4 : 4 : BODY_ICON;
                 graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(),
                               (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                              height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
+                              height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
                 if (Math.abs(BLEND_BODY_TEMP) < 100)
                 {
                     // render new icon over old icon
@@ -169,7 +169,7 @@ public class Overlays
                                   // X position
                                   (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
                                   // Y position
-                                  height - 53 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
+                                  height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
                                   0,
                                   // UV Y-coordinate for the icon in this stage
                                   40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
@@ -234,7 +234,7 @@ public class Overlays
             // Render frame
             graphics.blit(VAGUE_TEMP_GAUGE_LOCATION.get(),
                           (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
-                          height - 56 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
+                          height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
                           0, 64 - severity * 16, 16, 16, 16, 144);
 
             RenderSystem.disableBlend();
