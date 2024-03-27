@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -16,7 +16,8 @@ import java.util.function.Supplier;
 
 public class SyncConfigSettingsMessage
 {
-    static final UUID EMPTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public static final UUID EMPTY_UUID = new UUID(0, 0);
+
     Map<String, CompoundTag> configValues;
     UUID menuOpener;
 
@@ -48,16 +49,15 @@ public class SyncConfigSettingsMessage
     }
 
     public static SyncConfigSettingsMessage decode(FriendlyByteBuf buffer)
-    {
-        UUID openMenu = buffer.readUUID();
-
+    {   UUID menuOpener = buffer.readUUID();
         int size = buffer.readInt();
         Map<String, CompoundTag> values = new HashMap<>();
+
         for (int i = 0; i < size; i++)
         {   values.put(buffer.readUtf(), buffer.readNbt());
         }
 
-        return new SyncConfigSettingsMessage(values, openMenu);
+        return new SyncConfigSettingsMessage(values, menuOpener);
     }
 
     public static void handle(SyncConfigSettingsMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -70,17 +70,15 @@ public class SyncConfigSettingsMessage
             if (context.getDirection().getReceptionSide().isServer())
             {
                 if (context.getSender() != null && context.getSender().hasPermissions(2))
-                {   message.configValues.forEach(ConfigSettings::decode);
-                    ConfigSettings.saveValues();
+                {   ConfigSettings.saveValues();
                     ColdSweatConfig.getInstance().save();
                 }
 
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(message.menuOpener));
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID));
             }
             else if (context.getDirection().getReceptionSide().isClient())
             {
-                message.configValues.forEach(ConfigSettings::decode);
-                if (!message.menuOpener.equals(EMPTY_UUID))
+                if (message.menuOpener.equals(ClientOnlyHelper.getClientPlayer().getUUID()))
                 {   ClientOnlyHelper.openConfigScreen();
                 }
             }
