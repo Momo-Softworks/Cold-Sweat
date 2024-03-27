@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -11,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -54,8 +54,9 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
             GuiComponent.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 30, 34);
 
             int i = 0;
-            for (ItemData item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
-            {   itemRenderer.renderGuiItem(new ItemStack(item.getItem(), 1, item.getTag()), x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
+            for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
+            {   itemRenderer.renderGuiItem(new ItemStack(item, 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).nbt().tag()),
+                                    x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }
         }
