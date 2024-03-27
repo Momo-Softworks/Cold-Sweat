@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -85,7 +86,7 @@ public class CreativeTabInit
         list.sort(Comparator.comparing(item -> ForgeRegistries.ITEMS.tags().getReverseTag(item.getKey()).orElse(null).getTagKeys().sequential().map(tag -> tag.location().toString()).reduce("", (a, b) -> a + b)));
         // Sort by armor material and slot
         list.sort(Comparator.comparing(item -> item.getKey() instanceof ArmorItem armor
-                                               ? armor.getMaterial().getName() + (3 - armor.getEquipmentSlot().getIndex())
+                                               ? armor.getMaterial().getName() + (3 - LivingEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex())
                                                : ""));
         return list.stream().map(data -> new ItemStack(data.getKey(), 1, data.getValue().nbt().tag())).toList();
     }
