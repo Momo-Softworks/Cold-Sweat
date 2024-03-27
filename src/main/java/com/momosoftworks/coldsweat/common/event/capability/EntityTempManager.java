@@ -16,9 +16,9 @@ import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -27,10 +27,12 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.IContainerListener;
@@ -62,10 +64,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
 public class EntityTempManager
@@ -235,7 +235,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void returnFromEnd(PlayerEvent.Clone event)
     {
-        if (!event.isWasDeath() && !event.getPlayer().level.isClientSide)
+        if (!event.getEntity().level.isClientSide)
         {
             // Get the old player's capability
             PlayerEntity oldPlayer = event.getOriginal();
@@ -247,7 +247,8 @@ public class EntityTempManager
                 {   getTemperatureCap(oldPlayer).ifPresent(cap::copy);
                 });
             }
-            getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>()).forEach(attr ->
+            getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
+            .forEach(attr ->
             {   event.getPlayer().getAttribute(attr).setBaseValue(oldPlayer.getAttribute(attr).getBaseValue());
             });
         }
@@ -320,7 +321,7 @@ public class EntityTempManager
                     if (!(slot instanceof CraftingResultSlot))
                     {
                         if (slot.container == player.inventory
-                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack))))
+                        && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())))
                         {   player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
                         }
                     }
@@ -446,7 +447,9 @@ public class EntityTempManager
         {
             PlayerEntity player = (PlayerEntity) event.getEntity();
             // If food item defined in config
-            float foodTemp = ConfigSettings.FOOD_TEMPERATURES.get().getOrDefault(ItemData.of(event.getItem()), 0d).floatValue();
+            float foodTemp = CSMath.getIfNotNull(ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()),
+                                                 food -> food.test(event.getItem()) ? food.value() : 0,
+                                                 0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
             }
@@ -551,6 +554,22 @@ public class EntityTempManager
         throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + param + "\" is not a valid type or ability!"));
     }
 
+    public static Collection<AttributeModifier> getAttributeModifiers(LivingEntity entity, ModifiableAttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
+    {
+        Collection<AttributeModifier> modifiers = new ArrayList<>(operation == null
+                                                                  ? attribute.getModifiers()
+                                                                  : attribute.getModifiers(operation));
+        for (EquipmentSlotType slot : EquipmentSlotType.values())
+        {
+            if (slot.getType() != EquipmentSlotType.Group.ARMOR) continue;
+            ItemStack stack = entity.getItemBySlot(slot);
+            if (!stack.isEmpty())
+            {   modifiers.addAll(ItemInsulationManager.getAttributeModifiers(stack, attribute.getAttribute(), slot, operation, entity));
+            }
+        }
+        return modifiers;
+    }
+
     public static AttributeModifier makeAttributeModifier(Either<Temperature.Type, Temperature.Ability> param, double value, AttributeModifier.Operation operation)
     {
         return param.map(
@@ -575,5 +594,17 @@ public class EntityTempManager
                 default : throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.makeAttributeModifier(): \"" + ability + "\" is not a valid ability!"));
             }
         });
+    }
+
+    public static boolean isTemperatureAttribute(Attribute attribute)
+    {
+        return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
+                                  Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                                        .map(e ->
+                                        {
+                                            return e.left().isPresent()
+                                                   ? e.left().get().getSerializedName()
+                                                   : e.right().get().getSerializedName();
+                                        }).toArray(String[]::new));
     }
 }

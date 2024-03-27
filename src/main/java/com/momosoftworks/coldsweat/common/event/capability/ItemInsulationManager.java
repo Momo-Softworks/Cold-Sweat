@@ -1,15 +1,19 @@
 package com.momosoftworks.coldsweat.common.event.capability;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
-import com.momosoftworks.coldsweat.config.util.ItemData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.enchantment.IArmorVanishable;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
@@ -28,27 +32,26 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
-    public static Map<ItemStack, LazyOptional<IInsulatableCap>> ITEM_INSULATION_CAPS = new HashMap<>();
+    public static Map<ItemStack, LazyOptional<IInsulatableCap>> ITEM_INSULATION_CAPS = new WeakHashMap<>();
 
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
     {
         ItemStack stack = event.getObject();
-        Item item = stack.getItem();
-        if (item instanceof IArmorVanishable
-        && !ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack)))
+        if (isInsulatable(stack))
         {
             // Make a new capability instance to attach to the item
             ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
@@ -97,7 +100,6 @@ public class ItemInsulationManager
                         case FEET  : itemInsulationCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
                         default    : itemInsulationCap.addInsulationItem(ItemStack.EMPTY); break;
                     }
-                    itemInsulationCap.serializeSimple(stack);
                 }
             }
         }
@@ -105,11 +107,7 @@ public class ItemInsulationManager
 
     public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
     {
-        return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s ->
-        {   LazyOptional<IInsulatableCap> cap = stack.getCapability(ModCapabilities.ITEM_INSULATION);
-            cap.addListener(c -> ITEM_INSULATION_CAPS.remove(stack));
-            return cap;
-        });
+        return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s -> stack.getCapability(ModCapabilities.ITEM_INSULATION));
     }
 
     @SubscribeEvent
@@ -123,48 +121,29 @@ public class ItemInsulationManager
     {
         // if the inventory screen is open
         PlayerEntity player = event.player;
-        if (event.phase == TickEvent.Phase.END && player.tickCount % 20 == 0
-        && event.side == LogicalSide.SERVER && player.getPersistentData().getBoolean("InventoryOpen"))
+        if (event.phase == TickEvent.Phase.END
+        && (player.getPersistentData().getBoolean("InventoryOpen") || player.level.isClientSide))
         {
-            player.getAllSlots().forEach(stack ->
-            {
-                if (isInsulatable(stack))
-                {   getInsulationCap(stack).ifPresent(iCap ->
-                    {   if (iCap instanceof ItemInsulationCap)
-                        {   ((ItemInsulationCap) iCap).serializeSimple(stack);
-                        }
-                    });
-                }
-            });
+            synchronizeArmorInsulation(player);
         }
     }
 
-    @SubscribeEvent
-    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
+    private static void synchronizeArmorInsulation(PlayerEntity player)
     {
-        PlayerEntity player = event.getPlayer();
-        player.getAllSlots().forEach(stack ->
+        player.inventory.items.forEach(stack ->
         {
             if (isInsulatable(stack))
-            {   getInsulationCap(stack).ifPresent(iCap ->
+            {   // Cache the item cap
+                getInsulationCap(stack).ifPresent(iCap ->
                 {
-                    // Legacy code for updating items using the pre-2.2 insulation system
-                    CompoundNBT stackNBT = stack.getOrCreateTag();
-                    if (stack.getItem() instanceof ArmorItem)
+                    if (iCap instanceof ItemInsulationCap)
                     {
-                        ArmorItem armor = (ArmorItem) stack.getItem();
-                        if (stackNBT.getBoolean("insulated"))
-                        {   stackNBT.remove("insulated");
-                            switch (armor.getSlot())
-                            {   case HEAD  : iCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
-                                case CHEST : iCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
-                                case LEGS  : iCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
-                                case FEET  : iCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
-                                default    : iCap.addInsulationItem(ItemStack.EMPTY); break;
-                            }
-                            if (iCap instanceof ItemInsulationCap)
-                            {   ((ItemInsulationCap) iCap).serializeSimple(stack);
-                            }
+                        ItemInsulationCap cap = ((ItemInsulationCap) iCap);
+                        if (!player.level.isClientSide && !cap.getInsulation().isEmpty())
+                        {   stack.getOrCreateTag().merge(cap.serializeNBT());
+                        }
+                        else if (stack.getOrCreateTag().contains("Insulation"))
+                        {   cap.deserializeNBT(stack.getOrCreateTag());
                         }
                     }
                 });
@@ -189,6 +168,47 @@ public class ItemInsulationManager
     public static boolean isInsulatable(ItemStack stack)
     {
         return stack.getItem() instanceof IArmorVanishable
-            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(ItemData.of(stack));
+            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem());
+    }
+
+    public static List<AttributeModifier> getAttributeModifiers(ItemStack stack, Attribute attribute, EquipmentSlotType slot, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    {
+        List<AttributeModifier> modifiers = new ArrayList<>(operation != null
+                                                  ? stack.getAttributeModifiers(slot).get(attribute)
+                                                         .stream()
+                                                         .filter(mod -> mod.getOperation() == operation)
+                                                         .collect(Collectors.toList())
+                                                  : stack.getAttributeModifiers(slot).get(attribute));
+        getInsulationCap(stack).ifPresent(cap ->
+        {
+            for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
+            {
+                CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulator ->
+                {
+                    if (owner == null || insulator.test(owner, pair.getFirst()))
+                    {
+                        modifiers.addAll(insulator.attributes.get(attribute)
+                                                  .stream()
+                                                  .filter(mod -> operation == null || mod.getOperation() == operation)
+                                                  .collect(Collectors.toList()));
+                    }
+                });
+            }
+        });
+        CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulator ->
+        {
+            if (owner == null || insulator.test(owner, stack))
+            {
+                modifiers.addAll(insulator.attributes.get(attribute)
+                                          .stream()
+                                          .filter(mod -> operation == null || mod.getOperation() == operation)
+                                          .collect(Collectors.toList()));
+            }
+        });
+        return modifiers;
+    }
+
+    public static List<AttributeModifier> getAttributeModifiers(ItemStack stack, Attribute attribute, EquipmentSlotType slot)
+    {   return getAttributeModifiers(stack, attribute, slot, null, null);
     }
 }

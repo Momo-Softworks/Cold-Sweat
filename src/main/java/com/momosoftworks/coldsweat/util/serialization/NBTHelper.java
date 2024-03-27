@@ -183,7 +183,10 @@ public class NBTHelper
     {
         ListNBT tag = new ListNBT();
         for (Object obj : list)
-        {   tag.add(writeValue(obj));
+        {   if (obj instanceof INBT)
+            {   tag.add(((INBT) obj));
+            }
+            else tag.add(writeValue(obj));
         }
         return tag;
     }

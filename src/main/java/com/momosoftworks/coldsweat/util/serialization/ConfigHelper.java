@@ -5,8 +5,13 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -24,6 +29,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -102,37 +108,6 @@ public class ConfigHelper
             }
         }
         return items;
-    }
-
-    public static Map<ItemData, Double> getItemsWithValues(List<? extends List<?>> source)
-    {
-        Map<ItemData, Double> map = new HashMap<>();
-        for (List<?> entry : source)
-        {
-            String itemId = (String) entry.get(0);
-            CompoundNBT nbt = entry.size() > 2 ? NBTHelper.parseCompoundNbt((String) entry.get(2)) : new CompoundNBT();
-
-            if (itemId.startsWith("#"))
-            {
-                final String tagID = itemId.replace("#", "");
-                ITag<Item> itemTag = ItemTags.getAllTags().getTag(new ResourceLocation(tagID));
-                if (itemTag != null)
-                {
-                    for (Item item : itemTag.getValues())
-                    {
-                        map.put(new ItemData(item, nbt), ((Number) entry.get(1)).doubleValue());
-                    }
-                }
-            }
-            else
-            {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-                if (item != null && item != Items.AIR)
-                {   map.put(new ItemData(item, nbt), ((Number) entry.get(1)).doubleValue());
-                }
-                else ColdSweat.LOGGER.error("Error parsing item config: item \"" + itemId + "\" does not exist");
-            }
-        }
-        return map;
     }
 
     public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
@@ -311,173 +286,124 @@ public class ConfigHelper
         return map;
     }
 
-    public static CompoundNBT serializeItemMap(Map<ItemData, Double> map, String key)
+    public static <T> CompoundNBT serializeItemMap(Map<Item, T> map, String key, Function<T, CompoundNBT> serializer)
     {
         CompoundNBT tag = new CompoundNBT();
         CompoundNBT mapTag = new CompoundNBT();
-        for (Map.Entry<ItemData, Double> entry : map.entrySet())
+        for (Map.Entry<Item, T> entry : map.entrySet())
         {
-            CompoundNBT itemTag = new CompoundNBT();
-            itemTag.put("Item", entry.getKey().save(new CompoundNBT()));
-            itemTag.putDouble("Value", entry.getValue());
-            mapTag.put(ForgeRegistries.ITEMS.getKey(entry.getKey().getItem()).toString(), itemTag);
+            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(entry.getKey());
+            if (itemId == null) continue;
+            mapTag.put(itemId.toString(), serializer.apply(entry.getValue()));
         }
         tag.put(key, mapTag);
         return tag;
     }
 
-    public static Map<ItemData, Double> deserializeItemMap(CompoundNBT tag, String key)
+    public static <T> Map<Item, T> deserializeItemMap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
     {
-        Map<ItemData, Double> map = new HashMap<>();
+        Map<Item, T> map = new HashMap<>();
         CompoundNBT mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
-            CompoundNBT itemTag = mapTag.getCompound(itemID);
-            ItemData stack = ItemData.load(itemTag.getCompound("Item"));
-            double value = itemTag.getDouble("Value");
-            map.put(stack, value);
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
+            map.put(item, deserializer.apply(mapTag.getCompound(itemID)));
         }
         return map;
     }
 
-    public static Map<ItemData, Double> readItemMap(List<? extends List<?>> items)
+    public static <T> Map<Item, T> readItemMap(List<? extends List<?>> source, Function<List<?>, T> valueParser)
     {
-        Map<ItemData, Double> map = new HashMap<>();
-        for (List<?> entry : items)
+        Map<Item, T> map = new HashMap<>();
+        for (List<?> entry : source)
         {
-            String itemID = (String) entry.get(0);
-            double value = ((Number) entry.get(1)).doubleValue();
-            CompoundNBT nbt = entry.size() > 2 ? NBTHelper.parseCompoundNbt(((String) entry.get(2))) : new CompoundNBT();
-            for (Item item : ConfigHelper.getItems(itemID))
-            {   map.put(new ItemData(item, nbt), value);
+            String itemId = (String) entry.get(0);
+            for (Item item : getItems(itemId))
+            {
+                map.put(item, valueParser.apply(entry.subList(1, entry.size())));
             }
         }
         return map;
     }
 
-    public static void writeItemMap(Map<ItemData, Double> items, Consumer<List<? extends List<?>>> saver)
+    public static <T> void writeItemMap(Map<Item, T> map, Consumer<List<? extends List<?>>> saver, Function<T, List<?>> valueWriter)
     {
         List<List<?>> list = new ArrayList<>();
-        for (Map.Entry<ItemData, Double> entry : items.entrySet())
+        for (Map.Entry<Item, T> entry : map.entrySet())
         {
-            ItemData itemData = entry.getKey();
-            if (itemData.getPredicate() != null) continue;
-            List<Object> item = new ArrayList<>();
-            item.add(ForgeRegistries.ITEMS.getKey(itemData.getItem()).toString());
-            item.add(entry.getValue());
-            if (!itemData.getTag().isEmpty())
-            {   item.add(itemData.getTag().toString());
-            }
-            list.add(item);
+            Item item = entry.getKey();
+            T value = entry.getValue();
+            List<Object> itemData = new ArrayList<>();
+            itemData.add(ForgeRegistries.ITEMS.getKey(item).toString());
+            itemData.addAll(valueWriter.apply(value));
+            list.add(itemData);
         }
         saver.accept(list);
     }
 
-    public static CompoundNBT serializeItemInsulations(Map<ItemData, Insulation> map, String key)
+    public static CompoundNBT serializeItemInsulations(Map<Item, Insulator> map, String key)
     {
         CompoundNBT tag = new CompoundNBT();
         CompoundNBT mapTag = new CompoundNBT();
-        for (Map.Entry<ItemData, Insulation> entry : map.entrySet())
+        for (Map.Entry<Item, Insulator> entry : map.entrySet())
         {
-            CompoundNBT itemTag = new CompoundNBT();
-            ItemData stack = entry.getKey();
-            itemTag.put("Item", stack.save(new CompoundNBT()));
-            itemTag.putString("Type", entry.getValue() instanceof StaticInsulation ? "static" : "adaptive");
-
-            if (entry.getValue() instanceof StaticInsulation)
-            {
-                StaticInsulation insulation = ((StaticInsulation) entry.getValue());
-                itemTag.putDouble("Value1", insulation.getCold());
-                itemTag.putDouble("Value2", insulation.getHot());
-            }
-            else
-            {   AdaptiveInsulation insulation = (AdaptiveInsulation) entry.getValue();
-                itemTag.putDouble("Value1", insulation.getInsulation());
-                itemTag.putDouble("Value2", insulation.getSpeed());
-            }
-            mapTag.put(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString(), itemTag);
+            Item item = entry.getKey();
+            Insulator insulator = entry.getValue();
+            mapTag.put(ForgeRegistries.ITEMS.getKey(item).toString(), insulator.serialize());
         }
         tag.put(key, mapTag);
+
         return tag;
     }
 
-    public static Map<ItemData, Insulation> deserializeItemInsulations(CompoundNBT tag, String key)
+    public static Map<Item, Insulator> deserializeItemInsulations(CompoundNBT tag, String key)
     {
-        Map<ItemData, Insulation> map = new HashMap<>();
+        Map<Item, Insulator> map = new HashMap<>();
         CompoundNBT mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
-            CompoundNBT itemTag = mapTag.getCompound(itemID);
-            ItemData stack = ItemData.load(itemTag.getCompound("Item"));
-            double value1 = itemTag.getDouble("Value1");
-            double value2 = itemTag.getDouble("Value2");
-
-            if (itemTag.getString("Type").equals("static"))
-            {   map.put(stack, new StaticInsulation(value1, value2));
-            }
-            else
-            {   map.put(stack, new AdaptiveInsulation(value1, value2));
-            }
+            CompoundNBT insulatorTag = mapTag.getCompound(itemID);
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
+            Insulator insulator = Insulator.deserialize(insulatorTag);
+            map.put(item, insulator);
         }
         return map;
     }
 
-    public static Map<ItemData, Insulation> readItemInsulations(List<? extends List<?>> items)
+    public static Map<Item, Insulator> readItemInsulations(List<? extends List<?>> items, InsulationSlot slot)
     {
-        Map<ItemData, Insulation> map = new HashMap<>();
-        for (List<?> entry : items)
+        return readItemMap(items, args ->
         {
-            String itemID = (String) entry.get(0);
-            double value1 = ((Number) entry.get(1)).doubleValue();
-            double value2 = ((Number) entry.get(2)).doubleValue();
-            String type = entry.size() > 3 ? (String) entry.get(3) : "static";
-            CompoundNBT nbt = entry.size() > 4 ? NBTHelper.parseCompoundNbt(((String) entry.get(4))) : new CompoundNBT();
-
-            for (Item item : ConfigHelper.getItems(itemID))
-            {
-                ItemData data = new ItemData(item, nbt);
-                if (type.equals("static"))
-                {   map.put(data, new StaticInsulation(value1, value2));
-                }
-                else if (type.equals("adaptive"))
-                {   map.put(data, new AdaptiveInsulation(value1, value2));
-                }
-                else ColdSweat.LOGGER.error("Error parsing item insulation \"" + itemID + "\": invalid insulation type \"" + type + "\"");
-            }
-        }
-        return map;
+            double value1 = ((Number) args.get(0)).doubleValue();
+            double value2 = ((Number) args.get(1)).doubleValue();
+            String type = args.size() > 2 ? (String) args.get(2) : "static";
+            CompoundNBT nbt = args.size() > 3 ? NBTHelper.parseCompoundNbt(((String) args.get(3))) : new CompoundNBT();
+            Insulation insulation = type.equals("static")
+                                    ? new StaticInsulation(value1, value2)
+                                    : new AdaptiveInsulation(value1, value2);
+            return new Insulator(insulation, slot, new NbtRequirement(nbt), EntityRequirement.ANY, new AttributeModifierMap());
+        });
     }
 
-    public static void writeItemInsulations(Map<ItemData, Insulation> items, Consumer<List<? extends List<?>>> saver)
+    public static void writeItemInsulations(Map<Item, Insulator> items, Consumer<List<? extends List<?>>> saver)
     {
-        List<List<?>> list = new ArrayList<>();
-        for (Map.Entry<ItemData, Insulation> entry : items.entrySet())
+        writeItemMap(items, saver, insulator ->
         {
-            ItemData itemData = entry.getKey();
-            List<Object> item = new ArrayList<>();
-            item.add(ForgeRegistries.ITEMS.getKey(itemData.getItem()).toString());
-
-            if (entry.getValue() instanceof StaticInsulation)
-            {
-                StaticInsulation insulation = ((StaticInsulation) entry.getValue());
-                item.add(insulation.getCold());
-                item.add(insulation.getHot());
+            if (insulator.predicate.equals(EntityRequirement.ANY))
+            {   return Arrays.asList();
             }
-            else
-            {   AdaptiveInsulation insulation = (AdaptiveInsulation) entry.getValue();
-                item.add(insulation.getInsulation());
-                item.add(insulation.getSpeed());
-            }
-            if (entry.getValue() instanceof AdaptiveInsulation)
-            {   item.add("adaptive");
-            }
-
-            if (!itemData.getTag().isEmpty())
-            {   item.add(itemData.getTag().toString());
-            }
-
-            list.add(item);
-        }
-        saver.accept(list);
+            List<Object> itemData = new ArrayList<>();
+            itemData.add(insulator.insulation instanceof StaticInsulation
+                         ? insulator.insulation.getCold()
+                         : ((AdaptiveInsulation) insulator.insulation).getInsulation());
+            itemData.add(insulator.insulation instanceof StaticInsulation
+                         ? insulator.insulation.getHot()
+                         : ((AdaptiveInsulation) insulator.insulation).getSpeed());
+            itemData.add(insulator.insulation instanceof StaticInsulation
+                         ? "static"
+                         : "adaptive");
+            itemData.add(insulator.nbt.serialize().toString());
+            return itemData;
+        });
     }
 }

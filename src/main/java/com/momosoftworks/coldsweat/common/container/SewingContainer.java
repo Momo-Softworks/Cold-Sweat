@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.common.container;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
@@ -113,7 +111,9 @@ public class SewingContainer extends Container
             @Override
             public boolean mayPlace(ItemStack stack)
             {   return stack.getItem() instanceof IArmorVanishable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
-                    && ConfigSettings.INSULATION_ITEMS.get().getOrDefault(ItemData.of(stack), new StaticInsulation(0, 0)).isEmpty();
+                    && CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
+                                           ins -> ins.insulation,
+                                           new StaticInsulation(0, 0)).isEmpty() ;
             }
 
             @Override
@@ -136,7 +136,10 @@ public class SewingContainer extends Container
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   return !ConfigSettings.INSULATION_ITEMS.get().getOrDefault(ItemData.of(stack), new StaticInsulation(0, 0)).isEmpty() || stack.getItem() instanceof ShearsItem;
+            {   return !CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
+                                            ins -> ins.insulation,
+                                            new StaticInsulation(0, 0)).isEmpty()
+                    || stack.getItem() instanceof ShearsItem;
             }
 
             @Override
@@ -226,7 +229,7 @@ public class SewingContainer extends Container
         ItemInsulationManager.getInsulationCap(input1).ifPresent(cap ->
         {
             // If insulation is being removed
-            if (this.getItem(1).getItem() instanceof ShearsItem)
+            if (input2.getItem() instanceof ShearsItem)
             {
                 if (!cap.getInsulation().isEmpty())
                 {   // Damage shears
@@ -239,7 +242,7 @@ public class SewingContainer extends Container
                     // Play shear sound
                     player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 0.8F, 1.0F);
 
-                    serializeInsulation(input1, cap);
+                    input1.getOrCreateTag().merge(cap.serializeNBT());
                 }
             }
             // If insulation is being added
@@ -264,19 +267,6 @@ public class SewingContainer extends Container
         }
     }
 
-    static void serializeInsulation(ItemStack stack, IInsulatableCap iCap)
-    {
-        if (iCap instanceof ItemInsulationCap)
-        {
-            ItemInsulationCap cap = (ItemInsulationCap) iCap;
-            CompoundNBT tag = cap.serializeSimple(stack);
-            // Remove "Insulation" tag if armor has no insulation left
-            if (iCap.getInsulation().isEmpty())
-            {   tag.remove("Insulation");
-            }
-        }
-    }
-
     private void testForRecipe()
     {
         ItemStack wearableItem = this.getItem(0);
@@ -296,7 +286,7 @@ public class SewingContainer extends Container
                 });
             }
             // Item is for insulation
-            else if ((ConfigSettings.INSULATION_ITEMS.get().get(ItemData.of(insulatorItem)) != null)
+            else if (ConfigSettings.INSULATION_ITEMS.get().get(insulatorItem.getItem()) != null
             && (!(insulatorItem.getItem() instanceof IArmorVanishable)
             || MobEntity.getEquipmentSlotForItem(wearableItem) == MobEntity.getEquipmentSlotForItem(insulatorItem)))
             {
@@ -307,25 +297,15 @@ public class SewingContainer extends Container
                 insulCap.addInsulationItem(insulator);
 
                 // Cancel crafting if the insulation provided by the insulator is too much
-                AtomicInteger posInsul = new AtomicInteger();
-                AtomicInteger negInsul = new AtomicInteger();
+                AtomicInteger positiveInsul = new AtomicInteger();
                 // Get the total positive/negative insulation of the armor
-                insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(pair ->
+                insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
                 {
-                    if (pair instanceof StaticInsulation)
-                    {
-                        StaticInsulation insul = ((StaticInsulation) pair);
-                        if (insul.getHot() > 0 || insul.getCold() > 0) posInsul.getAndIncrement();
-                        else negInsul.getAndIncrement();
-                    }
-                    if (pair instanceof AdaptiveInsulation)
-                    {
-                        AdaptiveInsulation insul = ((AdaptiveInsulation) pair);
-                        if (insul.getInsulation() > 0) posInsul.getAndIncrement();
-                        else negInsul.getAndIncrement();
+                    if (insul.getHot() >= 0 || insul.getCold() >= 0)
+                    {   positiveInsul.getAndIncrement();
                     }
                 });
-                if (posInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem) || negInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
+                if (positiveInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
                 {   return;
                 }
 
@@ -344,7 +324,9 @@ public class SewingContainer extends Container
                     return false;
                 });
 
-                serializeInsulation(processed, insulCap);
+                if (insulCap.getInsulation().isEmpty())
+                {   processed.getOrCreateTag().remove("Insulation");
+                }
 
                 this.setItem(2, processed);
             }
@@ -372,7 +354,7 @@ public class SewingContainer extends Container
                     if (player.isAlive() && !serverPlayer.hasDisconnected())
                     {   player.inventory.placeItemBackInInventory(player.level, itemStack);
                     }
-                    else player.drop(itemStack, false, true);
+                    else player.drop(itemStack, true);
                 }
             }
         }
