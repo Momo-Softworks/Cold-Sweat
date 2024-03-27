@@ -571,7 +571,7 @@ public class EntityTempManager
                                                                   : attribute.getModifiers(operation));
         for (EquipmentSlot slot : EquipmentSlot.values())
         {
-            if (!slot.isArmor()) continue;
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
             ItemStack stack = entity.getItemBySlot(slot);
             if (!stack.isEmpty())
             {   modifiers.addAll(ItemInsulationManager.getAttributeModifiers(stack, attribute.getAttribute(), slot, operation, entity));

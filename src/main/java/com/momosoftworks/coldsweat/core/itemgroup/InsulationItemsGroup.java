@@ -1,20 +1,18 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class InsulationItemsGroup extends CreativeModeTab
 {
@@ -37,9 +35,9 @@ public class InsulationItemsGroup extends CreativeModeTab
     {
         // Spoof the item categories to allow items to be added to the tab
         List<List<ItemStack>> itemCategories = List.of(
-                sort(ConfigSettings.INSULATION_ITEMS.get().keySet()),
-                sort(ConfigSettings.INSULATING_ARMORS.get().keySet()),
-                sort(ConfigSettings.INSULATING_CURIOS.get().keySet())
+                sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()),
+                sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()),
+                sort(ConfigSettings.INSULATING_CURIOS.get().entrySet())
         );
 
         for (List<ItemStack> category : itemCategories)
@@ -58,16 +56,16 @@ public class InsulationItemsGroup extends CreativeModeTab
         }
     }
 
-    private static List<ItemStack> sort(Set<ItemData> items)
-    {   List<ItemStack> list = new ArrayList<>(items.stream().map(data -> new ItemStack(data.getItem())).toList());
+    private static List<ItemStack> sort(Set<Map.Entry<Item, Insulator>> items)
+    {   List<Map.Entry<Item, Insulator>> list = new ArrayList<>(items);
         // Sort by name first
-        list.sort(Comparator.comparing(item -> item.getDisplayName().getString()));
+        list.sort(Comparator.comparing(item -> item.getKey().getDefaultInstance().getDisplayName().getString()));
         // Sort by tags the items are in
-        list.sort(Comparator.comparing(item -> ForgeRegistries.ITEMS.tags().getReverseTag(item.getItem()).orElse(null).getTagKeys().sequential().map(tag -> tag.location().toString()).reduce("", (a, b) -> a + b)));
+        list.sort(Comparator.comparing(item -> ForgeRegistries.ITEMS.tags().getReverseTag(item.getKey()).orElse(null).getTagKeys().sequential().map(tag -> tag.location().toString()).reduce("", (a, b) -> a + b)));
         // Sort by armor material and slot
-        list.sort(Comparator.comparing(item -> item.getItem() instanceof ArmorItem armor
-                                               ? armor.getMaterial().getName() + (3 - LivingEntity.getEquipmentSlotForItem(item).getIndex())
+        list.sort(Comparator.comparing(item -> item.getKey() instanceof ArmorItem armor
+                                               ? armor.getMaterial().getName() + (3 - LivingEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex())
                                                : ""));
-        return list;
+        return list.stream().map(data -> new ItemStack(data.getKey(), 1, data.getValue().nbt().tag())).toList();
     }
 }

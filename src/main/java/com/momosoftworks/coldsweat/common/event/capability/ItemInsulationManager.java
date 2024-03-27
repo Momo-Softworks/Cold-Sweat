@@ -117,7 +117,7 @@ public class ItemInsulationManager
         // if the inventory screen is open
         Player player = event.player;
         if (event.phase == TickEvent.Phase.END
-        && (player.getPersistentData().getBoolean("InventoryOpen") || player.level().isClientSide))
+        && (player.getPersistentData().getBoolean("InventoryOpen") || player.level.isClientSide))
         {
             synchronizeArmorInsulation(player);
         }
