@@ -1928,3 +1928,21 @@ Technical Changes:
 Fixes:
 - Fixed crash when Create is not installed
 - Fixed item still not stacking properly in some cases
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b02e
+
+Fixes:
+- Fixed armor insulation being cleared when opening the creative inventory on a dedicated server
+- Fixed minimum and maximum habitable temperatures being swapped in some logic
+      - This fixes the bug that prevents players from sleeping
+- Fixed server crash when using conditionally-insulated items
+- Fixed some config settings not syncing to clients on servers
+- Fixed crash when hovering over armor tooltips in some cases
+- Fixed abnormally high lag caused by Create compat
+
+Technical Changes:
+- Added support for adding custom attributes to insulation items using JSON
+      - Attributes will be applied to the player's armor
+      - Any attributes (even Vanilla and modded ones) are supported
