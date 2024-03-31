@@ -27,7 +27,12 @@
     "placed_hearth": {
       "trigger": "minecraft:placed_block",
       "conditions": {
-        "block": "cold_sweat:hearth_bottom"
+        "location": [
+          {
+            "block": "cold_sweat:hearth_bottom",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
       }
     }
   },
