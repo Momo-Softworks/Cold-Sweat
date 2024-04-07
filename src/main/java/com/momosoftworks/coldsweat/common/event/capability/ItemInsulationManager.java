@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +18,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,7 +27,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -84,7 +83,7 @@ public class ItemInsulationManager
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
 
             // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundTag stackNBT = CSMath.orElse(stack.getTag(), new CompoundTag());
+            CompoundTag stackNBT = NBTHelper.getTagOrEmpty(stack);
             if (stack.getItem() instanceof ArmorItem armor)
             {
                 if (stackNBT.getBoolean("insulated"))
@@ -110,40 +109,6 @@ public class ItemInsulationManager
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {
         event.getPlayer().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
-    }
-
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
-    {
-        // if the inventory screen is open
-        Player player = event.player;
-        if (event.phase == TickEvent.Phase.END
-        && (player.getPersistentData().getBoolean("InventoryOpen") || player.level.isClientSide))
-        {
-            synchronizeArmorInsulation(player);
-        }
-    }
-
-    private static void synchronizeArmorInsulation(Player player)
-    {
-        player.getInventory().items.forEach(stack ->
-        {
-            if (isInsulatable(stack))
-            {   // Cache the item cap
-                getInsulationCap(stack).ifPresent(iCap ->
-                {
-                    if (iCap instanceof ItemInsulationCap cap)
-                    {
-                        if (!player.level.isClientSide && !cap.getInsulation().isEmpty())
-                        {   stack.getOrCreateTag().merge(cap.serializeNBT());
-                        }
-                        else if (stack.getOrCreateTag().contains("Insulation"))
-                        {   cap.deserializeNBT(stack.getOrCreateTag());
-                        }
-                    }
-                });
-            }
-        });
     }
 
     public static int getInsulationSlots(ItemStack item)

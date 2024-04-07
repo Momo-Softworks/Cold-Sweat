@@ -58,6 +58,7 @@ public class CompatManager
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
     private static final boolean THIRST_LOADED = modLoaded("thirst");
+    private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
 
     public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -132,6 +133,9 @@ public class CompatManager
     }
     public static boolean isThirstLoaded()
     {   return THIRST_LOADED;
+    }
+    public static boolean isIcebergLoaded()
+    {   return ICEBERG_LOADED;
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
