@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.EntityPickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;

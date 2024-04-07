@@ -382,7 +382,7 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            return new Insulator(insulation, slot, new NbtRequirement(nbt), EntityRequirement.ANY, new AttributeModifierMap());
+            return new Insulator(insulation, slot, new NbtRequirement(nbt), EntityRequirement.NONE, new AttributeModifierMap());
         });
     }
 
@@ -390,7 +390,7 @@ public class ConfigHelper
     {
         writeItemMap(items, saver, insulator ->
         {
-            if (insulator.predicate().equals(EntityRequirement.ANY))
+            if (insulator.predicate().equals(EntityRequirement.NONE))
             {   return List.of();
             }
             List<Object> itemData = new ArrayList<>();

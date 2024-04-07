@@ -120,7 +120,9 @@ public record NbtRequirement(CompoundTag tag)
                 {   return CSMath.betweenInclusive(otherNumber.getAsDouble(), range[0], range[1]);
                 }
             }
-            catch (Exception ignored) {}
+            catch (Exception e)
+            {   return false;
+            }
         }
         return tag.equals(other);
     }
