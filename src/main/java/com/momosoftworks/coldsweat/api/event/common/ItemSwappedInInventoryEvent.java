@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.api.event.common;
 
+import com.momosoftworks.coldsweat.api.event.util.ClickAction;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.eventbus.api.Cancelable;
@@ -13,28 +15,39 @@ public class ItemSwappedInInventoryEvent extends Event
     final ItemStack heldItem;
     final Container container;
     final PlayerEntity player;
+    final ClickAction clickType;
 
-    public ItemSwappedInInventoryEvent(ItemStack slotItem, ItemStack heldItem, Container container, PlayerEntity player)
+    public ItemSwappedInInventoryEvent(ItemStack slotItem, ItemStack heldItem, Container container, PlayerEntity player, ClickAction clickAction)
     {
         this.slotItem = slotItem;
         this.heldItem = heldItem;
         this.container = container;
         this.player = player;
+        this.clickType = clickAction;
     }
 
     public ItemStack getSlotItem()
-    {   return slotItem;
+    {
+        return slotItem;
     }
 
     public ItemStack getHeldItem()
-    {   return heldItem;
+    {
+        return heldItem;
     }
 
     public Container getContainer()
-    {   return container;
+    {
+        return container;
     }
 
     public PlayerEntity getPlayer()
-    {   return player;
+    {
+        return player;
+    }
+
+    public ClickAction getClickAction()
+    {
+        return clickType;
     }
 }

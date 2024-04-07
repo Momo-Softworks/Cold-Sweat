@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.ItemSwappedInInventoryEvent;
+import com.momosoftworks.coldsweat.api.event.util.ClickAction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ItemSwapMixin
 {
     Container self = (Container)(Object)this;
+
     @Inject(method = "doClick(IILnet/minecraft/inventory/container/ClickType;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/item/ItemStack;",
             slice = @Slice(from = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 0),
                            to   = @At(target = "Lnet/minecraft/inventory/container/Container;consideredTheSameItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z", value = "INVOKE", ordinal = 1)),
@@ -24,7 +25,7 @@ public class ItemSwapMixin
             cancellable = true)
     private void onItemSwap(int slotId, int dragType, ClickType clickType, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir)
     {
-        if (MinecraftForge.EVENT_BUS.post(new ItemSwappedInInventoryEvent(self.getSlot(slotId).getItem(), player.inventory.getCarried(), (Container)(Object)this, player)))
+        if (MinecraftForge.EVENT_BUS.post(new ItemSwappedInInventoryEvent(self.getSlot(slotId).getItem(), player.inventory.getCarried(), (Container)(Object)this, player, ClickAction.values()[dragType])))
         {   cir.setReturnValue(ItemStack.EMPTY);
         }
     }

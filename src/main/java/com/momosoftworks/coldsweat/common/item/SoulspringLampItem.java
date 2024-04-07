@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import com.momosoftworks.coldsweat.api.event.util.ClickAction;
 import com.momosoftworks.coldsweat.api.event.common.ItemSwappedInInventoryEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -7,12 +8,10 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -21,6 +20,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -218,12 +218,24 @@ public class SoulspringLampItem extends Item
         ItemStack thisStack = event.getSlotItem();
         ItemStack fuelStack = event.getHeldItem();
         PlayerEntity player = event.getPlayer();
+        ClickAction action = event.getClickAction();
+
         PredicateItem fuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem());
         if (fuel != null && fuel.test(fuelStack) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
-            addFuel(thisStack, fuelStack);
-            fuelStack.shrink((int) ((64 - currentFuel) / getFuelForStack(fuelStack)));
+            if (action == ClickAction.PRIMARY)
+            {
+                addFuel(thisStack, fuelStack);
+                fuelStack.shrink((int) ((64 - currentFuel) / getFuelForStack(fuelStack)));
+            }
+            else if (action == ClickAction.SECONDARY)
+            {
+                ItemStack singleFuelItem = fuelStack.copy();
+                singleFuelItem.setCount(1);
+                addFuel(thisStack, singleFuelItem);
+                fuelStack.shrink(1);
+            }
 
             if (player instanceof ServerPlayerEntity)
             {   ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(((ServerPlayerEntity) player), fuelStack, thisStack);
