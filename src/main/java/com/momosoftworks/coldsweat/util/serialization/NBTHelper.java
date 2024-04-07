@@ -153,7 +153,14 @@ public class NBTHelper
         for (ItemStack stack : items)
         {
             Item item = stack.getItem();
-            CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
+            CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
+
+            // Remove empty tags from stackable items
+            if (stack.getMaxStackSize() > 1
+            && stack.getTag() != null && stack.getTag().isEmpty())
+            {   stack.setTag(null);
+            }
+            // Convert old tags on existing items
             if (item == ModItems.SOULSPRING_LAMP)
             {
                 if (tag.contains("fuel"))
