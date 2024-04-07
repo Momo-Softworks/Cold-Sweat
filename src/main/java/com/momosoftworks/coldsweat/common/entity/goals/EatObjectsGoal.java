@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -14,14 +15,12 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class EatObjectsGoal extends Goal
 {
@@ -58,7 +57,8 @@ public class EatObjectsGoal extends Goal
             {
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
-                if (edible.isPresent())
+                if (edible.isPresent()
+                && NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString()))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity))
                     {
@@ -148,13 +148,13 @@ public class EatObjectsGoal extends Goal
                         // Play tongue in sound
                         WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_IN, this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
                     }
-                }, this.entity.getEatAnimLength() - 1);
+                }, this.entity.getEatAnimLength() / 2 + 2);
 
                 // Send the entity toward the chameleon
                 TaskScheduler.scheduleServer(() ->
                 {
-                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(1));
-                }, this.entity.getEatAnimLength() / 3);
+                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(0.75));
+                }, this.entity.getEatAnimLength() / 2);
             }
 
             this.entity.goalSelector.getRunningGoals().forEach(goal ->
