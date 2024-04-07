@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
+import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -58,7 +58,7 @@ public class SoulspringLampItem extends Item
                 // Is selected
                 if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && (level.dimensionTypeRegistration().is(ModDimensionTags.SOUL_LAMP_VALID) || ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
+                && (ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
@@ -130,7 +130,7 @@ public class SoulspringLampItem extends Item
     }
 
     public static double getFuelForStack(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+    {   return CSMath.getIfNotNull(ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item.getItem()),
                                    fuel -> fuel.test(item) ? fuel.value() : 0,
                                    0).intValue();
     }

@@ -673,7 +673,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+    {   return CSMath.getIfNotNull(ConfigSettings.HEARTH_FUEL.get().get(item.getItem()),
                                    fuel -> fuel.test(item) ? fuel.value() : 0,
                                    0).intValue();
     }
