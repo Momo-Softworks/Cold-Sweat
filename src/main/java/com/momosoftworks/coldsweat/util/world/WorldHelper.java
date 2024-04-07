@@ -368,7 +368,7 @@ public abstract class WorldHelper
                         y + ySpread - rand.nextDouble() * (ySpread * 2),
                         z + zSpread - rand.nextDouble() * (zSpread * 2), vec.x, vec.y, vec.z));
             }
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) getChunk(level, (int) x >> 4, (int) z >> 4)), particles);
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.DIMENSION.with(level::dimension), particles);
         }
         else
         {

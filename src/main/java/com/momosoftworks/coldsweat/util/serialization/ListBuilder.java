@@ -10,24 +10,20 @@ public class ListBuilder<T>
 
     @SafeVarargs
     private ListBuilder(T... elements)
-    {
-        this.elements.addAll(Arrays.asList(elements));
+    {   this.elements.addAll(Arrays.asList(elements));
     }
 
     private ListBuilder(T element)
-    {
-        this.elements.add(element);
+    {   this.elements.add(element);
     }
 
     @SafeVarargs
     public static <E> ListBuilder<E> begin(E... elements)
-    {
-        return new ListBuilder<>(elements);
+    {   return new ListBuilder<>(elements);
     }
 
     public static <E> ListBuilder<E> begin(E element)
-    {
-        return new ListBuilder<>(element);
+    {   return new ListBuilder<>(element);
     }
 
     /**
@@ -51,7 +47,8 @@ public class ListBuilder<T>
      * @return The ListBuilder instance.
      */
     public final ListBuilder<T> addIf(boolean condition, Supplier<T> supplier)
-    {   if (condition)
+    {
+        if (condition)
         {   T element = supplier.get();
             if (element != null)
             {   this.elements.add(element);
@@ -72,7 +69,6 @@ public class ListBuilder<T>
     }
 
     public ArrayList<T> build()
-    {
-        return elements;
+    {   return elements;
     }
 }
