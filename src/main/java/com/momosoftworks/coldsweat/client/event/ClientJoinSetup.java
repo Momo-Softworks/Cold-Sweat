@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.momosoftworks.coldsweat.api.event.core.EdiblesRegisterEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
@@ -8,6 +9,7 @@ import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -22,5 +24,6 @@ public class ClientJoinSetup
         ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         // Rebuild TempModifier registries
         TempModifierInit.buildRegistries();
+        MinecraftForge.EVENT_BUS.post(new EdiblesRegisterEvent());
     }
 }
