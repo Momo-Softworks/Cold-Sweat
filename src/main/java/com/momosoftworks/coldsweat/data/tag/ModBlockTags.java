@@ -10,9 +10,12 @@ public class ModBlockTags
 {
     public static final ITag.INamedTag<Block> CAMPFIRES = createTag("campfires");
     public static final ITag.INamedTag<Block> SOUL_CAMPFIRES = createTag("soul_campfires");
+
     public static final ITag.INamedTag<Block> SOUL_STALK_PLACEABLE_ON = createTag("may_place_on/soul_stalk");
+
     public static final ITag.INamedTag<Block> HEARTH_WHITELIST = createTag("hearth/spread_whitelist");
     public static final ITag.INamedTag<Block> HEARTH_BLACKLIST = createTag("hearth/spread_blacklist");
+
     public static final ITag.INamedTag<Block> IGNORE_SLEEP_CHECK = createTag("ignore_sleep_check");
     public static final ITag.INamedTag<Block> SOUL_SAND_REPLACEABLE = createTag("soul_sand_replaceable");
 

@@ -44,8 +44,7 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
                 if (!string.contains("#")) return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
                 return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(itemLocation));

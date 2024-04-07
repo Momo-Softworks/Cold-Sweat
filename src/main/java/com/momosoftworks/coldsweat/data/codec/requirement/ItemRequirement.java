@@ -50,7 +50,27 @@ public class ItemRequirement
     }
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().fieldOf("items").forGetter(predicate -> predicate.items),
+            Codec.STRING.xmap(
+            // Convert from a string to a TagKey
+            string ->
+            {
+                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
+                if (!string.contains("#")) return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
+
+                return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(itemLocation));
+            },
+            // Convert from a TagKey to a string
+            tag ->
+            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
+                String result = tag.left().isPresent()
+                                ? "#" + ItemTags.getAllTags().getId(tag.left().get())
+                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
+                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+
+                return result;
+            })
+            .listOf()
+            .fieldOf("items").forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -128,8 +148,7 @@ public class ItemRequirement
                                                      .map(tg ->
                                                      {
                                                            String string = tg.getAsString();
-                                                           ResourceLocation location = ResourceLocation.tryParse(string.replace("#", ""));
-                                                           if (location == null) throw new IllegalArgumentException("Item tag or ID is null");
+                                                           ResourceLocation location = new ResourceLocation(string.replace("#", ""));
                                                            if (!string.contains("#"))
                                                            {   return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
                                                            }

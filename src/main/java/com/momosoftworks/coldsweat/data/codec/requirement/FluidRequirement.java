@@ -77,7 +77,7 @@ public class FluidRequirement
 
     public static FluidRequirement deserialize(CompoundNBT pTag)
     {
-        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> ForgeRegistries.FLUIDS.getValue(ResourceLocation.tryParse(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
+        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
         Optional<ITag<Fluid>> lTag = pTag.contains("tag") ? Optional.of(FluidTags.getAllTags().getTag(new ResourceLocation(pTag.getString("tag")))) : Optional.empty();
         Optional<BlockRequirement.StateRequirement> lState = pTag.contains("state") ? Optional.of(BlockRequirement.StateRequirement.deserialize(pTag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> lNbt = pTag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(pTag.getCompound("nbt"))) : Optional.empty();

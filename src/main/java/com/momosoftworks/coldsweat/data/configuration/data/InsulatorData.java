@@ -58,8 +58,7 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
                 if (!string.contains("#")) return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
                 return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(itemLocation));
@@ -93,7 +92,7 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
             })
             .fieldOf("insulation").forGetter(data -> data.insulation),
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundNBT())).forGetter(data -> data.nbt),
-            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.ANY).forGetter(data -> data.predicate),
+            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(data -> data.predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(data -> data.attributes),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, InsulatorData::new));

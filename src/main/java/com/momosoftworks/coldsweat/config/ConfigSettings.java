@@ -16,10 +16,13 @@ import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.*;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -80,7 +83,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_ARMORS;
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<Integer[]> INSULATION_SLOTS;
-    public static final DynamicHolder<List<ResourceLocation>> INSULATION_BLACKLIST;
+    public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
 
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
@@ -88,7 +91,7 @@ public class ConfigSettings
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
-    public static final DynamicHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
+    public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
 
     public static final DynamicHolder<Map<Item, PredicateItem>> BOILER_FUEL;
     public static final DynamicHolder<Map<Item, PredicateItem>> ICEBOX_FUEL;
@@ -263,7 +266,7 @@ public class ConfigSettings
             {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
             }
             else nbtRequirement = new NbtRequirement(new CompoundNBT());
-            return new PredicateItem(fuel, nbtRequirement, EntityRequirement.ANY);
+            return new PredicateItem(fuel, nbtRequirement, EntityRequirement.NONE);
         };
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
@@ -277,7 +280,7 @@ public class ConfigSettings
                                            fuel -> Arrays.asList(fuel.value, fuel.nbt.tag.toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
-        BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).collect(Collectors.toList()));
+        BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).collect(ArrayList::new, List::add, List::addAll));
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), InsulationSlot.ITEM),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
@@ -317,7 +320,10 @@ public class ConfigSettings
         decoder -> new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") },
         saver -> ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3])));
 
-        INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist().stream().map(ResourceLocation::new).collect(Collectors.toList()));
+        INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
+                                                                        .stream()
+                                                                        .map(entry -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry)))
+                                                                        .collect(ArrayList::new, List::add, List::addAll));
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
 
@@ -328,7 +334,7 @@ public class ConfigSettings
             NbtRequirement nbtRequirement = args.size() > 2
                                             ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
                                             : new NbtRequirement(new CompoundNBT());
-            return new PredicateItem(((Number) args.get(0)).doubleValue(), nbtRequirement, EntityRequirement.ANY);
+            return new PredicateItem(((Number) args.get(0)).doubleValue(), nbtRequirement, EntityRequirement.NONE);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
@@ -338,7 +344,12 @@ public class ConfigSettings
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
-        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).collect(Collectors.toList())));
+        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
+                                                                                    .stream()
+                                                                                    .map(entry -> CSMath.getIfNotNull(WorldHelper.getServer(),
+                                                                                                                      server -> server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)),
+                                                                                                                      null))
+                                                                                    .collect(ArrayList::new, List::add, List::addAll)));
 
         FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {   List<?> entry = EntitySettingsConfig.getInstance().getLlamaFurStats();
@@ -394,8 +405,8 @@ public class ConfigSettings
                               ? coldInsul
                               : ((Number) entry.get(2)).doubleValue();
 
-            return new AbstractMap.SimpleEntry<>(new ResourceLocation(entityID), new InsulatingMount(ForgeRegistries.ENTITIES.getValue(ResourceLocation.tryParse(entityID)),
-                                                                                 coldInsul, hotInsul, EntityRequirement.ANY));
+            return new AbstractMap.SimpleEntry<>(new ResourceLocation(entityID), new InsulatingMount(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityID)),
+                                                                                 coldInsul, hotInsul, EntityRequirement.NONE));
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
