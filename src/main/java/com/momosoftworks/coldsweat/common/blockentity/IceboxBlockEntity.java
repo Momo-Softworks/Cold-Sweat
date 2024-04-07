@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -116,7 +117,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
+                    CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
@@ -205,7 +206,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+    {   return CSMath.getIfNotNull(ConfigSettings.ICEBOX_FUEL.get().get(item.getItem()),
                                    fuel -> fuel.test(item) ? fuel.value() : 0,
                                    0).intValue();
     }
