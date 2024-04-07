@@ -27,7 +27,7 @@ public record InsulatingMount(EntityType<?> entityType, double coldInsulation, d
 
     public static InsulatingMount deserialize(CompoundTag tag)
     {
-        return new InsulatingMount(ForgeRegistries.ENTITIES.getValue(ResourceLocation.tryParse(tag.getString("entity"))),
+        return new InsulatingMount(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("entity"))),
                                    tag.getDouble("cold_insulation"),
                                    tag.getDouble("heat_insulation"),
                                    EntityRequirement.deserialize(tag.getCompound("requirement")));

@@ -121,7 +121,7 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(ForgeRegistries.ITEMS.getKey(stack.getItem()))
+            {   return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
                     && CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
                                            ins -> ins.insulation(),
                                            new StaticInsulation(0, 0)).isEmpty() ;

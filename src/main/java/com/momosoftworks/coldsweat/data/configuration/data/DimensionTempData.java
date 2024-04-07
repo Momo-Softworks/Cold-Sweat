@@ -21,7 +21,7 @@ public record DimensionTempData(List<Either<TagKey<DimensionType>, ResourceLocat
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
                 if (tagLocation == null) throw new IllegalArgumentException("Dimension tag is null");
                 if (!string.contains("#")) return Either.<TagKey<DimensionType>, ResourceLocation>right(tagLocation);
 

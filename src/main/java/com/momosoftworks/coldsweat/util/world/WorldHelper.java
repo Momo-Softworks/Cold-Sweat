@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -455,5 +456,9 @@ public abstract class WorldHelper
      */
     public static ServerLevel getServerLevel(Level level)
     {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
+    }
+
+    public static MinecraftServer getServer()
+    {   return ServerLifecycleHooks.getCurrentServer();
     }
 }

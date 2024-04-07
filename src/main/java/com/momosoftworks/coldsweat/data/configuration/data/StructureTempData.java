@@ -21,7 +21,7 @@ public record StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?,
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
                 if (tagLocation == null) throw new IllegalArgumentException("Structure tag is null");
                 if (!string.contains("#")) return Either.<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceLocation>right(tagLocation);
 

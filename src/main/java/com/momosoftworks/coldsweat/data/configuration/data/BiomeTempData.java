@@ -22,8 +22,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (tagLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
                 if (!string.contains("#")) return Either.<TagKey<Biome>, ResourceLocation>right(tagLocation);
 
                 return Either.<TagKey<Biome>, ResourceLocation>left(TagKey.create(Registry.BIOME_REGISTRY, tagLocation));
