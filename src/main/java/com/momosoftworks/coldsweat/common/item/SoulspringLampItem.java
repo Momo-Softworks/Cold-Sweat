@@ -192,7 +192,8 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack fuelStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
     {
-        if (ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem()) != null && getFuel(thisStack) < 64)
+        PredicateItem fuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem());
+        if (fuel != null && fuel.test(fuelStack) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
             addFuel(thisStack, fuelStack);

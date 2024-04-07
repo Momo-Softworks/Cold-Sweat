@@ -4,15 +4,21 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.data.configuration.value.ItemValue;
+import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
+import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -68,7 +74,7 @@ public class ConfigSettings
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
-    public static final DynamicHolder<List<Block>> SLEEP_CHECK_OVERRIDE_BLOCKS;
+    public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
 
     // Item settings
     public static final DynamicHolder<Map<Item, Insulator>> INSULATION_ITEMS;
@@ -79,16 +85,16 @@ public class ConfigSettings
 
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
-    public static final DynamicHolder<Map<Item, ItemValue>> FOOD_TEMPERATURES;
+    public static final DynamicHolder<Map<Item, PredicateItem>> FOOD_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
     public static final DynamicHolder<List<ResourceLocation>> LAMP_DIMENSIONS;
 
-    public static final DynamicHolder<Map<Item, ItemValue>> BOILER_FUEL;
-    public static final DynamicHolder<Map<Item, ItemValue>> ICEBOX_FUEL;
-    public static final DynamicHolder<Map<Item, ItemValue>> HEARTH_FUEL;
-    public static final DynamicHolder<Map<Item, ItemValue>> SOULSPRING_LAMP_FUEL;
+    public static final DynamicHolder<Map<Item, PredicateItem>> BOILER_FUEL;
+    public static final DynamicHolder<Map<Item, PredicateItem>> ICEBOX_FUEL;
+    public static final DynamicHolder<Map<Item, PredicateItem>> HEARTH_FUEL;
+    public static final DynamicHolder<Map<Item, PredicateItem>> SOULSPRING_LAMP_FUEL;
 
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
     public static final DynamicHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
@@ -97,7 +103,7 @@ public class ConfigSettings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final DynamicHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
     public static final DynamicHolder<Map<ResourceLocation, Integer>> GOAT_BIOMES;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Double>>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Map<ResourceLocation, InsulatingMount>> INSULATED_ENTITIES;
 
     // Client Settings **NULL ON THE SERVER**
     public static final DynamicHolder<Boolean> CELSIUS;
@@ -249,15 +255,15 @@ public class ConfigSettings
                                            decoder -> decoder.getDouble("CaveInsulation"),
                                            saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
-        Function<List<?>, ItemValue> fuelMapper = args ->
+        Function<List<?>, PredicateItem> fuelMapper = args ->
         {
             double fuel = ((Number) args.get(0)).doubleValue();
             NbtRequirement nbtRequirement;
             if (args.size() > 2)
-            {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)));
+            {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
             }
             else nbtRequirement = new NbtRequirement(new CompoundTag());
-            return new ItemValue(fuel, nbtRequirement);
+            return new PredicateItem(fuel, nbtRequirement, EntityRequirement.NONE);
         };
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
@@ -265,7 +271,7 @@ public class ConfigSettings
 
         SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
         encoder -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> ItemValue.deserialize(nbt)),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
                                            fuel -> List.of(fuel.value(), fuel.nbt().tag().toString())));
@@ -315,24 +321,24 @@ public class ConfigSettings
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
 
-        SLEEP_CHECK_OVERRIDE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
+        SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
 
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), args ->
         {
             NbtRequirement nbtRequirement = args.size() > 2
                                             ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
                                             : new NbtRequirement(new CompoundTag());
-            return new ItemValue(((Number) args.get(0)).doubleValue(), nbtRequirement);
+            return new PredicateItem(((Number) args.get(0)).doubleValue(), nbtRequirement, EntityRequirement.NONE);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> ItemValue.deserialize(nbt)),
+        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
                                            food -> List.of(food.value(), food.nbt().tag().toString())));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
-        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList());
+        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions().stream().map(ResourceLocation::new).toList()));
 
         FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {   List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
@@ -388,7 +394,8 @@ public class ConfigSettings
                               ? coldInsul
                               : ((Number) entry.get(2)).doubleValue();
 
-            return Map.entry(new ResourceLocation(entityID), Pair.of(coldInsul, hotInsul));
+            return Map.entry(new ResourceLocation(entityID), new InsulatingMount(ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.tryParse(entityID)),
+                                                                                 coldInsul, hotInsul, EntityRequirement.NONE));
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
@@ -595,5 +602,22 @@ public class ConfigSettings
 
     public static void load()
     {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
+    }
+
+    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
+    {
+        ResourceLocation biomeName = biome.unwrapKey().get().location();
+        double biomeTemp = biome.value().getBaseTemperature();
+        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biomeName),
+                                                                              ObjectBuilder.build(() ->
+                                                                              {
+                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biomeName);
+                                                                                  if (offset == null) return null;
+                                                                                  return new Triplet<>(biomeTemp + offset.getA(),
+                                                                                                       biomeTemp + offset.getB(),
+                                                                                                       Temperature.Units.MC);
+                                                                              }),
+                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
+        return Pair.of(tempConfig.getA(), tempConfig.getB());
     }
 }

@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.*;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -83,7 +83,7 @@ public class NBTHelper
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
         CompoundTag tag;
-        if (owner instanceof LivingEntity entity)
+        if (owner instanceof Entity entity)
         {   tag = entity.getPersistentData();
         }
         else if (owner instanceof ItemStack stack)
@@ -99,6 +99,17 @@ public class NBTHelper
         {   tag.putInt(key, value + amount);
         }
         return value + amount;
+    }
+
+    /**
+     * Gets an item's tag, without creating a new one if it is not present.<br>
+     * An empty {@link CompoundTag} will be returned in that case, so a null check will not be necessary.<br>
+     * <br>
+     * Use {@link ItemStack#getOrCreateTag()} if you need to write to the tag.<br>
+     * @return The item's tag, or an empty tag if it is not present
+     */
+    public static CompoundTag getTagOrEmpty(ItemStack stack)
+    {   return CSMath.orElse(stack.getTag(), new CompoundTag());
     }
 
     /**
