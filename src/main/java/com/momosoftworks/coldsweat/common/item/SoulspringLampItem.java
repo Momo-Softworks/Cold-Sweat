@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -207,7 +208,8 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack fuelStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
     {
-        if (ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem()) != null && getFuel(thisStack) < 64)
+        PredicateItem fuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem());
+        if (fuel != null && fuel.test(fuelStack) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
             addFuel(thisStack, fuelStack);

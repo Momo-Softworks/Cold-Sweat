@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +21,8 @@ public record StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?,
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
+                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                if (tagLocation == null) throw new IllegalArgumentException("Structure tag is null");
                 if (!string.contains("#")) return Either.<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceLocation>right(tagLocation);
 
                 return Either.<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceLocation>left(TagKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, tagLocation));
@@ -49,7 +49,6 @@ public record StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?,
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {

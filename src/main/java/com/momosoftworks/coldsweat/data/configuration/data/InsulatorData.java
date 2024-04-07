@@ -74,7 +74,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
             })
             .fieldOf("insulation").forGetter(InsulatorData::insulation),
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(InsulatorData::nbt),
-            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.ANY).forGetter(InsulatorData::predicate),
+            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(InsulatorData::attributes),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));

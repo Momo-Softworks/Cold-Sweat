@@ -29,7 +29,8 @@ public record ItemData(List<Either<TagKey<Item>, Item>> items, Double value, Nbt
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
+                ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
+                if (itemLocation == null) throw new IllegalArgumentException("Item tag is null");
                 if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
                 return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, itemLocation));

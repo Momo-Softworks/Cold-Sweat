@@ -19,7 +19,7 @@ public class PreventPlayerSleep
 
         // There's already something blocking the player from sleeping
         if (event.getResultStatus() != null || !ConfigSettings.CHECK_SLEEP_CONDITIONS.get()
-        || ConfigSettings.SLEEP_CHECK_OVERRIDE_BLOCKS.get().contains(player.level.getBlockState(event.getPos()).getBlock()))
+        || ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().contains(player.level.getBlockState(event.getPos()).getBlock()))
         {   return;
         }
 

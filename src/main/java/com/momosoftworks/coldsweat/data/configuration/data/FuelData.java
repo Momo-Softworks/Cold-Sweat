@@ -11,6 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -20,9 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record FuelData(List<Either<TagKey<Item>, Item>> items, Double fuel, NbtRequirement nbt, Optional<List<String>> requiredMods) implements NbtSerializable, IForgeRegistryEntry<FuelData>
+public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Double fuel,
+                       NbtRequirement nbt, Optional<List<String>> requiredMods) implements NbtSerializable, IForgeRegistryEntry<FuelData>
 {
     public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            FuelType.CODEC.fieldOf("type").forGetter(FuelData::type),
             Codec.STRING.xmap(
             // Convert from a string to a TagKey
             string ->
@@ -53,6 +56,7 @@ public record FuelData(List<Either<TagKey<Item>, Item>> items, Double fuel, NbtR
     public CompoundTag serialize()
     {
         CompoundTag tag = new CompoundTag();
+        tag.putString("type", type.getSerializedName());
         ListTag items = new ListTag();
         ListTag tags = new ListTag();
         this.items.forEach(item ->
@@ -79,6 +83,7 @@ public record FuelData(List<Either<TagKey<Item>, Item>> items, Double fuel, NbtR
     public static FuelData deserialize(CompoundTag nbt)
     {
         List<Either<TagKey<Item>, Item>> items = new ArrayList<>();
+        FuelType type = FuelType.byName(nbt.getString("type"));
         ListTag itemsTag = nbt.getList("items", 8);
         ListTag tags = nbt.getList("tags", 8);
         for (int i = 0; i < itemsTag.size(); i++)
@@ -100,7 +105,35 @@ public record FuelData(List<Either<TagKey<Item>, Item>> items, Double fuel, NbtR
             }
             return mods1;
         });
-        return new FuelData(items, fuel, nbtRequirement, requiredMods);
+        return new FuelData(type, items, fuel, nbtRequirement, requiredMods);
+    }
+
+    public enum FuelType implements StringRepresentable
+    {
+        BOILER("boiler"),
+        ICEBOX("icebox"),
+        HEARTH("hearth"),
+        SOUL_LAMP("soul_lamp");
+
+        public static Codec<FuelType> CODEC = StringRepresentable.fromEnum(FuelType::values, FuelType::byName);
+
+        private final String name;
+
+        FuelType(String name)
+        {   this.name = name;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
+
+        public static FuelType byName(String name)
+        {   for (FuelType type : values())
+            {   if (type.name.equals(name)) return type;
+            }
+            return null;
+        }
     }
 
     @Override

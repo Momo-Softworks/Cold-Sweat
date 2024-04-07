@@ -9,13 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
-public record MountData(List<Either<TagKey<EntityType<?>>, ResourceLocation>> entities, double coldInsulation, double heatInsulation,
-                        EntityRequirement requirement, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<MountData>
+public record MountData(List<Either<TagKey<EntityType<?>>, ResourceLocation>> entities, double coldInsulation, double heatInsulation, EntityRequirement requirement, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<MountData>
 {
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.either(TagKey.codec(Registry.ENTITY_TYPE_REGISTRY), ResourceLocation.CODEC).listOf().fieldOf("entities").forGetter(MountData::entities),
@@ -31,7 +29,6 @@ public record MountData(List<Either<TagKey<EntityType<?>>, ResourceLocation>> en
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {

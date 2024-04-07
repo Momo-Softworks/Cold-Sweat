@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -17,6 +16,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -450,9 +450,9 @@ public class EntityTempManager
                 // If insulated entity (defined in config)
                 else
                 {
-                    Pair<Double, Double> entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(ForgeRegistries.ENTITIES.getKey(mount.getType()));
-                    if (entityInsul != null)
-                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.getFirst(), entityInsul.getSecond()).tickRate(5).expires(5), Temperature.Type.RATE);
+                    InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(ForgeRegistries.ENTITIES.getKey(mount.getType()));
+                    if (entityInsul != null && entityInsul.test(mount))
+                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Type.RATE);
                     }
                 }
             }
@@ -471,7 +471,7 @@ public class EntityTempManager
         {
             // If food item defined in config
             float foodTemp = CSMath.getIfNotNull(ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()),
-                                                 food -> food.test(event.getItem()) ? food.value() : 0,
+                                                 food -> food.test(player, event.getItem()) ? food.value() : 0,
                                                  0d).floatValue();
             if (foodTemp != 0)
             {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
