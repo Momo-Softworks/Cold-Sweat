@@ -292,7 +292,7 @@ public class WorldSettingsConfig
 
         checkSleep = BUILDER
                 .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
-                .define("Prevent Sleep When in Danger", true);
+                .define("Check Sleeping Conditions", true);
 
         coldSoulFire = BUILDER
                 .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",

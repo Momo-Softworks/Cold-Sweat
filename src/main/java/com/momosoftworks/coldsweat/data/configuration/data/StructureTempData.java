@@ -16,10 +16,10 @@ public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
     public double temperature;
     public Temperature.Units units;
     public Optional<List<String>> requiredMods;
-    
+
     public StructureTempData(List<ResourceLocation> structures, double temperature,
                              Temperature.Units units, Optional<List<String>> requiredMods)
-    {   
+    {
         this.structures = structures;
         this.temperature = temperature;
         this.units = units;
@@ -38,7 +38,6 @@ public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {

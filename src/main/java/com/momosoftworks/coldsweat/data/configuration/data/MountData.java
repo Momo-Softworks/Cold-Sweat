@@ -10,7 +10,6 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +43,6 @@ public class MountData implements IForgeRegistryEntry<MountData>
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {

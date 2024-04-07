@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
@@ -82,8 +83,8 @@ public class NBTHelper
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
         CompoundNBT tag;
-        if (owner instanceof LivingEntity)
-        {   tag = ((LivingEntity) owner).getPersistentData();
+        if (owner instanceof Entity)
+        {   tag = ((Entity) owner).getPersistentData();
         }
         else if (owner instanceof ItemStack)
         {   tag = ((ItemStack) owner).getOrCreateTag();

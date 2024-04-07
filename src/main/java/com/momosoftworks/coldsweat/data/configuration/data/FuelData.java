@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -23,19 +24,22 @@ import java.util.Optional;
 
 public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
 {
+    public final FuelType type;
     public final List<Either<ITag<Item>, Item>> items;
     public final Double fuel;
     public final NbtRequirement nbt;
     public final Optional<List<String>> requiredMods;
 
-    public FuelData(List<Either<ITag<Item>, Item>> items, Double fuel, NbtRequirement nbt, Optional<List<String>> requiredMods)
+    public FuelData(FuelType type, List<Either<ITag<Item>, Item>> items, Double fuel, NbtRequirement nbt, Optional<List<String>> requiredMods)
     {
+        this.type = type;
         this.items = items;
         this.fuel = fuel;
         this.nbt = nbt;
         this.requiredMods = requiredMods;
     }
     public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            FuelType.CODEC.fieldOf("type").forGetter(data -> data.type),
             Codec.STRING.xmap(
             // Convert from a string to a TagKey
             string ->
@@ -66,6 +70,7 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
     public CompoundNBT serialize()
     {
         CompoundNBT tag = new CompoundNBT();
+        tag.putString("type", type.getSerializedName());
         ListNBT items = new ListNBT();
         ListNBT tags = new ListNBT();
         this.items.forEach(item ->
@@ -92,6 +97,7 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
     public static FuelData deserialize(CompoundNBT nbt)
     {
         List<Either<ITag<Item>, Item>> items = new ArrayList<>();
+        FuelType type = FuelType.byName(nbt.getString("type"));
         ListNBT itemsTag = nbt.getList("items", 8);
         ListNBT tags = nbt.getList("tags", 8);
         for (int i = 0; i < itemsTag.size(); i++)
@@ -113,7 +119,35 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
             }
             return mods1;
         });
-        return new FuelData(items, fuel, nbtRequirement, requiredMods);
+        return new FuelData(type, items, fuel, nbtRequirement, requiredMods);
+    }
+
+    public enum FuelType implements StringRepresentable
+    {
+        BOILER("boiler"),
+        ICEBOX("icebox"),
+        HEARTH("hearth"),
+        SOUL_LAMP("soul_lamp");
+
+        public static Codec<FuelType> CODEC = StringRepresentable.fromEnum(FuelType::values);
+
+        private final String name;
+
+        FuelType(String name)
+        {   this.name = name;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
+
+        public static FuelType byName(String name)
+        {   for (FuelType type : values())
+            {   if (type.name.equals(name)) return type;
+            }
+            return null;
+        }
     }
 
     @Override
