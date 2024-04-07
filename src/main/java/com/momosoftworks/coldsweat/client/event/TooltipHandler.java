@@ -16,7 +16,7 @@ import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
-import com.momosoftworks.coldsweat.data.configuration.value.ItemValue;
+import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -41,6 +41,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,21 +52,49 @@ public class TooltipHandler
     public static final TextFormatting COLD = TextFormatting.BLUE;
     public static final TextFormatting HOT  = TextFormatting.RED;
 
+    public static int getTooltipTitleIndex(List<ITextComponent> tooltip, ItemStack stack)
+    {
+        int insulTooltipIndex;
+        String hoverName = stack.getHoverName().getString();
+
+        for (insulTooltipIndex = 0; insulTooltipIndex < tooltip.size(); insulTooltipIndex++)
+        {
+            if (tooltip.get(insulTooltipIndex).getString().trim().equals(hoverName))
+            {   insulTooltipIndex++;
+                break;
+            }
+        }
+        return insulTooltipIndex;
+    }
+
+    public static int getTooltipEndIndex(List<ITextComponent> tooltip, ItemStack stack)
+    {
+        int tooltipEndIndex = tooltip.size();
+        if (Minecraft.getInstance().options.advancedItemTooltips)
+        {
+            while (tooltip.get(tooltipEndIndex - 1).getString().equals(stack.getItem().getRegistryName().toString()))
+            {   tooltipEndIndex--;
+            }
+            tooltipEndIndex--;
+        }
+        return tooltipEndIndex;
+    }
+
     public static void addModifierTooltipLines(List<ITextComponent> tooltip, AttributeModifierMap map)
     {
         map.getMap().asMap().forEach((attribute, modifiers) ->
-                                     {
-                                         for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
-                                         {
-                                             double value = 0;
-                                             for (AttributeModifier modifier : modifiers.stream().filter(mod -> mod.getOperation() == operation).collect(Collectors.toList()))
-                                             {   value += modifier.getAmount();
-                                             }
-                                             if (value != 0)
-                                             {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
-                                             }
-                                         }
-                                     });
+        {
+            for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
+            {
+                double value = 0;
+                for (AttributeModifier modifier : modifiers.stream().filter(mod -> mod.getOperation() == operation).collect(Collectors.toList()))
+                {   value += modifier.getAmount();
+                }
+                if (value != 0)
+                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
+                }
+            }
+        });
     }
 
     public static IFormattableTextComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation)
@@ -120,50 +149,35 @@ public class TooltipHandler
         List<ITextComponent> elements = event.getToolTip();
         if (stack.isEmpty()) return;
 
-        String hoverName = stack.getHoverName().getString().trim();
-
         // Get the index at which the tooltip should be inserted
-        // Insert the tooltip at the first non-blank line under the item's name
-        int tooltipIndex;
-        for (tooltipIndex = 0; tooltipIndex < elements.size(); tooltipIndex++)
-        {
-            if (elements.get(tooltipIndex).getString().trim().equals(hoverName))
-            {
-                tooltipIndex++;
-                if (elements.size() > tooltipIndex + 1
-                && (elements.get(tooltipIndex).getString().isEmpty()))
-                {   tooltipIndex++;
-                }
-                break;
-            }
-        }
+        int tooltipStartIndex = getTooltipTitleIndex(elements, stack);
+        // Get the index of the end of the tooltip, before the debug info (if enabled)
+        int tooltipEndIndex = getTooltipEndIndex(elements, stack);
 
         Insulator itemInsul = null;
         PlayerEntity player = Minecraft.getInstance().player;
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
-            {   elements.add(tooltipIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
+            {   elements.add(tooltipStartIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
-                 {   elements.add(tooltipIndex, new StringTextComponent(""));
+                 {   elements.add(tooltipStartIndex, new StringTextComponent(""));
                  }
-            elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
+            elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
-            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(item, (it, temp) ->
+            PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
+            if (temp != null && temp.test(stack))
             {
-                if (!temp.test(stack)) return temp;
-                int index = Minecraft.getInstance().options.advancedItemTooltips ? elements.size() - 1 : elements.size();
-                elements.add(index,
-                        temp.value > 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
-                                 : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
+                elements.add(tooltipEndIndex, temp.value > 0
+                        ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT)
+                        : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD)
                 );
-                elements.add(index, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-                elements.add(index, new StringTextComponent(""));
-                return temp;
-            });
+                elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+                elements.add(tooltipEndIndex, new StringTextComponent(""));
+            }
         }
         // Is insulation item
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().getOrDefault(item,
@@ -172,7 +186,7 @@ public class TooltipHandler
         && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.predicate.test(player) && itemInsul.nbt.test(stack.getTag()))
-            {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+            {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
             }
         }
         // Has insulation (armor)
@@ -183,7 +197,7 @@ public class TooltipHandler
             {
                 IInsulatableCap cap = iCap.orElseThrow(NullPointerException::new);
                 if (cap.getInsulation().stream().allMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst()).test(player, stack)))
-                {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+                {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
                 }
             }
         }
@@ -224,6 +238,7 @@ public class TooltipHandler
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
         if (stack.getItem() instanceof IArmorVanishable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
+            ItemInsulationManager.getInsulationCap(stack).orElse(new ItemInsulationCap()).deserializeNBT(stack.getOrCreateTag());
             // Create the list of insulation pairs from NBT
             List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
                                           // Get insulation values
@@ -299,7 +314,7 @@ public class TooltipHandler
                 double fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
                 ItemStack carriedStack = player.inventory.getCarried();
 
-                ItemValue itemFuel;
+                PredicateItem itemFuel;
                 if (!carriedStack.isEmpty()
                 && (itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(carriedStack.getItem())) != null
                 && itemFuel.test(carriedStack))

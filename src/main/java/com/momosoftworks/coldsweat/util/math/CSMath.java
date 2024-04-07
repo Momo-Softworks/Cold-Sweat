@@ -801,6 +801,20 @@ public class CSMath
         return -1;
     }
 
+    public static <T> int getIndexOf(List<T> list, Predicate<T> equals)
+    {
+        T[] es = list.toArray((T[]) new Object[0]);
+        int size = list.size();
+        for (int i = 0; i < size - 1; i++)
+        {
+            if (equals.test(es[i]))
+            {   return i;
+            }
+        }
+
+        return -1;
+    }
+
     public static String formatDoubleOrInt(double value)
     {   return isInteger(value) ? String.valueOf((int) value) : String.valueOf(value);
     }
