@@ -26,8 +26,7 @@ public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Do
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
                 if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
                 return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));

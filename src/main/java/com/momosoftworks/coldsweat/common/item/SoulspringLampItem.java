@@ -49,16 +49,16 @@ public class SoulspringLampItem extends Item
             boolean shouldBeOn = false;
             try
             {
-                if (!(isSelected || player.getOffhandItem() == stack)) return;
+                if (!(isSelected || player.getOffhandItem() == stack))
+                {   return;
+                }
                 double max = ConfigSettings.MAX_TEMP.get();
 
                 double temp = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)
                               .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Type.WORLD));
 
-                // Is selected
-                if ((isSelected || player.getOffhandItem() == stack)
                 // Is in valid dimension
-                && (ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimension().location()))
+                if ((ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimensionType()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {

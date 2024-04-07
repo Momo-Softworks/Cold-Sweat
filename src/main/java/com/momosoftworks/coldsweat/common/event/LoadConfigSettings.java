@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
@@ -85,7 +86,10 @@ public class LoadConfigSettings
                                                               .stream().map(Holder::get).toList());
         ConfigSettings.LAMP_DIMENSIONS.get().addAll(registries.registryOrThrow(Registries.DIMENSION_TYPE)
                                                     .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
-                                                    .stream().map(holder -> holder.unwrapKey().get().location()).toList());
+                                                    .stream().map(holder -> holder.get()).toList());
+        ConfigSettings.INSULATION_BLACKLIST.get().addAll(registries.registryOrThrow(Registries.ITEM)
+                                                        .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
+                                                        .stream().map(Holder::get).toList());
 
         /*
          Fetch JSON registries
