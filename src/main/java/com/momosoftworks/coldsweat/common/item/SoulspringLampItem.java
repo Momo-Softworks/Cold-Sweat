@@ -211,11 +211,22 @@ public class SoulspringLampItem extends Item
         if (fuel != null && fuel.test(fuelStack) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);
-            addFuel(thisStack, fuelStack);
-            fuelStack.shrink((int) ((64 - currentFuel) / getFuelForStack(fuelStack)));
+            if (action == ClickAction.PRIMARY)
+            {
+                addFuel(thisStack, fuelStack);
+                fuelStack.shrink((int) ((64 - currentFuel) / getFuelForStack(fuelStack)));
+            }
+            else if (action == ClickAction.SECONDARY)
+            {
+                ItemStack singleFuelItem = fuelStack.copy();
+                singleFuelItem.setCount(1);
+                addFuel(thisStack, singleFuelItem);
+                fuelStack.shrink(1);
+            }
 
             if (player instanceof ServerPlayer serverPlayer)
-                ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
+            {   ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
+            }
 
             return true;
         }
