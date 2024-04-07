@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -11,6 +13,8 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -46,6 +50,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import javax.xml.ws.Holder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -434,5 +439,21 @@ public abstract class WorldHelper
      */
     public static Vector3d centerOf(BlockPos pos)
     {   return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    }
+
+    public static Pair<Double, Double> getBiomeTemperature(Biome biome)
+    {
+        double biomeTemp = biome.getBaseTemperature();
+        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome),
+                                                                              ObjectBuilder.build(() ->
+                                                                                                  {
+                                                                                                      Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome);
+                                                                                                      if (offset == null) return null;
+                                                                                                      return new Triplet<>(biomeTemp + offset.getFirst(),
+                                                                                                                           biomeTemp + offset.getSecond(),
+                                                                                                                           Temperature.Units.MC);
+                                                                                                  }),
+                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
+        return Pair.of(tempConfig.getFirst(), tempConfig.getSecond());
     }
 }
