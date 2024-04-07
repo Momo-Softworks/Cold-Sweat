@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -112,7 +113,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    CompoundNBT tag = CSMath.orElse(stack.getTag(), new CompoundNBT());
+                    CompoundNBT tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (ModItemTags.BOILER_VALID.contains(stack.getItem()))

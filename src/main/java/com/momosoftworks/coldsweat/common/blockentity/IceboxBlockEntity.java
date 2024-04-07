@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -111,7 +112,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    CompoundNBT tag = CSMath.orElse(stack.getTag(), new CompoundNBT());
+                    CompoundNBT tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
@@ -200,7 +201,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.BOILER_FUEL.get().get(item.getItem()),
+    {   return CSMath.getIfNotNull(ConfigSettings.ICEBOX_FUEL.get().get(item.getItem()),
                                    fuel -> fuel.test(item) ? fuel.value : 0,
                                    0).intValue();
     }
