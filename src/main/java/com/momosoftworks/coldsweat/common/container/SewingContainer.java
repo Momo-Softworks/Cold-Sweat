@@ -324,10 +324,7 @@ public class SewingContainer extends Container
                     return false;
                 });
 
-                if (insulCap.getInsulation().isEmpty())
-                {   processed.getOrCreateTag().remove("Insulation");
-                }
-
+                processed.getOrCreateTag().merge(insulCap.serializeNBT());
                 this.setItem(2, processed);
             }
         }

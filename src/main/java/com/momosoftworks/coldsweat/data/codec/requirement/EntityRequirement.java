@@ -50,7 +50,7 @@ public class EntityRequirement
         this.passenger = passenger;
         this.target = target;
     }
-    public static EntityRequirement ANY = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+    public static EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
                                                                 Optional.empty(), Optional.empty());
@@ -70,11 +70,15 @@ public class EntityRequirement
     // Allow for up to 16 layers of inner codecs
     static
     {   for (int i = 0; i < 16; i++)
-        {   getCodec();
+        {   addCodecStack();
         }
     }
 
     public static Codec<EntityRequirement> getCodec()
+    {   return REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
+    }
+
+    private static void addCodecStack()
     {
         Codec<EntityRequirement> latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
         Codec<EntityRequirement> codec = RecordCodecBuilder.create(instance -> instance.group(
@@ -92,7 +96,6 @@ public class EntityRequirement
         ).apply(instance, EntityRequirement::new));
 
         REQUIREMENT_CODEC_STACK.add(codec);
-        return codec;
     }
 
     public boolean test(Entity entity)
@@ -100,7 +103,7 @@ public class EntityRequirement
         if (entity == null)
         {   return true;
         }
-        if (Objects.equals(this, ANY))
+        if (Objects.equals(this, NONE))
         {   return true;
         }
         if (type.isPresent() && !type.get().equals(entity.getType()))
@@ -188,7 +191,7 @@ public class EntityRequirement
         }
         catch (Exception e)
         {   ColdSweat.LOGGER.error("Error deserializing entity requirement: " + e.getMessage());
-            return ANY;
+            return NONE;
         }
     }
 
