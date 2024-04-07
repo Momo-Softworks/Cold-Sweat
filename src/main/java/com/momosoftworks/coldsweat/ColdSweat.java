@@ -11,14 +11,10 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.data.BiomeTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.BlockTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.DimensionTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.InsulatorData;
+import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
@@ -78,11 +74,15 @@ public class ColdSweat
         EntitySettingsConfig.setup();
 
         // Setup JSON data-driven handlers
-        bus.addListener((NewRegistryEvent event) -> {
-            event.create(new RegistryBuilder<InsulatorData>().setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
+        bus.addListener((NewRegistryEvent event) ->
+        {   event.create(new RegistryBuilder<InsulatorData>().setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
+            event.create(new RegistryBuilder<FuelData>().setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
+            event.create(new RegistryBuilder<ItemData>().setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(ItemData.CODEC));
             event.create(new RegistryBuilder<BlockTempData>().setName(ModRegistries.BLOCK_TEMP_DATA.location()).dataPackRegistry(BlockTempData.CODEC));
             event.create(new RegistryBuilder<BiomeTempData>().setName(ModRegistries.BIOME_TEMP_DATA.location()).dataPackRegistry(BiomeTempData.CODEC));
             event.create(new RegistryBuilder<DimensionTempData>().setName(ModRegistries.DIMENSION_TEMP_DATA.location()).dataPackRegistry(DimensionTempData.CODEC));
+            event.create(new RegistryBuilder<StructureTempData>().setName(ModRegistries.STRUCTURE_TEMP_DATA.location()).dataPackRegistry(StructureTempData.CODEC));
+            event.create(new RegistryBuilder<MountData>().setName(ModRegistries.MOUNT_DATA.location()).dataPackRegistry(MountData.CODEC));
         });
     }
 

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.configuration.data;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.core.Registry;
@@ -11,7 +12,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -19,42 +19,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Double fuel,
-                       NbtRequirement nbt, Optional<List<String>> requiredMods) implements NbtSerializable
+public record ItemData(List<Either<TagKey<Item>, Item>> items, Double value, NbtRequirement nbt,
+                       Optional<EntityRequirement> entityRequirement, Optional<List<String>> requiredMods) implements NbtSerializable
 {
-    public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            FuelType.CODEC.fieldOf("type").forGetter(FuelData::type),
+    public static final Codec<ItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
             // Convert from a string to a TagKey
             string ->
             {
                 ResourceLocation itemLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                if (itemLocation == null) throw new IllegalArgumentException("Item tag is null");
                 if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
                 return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, itemLocation));
             },
             // Convert from a TagKey to a string
             tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
+            {   if (tag == null) throw new IllegalArgumentException("Item tag is null");
                 String result = tag.left().isPresent()
                                 ? "#" + tag.left().get().location()
                                 : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+                if (result.isEmpty()) throw new IllegalArgumentException("Item field is not a tag or valid ID");
                 return result;
             })
             .listOf()
-            .fieldOf("items").forGetter(FuelData::items),
-            Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel),
-            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(FuelData::nbt),
-            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(FuelData::requiredMods)
-    ).apply(instance, FuelData::new));
+            .fieldOf("items").forGetter(ItemData::items),
+            Codec.DOUBLE.fieldOf("value").forGetter(ItemData::value),
+            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(ItemData::nbt),
+            EntityRequirement.getCodec().optionalFieldOf("entity_requirement").forGetter(ItemData::entityRequirement),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(ItemData::requiredMods)
+    ).apply(instance, ItemData::new));
 
     @Override
     public CompoundTag serialize()
     {
         CompoundTag tag = new CompoundTag();
-        tag.putString("type", type.getSerializedName());
         ListTag items = new ListTag();
         ListTag tags = new ListTag();
         this.items.forEach(item ->
@@ -67,9 +66,10 @@ public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Do
             });
         });
         tag.put("items", items);
-        tag.putDouble("fuel", fuel);
+        tag.putDouble("value", value);
         tag.put("tags", tags);
         tag.put("nbt", nbt.serialize());
+        entityRequirement.ifPresent(entityRequirement1 -> tag.put("entity_requirement", entityRequirement1.serialize()));
         ListTag mods = new ListTag();
         requiredMods.ifPresent(mods1 ->
         {   mods1.forEach(mod -> mods.add(StringTag.valueOf(mod)));
@@ -78,10 +78,9 @@ public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Do
         return tag;
     }
 
-    public static FuelData deserialize(CompoundTag nbt)
+    public static ItemData deserialize(CompoundTag nbt)
     {
         List<Either<TagKey<Item>, Item>> items = new ArrayList<>();
-        FuelType type = FuelType.byName(nbt.getString("type"));
         ListTag itemsTag = nbt.getList("items", 8);
         ListTag tags = nbt.getList("tags", 8);
         for (int i = 0; i < itemsTag.size(); i++)
@@ -94,8 +93,11 @@ public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Do
             TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag));
             items.add(Either.left(tagKey));
         }
-        Double fuel = nbt.getDouble("fuel");
+        Double value = nbt.getDouble("value");
         NbtRequirement nbtRequirement = NbtRequirement.deserialize(nbt.getCompound("nbt"));
+        Optional<EntityRequirement> entityRequirement = Optional.ofNullable(nbt.contains("entity_requirement")
+                                                                            ? EntityRequirement.deserialize(nbt.getCompound("entity_requirement"))
+                                                                            : null);
         Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8)).map(mods ->
         {   List<String> mods1 = new ArrayList<>();
             for (int i = 0; i < mods.size(); i++)
@@ -103,34 +105,6 @@ public record FuelData(FuelType type, List<Either<TagKey<Item>, Item>> items, Do
             }
             return mods1;
         });
-        return new FuelData(type, items, fuel, nbtRequirement, requiredMods);
-    }
-
-    public enum FuelType implements StringRepresentable
-    {
-        BOILER("boiler"),
-        ICEBOX("icebox"),
-        HEARTH("hearth"),
-        SOUL_LAMP("soul_lamp");
-
-        public static Codec<FuelType> CODEC = StringRepresentable.fromEnum(FuelType::values);
-
-        private final String name;
-
-        FuelType(String name)
-        {   this.name = name;
-        }
-
-        @Override
-        public String getSerializedName()
-        {   return name;
-        }
-
-        public static FuelType byName(String name)
-        {   for (FuelType type : values())
-            {   if (type.name.equals(name)) return type;
-            }
-            return null;
-        }
+        return new ItemData(items, value, nbtRequirement, entityRequirement, requiredMods);
     }
 }
