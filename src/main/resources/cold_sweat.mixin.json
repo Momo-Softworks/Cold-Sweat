@@ -12,6 +12,7 @@
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
     "MixinItemTooltip",
+    "MixinPickEntity",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel",
     "compat.MixinCreateOverlay"
@@ -23,7 +24,6 @@
     "MixinEntityRiding",
     "MixinInventoryOpenServer",
     "MixinMinecart",
-    "MixinPickEntity",
     "MixinSoulCampfire",
     "MixinSoulFire"
   ],
