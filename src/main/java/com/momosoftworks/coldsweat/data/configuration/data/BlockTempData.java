@@ -22,8 +22,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
             // Convert from a string to a TagKey
             string ->
             {
-                ResourceLocation tagLocation = ResourceLocation.tryParse(string.replace("#", ""));
-                if (tagLocation == null) throw new IllegalArgumentException("Biome tag is null");
+                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
                 if (!string.contains("#")) return Either.<TagKey<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(tagLocation));
 
                 return Either.<TagKey<Block>, Block>left(TagKey.create(Registry.BLOCK_REGISTRY, tagLocation));
