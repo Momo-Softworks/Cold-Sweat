@@ -7,10 +7,10 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.common.entity.goals.EatObjectsGoal;
 import com.momosoftworks.coldsweat.common.entity.goals.LazyLookGoal;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -85,8 +85,13 @@ public class ChameleonEntity extends AnimalEntity
     public float tailPhase = 0;
 
     float eatAnimationTimer = 0;
+    private int feedCooldown = 0;
     public float opacity = 1;
     float desiredTemp = 1f;
+
+    boolean mountSneaking = false;
+    int mountSneakCount = 0;
+    int lastMountSneak = 0;
 
     public ChameleonEntity(EntityType<ChameleonEntity> type, World world)
     {
@@ -99,10 +104,10 @@ public class ChameleonEntity extends AnimalEntity
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
         this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream)
-                                                                                                              .map(item -> (IItemProvider) () -> item).toArray(IItemProvider[]::new)), false));
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-        this.goalSelector.addGoal(6, new LazyLookGoal(this));
-        this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
+                                                                                     .map(item -> (IItemProvider) () -> item).toArray(IItemProvider[]::new)), false));
+        this.goalSelector.addGoal(5, new LazyLookGoal(this));
+        this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6.0F));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
     }
 
     public static AttributeModifierMap.MutableAttribute createAttributes()
@@ -145,16 +150,18 @@ public class ChameleonEntity extends AnimalEntity
     @Override
     public void die(DamageSource source)
     {
-        ITextComponent deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(source);
 
         if (this.dead)
         {
+            this.getCombatTracker().recordDamage(source, this.getHealth(), 1);
+            ITextComponent deathMessage = this.getCombatTracker().getDeathMessage();
             ListNBT trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
-            if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !this.getTrustedPlayers().getList("Players", 8).isEmpty())
+
+            if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES))
             {   trustedPlayers.forEach(string ->
                 {
-                    PlayerEntity player = level.getPlayerByUUID(UUID.fromString(string.getAsString()));
+                    PlayerEntity player = this.level.getPlayerByUUID(UUID.fromString(string.getAsString()));
                     if (player != null)
                     {   player.sendMessage(deathMessage, Util.NIL_UUID);
                     }
@@ -166,11 +173,42 @@ public class ChameleonEntity extends AnimalEntity
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand)
     {
-        if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
+        ItemStack stack = player.getItemInHand(hand);
+        Edible edible = ChameleonEdibles.getEdible(stack).orElse(null);
+        if (edible != null)
+        {
+            if (this.feedCooldown <= 0 && (this.isPlayerTrusted(player) ^ this.isTamingItem(stack))
+            && this.getCooldown(edible) <= 0)
+            {
+                if (!player.level.isClientSide)
+                {
+                    ItemStack dropStack = stack.copy();
+                    dropStack.setCount(1);
+                    dropStack.getOrCreateTag().put("Recipient", StringNBT.valueOf(this.getUUID().toString()));
+                    player.drop(dropStack, true);
+                    player.stopUsingItem();
+                    this.usePlayerItem(player, stack);
+                }
+                this.feedCooldown = 10;
+
+                return ActionResultType.SUCCESS;
+            }
+            else
+            {   player.swing(hand);
+                return ActionResultType.CONSUME;
+            }
+        }
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
         {   this.startRiding(player);
             return ActionResultType.SUCCESS;
         }
+
         return ActionResultType.PASS;
+    }
+
+    @Override
+    public float getEyeHeight(Pose pose)
+    {   return this.isBaby() ? 0.25F : 0.35F;
     }
 
     @SubscribeEvent
@@ -178,13 +216,10 @@ public class ChameleonEntity extends AnimalEntity
     {
         if (event.getEntity() instanceof ChameleonEntity)
         {
-            ChameleonEntity chameleon = (ChameleonEntity) event.getEntity();
-            event.setNewEyeHeight(0.35F);
+            ChameleonEntity chameleon = ((ChameleonEntity) event.getEntity());
             if (chameleon.isBaby())
-            {   event.setNewEyeHeight(0.25F);
-                event.setNewSize(EntitySize.fixed(0.65f, 0.5f));
+            {   event.setNewSize(EntitySize.fixed(0.65f, 0.5f));
             }
-            else event.setNewEyeHeight(0.35F);
         }
     }
 
@@ -279,6 +314,9 @@ public class ChameleonEntity extends AnimalEntity
         {   this.eatAnimationTimer--;
         }
 
+        if (this.feedCooldown > 0)
+            this.feedCooldown--;
+
         // Age
         if (!this.level.isClientSide && this.tickCount % 20 == 0)
         {   this.setAgeSecs(this.getAgeSecs() + 1);
@@ -323,25 +361,28 @@ public class ChameleonEntity extends AnimalEntity
         if (this.getVehicle() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) this.getVehicle();
-            CompoundNBT data = player.getPersistentData();
             if (player.isCrouching())
             {
-                if (!data.getBoolean("Sneaking"))
+                if (!mountSneaking)
                 {
-                    if (player.tickCount - data.getLong("LastSneak") < 8)
-                        data.putInt("SneakCount", data.getInt("SneakCount") + 1);
-                    else data.putInt("SneakCount", 1);
-                    data.putLong("LastSneak", player.tickCount);
-                    data.putBoolean("Sneaking", true);
+                    if (player.tickCount - lastMountSneak < 8 || mountSneakCount == 0)
+                    {   mountSneakCount++;
+                    }
+                    else
+                    {   mountSneakCount = 0;
+                    }
+                    lastMountSneak = player.tickCount;
+                    mountSneaking = true;
 
-                    if (data.getInt("SneakCount") >= 2)
+                    if (mountSneakCount >= 2)
                     {
                         this.stopRiding();
-                        data.putInt("SneakCount", 0);
+                        this.boardingCooldown = 10;
+                        mountSneakCount = 0;
                     }
                 }
             }
-            else data.putBoolean("Sneaking", false);
+            else mountSneaking = false;
         }
 
         // Spawn particles if tracking a position. After 5 minutes, clear the position
@@ -354,11 +395,16 @@ public class ChameleonEntity extends AnimalEntity
                                           0.01, 0.01, 0.01);
             }
 
-            if (this.tickCount % 20 == 0 && (this.getAgeSecs() * 20L - this.getEatTimestamp() > 6000
-            || Math.sqrt(Math.pow(this.getX() - this.getTrackingPos().getX(), 2) + Math.pow(this.getZ() - this.getTrackingPos().getZ(), 2)) < 20))
+            if (this.tickCount % 20 == 0)
             {
+                if (this.getAgeSecs() * 20L - this.getEatTimestamp() > 6000)
+                {   this.clearTrackingPos();
+                }
                 // Award nearby players the "chameleon_find_biome" advancement
-                if (this.getServer() != null)
+                if ((Math.sqrt(Math.pow(this.getX() - this.getTrackingPos().getX(), 2)
+                             + Math.pow(this.getZ() - this.getTrackingPos().getZ(), 2)) < 20
+                || this.getTrackingPos().equals(BlockPos.ZERO))
+                && this.getServer() != null)
                 {
                     Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
                     for (ServerPlayerEntity player : this.level.getEntitiesOfClass(ServerPlayerEntity.class, this.getBoundingBox().inflate(20)))
@@ -436,7 +482,7 @@ public class ChameleonEntity extends AnimalEntity
                     }
                 });
             }
-            this.setEatTimestamp(this.tickCount);
+            this.setEatTimestamp(this.getAgeSecs() * 20);
         }
     }
 

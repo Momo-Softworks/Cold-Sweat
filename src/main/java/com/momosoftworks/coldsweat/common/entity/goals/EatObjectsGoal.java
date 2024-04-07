@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -13,7 +14,6 @@ import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigator;
@@ -57,7 +57,8 @@ public class EatObjectsGoal extends Goal
                 ItemEntity itemEntity = (ItemEntity) ent;
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
-                if (edible.isPresent())
+                if (edible.isPresent()
+                && NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString()))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity))
                     {
@@ -144,13 +145,13 @@ public class EatObjectsGoal extends Goal
                         // Play tongue in sound
                         WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_IN, this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
                     }
-                }, this.entity.getEatAnimLength() - 1);
+                }, this.entity.getEatAnimLength() / 2 + 2);
 
                 // Send the entity toward the chameleon
                 TaskScheduler.scheduleServer(() ->
                 {
-                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(1));
-                }, this.entity.getEatAnimLength() / 3);
+                    this.target.setDeltaMovement(this.entity.position().subtract(this.target.position()).normalize().scale(0.75));
+                }, this.entity.getEatAnimLength() / 2);
             }
 
             this.entity.goalSelector.getRunningGoals().forEach(goal ->
