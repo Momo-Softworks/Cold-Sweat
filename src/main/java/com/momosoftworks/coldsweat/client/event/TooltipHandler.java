@@ -212,7 +212,7 @@ public class TooltipHandler
                                           {
                                               ItemStack stack1 = pair.getFirst();
                                               return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                         insulator -> insulator.predicate().test(player) && insulator.nbt().test(stack1.getTag()),
+                                                                         insulator -> insulator.test(player, stack1),
                                                                          false);
                                           })
                                           // Flat map the insulation values
@@ -231,9 +231,6 @@ public class TooltipHandler
                     insulation.addAll(armorInsulator.insulation().split());
                 }
             }
-
-            // Sort the insulation values from cold to hot
-            Insulation.sort(insulation);
 
             if (!insulation.isEmpty())
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, InsulationSlot.ARMOR)));
