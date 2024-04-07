@@ -320,10 +320,7 @@ public class SewingContainer extends AbstractContainerMenu
                     return false;
                 });
 
-                if (insulCap.getInsulation().isEmpty())
-                {   processed.getOrCreateTag().remove("Insulation");
-                }
-
+                processed.getOrCreateTag().merge(insulCap.serializeNBT());
                 this.setItem(2, processed);
                 this.sendAllDataToRemote();
             }

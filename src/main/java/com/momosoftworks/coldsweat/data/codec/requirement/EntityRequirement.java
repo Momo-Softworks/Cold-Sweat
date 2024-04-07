@@ -22,10 +22,10 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
                                 Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
                                 Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target)
 {
-    public static EntityRequirement ANY = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                Optional.empty(), Optional.empty());
+    public static EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                 Optional.empty(), Optional.empty());
 
     public static Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ForgeRegistries.ENTITIES.getCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
@@ -42,11 +42,15 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     // Allow for up to 16 layers of inner codecs
     static
     {   for (int i = 0; i < 16; i++)
-        {   getCodec();
+        {   addCodecStack();
         }
     }
 
     public static Codec<EntityRequirement> getCodec()
+    {   return REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
+    }
+
+    private static void addCodecStack()
     {
         var latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
         var codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
@@ -64,7 +68,6 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         ).apply(instance, EntityRequirement::new));
 
         REQUIREMENT_CODEC_STACK.add(codec);
-        return codec;
     }
 
     public boolean test(Entity entity)
@@ -72,7 +75,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         if (entity == null)
         {   return true;
         }
-        if (Objects.equals(this, ANY))
+        if (Objects.equals(this, NONE))
         {   return true;
         }
         if (type.isPresent() && !type.get().equals(entity.getType()))
@@ -159,7 +162,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         }
         catch (Exception e)
         {   ColdSweat.LOGGER.error("Error deserializing entity requirement: " + e.getMessage());
-            return ANY;
+            return NONE;
         }
     }
 
