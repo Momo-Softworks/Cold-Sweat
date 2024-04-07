@@ -275,9 +275,11 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             {
                 double cold = staticInsulation.getCold();
                 double hot = staticInsulation.getHot();
-                double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
-                if (cold == neutral) cold = 0;
-                if (hot == neutral) hot = 0;
+                double neutral = cold > 0 == hot > 0
+                                 ? CSMath.minAbs(cold, hot)
+                                 : 0;
+                cold -= neutral;
+                hot -= neutral;
 
                 // Cold insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
