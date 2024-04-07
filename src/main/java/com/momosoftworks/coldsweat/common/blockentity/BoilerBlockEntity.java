@@ -18,6 +18,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -119,7 +120,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    CompoundTag tag = CSMath.orElse(stack.getTag(), new CompoundTag());
+                    CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.is(ModItemTags.BOILER_VALID) || stack.is(ModItemTags.BOILER_PURIFIABLE))
