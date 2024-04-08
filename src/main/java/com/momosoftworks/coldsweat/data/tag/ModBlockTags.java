@@ -13,8 +13,8 @@ public class ModBlockTags
 
     public static final TagKey<Block> SOUL_STALK_PLACEABLE_ON = createTag("may_place_on/soul_stalk");
 
-    public static final TagKey<Block> HEARTH_WHITELIST = createTag("hearth/spread_whitelist");
-    public static final TagKey<Block> HEARTH_BLACKLIST = createTag("hearth/spread_blacklist");
+    public static final TagKey<Block> HEARTH_SPREAD_WHITELIST = createTag("hearth/spread_whitelist");
+    public static final TagKey<Block> HEARTH_SPREAD_BLACKLIST = createTag("hearth/spread_blacklist");
 
     public static final TagKey<Block> IGNORE_SLEEP_CHECK = createTag("ignore_sleep_check");
     public static final TagKey<Block> SOUL_SAND_REPLACEABLE = createTag("soul_sand_replaceable");

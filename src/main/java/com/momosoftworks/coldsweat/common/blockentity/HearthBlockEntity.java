@@ -77,7 +77,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -472,7 +471,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             List<MobEffectInstance> itemEffects = PotionUtils.getMobEffects(fuelStack);
             if (ConfigSettings.HEARTH_POTIONS_ENABLED.get()
             && !itemEffects.isEmpty() && !itemEffects.equals(effects)
-            && itemEffects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect()))))
+            && itemEffects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect())))
             {
                 if (fuelStack.getItem() instanceof PotionItem)
                 {   this.getItems().set(0, Items.GLASS_BOTTLE.getDefaultInstance());
