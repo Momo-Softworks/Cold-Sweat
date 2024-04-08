@@ -60,7 +60,6 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
-        CommandInit.ARGUMENTS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
