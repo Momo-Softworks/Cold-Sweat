@@ -13,14 +13,18 @@ import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTrigge
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.configuration.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -29,6 +33,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -71,6 +76,11 @@ public class ColdSweat
         ColdSweatConfig.setup();
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
+
+        // Setup JSON data-driven handlers
+        bus.addListener((RegistryEvent.NewRegistry event) -> {
+            ModRegistries.INSULATOR = new RegistryBuilder<Insulator>().setName(new ResourceLocation(ColdSweat.MOD_ID, "insulator")).setType(Insulator.class).create();
+        });
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)

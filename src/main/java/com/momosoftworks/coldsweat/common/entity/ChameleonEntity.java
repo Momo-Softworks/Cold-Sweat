@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;

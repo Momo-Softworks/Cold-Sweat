@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.container;
 
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
-import com.momosoftworks.coldsweat.data.tags.ModItemTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;

@@ -56,13 +56,13 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder)
     {
-        return ISuggestionProvider.suggest(Stream.of(EntityTempManager.VALID_MODIFIER_TYPES).map(StringRepresentable::getSerializedName), builder);
+        return ISuggestionProvider.suggest(this.getExamples(), builder);
     }
 
     @Override
     public Collection<String> getExamples()
     {
-        return Stream.of(EntityTempManager.VALID_MODIFIER_TYPES).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
+        return Stream.of(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(either -> either.map(Temperature.Type::getSerializedName, Temperature.Ability::getSerializedName)).collect(Collectors.toList());
     }
 
     public static class Serializer implements IArgumentSerializer<AbilityOrTempTypeArgument>

@@ -4,6 +4,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
+import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
@@ -114,13 +116,13 @@ public class TooltipHandler
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.NORMAL);
+        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ITEM);
         }
         else if ((itemInsul = ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.ADAPTIVE);
+        {   tooltip = new InsulatorTooltip(ConfigSettings.ADAPTIVE_INSULATION_ITEMS.get().get(stack.getItem()), InsulationType.ADAPTIVE);
         }
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))
-        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulatorTooltip.InsulationType.CURIO);
+        {   tooltip = new InsulatorTooltip(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), InsulationType.CURIO);
         }
 
         // If the item is insulated armor

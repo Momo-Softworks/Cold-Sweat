@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -23,10 +24,10 @@ public class InsulatorTooltip extends Tooltip
     double cold = 0;
     double hot = 0;
     double neutral = 0;
-    InsulatorTooltip.InsulationType type;
+    InsulationType type;
     int width = 0;
 
-    public InsulatorTooltip(Pair<Double, Double> insulationValues, InsulatorTooltip.InsulationType type)
+    public InsulatorTooltip(Pair<Double, Double> insulationValues, InsulationType type)
     {
         this.insulationValues = insulationValues;
         this.type = type;
@@ -47,7 +48,7 @@ public class InsulatorTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
     {
-        boolean isAdaptive = this.type == InsulatorTooltip.InsulationType.ADAPTIVE;
+        boolean isAdaptive = this.type == InsulationType.ADAPTIVE;
         y += 12;
         cold = insulationValues.getFirst();
         hot = insulationValues.getSecond();
@@ -73,14 +74,14 @@ public class InsulatorTooltip extends Tooltip
 
         // Positive insulation bar
         if (posSlots > 0)
-        {   renderBar(matrixStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false, this.type == InsulatorTooltip.InsulationType.CURIO);
+        {   renderBar(matrixStack, x, y, posSlots, cold, neutral, hot, isAdaptive, negSlots > 0, false, this.type == InsulationType.CURIO);
             matrixStack.translate(posSlots * 6 + 12, 0, 0);
             width += posSlots * 6 + 12;
         }
 
         // Negative insulation bar
         if (negSlots > 0)
-        {   renderBar(matrixStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true, this.type == InsulatorTooltip.InsulationType.CURIO);
+        {   renderBar(matrixStack, x, y, negSlots, -cold, -neutral, -hot, isAdaptive, true, true, this.type == InsulationType.CURIO);
             width += negSlots * 6 + 12;
         }
 
@@ -159,12 +160,5 @@ public class InsulatorTooltip extends Tooltip
                 AbstractGui.blit(matrixStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
             }
         }
-    }
-
-    public enum InsulationType
-    {
-        NORMAL,
-        ADAPTIVE,
-        CURIO
     }
 }
