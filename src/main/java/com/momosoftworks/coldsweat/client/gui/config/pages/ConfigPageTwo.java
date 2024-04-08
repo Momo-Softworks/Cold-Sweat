@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -96,7 +97,7 @@ public class ConfigPageTwo extends AbstractConfigPage
         // Direction Buttons: Temp Readout
         this.addDirectionPanel("readout_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_readout_location.name"),
                 amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
-                                                                      ConfigSettings.BODY_READOUT_POS.get().y())),
+                                                                        ConfigSettings.BODY_READOUT_POS.get().y())),
                 amount -> ConfigSettings.BODY_READOUT_POS.set(new Vec2i(ConfigSettings.BODY_READOUT_POS.get().x(),
                                                                       ConfigSettings.BODY_READOUT_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
                 () ->
@@ -138,7 +139,7 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("button_position", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.config_button_pos.name"),
                        button ->
                        {
-                           DrawConfigButton.DRAW_CONTROLS = true;
+                           DrawConfigButton.EDIT_MODE = true;
                            this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
                        },
                        false, false, true, new TranslationTextComponent("cold_sweat.config.config_button_pos.desc"));
