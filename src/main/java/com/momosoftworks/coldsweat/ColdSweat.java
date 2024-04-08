@@ -92,9 +92,6 @@ public class ColdSweat
         ColdSweatPacketHandler.init();
         event.enqueueWork(() ->
         {
-            SpawnPlacements.register(EntityInit.CHAMELEON.get(), SpawnPlacements.Type.ON_GROUND,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn);
-
             // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
