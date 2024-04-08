@@ -503,10 +503,6 @@ public class Chameleon extends Animal
                : 0;
     }
 
-    public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, Random random)
-    {   return true;
-    }
-
     private void rotateBodyIfNecessary()
     {
         this.yBodyRot = Mth.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());

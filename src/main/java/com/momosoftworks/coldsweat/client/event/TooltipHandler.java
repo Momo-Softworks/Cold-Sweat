@@ -85,7 +85,7 @@ public class TooltipHandler
         return tooltipEndIndex;
     }
 
-    public static void addModifierTooltipLines(List<Component> tooltip, AttributeModifierMap map)
+    public static void addModifierTooltipLines(List<MutableComponent> tooltip, AttributeModifierMap map)
     {
         map.getMap().asMap().forEach((attribute, modifiers) ->
         {
