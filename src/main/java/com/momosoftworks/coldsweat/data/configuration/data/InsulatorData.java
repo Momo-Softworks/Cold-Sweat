@@ -14,10 +14,8 @@ import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,24 +45,6 @@ public class InsulatorData implements IForgeRegistryEntry<InsulatorData>
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, InsulatorData::new));
 
-    @Override
-    public InsulatorData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<InsulatorData> getRegistryType()
-    {   return InsulatorData.class;
-    }
-
     public Insulation getInsulation()
     {
         if (insulation.left().isPresent())
@@ -74,5 +54,23 @@ public class InsulatorData implements IForgeRegistryEntry<InsulatorData>
         {   return insulation.right().get();
         }
         throw new IllegalArgumentException(String.format("Insulation %s is not defined!", insulation));
+    }
+
+    @Override
+    public InsulatorData setRegistryName(ResourceLocation name)
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation getRegistryName()
+    {
+        return new ResourceLocation("coldsweat", "insulators");
+    }
+
+    @Override
+    public Class<InsulatorData> getRegistryType()
+    {
+        return InsulatorData.class;
     }
 }

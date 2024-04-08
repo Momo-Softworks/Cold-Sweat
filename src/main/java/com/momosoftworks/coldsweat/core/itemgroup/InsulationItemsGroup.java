@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.util.ItemData;
+import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ArmorItem;
@@ -35,9 +35,9 @@ public class InsulationItemsGroup extends ItemGroup
     {
         // Spoof the item categories to allow items to be added to the tab
         List<List<ItemStack>> itemCategories = Arrays.asList(
-                sort(ConfigSettings.INSULATION_ITEMS.get().keySet()),
-                sort(ConfigSettings.INSULATING_ARMORS.get().keySet()),
-                sort(ConfigSettings.INSULATING_CURIOS.get().keySet())
+                sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()),
+                sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()),
+                sort(ConfigSettings.INSULATING_CURIOS.get().entrySet())
         );
 
         for (List<ItemStack> category : itemCategories)
@@ -56,16 +56,16 @@ public class InsulationItemsGroup extends ItemGroup
         }
     }
 
-    private static List<ItemStack> sort(Set<ItemData> items)
-    {   List<ItemStack> list = new ArrayList<>(items.stream().map(data -> new ItemStack(data.getItem())).collect(Collectors.toList()));
+    private static List<ItemStack> sort(Set<Map.Entry<Item, Insulator>> items)
+    {   List<Map.Entry<Item, Insulator>> list = new ArrayList<>(items);
         // Sort by name first
-        list.sort(Comparator.comparing(item -> item.getDisplayName().getString()));
+        list.sort(Comparator.comparing(item -> item.getKey().getDefaultInstance().getDisplayName().getString()));
         // Sort by tags the items are in
-        list.sort(Comparator.comparing(item -> item.getItem().getTags().stream().map(ResourceLocation::toString).reduce("", (a, b) -> a + b)));
+        list.sort(Comparator.comparing(item -> item.getKey().getTags().stream().map(ResourceLocation::toString).reduce("", (a, b) -> a + b)));
         // Sort by armor material and slot
-        list.sort(Comparator.comparing(item -> item.getItem() instanceof ArmorItem
-                                               ? ((ArmorItem) item.getItem()).getMaterial().getName() + (3 - MobEntity.getEquipmentSlotForItem(item).getIndex())
+        list.sort(Comparator.comparing(item -> item.getKey() instanceof ArmorItem
+                                               ? ((ArmorItem) item.getKey()).getMaterial().getName() + (3 - MobEntity.getEquipmentSlotForItem(item.getKey().getDefaultInstance()).getIndex())
                                                : ""));
-        return list;
+        return list.stream().map(data -> new ItemStack(data.getKey(), 1, data.getValue().nbt.tag)).collect(Collectors.toList());
     }
 }

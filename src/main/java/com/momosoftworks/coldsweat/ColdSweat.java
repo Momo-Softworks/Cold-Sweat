@@ -14,10 +14,7 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.data.BiomeTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.BlockTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.DimensionTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.InsulatorData;
+import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
@@ -37,6 +34,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -83,9 +81,13 @@ public class ColdSweat
         // Setup JSON data-driven handlers
         bus.addListener((RegistryEvent.NewRegistry event) -> {
             ModRegistries.INSULATOR_DATA = new RegistryBuilder<InsulatorData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "insulator")).setType(InsulatorData.class).create();
+            event.create(new RegistryBuilder<FuelData>().setType(FuelData.class).setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
+            event.create(new RegistryBuilder<ItemData>().setType(ItemData.class).setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(ItemData.CODEC));
             ModRegistries.BLOCK_TEMP_DATA = new RegistryBuilder<BlockTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "block_temp")).setType(BlockTempData.class).create();
             ModRegistries.BIOME_TEMP_DATA = new RegistryBuilder<BiomeTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "biome_temp")).setType(BiomeTempData.class).create();
             ModRegistries.DIMENSION_TEMP_DATA = new RegistryBuilder<DimensionTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "dimension_temp")).setType(DimensionTempData.class).create();
+            event.create(new RegistryBuilder<StructureTempData>().setType(StructureTempData.class).setName(ModRegistries.STRUCTURE_TEMP_DATA.location()).dataPackRegistry(StructureTempData.CODEC));
+            event.create(new RegistryBuilder<MountData>().setType(MountData.class).setName(ModRegistries.MOUNT_DATA.location()).dataPackRegistry(MountData.CODEC));
         });
     }
 

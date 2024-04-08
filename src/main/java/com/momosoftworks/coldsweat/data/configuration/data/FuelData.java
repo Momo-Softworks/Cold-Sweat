@@ -14,7 +14,9 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,7 @@ public class FuelData implements NbtSerializable
     public final Double fuel;
     public final NbtRequirement nbt;
     public final Optional<List<String>> requiredMods;
-    
+
     public FuelData(List<Either<ITag<Item>, Item>> items, Double fuel, NbtRequirement nbt, Optional<List<String>> requiredMods)
     {
         this.items = items;
