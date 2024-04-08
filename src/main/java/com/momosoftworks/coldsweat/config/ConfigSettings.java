@@ -19,10 +19,9 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -102,7 +101,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Item, PredicateItem>> SOULSPRING_LAMP_FUEL;
 
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
-    public static final DynamicHolder<List<ResourceLocation>> BLACKLISTED_POTIONS;
+    public static final DynamicHolder<List<MobEffect>> HEARTH_POTION_BLACKLIST;
 
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
@@ -282,7 +281,10 @@ public class ConfigSettings
                                            fuel -> List.of(fuel.value(), fuel.nbt().tag().toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
-        BLACKLISTED_POTIONS = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist().stream().map(ResourceLocation::new).collect(ArrayList::new, List::add, List::addAll));
+        HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist()
+                                                                          .stream()
+                                                                          .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
+                                                                          .collect(ArrayList::new, List::add, List::addAll));
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), InsulationSlot.ITEM),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),

@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
 import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
+import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -54,10 +55,7 @@ import oshi.util.tuples.Triplet;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,10 +73,10 @@ public class LoadConfigSettings
          Add blocks from tags to configs
          */
         ConfigSettings.HEARTH_SPREAD_WHITELIST.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
-                                                            .getTag(ModBlockTags.HEARTH_WHITELIST).orElseThrow()
+                                                            .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
                                                             .stream().map(Holder::get).toList());
         ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
-                                                            .getTag(ModBlockTags.HEARTH_BLACKLIST).orElseThrow()
+                                                            .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
                                                             .stream().map(Holder::get).toList());
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
                                                               .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
@@ -89,6 +87,9 @@ public class LoadConfigSettings
         ConfigSettings.INSULATION_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.ITEM_REGISTRY)
                                                         .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
                                                         .stream().map(Holder::get).toList());
+        ConfigSettings.HEARTH_POTION_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.MOB_EFFECT_REGISTRY)
+                                                           .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
+                                                           .stream().map(Holder::get).toList());
 
         /*
          Fetch JSON registries
@@ -457,7 +458,7 @@ public class LoadConfigSettings
         if (!jsonDirectory.exists())
         {   return output;
         }
-        else for (File file : jsonDirectory.listFiles())
+        else for (File file : findFilesRecursive(jsonDirectory))
         {
             if (file.getName().endsWith(".json"))
             {
@@ -473,5 +474,24 @@ public class LoadConfigSettings
             }
         }
         return output;
+    }
+
+    private static List<File> findFilesRecursive(File directory)
+    {
+        List<File> files = new ArrayList<>();
+        File[] filesInDirectory = directory.listFiles();
+        if (filesInDirectory == null)
+        {   return files;
+        }
+        for (File file : filesInDirectory)
+        {
+            if (file.isDirectory())
+            {   files.addAll(findFilesRecursive(file));
+            }
+            else
+            {   files.add(file);
+            }
+        }
+        return files;
     }
 }
