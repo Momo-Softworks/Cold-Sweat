@@ -495,10 +495,6 @@ public class ChameleonEntity extends AnimalEntity
                : 0;
     }
 
-    public static boolean canSpawn(EntityType<ChameleonEntity> type, IWorld level, SpawnReason spawnType, BlockPos pos, Random random)
-    {   return true;
-    }
-
     private void rotateBodyIfNecessary()
     {
         this.yBodyRot = MathHelper.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
