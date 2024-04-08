@@ -9,10 +9,7 @@ import net.minecraft.ChatFormatting;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 
 import javax.annotation.Nullable;
 
@@ -23,14 +20,14 @@ public class ConfigPageTwo extends AbstractConfigPage
     }
 
     @Override
-    public BaseComponent sectionOneTitle()
+    public MutableComponent sectionOneTitle()
     {
         return new TranslatableComponent("cold_sweat.config.section.preference");
     }
 
     @Nullable
     @Override
-    public BaseComponent sectionTwoTitle()
+    public MutableComponent sectionTwoTitle()
     {
         return new TranslatableComponent("cold_sweat.config.section.hud_settings");
     }

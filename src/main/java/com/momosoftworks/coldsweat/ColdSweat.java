@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat;
 
-import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -12,14 +11,9 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.data.BiomeTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.BlockTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.DimensionTempData;
-import com.momosoftworks.coldsweat.data.configuration.data.InsulatorData;
+import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -35,6 +29,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -80,10 +75,14 @@ public class ColdSweat
 
         // Setup JSON data-driven handlers
         bus.addListener((NewRegistryEvent event) -> {
-            event.create(new RegistryBuilder<InsulatorData>().setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
-            event.create(new RegistryBuilder<BlockTempData>().setName(ModRegistries.BLOCK_TEMP_DATA.location()).dataPackRegistry(BlockTempData.CODEC));
-            event.create(new RegistryBuilder<BiomeTempData>().setName(ModRegistries.BIOME_TEMP_DATA.location()).dataPackRegistry(BiomeTempData.CODEC));
-            event.create(new RegistryBuilder<DimensionTempData>().setName(ModRegistries.DIMENSION_TEMP_DATA.location()).dataPackRegistry(DimensionTempData.CODEC));
+            event.create(new RegistryBuilder<InsulatorData>().setType(InsulatorData.class).setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
+            event.create(new RegistryBuilder<FuelData>().setType(FuelData.class).setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
+            event.create(new RegistryBuilder<ItemData>().setType(ItemData.class).setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(ItemData.CODEC));
+            event.create(new RegistryBuilder<BlockTempData>().setType(BlockTempData.class).setName(ModRegistries.BLOCK_TEMP_DATA.location()).dataPackRegistry(BlockTempData.CODEC));
+            event.create(new RegistryBuilder<BiomeTempData>().setType(BiomeTempData.class).setName(ModRegistries.BIOME_TEMP_DATA.location()).dataPackRegistry(BiomeTempData.CODEC));
+            event.create(new RegistryBuilder<DimensionTempData>().setType(DimensionTempData.class).setName(ModRegistries.DIMENSION_TEMP_DATA.location()).dataPackRegistry(DimensionTempData.CODEC));
+            event.create(new RegistryBuilder<StructureTempData>().setType(StructureTempData.class).setName(ModRegistries.STRUCTURE_TEMP_DATA.location()).dataPackRegistry(StructureTempData.CODEC));
+            event.create(new RegistryBuilder<MountData>().setType(MountData.class).setName(ModRegistries.MOUNT_DATA.location()).dataPackRegistry(MountData.CODEC));
         });
     }
 
@@ -115,8 +114,6 @@ public class ColdSweat
         // Fix hearth transparency
         ItemBlockRenderTypes.setRenderLayer(BlockInit.HEARTH_BOTTOM.get(), RenderType.cutoutMipped());
         ItemBlockRenderTypes.setRenderLayer(BlockInit.SOUL_STALK.get(), RenderType.cutoutMipped());
-        // Register GUI elements
-        Overlays.registerOverlays();
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)

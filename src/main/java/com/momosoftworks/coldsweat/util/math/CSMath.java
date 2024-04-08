@@ -435,7 +435,7 @@ public class CSMath
     /**
      * @return 1 if the given value is above the range, -1 if it is below the range, and 0 if it is within the range.
      */
-    public static int getSignForRange(double value, double min, double max)
+    public static int signForRange(double value, double min, double max)
     {
         return value > max ? 1 : value < min ? -1 : 0;
     }

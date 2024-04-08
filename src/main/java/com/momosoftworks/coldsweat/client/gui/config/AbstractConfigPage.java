@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -64,10 +63,10 @@ public abstract class AbstractConfigPage extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
-    public abstract BaseComponent sectionOneTitle();
+    public abstract MutableComponent sectionOneTitle();
 
     @Nullable
-    public abstract BaseComponent sectionTwoTitle();
+    public abstract MutableComponent sectionTwoTitle();
 
     public AbstractConfigPage(Screen parentScreen)
     {   super(new TranslatableComponent("cold_sweat.config.title"));

@@ -10,9 +10,11 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
+
+import javax.annotation.Nullable;
 
 public class ConfigPageOne extends AbstractConfigPage
 {
@@ -28,12 +30,12 @@ public class ConfigPageOne extends AbstractConfigPage
     }
 
     @Override
-    public BaseComponent sectionOneTitle()
+    public MutableComponent sectionOneTitle()
     {   return new TranslatableComponent("cold_sweat.config.section.temperature_details");
     }
 
     @Override
-    public BaseComponent sectionTwoTitle()
+    public @Nullable MutableComponent sectionTwoTitle()
     {   return new TranslatableComponent("cold_sweat.config.section.difficulty.name");
     }
 

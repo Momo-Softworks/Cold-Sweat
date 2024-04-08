@@ -108,7 +108,7 @@ public class LoadConfigSettings
             Block[] blocks = blockTempData.blocks()
                              .stream()
                              .map(either -> either.left().isPresent()
-                                            ? registries.registryOrThrow(Registry.BLOCK_REGISTRY).getTag(either.left().get()).orElseThrow().stream().map(Holder::get).toArray(Block[]::new)
+                                            ? registries.registryOrThrow(Registry.BLOCK_REGISTRY).getTag(either.left().get()).orElseThrow().stream().map(Holder::value).toArray(Block[]::new)
                                             : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {

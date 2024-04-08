@@ -48,7 +48,7 @@ public class TooltipHandler
     public static final ChatFormatting COLD = ChatFormatting.BLUE;
     public static final ChatFormatting HOT = ChatFormatting.RED;
 
-    public static void addModifierTooltipLines(List<BaseComponent> tooltip, AttributeModifierMap map)
+    public static void addModifierTooltipLines(List<MutableComponent> tooltip, AttributeModifierMap map)
     {
         map.getMap().asMap().forEach((attribute, modifiers) ->
         {

@@ -9,9 +9,7 @@ import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -31,8 +29,8 @@ public class MixinItemTooltip
 {
     @Inject(method = "getTooltipLines", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/ItemStack$TooltipPart;MODIFIERS:Lnet/minecraft/world/item/ItemStack$TooltipPart;", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void injectBeforeAttributes(Player player, TooltipFlag advanced, CallbackInfoReturnable<List<Component>> cir,
-                                      List<Component> tooltip)
+    private void injectBeforeAttributes(Player player, TooltipFlag advanced, CallbackInfoReturnable<List<MutableComponent>> cir,
+                                      List<MutableComponent> tooltip)
     {
         ItemStack stack = (ItemStack) (Object) this;
         Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())).ifPresent(insulator ->
@@ -41,8 +39,8 @@ public class MixinItemTooltip
             {
                 if (!insulator.attributes().getMap().isEmpty())
                 {
-                    tooltip.add(CommonComponents.EMPTY);
-                    tooltip.add(Component.translatable("item.modifiers.insulation").withStyle(ChatFormatting.GRAY));
+                    tooltip.add(new TextComponent(""));
+                    tooltip.add(new TranslatableComponent("item.modifiers.insulation").withStyle(ChatFormatting.GRAY));
                     TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
                 }
             }

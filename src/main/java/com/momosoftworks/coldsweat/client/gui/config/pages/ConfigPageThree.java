@@ -16,13 +16,13 @@ public class ConfigPageThree extends AbstractConfigPage
     }
 
     @Override
-    public BaseComponent sectionOneTitle()
+    public MutableComponent sectionOneTitle()
     {   return new TranslatableComponent("cold_sweat.config.section.other");
     }
 
     @Nullable
     @Override
-    public BaseComponent sectionTwoTitle()
+    public MutableComponent sectionTwoTitle()
     {   return null;
     }
 

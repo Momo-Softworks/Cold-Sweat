@@ -132,7 +132,7 @@ dependencies {
     implementation fg.deobf("curse.maven:carrots-311327:4382778")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071551")
 
-    compileOnly fg.deobf("curse.maven:create-328085:4625533")
+    implementation fg.deobf("curse.maven:create-328085:4625533")
     compileOnly fg.deobf("curse.maven:storms-237746:4426524")
     compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
     compileOnly fg.deobf("curse.maven:sereneapi-291874:3693809")

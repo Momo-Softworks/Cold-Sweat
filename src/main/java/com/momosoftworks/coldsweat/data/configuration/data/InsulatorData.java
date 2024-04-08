@@ -13,7 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -24,13 +24,15 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSlot slot,
                             Insulation insulation, NbtRequirement nbt,
                             EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
-                            Optional<List<String>> requiredMods) implements NbtSerializable
+                            Optional<List<String>> requiredMods) implements NbtSerializable, IForgeRegistryEntry<InsulatorData>
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -41,7 +43,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
                 if (itemLocation == null) throw new IllegalArgumentException("Biome tag is null");
                 if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
 
-                return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));
+                return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, itemLocation));
             },
             // Convert from a TagKey to a string
             tag ->
@@ -125,7 +127,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
         for (int i = 0; i < tags.size(); i++)
         {
             String tag = tags.getString(i);
-            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, new ResourceLocation(tag));
+            TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag));
             items.add(Either.left(tagKey));
         }
         InsulationSlot type = InsulationSlot.valueOf(nbt.getString("type"));
@@ -156,5 +158,23 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
         });
 
         return new InsulatorData(items, type, insulation, nbt1, predicate, attributes, mods);
+    }
+
+    @Override
+    public InsulatorData setRegistryName(ResourceLocation name)
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation getRegistryName()
+    {
+        return new ResourceLocation("coldsweat", "insulators");
+    }
+
+    @Override
+    public Class<InsulatorData> getRegistryType()
+    {
+        return InsulatorData.class;
     }
 }
