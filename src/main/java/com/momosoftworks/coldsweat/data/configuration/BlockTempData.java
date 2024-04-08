@@ -16,7 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade, List<BlockPredicate> conditions, Optional<CompoundTag> tag) implements IForgeRegistryEntry<BlockTempData>
+public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade,
+                            List<BlockPredicate> conditions, Optional<CompoundTag> tag, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<BlockTempData>
 {
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -44,7 +45,8 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
             BlockPredicate.CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(BlockTempData::conditions),
-            CompoundTag.CODEC.optionalFieldOf("tag").forGetter(BlockTempData::tag)
+            CompoundTag.CODEC.optionalFieldOf("tag").forGetter(BlockTempData::tag),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
 
     @Override

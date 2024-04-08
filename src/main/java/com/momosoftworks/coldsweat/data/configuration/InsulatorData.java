@@ -6,7 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
+import com.momosoftworks.coldsweat.api.util.InsulationSlot;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +20,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public record InsulatorData(List<Either<TagKey<Item>, Item>> items, Optional<TagKey<Item>> tag, InsulationType type,
-                            Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundTag> nbt) implements IForgeRegistryEntry<InsulatorData>
+public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSlot type,
+                            Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundTag> nbt,
+                            Optional<EntityRequirement> predicate, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<InsulatorData>
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -44,10 +46,11 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, Optional<Tag
             })
             .listOf()
             .fieldOf("items").forGetter(InsulatorData::items),
-            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("tag").forGetter(InsulatorData::tag),
-            InsulationType.CODEC.fieldOf("type").forGetter(InsulatorData::type),
+            InsulationSlot.CODEC.fieldOf("type").forGetter(InsulatorData::type),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).fieldOf("insulation").forGetter(InsulatorData::insulation),
-            CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(InsulatorData::nbt)
+            CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(InsulatorData::nbt),
+            EntityRequirement.getCodec().optionalFieldOf("predicate").forGetter(InsulatorData::predicate),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
     @Override

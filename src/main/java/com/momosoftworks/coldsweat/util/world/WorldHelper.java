@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -39,11 +40,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -409,11 +412,23 @@ public abstract class WorldHelper
     }
 
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
+    {   return entityDropItem(entity, stack, 6000);
+    }
+
+    public static ItemEntity entityDropItem(Entity entity, ItemStack stack, int lifeTime)
     {
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+            age.setAccessible(true);
+            try
+            {   age.set(item, 6000 - lifeTime);
+            }
+            catch (Exception e)
+            {   e.printStackTrace();
+            }
         }
         return item;
     }
@@ -435,17 +450,10 @@ public abstract class WorldHelper
         }
     }
 
-    public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
-    {
-        return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
-            && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
-            && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
-    }
-
     /**
-     * @return A Vec3 at the center of the given BlockPos.
+     * Allows the server world to be accessed from any thread
      */
-    public static Vec3 centerOf(BlockPos pos)
-    {   return new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    public static ServerLevel getServerLevel(Level level)
+    {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 }
