@@ -39,7 +39,7 @@ public class HearthContainer extends Container
                 // Check if the potion is blacklisted
                 Collection< EffectInstance> effects = PotionUtils.getMobEffects(stack);
                 return !effects.isEmpty()
-                    && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.POTIONS.getKey(eff.getEffect())));
+                    && effects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect()));
             }
 
             @Override

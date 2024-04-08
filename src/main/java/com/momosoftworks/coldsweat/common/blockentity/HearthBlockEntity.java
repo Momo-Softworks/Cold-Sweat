@@ -452,7 +452,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             List<EffectInstance> itemEffects = PotionUtils.getMobEffects(fuelStack);
             if (ConfigSettings.HEARTH_POTIONS_ENABLED.get()
             && !itemEffects.isEmpty() && !itemEffects.equals(effects)
-            && itemEffects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.POTIONS.getKey(eff.getEffect()))))
+            && itemEffects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect())))
             {
                 if (fuelStack.getItem() instanceof PotionItem)
                 {   this.getItems().set(0, Items.GLASS_BOTTLE.getDefaultInstance());
