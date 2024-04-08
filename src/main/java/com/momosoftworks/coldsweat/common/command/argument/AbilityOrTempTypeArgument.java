@@ -31,12 +31,12 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found));
 
-    public static AbilityOrTempTypeArgument modifier()
+    public static AbilityOrTempTypeArgument attribute()
     {   return new AbilityOrTempTypeArgument();
     }
 
-    public static Temperature.Type getModifier(CommandContext<CommandSourceStack> context, String argument)
-    {   return context.getArgument(argument, Temperature.Type.class);
+    public static Either<Temperature.Type, Temperature.Ability> getAttribute(CommandContext<CommandSourceStack> context, String argument)
+    {   return context.getArgument(argument, Either.class);
     }
 
     @Override

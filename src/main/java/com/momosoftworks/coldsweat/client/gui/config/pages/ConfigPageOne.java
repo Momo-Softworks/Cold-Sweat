@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;

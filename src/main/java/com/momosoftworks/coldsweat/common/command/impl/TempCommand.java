@@ -8,7 +8,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
@@ -93,7 +92,7 @@ public class TempCommand extends BaseCommand
                                 /* Clear all attributes */
                                 .then(Commands.literal("clear")
                                               /* Modify attribute of this type */
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .executes(source -> executeClearModifier(
                                                                     source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                     AbilityOrTempTypeArgument.getAttribute(source, "type"))
@@ -105,7 +104,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Add to base value */
                                 .then(Commands.literal("add")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -127,7 +126,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_base")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -148,7 +147,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_total")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -168,7 +167,7 @@ public class TempCommand extends BaseCommand
                                               )
                                 )
                                 .then(Commands.literal("set")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                               .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                           .executes(source -> executeModifyEntityTemp(
