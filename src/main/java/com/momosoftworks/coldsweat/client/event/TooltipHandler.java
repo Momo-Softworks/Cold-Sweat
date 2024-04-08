@@ -59,7 +59,7 @@ public class TooltipHandler
             {
                 do
                 {   tooltipIndex++;
-                } 
+                }
                 while (tooltipIndex < elements.size()
                    && (elements.get(tooltipIndex).getString().isEmpty()));
                 break;
@@ -67,6 +67,7 @@ public class TooltipHandler
         }
 
         Insulation itemInsul = null;
+        PlayerEntity player = Minecraft.getInstance().player;
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             if (!Screen.hasShiftDown())
@@ -94,11 +95,19 @@ public class TooltipHandler
         // Is insulation item
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null
         && !itemInsul.isEmpty())
-        {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+        {
+            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), itemData), itemData);
+            if (itemData.testEntity(player))
+            {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+            }
         }
         // Has insulation (armor)
         else if (stack.getItem() instanceof IArmorVanishable && ItemInsulationManager.getInsulationCap(stack).map(c -> !c.getInsulation().isEmpty()).orElse(false))
-        {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+        {
+            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), itemData), itemData);
+            if (itemData.testEntity(player))
+            {   elements.add(tooltipIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+            }
         }
     }
 
@@ -111,6 +120,7 @@ public class TooltipHandler
         if (stack.isEmpty()) return;
 
         Tooltip tooltip = null;
+        PlayerEntity player = Minecraft.getInstance().player;
 
         Insulation itemInsul = null;
 
@@ -118,11 +128,19 @@ public class TooltipHandler
         {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.isEmpty())
-        {   tooltip = new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM);
+        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        {
+            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), itemData), itemData);
+            if (itemData.testEntity(player))
+            {   tooltip = new InsulationTooltip(ConfigSettings.INSULATION_ITEMS.get().get(itemData).split(), InsulationType.ITEM);
+            }
         }
-        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())) != null && !itemInsul.isEmpty())
-        {   tooltip = new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO);
+        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(itemData)) != null && !itemInsul.isEmpty())
+        {
+            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATING_CURIOS.get(), itemData), itemData);
+            if (itemData.testEntity(player))
+            {   tooltip = new InsulationTooltip(ConfigSettings.INSULATING_CURIOS.get().get(itemData).split(), InsulationType.CURIO);
+            }
         }
 
         // If the item is insulated armor
@@ -131,20 +149,24 @@ public class TooltipHandler
         {
             // Create the list of insulation pairs from NBT
             List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
-            .map(c ->
-            {
-                if (c instanceof ItemInsulationCap)
-                {   return ((ItemInsulationCap) c);
-                }
-                return new ItemInsulationCap();
-            }).map(cap -> cap.getInsulationValues().stream().map(Insulation::split).reduce(new ArrayList<>(), (list, insul) ->
-            {   list.addAll(insul);
-                return list;
-            })).orElse(new ArrayList<>());
+                                          // Get insulation values
+                                          .map(cap -> cap.getInsulation().stream()
+                                          // Filter out insulation that doesn't match the player's predicate
+                                          .filter(pair -> CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), ItemData.of(pair.getFirst()))
+                                                                  .testEntity(player))
+                                          // Flat map the insulation values
+                                          .map(pair -> pair.getSecond()).reduce(new ArrayList<>(), (list, insul) ->
+                                          {   list.addAll(insul);
+                                              return list;
+                                          })).orElse(new ArrayList<>());
+            itemData = CSMath.orElse(CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), itemData), itemData);
 
             // If the armor has intrinsic insulation due to configs, add it to the list
             ConfigSettings.INSULATING_ARMORS.get().computeIfPresent(itemData, (item, pair) ->
-            {   insulation.addAll(pair.split());
+            {   ItemData data = CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), item);
+                if (data != null && data.testEntity(player))
+                {   insulation.addAll(pair.split());
+                }
                 return pair;
             });
 

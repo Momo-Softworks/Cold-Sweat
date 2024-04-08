@@ -8,6 +8,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
+import java.util.Optional;
 
 public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
 {
@@ -16,14 +17,16 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
     double max;
     Temperature.Units units;
     boolean isOffset;
+    Optional<List<String>> requiredMods;
 
-    public BiomeTempData(List<ResourceLocation> biomes, double min, double max, Temperature.Units units, boolean isOffset)
+    public BiomeTempData(List<ResourceLocation> biomes, double min, double max, Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {
         this.biomes = biomes;
         this.min = min;
         this.max = max;
         this.units = units;
         this.isOffset = isOffset;
+        this.requiredMods = requiredMods;
     }
 
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -45,7 +48,8 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
                     },
                     Either::right).forGetter(data -> data.max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset)
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, BiomeTempData::new));
 
     @Override

@@ -361,6 +361,7 @@ public class ConfigHelper
         for (Map.Entry<ItemData, Double> entry : items.entrySet())
         {
             ItemData stack = entry.getKey();
+            if (stack.getPredicate() != null) continue;
             List<Object> item = new ArrayList<>();
             item.add(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
             item.add(entry.getValue());

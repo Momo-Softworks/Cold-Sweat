@@ -1,13 +1,19 @@
 package com.momosoftworks.coldsweat.util.entity;
 
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.world.GameType;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class EntityHelper
@@ -42,5 +48,27 @@ public class EntityHelper
         catch (Exception e)
         {   return 1f;
         }
+    }
+
+    public static GameType getGameModeForPlayer(PlayerEntity player)
+    {
+        return player instanceof ServerPlayerEntity
+               ? ObjectBuilder.build((() ->
+                 {
+                     ServerPlayerEntity serverPlayer = ((ServerPlayerEntity) player);
+                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayerEntity.class, "f_8941_");
+                     gameMode.setAccessible(true);
+                     try
+                     {   return (GameType) gameMode.get(serverPlayer);
+                     }
+                     catch (IllegalAccessException e)
+                     {   throw new RuntimeException(e);
+                     }
+                 }))
+               : ClientOnlyHelper.getGameMode();
+    }
+
+    public static ServerPlayerEntity getServerPlayer(PlayerEntity player)
+    {   return ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(player.getUUID());
     }
 }

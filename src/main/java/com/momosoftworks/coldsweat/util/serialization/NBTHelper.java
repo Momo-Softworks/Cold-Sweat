@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.container.Slot;
@@ -14,7 +15,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -72,31 +75,26 @@ public class NBTHelper
     }
 
     public static void incrementTag(Object owner, String key, int amount)
-    {
-        incrementTag(owner, key, amount, (tag) -> true);
+    {   incrementTag(owner, key, amount, (tag) -> true);
     }
 
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
         CompoundNBT tag;
         if (owner instanceof LivingEntity)
-        {
-            tag = ((LivingEntity) owner).getPersistentData();
+        {   tag = ((LivingEntity) owner).getPersistentData();
         }
         else if (owner instanceof ItemStack)
-        {
-            tag = ((ItemStack) owner).getOrCreateTag();
+        {   tag = ((ItemStack) owner).getOrCreateTag();
         }
         else if (owner instanceof TileEntity)
-        {
-            tag = ((TileEntity) owner).getTileData();
+        {   tag = ((TileEntity) owner).getTileData();
         }
         else return 0;
 
         int value = tag.getInt(key);
         if (predicate.test(value))
-        {
-            tag.putInt(key, value + amount);
+        {   tag.putInt(key, value + amount);
         }
         return value + amount;
     }
@@ -171,5 +169,85 @@ public class NBTHelper
         {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
             return new CompoundNBT();
         }
+    }
+
+    public static EntityRequirement readEntityPredicate(CompoundNBT tag)
+    {   return EntityRequirement.deserialize(tag);
+    }
+
+    public static CompoundNBT writeEntityRequirement(EntityRequirement predicate)
+    {   return predicate.serialize();
+    }
+
+    public static ListNBT listTagOf(List<?> list)
+    {
+        ListNBT tag = new ListNBT();
+        for (Object obj : list)
+        {   tag.add(writeValue(obj));
+        }
+        return tag;
+    }
+
+    @Nullable
+    public static Object getValue(INBT tag)
+    {
+        if (tag instanceof IntNBT)
+        {   return ((IntNBT) tag).getAsInt();
+        }
+        else if (tag instanceof FloatNBT)
+        {   return ((FloatNBT) tag).getAsFloat();
+        }
+        else if (tag instanceof DoubleNBT)
+        {   return ((DoubleNBT) tag).getAsDouble();
+        }
+        else if (tag instanceof LongNBT)
+        {   return ((LongNBT) tag).getAsLong();
+        }
+        else if (tag instanceof ShortNBT)
+        {   return ((ShortNBT) tag).getAsShort();
+        }
+        else if (tag instanceof ByteNBT)
+        {   return ((ByteNBT) tag).getAsByte();
+        }
+        else if (tag instanceof ByteArrayNBT)
+        {   return ((ByteArrayNBT) tag).getAsString();
+        }
+        else if (tag instanceof IntArrayNBT)
+        {   return ((IntArrayNBT) tag).getAsIntArray();
+        }
+        else if (tag instanceof LongArrayNBT)
+        {   return ((LongArrayNBT) tag).getAsLongArray();
+        }
+        else if (tag instanceof StringNBT)
+        {   return ((StringNBT) tag).getAsString();
+        }
+        return null;
+    }
+
+    @Nullable
+    public static INBT writeValue(Object obj)
+    {
+        if (obj instanceof Integer)
+        {   return IntNBT.valueOf((Integer) obj);
+        }
+        else if (obj instanceof Float)
+        {   return FloatNBT.valueOf((Float) obj);
+        }
+        else if (obj instanceof Double)
+        {   return DoubleNBT.valueOf((Double) obj);
+        }
+        else if (obj instanceof Long)
+        {   return LongNBT.valueOf((Long) obj);
+        }
+        else if (obj instanceof Short)
+        {   return ShortNBT.valueOf((Short) obj);
+        }
+        else if (obj instanceof Byte)
+        {   return ByteNBT.valueOf((Byte) obj);
+        }
+        else if (obj instanceof String)
+        {   return StringNBT.valueOf((String) obj);
+        }
+        return null;
     }
 }

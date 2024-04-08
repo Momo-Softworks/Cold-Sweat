@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
@@ -26,8 +27,11 @@ public class InsulatorData implements IForgeRegistryEntry<InsulatorData>
     InsulationType type;
     Either<StaticInsulation, AdaptiveInsulation> insulation;
     Optional<CompoundNBT> nbt;
+    Optional<EntityRequirement> predicate;
+    Optional<List<String>> requiredMods;
 
-    public InsulatorData(List<Either<ITag<Item>, Item>> items, InsulationType type, Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundNBT> nbt)
+    public InsulatorData(List<Either<ITag<Item>, Item>> items, InsulationType type, Either<StaticInsulation, AdaptiveInsulation> insulation, Optional<CompoundNBT> nbt,
+                         Optional<EntityRequirement> predicate, Optional<List<String>> requiredMods)
     {   this.items = items;
         this.type = type;
         this.insulation = insulation;
@@ -38,7 +42,9 @@ public class InsulatorData implements IForgeRegistryEntry<InsulatorData>
             Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().fieldOf("item").forGetter(insulator -> insulator.items),
             InsulationType.CODEC.fieldOf("type").forGetter(insulator -> insulator.type),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).fieldOf("insulation").forGetter(insulator -> insulator.insulation),
-            CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(insulator -> insulator.nbt)
+            CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(insulator -> insulator.nbt),
+            EntityRequirement.getCodec().optionalFieldOf("predicate").forGetter(data -> data.predicate),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, InsulatorData::new));
 
     @Override

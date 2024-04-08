@@ -39,11 +39,14 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -381,11 +384,23 @@ public abstract class WorldHelper
     }
 
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
+    {   return entityDropItem(entity, stack, 6000);
+    }
+
+    public static ItemEntity entityDropItem(Entity entity, ItemStack stack, int lifeTime)
     {
         Random rand = new Random();
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+            age.setAccessible(true);
+            try
+            {   age.set(item, 6000 - lifeTime);
+            }
+            catch (Exception e)
+            {   e.printStackTrace();
+            }
         }
         return item;
     }
@@ -407,11 +422,11 @@ public abstract class WorldHelper
         }
     }
 
-    public static boolean withinCubeDistance(BlockPos pos1, BlockPos pos2, double maxDistance)
-    {
-        return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
-            && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
-            && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    /**
+     * Allows the server world to be accessed from any thread
+     */
+    public static ServerWorld getServerLevel(World level)
+    {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 
     /**

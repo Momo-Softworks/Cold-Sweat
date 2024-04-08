@@ -26,8 +26,10 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     boolean fade;
     List<BlockState> conditions;
     Optional<CompoundNBT> tag;
+    Optional<List<String>> requiredMods;
 
-    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade, List<BlockState> conditions, Optional<CompoundNBT> tag)
+    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade,
+                         List<BlockState> conditions, Optional<CompoundNBT> tag, Optional<List<String>> requiredMods)
     {
         this.blocks = blocks;
         this.temperature = temperature;
@@ -35,6 +37,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
         this.fade = fade;
         this.conditions = conditions;
         this.tag = tag;
+        this.requiredMods = requiredMods;
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -43,7 +46,8 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
             BlockState.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
-            CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag)
+            CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, BlockTempData::new));
 
     @Override

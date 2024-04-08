@@ -7,4 +7,36 @@ public class ObjectBuilder
     public static <T> T build(Supplier<T> object)
     {   return object.get();
     }
+
+    public static String formatComplexString(String string)
+    {
+        int indentation = 0;
+        StringBuilder builder = new StringBuilder();
+        for (char c : string.toCharArray())
+        {
+            if (c == '{')
+            {
+                builder.append(c).append('\n');
+                indentation++;
+                builder.append(new String(new char[indentation]).replace("\0", "    "));
+            }
+            else if (c == '}')
+            {
+                builder.append('\n');
+                indentation--;
+                builder.append(new String(new char[indentation]).replace("\0", "    "));
+                builder.append(c);
+            }
+            else if (c == ',')
+            {
+                builder.append(c).append('\n');
+                builder.append(new String(new char[indentation]).replace("\0", "    "));
+            }
+            else
+            {
+                builder.append(c);
+            }
+        }
+        return builder.toString();
+    }
 }

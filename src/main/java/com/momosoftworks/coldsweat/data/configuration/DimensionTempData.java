@@ -11,6 +11,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
 {
@@ -18,20 +19,24 @@ public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
     double temperature;
     Temperature.Units units;
     boolean isOffset;
+    Optional<List<String>> requiredMods;
 
-    public DimensionTempData(List<ResourceLocation> dimensions, double temperature, Temperature.Units units, boolean isOffset)
+    public DimensionTempData(List<ResourceLocation> dimensions, double temperature,
+                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {
         this.dimensions = dimensions;
         this.temperature = temperature;
         this.units = units;
         this.isOffset = isOffset;
+        this.requiredMods = requiredMods;
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             com.momosoftworks.coldsweat.api.util.Temperature.Units.CODEC.optionalFieldOf("units", com.momosoftworks.coldsweat.api.util.Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset)
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, DimensionTempData::new));
 
     @Override
@@ -40,7 +45,6 @@ public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {

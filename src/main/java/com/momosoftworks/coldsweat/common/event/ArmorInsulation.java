@@ -36,11 +36,12 @@ import java.util.stream.Collectors;
 public class ArmorInsulation
 {
     @SubscribeEvent
-    public static void addLeatherModifiers(TickEvent.PlayerTickEvent event)
+    public static void applyArmorInsulation(TickEvent.PlayerTickEvent event)
     {
         PlayerEntity player = event.player;
-        if (event.phase == TickEvent.Phase.END && !player.level.isClientSide() && player.tickCount % 10 == 0)
+        if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayerEntity && player.tickCount % 20 == 0)
         {
+            ServerPlayerEntity serverPlayer = ((ServerPlayerEntity) player);
             int fullyInsulated = 0;
             double cold = 0;
             double hot = 0;
@@ -53,12 +54,16 @@ public class ArmorInsulation
             {
                 if (armorStack.getItem() instanceof ArmorItem)
                 {
-                    ArmorItem armorItem = (ArmorItem) armorStack.getItem();
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
                     Insulation insulationValue = ConfigSettings.INSULATING_ARMORS.get().get(ItemData.of(armorStack));
                     if (insulationValue != null)
                     {
+                        // Check if the player meets the predicate for the insulation
+                        ItemData data = CSMath.getExactKey(ConfigSettings.INSULATING_ARMORS.get(), ItemData.of(armorStack));
+                        if (data == null || !data.testEntity(serverPlayer))
+                        {   continue;
+                        }
                         cold += insulationValue.getCold();
                         hot += insulationValue.getHot();
                     }
@@ -68,6 +73,7 @@ public class ArmorInsulation
                         List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
                                                       .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                                                       .stream()
+                                                      .filter(pair -> CSMath.getExactKey(ConfigSettings.INSULATION_ITEMS.get(), ItemData.of(pair.getFirst())).testEntity(serverPlayer))
                                                       .map(pair -> pair.getSecond())
                                                       .flatMap(List::stream).collect(Collectors.toList());
 
@@ -114,9 +120,8 @@ public class ArmorInsulation
                 Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
 
             // Award advancement for full insulation
-            if (fullyInsulated >= 4 && player instanceof ServerPlayerEntity)
+            if (fullyInsulated >= 4)
             {
-                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
                 if (serverPlayer.getServer() != null)
                 {
                     Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));

@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.IArgumentSerializer;
@@ -42,9 +43,7 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
     {
         String name = reader.readUnquotedString();
         try
-        {   return Temperature.Type.fromID(name) != null
-                   ? Either.left(Temperature.Type.fromID(name))
-                   : Either.right(Temperature.Ability.fromID(name));
+        {   return CSMath.orElse(Either.left(Temperature.Type.fromID(name)), Either.right(Temperature.Ability.fromID(name)));
         }
         catch (IllegalArgumentException e)
         {   throw INVALID_ENUM.createWithContext(reader, name, Arrays.toString(this.getExamples().toArray()));

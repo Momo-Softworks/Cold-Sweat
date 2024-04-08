@@ -4,11 +4,13 @@ import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
+import net.minecraft.client.multiplayer.PlayerController;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
@@ -41,5 +43,9 @@ public class ClientOnlyHelper
 
     public static PlayerEntity getClientPlayer()
     {   return Minecraft.getInstance().player;
+    }
+
+    public static GameType getGameMode()
+    {   return Minecraft.getInstance().gameMode.getPlayerMode();
     }
 }
