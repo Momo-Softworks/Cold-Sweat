@@ -16,7 +16,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -39,7 +38,7 @@ public class HearthContainer extends AbstractContainerMenu
                 // Check if the potion is blacklisted
                 Collection< MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
                 return !effects.isEmpty()
-                    && effects.stream().noneMatch(eff -> ConfigSettings.BLACKLISTED_POTIONS.get().contains(ForgeRegistries.MOB_EFFECTS.getKey(eff.getEffect())));
+                    && effects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect()));
             }
 
             @Override
