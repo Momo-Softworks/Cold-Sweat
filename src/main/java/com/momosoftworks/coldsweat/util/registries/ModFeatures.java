@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.util.registries;
 
 import com.momosoftworks.coldsweat.common.world.feature.SoulStalkFeatureConfig;
 import com.momosoftworks.coldsweat.core.init.FeatureInit;
-import com.momosoftworks.coldsweat.data.tags.ModBlockTags;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.data.worldgen.placement.PlacementUtils;

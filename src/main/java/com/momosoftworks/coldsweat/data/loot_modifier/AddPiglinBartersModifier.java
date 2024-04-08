@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.loot_modifiers;
+package com.momosoftworks.coldsweat.data.loot_modifier;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
