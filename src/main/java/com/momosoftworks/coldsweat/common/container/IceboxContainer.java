@@ -105,14 +105,14 @@ public class IceboxContainer extends AbstractContainerMenu
             }
             else
             {
-                if (itemstack.is(ModItemTags.ICEBOX_VALID))
+                if (this.slots.get(1).mayPlace(itemstack))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (this.te.getItemFuel(itemstack) > 0)
+                else if (this.slots.get(0).mayPlace(itemstack))
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
