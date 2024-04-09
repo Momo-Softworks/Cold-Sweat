@@ -44,6 +44,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTileEntity, ISidedInventory
 {
@@ -169,26 +170,21 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
         if (!shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+            double min = cap.getAbility(Temperature.Ability.FREEZING_POINT);
+            double max = cap.getAbility(Temperature.Ability.BURNING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.betweenInclusive(temp, min, max))
             {
                 // Find the player's HearthTempModifier
-                TempModifier modifier = null;
-                for (TempModifier tempModifier : cap.getModifiers(Temperature.Type.WORLD))
-                {   if (tempModifier instanceof HearthTempModifier)
-                {   modifier = tempModifier;
-                    break;
-                }
-                }
+                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
                 // If they have one, refresh it
-                if (modifier != null)
-                {   if (modifier.getExpireTime() - modifier.getTicksExisted() > 20)
-                {   return;
-                }
-                    temp = modifier.getLastInput();
+                if (modifier.isPresent())
+                {
+                    if (modifier.get().getExpireTime() - modifier.get().getTicksExisted() > 20)
+                    {   return;
+                    }
+                    temp = modifier.get().getLastInput();
                 }
                 // This means the player is not insulated, and they are habitable without it
                 else return;
