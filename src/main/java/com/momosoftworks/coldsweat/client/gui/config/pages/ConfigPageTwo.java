@@ -40,41 +40,39 @@ public class ConfigPageTwo extends AbstractConfigPage
     {
         super.init();
 
-        ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
-
         // Temp Offset
         this.addDecimalInput("temp_offset", Side.LEFT, new TranslationTextComponent("cold_sweat.config.temp_offset.name"),
-                             value -> clientConfig.setTempOffset(value.intValue()),
-                             input -> input.setValue(String.valueOf(clientConfig.getTempOffset())),
+                             value -> ConfigSettings.TEMP_OFFSET.set(value.intValue()),
+                             input -> input.setValue(String.valueOf(ConfigSettings.TEMP_OFFSET.get())),
                              false, false, true, new TranslationTextComponent("cold_sweat.config.temp_offset.desc"));
 
         // Temp Smoothing
         this.addDecimalInput("temp_smoothing", Side.LEFT, new TranslationTextComponent("cold_sweat.config.temp_smoothing.name"),
-                             value -> clientConfig.setTempSmoothing(value),
-                             input -> input.setValue(String.valueOf(clientConfig.getTempSmoothing())),
+                             value -> ConfigSettings.TEMP_SMOOTHING.set(value),
+                             input -> input.setValue(String.valueOf(ConfigSettings.TEMP_SMOOTHING.get())),
                              false, false, true, new TranslationTextComponent("cold_sweat.config.temp_smoothing.desc"));
 
         // Hearth Debug
-        this.addButton("hearth_debug", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.hearth_debug.name").append(": ").append(clientConfig.isHearthDebugEnabled() ? ON : OFF),
+        this.addButton("hearth_debug", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.hearth_debug.name").append(": ").append(ConfigSettings.HEARTH_DEBUG.get() ? ON : OFF),
                 button ->
                 {
-                    clientConfig.setHearthDebug(!clientConfig.isHearthDebugEnabled());
+                    ConfigSettings.HEARTH_DEBUG.set(!ConfigSettings.HEARTH_DEBUG.get());
                 },
                 false, false, true, new TranslationTextComponent("cold_sweat.config.hearth_debug.desc"));
 
         // Camera Sway
-        this.addButton("camera_sway", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.distortion.name").append(": ").append(clientConfig.areDistortionsEnabled() ? ON : OFF),
+        this.addButton("camera_sway", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.distortion.name").append(": ").append(ConfigSettings.DISTORTION_EFFECTS.get() ? ON : OFF),
                 button ->
                 {
-                    clientConfig.setDistortionsEnabled(!clientConfig.areDistortionsEnabled());
+                    ConfigSettings.DISTORTION_EFFECTS.set(!ConfigSettings.DISTORTION_EFFECTS.get());
                 },
                 false, false, true, new TranslationTextComponent("cold_sweat.config.distortion.desc"));
 
         // High Contrast
-        this.addButton("high_contrast", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.high_contrast.name").append(": ").append(clientConfig.isHighContrast() ? ON : OFF),
+        this.addButton("high_contrast", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.high_contrast.name").append(": ").append(ConfigSettings.HIGH_CONTRAST.get() ? ON : OFF),
                 button ->
                 {
-                    clientConfig.setHighContrast(!clientConfig.isHighContrast());
+                    ConfigSettings.HIGH_CONTRAST.set(!ConfigSettings.HIGH_CONTRAST.get());
                 },
                 false, false, true, new TranslationTextComponent("cold_sweat.config.high_contrast.desc"));
 
@@ -88,8 +86,8 @@ public class ConfigPageTwo extends AbstractConfigPage
                 {   ConfigSettings.BODY_ICON_POS.set(new Vec2i(0, 0));
                 },
                 () ->
-                {   clientConfig.setBodyIconEnabled(!clientConfig.isBodyIconEnabled());
-                    return clientConfig.isBodyIconEnabled();
+                {   ConfigSettings.BODY_ICON_ENABLED.set(!ConfigSettings.BODY_ICON_ENABLED.get());
+                    return ConfigSettings.BODY_ICON_ENABLED.get();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_icon_location.desc"),
                                           new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
@@ -104,8 +102,8 @@ public class ConfigPageTwo extends AbstractConfigPage
                 {   ConfigSettings.BODY_READOUT_POS.set(new Vec2i(0, 0));
                 },
                 () ->
-                {   clientConfig.setBodyReadoutEnabled(!clientConfig.isBodyReadoutEnabled());
-                    return clientConfig.isBodyReadoutEnabled();
+                {   ConfigSettings.BODY_READOUT_ENABLED.set(!ConfigSettings.BODY_READOUT_ENABLED.get());
+                    return ConfigSettings.BODY_READOUT_ENABLED.get();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_readout_location.desc"),
                                           new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
@@ -119,20 +117,20 @@ public class ConfigPageTwo extends AbstractConfigPage
                 {   ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(0, 0));
                 },
                 () ->
-                {   clientConfig.setWorldGaugeEnabled(!clientConfig.isWorldGaugeEnabled());
-                    return clientConfig.isWorldGaugeEnabled();
+                {   ConfigSettings.WORLD_GAUGE_ENABLED.set(!ConfigSettings.WORLD_GAUGE_ENABLED.get());
+                    return ConfigSettings.WORLD_GAUGE_ENABLED.get();
                 },
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.world_temp_location.desc"),
                                           new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
         // Custom Hotbar
-        this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").append(": ").append(clientConfig.customHotbarEnabled() ? ON : OFF),
-                button -> clientConfig.setCustomHotbar(!clientConfig.customHotbarEnabled()),
+        this.addButton("custom_hotbar", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.custom_hotbar.name").append(": ").append(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get() ? ON : OFF),
+                button -> ConfigSettings.CUSTOM_HOTBAR_LAYOUT.set(!ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get()),
                 false, false, true, new TranslationTextComponent("cold_sweat.config.custom_hotbar.desc"));
 
         // Icon Bobbing
-        this.addButton("icon_bobbing", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.icon_bobbing.name").append(": ").append(clientConfig.isIconBobbingEnabled() ? ON : OFF),
-                button -> clientConfig.setIconBobbing(!clientConfig.isIconBobbingEnabled()),
+        this.addButton("icon_bobbing", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.icon_bobbing.name").append(": ").append(ConfigSettings.ICON_BOBBING.get() ? ON : OFF),
+                button -> ConfigSettings.ICON_BOBBING.set(!ConfigSettings.ICON_BOBBING.get()),
                 false, false, true, new TranslationTextComponent("cold_sweat.config.icon_bobbing.desc"));
 
         // Config Button Repositioning Screen

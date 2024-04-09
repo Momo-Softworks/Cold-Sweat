@@ -54,7 +54,7 @@ public class DrawConfigButton
 
             // Main config button
             ImageButton mainButton = new ImageButton(buttonX + xOffset.get(), buttonY + yOffset.get(),
-                                     24, 24, 0, 40, 24,
+                                     24, 24, 40, 40, 24,
                                      new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
                                      button ->
                                      {
