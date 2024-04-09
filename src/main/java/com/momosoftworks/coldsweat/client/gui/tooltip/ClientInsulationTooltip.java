@@ -222,7 +222,6 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             int textColor = 10526880;
 
             poseStack.pushPose();
-            poseStack.translate(2, 0, 0);
             // Render cold insulation
             if (cold > 0)
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, InsulationType.COLD);
