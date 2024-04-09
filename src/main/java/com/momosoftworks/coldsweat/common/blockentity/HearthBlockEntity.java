@@ -336,7 +336,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         // Input fuel
         if (this.ticksExisted % 20 == 0)
-        {   this.checkForFuel();
+        {   this.checkConsumeFuel();
         }
 
         // Update fuel
@@ -462,7 +462,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    public void checkForFuel()
+    public void checkConsumeFuel()
     {
         BlockPos pos = this.getBlockPos();
         ItemStack fuelStack = this.getItems().get(0);

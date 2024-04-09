@@ -209,7 +209,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected void drainFuel()
+    public void checkConsumeFuel()
     {
         ItemStack fuelStack = this.getItem(0);
         int itemFuel = getItemFuel(fuelStack);

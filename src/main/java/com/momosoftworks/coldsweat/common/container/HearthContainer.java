@@ -43,7 +43,7 @@ public class HearthContainer extends AbstractContainerMenu
 
             @Override
             public void setChanged()
-            {   TaskScheduler.scheduleServer(() -> ((HearthBlockEntity) this.container).checkForFuel(), 0);
+            {   TaskScheduler.scheduleServer(() -> ((HearthBlockEntity) this.container).checkConsumeFuel(), 0);
                 super.setChanged();
             }
         });
