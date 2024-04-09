@@ -317,7 +317,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
         // Input fuel
         if (this.ticksExisted % 20 == 0)
-        {   this.checkForFuel();
+        {   this.checkConsumeFuel();
         }
 
         // Update fuel
@@ -443,7 +443,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
-    public void checkForFuel()
+    public void checkConsumeFuel()
     {
         BlockPos pos = this.getBlockPos();
         ItemStack fuelStack = this.getItems().get(0);
