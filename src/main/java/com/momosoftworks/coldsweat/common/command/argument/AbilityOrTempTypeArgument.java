@@ -25,6 +25,7 @@ import net.minecraft.util.StringRepresentable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -32,8 +33,8 @@ import java.util.stream.Collectors;
 public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperature.Type, Temperature.Ability>>
 {
     private static final Codec<Either<Temperature.Type, Temperature.Ability>> TEMPERATURES_CODEC = new EitherCodec<>(
-    StringRepresentable.fromEnum(() -> new Temperature.Type[] {Temperature.Type.WORLD, Temperature.Type.BASE}),
-    StringRepresentable.fromEnum(() -> Temperature.Ability.values()));
+    StringRepresentable.fromEnum(() -> (Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(either -> either.left()).filter(Optional::isPresent).map(Optional::get).toArray(Temperature.Type[]::new))),
+    StringRepresentable.fromEnum(() -> (Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(either -> either.right()).filter(Optional::isPresent).map(Optional::get).toArray(Temperature.Ability[]::new))));
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((p_234071_) -> {
         return Component.translatable("argument.enum.invalid", p_234071_);
