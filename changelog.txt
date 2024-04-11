@@ -1946,3 +1946,37 @@ Technical Changes:
 - Added support for adding custom attributes to insulation items using JSON
       - Attributes will be applied to the player's armor
       - Any attributes (even Vanilla and modded ones) are supported
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03a
+- The soulspring lamp can now be given one fuel item at a time by right-clicking
+- Chameleons can now be right-clicked to be given items
+      - This is also a way of ensuring which chameleon will eat the item if there are multiple nearby. The dropped item will be marked with the chameleon's UUID
+- Added an empty tag remover that fixes existing items affected by the item stacking bug from previous versions
+
+Fixes:
+- Fixed cold fuel items not working in the hearth or icebox
+- Fixed the soulspring lamp not recharging when given fuel
+- Fixed goats not dropping fur on death
+- Fixed malformed JSON file for the Home Sweet Home advancement
+- Fixed the smokestack not being mineable with a pickaxe
+- Fixed the tooltip for temperature-affecting foods being formatted incorrectly
+- Fixed clientside mixin (MixinPickEntity) trying to load on the server
+- When a chameleon is fed an item that makes it search for a biome, the search is now done on a separate thread to prevent stalling the server thread
+      - This means there is no longer a noticeable lag spike when a chameleon attempts to find a biome
+- Fixed chameleons' death messages not showing the cause of death in some cases
+- Fixed other issues with chameleons locating biomes
+
+Technical Changes:
+- Data-driven stuff can now be defined in Cold Sweat's config folder (config/coldsweat/data)
+      - This allows users to define their own data without having to make a datapack
+- Added data-driven options for the several configs:
+      - Fuel items
+      - Structure temperatures
+      - Food temperatures
+      - Insulating mounts
+- Added block tags for hearth spread whitelist/blacklist (cold_sweat:tags/block/hearth/spread_whitelist and spread_blacklist)
+- Added block tag for blocks that should ignore sleeping conditions (cold_sweat:tags/block/ignore_sleep_check) (ignore the "Check Sleeping Conditions" setting)
+- Added item tag for non-insulatable armor items (cold_sweat:tags/item/not_insulatable)
+- Added effect tag for blacklisted potion effects in the hearth (cold_sweat:tags/mob_effect/hearth_blacklisted)
