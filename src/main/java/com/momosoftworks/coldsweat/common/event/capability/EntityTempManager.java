@@ -267,26 +267,23 @@ public class EntityTempManager
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
     {
         // Default TempModifiers for players
-        if (event.getEntity() instanceof PlayerEntity)
+        if (event.getEntity() instanceof PlayerEntity && event.getType() == Temperature.Trait.WORLD)
         {
-            if (event.getType() == Temperature.Trait.WORLD)
-            {
-                event.addModifier(new BiomeTempModifier(25).tickRate(10), false, Addition.BEFORE_FIRST);
-                event.addModifier(new DepthTempModifier().tickRate(10), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-                event.addModifier(new BlockTempModifier().tickRate(4), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof DepthTempModifier));
+            event.addModifier(new BiomeTempModifier(25).tickRate(10), false, Addition.BEFORE_FIRST);
+            event.addModifier(new UndergroundTempModifier().tickRate(10), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier().tickRate(4), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
-                // Serene Seasons compat
-                if (CompatManager.isSereneSeasonsLoaded())
-                {
-                    TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                                     mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
-                // Weather2 Compat
-                if (CompatManager.isWeather2Loaded())
-                {
-                    TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                               mod2 -> mod2 instanceof UndergroundTempModifier)));
-                }
+            // Serene Seasons compat
+            if (CompatManager.isSereneSeasonsLoaded())
+            {
+                TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                                 mod2 -> mod2 instanceof UndergroundTempModifier)));
+            }
+            // Weather2 Compat
+            if (CompatManager.isWeather2Loaded())
+            {
+                TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                           mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
         }
         // Default TempModifiers for other temperature-enabled entities
