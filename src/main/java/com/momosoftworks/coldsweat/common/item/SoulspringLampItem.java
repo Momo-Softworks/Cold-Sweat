@@ -10,7 +10,6 @@ import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -60,8 +59,8 @@ public class SoulspringLampItem extends Item
                 }
                 double max = ConfigSettings.MAX_TEMP.get();
 
-                double temp = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)
-                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Type.WORLD));
+                double temp = Temperature.getModifier(player, Temperature.Trait.WORLD, SoulLampTempModifier.class)
+                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
                 if ((ConfigSettings.LAMP_DIMENSIONS.get().contains(level.dimensionType()))
@@ -80,12 +79,12 @@ public class SoulspringLampItem extends Item
                     for (Player entity : level.getEntitiesOfClass(Player.class, bb))
                     {
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(entity, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(entity, Temperature.Trait.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD);
                         }
                     }
                     shouldBeOn = true;

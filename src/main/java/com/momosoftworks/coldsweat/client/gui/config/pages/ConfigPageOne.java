@@ -62,7 +62,7 @@ public class ConfigPageOne extends AbstractConfigPage
             clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.WORLD_TEMP = Temperature.convertUnits(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTemp(Temperature.Type.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
+                Overlays.WORLD_TEMP = Temperature.convertUnits(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
             properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 

@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -71,20 +70,27 @@ import java.util.concurrent.atomic.AtomicReference;
 @Mod.EventBusSubscriber
 public class EntityTempManager
 {
-    public static final Temperature.Type[] VALID_TEMPERATURE_TYPES = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.WORLD};
+    public static final Temperature.Trait[] VALID_TEMPERATURE_TRAITS = { Temperature.Trait.CORE, Temperature.Trait.BASE, Temperature.Trait.WORLD,
+                                                                         Temperature.Trait.HEAT_RESISTANCE, Temperature.Trait.COLD_RESISTANCE,
+                                                                         Temperature.Trait.HEAT_DAMPENING, Temperature.Trait.COLD_DAMPENING,
+                                                                         Temperature.Trait.FREEZING_POINT, Temperature.Trait.BURNING_POINT };
 
-    public static final Temperature.Type[] VALID_MODIFIER_TYPES    = {Temperature.Type.CORE, Temperature.Type.BASE, Temperature.Type.RATE, Temperature.Type.WORLD};
+    public static final Temperature.Trait[] VALID_MODIFIER_TRAITS = { Temperature.Trait.CORE, Temperature.Trait.BASE,
+                                                                      Temperature.Trait.RATE, Temperature.Trait.WORLD,
+                                                                      Temperature.Trait.HEAT_RESISTANCE, Temperature.Trait.COLD_RESISTANCE,
+                                                                      Temperature.Trait.HEAT_DAMPENING, Temperature.Trait.COLD_DAMPENING,
+                                                                      Temperature.Trait.FREEZING_POINT, Temperature.Trait.BURNING_POINT };
 
-    public static final Either<Temperature.Type, Temperature.Ability>[] VALID_ATTRIBUTE_TYPES = new Either[]
+    public static final Temperature.Trait[] VALID_ATTRIBUTE_TYPES = new Temperature.Trait[]
     {
-        Either.left(Temperature.Type.WORLD),
-        Either.left(Temperature.Type.BASE),
-        Either.right(Temperature.Ability.HEAT_RESISTANCE),
-        Either.right(Temperature.Ability.COLD_RESISTANCE),
-        Either.right(Temperature.Ability.HEAT_DAMPENING),
-        Either.right(Temperature.Ability.COLD_DAMPENING),
-        Either.right(Temperature.Ability.FREEZING_POINT),
-        Either.right(Temperature.Ability.BURNING_POINT)
+        Temperature.Trait.WORLD,
+        Temperature.Trait.BASE,
+        Temperature.Trait.HEAT_RESISTANCE,
+        Temperature.Trait.COLD_RESISTANCE,
+        Temperature.Trait.HEAT_DAMPENING,
+        Temperature.Trait.COLD_DAMPENING,
+        Temperature.Trait.FREEZING_POINT,
+        Temperature.Trait.BURNING_POINT
     };
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
@@ -158,14 +164,14 @@ public class EntityTempManager
         {
             if (living.getServer() != null) living.getServer().execute(() ->
             {
-                for (Temperature.Type type : VALID_MODIFIER_TYPES)
+                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
                 {
-                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, type);
+                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
                     MinecraftForge.EVENT_BUS.post(gatherEvent);
 
                     getTemperatureCap(living).ifPresent(cap ->
-                    {   cap.clearModifiers(type);
-                        cap.getModifiers(type).addAll(gatherEvent.getModifiers());
+                    {   cap.clearModifiers(trait);
+                        cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                     });
                 }
             });
@@ -181,8 +187,8 @@ public class EntityTempManager
         {
             TaskScheduler.schedule(() ->
             {
-                for (Either<Temperature.Type, Temperature.Ability> type : VALID_ATTRIBUTE_TYPES)
-                {   AttributeInstance attribute = getAttribute(type, living);
+                for (Temperature.Trait trait : VALID_ATTRIBUTE_TYPES)
+                {   AttributeInstance attribute = getAttribute(trait, living);
                     if (attribute == null) continue;
                     attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
                     attribute.removeModifiers();
@@ -213,9 +219,9 @@ public class EntityTempManager
             }
 
             // Remove expired modifiers
-            for (Temperature.Type type : VALID_MODIFIER_TYPES)
+            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
             {
-                cap.getModifiers(type).removeIf(modifier ->
+                cap.getModifiers(trait).removeIf(modifier ->
                 {   int expireTime = modifier.getExpireTime();
                     return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
                 });
@@ -263,7 +269,7 @@ public class EntityTempManager
         // Default TempModifiers for players
         if (event.getEntity() instanceof Player)
         {
-            if (event.getType() == Temperature.Type.WORLD)
+            if (event.getType() == Temperature.Trait.WORLD)
             {
                 event.addModifier(new BiomeTempModifier(25).tickRate(10), false, Addition.BEFORE_FIRST);
                 event.addModifier(new UndergroundTempModifier().tickRate(10), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
@@ -284,7 +290,7 @@ public class EntityTempManager
             }
         }
         // Default TempModifiers for other temperature-enabled entities
-        else if (event.getType() == Temperature.Type.WORLD && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
+        else if (event.getType() == Temperature.Trait.WORLD && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
         {   // Basic modifiers
             event.addModifier(new BiomeTempModifier(16).tickRate(40), false, Addition.BEFORE_FIRST);
             event.addModifier(new UndergroundTempModifier().tickRate(40), false, Addition.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
@@ -342,15 +348,15 @@ public class EntityTempManager
             {
                 if (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                 && WorldHelper.isRainingAt(player.level, player.blockPosition()))
-                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Type.WORLD, false);
+                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, false);
                 }
 
                 if (player.isFreezing())
-                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Type.BASE);
+                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Trait.BASE);
                 }
 
                 if (player.isOnFire())
-                {   Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Type.BASE);
+                {   Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Trait.BASE);
                 }
             }
 
@@ -361,7 +367,7 @@ public class EntityTempManager
 
                 if (!hasIcePotion)
                 {
-                    Temperature.getModifier(player, Temperature.Type.RATE, InsulationTempModifier.class).ifPresent(insulModifier ->
+                    Temperature.getModifier(player, Temperature.Trait.RATE, InsulationTempModifier.class).ifPresent(insulModifier ->
                     {   insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDouble("Hot") + insulModifier.getNBT().getDouble("Cold")));
                     });
                 }
@@ -398,11 +404,11 @@ public class EntityTempManager
             {   MobEffectInstance effect = event.getPotionEffect();
                 // New HearthTempModifier
                 TempModifier newMod = new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
-                Temperature.addOrReplaceModifier(player, newMod, Temperature.Type.WORLD);
+                Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD);
             }
             // Remove TempModifier on potion effect removed
             else if (event instanceof PotionEvent.PotionRemoveEvent)
-            {   Temperature.removeModifiers(player, Temperature.Type.WORLD, 1, mod -> mod instanceof HearthTempModifier);
+            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, 1, mod -> mod instanceof HearthTempModifier);
             }
         }
     }
@@ -422,8 +428,8 @@ public class EntityTempManager
                     // Divide the player's current temperature by 4
                     getTemperatureCap(player).ifPresent(cap ->
                     {
-                        double temp = cap.getTemp(Temperature.Type.CORE);
-                        cap.setTemp(Temperature.Type.CORE, temp / 4f);
+                        double temp = cap.getTrait(Temperature.Trait.CORE);
+                        cap.setTrait(Temperature.Trait.CORE, temp / 4f);
                         Temperature.updateTemperature(player, cap, true);
                     });
                 }
@@ -445,14 +451,14 @@ public class EntityTempManager
                 Entity mount = player.getVehicle();
                 // If insulated minecart
                 if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
-                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Type.RATE);
+                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Trait.RATE);
                 }
                 // If insulated entity (defined in config)
                 else
                 {
                     InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(ForgeRegistries.ENTITIES.getKey(mount.getType()));
                     if (entityInsul != null && entityInsul.test(mount))
-                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Type.RATE);
+                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE);
                     }
                 }
             }
@@ -474,11 +480,11 @@ public class EntityTempManager
                                                  food -> food.test(player, event.getItem()) ? food.value() : 0,
                                                  0d).floatValue();
             if (foodTemp != 0)
-            {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Type.CORE, true);
+            {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Trait.CORE, true);
             }
             // Soul sprout
             else if (event.getItem().getItem() == ModItems.SOUL_SPROUT)
-            {   Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Type.BASE);
+            {   Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Trait.BASE);
             }
         }
     }
@@ -504,70 +510,44 @@ public class EntityTempManager
     }
 
     /**
-     * Sets the corresponding attribute value for the given {@link Temperature.Type} or {@link Temperature.Ability}.
-     * @param param the type or ability to get the attribute for
+     * Sets the corresponding attribute value for the given {@link Temperature.Trait}.
+     * @param trait the type or ability to get the attribute for
      */
-    public static void setAttribute(Object param, LivingEntity entity, double value)
+    public static void setAttribute(Temperature.Trait trait, LivingEntity entity, double value)
     {
-        if (param instanceof Temperature.Type type)
+        switch (trait)
         {
-            switch (type)
-            {
-                case WORLD -> entity.getAttribute(ModAttributes.WORLD_TEMPERATURE).setBaseValue(value);
-                case BASE  -> entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE).setBaseValue(value);
-            }
+            case WORLD -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE), att -> att.setBaseValue(value));
+            case BASE  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE), att -> att.setBaseValue(value));
+            case HEAT_RESISTANCE -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_RESISTANCE), att -> att.setBaseValue(value));
+            case COLD_RESISTANCE -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_RESISTANCE), att -> att.setBaseValue(value));
+            case HEAT_DAMPENING  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_DAMPENING), att -> att.setBaseValue(value));
+            case COLD_DAMPENING  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_DAMPENING), att -> att.setBaseValue(value));
+            case FREEZING_POINT -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.FREEZING_POINT), att -> att.setBaseValue(value));
+            case BURNING_POINT  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BURNING_POINT), att -> att.setBaseValue(value));
         }
-        else if (param instanceof Temperature.Ability ability)
-        {
-            switch (ability)
-            {
-                case HEAT_RESISTANCE -> entity.getAttribute(ModAttributes.HEAT_RESISTANCE).setBaseValue(value);
-                case COLD_RESISTANCE -> entity.getAttribute(ModAttributes.COLD_RESISTANCE).setBaseValue(value);
-                case HEAT_DAMPENING  -> entity.getAttribute(ModAttributes.HEAT_DAMPENING).setBaseValue(value);
-                case COLD_DAMPENING  -> entity.getAttribute(ModAttributes.COLD_DAMPENING).setBaseValue(value);
-                case FREEZING_POINT -> entity.getAttribute(ModAttributes.FREEZING_POINT).setBaseValue(value);
-                case BURNING_POINT  -> entity.getAttribute(ModAttributes.BURNING_POINT).setBaseValue(value);
-            }
-        }
-
-        throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + param + "\" is not a valid type or ability!"));
     }
 
     /**
-     * Gets the corresponding attribute value for the given {@link Temperature.Type} or {@link Temperature.Ability}.
-     * @param param the type or ability to get the attribute for
+     * Gets the corresponding attribute value for the given {@link Temperature.Trait}.
+     * @param trait the type or ability to get the attribute for
      */
     @Nullable
-    public static AttributeInstance getAttribute(Object param, LivingEntity entity)
+    public static AttributeInstance getAttribute(Temperature.Trait trait, LivingEntity entity)
     {
-        if (param instanceof Either<?, ?> either)
+        return switch (trait)
         {
-            return ((Either<Temperature.Type, Temperature.Ability>) either).map(
-                type -> switch (type)
-                {
-                    case WORLD -> entity.getAttribute(ModAttributes.WORLD_TEMPERATURE);
-                    case BASE  -> entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE);
-                    default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + type + "\" is not a valid type!"));
-                },
-                ability -> switch (ability)
-                {
-                    case FREEZING_POINT  -> entity.getAttribute(ModAttributes.FREEZING_POINT);
-                    case BURNING_POINT   -> entity.getAttribute(ModAttributes.BURNING_POINT);
-                    case HEAT_RESISTANCE -> entity.getAttribute(ModAttributes.HEAT_RESISTANCE);
-                    case COLD_RESISTANCE -> entity.getAttribute(ModAttributes.COLD_RESISTANCE);
-                    case HEAT_DAMPENING  -> entity.getAttribute(ModAttributes.HEAT_DAMPENING);
-                    case COLD_DAMPENING  -> entity.getAttribute(ModAttributes.COLD_DAMPENING);
-                }
-            );
-        }
-        else if (param instanceof Temperature.Type type)
-        {   return getAttribute(Either.left(type), entity);
-        }
-        else if (param instanceof Temperature.Ability ability)
-        {   return getAttribute(Either.right(ability), entity);
-        }
+            case WORLD -> entity.getAttribute(ModAttributes.WORLD_TEMPERATURE);
+            case BASE  -> entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE);
+            case FREEZING_POINT  -> entity.getAttribute(ModAttributes.FREEZING_POINT);
+            case BURNING_POINT   -> entity.getAttribute(ModAttributes.BURNING_POINT);
+            case HEAT_RESISTANCE -> entity.getAttribute(ModAttributes.HEAT_RESISTANCE);
+            case COLD_RESISTANCE -> entity.getAttribute(ModAttributes.COLD_RESISTANCE);
+            case HEAT_DAMPENING  -> entity.getAttribute(ModAttributes.HEAT_DAMPENING);
+            case COLD_DAMPENING  -> entity.getAttribute(ModAttributes.COLD_DAMPENING);
 
-        throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + param + "\" is not a valid type or ability!"));
+            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + trait + "\" is not a valid trait!"));
+        };
     }
 
     public static Collection<AttributeModifier> getAttributeModifiers(LivingEntity entity, AttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
@@ -586,35 +566,27 @@ public class EntityTempManager
         return modifiers;
     }
 
-    public static AttributeModifier makeAttributeModifier(Either<Temperature.Type, Temperature.Ability> param, double value, AttributeModifier.Operation operation)
+    public static AttributeModifier makeAttributeModifier(Temperature.Trait trait, double value, AttributeModifier.Operation operation)
     {
-        return param.map(
-        type -> switch (type)
+        return switch (trait)
         {
             case WORLD -> new AttributeModifier("World Temperature Modifier", value, operation);
             case BASE  -> new AttributeModifier("Base Body Temperature Modifier", value, operation);
-            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.makeAttributeModifier(): \"" + type + "\" is not a valid type!"));
-        },
-        ability -> switch (ability)
-        {
+
             case FREEZING_POINT -> new AttributeModifier("Freezing Point Modifier", value, operation);
             case BURNING_POINT  -> new AttributeModifier("Burning Point Modifier", value, operation);
             case HEAT_RESISTANCE -> new AttributeModifier("Heat Resistance Modifier", value, operation);
             case COLD_RESISTANCE -> new AttributeModifier("Cold Resistance Modifier", value, operation);
             case HEAT_DAMPENING  -> new AttributeModifier("Heat Dampening Modifier", value, operation);
             case COLD_DAMPENING  -> new AttributeModifier("Cold Dampening Modifier", value, operation);
-        });
+            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.makeAttributeModifier(): \"" + trait + "\" is not a valid type!"));
+        };
     }
 
     public static boolean isTemperatureAttribute(Attribute attribute)
     {
         return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
                                   Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
-                                        .map(e ->
-                                        {
-                                            return e.left().isPresent()
-                                                   ? e.left().get().getSerializedName()
-                                                   : e.right().get().getSerializedName();
-                                        }).toArray(String[]::new));
+                                        .map(Temperature.Trait::getSerializedName).toArray(String[]::new));
     }
 }

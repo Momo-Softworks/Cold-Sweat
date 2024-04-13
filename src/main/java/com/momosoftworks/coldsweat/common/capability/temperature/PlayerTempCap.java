@@ -31,7 +31,7 @@ public class PlayerTempCap extends AbstractTempCap
             {   calculateHudVisibility(player);
             }
             if (player.isCreative())
-            {   this.setTemp(Temperature.Type.CORE, 0);
+            {   this.setTrait(Temperature.Trait.CORE, 0);
             }
         }
     }

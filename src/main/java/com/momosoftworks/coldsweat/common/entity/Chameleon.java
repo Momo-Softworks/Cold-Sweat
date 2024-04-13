@@ -47,7 +47,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -362,7 +361,7 @@ public class Chameleon extends Animal
         // Control temperature
         if (this.tickCount % 20 == 0)
         {   // Use the player's temperature if mounted
-            this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Type.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
+            this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
         }
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 

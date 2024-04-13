@@ -184,15 +184,15 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
         // Apply the insulation effect
         if (!shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
-        {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = cap.getAbility(Temperature.Ability.FREEZING_POINT);
-            double max = cap.getAbility(Temperature.Ability.BURNING_POINT);
+        {   double temp = cap.getTrait(Temperature.Trait.WORLD);
+            double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
+            double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.betweenInclusive(temp, min, max))
             {
                 // Find the player's HearthTempModifier
-                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Type.WORLD, HearthTempModifier.class);
+                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Trait.WORLD, HearthTempModifier.class);
                 // If they have one, refresh it
                 if (modifier.isPresent())
                 {

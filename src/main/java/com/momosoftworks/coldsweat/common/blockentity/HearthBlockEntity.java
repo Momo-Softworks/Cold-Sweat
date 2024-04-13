@@ -556,16 +556,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         // Apply the insulation effect
         if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
-        {   double temp = cap.getTemp(Temperature.Type.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getAbility(Temperature.Ability.FREEZING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getAbility(Temperature.Ability.BURNING_POINT);
+        {
+            double temp = cap.getTrait(Temperature.Trait.WORLD);
+            double min = ConfigSettings.MIN_TEMP.get() + cap.getTrait(Temperature.Trait.FREEZING_POINT);
+            double max = ConfigSettings.MAX_TEMP.get() + cap.getTrait(Temperature.Trait.BURNING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.betweenInclusive(temp, min, max))
             {
                 // Find the player's HearthTempModifier
                 TempModifier modifier = null;
-                for (TempModifier tempModifier : cap.getModifiers(Temperature.Type.WORLD))
+                for (TempModifier tempModifier : cap.getModifiers(Temperature.Trait.WORLD))
                 {   if (tempModifier instanceof HearthTempModifier)
                     {   modifier = tempModifier;
                         break;

@@ -15,24 +15,24 @@ import java.util.function.Supplier;
 public class TemperatureSyncMessage
 {
     int entityId;
-    CompoundTag temps;
+    CompoundTag traits;
     boolean instant;
 
-    public TemperatureSyncMessage(LivingEntity entity, CompoundTag temps, boolean instant)
+    public TemperatureSyncMessage(LivingEntity entity, CompoundTag traits, boolean instant)
     {   this.entityId = entity.getId();
-        this.temps = temps;
+        this.traits = traits;
         this.instant = instant;
     }
 
-    TemperatureSyncMessage(int entityId, CompoundTag temps, boolean instant)
+    TemperatureSyncMessage(int entityId, CompoundTag traits, boolean instant)
     {   this.entityId = entityId;
-        this.temps = temps;
+        this.traits = traits;
         this.instant = instant;
     }
 
     public static void encode(TemperatureSyncMessage message, FriendlyByteBuf buffer)
     {   buffer.writeInt(message.entityId);
-        buffer.writeNbt(message.temps);
+        buffer.writeNbt(message.traits);
         buffer.writeBoolean(message.instant);
     }
 
@@ -54,10 +54,9 @@ public class TemperatureSyncMessage
                 {
                     EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                     {
-                        cap.deserializeTemps(message.temps);
-                        cap.deserializeAbilities(message.temps);
+                        cap.deserializeTraits(message.traits);
                         if (message.instant && cap instanceof PlayerTempCap)
-                        {   Overlays.setBodyTempInstant(cap.getTemp(Temperature.Type.BODY));
+                        {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
                         }
                     });
                 }
