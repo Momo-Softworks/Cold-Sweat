@@ -5,14 +5,14 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
-public class InsulationTempModifier extends TempModifier
+public class ArmorInsulationTempModifier extends TempModifier
 {
-    public InsulationTempModifier()
+    public ArmorInsulationTempModifier()
     {
         this(0d, 0d);
     }
 
-    public InsulationTempModifier(double cold, double hot)
+    public ArmorInsulationTempModifier(double cold, double hot)
     {
         this.getNBT().putDouble("cold", cold);
         this.getNBT().putDouble("hot", hot);

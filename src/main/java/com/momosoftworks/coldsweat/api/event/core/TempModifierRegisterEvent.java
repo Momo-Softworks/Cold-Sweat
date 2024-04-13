@@ -1,8 +1,9 @@
 package com.momosoftworks.coldsweat.api.event.core;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import net.minecraft.SharedConstants;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -23,22 +24,40 @@ public class TempModifierRegisterEvent extends Event
      *
      * @param modifier the {@link TempModifier} to add.
      */
-    public void register(Supplier<TempModifier> modifier)
-    {   TempModifierRegistry.register(modifier);
+    public void register(ResourceLocation id, Supplier<TempModifier> modifier)
+    {   TempModifierRegistry.register(id, modifier);
     }
 
-    public void registerByClassName(String className)
+    //TODO Remove soon
+    /**
+     * TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.
+     */
+    @Deprecated(since = "2.3", forRemoval = true)
+    public void register(Supplier<TempModifier> modifier)
+    {
+        if (SharedConstants.IS_RUNNING_IN_IDE)
+        {   throw new RuntimeException("TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.");
+        }
+        register(new ResourceLocation(modifier.get().getID()), modifier);
+    }
+
+    /**
+     * A way of indirectly registering TempModifiers by class name.<br>
+     * Useful for adding compat for other mods, where loading the TempModifier's class directly would cause an error.<br>
+     * The class must have a no-arg constructor for this to work.
+     */
+    public void registerByClassName(ResourceLocation id, String className)
     {
         try
         {
-            this.register(() ->
+            this.register(id, () ->
             {   try
                 {   return (TempModifier) Class.forName(className).getConstructor().newInstance();
                 } catch (Exception e) { throw new RuntimeException(e); }
             });
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Failed to register TempModifier by class name: \"" + className + "\"!", e);
+        {   throw new RuntimeException(String.format("Failed to register TempModifier by class name: \"%s\"!", className), e);
         }
     }
 }

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.nbt.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -32,7 +33,7 @@ public class NBTHelper
     {
         // Write the modifier's data to a CompoundTag
         CompoundTag modifierTag = new CompoundTag();
-        modifierTag.putString("Id", modifier.getID());
+        modifierTag.putString("Id", TempModifierRegistry.getKey(modifier).toString());
 
         // Add the modifier's arguments
         modifierTag.put("ModifierData", modifier.getNBT());
@@ -54,7 +55,7 @@ public class NBTHelper
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        Optional<TempModifier> optional = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
+        Optional<TempModifier> optional = TempModifierRegistry.getValue(new ResourceLocation(modifierTag.getString("Id")));
         optional.ifPresent(modifier ->
         {
             modifier.setNBT(modifierTag.getCompound("ModifierData"));

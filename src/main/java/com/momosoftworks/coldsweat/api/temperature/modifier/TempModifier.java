@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.TempModifierRegisterEvent;
+import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import net.minecraft.nbt.CompoundTag;
@@ -94,7 +95,7 @@ public abstract class TempModifier
     }
 
     /**
-     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity)} at a specified interval.<br>
+     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, Temperature.Trait)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
      * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
@@ -137,15 +138,26 @@ public abstract class TempModifier
         this.nbt = data;
     }
 
+    // TODO Remove soon
     /**
-     * The ID is used to mark the TempModifier when it is stored in NBT
-     * @return the String ID of the TempModifier. You should include your mod's ID to prevent duplicate IDs.<br>
+     * This method is being removed in favor of registering TempModifiers with a ResourceLocation instead. <br>
+     * This method here as to not break classes that extent this method.
      */
-    public abstract String getID();
+    @Deprecated(since = "2.3", forRemoval = true)
+    public String getID()
+    {   throw new RuntimeException("TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.");
+    }
 
     @Override
     public String toString()
+    {   return TempModifierRegistry.getKey(this).toString();
+    }
+
+    @Override
+    public boolean equals(Object obj)
     {
-        return this.getID();
+        return obj instanceof TempModifier mod
+            && TempModifierRegistry.getKey(mod).equals(TempModifierRegistry.getKey(this))
+            && mod.getNBT().equals(this.getNBT());
     }
 }

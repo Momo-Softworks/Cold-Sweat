@@ -52,7 +52,8 @@ public class GatherDefaultTempModifiersEvent extends Event
         boolean after   = params.mode()  == Temperature.Addition.Mode.AFTER;
         boolean forward = params.order() == Temperature.Addition.Order.FIRST;
 
-        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(modifier.getID())) && !replace)
+        if (!allowDupes && !replace
+        && modifiers.stream().anyMatch(mod -> mod.equals(modifier)))
         {   return;
         }
 
