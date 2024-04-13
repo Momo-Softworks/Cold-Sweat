@@ -187,7 +187,7 @@ public class Temperature
      */
     public static void addOrReplaceModifier(Player player, TempModifier modifier, Trait trait)
     {
-        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> mod.equals(modifier)));
     }
 
     /**
@@ -199,7 +199,7 @@ public class Temperature
      */
     public static void replaceModifier(Player player, TempModifier modifier, Trait trait)
     {
-        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> mod.equals(modifier)));
     }
 
     /**
@@ -219,60 +219,54 @@ public class Temperature
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
-            TempModifier newModifier = event.getModifier();
-            if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
+            TempModifier newMod = event.getModifier();
+            EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
             {
-                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+                List<TempModifier> modifiers = cap.getModifiers(event.trait);
+                boolean changed = false;
+                try
                 {
-                    List<TempModifier> modifiers = cap.getModifiers(event.trait);
-                    boolean changed = false;
-                    try
+                    Predicate<TempModifier> predicate = params.predicate();
+                    if (predicate == null) predicate = mod -> true;
+
+                    boolean replace = params.mode  == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
+                    boolean after   = params.mode  == Addition.Mode.AFTER;
+                    boolean forward = params.order == Addition.Order.FIRST;
+
+                    if (!allowDupes && !replace
+                    && modifiers.stream().anyMatch(mod -> mod.equals(modifier)))
+                    {   return;
+                    }
+
+                    // Get the start of the iterator & which direction it's going
+                    int start = forward ? 0 : (modifiers.size() - 1);
+                    // Iterate through the list (backwards if "forward" is false)
+                    for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
                     {
-                        Predicate<TempModifier> predicate = params.predicate();
-                        if (predicate == null) predicate = mod -> true;
-
-                        boolean replace = params.mode  == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
-                        boolean after   = params.mode  == Addition.Mode.AFTER;
-                        boolean forward = params.order == Addition.Order.FIRST;
-
-                        TempModifier newMod = event.getModifier();
-
-                        if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID())) && !replace)
-                        {   return;
-                        }
-                        // Get the start of the iterator & which direction it's going
-                        int start = forward ? 0 : (modifiers.size() - 1);
-                        // Iterate through the list (backwards if "forward" is false)
-                        for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
+                        TempModifier mod = modifiers.get(i);
+                        // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
+                        if (predicate.test(mod))
                         {
-                            TempModifier mod = modifiers.get(i);
-                            // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
-                            if (predicate.test(mod))
-                            {
-                                if (replace)
-                                {   modifiers.set(i, newMod);
-                                }
-                                else
-                                {   modifiers.add(i + (after ? 1 : 0), newMod);
-                                }
-                                changed = true;
-                                return;
+                            if (replace)
+                            {   modifiers.set(i, newMod);
                             }
-                        }
-                        // Add the modifier if the insertion check fails
-                        if (params.mode != Addition.Mode.REPLACE)
-                        {   modifiers.add(newMod);
+                            else
+                            {   modifiers.add(i + (after ? 1 : 0), newMod);
+                            }
                             changed = true;
+                            return;
                         }
                     }
-                    finally
-                    {   if (changed) updateModifiers(entity, cap);
+                    // Add the modifier if the insertion check fails
+                    if (params.mode != Addition.Mode.REPLACE)
+                    {   modifiers.add(newMod);
+                        changed = true;
                     }
-                });
-            }
-            else
-            {   ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
-            }
+                }
+                finally
+                {   if (changed) updateModifiers(entity, cap);
+                }
+            });
         }
     }
 
@@ -280,11 +274,8 @@ public class Temperature
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            List<TempModifier> list = cap.getModifiers(trait);
             for (TempModifier modifier : modifiers)
-            {
-                if (duplicates || list.stream().noneMatch(mod -> mod.getID().equals(modifier.getID())))
-                    cap.getModifiers(trait).add(modifier);
+            {   addModifier(entity, modifier, trait, duplicates);
             }
             updateModifiers(entity, cap);
         });

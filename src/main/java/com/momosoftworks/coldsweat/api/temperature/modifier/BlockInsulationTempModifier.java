@@ -7,14 +7,14 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
-public class HearthTempModifier extends TempModifier
+public class BlockInsulationTempModifier extends TempModifier
 {
-    public HearthTempModifier()
+    public BlockInsulationTempModifier()
     {
        this(0);
     }
 
-    public HearthTempModifier(int strength)
+    public BlockInsulationTempModifier(int strength)
     {
         this.getNBT().putInt("Strength", strength);
     }
