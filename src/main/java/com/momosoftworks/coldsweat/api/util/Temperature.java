@@ -76,27 +76,16 @@ public class Temperature
     /**
      * Returns the player's temperature of the specified type.
      */
-    public static double get(LivingEntity entity, Type type)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTemp(type)).orElse(0.0);
+    public static double get(LivingEntity entity, Trait trait)
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTrait(trait)).orElse(0.0);
     }
 
-    public static double get(LivingEntity entity, Ability type)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getAbility(type)).orElse(0.0);
+    public static void set(LivingEntity entity, Trait trait, double value)
+    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTrait(trait, value);
     }
 
-    public static void set(LivingEntity entity, Type type, double value)
-    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTemp(type, value);
-    }
-
-    public static void set(LivingEntity entity, Ability type, double value)
-    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setAbility(type, value);
-    }
-
-    public static void add(LivingEntity entity, double value, Type type)
-    {
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-        {   cap.setTemp(type, value + cap.getTemp(type));
-        });
+    public static void add(LivingEntity entity, Trait trait, double value)
+    {   EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, cap.getTrait(trait) + value));
     }
 
     /**
@@ -104,15 +93,15 @@ public class Temperature
      * @param entity the entity this modifier should use
      * @param modifiers the modifier(s) being applied to the {@code Temperature}
      */
-    public static double apply(double temp, LivingEntity entity, Type type, TempModifier... modifiers)
+    public static double apply(double currentTemp, LivingEntity entity, Trait trait, TempModifier... modifiers)
     {
-        double temp2 = temp;
+        double temp2 = currentTemp;
         for (TempModifier modifier : modifiers)
         {
             if (modifier == null) continue;
 
             double newTemp = entity.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
-                    ? modifier.update(temp2, entity, type)
+                    ? modifier.update(temp2, entity, trait)
                     : modifier.getResult(temp2);
             if (!Double.isNaN(newTemp))
             {   temp2 = newTemp;
@@ -126,12 +115,12 @@ public class Temperature
      * @param entity the entity this list of modifiers should use
      * @param modifiers the list of modifiers being applied to the player's temperature
      */
-    public static double apply(double temp, LivingEntity entity, Type type, Collection<TempModifier> modifiers)
-    {
-        return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
+    public static double apply(double temp, LivingEntity entity, Trait trait, Collection<TempModifier> modifiers)
+    {   return apply(temp, entity, trait, modifiers.toArray(new TempModifier[0]));
     }
 
     static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
+
     public static double getTemperatureAt(BlockPos pos, Level level)
     {
         ResourceLocation dimension = level.dimension().location();
@@ -141,45 +130,45 @@ public class Temperature
         if (dummy == null || dummy.level() != level)
         {   DUMMIES.put(dimension, dummy = new DummyPlayer(level));
             // Use default player modifiers to determine the temperature
-            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Type.WORLD);
+            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Trait.WORLD);
             MinecraftForge.EVENT_BUS.post(event);
-            addModifiers(dummy, event.getModifiers(), Type.WORLD, true);
+            addModifiers(dummy, event.getModifiers(), Trait.WORLD, true);
         }
         // Move the dummy to the position being tested
         dummy.setPos(CSMath.getCenterPos(pos));
-        return apply(0, dummy, Type.WORLD, getModifiers(dummy, Type.WORLD));
+        return apply(0, dummy, Trait.WORLD, getModifiers(dummy, Trait.WORLD));
     }
 
     /**
      * @param modClass The class of the TempModifier to check for
-     * @param type The type of TempModifier to check for
+     * @param trait The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
      */
-    public static boolean hasModifier(LivingEntity entity, Type type, Class<? extends TempModifier> modClass)
+    public static boolean hasModifier(LivingEntity entity, Trait trait, Class<? extends TempModifier> modClass)
     {
-        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.hasModifier(type, modClass)).orElse(false);
+        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.hasModifier(trait, modClass)).orElse(false);
     }
 
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
-    public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Type type, Class<T> modClass)
+    public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Trait trait, Class<T> modClass)
     {
-        return getModifier(EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()), type, modClass);
+        return getModifier(EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()), trait, modClass);
     }
 
-    public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Type type, Class<T> modClass)
+    public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Trait trait, Class<T> modClass)
     {
-        return (Optional<T>) cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst();
+        return (Optional<T>) cap.getModifiers(trait).stream().filter(modClass::isInstance).findFirst();
     }
 
     /**
      * @return The first modifier applied to the player that fits the predicate.
      */
     @Nullable
-    public static TempModifier getModifier(LivingEntity entity, Type type, Predicate<TempModifier> condition)
+    public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(type))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(trait))
         {
             if (condition.test(modifier))
             {
@@ -194,11 +183,11 @@ public class Temperature
      * Otherwise, it will add the modifier.<br>
      * @param player The player to apply the modifier to
      * @param modifier The modifier to apply
-     * @param type The type of temperature to apply the modifier to
+     * @param trait The type of temperature to apply the modifier to
      */
-    public static void addOrReplaceModifier(Player player, TempModifier modifier, Type type)
+    public static void addOrReplaceModifier(Player player, TempModifier modifier, Trait trait)
     {
-        addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
     /**
@@ -206,11 +195,11 @@ public class Temperature
      * It will not add the modifier if an existing instance of the same TempModifier class is not found.<br>
      * @param player The player to apply the modifier to
      * @param modifier The modifier to apply
-     * @param type The type of temperature to apply the modifier to
+     * @param trait The type of temperature to apply the modifier to
      */
-    public static void replaceModifier(Player player, TempModifier modifier, Type type)
+    public static void replaceModifier(Player player, TempModifier modifier, Trait trait)
     {
-        addModifier(player, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+        addModifier(player, modifier, trait, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
     /**
@@ -219,14 +208,14 @@ public class Temperature
      * @param allowDupes allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes)
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes)
     {
-        addModifier(entity, modifier, type, allowDupes, Addition.AFTER_LAST);
+        addModifier(entity, modifier, trait, allowDupes, Addition.AFTER_LAST);
     }
 
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes, Addition params)
     {
-        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, type);
+        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, trait);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
@@ -235,7 +224,7 @@ public class Temperature
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    List<TempModifier> modifiers = cap.getModifiers(event.type);
+                    List<TempModifier> modifiers = cap.getModifiers(event.trait);
                     boolean changed = false;
                     try
                     {
@@ -287,15 +276,15 @@ public class Temperature
         }
     }
 
-    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Type type, boolean duplicates)
+    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Trait trait, boolean duplicates)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            List<TempModifier> list = cap.getModifiers(type);
+            List<TempModifier> list = cap.getModifiers(trait);
             for (TempModifier modifier : modifiers)
             {
                 if (duplicates || list.stream().noneMatch(mod -> mod.getID().equals(modifier.getID())))
-                    cap.getModifiers(type).add(modifier);
+                    cap.getModifiers(trait).add(modifier);
             }
             updateModifiers(entity, cap);
         });
@@ -304,21 +293,21 @@ public class Temperature
     /**
      * Removes the specified number of TempModifiers of the specified type from the player
      * @param entity The entity being sampled
-     * @param type Determines which TempModifier list to pull from
+     * @param trait Determines which TempModifier list to pull from
      * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifiers(LivingEntity entity, Type type, int count, Predicate<TempModifier> condition)
+    public static void removeModifiers(LivingEntity entity, Trait trait, int count, Predicate<TempModifier> condition)
     {
         AtomicInteger removed = new AtomicInteger(0);
 
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            cap.getModifiers(type).removeIf(modifier ->
+            cap.getModifiers(trait).removeIf(modifier ->
             {
                 if (removed.get() < count)
                 {
-                    TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, type, count, condition);
+                    TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, trait, count, condition);
                     MinecraftForge.EVENT_BUS.post(event);
                     if (!event.isCanceled())
                     {
@@ -339,45 +328,45 @@ public class Temperature
         });
     }
 
-    public static void removeModifiers(LivingEntity entity, Type type, Predicate<TempModifier> condition)
+    public static void removeModifiers(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        removeModifiers(entity, type, Integer.MAX_VALUE, condition);
+        removeModifiers(entity, trait, Integer.MAX_VALUE, condition);
     }
 
     /**
      * Gets all TempModifiers of the specified type on the player
      * @param entity is the entity being sampled
-     * @param type determines which TempModifier list to pull from
+     * @param trait determines which TempModifier list to pull from
      * @return a NEW list of all TempModifiers of the specified type
      */
-    public static List<TempModifier> getModifiers(LivingEntity entity, Type type)
+    public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
     {
-        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(type)).orElse(List.of());
+        return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(List.of());
     }
 
     /**
      * Iterates through all TempModifiers of the specified type on the player
-     * @param type determines which TempModifier list to pull from
+     * @param trait determines which TempModifier list to pull from
      * @param action the action(s) to perform on each TempModifier
      */
-    public static void forEachModifier(LivingEntity entity, Type type, Consumer<TempModifier> action)
+    public static void forEachModifier(LivingEntity entity, Trait trait, Consumer<TempModifier> action)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (cap.getModifiers(type) != null)
+            if (cap.getModifiers(trait) != null)
             {
-                cap.getModifiers(type).forEach(action);
+                cap.getModifiers(trait).forEach(action);
             }
         });
     }
 
-    public static void forEachModifier(LivingEntity entity, Type type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
+    public static void forEachModifier(LivingEntity entity, Trait trait, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (cap.getModifiers(type) != null)
+            if (cap.getModifiers(trait) != null)
             {
-                CSMath.breakableForEach(cap.getModifiers(type), action);
+                CSMath.breakableForEach(cap.getModifiers(trait), action);
             }
         });
     }
@@ -389,7 +378,7 @@ public class Temperature
             ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
                             ? PacketDistributor.PLAYER.with(() -> player)
                             : PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-            new TemperatureSyncMessage(entity, cap.serializeTemps().merge(cap.serializeAbilities()), instant));
+            new TemperatureSyncMessage(entity, cap.serializeTraits(), instant));
         }
     }
 
@@ -404,8 +393,8 @@ public class Temperature
         }
     }
 
-    public static Map<Type, Double> getTemperatures(LivingEntity entity)
-    {   return EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getTemperatures).orElse(new EnumMap<>(Type.class));
+    public static Map<Trait, Double> getTemperatures(LivingEntity entity)
+    {   return EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getTraits).orElse(new EnumMap<>(Trait.class));
     }
 
     /**
@@ -418,44 +407,6 @@ public class Temperature
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
      * {@link #BODY}: The sum of the player's core and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
-     */
-    public enum Type implements StringRepresentable
-    {
-        WORLD("world"),
-        CORE("core"),
-        BASE("base"),
-        BODY("body"),
-        RATE("rate");
-
-        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
-
-        private final String id;
-
-        Type(String id)
-        {   this.id = id;
-        }
-
-        public static Type fromID(String id)
-        {
-            for (Type type : values())
-            {
-                if (type.getSerializedName().equals(id))
-                    return type;
-            }
-            return null;
-        }
-
-        @Override
-        public String getSerializedName()
-        {   return id;
-        }
-    }
-
-    /**
-     * Defines all extra temperature-related abilities in Cold Sweat. <br>
-     * These are different from {@link Temperature.Type} because they do not get TempModifiers. These are mainly used for third-party stuff.
-     * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
-     * <br>
      * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
      * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
      * {@link #COLD_RESISTANCE}: Resistance to cold temperature-related damage. <br>
@@ -463,8 +414,14 @@ public class Temperature
      * {@link #COLD_DAMPENING}: Changes the rate of body temperature increase. <br>
      * {@link #HEAT_DAMPENING}: Changes the rate of body temperature decrease. <br>
      */
-    public enum Ability implements StringRepresentable
+    public enum Trait implements StringRepresentable
     {
+        WORLD("world"),
+        CORE("core"),
+        BASE("base"),
+        BODY("body"),
+        RATE("rate"),
+
         FREEZING_POINT("freezing_point"),
         BURNING_POINT("burning_point"),
         COLD_RESISTANCE("cold_resistance"),
@@ -472,20 +429,20 @@ public class Temperature
         COLD_DAMPENING("cold_dampening"),
         HEAT_DAMPENING("heat_dampening");
 
-        public static final Codec<Ability> CODEC = StringRepresentable.fromEnum(Ability::values);
+        public static final Codec<Trait> CODEC = StringRepresentable.fromEnum(Trait::values);
 
         private final String id;
 
-        Ability(String id)
+        Trait(String id)
         {   this.id = id;
         }
 
-        public static Ability fromID(String id)
+        public static Trait fromID(String id)
         {
-            for (Ability ability : values())
+            for (Trait trait : values())
             {
-                if (ability.getSerializedName().equals(id))
-                    return ability;
+                if (trait.getSerializedName().equals(id))
+                    return trait;
             }
             return null;
         }

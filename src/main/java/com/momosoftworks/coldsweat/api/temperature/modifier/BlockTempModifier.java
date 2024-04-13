@@ -33,7 +33,7 @@ public class BlockTempModifier extends TempModifier
     Map<ChunkPos, ChunkAccess> chunks = new HashMap<>(16);
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         Map<BlockTemp, Double> affectMap = new HashMap<>(128);
         Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);

@@ -14,22 +14,20 @@ import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
 
-public class TempModifierTypeArgument extends StringRepresentableArgument<Temperature.Type>
+public class TempModifierTypeArgument extends StringRepresentableArgument<Temperature.Trait>
 {
-    private static final Codec<Temperature.Type> MODIFIERS_CODEC = StringRepresentable.fromEnumWithMapping(() -> EntityTempManager.VALID_MODIFIER_TYPES, (p_275334_) ->
-    {   return p_275334_.toLowerCase(Locale.ROOT);
-    });
+    private static final Codec<Temperature.Trait> MODIFIERS_CODEC = StringRepresentable.fromEnum(() -> EntityTempManager.VALID_MODIFIER_TRAITS);
 
     private TempModifierTypeArgument()
-    {   super(MODIFIERS_CODEC, () -> EntityTempManager.VALID_MODIFIER_TYPES);
+    {   super(MODIFIERS_CODEC, () -> EntityTempManager.VALID_MODIFIER_TRAITS);
     }
 
-    public static TempModifierTypeArgument temperature()
+    public static TempModifierTypeArgument modifier()
     {   return new TempModifierTypeArgument();
     }
 
-    public static Temperature.Type getTemperature(CommandContext<CommandSourceStack> context, String argument)
-    {   return context.getArgument(argument, Temperature.Type.class);
+    public static Temperature.Trait getModifier(CommandContext<CommandSourceStack> context, String argument)
+    {   return context.getArgument(argument, Temperature.Trait.class);
     }
 
     protected String convertId(String Id)

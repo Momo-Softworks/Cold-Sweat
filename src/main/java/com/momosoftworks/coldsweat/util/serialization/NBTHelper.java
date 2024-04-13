@@ -115,32 +115,11 @@ public class NBTHelper
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
-     * @param type The type of Temperature to be stored. ({@link Temperature.Type#WORLD} should only be stored when needed to prevent lag)
+     * @param trait The type of Temperature to be stored. ({@link Temperature.Trait#WORLD} should only be stored when needed to prevent lag)
      * @return The NBT tag name for the given type
      */
-    public static String getTemperatureTag(Temperature.Type type)
-    {
-        return switch (type)
-        {
-            case CORE  -> "Core";
-            case WORLD -> "World";
-            case BASE  -> "Base";
-            case RATE  -> "Rate";
-            default -> throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
-        };
-    }
-
-    public static String getAbilityTag(Temperature.Ability ability)
-    {
-        return switch (ability)
-        {
-            case FREEZING_POINT -> "FreezingPoint";
-            case BURNING_POINT -> "BurningPoint";
-            case COLD_RESISTANCE -> "ColdResistance";
-            case HEAT_RESISTANCE -> "HeatResistance";
-            case COLD_DAMPENING -> "ColdDampening";
-            case HEAT_DAMPENING -> "HeatDampening";
-        };
+    public static String getTraitTagKey(Temperature.Trait trait)
+    {   return trait.getSerializedName();
     }
 
     @SubscribeEvent

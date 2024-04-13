@@ -269,7 +269,7 @@ public class Overlays
 
                     // Get temperature in actual degrees
                     boolean celsius = ConfigSettings.CELSIUS.get();
-                    double worldTemp = cap.getTemp(Temperature.Type.WORLD);
+                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
                     double realTemp = Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                     // Calculate the blended world temperature for this tick
                     double diff = realTemp - WORLD_TEMP;
@@ -277,16 +277,16 @@ public class Overlays
                     WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
                     // Update max/min offset
-                    MAX_TEMP = cap.getAbility(Temperature.Ability.BURNING_POINT);
-                    MIN_TEMP = cap.getAbility(Temperature.Ability.FREEZING_POINT);
+                    MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
+                    MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
 
 
                     /* Body Temp */
 
                     // Blend body temp (per tick)
                     PREV_BODY_TEMP = BODY_TEMP;
-                    double currentTemp = cap.getTemp(Temperature.Type.BODY);
-                    BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTemp(Temperature.Type.BODY) - BODY_TEMP) / 5;
+                    double currentTemp = cap.getTrait(Temperature.Trait.BODY);
+                    BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
 
                     // Handle effects for the icon (bobbing, stage, transition)
                     // Get icon bob

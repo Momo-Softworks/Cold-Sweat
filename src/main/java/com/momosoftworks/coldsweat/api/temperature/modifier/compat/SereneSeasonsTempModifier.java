@@ -18,7 +18,7 @@ public class SereneSeasonsTempModifier extends TempModifier
     public SereneSeasonsTempModifier() {}
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         if (entity.level().dimensionType().natural())
         {

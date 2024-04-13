@@ -59,7 +59,7 @@ public class TempEffectsClient
         {
             // Get the FPS of the game
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
-            float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;

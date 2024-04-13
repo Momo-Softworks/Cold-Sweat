@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -23,8 +24,14 @@ public class PlayerTempCap extends AbstractTempCap
     public void tick(LivingEntity entity)
     {
         super.tick(entity);
-        if (entity.tickCount % 20 == 0 && entity instanceof Player player)
-        {   calculateHudVisibility(player);
+        if (entity instanceof Player player)
+        {
+            if (player.tickCount % 20 == 0)
+            {   calculateHudVisibility(player);
+            }
+            if (player.isCreative())
+            {   this.setTrait(Temperature.Trait.CORE, 0);
+            }
         }
     }
 

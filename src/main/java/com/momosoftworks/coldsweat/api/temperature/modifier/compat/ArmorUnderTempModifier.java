@@ -14,7 +14,7 @@ public class ArmorUnderTempModifier extends TempModifier
     public ArmorUnderTempModifier() {}
 
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         /*CompoundTag nbt = this.getNBT();
         double bodyTemp = Temperature.get(entity, Temperature.Type.BODY);

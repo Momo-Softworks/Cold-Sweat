@@ -5,13 +5,12 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -22,12 +21,12 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -77,9 +76,9 @@ public class TempCommand extends BaseCommand
                 /* Get TempModifiers from entity */
                 .then(Commands.literal("debug")
                         .then(Commands.argument("entity", EntityArgument.entity())
-                                  .then(Commands.argument("type", TempModifierTypeArgument.temperature())
-                                          .executes(source -> executeShowModifiers(
-                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), TempModifierTypeArgument.getTemperature(source, "type"))
+                                  .then(Commands.argument("type", TempModifierTypeArgument.modifier())
+                                          .executes(source -> executeDebugModifiers(
+                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), TempModifierTypeArgument.getModifier(source, "type"))
                                           )
                                   )
                         )
@@ -90,7 +89,7 @@ public class TempCommand extends BaseCommand
                                 /* Clear all attributes */
                                 .then(Commands.literal("clear")
                                               /* Modify attribute of this type */
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .executes(source -> executeClearModifier(
                                                                     source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                     AbilityOrTempTypeArgument.getAttribute(source, "type"))
@@ -102,7 +101,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Add to base value */
                                 .then(Commands.literal("add")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -124,7 +123,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_base")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -145,7 +144,7 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_total")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
@@ -165,7 +164,7 @@ public class TempCommand extends BaseCommand
                                               )
                                 )
                                 .then(Commands.literal("set")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.type())
+                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
                                                               .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                           .executes(source -> executeModifyEntityTemp(
@@ -199,7 +198,7 @@ public class TempCommand extends BaseCommand
         {
             if (!(entity instanceof LivingEntity)) continue;
             EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-            {   cap.setTemp(Temperature.Type.CORE, temp);
+            {   cap.setTrait(Temperature.Trait.CORE, temp);
                 Temperature.updateTemperature((LivingEntity) entity, cap, true);
             });
         }
@@ -223,7 +222,7 @@ public class TempCommand extends BaseCommand
         }
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {   //Compose & send message
-            int bodyTemp = (int) Temperature.get((LivingEntity) target, Temperature.Type.BODY);
+            int bodyTemp = (int) Temperature.get((LivingEntity) target, Temperature.Trait.BODY);
             source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.result", target.getName().getString(), bodyTemp), false);
         }
         return entities.size();
@@ -242,13 +241,26 @@ public class TempCommand extends BaseCommand
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeShowModifiers(CommandSourceStack source, Entity entity, Temperature.Type type)
+    private int executeDebugModifiers(CommandSourceStack source, Entity entity, Temperature.Trait trait)
     {
         if (!(entity instanceof Player || EntityTempManager.getEntitiesWithTemperature().contains(entity.getType())))
         {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
             return 0;
         }
-        for (TempModifier modifier : Temperature.getModifiers((LivingEntity) entity, type))
+
+        LivingEntity living = (LivingEntity) entity;
+        AttributeInstance attribute = EntityTempManager.getAttribute(trait, living);
+        double lastValue = 0;
+
+        if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
+        {
+            source.sendSuccess(() ->
+                               Component.literal(ForgeRegistries.ATTRIBUTES.getKey(attribute.getAttribute()).toString()).withStyle(ChatFormatting.GOLD)
+                       .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
+                       .append(Component.literal(attribute.getValue()+"").withStyle(ChatFormatting.AQUA)), false);
+            lastValue = attribute.getBaseValue();
+        }
+        else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {
             source.sendSuccess(() ->
                                Component.literal(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
@@ -256,11 +268,40 @@ public class TempCommand extends BaseCommand
                        .append(Component.literal(modifier.toString()).withStyle(ChatFormatting.GOLD))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                        .append(Component.literal(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
+            lastValue = modifier.getLastOutput();
+        }
+        if (attribute != null)
+        {
+            for (AttributeModifier modifier : attribute.getModifiers().stream().sorted(Comparator.comparing(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION
+                                                                                                            ? 1 : mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
+                                                                                                            ? 2 : 3)).toList())
+            {
+                double lastValueStore = lastValue;
+                switch (modifier.getOperation())
+                {
+                    case ADDITION:
+                        lastValue += modifier.getAmount();
+                        break;
+                    case MULTIPLY_BASE:
+                        lastValue += lastValue * modifier.getAmount();
+                        break;
+                    case MULTIPLY_TOTAL:
+                        lastValue *= 1.0D + modifier.getAmount();
+                        break;
+                }
+                double newValue = lastValue;
+                source.sendSuccess(() ->
+                                   Component.literal(CSMath.truncate(lastValueStore, 2)+"").withStyle(ChatFormatting.WHITE)
+                           .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
+                           .append(Component.literal(modifier.getName()).withStyle(ChatFormatting.GOLD))
+                           .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
+                           .append(Component.literal(CSMath.truncate(newValue, 2)+"").withStyle(ChatFormatting.AQUA)), false);
+            }
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private int executeModifyEntityTemp(CommandSourceStack source, Collection<? extends Entity> entities, Either<Temperature.Type, Temperature.Ability> attribute,
+    private int executeModifyEntityTemp(CommandSourceStack source, Collection<? extends Entity> entities, Temperature.Trait attribute,
                                         double amount, AttributeModifier.Operation operation, boolean permanent)
     {
         for (Entity entity : entities)
@@ -291,35 +332,31 @@ public class TempCommand extends BaseCommand
         if (entities.size() == 1)
         {
             if (operation == null)
-            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.modify.set.single.result",
-                                                            attribute.left().map(StringRepresentable::getSerializedName)
-                                                                    .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                    .orElse("")),
-                                                            entities.iterator().next().getName().getString(), amount), true);
-            else source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.modify.add_modifier.single.result",
-                                                                 attribute.left().map(StringRepresentable::getSerializedName)
-                                                                         .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                         .orElse("")),
-                                                                 entities.iterator().next().getName().getString()), true);
+            source.sendSuccess(() ->
+                               Component.translatable("commands.cold_sweat.temperature.modify.set.single.result",
+                                                      attribute.getSerializedName(),
+                                                      entities.iterator().next().getName().getString(), amount), true);
+            else source.sendSuccess(() ->
+                                    Component.translatable("commands.cold_sweat.temperature.modify.add_modifier.single.result",
+                                                           attribute.getSerializedName(),
+                                                           entities.iterator().next().getName().getString()), true);
         }
         else
         {
             if (operation == null)
-            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.modify.set.many.result",
-                                                            attribute.left().map(StringRepresentable::getSerializedName)
-                                                                    .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                    .orElse("")),
-                                                            entities.size(), amount), true);
-            else source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.modify.add_modifier.many.result",
-                                                                 attribute.left().map(StringRepresentable::getSerializedName)
-                                                                         .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                         .orElse("")),
-                                                                 entities.size()), true);
+            source.sendSuccess(() ->
+                               Component.translatable("commands.cold_sweat.temperature.modify.set.many.result",
+                                                      attribute.getSerializedName(),
+                                                      entities.size(), amount), true);
+            else source.sendSuccess(() ->
+                                    Component.translatable("commands.cold_sweat.temperature.modify.add_modifier.many.result",
+                                                           attribute.getSerializedName(),
+                                                           entities.size()), true);
         }
         return entities.size();
     }
 
-    private int executeClearModifier(CommandSourceStack source, Collection<? extends Entity> entities, Either<Temperature.Type, Temperature.Ability> attribute)
+    private int executeClearModifier(CommandSourceStack source, Collection<? extends Entity> entities, Temperature.Trait attribute)
     {
         for (Entity entity : entities)
         {
@@ -339,18 +376,16 @@ public class TempCommand extends BaseCommand
             }
         }
         if (entities.size() == 1)
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.clear.single.result",
-                                                            attribute.left().map(StringRepresentable::getSerializedName)
-                                                                    .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                                    .orElse("")),
-                                                            entities.iterator().next().getName().getString()), true);
+        {   source.sendSuccess(() ->
+                               Component.translatable("commands.cold_sweat.temperature.clear.single.result",
+                                                      attribute.getSerializedName(),
+                                                      entities.iterator().next().getName().getString()), true);
         }
         else
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.clear.many.result",
-                                                            attribute.left().map(StringRepresentable::getSerializedName)
-                                                                    .orElse(attribute.right().map(StringRepresentable::getSerializedName)
-                                                                                    .orElse("")),
-                                                            entities.size()), true);
+        {   source.sendSuccess(() ->
+                               Component.translatable("commands.cold_sweat.temperature.clear.many.result",
+                                                      attribute.getSerializedName(),
+                                                      entities.size()), true);
         }
         return entities.size();
     }
@@ -363,7 +398,7 @@ public class TempCommand extends BaseCommand
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    for (Either<Temperature.Type, Temperature.Ability> attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                    for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
                     {
                         AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                         if (instance == null) continue;

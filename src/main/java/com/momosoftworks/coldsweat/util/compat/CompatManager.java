@@ -268,7 +268,7 @@ public class CompatManager
         if (!player.isCreative() && !player.isInLava()
         && backTank.getItem() instanceof BacktankItem
         && backTank.getItem().isFireResistant()
-        && Temperature.get(player, Temperature.Type.WORLD) > Temperature.get(player, Temperature.Ability.BURNING_POINT))
+        && Temperature.get(player, Temperature.Trait.WORLD) > Temperature.get(player, Temperature.Trait.BURNING_POINT))
         {
             // Ensure player is wearing a full set of fire-resistant armor
             ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
@@ -317,7 +317,7 @@ public class CompatManager
 
                             double cold = insulator.insulation().getCold();
                             double hot = insulator.insulation().getHot();
-                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Trait.RATE);
                         }
                     }
                 });
