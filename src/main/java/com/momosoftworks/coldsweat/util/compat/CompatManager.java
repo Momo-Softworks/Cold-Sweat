@@ -229,7 +229,7 @@ public class CompatManager
 
                             double cold = insulator.insulation.getCold();
                             double hot = insulator.insulation.getHot();
-                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Type.RATE);
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Trait.RATE);
                         }
                     }
                 });

@@ -13,13 +13,13 @@ public class GatherDefaultTempModifiersEvent extends Event
 {
     private List<TempModifier> modifiers;
     private LivingEntity entity;
-    private Temperature.Type type;
+    private Temperature.Trait trait;
 
-    public GatherDefaultTempModifiersEvent(LivingEntity entity, Temperature.Type type)
+    public GatherDefaultTempModifiersEvent(LivingEntity entity, Temperature.Trait trait)
     {
         this.entity = entity;
-        this.type = type;
-        this.modifiers = new ArrayList<>(Temperature.getModifiers(entity, type));
+        this.trait = trait;
+        this.modifiers = new ArrayList<>(Temperature.getModifiers(entity, trait));
     }
 
     public List<TempModifier> getModifiers()
@@ -30,8 +30,8 @@ public class GatherDefaultTempModifiersEvent extends Event
     {   return entity;
     }
 
-    public Temperature.Type getType()
-    {   return type;
+    public Temperature.Trait getType()
+    {   return trait;
     }
 
     public void addModifier(TempModifier modifier)

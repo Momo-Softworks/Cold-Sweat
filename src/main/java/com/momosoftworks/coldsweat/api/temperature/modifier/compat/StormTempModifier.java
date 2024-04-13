@@ -14,7 +14,7 @@ public class StormTempModifier extends TempModifier
     public StormTempModifier() {}
 
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         /*if (!entity.level.isClientSide())
         {

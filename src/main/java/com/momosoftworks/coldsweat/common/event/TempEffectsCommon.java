@@ -27,7 +27,7 @@ public class TempEffectsCommon
         if (!ColdSweatConfig.getInstance().coldMining() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
         // Get the player's temperature
-        float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+        float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
 
         // If the player is too cold, slow down their mining speed
         if (temp < -50)
@@ -45,7 +45,7 @@ public class TempEffectsCommon
         PlayerEntity player = event.player;
         if (event.phase == TickEvent.Phase.END)
         {
-            float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
                 if (!ColdSweatConfig.getInstance().coldMovement()
@@ -75,7 +75,7 @@ public class TempEffectsCommon
             PlayerEntity player = (PlayerEntity) event.getEntityLiving().getLastHurtByMob();
             if (!ColdSweatConfig.getInstance().coldKnockback() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
-            float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
                 // Get protection from armor underwear
@@ -97,7 +97,7 @@ public class TempEffectsCommon
             if (!ColdSweatConfig.getInstance().freezingHearts() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
             float healing = event.getAmount();
-            float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
                 // Get protection from armor underwear

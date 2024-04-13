@@ -37,10 +37,10 @@ public class BlockAffectTempTrigger extends AbstractCriterionTrigger<BlockAffect
             {
                 JsonObject entry = element.getAsJsonObject();
 
-                Temperature.Type type = Temperature.Type.fromID(entry.get("type").getAsString());
+                Temperature.Trait trait = Temperature.Trait.fromID(entry.get("type").getAsString());
                 TriggerHelper.getTempValueOrRange(entry)
-                        .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(type, either, either)))
-                        .ifRight(pair -> conditions.add(new TriggerHelper.TempCondition(type, pair.getFirst(), pair.getSecond())));
+                        .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(trait, either, either)))
+                        .ifRight(pair -> conditions.add(new TriggerHelper.TempCondition(trait, pair.getFirst(), pair.getSecond())));
             }
         }
 
@@ -74,11 +74,11 @@ public class BlockAffectTempTrigger extends AbstractCriterionTrigger<BlockAffect
 
         public boolean matches(ServerPlayerEntity player, BlockPos pos, double distance, double totalEffect)
         {
-            Map<Temperature.Type, Double> temps = Temperature.getTemperatures(player);
-            return this.distance.matches((float) distance)
-                && this.totalEffect.matches((float) totalEffect)
+            Map<Temperature.Trait, Double> temps = Temperature.getTemperatures(player);
+            return this.distance.matches(((float) distance))
+                && this.totalEffect.matches(((float) totalEffect))
                 && this.block.matches(player.getLevel(), pos)
-                && conditions.stream().allMatch(condition -> condition.matches(temps.get(condition.type())));
+                && conditions.stream().allMatch(condition -> condition.matches(temps.get(condition.trait())));
         }
 
         @Override

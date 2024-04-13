@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TempModifierTypeArgument implements ArgumentType<Temperature.Type>
+public class TempModifierTypeArgument implements ArgumentType<Temperature.Trait>
 {
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslationTextComponent("commands.forge.arguments.enum.invalid", constants, found));
@@ -32,16 +32,16 @@ public class TempModifierTypeArgument implements ArgumentType<Temperature.Type>
     {   return new TempModifierTypeArgument();
     }
 
-    public static Temperature.Type getModifier(CommandContext<CommandSource> context, String argument)
-    {   return context.getArgument(argument, Temperature.Type.class);
+    public static Temperature.Trait getModifier(CommandContext<CommandSource> context, String argument)
+    {   return context.getArgument(argument, Temperature.Trait.class);
     }
 
     @Override
-    public Temperature.Type parse(final StringReader reader) throws CommandSyntaxException
+    public Temperature.Trait parse(final StringReader reader) throws CommandSyntaxException
     {
         String name = reader.readUnquotedString();
         try
-        {   return Temperature.Type.fromID(name);
+        {   return Temperature.Trait.fromID(name);
         }
         catch (IllegalArgumentException e)
         {   throw INVALID_ENUM.createWithContext(reader, name, Arrays.toString(this.getExamples().toArray()));
@@ -51,13 +51,13 @@ public class TempModifierTypeArgument implements ArgumentType<Temperature.Type>
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder)
     {
-        return ISuggestionProvider.suggest(Stream.of(EntityTempManager.VALID_MODIFIER_TYPES).map(StringRepresentable::getSerializedName), builder);
+        return ISuggestionProvider.suggest(Stream.of(EntityTempManager.VALID_MODIFIER_TRAITS).map(StringRepresentable::getSerializedName), builder);
     }
 
     @Override
     public Collection<String> getExamples()
     {
-        return Stream.of(EntityTempManager.VALID_MODIFIER_TYPES).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
+        return Stream.of(EntityTempManager.VALID_MODIFIER_TRAITS).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
     }
 
     public static class Serializer implements IArgumentSerializer<TempModifierTypeArgument>

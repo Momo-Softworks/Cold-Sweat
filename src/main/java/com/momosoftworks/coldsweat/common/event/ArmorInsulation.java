@@ -46,9 +46,9 @@ public class ArmorInsulation
             double cold = 0;
             double hot = 0;
 
-            double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-            double minTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
-            double maxTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
+            double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
+            double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
+            double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
 
             for (ItemStack armorStack : player.getArmorSlots())
             {
@@ -114,9 +114,9 @@ public class ArmorInsulation
             }
 
             if (cold == 0 && hot == 0)
-                Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
+                Temperature.removeModifiers(player, Temperature.Trait.RATE, (mod) -> mod instanceof InsulationTempModifier);
             else
-                Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
+                Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Trait.RATE);
 
             // Award advancement for full insulation
             if (fullyInsulated >= 4)

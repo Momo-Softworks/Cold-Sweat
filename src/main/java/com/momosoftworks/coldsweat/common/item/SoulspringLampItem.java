@@ -65,8 +65,8 @@ public class SoulspringLampItem extends Item
                 }
                 double max = ConfigSettings.MAX_TEMP.get();
 
-                double temp = Temperature.getModifier(player, Temperature.Type.WORLD, SoulLampTempModifier.class)
-                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Type.WORLD));
+                double temp = Temperature.getModifier(player, Temperature.Trait.WORLD, SoulLampTempModifier.class)
+                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
                 if ((ConfigSettings.LAMP_DIMENSIONS.get().contains(world.dimensionType()))
@@ -85,12 +85,12 @@ public class SoulspringLampItem extends Item
                     for (PlayerEntity playerEnt : world.getEntitiesOfClass(PlayerEntity.class, bb))
                     {
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(playerEnt, Temperature.Type.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(((PlayerEntity) entity), Temperature.Trait.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(playerEnt, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Type.WORLD);
+                        {   Temperature.addOrReplaceModifier(((PlayerEntity) entity), new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD);
                         }
                     }
                     shouldBeOn = true;

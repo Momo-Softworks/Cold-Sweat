@@ -19,30 +19,29 @@ public class ArmorUnderTempModifier extends TempModifier
     public ArmorUnderTempModifier() {}
 
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         CompoundNBT nbt = this.getNBT();
-        double bodyTemp = Temperature.get(entity, Temperature.Type.BODY);
+        double bodyTemp = Temperature.get(entity, Temperature.Trait.BODY);
         double totalOffset = 0;
 
         // If this modifier is applied to MIN, get the cold lining; same for hot
         for (ItemStack stack : entity.getArmorSlots())
         {
-            switch (type)
+            switch (trait)
             {
-                // TODO: Add this back
-                //case FREEZING_POINT :
-                //{   totalOffset += Math.min(0,
-                //            Armory.getTLining(stack).getModifier() * 3
-                //            + nbt.getFloat("OzzyTemp"));
-                //    break;
-                //}
-                //case BURNING_POINT :
-                //{   totalOffset += Math.max(0,
-                //            Armory.getTLining(stack).getModifier() * 3
-                //            + nbt.getFloat("OzzyTemp"));
-                //    break;
-                //}
+                case FREEZING_POINT :
+                {   totalOffset += Math.min(0,
+                            Armory.getTLining(stack).getModifier() * 3
+                            + nbt.getFloat("OzzyTemp"));
+                    break;
+                }
+                case BURNING_POINT :
+                {   totalOffset += Math.max(0,
+                            Armory.getTLining(stack).getModifier() * 3
+                            + nbt.getFloat("OzzyTemp"));
+                    break;
+                }
             }
 
             // Special functionality for certain linings

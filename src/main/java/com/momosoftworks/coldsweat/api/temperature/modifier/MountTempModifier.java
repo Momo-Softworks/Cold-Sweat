@@ -18,7 +18,7 @@ public class MountTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         return temp ->
         {   String toChange = temp > 0 ? "HotInsulation" : "ColdInsulation";

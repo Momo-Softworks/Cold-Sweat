@@ -55,7 +55,7 @@ public class TempEffectsClient
         {
             // Get the FPS of the game
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
-            float temp = (float) Temperature.get(player, Temperature.Type.BODY);
+            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
             BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
@@ -138,9 +138,9 @@ public class TempEffectsClient
             if (event instanceof EntityViewRenderEvent.FogDensity)
             {
                 EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
-                float density = CSMath.isWithin(tempWithResistance, 50, 55)
+                float density = CSMath.betweenInclusive(tempWithResistance, 50, 55)
                                 ? CSMath.blend(-1, 0f, tempWithResistance, 50f, 55f)
-                                : CSMath.isWithin(tempWithResistance, 55, 80)
+                                : CSMath.betweenInclusive(tempWithResistance, 55, 80)
                                 ? CSMath.blend(0f, 0.1f, tempWithResistance, 55f, 80f)
                                 : CSMath.blend(0.1f, 0.3f, tempWithResistance, 80f, 90f);
                 ((EntityViewRenderEvent.FogDensity) event).setDensity(density);

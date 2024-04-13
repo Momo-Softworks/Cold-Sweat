@@ -11,7 +11,7 @@ public class SoulSproutTempModifier extends TempModifier
 {
 
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         if (Math.random() < 0.3 && entity.tickCount % 5 == 0)
         {

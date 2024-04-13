@@ -41,22 +41,22 @@ public abstract class TempModifier
      * @param entity the entity that is being affected by the modifier.<br>
      * @return the new temperature.<br>
      */
-    protected abstract Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type);
+    protected abstract Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait);
 
     /**
-     * Posts this TempModifier's {@link #calculate(LivingEntity, com.momosoftworks.coldsweat.api.util.Temperature.Type)} to the Forge event bus.<br>
+     * Posts this TempModifier's {@link #calculate(LivingEntity, Temperature.Trait)} to the Forge event bus.<br>
      * Returns the stored value if this TempModifier has a tickRate set, and it is not the right tick.<br>
      * <br>
-     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, com.momosoftworks.coldsweat.api.util.Temperature.Type)} method.
+     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, Temperature.Trait)} method.
      * @param entity the entity that is being affected by the modifier.
      */
-    public final double update(double temp, LivingEntity entity, Temperature.Type type)
+    public final double update(double temp, LivingEntity entity, Temperature.Trait trait)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
         MinecraftForge.EVENT_BUS.post(pre);
         if (pre.isCanceled()) return pre.getTemperature();
 
-        this.function = this.calculate(entity, type);
+        this.function = this.calculate(entity, trait);
 
         TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
         MinecraftForge.EVENT_BUS.post(post);
@@ -94,7 +94,7 @@ public abstract class TempModifier
     }
 
     /**
-     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, com.momosoftworks.coldsweat.api.util.Temperature.Type)} at a specified interval.<br>
+     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, Temperature.Trait)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
      * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>

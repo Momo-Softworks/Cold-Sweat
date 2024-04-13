@@ -9,7 +9,7 @@ import java.util.function.Function;
 public class SoulLampTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         double almostMax = ConfigSettings.MAX_TEMP.get() * 0.99;
         return temp ->

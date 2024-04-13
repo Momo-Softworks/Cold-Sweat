@@ -8,8 +8,9 @@ import java.util.function.Function;
 public class FireTempModifier extends TempModifier
 {
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
-    {   return temp -> entity.isOnFire() ? temp + 10 : temp;
+    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
+    {
+        return temp -> entity.isOnFire() ? temp + 10 : temp;
     }
 
     @Override

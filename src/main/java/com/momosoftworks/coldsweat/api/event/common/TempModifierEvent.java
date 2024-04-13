@@ -19,7 +19,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
      * {@link #entity} is the player the TempModifier is being applied to. <br>
-     * {@link #type} determines the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY} <br>
+     * {@link #trait} determines the modifier's {@link Temperature.Trait}. It will never be {@link Temperature.Trait#BODY} <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being added.<br>
@@ -31,10 +31,10 @@ public class TempModifierEvent extends Event
     {
         private final LivingEntity entity;
         private TempModifier modifier;
-        public Temperature.Type type;
+        public Temperature.Trait trait;
 
-        public void setModifierType(Temperature.Type newType) {
-            this.type = newType;
+        public void setModifierType(Temperature.Trait newTrait) {
+            this.trait = newTrait;
         }
 
         public final TempModifier getModifier() {
@@ -49,10 +49,10 @@ public class TempModifierEvent extends Event
             return entity;
         }
 
-        public Add(TempModifier modifier, LivingEntity entity, Temperature.Type type)
+        public Add(TempModifier modifier, LivingEntity entity, Temperature.Trait trait)
         {
             this.entity = entity;
-            this.type = type;
+            this.trait = trait;
             this.modifier = modifier;
         }
     }
@@ -62,7 +62,7 @@ public class TempModifierEvent extends Event
      * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
      * <br>
      * {@link #entity} is the player the TempModifier is being removed from. <br>
-     * {@link #type} is the modifier's {@link Temperature.Type}. It will never be {@link Temperature.Type#BODY}. <br>
+     * {@link #trait} is the modifier's {@link Temperature.Trait}. It will never be {@link Temperature.Trait#BODY}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
      * <br>
@@ -75,14 +75,14 @@ public class TempModifierEvent extends Event
     public static class Remove extends TempModifierEvent
     {
         public final LivingEntity entity;
-        public final Temperature.Type type;
+        public final Temperature.Trait trait;
         int count;
         Predicate<TempModifier> condition;
 
-        public Remove(LivingEntity entity, Temperature.Type type, int count, Predicate<TempModifier> condition)
+        public Remove(LivingEntity entity, Temperature.Trait trait, int count, Predicate<TempModifier> condition)
         {
             this.entity = entity;
-            this.type = type;
+            this.trait = trait;
             this.count = count;
             this.condition = condition;
         }

@@ -19,7 +19,7 @@ public class InsulationTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         double cold = this.getNBT().getDouble("cold");
         double hot = this.getNBT().getDouble("hot");

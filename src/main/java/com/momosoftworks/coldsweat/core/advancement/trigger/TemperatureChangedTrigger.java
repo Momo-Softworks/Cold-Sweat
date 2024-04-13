@@ -32,11 +32,11 @@ public class TemperatureChangedTrigger extends AbstractCriterionTrigger<Temperat
         {
             JsonObject entry = element.getAsJsonObject();
 
-            Temperature.Type type = Temperature.Type.fromID(entry.get("type").getAsString());
+            Temperature.Trait trait = Temperature.Trait.fromID(entry.get("type").getAsString());
 
             TriggerHelper.getTempValueOrRange(entry)
-                 .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(type, either, either)))
-                 .ifRight(pair  -> conditions.add(new TriggerHelper.TempCondition(type, pair.getFirst(), pair.getSecond())));
+                 .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(trait, either, either)))
+                 .ifRight(pair  -> conditions.add(new TriggerHelper.TempCondition(trait, pair.getFirst(), pair.getSecond())));
         }
 
         return new Instance(player, conditions);
@@ -48,7 +48,7 @@ public class TemperatureChangedTrigger extends AbstractCriterionTrigger<Temperat
         return ID;
     }
 
-    public void trigger(ServerPlayerEntity player, Map<Temperature.Type, Double> temps)
+    public void trigger(ServerPlayerEntity player, Map<Temperature.Trait, Double> temps)
     {
         this.trigger(player, triggerInstance -> triggerInstance.matches(temps));
     }
@@ -63,11 +63,11 @@ public class TemperatureChangedTrigger extends AbstractCriterionTrigger<Temperat
             this.conditions = conditions;
         }
 
-        public boolean matches(Map<Temperature.Type, Double> temps)
+        public boolean matches(Map<Temperature.Trait, Double> temps)
         {
             for (TriggerHelper.TempCondition condition : conditions)
             {
-                double value = temps.get(condition.type());
+                double value = temps.get(condition.trait());
 
                 if (!condition.matches(value))
                     return false;

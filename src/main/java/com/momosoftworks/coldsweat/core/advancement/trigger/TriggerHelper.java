@@ -70,7 +70,7 @@ public class TriggerHelper
             double above = condition.above();
             double below = condition.below();
             JsonObject value = new JsonObject();
-            value.addProperty("type", condition.type().getSerializedName());
+            value.addProperty("type", condition.trait().getSerializedName());
             if (above == below)
             {   value.addProperty("value", above);
             }
@@ -87,13 +87,13 @@ public class TriggerHelper
 
     public static class TempCondition
     {
-        private final Temperature.Type type;
+        private final Temperature.Trait trait;
         private final double below;
         private final double above;
 
-        public TempCondition(Temperature.Type type, double below, double above)
+        public TempCondition(Temperature.Trait trait, double below, double above)
         {
-            this.type = type;
+            this.trait = trait;
             this.below = below;
             this.above = above;
         }
@@ -104,8 +104,8 @@ public class TriggerHelper
                  : value >= above || value <= below;
         }
 
-        public Temperature.Type type()
-        {   return type;
+        public Temperature.Trait trait()
+        {   return trait;
         }
 
         public double below()

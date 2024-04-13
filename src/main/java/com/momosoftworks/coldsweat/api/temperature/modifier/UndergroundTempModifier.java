@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class UndergroundTempModifier extends TempModifier
 {
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
 
