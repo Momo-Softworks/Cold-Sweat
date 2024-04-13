@@ -18,7 +18,7 @@ public class FreezingTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         return temp -> temp - this.getNBT().getDouble("chill");
     }

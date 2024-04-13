@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +22,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -46,9 +44,9 @@ public class ArmorInsulation
             double cold = 0;
             double hot = 0;
 
-            double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-            double minTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
-            double maxTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
+            double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
+            double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
+            double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
 
             for (ItemStack armorStack : player.getArmorSlots())
             {
@@ -111,9 +109,9 @@ public class ArmorInsulation
             }
 
             if (cold == 0 && hot == 0)
-                Temperature.removeModifiers(player, Temperature.Type.RATE, (mod) -> mod instanceof InsulationTempModifier);
+                Temperature.removeModifiers(player, Temperature.Trait.RATE, (mod) -> mod instanceof InsulationTempModifier);
             else
-                Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Type.RATE);
+                Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Trait.RATE);
 
             // Award advancement for full insulation
             if (fullyInsulated >= 4)

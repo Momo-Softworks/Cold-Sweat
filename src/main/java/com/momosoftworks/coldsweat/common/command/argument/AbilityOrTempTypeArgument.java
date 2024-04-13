@@ -9,10 +9,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.EitherCodec;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import net.minecraft.commands.CommandBuildContext;
@@ -25,39 +23,36 @@ import net.minecraft.util.StringRepresentable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperature.Type, Temperature.Ability>>
+public class AbilityOrTempTypeArgument implements ArgumentType<Temperature.Trait>
 {
-    private static final Codec<Either<Temperature.Type, Temperature.Ability>> TEMPERATURES_CODEC = new EitherCodec<>(
-    StringRepresentable.fromEnum(() -> (Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(either -> either.left()).filter(Optional::isPresent).map(Optional::get).toArray(Temperature.Type[]::new))),
-    StringRepresentable.fromEnum(() -> (Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(either -> either.right()).filter(Optional::isPresent).map(Optional::get).toArray(Temperature.Ability[]::new))));
+    private static final Codec<Temperature.Trait> TEMPERATURES_CODEC = Temperature.Trait.CODEC;
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((p_234071_) -> {
         return Component.translatable("argument.enum.invalid", p_234071_);
     });
 
-    private final Codec<Either<Temperature.Type, Temperature.Ability>> codec;
-    private final Supplier<Either<Temperature.Type, Temperature.Ability>[]> values;
+    private final Codec<Temperature.Trait> codec;
+    private final Supplier<Temperature.Trait[]> values;
 
     private AbilityOrTempTypeArgument()
     {   this.codec = TEMPERATURES_CODEC;
-        this.values = () -> (Either<Temperature.Type, Temperature.Ability>[]) EntityTempManager.VALID_ATTRIBUTE_TYPES;
+        this.values = () -> (Temperature.Trait[]) EntityTempManager.VALID_ATTRIBUTE_TYPES;
     }
 
-    public static AbilityOrTempTypeArgument type()
+    public static AbilityOrTempTypeArgument attribute()
     {   return new AbilityOrTempTypeArgument();
     }
 
-    public static Either<Temperature.Type, Temperature.Ability> getAttribute(CommandContext<CommandSourceStack> context, String argument)
-    {   return context.getArgument(argument, Either.class);
+    public static Temperature.Trait getAttribute(CommandContext<CommandSourceStack> context, String argument)
+    {   return context.getArgument(argument, Temperature.Trait.class);
     }
 
 
-    public Either<Temperature.Type, Temperature.Ability> parse(StringReader stringReader) throws CommandSyntaxException
+    public Temperature.Trait parse(StringReader stringReader) throws CommandSyntaxException
     {   String s = stringReader.readUnquotedString();
         return this.codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result().orElseThrow(() ->
         {   return ERROR_INVALID_VALUE.create(s);
@@ -66,11 +61,7 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
 
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> pContext, SuggestionsBuilder pBuilder)
     {
-        return SharedSuggestionProvider.suggest(Arrays.stream(this.values.get()).map((either) ->
-        {   return either.left().map(StringRepresentable::getSerializedName)
-                   .orElse(either.right().map(StringRepresentable::getSerializedName)
-                   .orElse(""));
-        }).toList(), pBuilder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(this.values.get()).map(Temperature.Trait::getSerializedName).toList(), pBuilder);
     }
 
     public Collection<String> getExamples()

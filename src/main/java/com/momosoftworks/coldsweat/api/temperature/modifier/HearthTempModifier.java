@@ -20,7 +20,7 @@ public class HearthTempModifier extends TempModifier
     }
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         double min = ConfigSettings.MIN_TEMP.get();
         double max = ConfigSettings.MAX_TEMP.get();

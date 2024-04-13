@@ -23,10 +23,10 @@ public class PreventPlayerSleep
         {   return;
         }
 
-        double bodyTemp = Temperature.get(player, Temperature.Type.BODY);
-        double worldTemp = Temperature.get(player, Temperature.Type.WORLD);
-        double minTemp = Temperature.get(player, Temperature.Ability.FREEZING_POINT);
-        double maxTemp = Temperature.get(player, Temperature.Ability.BURNING_POINT);
+        double bodyTemp = Temperature.get(player, Temperature.Trait.BODY);
+        double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
+        double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
+        double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
 
         // If the player's body temperature is critical
         if (!CSMath.betweenExclusive(bodyTemp, -100, 100))
