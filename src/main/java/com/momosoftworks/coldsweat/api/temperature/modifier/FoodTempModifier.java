@@ -22,10 +22,4 @@ public class FoodTempModifier extends TempModifier
     {
         return temp -> temp + this.getNBT().getDouble("effect");
     }
-
-    @Override
-    public String getID()
-    {
-        return "cold_sweat:consumable";
-    }
 }

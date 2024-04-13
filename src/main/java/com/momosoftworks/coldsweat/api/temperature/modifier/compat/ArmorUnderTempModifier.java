@@ -47,10 +47,4 @@ public class ArmorUnderTempModifier extends TempModifier
         return temp -> returnTemp;*/
         return temp -> temp;
     }
-
-    @Override
-    public String getID()
-    {
-        return "armorunder:lining";
-    }
 }

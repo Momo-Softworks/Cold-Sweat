@@ -54,10 +54,4 @@ public class WaterTempModifier extends TempModifier
             return temp - newStrength;
         };
     }
-
-    @Override
-    public String getID()
-    {
-        return "cold_sweat:water";
-    }
 }

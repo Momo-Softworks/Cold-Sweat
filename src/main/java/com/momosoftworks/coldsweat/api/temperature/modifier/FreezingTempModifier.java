@@ -22,9 +22,4 @@ public class FreezingTempModifier extends TempModifier
     {
         return temp -> temp - this.getNBT().getDouble("chill");
     }
-
-    @Override
-    public String getID() {
-        return "cold_sweat:freezing";
-    }
 }

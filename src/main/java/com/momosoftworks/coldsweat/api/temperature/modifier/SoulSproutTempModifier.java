@@ -20,10 +20,4 @@ public class SoulSproutTempModifier extends TempModifier
         }
         return temp -> temp - 20;
     }
-
-    @Override
-    public String getID()
-    {
-        return "cold_sweat:soul_sprout";
-    }
 }

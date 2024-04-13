@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
+import java.lang.reflect.Constructor;
 import java.util.function.Supplier;
 
 /**
@@ -50,14 +51,15 @@ public class TempModifierRegisterEvent extends Event
     {
         try
         {
-            this.register(id, () ->
-            {   try
-                {   return (TempModifier) Class.forName(className).getConstructor().newInstance();
-                } catch (Exception e) { throw new RuntimeException(e); }
+            Constructor<?> clazz = Class.forName(className).getConstructor();
+            this.register(id, () -> {
+                try
+                {
+                    return (TempModifier) clazz.newInstance();
+                } catch (Exception e)
+                {   throw new RuntimeException(e);
+                }
             });
-        }
-        catch (Exception e)
-        {   throw new RuntimeException(String.format("Failed to register TempModifier by class name: \"%s\"!", className), e);
-        }
+        } catch (Exception e) { throw new RuntimeException(e); }
     }
 }

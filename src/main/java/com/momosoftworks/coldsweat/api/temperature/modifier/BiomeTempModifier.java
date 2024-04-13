@@ -173,8 +173,4 @@ public class BiomeTempModifier extends TempModifier
                                                              new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }
-
-    public String getID()
-    {   return "cold_sweat:biome";
-    }
 }
