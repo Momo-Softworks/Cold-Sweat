@@ -278,14 +278,14 @@ public class EntityTempManager
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
                 {
-                    TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                                     mod2 -> mod2 instanceof DepthTempModifier)));
+                    TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                                     mod2 -> mod2 instanceof UndergroundTempModifier)));
                 }
                 // Weather2 Compat
                 if (CompatManager.isWeather2Loaded())
                 {
-                    TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                               mod2 -> mod2 instanceof DepthTempModifier)));
+                    TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+                                                                                                                                               mod2 -> mod2 instanceof UndergroundTempModifier)));
                 }
             }
         }
@@ -298,12 +298,12 @@ public class EntityTempManager
 
             // Serene Seasons compat
             if (CompatManager.isSereneSeasonsLoaded())
-            {   TempModifierRegistry.getEntryFor("sereneseasons:season").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+            {   TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                           mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
             // Weather2 Compat
             if (CompatManager.isWeather2Loaded())
-            {   TempModifierRegistry.getEntryFor("weather2:storm").ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
+            {   TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Addition.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                     mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
         }
@@ -379,12 +379,12 @@ public class EntityTempManager
             if (event instanceof PotionEvent.PotionAddedEvent)
             {   EffectInstance effect = event.getPotionEffect();
                 // New HearthTempModifier
-                TempModifier newMod = new HearthTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
+                TempModifier newMod = new BlockInsulationTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
                 Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD);
             }
             // Remove TempModifier on potion effect removed
             else if (event instanceof PotionEvent.PotionRemoveEvent)
-            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, 1, mod -> mod instanceof HearthTempModifier);
+            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, 1, mod -> mod instanceof BlockInsulationTempModifier);
             }
         }
     }

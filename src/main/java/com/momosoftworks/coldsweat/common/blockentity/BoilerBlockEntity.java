@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
@@ -177,7 +177,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
             if (CSMath.betweenInclusive(temp, min, max))
             {
                 // Find the player's HearthTempModifier
-                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Trait.WORLD, HearthTempModifier.class);
+                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Trait.WORLD, BlockInsulationTempModifier.class);
                 // If they have one, refresh it
                 if (modifier.isPresent())
                 {

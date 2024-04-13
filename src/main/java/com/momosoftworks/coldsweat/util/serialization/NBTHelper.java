@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -30,9 +31,9 @@ public class NBTHelper
 
     public static CompoundNBT modifierToTag(TempModifier modifier)
     {
-        // Write the modifier's data to a CompoundNBT
+        // Write the modifier's data to a CompoundTag
         CompoundNBT modifierTag = new CompoundNBT();
-        modifierTag.putString("Id", modifier.getID());
+        modifierTag.putString("Id", TempModifierRegistry.getKey(modifier).toString());
 
         // Add the modifier's arguments
         modifierTag.put("ModifierData", modifier.getNBT());
@@ -53,8 +54,8 @@ public class NBTHelper
 
     public static Optional<TempModifier> tagToModifier(CompoundNBT modifierTag)
     {
-        // Create a new modifier from the CompoundNBT
-        Optional<TempModifier> optional = TempModifierRegistry.getEntryFor(modifierTag.getString("Id"));
+        // Create a new modifier from the CompoundTag
+        Optional<TempModifier> optional = TempModifierRegistry.getValue(new ResourceLocation(modifierTag.getString("Id")));
         optional.ifPresent(modifier ->
         {
             modifier.setNBT(modifierTag.getCompound("ModifierData"));

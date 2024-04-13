@@ -62,9 +62,9 @@ public class AbstractTempCap implements ITemperatureCap
     public double getTrait(Trait trait)
     {   // Special case for BODY
         if (trait == Trait.BODY) return getTrait(Trait.CORE) + getTrait(Trait.BASE);
-        // Throw exception if this temperature type is not supported
+        // Throw exception if this temperature trait is not supported
         if (!traits.containsKey(trait))
-        {   throw new IllegalArgumentException("Invalid temperature type: " + trait);
+        {   throw new IllegalArgumentException("Invalid temperature trait: " + trait);
         }
 
         return traits.get(trait);
@@ -78,7 +78,6 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void setTrait(Trait trait, double value)
     {
-        // Throw exception if this temperature type is not supported
         switch (trait)
         {
             case CORE  : changed |= ((int) value) != ((int) getTrait(Trait.CORE)); break;
@@ -86,14 +85,15 @@ public class AbstractTempCap implements ITemperatureCap
             case WORLD : changed |= Math.abs(value - getTrait(Trait.WORLD)) >= 0.02; break;
             default : changed |= true;
         };
+        // Throw exception if this temperature trait is not supported
         if (traits.replace(trait, value) == null)
-        {   throw new IllegalArgumentException("Invalid temperature type: " + trait);
+        {   throw new IllegalArgumentException("Invalid temperature trait: " + trait);
         }
     }
 
-    public void setTemp(Trait trait, double value, Entity entity)
+    public void setTrait(Trait trait, double value, LivingEntity entity)
     {
-        double oldTemp = getTrait(trait);
+        double oldTemp = this.getTrait(trait);
         if (oldTemp != value && entity instanceof ServerPlayerEntity)
         {   ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(((ServerPlayerEntity) entity), this.getTraits());
         }
@@ -109,7 +109,7 @@ public class AbstractTempCap implements ITemperatureCap
     public List<TempModifier> getModifiers(Trait trait)
     {   // Throw exception if this modifier type is not supported
         return modifiers.computeIfAbsent(trait, t ->
-        {   throw new IllegalArgumentException("Invalid modifier type: " + t);
+        {   throw new IllegalArgumentException("Invalid modifier trait: " + t);
         });
     }
 
@@ -254,9 +254,9 @@ public class AbstractTempCap implements ITemperatureCap
         }
 
         // Write the new temperature values
-        this.setTemp(Trait.CORE, CSMath.clamp(newCoreTemp, -150, 150), entity);
-        this.setTemp(Trait.BASE, CSMath.clamp(newBaseTemp, -150, 150), entity);
-        this.setTemp(Trait.WORLD, newWorldTemp, entity);
+        this.setTrait(Trait.CORE, CSMath.clamp(newCoreTemp, -150, 150), entity);
+        this.setTrait(Trait.BASE, CSMath.clamp(newBaseTemp, -150, 150), entity);
+        this.setTrait(Trait.WORLD, newWorldTemp, entity);
         // Write the new ability values
         this.setTrait(Trait.BURNING_POINT, maxTemp);
         this.setTrait(Trait.FREEZING_POINT, minTemp);

@@ -6,7 +6,7 @@ import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
-import com.momosoftworks.coldsweat.api.temperature.modifier.HearthTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
@@ -548,7 +548,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 // Find the player's HearthTempModifier
                 TempModifier modifier = null;
                 for (TempModifier tempModifier : cap.getModifiers(Temperature.Trait.WORLD))
-                {   if (tempModifier instanceof HearthTempModifier)
+                {   if (tempModifier instanceof BlockInsulationTempModifier)
                     {   modifier = tempModifier;
                         break;
                     }
