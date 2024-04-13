@@ -170,9 +170,4 @@ public class BlockTempModifier extends TempModifier
             return temp;
         };
     }
-
-    public String getID()
-    {
-        return "cold_sweat:blocks";
-    }
 }

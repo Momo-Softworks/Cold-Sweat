@@ -12,10 +12,4 @@ public class FireTempModifier extends TempModifier
     {
         return temp -> entity.isOnFire() ? temp + 10 : temp;
     }
-
-    @Override
-    public String getID()
-    {
-        return "cold_sweat:on_fire";
-    }
 }

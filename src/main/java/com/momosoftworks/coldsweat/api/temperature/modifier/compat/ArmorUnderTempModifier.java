@@ -52,10 +52,4 @@ public class ArmorUnderTempModifier extends TempModifier
         double returnTemp = Temperature.convert(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
         return temp -> temp + returnTemp;
     }
-
-    @Override
-    public String getID()
-    {
-        return "armorunder:lining";
-    }
 }
