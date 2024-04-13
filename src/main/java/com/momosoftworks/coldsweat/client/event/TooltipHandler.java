@@ -48,7 +48,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -116,7 +115,7 @@ public class TooltipHandler
         || attribute == ModAttributes.WORLD_TEMPERATURE
         || attribute == ModAttributes.BASE_BODY_TEMPERATURE))
         {
-            value = Temperature.convertUnits(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
+            value = Temperature.convert(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
         }
         String operationString = operation == AttributeModifier.Operation.ADDITION ? "add" : "multiply";
         ChatFormatting color;

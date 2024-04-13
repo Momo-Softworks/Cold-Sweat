@@ -48,7 +48,7 @@ public class Temperature
      * @param absolute Used when dealing with world temperatures with Minecraft units.
      * @return The converted temperature.
      */
-    public static double convertUnits(double value, Units from, Units to, boolean absolute)
+    public static double convert(double value, Units from, Units to, boolean absolute)
     {
         return switch (from)
         {

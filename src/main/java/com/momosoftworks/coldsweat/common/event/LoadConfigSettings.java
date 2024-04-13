@@ -343,13 +343,13 @@ public class LoadConfigSettings
                 {
                     Temperature.Units units = biomeTempData.units();
                     if (biomeTempData.isOffset())
-                    {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convertUnits(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                                    Temperature.convertUnits(biomeTempData.max(), units, Temperature.Units.MC, true),
+                    {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                                                                                    Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
                                                                                     biomeTempData.units()));
                     }
                     else
-                    {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convertUnits(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                                  Temperature.convertUnits(biomeTempData.max(), units, Temperature.Units.MC, true),
+                    {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                                                                                  Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
                                                                                   biomeTempData.units()));
                     }
                 }
@@ -380,11 +380,11 @@ public class LoadConfigSettings
                 {
                     Temperature.Units units = dimensionTempData.units();
                     if (dimensionTempData.isOffset())
-                    {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convertUnits(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                    {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
                                                                                       dimensionTempData.units()));
                     }
                     else
-                    {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convertUnits(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                    {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
                                                                                     dimensionTempData.units()));
                     }
                 }
@@ -414,7 +414,7 @@ public class LoadConfigSettings
                                                             location -> List.of(location)))
                 {
                     Temperature.Units units = structureTempData.units();
-                    ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(Temperature.convertUnits(structureTempData.temperature(), units, Temperature.Units.MC, true),
+                    ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(Temperature.convert(structureTempData.temperature(), units, Temperature.Units.MC, true),
                                                                               structureTempData.units()));
                 }
             }
