@@ -298,7 +298,7 @@ public class FilledWaterskinItem extends Item
         TextFormatting color = temp == 0 ? TextFormatting.GRAY : (temp < 0 ? TextFormatting.BLUE : TextFormatting.RED);
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
-        if (celsius) temp = Temperature.convertUnits(temp, Temperature.Units.F, Temperature.Units.C, true);
+        if (celsius) temp = Temperature.convert(temp, Temperature.Units.F, Temperature.Units.C, true);
         temp += ConfigSettings.TEMP_OFFSET.get() / 2.0;
 
         tooltip.add(1, new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY)

@@ -79,7 +79,7 @@ public class RegisterItemOverrides
                                 case -4 : tempColor = TextFormatting.BLUE; break;
                                 default : tempColor = TextFormatting.RESET; break;
                             };
-                            int convertedTemp = (int) Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
+                            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
                             frame.getItem().setHoverName(new StringTextComponent(convertedTemp + " \u00B0" + (celsius ? "C" : "F")).withStyle(tempColor));
                         }
                     }

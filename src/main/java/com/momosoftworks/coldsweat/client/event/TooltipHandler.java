@@ -109,7 +109,7 @@ public class TooltipHandler
                 || attribute == ModAttributes.WORLD_TEMPERATURE
                 || attribute == ModAttributes.BASE_BODY_TEMPERATURE))
         {
-            value = Temperature.convertUnits(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
+            value = Temperature.convert(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
         }
         String operationString = operation == AttributeModifier.Operation.ADDITION ? "add" : "multiply";
         TextFormatting color;

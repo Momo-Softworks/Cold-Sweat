@@ -202,8 +202,8 @@ public class ConfigSettings
                                                             .map(entry ->
                                                             {
                                                                 Temperature.Units units = entry.getValue().getThird();
-                                                                double min = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
-                                                                double max = Temperature.convertUnits(entry.getValue().getSecond(), Temperature.Units.MC, units, true);
+                                                                double min = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                                double max = Temperature.convert(entry.getValue().getSecond(), Temperature.Units.MC, units, true);
                                                                 return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
                                                             })
                                                             .collect(Collectors.toList())));
@@ -215,8 +215,8 @@ public class ConfigSettings
                                                             .map(entry ->
                                                             {
                                                                 Temperature.Units units = entry.getValue().getThird();
-                                                                double min = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
-                                                                double max = Temperature.convertUnits(entry.getValue().getSecond(), Temperature.Units.MC, units, false);
+                                                                double min = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                                double max = Temperature.convert(entry.getValue().getSecond(), Temperature.Units.MC, units, false);
                                                                 return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
                                                             })
                                                             .collect(Collectors.toList())));
@@ -227,7 +227,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
-                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                         double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
                                                          return Arrays.asList(entry.getKey().toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
@@ -238,7 +238,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
-                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
+                                                         double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
                                                          return Arrays.asList(entry.getKey().toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
@@ -249,7 +249,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
-                                                         double temp = Temperature.convertUnits(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+                                                         double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
                                                          return Arrays.asList(entry.getKey().toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
@@ -508,8 +508,8 @@ public class ConfigSettings
     public enum Difficulty
     {
         SUPER_EASY(CSMath.mapOf(
-            "min_temp", () -> Temperature.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convertUnits(120, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convert(40, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convert(120, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 0.5,
             "require_thermometer", () -> false,
             "fire_resistance_enabled", () -> true,
@@ -518,8 +518,8 @@ public class ConfigSettings
         )),
 
         EASY(CSMath.mapOf(
-            "min_temp", () -> Temperature.convertUnits(45, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convertUnits(110, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convert(45, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convert(110, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 0.75,
             "require_thermometer", () -> false,
             "fire_resistance_enabled", () -> true,
@@ -528,8 +528,8 @@ public class ConfigSettings
         )),
 
         NORMAL(CSMath.mapOf(
-            "min_temp", () -> Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 1.0,
             "require_thermometer", () -> true,
             "fire_resistance_enabled", () -> true,
@@ -538,8 +538,8 @@ public class ConfigSettings
         )),
 
         HARD(CSMath.mapOf(
-            "min_temp", () -> Temperature.convertUnits(60, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true),
+            "min_temp", () -> Temperature.convert(60, Temperature.Units.F, Temperature.Units.MC, true),
+            "max_temp", () -> Temperature.convert(90, Temperature.Units.F, Temperature.Units.MC, true),
             "temp_rate", () -> 1.5,
             "require_thermometer", () -> true,
             "fire_resistance_enabled", () -> false,

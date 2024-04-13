@@ -51,7 +51,7 @@ public class ArmorUnderTempModifier extends TempModifier
             else nbt.remove("OzzyTemp");
         }
 
-        double returnTemp = Temperature.convertUnits(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
+        double returnTemp = Temperature.convert(totalOffset, Temperature.Units.F, Temperature.Units.MC, false);
         return temp -> temp + returnTemp;
     }
 

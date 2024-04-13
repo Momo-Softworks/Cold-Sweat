@@ -235,7 +235,7 @@ public class TempCommand extends BaseCommand
     private int executeGetWorldTemp(CommandSource source, int x , int y, int z, ServerWorld level)
     {   //Compose & send message
         Temperature.Units units = CSMath.getIfNotNull(source.getEntity(), ent -> EntityTempManager.getTemperatureCap(ent).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F), Temperature.Units.F);
-        int worldTemp = (int) Temperature.convertUnits(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
+        int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
                                                                                                            ? level
                                                                                                            : source.getLevel()),
                                                        Temperature.Units.MC, units, true);
