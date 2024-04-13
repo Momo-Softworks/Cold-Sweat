@@ -52,9 +52,4 @@ public class SereneSeasonsTempModifier extends TempModifier
 
         return temp -> temp;
     }
-
-    @Override
-    public String getID() {
-        return "sereneseasons:season";
-    }
 }

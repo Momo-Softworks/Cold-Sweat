@@ -18,9 +18,4 @@ public class SoulLampTempModifier extends TempModifier
             return Math.max(temp * 0.4, almostMax);
         };
     }
-
-    @Override
-    public String getID() {
-        return "cold_sweat:soulspring_lamp";
-    }
 }

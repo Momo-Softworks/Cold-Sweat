@@ -47,9 +47,4 @@ public class UndergroundTempModifier extends TempModifier
             return CSMath.blend(depthAvg, biomeTempAvg, biomeCount, 0, depthTable.size());
         };
     }
-
-    public String getID()
-    {
-        return "cold_sweat:height";
-    }
 }

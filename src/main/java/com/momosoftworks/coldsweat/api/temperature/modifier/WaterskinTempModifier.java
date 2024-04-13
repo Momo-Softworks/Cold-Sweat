@@ -19,9 +19,4 @@ public class WaterskinTempModifier extends TempModifier
     public Function<Double, Double>  calculate(LivingEntity entity, Temperature.Trait trait)
     {   return temp -> temp + this.getNBT().getDouble("Temperature");
     }
-
-    public String getID()
-    {
-        return "cold_sweat:waterskin";
-    }
 }

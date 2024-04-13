@@ -25,9 +25,4 @@ public class MountTempModifier extends TempModifier
             return CSMath.blend(temp, 0, this.getNBT().getDouble(toChange), 0, 1);
         };
     }
-
-    public String getID()
-    {
-        return "cold_sweat:mount";
-    }
 }

@@ -30,9 +30,4 @@ public class CuriosTempModifier extends TempModifier
             return temp * (insulation >= 0 ? Math.pow(0.1, insulation / 60) : -(insulation / 20) + 1);
         };
     }
-
-    public String getID()
-    {
-        return "curios:curios";
-    }
 }

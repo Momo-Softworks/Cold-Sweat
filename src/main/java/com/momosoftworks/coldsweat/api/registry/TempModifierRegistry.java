@@ -50,16 +50,16 @@ public class TempModifierRegistry
         {   return Optional.of(mod.get());
         }
         else
-        {   throw new RuntimeException(String.format("Tried to instantiate TempModifier \"%s\", but it is not registered!", id));
+        {   return Optional.empty();
         }
     }
 
     public static ResourceLocation getKey(TempModifier modifier)
     {
         return TEMP_MODIFIERS.entrySet().stream()
-                .filter(entry -> entry.getValue().getClass().equals(modifier.getClass()))
+                .filter(entry -> entry.getValue().get().getClass().equals(modifier.getClass()))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Tried to get the key of an unregistered TempModifier!"));
+                .orElseThrow(() -> new RuntimeException("Tried to get the key of an unregistered TempModifier! " + modifier.getClass().getSimpleName()));
     }
 }

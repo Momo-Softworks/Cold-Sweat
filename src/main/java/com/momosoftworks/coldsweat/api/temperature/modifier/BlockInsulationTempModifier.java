@@ -31,9 +31,4 @@ public class BlockInsulationTempModifier extends TempModifier
 
         return temp -> CSMath.blend(temp, CSMath.weightedAverage(temp, mid, 1 - hearthStrength, 1.0), insulationStrength, 0, 10);
     }
-
-    public String getID()
-    {
-        return "cold_sweat:hearth";
-    }
 }
