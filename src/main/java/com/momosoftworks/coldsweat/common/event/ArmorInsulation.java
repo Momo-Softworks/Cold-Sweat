@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.common.event;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.temperature.modifier.InsulationTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
@@ -109,9 +109,9 @@ public class ArmorInsulation
             }
 
             if (cold == 0 && hot == 0)
-                Temperature.removeModifiers(player, Temperature.Trait.RATE, (mod) -> mod instanceof InsulationTempModifier);
+                Temperature.removeModifiers(player, Temperature.Trait.RATE, (mod) -> mod instanceof ArmorInsulationTempModifier);
             else
-                Temperature.addOrReplaceModifier(player, new InsulationTempModifier(cold, hot).tickRate(20), Temperature.Trait.RATE);
+                Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, hot).tickRate(20), Temperature.Trait.RATE);
 
             // Award advancement for full insulation
             if (fullyInsulated >= 4)
