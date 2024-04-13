@@ -54,12 +54,12 @@ public class ColdSweatConfig
 
         minHabitable = BUILDER
                 .comment("Defines the minimum habitable temperature")
-                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convertUnits(50, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
         maxHabitable = BUILDER
                 .comment("Defines the maximum habitable temperature")
-                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(100, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
         rateMultiplier = BUILDER

@@ -233,10 +233,10 @@ public class TempCommand extends BaseCommand
     private int executeGetWorldTemp(CommandSourceStack source, int x , int y, int z, ServerLevel level)
     {   //Compose & send message
         Temperature.Units units = CSMath.getIfNotNull(source.getEntity(), ent -> EntityTempManager.getTemperatureCap(ent).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F), Temperature.Units.F);
-        int worldTemp = (int) Temperature.convertUnits(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
+        int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
                                                                                                            ? level
                                                                                                            : source.getLevel()),
-                                                       Temperature.Units.MC, units, true);
+                                                  Temperature.Units.MC, units, true);
         source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, units.getFormattedName()), true);
         return Command.SINGLE_SUCCESS;
     }

@@ -27,11 +27,11 @@ public class BoilerBlockTemp extends BlockTemp
 
     @Override
     public double maxEffect() {
-        return Temperature.convertUnits(40, Temperature.Units.F, Temperature.Units.MC, false);
+        return Temperature.convert(40, Temperature.Units.F, Temperature.Units.MC, false);
     }
 
     @Override
     public double maxTemperature() {
-        return Temperature.convertUnits(212, Temperature.Units.F, Temperature.Units.MC, true);
+        return Temperature.convert(212, Temperature.Units.F, Temperature.Units.MC, true);
     }
 }

@@ -68,7 +68,7 @@ public class Overlays
             gui.setupOverlayRenderState(true, false);
 
             // Get player world temperature
-            double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Get the temperature severity
             int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
@@ -211,7 +211,7 @@ public class Overlays
             gui.setupOverlayRenderState(true, false);
 
             // Get player world temperature
-            double temp = Temperature.convertUnits(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             // Get the temperature severity
             int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
             int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
@@ -273,7 +273,7 @@ public class Overlays
                     // Get temperature in actual degrees
                     boolean celsius = ConfigSettings.CELSIUS.get();
                     double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
-                    double realTemp = Temperature.convertUnits(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
                     // Calculate the blended world temperature for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;

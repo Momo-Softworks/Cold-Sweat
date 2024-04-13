@@ -62,28 +62,28 @@ public class ConfigPageOne extends AbstractConfigPage
             clientConfig.setCelsius(!clientConfig.isCelsius());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.WORLD_TEMP = Temperature.convertUnits(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
+                Overlays.WORLD_TEMP = Temperature.convert(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
             properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    Temperature.convertUnits(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
 
             ((EditBox) this.widgetBatches.get("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
         }, false, false, true, new TranslatableComponent("cold_sweat.config.units.desc"));
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.max_temperature.name"),
-                value -> ConfigSettings.MAX_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(Temperature.convertUnits(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MAX_TEMP.set(Temperature.convert(value, properUnits[0], Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
                 true, false, false, new TranslatableComponent("cold_sweat.config.max_temperature.desc"));
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, new TranslatableComponent("cold_sweat.config.min_temperature.name"),
-                value -> ConfigSettings.MIN_TEMP.set(Temperature.convertUnits(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(Temperature.convertUnits(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MIN_TEMP.set(Temperature.convert(value, properUnits[0], Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
                 true, false, false, new TranslatableComponent("cold_sweat.config.min_temperature.desc"));
 
         // Temp Damage
