@@ -55,19 +55,19 @@ public class Temperature
             case C -> switch (to)
             {
                 case C -> value;
-                case F -> value * 1.8 + 32d;
-                case MC -> value / 23.333333333d;
+                case F -> value * 1.8 + (absolute ? 32d : 0d);
+                case MC -> value / 25d;
             };
             case F -> switch (to)
             {
-                case C -> (value - 32) / 1.8;
+                case C -> (value - (absolute ? 32d : 0d)) / 1.8;
                 case F -> value;
-                case MC -> (value - (absolute ? 32d : 0d)) / 42d;
+                case MC -> (value - (absolute ? 32d : 0d)) / 45d;
             };
             case MC -> switch (to)
             {
-                case C -> value * 23.333333333d;
-                case F -> value * 42d + (absolute ? 32d : 0d);
+                case C -> value * 25d;
+                case F -> value * 45d + (absolute ? 32d : 0d);
                 case MC -> value;
             };
         };
