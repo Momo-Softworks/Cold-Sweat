@@ -74,8 +74,8 @@ public class ConfigPageDifficulty extends Screen
     private static String getTemperatureString(double temp, String color)
     {
         DecimalFormat df = new DecimalFormat("#.##");
-        return color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " \u00B0F / "
-             + color + df.format(Temperature.convertUnits(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " \u00B0C";
+        return color + df.format(Temperature.convert(temp, Temperature.Units.MC, Temperature.Units.F, true)) + CLEAR + " \u00B0F / "
+             + color + df.format(Temperature.convert(temp, Temperature.Units.MC, Temperature.Units.C, true)) + CLEAR + " \u00B0C";
     }
 
     private static Component getRateComponent(ConfigSettings.Difficulty difficulty)

@@ -232,7 +232,7 @@ public class TempCommand extends BaseCommand
     {   //Compose & send message
         EntityTempManager.getTemperatureCap(source.getPlayer()).ifPresent(cap ->
         {
-            int worldTemp = (int) Temperature.convertUnits(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
+            int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
                                                                                                                ? level
                                                                                                                : source.getLevel()),
                                                            Temperature.Units.MC, cap.getPreferredUnits(), true);
