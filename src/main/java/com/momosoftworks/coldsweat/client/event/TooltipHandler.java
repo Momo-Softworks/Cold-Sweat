@@ -51,17 +51,17 @@ public class TooltipHandler
 
     public static int getTooltipTitleIndex(List<ITextComponent> tooltip, ItemStack stack)
     {
-        int insulTooltipIndex;
+        int tooltipStartIndex;
         String hoverName = stack.getHoverName().getString();
 
-        for (insulTooltipIndex = 0; insulTooltipIndex < tooltip.size(); insulTooltipIndex++)
+        for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
         {
-            if (tooltip.get(insulTooltipIndex).getString().trim().equals(hoverName))
-            {   insulTooltipIndex++;
+            if (tooltip.get(tooltipStartIndex).getString().trim().equals(hoverName))
+            {   tooltipStartIndex++;
                 break;
             }
         }
-        return insulTooltipIndex;
+        return tooltipStartIndex;
     }
 
     public static int getTooltipEndIndex(List<ITextComponent> tooltip, ItemStack stack)
@@ -73,6 +73,9 @@ public class TooltipHandler
             {   tooltipEndIndex--;
             }
             tooltipEndIndex--;
+        }
+        if (tooltipEndIndex == -1)
+        {   tooltipEndIndex = tooltip.size();
         }
         return tooltipEndIndex;
     }
