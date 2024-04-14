@@ -78,7 +78,8 @@ public class RegisterItemOverrides
                                 default -> ChatFormatting.RESET;
                             };
                             int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
-                            frame.getItem().setHoverName(new TextComponent(convertedTemp + " \u00B0" + (celsius ? "C" : "F")).withStyle(tempColor));
+                            frame.getItem().setHoverName(new TextComponent(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
+                                                                                                          : Temperature.Units.F.getFormattedName())).withStyle(tempColor));
                         }
                     }
 
