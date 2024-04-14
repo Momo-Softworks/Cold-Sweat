@@ -47,6 +47,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -56,20 +57,20 @@ public class TooltipHandler
 
     public static int getTooltipTitleIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
     {
-        int insulTooltipIndex;
+        int tooltipStartIndex;
         String hoverName = stack.getHoverName().getString();
 
         if (CompatManager.isIcebergLoaded())
-        {   insulTooltipIndex = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component.getClass().getName().equals("com.anthonyhilyard.iceberg.util.Tooltips$TitleBreakComponent")).orElse(false)) + 1;
+        {   tooltipStartIndex = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component.getClass().getName().equals("com.anthonyhilyard.iceberg.util.Tooltips$TitleBreakComponent")).orElse(false)) + 1;
         }
-        else for (insulTooltipIndex = 0; insulTooltipIndex < tooltip.size(); insulTooltipIndex++)
+        else for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
         {
-            if (tooltip.get(insulTooltipIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
-            {   insulTooltipIndex++;
+            if (tooltip.get(tooltipStartIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
+            {   tooltipStartIndex++;
                 break;
             }
         }
-        return insulTooltipIndex;
+        return tooltipStartIndex;
     }
 
     public static int getTooltipEndIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
@@ -81,6 +82,9 @@ public class TooltipHandler
             {   tooltipEndIndex--;
             }
             tooltipEndIndex--;
+        }
+        if (tooltipEndIndex == -1)
+        {   tooltipEndIndex = tooltip.size();
         }
         return tooltipEndIndex;
     }
