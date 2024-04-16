@@ -3,8 +3,6 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
@@ -41,7 +39,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -223,14 +220,14 @@ public class TooltipHandler
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.predicate.test(player) && itemInsul.nbt.test(stack.getTag()))
-            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), InsulationSlot.ITEM);
+            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.ITEM);
             }
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.predicate.test(player) && itemInsul.nbt.test(stack.getTag()))
-            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), InsulationSlot.CURIO);
+            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.CURIO);
             }
         }
 
@@ -269,7 +266,7 @@ public class TooltipHandler
             }
 
             if (!insulation.isEmpty())
-            {   tooltip = new InsulationTooltip(insulation, InsulationSlot.ARMOR);
+            {   tooltip = new InsulationTooltip(insulation, Insulation.Slot.ARMOR);
             }
         }
         // Find the empty line that this tooltip should fill

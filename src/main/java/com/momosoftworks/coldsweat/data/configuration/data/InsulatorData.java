@@ -7,8 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
@@ -24,7 +22,6 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -33,18 +30,18 @@ import java.util.*;
 public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<InsulatorData>
 {
     List<Either<ITag<Item>, Item>> items;
-    InsulationSlot slot;
+    Insulation.Slot slot;
     Insulation insulation;
     NbtRequirement nbt;
     EntityRequirement predicate;
     Optional<AttributeModifierMap> attributes;
     Optional<List<String>> requiredMods;
 
-    public InsulatorData(List<Either<ITag<Item>, Item>> items, InsulationSlot slot,
+    public InsulatorData(List<Either<ITag<Item>, Item>> items, Insulation.Slot slot,
                          Insulation insulation, NbtRequirement nbt,
                          EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
                          Optional<List<String>> requiredMods)
-    {   
+    {
         this.items = items;
         this.slot = slot;
         this.nbt = nbt;
@@ -75,7 +72,7 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
             })
             .listOf()
             .fieldOf("items").forGetter(data -> data.items),
-            InsulationSlot.CODEC.fieldOf("type").forGetter(data -> data.slot),
+            Insulation.Slot.CODEC.fieldOf("type").forGetter(data -> data.slot),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
             {
                 return either.left().isPresent() ? either.left().get() : either.right().get();
@@ -148,7 +145,7 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
             ITag<Item> tagKey = ItemTags.getAllTags().getTag(new ResourceLocation(tag));
             items.add(Either.left(tagKey));
         }
-        InsulationSlot type = InsulationSlot.valueOf(nbt.getString("type"));
+        Insulation.Slot type = Insulation.Slot.valueOf(nbt.getString("type"));
         Insulation insulation = Insulation.deserialize(nbt.getCompound("insulation"));
         NbtRequirement nbt1 = NbtRequirement.deserialize(nbt.getCompound("nbt"));
         EntityRequirement predicate = EntityRequirement.deserialize(nbt.getCompound("predicate"));

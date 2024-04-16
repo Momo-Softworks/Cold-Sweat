@@ -5,11 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -34,7 +31,7 @@ public class InsulationTooltip extends Tooltip
                                                                 : TOOLTIP;
 
     List<Insulation> insulation;
-    InsulationSlot slot;
+    Insulation.Slot slot;
     int width = 0;
 
     private static final Method INNER_BLIT = ObfuscationReflectionHelper.findMethod(AbstractGui.class, "func_238469_a_",
@@ -57,9 +54,9 @@ public class InsulationTooltip extends Tooltip
     {   innerBlit(poseStack, x, x + width, y, y + height, zOffset, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
     }
 
-    public InsulationTooltip(List<Insulation> insulation, InsulationSlot type)
+    public InsulationTooltip(List<Insulation> insulation, Insulation.Slot slot)
     {   this.insulation = insulation;
-        this.slot = type;
+        this.slot = slot;
     }
 
     @Override
@@ -151,14 +148,14 @@ public class InsulationTooltip extends Tooltip
         AbstractGui.blit(poseStack, x, y, 401, uvX, uvY, 6, 4, 32, 24);
     }
 
-    static int renderOverloadCell(MatrixStack poseStack, FontRenderer font, int x, int y, double insulation, int textColor, InsulationType type)
+    static int renderOverloadCell(MatrixStack poseStack, FontRenderer font, int x, int y, double insulation, int textColor, Insulation.Type type)
     {
         Number insul = CSMath.truncate(insulation / 2, 2);
         if (CSMath.isInteger(insul)) insul = insul.intValue();
         String text = "x" + insul;
         int uvX = 0;
         switch (type)
-        {   
+        {
             case COLD : uvX = 12; break;
             case HEAT : uvX = 18; break;
             case NEUTRAL : uvX = 6; break;
@@ -167,7 +164,7 @@ public class InsulationTooltip extends Tooltip
 
         poseStack.pushPose();
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
-        renderCell(poseStack, x + 7, y + 1, insulation, uvX, type == InsulationType.ADAPTIVE);
+        renderCell(poseStack, x + 7, y + 1, insulation, uvX, type == Insulation.Type.ADAPTIVE);
         AbstractGui.blit(poseStack,
                           x + 6, y,
                           401, /*z*/
@@ -183,7 +180,7 @@ public class InsulationTooltip extends Tooltip
         return 12 + font.width(text);
     }
 
-    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, InsulationSlot type, boolean showSign, boolean isNegative)
+    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative)
     {
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         FontRenderer font = Minecraft.getInstance().font;
@@ -229,19 +226,19 @@ public class InsulationTooltip extends Tooltip
             poseStack.pushPose();
             // Render cold insulation
             if (cold > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, InsulationType.COLD);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, Insulation.Type.COLD);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (hot > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, InsulationType.HEAT);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, Insulation.Type.HEAT);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (neutral > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, InsulationType.NEUTRAL);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, Insulation.Type.NEUTRAL);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (adaptive > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, InsulationType.ADAPTIVE);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, Insulation.Type.ADAPTIVE);
                 poseStack.translate(xOffs, 0, 0);
             }
             poseStack.popPose();
