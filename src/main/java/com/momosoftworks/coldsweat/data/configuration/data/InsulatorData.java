@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
@@ -24,13 +23,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record InsulatorData(InsulationSlot slot,
+public record InsulatorData(Insulation.Slot slot,
                             Insulation insulation, ItemRequirement data,
                             EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
                             Optional<List<String>> requiredMods) implements NbtSerializable
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            InsulationSlot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
+            Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
             {
                 return either.left().isPresent() ? either.left().get() : either.right().get();
@@ -83,7 +82,7 @@ public record InsulatorData(InsulationSlot slot,
 
     public static InsulatorData deserialize(CompoundTag nbt)
     {
-        InsulationSlot slot = InsulationSlot.valueOf(nbt.getString("type"));
+        Insulation.Slot slot = Insulation.Slot.valueOf(nbt.getString("type"));
         Insulation insulation = Insulation.deserialize(nbt.getCompound("insulation"));
         ItemRequirement requirement = ItemRequirement.deserialize(nbt.getCompound("data"));
         EntityRequirement predicate = EntityRequirement.deserialize(nbt.getCompound("predicate"));

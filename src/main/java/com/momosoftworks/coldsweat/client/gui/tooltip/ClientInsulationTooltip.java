@@ -5,8 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -31,10 +29,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                                                : TOOLTIP;
 
     List<Insulation> insulation;
-    InsulationSlot type;
+    Insulation.Slot type;
     int width = 0;
 
-    public ClientInsulationTooltip(List<Insulation> insulation, InsulationSlot type)
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot type)
     {   this.insulation = insulation;
         this.type = type;
     }
@@ -123,7 +121,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, uvX, uvY, 6, 4, 32, 24);
     }
 
-    static int renderOverloadCell(GuiGraphics graphics, Font font, int x, int y, double insulation, int textColor, InsulationType type)
+    static int renderOverloadCell(GuiGraphics graphics, Font font, int x, int y, double insulation, int textColor, Insulation.Type type)
     {
         Number insul = CSMath.truncate(insulation / 2, 2);
         if (CSMath.isInteger(insul)) insul = insul.intValue();
@@ -135,7 +133,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             case ADAPTIVE -> 12;
         };
 
-        renderCell(graphics, x + 7, y + 1, insulation, uvX, type == InsulationType.ADAPTIVE);
+        renderCell(graphics, x + 7, y + 1, insulation, uvX, type == Insulation.Type.ADAPTIVE);
         graphics.blit(TOOLTIP_LOCATION.get(),
                       x + 6, y,
                       0, /*z*/
@@ -147,7 +145,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return 12 + font.width(text);
     }
 
-    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, InsulationSlot type, boolean showSign, boolean isNegative)
+    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative)
     {
         PoseStack poseStack = graphics.pose();
         Font font = Minecraft.getInstance().font;
@@ -191,19 +189,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             poseStack.translate(0, 0, 0);
             // Render cold insulation
             if (cold > 0)
-            {   int xOffs = renderOverloadCell(graphics, font, x, y, cold, textColor, InsulationType.COLD);
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, cold, textColor, Insulation.Type.COLD);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (heat > 0)
-            {   int xOffs = renderOverloadCell(graphics, font, x, y, heat, textColor, InsulationType.HEAT);
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, heat, textColor, Insulation.Type.HEAT);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (neutral > 0)
-            {   int xOffs = renderOverloadCell(graphics, font, x, y, neutral, textColor, InsulationType.NEUTRAL);
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, neutral, textColor, Insulation.Type.NEUTRAL);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (adaptive > 0)
-            {   int xOffs = renderOverloadCell(graphics, font, x, y, adaptive, textColor, InsulationType.ADAPTIVE);
+            {   int xOffs = renderOverloadCell(graphics, font, x, y, adaptive, textColor, Insulation.Type.ADAPTIVE);
                 poseStack.translate(xOffs, 0, 0);
             }
             poseStack.popPose();
