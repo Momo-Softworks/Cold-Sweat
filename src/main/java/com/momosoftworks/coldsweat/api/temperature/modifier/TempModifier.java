@@ -138,16 +138,6 @@ public abstract class TempModifier
         this.nbt = data;
     }
 
-    // TODO Remove soon
-    /**
-     * This method is being removed in favor of registering TempModifiers with a ResourceLocation instead. <br>
-     * This method here as to not break classes that extent this method.
-     */
-    @Deprecated(since = "2.3", forRemoval = true)
-    public String getID()
-    {   throw new RuntimeException("TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.");
-    }
-
     @Override
     public String toString()
     {   return TempModifierRegistry.getKey(this).toString();
