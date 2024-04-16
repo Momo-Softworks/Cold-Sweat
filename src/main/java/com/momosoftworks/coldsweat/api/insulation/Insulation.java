@@ -1,7 +1,9 @@
 package com.momosoftworks.coldsweat.api.insulation;
 
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -68,5 +70,64 @@ public abstract class Insulation implements NbtSerializable
         {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("speed"));
         }
         return null;
+    }
+
+    public enum Slot implements StringRepresentable
+    {
+        ITEM("item"),
+        CURIO("curio"),
+        ARMOR("armor");
+
+        final String name;
+
+        Slot(String name)
+        {   this.name = name;
+        }
+
+        public static final Codec<Slot> CODEC = Codec.STRING.xmap(Slot::byName, Slot::getSerializedName);
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
+
+        public static Slot byName(String name)
+        {   for (Slot type : values())
+            {   if (type.name.equals(name))
+                {   return type;
+                }
+            }
+            throw new IllegalArgumentException("Unknown insulation type: " + name);
+        }
+    }
+
+    public enum Type implements StringRepresentable
+    {
+        COLD("cold"),
+        HEAT("heat"),
+        NEUTRAL("neutral"),
+        ADAPTIVE("adaptive");
+
+        final String name;
+
+        Type(String name)
+        {   this.name = name;
+        }
+
+        public static final Codec<Type> CODEC = Codec.STRING.xmap(Type::byName, Type::getSerializedName);
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
+
+        public static Type byName(String name)
+        {   for (Type type : values())
+            {   if (type.name.equals(name))
+                {   return type;
+                }
+            }
+            throw new IllegalArgumentException("Unknown insulation type: " + name);
+        }
     }
 }

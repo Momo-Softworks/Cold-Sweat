@@ -5,8 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationType;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -34,7 +32,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                                                : TOOLTIP;
 
     List<Insulation> insulation;
-    InsulationSlot type;
+    Insulation.Slot type;
     int width = 0;
 
     private static final Method INNER_BLIT = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "m_93187_",
@@ -58,7 +56,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
 
 
-    public ClientInsulationTooltip(List<Insulation> insulation, InsulationSlot type)
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot type)
     {   this.insulation = insulation;
         this.type = type;
     }
@@ -149,7 +147,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         GuiComponent.blit(poseStack, x, y, 401, uvX, uvY, 6, 4, 32, 24);
     }
 
-    static int renderOverloadCell(PoseStack poseStack, Font font, int x, int y, double insulation, int textColor, InsulationType type)
+    static int renderOverloadCell(PoseStack poseStack, Font font, int x, int y, double insulation, int textColor, Insulation.Type type)
     {
         Number insul = CSMath.truncate(insulation / 2, 2);
         if (CSMath.isInteger(insul)) insul = insul.intValue();
@@ -164,7 +162,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         poseStack.pushPose();
         int prevShader = RenderSystem.getShaderTexture(0);
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
-        renderCell(poseStack, x + 7, y + 1, insulation, uvX, type == InsulationType.ADAPTIVE);
+        renderCell(poseStack, x + 7, y + 1, insulation, uvX, type == Insulation.Type.ADAPTIVE);
         GuiComponent.blit(poseStack,
                       x + 6, y,
                       401, /*z*/
@@ -181,7 +179,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return 12 + font.width(text);
     }
 
-    static void renderBar(PoseStack poseStack, int x, int y, List<Insulation> insulations, InsulationSlot type, boolean showSign, boolean isNegative)
+    static void renderBar(PoseStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative)
     {
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
         Font font = Minecraft.getInstance().font;
@@ -225,19 +223,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             poseStack.translate(2, 0, 0);
             // Render cold insulation
             if (cold > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, InsulationType.COLD);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, Insulation.Type.COLD);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (hot > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, InsulationType.HEAT);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, Insulation.Type.HEAT);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (neutral > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, InsulationType.NEUTRAL);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, Insulation.Type.NEUTRAL);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (adaptive > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, InsulationType.ADAPTIVE);
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, Insulation.Type.ADAPTIVE);
                 poseStack.translate(xOffs, 0, 0);
             }
             poseStack.popPose();

@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
@@ -27,7 +26,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSlot slot,
+public record InsulatorData(List<Either<TagKey<Item>, Item>> items, Insulation.Slot slot,
                             Insulation insulation, NbtRequirement nbt,
                             EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
                             Optional<List<String>> requiredMods) implements NbtSerializable
@@ -54,7 +53,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
             })
             .listOf()
             .fieldOf("items").forGetter(InsulatorData::items),
-            InsulationSlot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
+            Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
             {
                 return either.left().isPresent() ? either.left().get() : either.right().get();
@@ -127,7 +126,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
             TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag));
             items.add(Either.left(tagKey));
         }
-        InsulationSlot type = InsulationSlot.valueOf(nbt.getString("type"));
+        Insulation.Slot type = Insulation.Slot.valueOf(nbt.getString("type"));
         Insulation insulation = Insulation.deserialize(nbt.getCompound("insulation"));
         NbtRequirement nbt1 = NbtRequirement.deserialize(nbt.getCompound("nbt"));
         EntityRequirement predicate = EntityRequirement.deserialize(nbt.getCompound("predicate"));
