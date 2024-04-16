@@ -3,11 +3,13 @@
     "create"
   ],
   "type": "armor",
-  "items": [
-    "create:netherite_backtank"
-  ],
+  "data": {
+    "items": [
+      "create:netherite_backtank"
+    ]
+  },
   "insulation": {
-    "hot": 1998,
+    "heat": 1998,
     "cold": 0
   },
   "predicate": {

@@ -9,51 +9,27 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSlot slot,
-                            Insulation insulation, NbtRequirement nbt,
+public record InsulatorData(InsulationSlot slot,
+                            Insulation insulation, ItemRequirement data,
                             EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
                             Optional<List<String>> requiredMods) implements NbtSerializable
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
-            {
-                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
-
-                return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));
-            },
-            // Convert from a TagKey to a string
-            tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
-                String result = tag.left().isPresent()
-                                ? "#" + tag.left().get().location()
-                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
-
-                return result;
-            })
-            .listOf()
-            .fieldOf("items").forGetter(InsulatorData::items),
             InsulationSlot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
             {
@@ -70,7 +46,7 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
                 return null;
             })
             .fieldOf("insulation").forGetter(InsulatorData::insulation),
-            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(InsulatorData::nbt),
+            ItemRequirement.CODEC.fieldOf("data").forGetter(InsulatorData::data),
             EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(InsulatorData::attributes),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(InsulatorData::requiredMods)
@@ -82,16 +58,11 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
         CompoundTag tag = new CompoundTag();
         ListTag items = new ListTag();
         ListTag tags = new ListTag();
-        this.items.forEach(item ->
-        {
-            item.ifLeft(tagKey -> tags.add(StringTag.valueOf(tagKey.location().toString())));
-            item.ifRight(item1 -> items.add(StringTag.valueOf(ForgeRegistries.ITEMS.getKey(item1).toString())));
-        });
         tag.put("items", items);
         tag.put("tags", tags);
         tag.putString("type", slot.name());
         tag.put("insulation", insulation.serialize());
-        tag.put("nbt", nbt.serialize());
+        tag.put("data", data.serialize());
         tag.put("predicate", predicate.serialize());
         if (attributes.isPresent())
         {
@@ -112,24 +83,9 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
 
     public static InsulatorData deserialize(CompoundTag nbt)
     {
-        List<Either<TagKey<Item>, Item>> items = new ArrayList<>();
-        ListTag itemsTag = nbt.getList("items", 8);
-        ListTag tags = nbt.getList("tags", 8);
-        for (int i = 0; i < itemsTag.size(); i++)
-        {
-            String item = itemsTag.getString(i);
-            Item item1 = ForgeRegistries.ITEMS.getValue(new ResourceLocation(item));
-            items.add(Either.right(item1));
-        }
-        for (int i = 0; i < tags.size(); i++)
-        {
-            String tag = tags.getString(i);
-            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, new ResourceLocation(tag));
-            items.add(Either.left(tagKey));
-        }
-        InsulationSlot type = InsulationSlot.valueOf(nbt.getString("type"));
+        InsulationSlot slot = InsulationSlot.valueOf(nbt.getString("type"));
         Insulation insulation = Insulation.deserialize(nbt.getCompound("insulation"));
-        NbtRequirement nbt1 = NbtRequirement.deserialize(nbt.getCompound("nbt"));
+        ItemRequirement requirement = ItemRequirement.deserialize(nbt.getCompound("data"));
         EntityRequirement predicate = EntityRequirement.deserialize(nbt.getCompound("predicate"));
 
         Optional<AttributeModifierMap> attributes = Optional.of(nbt.getCompound("attributes")).map(attributesTag ->
@@ -154,6 +110,6 @@ public record InsulatorData(List<Either<TagKey<Item>, Item>> items, InsulationSl
             return mods1;
         });
 
-        return new InsulatorData(items, type, insulation, nbt1, predicate, attributes, mods);
+        return new InsulatorData(slot, insulation, requirement, predicate, attributes, mods);
     }
 }

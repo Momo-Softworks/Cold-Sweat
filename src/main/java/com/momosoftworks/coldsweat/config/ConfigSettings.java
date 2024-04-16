@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
 import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
@@ -267,7 +268,11 @@ public class ConfigSettings
             {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
             }
             else nbtRequirement = new NbtRequirement(new CompoundTag());
-            return new PredicateItem(fuel, nbtRequirement, EntityRequirement.NONE);
+            return new PredicateItem(fuel, new ItemRequirement(List.of(), Optional.empty(),
+                                                               Optional.empty(), Optional.empty(),
+                                                               Optional.empty(), Optional.empty(),
+                                                               nbtRequirement),
+                                     EntityRequirement.NONE);
         };
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
         ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
@@ -278,7 +283,7 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
-                                           fuel -> List.of(fuel.value(), fuel.nbt().tag().toString())));
+                                           fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist()
@@ -338,13 +343,17 @@ public class ConfigSettings
             NbtRequirement nbtRequirement = args.size() > 2
                                             ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
                                             : new NbtRequirement(new CompoundTag());
-            return new PredicateItem(((Number) args.get(0)).doubleValue(), nbtRequirement, EntityRequirement.NONE);
+            ItemRequirement itemRequirement = new ItemRequirement(List.of(), Optional.empty(),
+                                                                  Optional.empty(), Optional.empty(),
+                                                                  Optional.empty(), Optional.empty(),
+                                                                  nbtRequirement);
+            return new PredicateItem(((Number) args.get(0)).doubleValue(), itemRequirement, EntityRequirement.NONE);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
-                                           food -> List.of(food.value(), food.nbt().tag().toString())));
+                                           food -> List.of(food.value(), food.data().nbt().tag().toString())));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 

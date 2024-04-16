@@ -3,11 +3,13 @@
     "create"
   ],
   "type": "armor",
-  "items": [
-    "create:netherite_diving_helmet"
-  ],
+  "data": {
+    "items": [
+      "create:netherite_diving_helmet"
+    ]
+  },
   "insulation": {
-    "hot": 1998,
+    "heat": 1998,
     "cold": 0
   },
   "predicate": {
