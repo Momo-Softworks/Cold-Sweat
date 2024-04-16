@@ -29,19 +29,6 @@ public class TempModifierRegisterEvent extends Event
     {   TempModifierRegistry.register(id, modifier);
     }
 
-    //TODO Remove soon
-    /**
-     * TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.
-     */
-    @Deprecated(since = "2.3", forRemoval = true)
-    public void register(Supplier<TempModifier> modifier)
-    {
-        if (SharedConstants.IS_RUNNING_IN_IDE)
-        {   throw new RuntimeException("TempModifier IDs are no longer defined in the class. Register using a ResourceLocation instead.");
-        }
-        register(new ResourceLocation(modifier.get().getID()), modifier);
-    }
-
     /**
      * A way of indirectly registering TempModifiers by class name.<br>
      * Useful for adding compat for other mods, where loading the TempModifier's class directly would cause an error.<br>
