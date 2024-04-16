@@ -18,31 +18,31 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
             ItemRequirement.CODEC.optionalFieldOf("chest").forGetter(requirement -> requirement.chest),
             ItemRequirement.CODEC.optionalFieldOf("legs").forGetter(requirement -> requirement.legs),
             ItemRequirement.CODEC.optionalFieldOf("feet").forGetter(requirement -> requirement.feet),
-            ItemRequirement.CODEC.optionalFieldOf("main_hand").forGetter(requirement -> requirement.mainHand),
-            ItemRequirement.CODEC.optionalFieldOf("off_hand").forGetter(requirement -> requirement.offHand)
+            ItemRequirement.CODEC.optionalFieldOf("mainhand").forGetter(requirement -> requirement.mainHand),
+            ItemRequirement.CODEC.optionalFieldOf("offhand").forGetter(requirement -> requirement.offHand)
     ).apply(instance, EquipmentRequirement::new));
 
     public boolean test(Entity entity)
     {
         return head.isEmpty() && chest.isEmpty() && legs.isEmpty() && feet.isEmpty() && mainHand.isEmpty() && offHand.isEmpty()
             || entity instanceof LivingEntity living
-            && (head.isEmpty() || head.get().test(living.getItemBySlot(EquipmentSlot.HEAD)))
-            && (chest.isEmpty() || chest.get().test(living.getItemBySlot(EquipmentSlot.CHEST)))
-            && (legs.isEmpty() || legs.get().test(living.getItemBySlot(EquipmentSlot.LEGS)))
-            && (feet.isEmpty() || feet.get().test(living.getItemBySlot(EquipmentSlot.FEET)))
-            && (mainHand.isEmpty() || mainHand.get().test(living.getMainHandItem()))
-            && (offHand.isEmpty() || offHand.get().test(living.getOffhandItem()));
+            && (head.isEmpty()  || head.get().test(living.getItemBySlot(EquipmentSlot.HEAD), true))
+            && (chest.isEmpty() || chest.get().test(living.getItemBySlot(EquipmentSlot.CHEST), true))
+            && (legs.isEmpty()  || legs.get().test(living.getItemBySlot(EquipmentSlot.LEGS), true))
+            && (feet.isEmpty()  || feet.get().test(living.getItemBySlot(EquipmentSlot.FEET), true))
+            && (mainHand.isEmpty() || mainHand.get().test(living.getMainHandItem(), true))
+            && (offHand.isEmpty()  || offHand.get().test(living.getOffhandItem(), true));
     }
 
     public CompoundTag serialize()
     {
         CompoundTag tag = new CompoundTag();
-        head.ifPresent(requirement -> tag.put("head", requirement.serialize()));
+        head.ifPresent(requirement  -> tag.put("head", requirement.serialize()));
         chest.ifPresent(requirement -> tag.put("chest", requirement.serialize()));
-        legs.ifPresent(requirement -> tag.put("legs", requirement.serialize()));
-        feet.ifPresent(requirement -> tag.put("feet", requirement.serialize()));
+        legs.ifPresent(requirement  -> tag.put("legs", requirement.serialize()));
+        feet.ifPresent(requirement  -> tag.put("feet", requirement.serialize()));
         mainHand.ifPresent(requirement -> tag.put("main_hand", requirement.serialize()));
-        offHand.ifPresent(requirement -> tag.put("off_hand", requirement.serialize()));
+        offHand.ifPresent(requirement  -> tag.put("off_hand", requirement.serialize()));
         return tag;
     }
 

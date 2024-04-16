@@ -36,37 +36,42 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
     ).apply(instance, LocationRequirement::new));
 
     public boolean test(Level level, Vec3 pos)
-    {   return this.test(level, (int) pos.x(), (int) pos.y(), (int) pos.z());
+    {   return this.test(level, new BlockPos(pos));
     }
 
-    public boolean test(Level level, int x, int y, int z)
+    public boolean test(Level level, BlockPos origin)
     {
+        BlockPos.MutableBlockPos pos = origin.mutable();
+        this.x.ifPresent(x -> pos.move(x, 0, 0));
+        this.y.ifPresent(y -> pos.move(0, y, 0));
+        this.z.ifPresent(z -> pos.move(0, 0, z));
+
         if (this.dimension.isPresent()
         && !level.dimension().equals(this.dimension.get()))
         {   return false;
         }
 
         if (this.biome.isPresent()
-        && !level.getBiome(new BlockPos(x, y, z)).unwrapKey().get().equals(this.biome.get()))
+        && !level.getBiome(pos).unwrapKey().get().equals(this.biome.get()))
         {   return false;
         }
 
         if (this.structure.isPresent()
-        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(new BlockPos(x, y, z), this.structure.get()) == StructureStart.INVALID_START)
+        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(pos, this.structure.get()) == StructureStart.INVALID_START)
         {   return false;
         }
 
         if (this.light.isPresent())
         {
-            int light = level.getMaxLocalRawBrightness(new BlockPos(x, y, z));
+            int light = level.getMaxLocalRawBrightness(pos);
             if (light < this.light.get().min() || light > this.light.get().max())
             {   return false;
             }
         }
-        if (this.block.isPresent() && !this.block.get().test(level, new BlockPos(x, y, z)))
+        if (this.block.isPresent() && !this.block.get().test(level, pos))
         {   return false;
         }
-        if (this.fluid.isPresent() && !this.fluid.get().test(level, new BlockPos(x, y, z)))
+        if (this.fluid.isPresent() && !this.fluid.get().test(level, pos))
         {
             return false;
         }
