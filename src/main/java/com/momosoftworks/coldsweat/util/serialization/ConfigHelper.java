@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
@@ -380,7 +381,10 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            return new Insulator(insulation, slot, new NbtRequirement(nbt), EntityRequirement.NONE, new AttributeModifierMap());
+            ItemRequirement requirement = new ItemRequirement(Arrays.asList(), Optional.empty(),
+                                                              Optional.empty(), Optional.empty(),
+                                                              Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
+            return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap());
         });
     }
 
@@ -396,12 +400,12 @@ public class ConfigHelper
                          ? insulator.insulation.getCold()
                          : ((AdaptiveInsulation) insulator.insulation).getInsulation());
             itemData.add(insulator.insulation instanceof StaticInsulation
-                         ? insulator.insulation.getHot()
+                         ? insulator.insulation.getHeat()
                          : ((AdaptiveInsulation) insulator.insulation).getSpeed());
             itemData.add(insulator.insulation instanceof StaticInsulation
                          ? "static"
                          : "adaptive");
-            itemData.add(insulator.nbt.serialize().toString());
+            itemData.add(insulator.data.nbt.serialize().toString());
             return itemData;
         });
     }

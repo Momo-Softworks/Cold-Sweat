@@ -11,7 +11,7 @@ public class AttributeCodecs
 {
     public static Codec<AttributeModifier.Operation> OPERATION_CODEC = Codec.STRING.xmap(
             string -> AttributeModifier.Operation.valueOf(string.toUpperCase()),
-            AttributeModifier.Operation::name
+            operation -> operation.name().toLowerCase()
     );
 
     public static Codec<AttributeModifier> MODIFIER_CODEC = RecordCodecBuilder.create(

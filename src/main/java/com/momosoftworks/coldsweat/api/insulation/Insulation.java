@@ -23,10 +23,10 @@ public abstract class Insulation implements NbtSerializable
     public abstract List<Insulation> split();
 
     public abstract double getCold();
-    public abstract double getHot();
+    public abstract double getHeat();
 
     /**
-     * Sort the list of insulation items, starting with cold insulation, then neutral, then hot, then adaptive.<br>
+     * Sort the list of insulation items, starting with cold insulation, then neutral, then heat, then adaptive.<br>
      * This method does not modify the input list
      * @return A sorted list of insulation items.
      */
@@ -44,7 +44,7 @@ public abstract class Insulation implements NbtSerializable
             {
                 StaticInsulation insul = ((StaticInsulation) pair);
                 double absCold = Math.abs(insul.getCold());
-                double absHot = Math.abs(insul.getHot());
+                double absHot = Math.abs(insul.getHeat());
                 if (absCold >= 2 && absHot >= 2)
                     return 2;
                 else if (absCold >= 2)

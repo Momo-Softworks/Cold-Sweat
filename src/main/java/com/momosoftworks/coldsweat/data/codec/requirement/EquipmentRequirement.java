@@ -17,7 +17,7 @@ public class EquipmentRequirement
     public final Optional<ItemRequirement> feet;
     public final Optional<ItemRequirement> mainHand;
     public final Optional<ItemRequirement> offHand;
-    
+
     public EquipmentRequirement(Optional<ItemRequirement> head, Optional<ItemRequirement> chest,
                                 Optional<ItemRequirement> legs, Optional<ItemRequirement> feet,
                                 Optional<ItemRequirement> mainHand, Optional<ItemRequirement> offHand)
@@ -29,37 +29,37 @@ public class EquipmentRequirement
         this.mainHand = mainHand;
         this.offHand = offHand;
     }
-    
+
     public static final Codec<EquipmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemRequirement.CODEC.optionalFieldOf("head").forGetter(requirement -> requirement.head),
             ItemRequirement.CODEC.optionalFieldOf("chest").forGetter(requirement -> requirement.chest),
             ItemRequirement.CODEC.optionalFieldOf("legs").forGetter(requirement -> requirement.legs),
             ItemRequirement.CODEC.optionalFieldOf("feet").forGetter(requirement -> requirement.feet),
-            ItemRequirement.CODEC.optionalFieldOf("main_hand").forGetter(requirement -> requirement.mainHand),
-            ItemRequirement.CODEC.optionalFieldOf("off_hand").forGetter(requirement -> requirement.offHand)
+            ItemRequirement.CODEC.optionalFieldOf("mainhand").forGetter(requirement -> requirement.mainHand),
+            ItemRequirement.CODEC.optionalFieldOf("offhand").forGetter(requirement -> requirement.offHand)
     ).apply(instance, EquipmentRequirement::new));
 
     public boolean test(Entity entity)
     {
         return !head.isPresent() && !chest.isPresent() && !legs.isPresent() && !feet.isPresent() && !mainHand.isPresent() && !offHand.isPresent()
             || entity instanceof LivingEntity
-            && (!head.isPresent() || head.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.HEAD)))
-            && (!chest.isPresent() || chest.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.CHEST)))
-            && (!legs.isPresent() || legs.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.LEGS)))
-            && (!feet.isPresent() || feet.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.FEET)))
-            && (!mainHand.isPresent() || mainHand.get().test(((LivingEntity) entity).getMainHandItem()))
-            && (!offHand.isPresent() || offHand.get().test(((LivingEntity) entity).getOffhandItem()));
+            && (!head.isPresent() || head.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.HEAD), true))
+            && (!chest.isPresent() || chest.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.CHEST), true))
+            && (!legs.isPresent() || legs.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.LEGS), true))
+            && (!feet.isPresent() || feet.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.FEET), true))
+            && (!mainHand.isPresent() || mainHand.get().test(((LivingEntity) entity).getMainHandItem(), true))
+            && (!offHand.isPresent() || offHand.get().test(((LivingEntity) entity).getOffhandItem(), true));
     }
 
     public CompoundNBT serialize()
     {
         CompoundNBT tag = new CompoundNBT();
-        head.ifPresent(requirement -> tag.put("head", requirement.serialize()));
+        head.ifPresent(requirement  -> tag.put("head", requirement.serialize()));
         chest.ifPresent(requirement -> tag.put("chest", requirement.serialize()));
-        legs.ifPresent(requirement -> tag.put("legs", requirement.serialize()));
-        feet.ifPresent(requirement -> tag.put("feet", requirement.serialize()));
+        legs.ifPresent(requirement  -> tag.put("legs", requirement.serialize()));
+        feet.ifPresent(requirement  -> tag.put("feet", requirement.serialize()));
         mainHand.ifPresent(requirement -> tag.put("main_hand", requirement.serialize()));
-        offHand.ifPresent(requirement -> tag.put("off_hand", requirement.serialize()));
+        offHand.ifPresent(requirement  -> tag.put("off_hand", requirement.serialize()));
         return tag;
     }
 

@@ -23,7 +23,7 @@ public class EntityRequirement
 {
     public final Optional<EntityType<?>> type;
     public final Optional<LocationRequirement> location;
-    public final Optional<LocationRequirement> standingOn;
+    public final Optional<LocationRequirement> steppingOn;
     public final Optional<EffectsRequirement> effects;
     public final Optional<NbtRequirement> nbt;
     public final Optional<EntityFlagsRequirement> flags;
@@ -33,14 +33,14 @@ public class EntityRequirement
     public final Optional<EntityRequirement> passenger;
     public final Optional<EntityRequirement> target;
 
-    public EntityRequirement(Optional<EntityType<?>> type, Optional<LocationRequirement> location, Optional<LocationRequirement> standingOn,
+    public EntityRequirement(Optional<EntityType<?>> type, Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                              Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
                              Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
                              Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target)
     {
         this.type = type;
         this.location = location;
-        this.standingOn = standingOn;
+        this.steppingOn = steppingOn;
         this.effects = effects;
         this.nbt = nbt;
         this.flags = flags;
@@ -58,7 +58,7 @@ public class EntityRequirement
     public static Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Registry.ENTITY_TYPE.optionalFieldOf("type").forGetter(requirement -> requirement.type),
             LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
-            LocationRequirement.CODEC.optionalFieldOf("standing_on").forGetter(requirement -> requirement.standingOn),
+            LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
@@ -84,7 +84,7 @@ public class EntityRequirement
         Codec<EntityRequirement> codec = RecordCodecBuilder.create(instance -> instance.group(
                 Registry.ENTITY_TYPE.optionalFieldOf("type").forGetter(requirement -> requirement.type),
                 LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
-                LocationRequirement.CODEC.optionalFieldOf("standing_on").forGetter(requirement -> requirement.standingOn),
+                LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
                 NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
                 EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
@@ -112,7 +112,7 @@ public class EntityRequirement
         if (location.isPresent() && !location.get().test(entity.level, entity.position()))
         {   return false;
         }
-        if (standingOn.isPresent() && !standingOn.get().test(entity.level, entity.position()))
+        if (steppingOn.isPresent() && !steppingOn.get().test(entity.level, entity.position().add(0, -0.5, 0)))
         {   return false;
         }
         if (effects.isPresent() && !effects.get().test(entity))
@@ -155,7 +155,7 @@ public class EntityRequirement
         {   CompoundNBT tag = new CompoundNBT();
             type.ifPresent(type -> tag.putString("type", ForgeRegistries.ENTITIES.getKey(type).toString()));
             location.ifPresent(location -> tag.put("location", location.serialize()));
-            standingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
+            steppingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
             effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
             nbt.ifPresent(nbt -> tag.put("nbt", nbt.serialize()));
             flags.ifPresent(flags -> tag.put("flags", flags.serialize()));
@@ -209,7 +209,7 @@ public class EntityRequirement
 
         return type.equals(that.type)
             && location.equals(that.location)
-            && standingOn.equals(that.standingOn)
+            && steppingOn.equals(that.steppingOn)
             && effects.equals(that.effects)
             && nbt.equals(that.nbt)
             && flags.equals(that.flags)
@@ -226,7 +226,7 @@ public class EntityRequirement
         return "Entity{" +
                 "type=" + type +
                 ", location=" + location +
-                ", standingOn=" + standingOn +
+                ", standingOn=" + steppingOn +
                 ", effects=" + effects +
                 ", nbt=" + nbt +
                 ", flags=" + flags +

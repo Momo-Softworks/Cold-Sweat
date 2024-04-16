@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.data.configuration.value;
 
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -12,21 +12,22 @@ import net.minecraft.nbt.CompoundNBT;
 public class PredicateItem implements NbtSerializable
 {
     public Double value;
-    public NbtRequirement nbt;
+    public ItemRequirement data;
     public EntityRequirement requirement;
-    
-    public PredicateItem(Double value, NbtRequirement nbt, EntityRequirement requirement)
+
+    public PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement)
     {
         this.value = value;
-        this.nbt = nbt;
+        this.data = data;
         this.requirement = requirement;
     }
+
     public boolean test(ItemStack stack)
-    {   return nbt.test(stack) ;
+    {   return data.test(stack, true);
     }
 
     public boolean test(Entity entity, ItemStack stack)
-    {   return nbt.test(stack) && requirement.test(entity);
+    {   return data.test(stack, true) && requirement.test(entity);
     }
 
     @Override
@@ -34,13 +35,15 @@ public class PredicateItem implements NbtSerializable
     {
         CompoundNBT tag = new CompoundNBT();
         tag.putDouble("value", value);
-        tag.put("nbt", nbt.serialize());
+        tag.put("data", data.serialize());
         tag.put("requirement", requirement.serialize());
         return tag;
     }
 
     public static PredicateItem deserialize(CompoundNBT tag)
     {
-        return new PredicateItem(tag.getDouble("value"), NbtRequirement.deserialize(tag.getCompound("nbt")), EntityRequirement.deserialize(tag.getCompound("requirement")));
+        return new PredicateItem(tag.getDouble("value"),
+                                 ItemRequirement.deserialize(tag.getCompound("data")),
+                                 EntityRequirement.deserialize(tag.getCompound("requirement")));
     }
 }

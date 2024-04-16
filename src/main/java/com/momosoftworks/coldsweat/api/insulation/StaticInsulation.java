@@ -13,15 +13,15 @@ public class StaticInsulation extends Insulation
 {
     public static final Codec<StaticInsulation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.DOUBLE.fieldOf("cold").forGetter(StaticInsulation::getCold),
-            Codec.DOUBLE.fieldOf("hot").forGetter(StaticInsulation::getHot)
+            Codec.DOUBLE.fieldOf("heat").forGetter(StaticInsulation::getHeat)
     ).apply(instance, StaticInsulation::new));
 
     private final double cold;
-    private final double hot;
+    private final double heat;
 
-    public StaticInsulation(double cold, double hot)
+    public StaticInsulation(double cold, double heat)
     {   this.cold = cold;
-        this.hot = hot;
+        this.heat = heat;
     }
 
     public StaticInsulation(Pair<? extends Number, ? extends Number> pair)
@@ -32,24 +32,24 @@ public class StaticInsulation extends Insulation
     {   return cold;
     }
 
-    public double getHot()
-    {   return hot;
+    public double getHeat()
+    {   return heat;
     }
 
     @Override
     public boolean isEmpty()
-    {   return cold == 0 && hot == 0;
+    {   return cold == 0 && heat == 0;
     }
 
     @Override
     public List<Insulation> split()
     {
         List<Insulation> insulation = new ArrayList<>();
-        double cold = getCold();
-        double hot = getHot();
-        double neutral = cold > 0 == hot > 0 ? CSMath.minAbs(cold, hot) : 0;
+        double cold = this.getCold();
+        double heat = this.getHeat();
+        double neutral = cold > 0 == heat > 0 ? CSMath.minAbs(cold, heat) : 0;
         cold -= neutral;
-        hot -= neutral;
+        heat -= neutral;
 
         // Cold insulation
         for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
@@ -63,17 +63,17 @@ public class StaticInsulation extends Insulation
             insulation.add(new StaticInsulation(neutralInsul, neutralInsul));
         }
 
-        // Hot insulation
-        for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
-        {   double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
-            insulation.add(new StaticInsulation(0d, hotInsul));
+        // Heat insulation
+        for (int i = 0; i < CSMath.ceil(Math.abs(heat)) / 2; i++)
+        {   double heatInsul = CSMath.minAbs(CSMath.shrink(heat, i * 2), 2);
+            insulation.add(new StaticInsulation(0d, heatInsul));
         }
         return insulation;
     }
 
     @Override
     public String toString()
-    {   return "Insulation{" + "cold=" + cold + ", hot=" + hot + '}';
+    {   return "Insulation{" + "cold=" + cold + ", heat=" + heat + '}';
     }
 
     @Override
@@ -84,7 +84,7 @@ public class StaticInsulation extends Insulation
         {
             StaticInsulation insul = ((StaticInsulation) obj);
             return cold == insul.cold
-                && hot == insul.hot;
+                && heat == insul.heat;
         }
         return false;
     }
@@ -94,7 +94,7 @@ public class StaticInsulation extends Insulation
     {
         CompoundNBT tag = new CompoundNBT();
         tag.putDouble("cold", cold);
-        tag.putDouble("heat", hot);
+        tag.putDouble("heat", heat);
         return tag;
     }
 

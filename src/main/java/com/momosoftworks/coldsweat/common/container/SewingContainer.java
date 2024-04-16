@@ -301,7 +301,7 @@ public class SewingContainer extends Container
                 // Get the total positive/negative insulation of the armor
                 insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
                 {
-                    if (insul.getHot() >= 0 || insul.getCold() >= 0)
+                    if (insul.getHeat() >= 0 || insul.getCold() >= 0)
                     {   positiveInsul.getAndIncrement();
                     }
                 });

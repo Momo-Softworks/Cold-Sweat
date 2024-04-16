@@ -228,8 +228,8 @@ public class CompatManager
                             if (insulator == null) continue;
 
                             double cold = insulator.insulation.getCold();
-                            double hot = insulator.insulation.getHot();
-                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, hot).expires(20), Temperature.Trait.RATE);
+                            double heat = insulator.insulation.getHeat();
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, heat).expires(20), Temperature.Trait.RATE);
                         }
                     }
                 });
