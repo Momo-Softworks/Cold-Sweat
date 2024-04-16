@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -405,7 +405,7 @@ public class EntityTempManager
             }
             // Remove TempModifier on potion effect removed
             else if (event instanceof PotionEvent.PotionRemoveEvent)
-            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, 1, mod -> mod instanceof BlockInsulationTempModifier);
+            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, mod -> mod instanceof BlockInsulationTempModifier);
             }
         }
     }

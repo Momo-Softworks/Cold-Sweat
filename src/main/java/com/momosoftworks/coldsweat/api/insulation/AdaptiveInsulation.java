@@ -49,7 +49,7 @@ public class AdaptiveInsulation extends Insulation
     {   return CSMath.blend(insulation * 0.75, 0, factor, -1, 1);
     }
 
-    public double getHot()
+    public double getHeat()
     {   return CSMath.blend(0, insulation * 0.75, factor, -1, 1);
     }
 

@@ -13,20 +13,20 @@ public class CuriosTempModifier extends TempModifier
         this(0d, 0d);
     }
 
-    public CuriosTempModifier(double cold, double hot)
+    public CuriosTempModifier(double cold, double heat)
     {
         this.getNBT().putDouble("cold", cold);
-        this.getNBT().putDouble("hot", hot);
+        this.getNBT().putDouble("heat", heat);
     }
 
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         double cold = this.getNBT().getDouble("cold");
-        double hot = this.getNBT().getDouble("hot");
+        double heat = this.getNBT().getDouble("heat");
         return temp ->
         {
-            double insulation = temp > 0 ? hot : cold;
+            double insulation = temp > 0 ? heat : cold;
             return temp * (insulation >= 0 ? Math.pow(0.1, insulation / 60) : -(insulation / 20) + 1);
         };
     }

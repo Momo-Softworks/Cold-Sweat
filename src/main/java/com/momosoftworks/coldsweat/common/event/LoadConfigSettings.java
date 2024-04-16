@@ -12,7 +12,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
@@ -156,14 +156,14 @@ public class LoadConfigSettings
                 }
             }
             Insulation insulation = insulatorData.insulation();
-            NbtRequirement nbt = insulatorData.nbt();
+            ItemRequirement data = insulatorData.data();
             EntityRequirement predicate = insulatorData.predicate();
             AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
-            for (Either<TagKey<Item>, Item> either : insulatorData.items())
+            for (Either<TagKey<Item>, Item> either : insulatorData.data().items())
             {
-                Insulator insulator = new Insulator(insulation, insulatorData.slot(), nbt, predicate, attributeModifiers);
+                Insulator insulator = new Insulator(insulation, insulatorData.slot(), data, predicate, attributeModifiers);
                 for (Item item : either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY)
                                                                 .getTag(tagKey).orElseThrow()
                                                                 .stream().map(Holder::value).toList(),
@@ -198,11 +198,13 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
+
             FuelData.FuelType type = fuelData.type();
-            NbtRequirement nbt = fuelData.nbt();
+            ItemRequirement data = fuelData.data();
             double fuel = fuelData.fuel();
-            PredicateItem predicateItem = new PredicateItem(fuel, nbt, EntityRequirement.NONE);
-            for (Either<TagKey<Item>, Item> either : fuelData.items())
+            PredicateItem predicateItem = new PredicateItem(fuel, data, EntityRequirement.NONE);
+
+            for (Either<TagKey<Item>, Item> either : fuelData.data().items())
             {
                 either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
                            item -> List.of(item).stream())
@@ -233,11 +235,11 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            NbtRequirement nbt = foodData.nbt();
+            ItemRequirement data = foodData.data();
             EntityRequirement predicate = foodData.entityRequirement().orElse(null);
             double food = foodData.value();
-            PredicateItem predicateItem = new PredicateItem(food, nbt, predicate);
-            for (Either<TagKey<Item>, Item> either : foodData.items())
+            PredicateItem predicateItem = new PredicateItem(food, data, predicate);
+            for (Either<TagKey<Item>, Item> either : foodData.data().items())
             {
                 either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
                            item -> List.of(item).stream())

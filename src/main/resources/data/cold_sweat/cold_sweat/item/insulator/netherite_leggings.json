@@ -3,11 +3,13 @@
     "create"
   ],
   "type": "armor",
-  "items": [
-    "minecraft:netherite_leggings"
-  ],
+  "data": {
+    "items": [
+      "minecraft:netherite_leggings"
+    ]
+  },
   "insulation": {
-    "hot": 1998,
+    "heat": 1998,
     "cold": 0
   },
   "predicate": {

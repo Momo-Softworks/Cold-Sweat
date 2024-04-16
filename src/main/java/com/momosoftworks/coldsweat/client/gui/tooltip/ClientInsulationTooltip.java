@@ -84,9 +84,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             if (ins instanceof StaticInsulation insul)
             {
                 double cold = insul.getCold();
-                double hot = insul.getHot();
+                double heat = insul.getHeat();
 
-                if (CSMath.sign(cold) == CSMath.sign(hot))
+                if (CSMath.sign(cold) == CSMath.sign(heat))
                 {
                     switch (CSMath.sign(cold))
                     {   case -1 -> negInsulation.add(ins);
@@ -99,9 +99,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                     {   case -1 -> negInsulation.add(new StaticInsulation(-cold, 0));
                         case 1 -> posInsulation.add(new StaticInsulation(cold, 0));
                     }
-                    switch (CSMath.sign(hot))
-                    {   case -1 -> negInsulation.add(new StaticInsulation(0, hot));
-                        case 1 -> posInsulation.add(new StaticInsulation(0, hot));
+                    switch (CSMath.sign(heat))
+                    {   case -1 -> negInsulation.add(new StaticInsulation(0, heat));
+                        case 1 -> posInsulation.add(new StaticInsulation(0, heat));
                     }
                 }
             }
@@ -199,17 +199,17 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         {
             // tally up the insulation from the sorted list into cold, hot, neutral, and adaptive
             double cold = 0;
-            double hot = 0;
+            double heat = 0;
             double neutral = 0;
             double adaptive = 0;
             for (Insulation insulation : sortedInsulation)
             {
                 if (insulation instanceof StaticInsulation staticInsulation)
                 {
-                    if (staticInsulation.getCold() > staticInsulation.getHot())
+                    if (staticInsulation.getCold() > staticInsulation.getHeat())
                         cold += staticInsulation.getCold();
-                    else if (staticInsulation.getHot() > staticInsulation.getCold())
-                        hot += staticInsulation.getHot();
+                    else if (staticInsulation.getHeat() > staticInsulation.getCold())
+                        heat += staticInsulation.getHeat();
                     else
                         neutral += staticInsulation.getCold() * 2;
                 }
@@ -225,8 +225,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, Insulation.Type.COLD);
                 poseStack.translate(xOffs, 0, 0);
             }
-            if (hot > 0)
-            {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, Insulation.Type.HEAT);
+            if (heat > 0)
+            {   int xOffs = renderOverloadCell(poseStack, font, x, y, heat, textColor, Insulation.Type.HEAT);
                 poseStack.translate(xOffs, 0, 0);
             }
             if (neutral > 0)
@@ -271,7 +271,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             else if (insulation instanceof StaticInsulation staticInsulation)
             {
                 double cold = staticInsulation.getCold();
-                double hot = staticInsulation.getHot();
+                double hot = staticInsulation.getHeat();
                 double neutral = cold > 0 == hot > 0
                                  ? CSMath.minAbs(cold, hot)
                                  : 0;

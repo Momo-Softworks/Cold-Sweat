@@ -38,11 +38,12 @@ public class ArmorInsulation
     public static void applyArmorInsulation(TickEvent.PlayerTickEvent event)
     {
         Player player = event.player;
-        if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer && player.tickCount % 20 == 0)
+        if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer
+        && player.tickCount % 20 == 0 && !player.level.isClientSide)
         {
             int fullyInsulated = 0;
             double cold = 0;
-            double hot = 0;
+            double heat = 0;
 
             double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
             double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
@@ -58,11 +59,11 @@ public class ArmorInsulation
                     if (armorInsulator != null)
                     {
                         // Check if the player meets the predicate for the insulation
-                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.nbt().test(armorStack))
+                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.data().test(armorStack, true))
                         {   continue;
                         }
                         cold += armorInsulator.insulation().getCold();
-                        hot += armorInsulator.insulation().getHot();
+                        heat += armorInsulator.insulation().getHeat();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
@@ -79,16 +80,16 @@ public class ArmorInsulation
                         {
                             if (value instanceof StaticInsulation insul)
                             {   cold += insul.getCold();
-                                hot += insul.getHot();
+                                heat += insul.getHeat();
                             }
                             else if (value instanceof AdaptiveInsulation insul)
                             {   cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
-                                hot += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
+                                heat += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
                             }
                         }
 
                         // Used for tracking "fully_insulated" advancement
-                        if ((cold + hot) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
+                        if ((cold + heat) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
                         {   fullyInsulated++;
                         }
 
@@ -103,12 +104,12 @@ public class ArmorInsulation
                                          .map(entry -> entry.getValue().getAmount())
                                          .mapToDouble(Double::doubleValue).sum();
                     cold += Math.min(armorAmount, 20);
-                    hot += Math.min(armorAmount, 20);
+                    heat += Math.min(armorAmount, 20);
 
                 }
             }
 
-            Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, hot).tickRate(20).expires(20), Temperature.Trait.RATE);
+            Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE);
 
             // Award advancement for full insulation
             if (fullyInsulated >= 4)

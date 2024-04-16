@@ -171,7 +171,7 @@ public class TooltipHandler
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
             PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
-            if (temp != null && temp.test(stack))
+            if (temp != null && temp.test(player, stack))
             {
                 elements.add(tooltipEndIndex, Either.left(
                         temp.value() > 0
@@ -185,14 +185,14 @@ public class TooltipHandler
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
-            if (itemInsul.predicate().test(player) && itemInsul.nbt().test(stack.getTag()))
+            if (itemInsul.test(player, stack))
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.ITEM)));
             }
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
-            if (itemInsul.predicate().test(player) && itemInsul.nbt().test(stack.getTag()))
+            if (itemInsul.test(player, stack))
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.CURIO)));
             }
         }
@@ -223,8 +223,7 @@ public class TooltipHandler
             // If the armor has intrinsic insulation due to configs, add it to the list
             if (armorInsulator != null)
             {
-                if (armorInsulator.predicate().test(player)
-                && armorInsulator.nbt().test(stack.getTag()))
+                if (armorInsulator.test(player, stack))
                 {
                     insulation.addAll(armorInsulator.insulation().split());
                 }

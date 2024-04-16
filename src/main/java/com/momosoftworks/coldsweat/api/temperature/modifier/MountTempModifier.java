@@ -12,16 +12,16 @@ public class MountTempModifier extends TempModifier
     {   this(0, 0);
     }
 
-    public MountTempModifier(double coldInsul, double hotInsul)
+    public MountTempModifier(double coldInsul, double heatInsul)
     {   this.getNBT().putDouble("ColdInsulation", coldInsul);
-        this.getNBT().putDouble("HotInsulation", hotInsul);
+        this.getNBT().putDouble("HeatInsulation", heatInsul);
     }
 
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         return temp ->
-        {   String toChange = temp > 0 ? "HotInsulation" : "ColdInsulation";
+        {   String toChange = temp > 0 ? "HeatInsulation" : "ColdInsulation";
             return CSMath.blend(temp, 0, this.getNBT().getDouble(toChange), 0, 1);
         };
     }
