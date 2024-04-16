@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.data.configuration.value;
 
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
@@ -11,7 +10,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
-public record Insulator(Insulation insulation, InsulationSlot slot, NbtRequirement nbt,
+public record Insulator(Insulation insulation, Insulation.Slot slot, NbtRequirement nbt,
                         EntityRequirement predicate, AttributeModifierMap attributes) implements NbtSerializable
 {
     public boolean test(Entity entity, ItemStack stack)
@@ -24,7 +23,7 @@ public record Insulator(Insulation insulation, InsulationSlot slot, NbtRequireme
     {
         CompoundTag tag = new CompoundTag();
         tag.put("insulation", insulation.serialize());
-        tag.put("slot", InsulationSlot.CODEC.encodeStart(NbtOps.INSTANCE, slot).result().get());
+        tag.put("slot", Insulation.Slot.CODEC.encodeStart(NbtOps.INSTANCE, slot).result().get());
         tag.put("nbt", nbt.serialize());
         tag.put("predicate", predicate.serialize());
         tag.put("attributes", attributes.serialize());
@@ -34,7 +33,7 @@ public record Insulator(Insulation insulation, InsulationSlot slot, NbtRequireme
     public static Insulator deserialize(CompoundTag tag)
     {
         Insulation insulation = Insulation.deserialize(tag.getCompound("insulation"));
-        InsulationSlot slot = InsulationSlot.CODEC.parse(NbtOps.INSTANCE, tag.get("slot")).result().get();
+        Insulation.Slot slot = Insulation.Slot.CODEC.parse(NbtOps.INSTANCE, tag.get("slot")).result().get();
         NbtRequirement nbt = NbtRequirement.deserialize(tag.getCompound("nbt"));
         EntityRequirement predicate = EntityRequirement.deserialize(tag.getCompound("predicate"));
         AttributeModifierMap attributes = AttributeModifierMap.deserialize(tag.getCompound("attributes"));

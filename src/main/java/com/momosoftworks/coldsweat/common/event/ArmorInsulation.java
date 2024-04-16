@@ -108,10 +108,7 @@ public class ArmorInsulation
                 }
             }
 
-            if (cold == 0 && hot == 0)
-                Temperature.removeModifiers(player, Temperature.Trait.RATE, (mod) -> mod instanceof ArmorInsulationTempModifier);
-            else
-                Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, hot).tickRate(20), Temperature.Trait.RATE);
+            Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, hot).tickRate(20).expires(20), Temperature.Trait.RATE);
 
             // Award advancement for full insulation
             if (fullyInsulated >= 4)

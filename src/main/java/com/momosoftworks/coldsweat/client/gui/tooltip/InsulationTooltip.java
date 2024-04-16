@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
@@ -9,9 +8,9 @@ import java.util.List;
 public class InsulationTooltip implements TooltipComponent
 {
     List<Insulation> insulation;
-    InsulationSlot slot;
+    Insulation.Slot slot;
 
-    public InsulationTooltip(List<Insulation> insulation, InsulationSlot slot)
+    public InsulationTooltip(List<Insulation> insulation, Insulation.Slot slot)
     {   this.insulation = insulation;
         this.slot = slot;
     }
@@ -20,7 +19,7 @@ public class InsulationTooltip implements TooltipComponent
     {   return insulation;
     }
 
-    public InsulationSlot getSlot()
+    public Insulation.Slot getSlot()
     {   return slot;
     }
 }

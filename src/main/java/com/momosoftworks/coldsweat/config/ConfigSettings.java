@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.util.InsulationSlot;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -286,19 +286,19 @@ public class ConfigSettings
                                                                           .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
                                                                           .collect(ArrayList::new, List::add, List::addAll));
 
-        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), InsulationSlot.ITEM),
+        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), Insulation.Slot.ITEM),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
         saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
 
-        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), InsulationSlot.ARMOR),
+        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), Insulation.Slot.ARMOR),
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
         saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
         INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
         {   if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
-            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), InsulationSlot.CURIO);
+            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), Insulation.Slot.CURIO);
         },
         encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
         decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),
