@@ -1,10 +1,8 @@
 package com.momosoftworks.coldsweat.api.util;
 
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
-import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;

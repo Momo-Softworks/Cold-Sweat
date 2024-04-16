@@ -7,7 +7,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +53,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
 
             int i = 0;
             for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
-            {   graphics.renderItem(new ItemStack(item, 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).nbt().tag()),
+            {   graphics.renderItem(new ItemStack(item, 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).data().nbt().tag()),
                                     x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }

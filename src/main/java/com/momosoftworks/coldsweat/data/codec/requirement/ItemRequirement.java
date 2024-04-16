@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                               Optional<List<EnchantmentRequirement>> enchantments, Optional<List<EnchantmentRequirement>> storedEnchantments,
-                              Optional<Potion> potion, Optional<NbtRequirement> nbt)
+                              Optional<Potion> potion, NbtRequirement nbt)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(
@@ -56,10 +56,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("stored_enchantments").forGetter(predicate -> predicate.storedEnchantments),
             ForgeRegistries.POTIONS.getCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
-    public boolean test(ItemStack stack)
+    public boolean test(ItemStack stack, boolean ignoreCount)
     {
         for (int i = 0; i < items.size(); i++)
         {
@@ -73,7 +73,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
             {   return false;
             }
         }
-        if (count.isPresent() && !count.get().test(stack.getCount()))
+        if (!ignoreCount && count.isPresent() && !count.get().test(stack.getCount()))
         {   return false;
         }
         else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
@@ -82,14 +82,15 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
         {   return false;
         }
-        else if (nbt.isPresent() && !nbt.get().test(stack.getTag()))
+        else if (!nbt.test(stack.getTag()))
         {   return false;
         }
         else if (enchantments.isPresent())
         {
             Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
             for (EnchantmentRequirement enchantment : enchantments.get())
-            {   if (!enchantment.test(stackEnchantments))
+            {
+                if (!enchantment.test(stackEnchantments))
                 {   return false;
                 }
             }
@@ -117,7 +118,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         enchantments.ifPresent(enchantments -> nbt.put("enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
         storedEnchantments.ifPresent(enchantments -> nbt.put("stored_enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
         potion.ifPresent(potion -> nbt.putString("potion", ForgeRegistries.POTIONS.getKey(potion).toString()));
-        this.nbt.ifPresent(requirement -> nbt.put("nbt", requirement.serialize()));
+        if (!this.nbt.tag().isEmpty()) nbt.put("nbt", this.nbt.serialize());
         return nbt;
     }
 
@@ -159,10 +160,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         Optional<Potion> potion = nbt.contains("potion") ? Optional.ofNullable(ForgeRegistries.POTIONS.getValue(new ResourceLocation(nbt.getString("potion"))))
                                                          : Optional.empty();
 
-        Optional<NbtRequirement> compound = nbt.contains("nbt") ? Optional.of(NbtRequirement.deserialize(nbt.getCompound("nbt")))
-                                                                : Optional.empty();
+        NbtRequirement nbtReq = nbt.contains("nbt") ? NbtRequirement.deserialize(nbt.getCompound("nbt"))
+                                                      : new NbtRequirement(new CompoundTag());
 
-        return new ItemRequirement(items, count, durability, enchantments, storedEnchantments, potion, compound);
+        return new ItemRequirement(items, count, durability, enchantments, storedEnchantments, potion, nbtReq);
     }
 
     @Override
@@ -205,7 +206,6 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
     public String toString()
     {
         return "Item{" +
-                "tag=" + items +
                 ", items=" + items +
                 ", count=" + count +
                 ", durability=" + durability +
