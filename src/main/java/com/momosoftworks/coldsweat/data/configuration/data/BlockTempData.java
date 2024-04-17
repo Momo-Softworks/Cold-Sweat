@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.configuration.data;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
@@ -23,17 +24,19 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
 {
     List<Either<ITag<Block>, Block>> blocks;
     double temperature;
+    double range;
     double maxEffect;
     boolean fade;
     List<BlockState> conditions;
     Optional<CompoundNBT> tag;
     Optional<List<String>> requiredMods;
 
-    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double maxEffect, boolean fade,
+    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range, double maxEffect, boolean fade,
                          List<BlockState> conditions, Optional<CompoundNBT> tag, Optional<List<String>> requiredMods)
     {
         this.blocks = blocks;
         this.temperature = temperature;
+        this.range = range;
         this.maxEffect = maxEffect;
         this.fade = fade;
         this.conditions = conditions;
@@ -64,6 +67,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
             .fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
+            Codec.DOUBLE.optionalFieldOf("range", ConfigSettings.BLOCK_RANGE.get().doubleValue()).forGetter(data -> data.range),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
             BlockState.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
             CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag),
@@ -76,7 +80,6 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
         return null;
     }
 
-    @Nullable
     @Override
     public ResourceLocation getRegistryName()
     {
