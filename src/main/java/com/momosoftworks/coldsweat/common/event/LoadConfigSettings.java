@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
@@ -275,19 +276,17 @@ public class LoadConfigSettings
                 final double temperature = blockTempData.temperature();
                 final double maxEffect = blockTempData.maxEffect();
                 final boolean fade = blockTempData.fade();
-                final List<BlockPredicate> conditions = blockTempData.conditions();
-                final CompoundTag tag = blockTempData.tag().orElse(null);
+                final BlockPredicate condition = blockTempData.condition();
+                final CompoundTag tag = blockTempData.nbt().orElse(null);
+                final double range = blockTempData.range();
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
                     if (level instanceof ServerLevel serverLevel)
                     {
-                        for (BlockPredicate condition : conditions)
-                        {
-                            if (!condition.test(serverLevel, pos))
-                            {   return 0;
-                            }
+                        if (!condition.test(serverLevel, pos))
+                        {   return 0;
                         }
                     }
                     if (tag != null)
@@ -298,14 +297,14 @@ public class LoadConfigSettings
                             CompoundTag blockTag = blockEntity.saveWithFullMetadata();
                             for (String key : tag.getAllKeys())
                             {
-                                if (!Objects.equals(tag.get(key), blockTag.get(key)))
+                                if (!NbtRequirement.compareNbt(tag.get(key), blockTag.get(key), true))
                                 {   return 0;
                                 }
                             }
                         }
                     }
                     return fade
-                         ? CSMath.blend(temperature, 0, distance, 0, ConfigSettings.BLOCK_RANGE.get())
+                         ? CSMath.blend(temperature, 0, distance, 0, Math.min(range, ConfigSettings.BLOCK_RANGE.get()))
                          : temperature;
                 }
 
