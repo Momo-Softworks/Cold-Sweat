@@ -41,7 +41,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
             .fieldOf("blocks").forGetter(BlockTempData::blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
-            Codec.DOUBLE.optionalFieldOf("range", ConfigSettings.BLOCK_RANGE.get().doubleValue()).forGetter(BlockTempData::range),
+            Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
             BlockPredicate.CODEC.optionalFieldOf("condition", BlockPredicate.alwaysTrue()).forGetter(BlockTempData::condition),
             CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(BlockTempData::nbt),
