@@ -15,7 +15,6 @@ public class ModBlockTags
     public static final ITag.INamedTag<Block> HEARTH_SPREAD_BLACKLIST = createTag("hearth/spread_blacklist");
 
     public static final ITag.INamedTag<Block> IGNORE_SLEEP_CHECK = createTag("ignore_sleep_check");
-    public static final ITag.INamedTag<Block> SOUL_SAND_REPLACEABLE = createTag("soul_sand_replaceable");
 
     private static ITag.INamedTag<Block> createTag(String name)
     {   return BlockTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
