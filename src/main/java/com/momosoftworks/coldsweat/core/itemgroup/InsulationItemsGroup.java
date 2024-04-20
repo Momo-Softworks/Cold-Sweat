@@ -66,6 +66,6 @@ public class InsulationItemsGroup extends CreativeModeTab
         list.sort(Comparator.comparing(item -> item.getKey() instanceof ArmorItem armor
                                                ? armor.getMaterial().getName() + (3 - LivingEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex())
                                                : ""));
-        return list.stream().map(data -> new ItemStack(data.getKey(), 1, data.getValue().nbt().tag())).toList();
+        return list.stream().map(data -> new ItemStack(data.getKey(), 1, data.getValue().data().nbt().tag())).toList();
     }
 }
