@@ -67,7 +67,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
             .fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
-            Codec.DOUBLE.optionalFieldOf("range", ConfigSettings.BLOCK_RANGE.get().doubleValue()).forGetter(data -> data.range),
+            Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
             BlockState.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
             CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag),
