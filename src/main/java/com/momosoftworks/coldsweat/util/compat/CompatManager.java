@@ -1,17 +1,17 @@
 package com.momosoftworks.coldsweat.util.compat;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
+import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
@@ -32,6 +32,8 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.api.combat.Armory;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -62,11 +64,11 @@ public class CompatManager
 
     public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
+        ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+        if (mod == null) return false;
+
         if (minMajorVer > 0 || minMinorVer > 0 || minPatchVer > 0)
         {
-            ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
-            if (mod == null) return false;
-
             ArtifactVersion version = mod.getModInfo().getVersion();
             if (version.getMajorVersion() >= minMajorVer
             &&  version.getMinorVersion() >= minMinorVer
@@ -79,7 +81,7 @@ public class CompatManager
                 return false;
             }
         }
-        else return ModList.get().isLoaded(modID);
+        else return true;
     }
 
     public static boolean modLoaded(String modID)
