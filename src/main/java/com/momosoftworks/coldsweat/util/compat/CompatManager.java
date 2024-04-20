@@ -57,11 +57,11 @@ public class CompatManager
 
     public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
+        ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+        if (mod == null) return false;
+
         if (minMajorVer > 0 || minMinorVer > 0 || minPatchVer > 0)
         {
-            ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
-            if (mod == null) return false;
-
             ArtifactVersion version = mod.getModInfo().getVersion();
             if (version.getMajorVersion() >= minMajorVer
             &&  version.getMinorVersion() >= minMinorVer
@@ -74,7 +74,7 @@ public class CompatManager
                 return false;
             }
         }
-        else return ModList.get().isLoaded(modID);
+        else return true;
     }
 
     public static boolean modLoaded(String modID)
