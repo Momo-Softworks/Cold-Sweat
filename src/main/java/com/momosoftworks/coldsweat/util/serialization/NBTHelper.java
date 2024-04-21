@@ -135,11 +135,6 @@ public class NBTHelper
             Item item = stack.getItem();
             CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
 
-            // Remove empty tags from stackable items
-            if (stack.getMaxStackSize() > 1
-            && stack.getTag() != null && stack.getTag().isEmpty())
-            {   stack.setTag(null);
-            }
             // Convert old tags on existing items
             if (item == ModItems.SOULSPRING_LAMP)
             {
