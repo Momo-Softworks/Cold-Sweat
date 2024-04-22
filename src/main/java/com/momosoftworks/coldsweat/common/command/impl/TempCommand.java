@@ -9,9 +9,9 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,9 +20,11 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -261,11 +263,43 @@ public class TempCommand extends BaseCommand
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {
-            source.sendSuccess(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
+            double lastInput = modifier.getLastInput();
+            double lastOutput = modifier.getLastOutput();
+            String unitsString = "";
+
+            if (switch (trait)
+            {
+                case WORLD, FREEZING_POINT, BURNING_POINT -> true;
+                default -> false;
+            })
+            {
+                Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
+                lastInput = Temperature.convert(lastInput, Temperature.Units.MC, preferredUnits, true);
+                lastOutput = Temperature.convert(lastOutput, Temperature.Units.MC, preferredUnits, true);
+                unitsString = " " + preferredUnits.getFormattedName();
+            }
+
+            final String units = unitsString;
+            HoverEvent inputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new TextComponent(CSMath.truncate(lastInput, 1)+units));
+            HoverEvent outputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new TextComponent(CSMath.truncate(lastOutput, 1)+units));
+
+            source.sendSuccess(new TextComponent("")
+                               // Modifier input value
+                       .append(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)
+                                                              .withHoverEvent(inputHover)))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
+                               // Modifier name
                        .append(new TextComponent(modifier.toString()).withStyle(ChatFormatting.GOLD))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(new TextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
+                               // Modifier output value
+                       .append(new TextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                                              .withHoverEvent(outputHover))), false);
             lastValue = modifier.getLastOutput();
         }
         if (attribute != null)
