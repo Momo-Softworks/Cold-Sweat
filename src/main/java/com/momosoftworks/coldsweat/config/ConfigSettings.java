@@ -6,9 +6,9 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
-import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
-import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
+import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
@@ -268,7 +268,7 @@ public class ConfigSettings
             {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
             }
             else nbtRequirement = new NbtRequirement(new CompoundNBT());
-            return new PredicateItem(fuel, new ItemRequirement(List.of(), Optional.empty(),
+            return new PredicateItem(fuel, new ItemRequirement(Arrays.asList(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                nbtRequirement),

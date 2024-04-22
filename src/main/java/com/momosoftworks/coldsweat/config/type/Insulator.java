@@ -1,9 +1,8 @@
-package com.momosoftworks.coldsweat.data.configuration.value;
+package com.momosoftworks.coldsweat.config.type;
 
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.entity.Entity;

@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration.value;
+package com.momosoftworks.coldsweat.config.type;
 
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
