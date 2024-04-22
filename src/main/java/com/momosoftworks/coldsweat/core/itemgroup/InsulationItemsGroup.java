@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
