@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
@@ -20,6 +21,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -261,11 +264,43 @@ public class TempCommand extends BaseCommand
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {
-            source.sendSuccess(Component.literal(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(ChatFormatting.WHITE)
+            double lastInput = modifier.getLastInput();
+            double lastOutput = modifier.getLastOutput();
+            String unitsString = "";
+
+            if (switch (trait)
+            {
+                case WORLD, FREEZING_POINT, BURNING_POINT -> true;
+                default -> false;
+            })
+            {
+                Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
+                lastInput = Temperature.convert(lastInput, Temperature.Units.MC, preferredUnits, true);
+                lastOutput = Temperature.convert(lastOutput, Temperature.Units.MC, preferredUnits, true);
+                unitsString = " " + preferredUnits.getFormattedName();
+            }
+
+            final String units = unitsString;
+            HoverEvent inputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Component.literal(CSMath.truncate(lastInput, 1)+units));
+            HoverEvent outputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Component.literal(CSMath.truncate(lastOutput, 1)+units));
+
+            source.sendSuccess(Component.empty()
+                               // Modifier input value
+                       .append(Component.literal(CSMath.truncate(modifier.getLastInput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)
+                                                              .withHoverEvent(inputHover)))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
+                               // Modifier name
                        .append(Component.literal(modifier.toString()).withStyle(ChatFormatting.GOLD))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(Component.literal(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(ChatFormatting.AQUA)), false);
+                               // Modifier output value
+                       .append(Component.literal(CSMath.truncate(modifier.getLastOutput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                                              .withHoverEvent(outputHover))), false);
             lastValue = modifier.getLastOutput();
         }
         if (attribute != null)
