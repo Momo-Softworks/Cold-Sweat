@@ -15,7 +15,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.data.configuration.value.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;

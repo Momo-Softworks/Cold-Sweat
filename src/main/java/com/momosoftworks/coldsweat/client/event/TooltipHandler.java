@@ -13,8 +13,8 @@ import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.configuration.value.Insulator;
-import com.momosoftworks.coldsweat.data.configuration.value.PredicateItem;
+import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -45,7 +45,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
