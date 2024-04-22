@@ -7,13 +7,12 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockPosArgument;
@@ -26,8 +25,10 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -263,11 +264,41 @@ public class TempCommand extends BaseCommand
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {
-            source.sendSuccess(new StringTextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"").withStyle(TextFormatting.WHITE)
+            double lastInput = modifier.getLastInput();
+            double lastOutput = modifier.getLastOutput();
+            String unitsString = "";
+
+            if (trait == Temperature.Trait.WORLD
+            || trait == Temperature.Trait.BURNING_POINT
+            || trait == Temperature.Trait.FREEZING_POINT)
+            {
+                Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
+                lastInput = Temperature.convert(lastInput, Temperature.Units.MC, preferredUnits, true);
+                lastOutput = Temperature.convert(lastOutput, Temperature.Units.MC, preferredUnits, true);
+                unitsString = " " + preferredUnits.getFormattedName();
+            }
+
+            final String units = unitsString;
+            HoverEvent inputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new StringTextComponent(CSMath.truncate(lastInput, 1)+units));
+            HoverEvent outputHover = new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new StringTextComponent(CSMath.truncate(lastOutput, 1)+units));
+
+            source.sendSuccess(new StringTextComponent("")
+                               // Modifier input value
+                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(TextFormatting.WHITE)
+                                                              .withHoverEvent(inputHover)))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
+                               // Modifier name
                        .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GOLD))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
-                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"").withStyle(TextFormatting.AQUA)), false);
+                               // Modifier output value
+                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
+                                        .withStyle(Style.EMPTY.withColor(TextFormatting.AQUA)
+                                                              .withHoverEvent(outputHover))), false);
             lastValue = modifier.getLastOutput();
         }
         if (attribute != null)
