@@ -57,9 +57,9 @@ public class TempModifierRegistry
     public static ResourceLocation getKey(TempModifier modifier)
     {
         return TEMP_MODIFIERS.entrySet().stream()
-                .filter(entry -> entry.getValue().getClass().equals(modifier.getClass()))
+                .filter(entry -> entry.getValue().get().getClass().equals(modifier.getClass()))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Tried to get the key of an unregistered TempModifier!"));
+                .orElseThrow(() -> new RuntimeException(String.format("Tried to get the key of unregistered TempModifier %s", modifier.getClass().getSimpleName())));
     }
 }
