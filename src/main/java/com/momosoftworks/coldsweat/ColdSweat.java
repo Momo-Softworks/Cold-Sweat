@@ -4,20 +4,18 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
-import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -29,7 +27,6 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -83,6 +80,7 @@ public class ColdSweat
             event.create(new RegistryBuilder<DimensionTempData>().setType(DimensionTempData.class).setName(ModRegistries.DIMENSION_TEMP_DATA.location()).dataPackRegistry(DimensionTempData.CODEC));
             event.create(new RegistryBuilder<StructureTempData>().setType(StructureTempData.class).setName(ModRegistries.STRUCTURE_TEMP_DATA.location()).dataPackRegistry(StructureTempData.CODEC));
             event.create(new RegistryBuilder<MountData>().setType(MountData.class).setName(ModRegistries.MOUNT_DATA.location()).dataPackRegistry(MountData.CODEC));
+            event.create(new RegistryBuilder<SpawnBiomeData>().setType(SpawnBiomeData.class).setName(ModRegistries.ENTITY_SPAWN_BIOME_DATA.location()).dataPackRegistry(SpawnBiomeData.CODEC));
         });
     }
 

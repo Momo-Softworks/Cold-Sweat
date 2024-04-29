@@ -10,21 +10,23 @@ import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
-import com.momosoftworks.coldsweat.config.type.InsulatingMount;
-import com.momosoftworks.coldsweat.config.type.Insulator;
-import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -56,7 +58,10 @@ import oshi.util.tuples.Triplet;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,6 +110,7 @@ public class LoadConfigSettings
         Set<Holder<StructureTempData>> structureTemps = registries.registryOrThrow(ModRegistries.STRUCTURE_TEMP_DATA).holders().collect(Collectors.toSet());
 
         Set<Holder<MountData>> mounts = registries.registryOrThrow(ModRegistries.MOUNT_DATA).holders().collect(Collectors.toSet());
+        Set<Holder<SpawnBiomeData>> spawnBiomes = registries.registryOrThrow(ModRegistries.ENTITY_SPAWN_BIOME_DATA).holders().collect(Collectors.toSet());
 
         /*
          Parse user-defined JSON data from the configs folder
@@ -119,6 +125,7 @@ public class LoadConfigSettings
         structureTemps.addAll(parseConfigData(ModRegistries.STRUCTURE_TEMP_DATA, StructureTempData.CODEC));
 
         mounts.addAll(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
+        spawnBiomes.addAll(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
 
         /*
          Add JSON data to the config settings
@@ -445,6 +452,26 @@ public class LoadConfigSettings
                     ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITIES.getKey(entity),
                                                                 new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
                 }
+            }
+        });
+    }
+
+    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registries)
+    {
+        spawnBiomes.forEach(holder ->
+        {
+            SpawnBiomeData spawnBiomeData = holder.value();
+            // Check if the required mods are loaded
+            if (spawnBiomeData.requiredMods().isPresent())
+            {
+                List<String> requiredMods = spawnBiomeData.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
+            for (Biome biome : ConfigHelper.resolveEitherList(ForgeRegistries.BIOMES, spawnBiomeData.biomes()))
+            {
+                ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
             }
         });
     }
