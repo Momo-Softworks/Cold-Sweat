@@ -1,20 +1,24 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
@@ -23,6 +27,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
@@ -200,8 +205,34 @@ public class ConfigHelper
         return blockPredicates;
     }
 
-    public static List<Biome> getBiomes(List<? extends String> ids)
-    {   return ids.stream().map(id -> ForgeRegistries.BIOMES.getValue(new ResourceLocation(id))).toList();
+    public static List<Biome> getBiomes(String... biomes)
+    {
+        List<Biome> biomeList = new ArrayList<>();
+        for (String biome : biomes)
+        {
+            if (biome.startsWith("#"))
+            {
+                final String tagID = biome.replace("#", "");
+                CSMath.doIfNotNull(ForgeRegistries.BIOMES.tags(), tags ->
+                {
+                    Optional<ITag<Biome>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(biomeITag -> biomeList.addAll(biomeITag.stream().toList()));
+                });
+            }
+            else
+            {
+                Biome newBiome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biome));
+                if (newBiome != null)
+                {
+                    biomeList.add(newBiome);
+                }
+                else
+                {
+                    ColdSweat.LOGGER.error("Error parsing biome config: biome \"" + biome + "\" does not exist");
+                }
+            }
+        }
+        return biomeList;
     }
 
     public static CompoundTag serializeNbtBool(boolean value, String key)

@@ -21,4 +21,5 @@ public class ModRegistries
 
     // Entity Registries
     public static final ResourceKey<Registry<MountData>> MOUNT_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"));
+    public static final ResourceKey<Registry<SpawnBiomeData>> ENTITY_SPAWN_BIOME_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"));
 }
