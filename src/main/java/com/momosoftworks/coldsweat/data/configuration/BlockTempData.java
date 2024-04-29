@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration.data;
+package com.momosoftworks.coldsweat.data.configuration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -77,7 +77,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     @Override
     public BlockTempData setRegistryName(ResourceLocation name)
     {
-        return null;
+        return this;
     }
 
     @Override

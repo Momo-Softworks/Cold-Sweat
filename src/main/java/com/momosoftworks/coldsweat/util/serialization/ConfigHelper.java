@@ -410,4 +410,37 @@ public class ConfigHelper
             return itemData;
         });
     }
+
+    public static <T> List<T> resolveEitherList(IForgeRegistry<T> registry, List<Either<TagKey<T>, T>> eitherList)
+    {
+        List<T> list = new ArrayList<>();
+        for (Either<TagKey<T>, T> either : eitherList)
+        {
+            either.ifLeft(tagKey -> list.addAll(registry.tags().getTag(tagKey).stream().toList()));
+            either.ifRight(list::add);
+        }
+        return list;
+    }
+
+    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<? extends Registry<T>> registry, ResourceLocation id)
+    {
+        try
+        {
+            return Optional.ofNullable(WorldHelper.getServer().registryAccess().registryOrThrow(registry).get(id));
+        }
+        catch (Exception e)
+        {   return Optional.empty();
+        }
+    }
+
+    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<? extends Registry<T>> registry, T value)
+    {
+        try
+        {
+            return Optional.ofNullable(WorldHelper.getServer().registryAccess().registryOrThrow(registry).getKey(value));
+        }
+        catch (Exception e)
+        {   return Optional.empty();
+        }
+    }
 }

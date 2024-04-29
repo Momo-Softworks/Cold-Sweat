@@ -1,10 +1,11 @@
-package com.momosoftworks.coldsweat.data.configuration.data;
+package com.momosoftworks.coldsweat.data.configuration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
@@ -12,14 +13,14 @@ import java.util.Optional;
 
 public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
 {
-    List<ResourceLocation> biomes;
+    List<Biome> biomes;
     double min;
     double max;
     Temperature.Units units;
     boolean isOffset;
     Optional<List<String>> requiredMods;
 
-    public BiomeTempData(List<ResourceLocation> biomes, double min, double max, Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
+    public BiomeTempData(List<Biome> biomes, double min, double max, Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {
         this.biomes = biomes;
         this.min = min;
@@ -30,7 +31,7 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
     }
 
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.listOf().fieldOf("biomes").forGetter(data -> data.biomes),
+            Biome.DIRECT_CODEC.listOf().fieldOf("biomes").forGetter(data -> data.biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     {

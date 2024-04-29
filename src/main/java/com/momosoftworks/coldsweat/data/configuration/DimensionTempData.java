@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration.data;
+package com.momosoftworks.coldsweat.data.configuration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -9,19 +9,18 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
 public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
 {
-    List<ResourceLocation> dimensions;
+    List<DimensionType> dimensions;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
     Optional<List<String>> requiredMods;
 
-    public DimensionTempData(List<ResourceLocation> dimensions, double temperature,
+    public DimensionTempData(List<DimensionType> dimensions, double temperature,
                              Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {
         this.dimensions = dimensions;
@@ -32,7 +31,7 @@ public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
+            DimensionType.DIRECT_CODEC.listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             com.momosoftworks.coldsweat.api.util.Temperature.Units.CODEC.optionalFieldOf("units", com.momosoftworks.coldsweat.api.util.Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),

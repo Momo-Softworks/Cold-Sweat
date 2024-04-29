@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.config;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -9,9 +12,11 @@ import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
+import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -19,9 +24,11 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.*;
 import net.minecraft.potion.Effect;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
@@ -105,8 +112,7 @@ public class ConfigSettings
 
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
-    public static final DynamicHolder<Map<ResourceLocation, Integer>> CHAMELEON_BIOMES;
-    public static final DynamicHolder<Map<ResourceLocation, Integer>> LLAMA_BIOMES;
+    public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Map<ResourceLocation, InsulatingMount>> INSULATED_ENTITIES;
 
     // Client Settings **NULL ON THE SERVER**
@@ -389,23 +395,29 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setLlamaFurStats(list);
         });
 
-        CHAMELEON_BIOMES = addSetting("chameleon_spawn_biomes", () ->
+        ENTITY_SPAWN_BIOMES = addSetting("entity_spawn_biomes", () ->
         {
-            Map<ResourceLocation, Integer> map = new HashMap<>();
-            for (List<?> entry : EntitySettingsConfig.getInstance().getChameleonSpawnBiomes())
+            Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
+            // Function to read biomes from configs and put them in the config settings
+            Consumer<List<? extends List<?>>> configReader = configBiomes ->
             {
-                map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
-            }
-            return map;
-        });
+                for (List<?> entry : configBiomes)
+                {
+                    String biomeId = ((String) entry.get(0));
+                    List<Biome> biomes = ConfigHelper.getBiomes(Arrays.asList(biomeId));
+                    for (Biome biome : biomes)
+                    {
+                        SpawnBiomeData spawnData = new SpawnBiomeData(biomes, EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
+                                                                      Arrays.asList(Either.right(ModEntities.CHAMELEON)),
+                                                                      Optional.empty());
+                        map.put(biome, spawnData);
+                    }
+                }
+            };
+            // Parse goat and chameleon biomes
+            configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
+            configReader.accept(EntitySettingsConfig.getInstance().getLlamaSpawnBiomes());
 
-        LLAMA_BIOMES = addSetting("llama_spawn_biomes", () ->
-        {
-            Map<ResourceLocation, Integer> map = new HashMap<>();
-            for (List<?> entry : EntitySettingsConfig.getInstance().getLlamaSpawnBiomes())
-            {
-                map.put(new ResourceLocation((String) entry.get(0)), ((Number) entry.get(1)).intValue());
-            }
             return map;
         });
 
