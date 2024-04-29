@@ -117,7 +117,7 @@ public final class ItemSettingsConfig
         soulLampItems = BUILDER
                 .comment("Defines items that the Soulspring Lamp can use as fuel",
                         "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
-                .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.<List<?>>begin(
                                     List.of("cold_sweat:soul_sprout", 4)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);

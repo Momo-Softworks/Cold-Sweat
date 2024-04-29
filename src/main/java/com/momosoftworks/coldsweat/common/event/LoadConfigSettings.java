@@ -18,8 +18,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.data.*;
+import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -48,6 +47,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -442,16 +442,10 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (Either<TagKey<EntityType<?>>, ResourceLocation> either : mountData.entities())
+            for (EntityType<?> entity : ConfigHelper.resolveEitherList(ForgeRegistries.ENTITIES, mountData.entities()))
             {
-                for (EntityType<?> entity : either.map(tag -> registries.registryOrThrow(Registry.ENTITY_TYPE_REGISTRY).getTag(tag).orElseThrow().stream()
-                                                                    .map(Holder::value)
-                                                                    .toList(),
-                                                       location -> List.of(ForgeRegistries.ENTITIES.getValue(location))))
-                {
-                    ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITIES.getKey(entity),
-                                                                new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
-                }
+                ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITIES.getKey(entity),
+                                                            new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
             }
         });
     }
