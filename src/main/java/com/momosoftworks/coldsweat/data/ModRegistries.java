@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.data;
 
+import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -15,4 +16,5 @@ public class ModRegistries
     public static IForgeRegistry<StructureTempData> STRUCTURE_TEMP_DATA = null;
 
     public static IForgeRegistry<MountData> MOUNT_DATA = null;
+    public static IForgeRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = null;
 }

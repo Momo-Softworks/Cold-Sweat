@@ -30,7 +30,7 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
     }
 
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.listOf().fieldOf("dimension").forGetter(data -> data.biomes),
+            ResourceLocation.CODEC.listOf().fieldOf("biomes").forGetter(data -> data.biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     {

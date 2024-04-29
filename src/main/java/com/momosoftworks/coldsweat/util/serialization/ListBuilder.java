@@ -2,6 +2,8 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,13 @@ public class ListBuilder<T>
     {   return new ListBuilder<>(elements);
     }
 
+    public static <E> ListBuilder<E> begin(List<E> elements)
+    {
+        ListBuilder<E> builder = new ListBuilder<>();
+        builder.elements.addAll(elements);
+        return builder;
+    }
+
     public static <E> ListBuilder<E> begin(E element)
     {   return new ListBuilder<>(element);
     }
@@ -37,6 +46,11 @@ public class ListBuilder<T>
     @SafeVarargs
     public final ListBuilder<T> addIf(boolean condition, Supplier<T>... elements)
     {   if (condition) this.elements.addAll(Arrays.stream(elements).map(Supplier::get).collect(Collectors.toList()));
+        return this;
+    }
+
+    public final ListBuilder<T> addAllIf(boolean condition, List<T> elements)
+    {   if (condition) this.elements.addAll(elements);
         return this;
     }
 
@@ -61,6 +75,11 @@ public class ListBuilder<T>
     @SafeVarargs
     public final ListBuilder<T> add(T... elements)
     {   this.elements.addAll(Arrays.asList(elements));
+        return this;
+    }
+
+    public final ListBuilder<T> addAll(List<?> elements)
+    {   this.elements.addAll((Collection<? extends T>) elements);
         return this;
     }
 
