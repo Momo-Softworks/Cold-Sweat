@@ -55,7 +55,7 @@
         - TempModifierEvent.Add
             - Called when a TempModifier modifier is added to a player
             - Cancellable
-            - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier trait
+            - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier type
         - TempModifierEvent.Remove
             - Called when a TempModifier is removed from a player
             - Cancellable
@@ -101,9 +101,9 @@
 - Technical Changes:
     - Added new methods for handling TempModifiers:
         - PlayerTemp.hasModifier():
-            - Returns true if the player has a modifier of the given trait
+            - Returns true if the player has a modifier of the given type
         - PlayerTemp.forEachModifier():
-            - Calls the given function for each modifier of the given trait
+            - Calls the given function for each modifier of the given type
     - Changed how PlayerTemp.removeModifier() works
         - Instead of removing all modifiers of the given class, it takes a predicate which determines which modifiers to remove
     - Added new method for TempModifierEvent.Add: setModifier()
@@ -173,7 +173,7 @@ Release 2.1:
         - If it is hot, for example, it will only use cold fuel
         - The Hearth will only give insulation to players who need it (won't consume fuel otherwise)
         - It now must have over 3/4 of an item's fuel value missing to consume fuel
-    - Now plays a sound when it runs out of the needed fuel trait
+    - Now plays a sound when it runs out of the needed fuel type
     - The Hearth's code is now up to 800x more efficient (~20,000-40,000ms -> ~50-200ms of lag over 60 seconds)
 - Made the Overworld slightly warmer by default (requires config reset)
 - Sleeping through the night now brings your temperature closer to 0 (divides it by 4)
@@ -218,16 +218,16 @@ Technical Changes:
     - Much easier to add arguments
     - Added new methods for handling:
         - PlayerTemp.hasModifier():
-            - Returns true if the player has a modifier of the given trait
+            - Returns true if the player has a modifier of the given type
         - PlayerTemp.forEachModifier():
-            - Calls the given function for each modifier of the given trait
+            - Calls the given function for each modifier of the given type
     - Changed how PlayerTemp.removeModifier() works:
         - Instead of removing all modifiers of the given class, it takes a predicate which determines which modifiers to remove
 - Added new events for compat mod developers to hook into:
     - TempModifierEvent.Add
         - Called when a TempModifier modifier is added to a player
         - Cancellable
-        - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier trait
+        - Allows for changing arguments, enabling/disabling duplicates, and changing the modifier type
     - TempModifierEvent.Remove
         - Called when a TempModifier is removed from a player
         - Cancellable
@@ -447,7 +447,7 @@ Technical Changes:
 - Renamed PlayerHelper to TempHelper
       - All non-temperature-related methods have been moved from TempHelper to a new PlayerHelper class
 - Events and methods for registering TempModifiers and BlockTemps have been moved/renamed to make it more intuitive
-- TempModifier arguments can now be cast in a cleaner way with trait arguments
+- TempModifier arguments can now be cast in a cleaner way with type arguments
       - ex: this.<Double>getArgument("my_argument") casts the returned argument to a double (CANNOT cast to primitives)
       - Because of this, the old getArgument(String id, Class clazz) method has been removed
       - This should also clear up a lot of issues with using primitives vs. classes (i.e. int vs. Integer)
@@ -664,7 +664,7 @@ Fixes:
 - Fixed memory leak when syncing TempModifiers from server to client
 - Fixed Hearth not resetting when a block update happens nearby
 - Fixed Hearth letting the Insulated effect expire before giving it to the player again (1.18.x)
-- Fixed the Hearth giving the Insulated effect despite having the incorrect fuel trait
+- Fixed the Hearth giving the Insulated effect despite having the incorrect fuel type
 - Fixed the Hearth not being able to be placed on a replaceable block (snow layer, tall grass, etc.)
 - Fixed the "replace" function of addModifier() not working properly (1.18.x)
 
@@ -807,7 +807,7 @@ Fixes:
 - Fixed some configs being reset when any changes are made
 
 Technical Changes:
-- "Temperature" is no longer an object trait
+- "Temperature" is no longer an object type
       - All instances of Temperature have been replaced by double values
       - Replaced "with()" with the static method "Temperature.apply()"
       - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
@@ -944,16 +944,16 @@ Fixes:
 Technical Changes:
 - Entities are now given the temperature capability on an EntityType basis instead of an individual basis
       - Prevents every entity in the world being unnecessarily scanned for the capability every tick (performance improvement)
-- TempModifier#calculate() will now be passed a Temperature.Type representing the trait of temperature the modifier is attached to
+- TempModifier#calculate() will now be passed a Temperature.Type representing the type of temperature the modifier is attached to
       - This means TempModifiers are now able to perform different functions depending on how they are applied (world, core, rate, etc.)
 - Added new advancement triggers related to Cold Sweat-specific events:
       - "cold_sweat:temperature_changed":
             - Triggered when the player's temperature changes
-            - Can discriminate based on the trait of temperature being affected
+            - Can discriminate based on the type of temperature being affected
             - Can also be configured to only trigger when the temperature is within a certain range
       - "cold_sweat:block_affects_temperature":
             - Triggered when a nearby block affects the player's temperature
-            - Arguments for distance, block trait, and the total effect this block trait has had on the player
+            - Arguments for distance, block type, and the total effect this block type has had on the player
       - "cold_sweat:soul_lamp_fueled":
             - Triggered when the player fuels a soulspring lamp
             - Arguments for the amount of fuel added
@@ -1081,7 +1081,7 @@ Fixes:
       - Cannot be insulated in the sewing table
       - Can be used as insulation for other items (similar to leather armor)
 * Chameleon molt can now be used as insulation
-      - This is a special new "adaptive" insulation item trait
+      - This is a special new "adaptive" insulation item type
             - Slowly adjusts its insulation value from hot to cold according to the player's environment
             - This process is slow, taking about 2 minutes to fully transition from cold to hot
       - Has the same raw insulation power as rabbit hide & wool
@@ -1270,7 +1270,7 @@ Technical Changes:
 - The powder snow overlay now appears when the player is freezing
 - Soul sprouts now extinguish the player when eaten
 - 1-5 Soul sprouts how have a chance to result from piglin bartering
-- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block trait can affect the player
+- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block type can affect the player
 - The temperature of lava is now drastically reduced while riding a strider
       - This is to prevent the player overheating extremely quickly while riding a strider on a lava ocean
 - Gave all insulation types distinct tooltip icons for easier reading
@@ -1447,7 +1447,7 @@ Misc. Temperature Changes:
       - If "Require Thermometer" is turned off, the exact gauge will always be shown
 - Biome temperature now takes altitude into account more seriously
       - Temperature will drop more substantially as height increases above sea level
-- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block trait can affect the player
+- Increased the effectiveness of most temperature-emitting blocks; though there is still a cap on how much a given block type can affect the player
 - The temperature of lava is now drastically reduced while riding a strider
       - This is to prevent the player overheating extremely quickly while riding a strider on a lava ocean
 - The body temperature's tendency to "equalize" will no longer fight against modifiers applied to it (such as waterskins)
@@ -1567,7 +1567,7 @@ Mod Compatibility:
 
 
 Technical Changes:
-- "Temperature" is no longer an object trait
+- "Temperature" is no longer an object type
       - All instances of Temperature have been replaced by double values
       - Replaced "with()" with the static method "Temperature.apply()"
       - Because all methods in Temperature are now static, the class has been merged with TempHelper (new class is named Temperature)
@@ -1853,7 +1853,7 @@ Fixes:
 Technical Changes:
 - Major changes to attributes:
       - The read-only attributes can now be written to
-            - If an attribute is set, it will override the player's temperature trait that corresponds to that attribute
+            - If an attribute is set, it will override the player's temperature type that corresponds to that attribute
             - For example, setting the player's cold_sweat:world_temperature to 0 will make the player's world temperature 0 until the attribute is removed
       - Previous "offset" attributes have been removed
       - Core temperature attribute has been removed
@@ -1986,6 +1986,7 @@ Technical Changes:
 2.3-b03b
 
 Fixes:
+- Fixed the thermometer not displaying temperature units when in an item frame
 - Fixed improper conversions between units of temperature in some cases
 - Slightly modified unit conversions to use more sensible numbers
       - Previously, arbitrary numbers like 42 and repeating numbers like 23.333... were used
@@ -1993,11 +1994,16 @@ Fixes:
             - MC to C: x * 25
             - MC to F: x * 45 (+ 32 if absolute measurement)
       - Some config settings defined in MC units (like min/max temp) might be slightly off now until they are reset
+- Fixed crash with certain mods that edit tooltips when advanced tooltips is enabled
+- Fixed inconsistencies between item/entity predicates (Vanilla) and item/entity requirements (Cold Sweat)
+- Removed the auto-tag-remover, as it was causing unforeseen issues with some items
 
 Technical Changes:
 - Temperature.Type and Ability have been merged into one Enum: Trait
-      - These two things are treated basically the same, so the only thing separating them was doing was making it more annoying to work with them
+      - These two things were functionally identical anyway, so separating them only made them more annoying to work with
       - This also means that previous Temperature.Ability types can now have TempModifiers applied to them
 - The TempModifier registration system has been slightly changed:
       - The ID for TempModifiers is no longer retrieved from a method in the TempModifier class
       - IDs are now assigned at registration via ResourceLocations like most other things
+- The Temperature.addModifier() method will now add/replace for every TempModifier instance that matches the given predicate if allowDupes is true
+- Added range field to BlockTemp JSONs
