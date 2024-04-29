@@ -1981,3 +1981,30 @@ Technical Changes:
 - Added block tag for blocks that should ignore sleeping conditions (cold_sweat:tags/block/ignore_sleep_check) (ignore the "Check Sleeping Conditions" setting)
 - Added item tag for non-insulatable armor items (cold_sweat:tags/item/not_insulatable)
 - Added effect tag for blacklisted potion effects in the hearth (cold_sweat:tags/mob_effect/hearth_blacklisted)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03b
+
+Fixes:
+- Fixed the thermometer not displaying temperature units when in an item frame
+- Fixed improper conversions between units of temperature in some cases
+- Slightly modified unit conversions to use more sensible numbers
+      - Previously, arbitrary numbers like 42 and repeating numbers like 23.333... were used
+      - Conversions now:
+            - MC to C: x * 25
+            - MC to F: x * 45 (+ 32 if absolute measurement)
+      - Some config settings defined in MC units (like min/max temp) might be slightly off now until they are reset
+- Fixed crash with certain mods that edit tooltips when advanced tooltips is enabled
+- Fixed inconsistencies between item/entity predicates (Vanilla) and item/entity requirements (Cold Sweat)
+- Removed the auto-tag-remover, as it was causing unforeseen issues with some items
+
+Technical Changes:
+- Temperature.Type and Ability have been merged into one Enum: Trait
+      - These two things were functionally identical anyway, so separating them only made them more annoying to work with
+      - This also means that previous Temperature.Ability types can now have TempModifiers applied to them
+- The TempModifier registration system has been slightly changed:
+      - The ID for TempModifiers is no longer retrieved from a method in the TempModifier class
+      - IDs are now assigned at registration via ResourceLocations like most other things
+- The Temperature.addModifier() method will now add/replace for every TempModifier instance that matches the given predicate if allowDupes is true
+- Added range field to BlockTemp JSONs
