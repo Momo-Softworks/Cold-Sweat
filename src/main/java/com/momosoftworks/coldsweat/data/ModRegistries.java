@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.data;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.configuration.data.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -21,4 +22,5 @@ public class ModRegistries
 
     // Entity Registries
     public static final ResourceKey<Registry<MountData>> MOUNT_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"));
+    public static final ResourceKey<Registry<SpawnBiomeData>> ENTITY_SPAWN_BIOME_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"));
 }
