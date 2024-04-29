@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration.data;
+package com.momosoftworks.coldsweat.data.configuration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -16,26 +16,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes
                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
-            {
-                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<TagKey<Biome>, ResourceLocation>right(tagLocation);
-
-                return Either.<TagKey<Biome>, ResourceLocation>left(TagKey.create(Registries.BIOME, tagLocation));
-            },
-            // Convert from a TagKey to a string
-            tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
-                String result = tag.left().isPresent()
-                                ? "#" + tag.left().get().location()
-                                : tag.right().map(ResourceLocation::toString).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
-                return result;
-            })
-            .listOf()
-            .fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            Codec.either(TagKey.codec(Registries.BIOME), ResourceLocation.CODEC).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
             either ->
             {
