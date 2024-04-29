@@ -1,8 +1,7 @@
 package com.momosoftworks.coldsweat.data;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.data.*;
+import com.momosoftworks.coldsweat.data.configuration.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

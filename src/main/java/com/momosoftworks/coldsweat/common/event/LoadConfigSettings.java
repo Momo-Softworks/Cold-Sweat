@@ -15,8 +15,8 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.data.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
@@ -439,16 +439,10 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (Either<TagKey<EntityType<?>>, ResourceLocation> either : mountData.entities())
+            for (EntityType<?> entity : ConfigHelper.resolveEitherList(ForgeRegistries.ENTITY_TYPES, mountData.entities()))
             {
-                for (EntityType<?> entity : either.map(tag -> registries.registryOrThrow(Registry.ENTITY_TYPE_REGISTRY).getTag(tag).orElseThrow().stream()
-                                                                    .map(Holder::get)
-                                                                    .toList(),
-                                                       location -> List.of(ForgeRegistries.ENTITY_TYPES.getValue(location))))
-                {
-                    ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITY_TYPES.getKey(entity),
-                                                                new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
-                }
+                ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITY_TYPES.getKey(entity),
+                                                            new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
             }
         });
     }
