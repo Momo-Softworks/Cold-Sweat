@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -15,7 +16,7 @@ import java.util.Optional;
 public record MountData(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities, double coldInsulation, double heatInsulation, EntityRequirement requirement, Optional<List<String>> requiredMods)
 {
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registries.ENTITY_TYPE), ForgeRegistries.ENTITY_TYPES.getCodec()).listOf().fieldOf("entities").forGetter(MountData::entities),
+            ConfigHelper.createForgeTagCodec(ForgeRegistries.ENTITY_TYPES, Registries.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(MountData::entities),
             Codec.DOUBLE.fieldOf("cold_insulation").forGetter(MountData::coldInsulation),
             Codec.DOUBLE.fieldOf("heat_insulation").forGetter(MountData::heatInsulation),
             EntityRequirement.getCodec().fieldOf("requirement").forGetter(MountData::requirement),

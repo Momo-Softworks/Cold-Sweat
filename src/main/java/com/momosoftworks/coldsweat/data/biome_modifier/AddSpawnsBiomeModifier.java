@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BiomeCodecInit;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.MobCategory;
@@ -14,6 +13,8 @@ import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.common.world.ModifiableBiomeInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Collection;
+
 
 public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifier
 {
@@ -22,21 +23,17 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
     {
         if (phase == Phase.ADD && useConfigs)
         {
-            biome.unwrapKey().ifPresent(biomeKey ->
+            Collection<SpawnBiomeData> spawns = ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(biome.value());
+            if (!spawns.isEmpty()) System.out.println("Adding spawns to " + biome.unwrapKey().get().location());
+            for (SpawnBiomeData spawn : spawns)
             {
-                CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(biome.value()), spawns ->
+                ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, spawn.entities())
+                .forEach(entityType ->
                 {
-                    for (SpawnBiomeData spawnBiomeData : spawns)
-                    {
-                        ConfigHelper.resolveEitherList(ForgeRegistries.ENTITY_TYPES, spawnBiomeData.entities())
-                        .forEach(entityType ->
-                        {
-                            builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).removeIf(spawnerData -> spawnerData.type == entityType);
-                            builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(entityType, spawnBiomeData.weight(), 1, 3));
-                        });
-                    }
+                    builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).removeIf(spawnerData -> spawnerData.type == entityType);
+                    builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(entityType, spawn.weight(), 1, 1));
                 });
-            });
+            }
         }
     }
 

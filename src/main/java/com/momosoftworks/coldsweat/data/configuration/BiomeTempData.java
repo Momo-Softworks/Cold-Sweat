@@ -4,19 +4,20 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
 
-public record BiomeTempData(List<Either<TagKey<Biome>, ResourceLocation>> biomes, double min, double max,
+public record BiomeTempData(List<Either<TagKey<Biome>, Biome>> biomes, double min, double max,
                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registries.BIOME), ResourceLocation.CODEC).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            ConfigHelper.createForgeTagCodec(ForgeRegistries.BIOMES, Registries.BIOME).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
             either ->
             {

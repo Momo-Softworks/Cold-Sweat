@@ -13,8 +13,10 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -86,6 +89,15 @@ public abstract class WorldHelper
 
         return biome;
     }
+
+    public static ResourceLocation getDimensionTypeID(DimensionType dimType)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getKey(dimType);
+    }
+
+    public static DimensionType getDimensionType(ResourceLocation dimID)
+    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(dimID);
+    }
+
 
     /**
      * Returns all block positions in a grid of the specified size<br>
@@ -425,5 +437,9 @@ public abstract class WorldHelper
 
     public static MinecraftServer getServer()
     {   return ServerLifecycleHooks.getCurrentServer();
+    }
+
+    public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
+    {   return getServer().registryAccess().registryOrThrow(registry);
     }
 }
