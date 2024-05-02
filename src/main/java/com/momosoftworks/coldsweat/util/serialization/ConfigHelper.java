@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -19,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
@@ -26,6 +28,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.tags.ITag;
@@ -110,21 +114,21 @@ public class ConfigHelper
                 if (item != null && item != Items.AIR)
                 {   items.add(item);
                 }
-                else ColdSweat.LOGGER.error("Error parsing item config: item \"" + itemId + "\" does not exist");
+                else ColdSweat.LOGGER.error("Error parsing item config: item \"{}\" does not exist", itemId);
             }
         }
         return items;
     }
 
-    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
+    public static Map<Biome, Triplet<Double, Double, Temperature.Units>> getBiomesWithValues(List<? extends List<?>> source, boolean absolute)
     {
-        Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+        Map<Biome, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
         for (List<?> entry : source)
         {
             try
             {
-                ResourceLocation biomeID = new ResourceLocation((String) entry.get(0));
-                Biome biome = WorldHelper.getBiome(biomeID);
+                ResourceLocation biomeId = new ResourceLocation((String) entry.get(0));
+                Biome biome = WorldHelper.getBiome(biomeId);
 
                 double min;
                 double max;
@@ -145,29 +149,51 @@ public class ConfigHelper
                 }
 
                 // Maps the biome ID to the temperature (and variance if present)
-                map.put(biomeID, new Triplet<>(min, max, units));
+                map.put(ForgeRegistries.BIOMES.getValue(biomeId), new Triplet<>(min, max, units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"" + entry.toString() + "\" does not exist or is not loaded yet.");
+            {
+                ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet.", entry.toString());
             }
         }
         return map;
     }
 
-    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source, boolean absolute)
+    public static Map<DimensionType, Pair<Double, Temperature.Units>> getDimensionsWithValues(List<? extends List<?>> source, boolean absolute)
     {
-        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        Map<DimensionType, Pair<Double, Temperature.Units>> map = new HashMap<>();
         for (List<?> entry : source)
         {
             try
             {
-                ResourceLocation dimensionID = new ResourceLocation((String) entry.get(0));
+                ResourceLocation dimensionId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                map.put(dimensionID, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                map.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"" + entry.toString() + "\" does not exist or is not loaded yet");
+            {
+                ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", entry.toString());
+            }
+        }
+        return map;
+    }
+
+    public static Map<Structure, Pair<Double, Temperature.Units>> getStructuresWithValues(List<? extends List<?>> source, boolean absolute)
+    {
+        Map<Structure, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        for (List<?> entry : source)
+        {
+            try
+            {
+                ResourceLocation structureId = new ResourceLocation((String) entry.get(0));
+                double temp = ((Number) entry.get(1)).doubleValue();
+                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                map.put(WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).get(structureId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+            }
+            catch (Exception e)
+            {
+                ColdSweat.LOGGER.error("Error parsing structure config: dimension \"{}\" does not exist or is not loaded yet", entry.toString());
             }
         }
         return map;
@@ -223,16 +249,42 @@ public class ConfigHelper
             {
                 Biome newBiome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biome));
                 if (newBiome != null)
-                {
-                    biomeList.add(newBiome);
+                {   biomeList.add(newBiome);
                 }
                 else
-                {
-                    ColdSweat.LOGGER.error("Error parsing biome config: biome \"" + biome + "\" does not exist");
+                {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
                 }
             }
         }
         return biomeList;
+    }
+
+    public static List<EntityType<?>> getEntityTypes(String... entities)
+    {
+        List<EntityType<?>> entityList = new ArrayList<>();
+        for (String entity : entities)
+        {
+            if (entity.startsWith("#"))
+            {
+                final String tagID = entity.replace("#", "");
+                CSMath.doIfNotNull(ForgeRegistries.ENTITY_TYPES.tags(), tags ->
+                {
+                    Optional<ITag<EntityType<?>>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(entityITag -> entityList.addAll(entityITag.stream().toList()));
+                });
+            }
+            else
+            {
+                EntityType<?> newEntity = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entity));
+                if (newEntity != null)
+                {   entityList.add(newEntity);
+                }
+                else
+                {   ColdSweat.LOGGER.error("Error parsing entity config: entity \"{}\" does not exist", entity);
+                }
+            }
+        }
+        return entityList;
     }
 
     public static CompoundTag serializeNbtBool(boolean value, String key)
@@ -263,57 +315,85 @@ public class ConfigHelper
         return tag;
     }
 
-    public static CompoundTag serializeDimensionTemps(Map<ResourceLocation, Pair<Double, Temperature.Units>> map, String key)
+    public static CompoundTag serializeBiomeTemps(Map<Biome, Triplet<Double, Double, Temperature.Units>> map, String key)
     {
         CompoundTag tag = new CompoundTag();
         CompoundTag mapTag = new CompoundTag();
-        for (Map.Entry<ResourceLocation, Pair<Double, Temperature.Units>> entry : map.entrySet())
-        {
-            CompoundTag biomeTag = new CompoundTag();
-            biomeTag.putDouble("Temp", entry.getValue().getFirst());
-            biomeTag.putString("Units", entry.getValue().getSecond().toString());
-            mapTag.put(entry.getKey().toString(), biomeTag);
-        }
-        tag.put(key, mapTag);
-        return tag;
-    }
-
-    public static Map<ResourceLocation, Pair<Double, Temperature.Units>> deserializeDimensionTemps(CompoundTag tag, String key)
-    {
-        Map<ResourceLocation, Pair<Double, Temperature.Units>> map = new HashMap<>();
-        CompoundTag mapTag = tag.getCompound(key);
-        for (String biomeID : mapTag.getAllKeys())
-        {
-            CompoundTag biomeTag = mapTag.getCompound(biomeID);
-            map.put(new ResourceLocation(biomeID), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
-        }
-        return map;
-    }
-
-    public static CompoundTag serializeBiomeTemps(Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map, String key)
-    {
-        CompoundTag tag = new CompoundTag();
-        CompoundTag mapTag = new CompoundTag();
-        for (Map.Entry<ResourceLocation, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
+        for (Map.Entry<Biome, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundTag biomeTag = new CompoundTag();
             biomeTag.putDouble("Min", entry.getValue().getA());
             biomeTag.putDouble("Max", entry.getValue().getB());
             biomeTag.putString("Units", entry.getValue().getC().toString());
-            mapTag.put(entry.getKey().toString(), biomeTag);
+            mapTag.put(ForgeRegistries.BIOMES.getKey(entry.getKey()).toString(), biomeTag);
         }
         tag.put(key, mapTag);
         return tag;
     }
 
-    public static Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> deserializeBiomeTemps(CompoundTag tag, String key)
+    public static Map<Biome, Triplet<Double, Double, Temperature.Units>> deserializeBiomeTemps(CompoundTag tag, String key)
     {
-        Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
+        Map<Biome, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();
         CompoundTag mapTag = tag.getCompound(key);
         for (String biomeID : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(biomeID);
-            map.put(new ResourceLocation(biomeID), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            map.put(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+        }
+        return map;
+    }
+
+    public static CompoundTag serializeDimensionTemps(Map<DimensionType, Pair<Double, Temperature.Units>> map, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<DimensionType, Pair<Double, Temperature.Units>> entry : map.entrySet())
+        {
+            CompoundTag dimensionTag = new CompoundTag();
+            dimensionTag.putDouble("Temp", entry.getValue().getFirst());
+            dimensionTag.putString("Units", entry.getValue().getSecond().toString());
+            mapTag.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey()).toString(), dimensionTag);
+        }
+        tag.put(key, mapTag);
+        return tag;
+    }
+
+    public static Map<DimensionType, Pair<Double, Temperature.Units>> deserializeDimensionTemps(CompoundTag tag, String key)
+    {
+        Map<DimensionType, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        CompoundTag mapTag = tag.getCompound(key);
+        for (String dimensionId : mapTag.getAllKeys())
+        {
+            CompoundTag biomeTag = mapTag.getCompound(dimensionId);
+            map.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(dimensionId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+        }
+        return map;
+    }
+
+    public static CompoundTag serializeStructureTemps(Map<Structure, Pair<Double, Temperature.Units>> map, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag mapTag = new CompoundTag();
+        for (Map.Entry<Structure, Pair<Double, Temperature.Units>> entry : map.entrySet())
+        {
+            CompoundTag structureTag = new CompoundTag();
+            structureTag.putDouble("Temp", entry.getValue().getFirst());
+            structureTag.putString("Units", entry.getValue().getSecond().toString());
+            mapTag.put(WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).getKey(entry.getKey()).toString(), structureTag);
+        }
+        tag.put(key, mapTag);
+
+        return tag;
+    }
+
+    public static Map<Structure, Pair<Double, Temperature.Units>> deserializeStructureTemps(CompoundTag tag, String key)
+    {
+        Map<Structure, Pair<Double, Temperature.Units>> map = new HashMap<>();
+        CompoundTag mapTag = tag.getCompound(key);
+        for (String structureId : mapTag.getAllKeys())
+        {
+            CompoundTag biomeTag = mapTag.getCompound(structureId);
+            map.put(WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).get(new ResourceLocation(structureId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -329,6 +409,7 @@ public class ConfigHelper
             mapTag.put(itemId.toString(), serializer.apply(entry.getValue()));
         }
         tag.put(key, mapTag);
+
         return tag;
     }
 
@@ -438,37 +519,88 @@ public class ConfigHelper
                          ? "static"
                          : "adaptive");
             itemData.add(insulator.data().nbt().serialize().toString());
+
             return itemData;
         });
     }
 
-    public static <T> List<T> resolveEitherList(IForgeRegistry<T> registry, List<Either<TagKey<T>, T>> eitherList)
+    public static <T> List<T> mapForgeRegistryTagList(IForgeRegistry<T> registry, List<Either<TagKey<T>, T>> eitherList)
     {
         List<T> list = new ArrayList<>();
         for (Either<TagKey<T>, T> either : eitherList)
         {
             either.ifLeft(tagKey -> list.addAll(registry.tags().getTag(tagKey).stream().toList()));
+            either.ifRight(object -> list.add(object));
+        }
+        return list;
+    }
+
+    public static <T> List<T> mapVanillaRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, T>> eitherList)
+    {
+        List<T> list = new ArrayList<>();
+        for (Either<TagKey<T>, T> either : eitherList)
+        {
+            either.ifLeft(tagKey -> list.addAll(WorldHelper.getRegistry(registry).getTag(tagKey).orElseThrow()
+                                                .stream()
+                                                .map(holder -> holder.get())
+                                                .toList()));
             either.ifRight(list::add);
         }
         return list;
     }
 
-    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<? extends Registry<T>> registry, ResourceLocation id)
+    public static <T> Codec<Either<TagKey<T>, T>> createForgeTagCodec(IForgeRegistry<T> forgeRegistry, ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        return Codec.STRING.xmap(
+               objectPath ->
+               {
+                   if (objectPath.startsWith("#"))
+                   {   return Either.left(new TagKey<>(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
+                   }
+                   else
+                   {   return Either.right(forgeRegistry.getValue(new ResourceLocation(objectPath)));
+                   }
+               },
+               objectEither -> objectEither.map(
+                       tagKey -> "#" + tagKey.location(),
+                       object -> forgeRegistry.getKey(object).toString()
+               ));
+    }
+
+    public static <T> Codec<Either<TagKey<T>, T>> createVanillaTagCodec(ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        return Codec.STRING.xmap(
+               objectPath ->
+               {
+                   if (objectPath.startsWith("#"))
+                   {   return Either.left(new TagKey<>(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
+                   }
+                   else
+                   {   return Either.right(getVanillaRegistryValue(vanillaRegistry, new ResourceLocation(objectPath)).orElseThrow());
+                   }
+               },
+               objectEither -> objectEither.map(
+                       tagKey -> "#" + tagKey.location(),
+                       object -> getVanillaRegistryKey(vanillaRegistry, object).orElseThrow().toString()
+               ));
+    }
+
+    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey< Registry<T>> registry, ResourceLocation id)
     {
         try
         {
-            return Optional.ofNullable(WorldHelper.getServer().registryAccess().registryOrThrow(registry).get(id));
+            return Optional.ofNullable(WorldHelper.getRegistry(registry).get(id));
         }
         catch (Exception e)
         {   return Optional.empty();
         }
     }
 
-    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<? extends Registry<T>> registry, T value)
+    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<Registry<T>> registry, T value)
     {
         try
         {
-            return Optional.ofNullable(WorldHelper.getServer().registryAccess().registryOrThrow(registry).getKey(value));
+            return Optional.ofNullable(WorldHelper.getRegistry(registry).getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();

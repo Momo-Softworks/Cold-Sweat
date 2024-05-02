@@ -184,7 +184,7 @@ public class TooltipHandler
                         : Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD)
                 ));
                 elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                elements.add(tooltipEndIndex, Either.left(Component.empty()));
+                elements.add(tooltipEndIndex, Either.left(                           Component.empty()));
             }
         }
         // If the item is an insulation ingredient, add the tooltip

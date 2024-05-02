@@ -14,7 +14,9 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -432,5 +434,9 @@ public abstract class WorldHelper
 
     public static MinecraftServer getServer()
     {   return ServerLifecycleHooks.getCurrentServer();
+    }
+
+    public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
+    {   return getServer().registryAccess().registryOrThrow(registry);
     }
 }

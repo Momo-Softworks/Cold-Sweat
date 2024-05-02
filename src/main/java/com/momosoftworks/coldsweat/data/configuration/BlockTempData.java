@@ -3,8 +3,8 @@ package com.momosoftworks.coldsweat.data.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -18,7 +18,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
                             BlockPredicate condition, Optional<CompoundTag> nbt, Optional<List<String>> requiredMods)
 {
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registry.BLOCK_REGISTRY), ForgeRegistries.BLOCKS.getCodec()).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
+            ConfigHelper.createForgeTagCodec(ForgeRegistries.BLOCKS, Registry.BLOCK_REGISTRY).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),

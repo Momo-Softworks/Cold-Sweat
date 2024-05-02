@@ -453,7 +453,7 @@ public class EntityTempManager
                 // If insulated entity (defined in config)
                 else
                 {
-                    InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(ForgeRegistries.ENTITY_TYPES.getKey(mount.getType()));
+                    InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(mount.getType());
                     if (entityInsul != null && entityInsul.test(mount))
                     {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE);
                     }
