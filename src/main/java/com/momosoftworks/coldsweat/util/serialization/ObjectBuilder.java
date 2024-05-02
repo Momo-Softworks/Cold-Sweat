@@ -14,13 +14,13 @@ public class ObjectBuilder
         StringBuilder builder = new StringBuilder();
         for (char c : string.toCharArray())
         {
-            if (c == '{')
+            if (c == '{' || c == '[')
             {
                 builder.append(c).append('\n');
                 indentation++;
                 builder.append("    ".repeat(indentation));
             }
-            else if (c == '}')
+            else if (c == '}' || c == ']')
             {
                 builder.append('\n');
                 indentation--;

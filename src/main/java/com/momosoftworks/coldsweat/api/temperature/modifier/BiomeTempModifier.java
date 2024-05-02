@@ -51,7 +51,7 @@ public class BiomeTempModifier extends TempModifier
             BlockPos entPos = entity.blockPosition();
 
             // In the case that the dimension temperature is overridden by config, use that and skip everything else
-            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(level.dimension().location());
+            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(level.dimensionType());
             if (dimTempOverride != null)
             {   return temp -> temp + dimTempOverride.getFirst();
             }
@@ -104,7 +104,7 @@ public class BiomeTempModifier extends TempModifier
             worldTemp /= Math.max(1, biomeCount);
 
             // Add dimension offset, if present
-            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(level.dimension().location());
+            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(level.dimensionType());
             if (dimTempOffsetConf != null)
             {   worldTemp += dimTempOffsetConf.getFirst();
             }
@@ -143,8 +143,7 @@ public class BiomeTempModifier extends TempModifier
                     // If the structure has a piece at the position, get the temperature
                     if (structureManager.structureHasPieceAt(pos, structurestart))
                     {
-                        ResourceLocation structureId = registry.getKey(structure.feature);
-                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structureId);
+                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
 
                         if (strucTemp != null)
                         {   return strucTemp.getFirst();
@@ -161,14 +160,13 @@ public class BiomeTempModifier extends TempModifier
     {
         Biome biome = holder.value();
         double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-        ResourceLocation biomeID = holder.unwrapKey().get().location();
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
                                                            new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
                                                              new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }

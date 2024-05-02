@@ -4,18 +4,21 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
+import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TemperatureTypeArgument;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.data.*;
+import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -101,6 +104,11 @@ public class ColdSweat
 
             // Register insulation items tab
             InsulationItemsGroup.INSULATION_ITEMS.register();
+
+            // Register custom command arguments
+            ArgumentTypes.register("temperature", TemperatureTypeArgument.class, new TemperatureTypeArgument.Serializer());
+            ArgumentTypes.register("temp_attribute", AbilityOrTempTypeArgument.class, new AbilityOrTempTypeArgument.Serializer());
+            ArgumentTypes.register("temp_modifier", TempModifierTypeArgument.class, new TempModifierTypeArgument.Serializer());
         });
     }
 

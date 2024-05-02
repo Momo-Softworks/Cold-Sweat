@@ -24,7 +24,7 @@ public class AddEntitySpawns
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
-                ConfigHelper.resolveEitherList(ForgeRegistries.ENTITIES, spawnBiomeData.entities())
+                ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, spawnBiomeData.entities())
                 .forEach(entityType ->
                 {
                     event.getSpawns().getSpawner(MobCategory.CREATURE).removeIf(spawnerData -> spawnerData.type == entityType);

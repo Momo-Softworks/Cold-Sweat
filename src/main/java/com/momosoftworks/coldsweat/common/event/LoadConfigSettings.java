@@ -26,6 +26,8 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.sun.jna.Structure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -131,26 +133,28 @@ public class LoadConfigSettings
          Add JSON data to the config settings
          */
         // insulators
-        addInsulatorConfigs(insulators, registries);
+        addInsulatorConfigs(insulators);
         // fuels
-        addFuelConfigs(fuels, registries);
+        addFuelConfigs(fuels);
         // foods
-        addFoodConfigs(foods, registries);
+        addFoodConfigs(foods);
 
         // block temperatures
-        addBlockTempConfigs(blockTemps, registries);
+        addBlockTempConfigs(blockTemps);
         // biome temperatures
-        addBiomeTempConfigs(biomeTemps, registries);
+        addBiomeTempConfigs(biomeTemps);
         // dimension temperatures
-        addDimensionTempConfigs(dimensionTemps, registries);
+        addDimensionTempConfigs(dimensionTemps);
         // structure temperatures
-        addStructureTempConfigs(structureTemps, registries);
+        addStructureTempConfigs(structureTemps);
 
         // mounts
-        addMountConfigs(mounts, registries);
+        addMountConfigs(mounts);
+        // spawn biomes
+        addSpawnBiomeConfigs(spawnBiomes);
     }
 
-    private static void addInsulatorConfigs(Set<Holder<InsulatorData>> insulators, RegistryAccess registries)
+    private static void addInsulatorConfigs(Set<Holder<InsulatorData>> insulators)
     {
         insulators.forEach(holder ->
         {
@@ -172,7 +176,7 @@ public class LoadConfigSettings
             for (Either<TagKey<Item>, Item> either : insulatorData.data().items())
             {
                 Insulator insulator = new Insulator(insulation, insulatorData.slot(), data, predicate, attributeModifiers);
-                for (Item item : either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY)
+                for (Item item : either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY)
                                                                 .getTag(tagKey).orElseThrow()
                                                                 .stream().map(Holder::value).toList(),
                                             item -> List.of(item)))
@@ -193,7 +197,7 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addFuelConfigs(Set<Holder<FuelData>> fuels, RegistryAccess registries)
+    private static void addFuelConfigs(Set<Holder<FuelData>> fuels)
     {
         fuels.forEach(holder ->
         {
@@ -214,7 +218,7 @@ public class LoadConfigSettings
 
             for (Either<TagKey<Item>, Item> either : fuelData.data().items())
             {
-                either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
+                either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
                            item -> List.of(item).stream())
                 .forEach(item ->
                 {
@@ -230,7 +234,7 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addFoodConfigs(Set<Holder<ItemData>> foods, RegistryAccess registries)
+    private static void addFoodConfigs(Set<Holder<ItemData>> foods)
     {
         foods.forEach(holder ->
         {
@@ -249,7 +253,7 @@ public class LoadConfigSettings
             PredicateItem predicateItem = new PredicateItem(food, data, predicate);
             for (Either<TagKey<Item>, Item> either : foodData.data().items())
             {
-                either.map(tagKey -> registries.registryOrThrow(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
+                either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
                            item -> List.of(item).stream())
                 .forEach(item ->
                 {
@@ -259,7 +263,7 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addBlockTempConfigs(Set<Holder<BlockTempData>> blockTemps, RegistryAccess registries)
+    private static void addBlockTempConfigs(Set<Holder<BlockTempData>> blockTemps)
     {
         blockTemps.forEach(holder ->
         {
@@ -272,11 +276,7 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            Block[] blocks = blockTempData.blocks()
-                             .stream()
-                             .map(either -> either.left().isPresent()
-                                            ? registries.registryOrThrow(Registry.BLOCK_REGISTRY).getTag(either.left().get()).orElseThrow().stream().map(Holder::value).toArray(Block[]::new)
-                                            : new Block[] {either.right().get()}).flatMap(Stream::of).toArray(Block[]::new);
+            Block[] blocks = ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blockTempData.blocks()).toArray(Block[]::new);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature();
@@ -329,7 +329,7 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addBiomeTempConfigs(Set<Holder<BiomeTempData>> biomeTemps, RegistryAccess registries)
+    private static void addBiomeTempConfigs(Set<Holder<BiomeTempData>> biomeTemps)
     {
         biomeTemps.forEach(holder ->
         {
@@ -342,30 +342,24 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (Either<TagKey<Biome>, ResourceLocation> either : biomeTempData.biomes())
+            for (Biome biome : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BIOMES, biomeTempData.biomes()))
             {
-                for (ResourceLocation biome : either.map(tag -> registries.registryOrThrow(Registry.BIOME_REGISTRY).getTag(tag).orElseThrow().stream()
-                                                                          .map(biomeHolder -> biomeHolder.unwrapKey().get().location())
-                                                                          .toList(),
-                                              location -> List.of(location)))
-                {
-                    Temperature.Units units = biomeTempData.units();
-                    if (biomeTempData.isOffset())
-                    {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                                    Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
-                                                                                    biomeTempData.units()));
-                    }
-                    else
-                    {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                                  Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
-                                                                                  biomeTempData.units()));
-                    }
+                Temperature.Units units = biomeTempData.units();
+                if (biomeTempData.isOffset())
+                {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                                                                                Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
+                                                                                biomeTempData.units()));
+                }
+                else
+                {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                                                                              Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
+                                                                              biomeTempData.units()));
                 }
             }
         });
     }
 
-    private static void addDimensionTempConfigs(Set<Holder<DimensionTempData>> dimensionTemps, RegistryAccess registries)
+    private static void addDimensionTempConfigs(Set<Holder<DimensionTempData>> dimensionTemps)
     {
         dimensionTemps.forEach(holder ->
         {
@@ -378,29 +372,22 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            Registry<DimensionType> dimensionRegistry = registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-            for (Either<TagKey<DimensionType>, ResourceLocation> either : dimensionTempData.dimensions())
+            for (DimensionType dimension : ConfigHelper.mapVanillaRegistryTagList(Registry.DIMENSION_TYPE_REGISTRY, dimensionTempData.dimensions()))
             {
-                for (ResourceLocation dimension : either.map(tag -> dimensionRegistry.getTag(tag).orElseThrow().stream()
-                                                                    .map(dimensionHolder -> dimensionHolder.unwrapKey().get().location())
-                                                                    .toList(),
-                                                            location -> List.of(location)))
-                {
-                    Temperature.Units units = dimensionTempData.units();
-                    if (dimensionTempData.isOffset())
-                    {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
-                                                                                      dimensionTempData.units()));
-                    }
-                    else
-                    {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
-                                                                                    dimensionTempData.units()));
-                    }
+                Temperature.Units units = dimensionTempData.units();
+                if (dimensionTempData.isOffset())
+                {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                                                                                  dimensionTempData.units()));
+                }
+                else
+                {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                                                                                dimensionTempData.units()));
                 }
             }
         });
     }
 
-    private static void addStructureTempConfigs(Set<Holder<StructureTempData>> structureTemps, RegistryAccess registries)
+    private static void addStructureTempConfigs(Set<Holder<StructureTempData>> structureTemps)
     {
         structureTemps.forEach(holder ->
         {
@@ -413,23 +400,15 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            Registry<ConfiguredStructureFeature<?, ?>> structureRegistry = registries.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-            for (Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceLocation> either : structureTempData.structures())
+            for (ConfiguredStructureFeature<?,?> structure : ConfigHelper.mapVanillaRegistryTagList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, structureTempData.structures()))
             {
-                for (ResourceLocation structure : either.map(tag -> structureRegistry.getTag(tag).orElseThrow().stream()
-                                                                    .map(structureHolder -> structureHolder.unwrapKey().get().location())
-                                                                    .toList(),
-                                                            location -> List.of(location)))
-                {
-                    Temperature.Units units = structureTempData.units();
-                    ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(Temperature.convert(structureTempData.temperature(), units, Temperature.Units.MC, true),
-                                                                              structureTempData.units()));
-                }
+                double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, true);
+                ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units()));
             }
         });
     }
 
-    private static void addMountConfigs(Set<Holder<MountData>> mounts, RegistryAccess registries)
+    private static void addMountConfigs(Set<Holder<MountData>> mounts)
     {
         mounts.forEach(holder ->
         {
@@ -442,15 +421,13 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (EntityType<?> entity : ConfigHelper.resolveEitherList(ForgeRegistries.ENTITIES, mountData.entities()))
-            {
-                ConfigSettings.INSULATED_ENTITIES.get().put(ForgeRegistries.ENTITIES.getKey(entity),
-                                                            new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
+            for (EntityType<?> entity : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, mountData.entities()))
+            {   ConfigSettings.INSULATED_ENTITIES.get().put(entity, new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
             }
         });
     }
 
-    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registries)
+    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes)
     {
         spawnBiomes.forEach(holder ->
         {
@@ -463,9 +440,8 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (Biome biome : ConfigHelper.resolveEitherList(ForgeRegistries.BIOMES, spawnBiomeData.biomes()))
-            {
-                ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
+            for (Biome biome : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BIOMES, spawnBiomeData.biomes()))
+            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
             }
         });
     }
@@ -491,7 +467,7 @@ public class LoadConfigSettings
                             .ifPresent(insulator -> output.add(Holder.direct(insulator)));
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse origin settings: " + e);
+                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
                 }
             }
         }

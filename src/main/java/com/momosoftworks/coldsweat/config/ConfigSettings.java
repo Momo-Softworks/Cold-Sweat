@@ -28,11 +28,13 @@ import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -69,11 +71,11 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
-    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
+    public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
+    public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
+    public static final DynamicHolder<Map<ConfiguredStructureFeature<?,?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
@@ -114,7 +116,7 @@ public class ConfigSettings
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
-    public static final DynamicHolder<Map<ResourceLocation, InsulatingMount>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
 
     // Client Settings **NULL ON THE SERVER**
     public static final DynamicHolder<Boolean> CELSIUS;
@@ -250,9 +252,9 @@ public class ConfigSettings
                                                      })
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
-        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "StructureTemperatures"),
-        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "StructureTemperatures"),
+        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
+        encoder -> ConfigHelper.serializeStructureTemps(encoder, "StructureTemperatures"),
+        decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures"),
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
@@ -417,6 +419,7 @@ public class ConfigSettings
                     }
                 }
             };
+
             // Parse goat and chameleon biomes
             configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
             configReader.accept(EntitySettingsConfig.getInstance().getGoatSpawnBiomes());
@@ -427,15 +430,21 @@ public class ConfigSettings
         INSULATED_ENTITIES = addSetting("insulated_entities", () ->
         EntitySettingsConfig.getInstance().getInsulatedEntities().stream().map(entry ->
         {
+            List<Map.Entry<EntityType<?>, InsulatingMount>> entries = new ArrayList<>();
             String entityID = (String) entry.get(0);
             double coldInsul = ((Number) entry.get(1)).doubleValue();
             double hotInsul = entry.size() < 3
                               ? coldInsul
                               : ((Number) entry.get(2)).doubleValue();
 
-            return Map.entry(new ResourceLocation(entityID), new InsulatingMount(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityID)),
-                                                                                 coldInsul, hotInsul, EntityRequirement.NONE));
+            for (EntityType<?> entityType : ConfigHelper.getEntityTypes(entityID))
+            {   entries.add(Map.entry(entityType, new InsulatingMount(entityType, coldInsul, hotInsul, EntityRequirement.NONE)));
+            }
+
+            return entries;
         })
+        .flatMap(List::stream)
+        .filter(entry -> entry.getKey() != null)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
@@ -645,12 +654,11 @@ public class ConfigSettings
 
     public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
     {
-        ResourceLocation biomeName = biome.unwrapKey().get().location();
         double biomeTemp = biome.value().getBaseTemperature();
-        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biomeName),
+        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome.value()),
                                                                               ObjectBuilder.build(() ->
                                                                               {
-                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biomeName);
+                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome.value());
                                                                                   if (offset == null) return null;
                                                                                   return new Triplet<>(biomeTemp + offset.getA(),
                                                                                                        biomeTemp + offset.getB(),
