@@ -25,10 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -460,5 +457,9 @@ public abstract class WorldHelper
 
     public static MinecraftServer getServer()
     {   return ServerLifecycleHooks.getCurrentServer();
+    }
+
+    public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
+    {   return getServer().registryAccess().registryOrThrow(registry);
     }
 }

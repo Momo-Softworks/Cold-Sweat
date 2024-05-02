@@ -10,7 +10,6 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
@@ -36,7 +35,7 @@ public class SpawnBiomeData implements IForgeRegistryEntry<SpawnBiomeData>
     }
 
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.xmap(rl -> ForgeRegistries.BIOMES.getValue(rl), bm -> bm.getRegistryName()).listOf().fieldOf("biomes").forGetter(data -> data.biomes),
+            Biome.DIRECT_CODEC.listOf().fieldOf("biomes").forGetter(data -> data.biomes),
             EntityClassification.CODEC.fieldOf("category").forGetter(data -> data.category),
             Codec.INT.fieldOf("weight").forGetter(data -> data.weight),
             Codec.either(ITag.codec(EntityTypeTags::getAllTags), Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(data -> data.entities),

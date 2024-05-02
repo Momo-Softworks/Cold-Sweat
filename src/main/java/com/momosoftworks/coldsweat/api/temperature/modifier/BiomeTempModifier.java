@@ -9,20 +9,18 @@ import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -49,7 +47,7 @@ public class BiomeTempModifier extends TempModifier
             BlockPos entPos = entity.blockPosition();
 
             // In the case that the dimension temperature is overridden by config, use that and skip everything else
-            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(world.dimension().location());
+            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get().get(world.dimensionType());
             if (dimTempOverride != null)
             {   return temp -> temp + dimTempOverride.getFirst();
             }
@@ -100,7 +98,7 @@ public class BiomeTempModifier extends TempModifier
             worldTemp /= Math.max(1, biomeCount);
 
             // Add dimension offset, if present
-            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(world.dimension().location());
+            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(world.dimensionType());
             if (dimTempOffsetConf != null)
             {   worldTemp += dimTempOffsetConf.getFirst();
             }
@@ -120,7 +118,6 @@ public class BiomeTempModifier extends TempModifier
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
-        Registry<Structure<?>> registry = level.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
 
         // Iterate over all structures at the position (ignores Y level)
         for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
@@ -140,8 +137,7 @@ public class BiomeTempModifier extends TempModifier
                     // If the structure has a piece at the position, get the temperature
                     if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
                     {
-                        ResourceLocation structureId = registry.getKey(structure);
-                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structureId);
+                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
 
                         if (strucTemp != null)
                         {   return strucTemp.getFirst();
@@ -157,14 +153,13 @@ public class BiomeTempModifier extends TempModifier
     public Pair<Double, Double> getBiomeTemp(Biome biome)
     {
         double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-        ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
                                                            new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biomeID,
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
                                                              new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getFirst(), configTemp.getSecond()), Pair.of(configOffset.getFirst(), configOffset.getSecond()));
     }

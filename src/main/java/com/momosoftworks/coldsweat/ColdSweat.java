@@ -8,20 +8,23 @@ import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
+import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TemperatureTypeArgument;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.data.*;
+import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -109,6 +112,11 @@ public class ColdSweat
 
             // Register insulation items tab
             InsulationItemsGroup.INSULATION_ITEMS.register();
+
+            // Register custom command arguments
+            ArgumentTypes.register("temperature", TemperatureTypeArgument.class, new TemperatureTypeArgument.Serializer());
+            ArgumentTypes.register("temp_attribute", AbilityOrTempTypeArgument.class, new AbilityOrTempTypeArgument.Serializer());
+            ArgumentTypes.register("temp_modifier", TempModifierTypeArgument.class, new TempModifierTypeArgument.Serializer());
         });
     }
 

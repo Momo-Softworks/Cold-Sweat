@@ -6,33 +6,33 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.config.type.InsulatingMount;
-import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.config.util.DynamicHolder;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.*;
 import net.minecraft.potion.Effect;
-import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -68,11 +68,11 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> GRACE_ENABLED;
 
     // World Settings
-    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
-    public static final DynamicHolder<Map<ResourceLocation, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
-    public static final DynamicHolder<Map<ResourceLocation, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
+    public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
+    public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
+    public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
+    public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
+    public static final DynamicHolder<Map<Structure<?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
@@ -113,7 +113,7 @@ public class ConfigSettings
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
-    public static final DynamicHolder<Map<ResourceLocation, InsulatingMount>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
 
     // Client Settings **NULL ON THE SERVER**
     public static final DynamicHolder<Boolean> CELSIUS;
@@ -250,9 +250,9 @@ public class ConfigSettings
                                                      })
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
-        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "StructureTemperatures"),
-        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "StructureTemperatures"),
+        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
+        encoder -> ConfigHelper.serializeStructureTemps(encoder, "StructureTemperatures"),
+        decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures"),
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {  Temperature.Units units = entry.getValue().getSecond();
@@ -414,6 +414,7 @@ public class ConfigSettings
                     }
                 }
             };
+
             // Parse goat and chameleon biomes
             configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
             configReader.accept(EntitySettingsConfig.getInstance().getLlamaSpawnBiomes());
@@ -424,15 +425,21 @@ public class ConfigSettings
         INSULATED_ENTITIES = addSetting("insulated_entities", () ->
         EntitySettingsConfig.getInstance().getInsulatedEntities().stream().map(entry ->
         {
+            List<Map.Entry<EntityType<?>, InsulatingMount>> entries = new ArrayList<>();
             String entityID = (String) entry.get(0);
             double coldInsul = ((Number) entry.get(1)).doubleValue();
             double hotInsul = entry.size() < 3
                               ? coldInsul
                               : ((Number) entry.get(2)).doubleValue();
 
-            return new AbstractMap.SimpleEntry<>(new ResourceLocation(entityID), new InsulatingMount(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityID)),
-                                                                                 coldInsul, hotInsul, EntityRequirement.NONE));
+            for (EntityType<?> entityType : ConfigHelper.getEntityTypes(entityID))
+            {   entries.add(new AbstractMap.SimpleEntry<>(entityType, new InsulatingMount(entityType, coldInsul, hotInsul, EntityRequirement.NONE)));
+            }
+
+            return entries;
         })
+        .flatMap(List::stream)
+        .filter(entry -> entry.getKey() != null)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),

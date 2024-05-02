@@ -4,10 +4,13 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
@@ -45,26 +48,21 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
+            ResourceLocation.CODEC.xmap(
+            rl ->
             {
-                ResourceLocation tagLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<ITag<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(tagLocation));
-
-                return Either.<ITag<Block>, Block>left(BlockTags.getAllTags().getTag(tagLocation));
+                if (rl.toString().charAt(0) == '#')
+                {   return Either.<ITag<Block>, Block>left(BlockTags.getAllTags().getTag(rl));
+                }
+                return Either.<ITag<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(rl));
             },
-            // Convert from a TagKey to a string
-            tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
-                String result = tag.left().isPresent()
-                                ? "#" + BlockTags.getAllTags().getId(tag.left().get())
-                                : tag.right().map(block -> ForgeRegistries.BLOCKS.getKey(block).toString()).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
-                return result;
+            either ->
+            {
+                return either.left().isPresent()
+                       ? BlockTags.getAllTags().getId(either.left().get())
+                       : ForgeRegistries.BLOCKS.getKey(either.right().get());
             })
-            .listOf()
-            .fieldOf("blocks").forGetter(data -> data.blocks),
+            .listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),

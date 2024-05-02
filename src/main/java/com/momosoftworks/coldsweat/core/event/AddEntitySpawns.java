@@ -3,10 +3,8 @@ package com.momosoftworks.coldsweat.core.event;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
 import net.minecraft.world.biome.MobSpawnInfo;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -24,7 +22,7 @@ public class AddEntitySpawns
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
-                ConfigHelper.resolveEitherList(ForgeRegistries.ENTITIES, spawnBiomeData.entities)
+                ConfigHelper.mapTaggedEntryList(ForgeRegistries.ENTITIES, spawnBiomeData.entities)
                 .forEach(entityType ->
                 {
                     event.getSpawns().getSpawner(EntityClassification.CREATURE).removeIf(spawnerData -> spawnerData.type == entityType);

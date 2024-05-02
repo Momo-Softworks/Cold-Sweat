@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
