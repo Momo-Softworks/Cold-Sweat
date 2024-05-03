@@ -138,7 +138,7 @@ dependencies {
     //runtimeOnly fg.deobf("curse.maven:iceberg-520110:4300529")
     //runtimeOnly fg.deobf("curse.maven:prism-lib-638111:3993293")
 
-    runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180227")
+    //runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180227")
     runtimeOnly fg.deobf("curse.maven:placebo-283644:5180198")
     runtimeOnly fg.deobf("curse.maven:patchouli-306770:4031402")
     //runtimeOnly fg.deobf("curse.maven:apothic-attributes-898963:5182713")

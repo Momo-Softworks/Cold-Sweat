@@ -20,6 +20,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
@@ -253,7 +254,11 @@ public class TempCommand extends BaseCommand
 
         LivingEntity living = (LivingEntity) entity;
         AttributeInstance attribute = EntityTempManager.getAttribute(trait, living);
+        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
         double lastValue = 0;
+
+        source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(ChatFormatting.WHITE), false);
+        source.sendSuccess(Component.translatable("commands.cold_sweat.temperature.debug_hover_note").append(Component.literal("\n")).withStyle(ChatFormatting.GRAY), false);
 
         if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
         {
@@ -266,41 +271,20 @@ public class TempCommand extends BaseCommand
         {
             double lastInput = modifier.getLastInput();
             double lastOutput = modifier.getLastOutput();
-            String unitsString = "";
-
-            if (switch (trait)
-            {
-                case WORLD, FREEZING_POINT, BURNING_POINT -> true;
-                default -> false;
-            })
-            {
-                Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
-                lastInput = Temperature.convert(lastInput, Temperature.Units.MC, preferredUnits, true);
-                lastOutput = Temperature.convert(lastOutput, Temperature.Units.MC, preferredUnits, true);
-                unitsString = " " + preferredUnits.getFormattedName();
-            }
-
-            final String units = unitsString;
-            HoverEvent inputHover = new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Component.literal(CSMath.truncate(lastInput, 1)+units));
-            HoverEvent outputHover = new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Component.literal(CSMath.truncate(lastOutput, 1)+units));
 
             source.sendSuccess(Component.empty()
                                // Modifier input value
                        .append(Component.literal(CSMath.truncate(modifier.getLastInput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)
-                                                              .withHoverEvent(inputHover)))
+                                                              .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits))))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                                // Modifier name
-                       .append(Component.literal(modifier.toString()).withStyle(ChatFormatting.GOLD))
+                       .append(Component.literal(modifier.toString()).withStyle(ChatFormatting.GRAY))
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                                // Modifier output value
                        .append(Component.literal(CSMath.truncate(modifier.getLastOutput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
-                                                              .withHoverEvent(outputHover))), false);
+                                                              .withHoverEvent(getConvertedUnitHover(trait, lastOutput, preferredUnits)))), false);
             lastValue = modifier.getLastOutput();
         }
         if (attribute != null)
@@ -309,27 +293,60 @@ public class TempCommand extends BaseCommand
                                                                                                             ? 1 : mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
                                                                                                             ? 2 : 3)).toList())
             {
-                double lastValueStore = lastValue;
+                double newValue = lastValue;
                 switch (modifier.getOperation())
                 {
                     case ADDITION:
-                        lastValue += modifier.getAmount();
+                        newValue += modifier.getAmount();
                         break;
                     case MULTIPLY_BASE:
-                        lastValue += lastValue * modifier.getAmount();
+                        newValue += newValue * modifier.getAmount();
                         break;
                     case MULTIPLY_TOTAL:
-                        lastValue *= 1.0D + modifier.getAmount();
+                        newValue *= 1.0D + modifier.getAmount();
                         break;
                 }
-                source.sendSuccess(Component.literal(CSMath.truncate(lastValueStore, 2)+"").withStyle(ChatFormatting.WHITE)
+
+                source.sendSuccess(Component.literal(CSMath.truncate(lastValue, 2)+"")
+                                            .withStyle(Style.EMPTY
+                                            .withColor(ChatFormatting.WHITE)
+                                            .withHoverEvent(getConvertedUnitHover(trait, lastValue, preferredUnits)))
                            .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                           .append(Component.literal(modifier.getName()).withStyle(ChatFormatting.GOLD))
+                           .append(Component.literal(modifier.getName())
+                                            .withStyle(Style.EMPTY
+                                            .withColor(ChatFormatting.LIGHT_PURPLE)
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(modifier.getId().toString())
+                                                                                                .append(Component.literal("\n"))
+                                                                                                .append(Component.translatable("chat.copy.click").withStyle(ChatFormatting.GRAY))))
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.getId().toString()))))
                            .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                           .append(Component.literal(CSMath.truncate(lastValue, 2)+"").withStyle(ChatFormatting.AQUA)), false);
+                           .append(Component.literal(CSMath.truncate(newValue, 2)+"").withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                                                                                                .withHoverEvent(getConvertedUnitHover(trait, newValue, preferredUnits)))), false);
             }
         }
         return Command.SINGLE_SUCCESS;
+    }
+
+    static double getFormattedTraitValue(Temperature.Trait trait, double rawValue, Temperature.Units units)
+    {
+        double converted = rawValue;
+
+        if (switch (trait)
+        {
+            case WORLD, FREEZING_POINT, BURNING_POINT -> true;
+            default -> false;
+        })
+        {
+            converted = Temperature.convert(converted, Temperature.Units.MC, units, true);
+        }
+        return converted;
+    }
+
+    static HoverEvent getConvertedUnitHover(Temperature.Trait trait, double value, Temperature.Units units)
+    {
+        return new HoverEvent(
+                HoverEvent.Action.SHOW_TEXT,
+                Component.literal(CSMath.truncate(getFormattedTraitValue(trait, value, units), 1) + " " + units.getFormattedName()));
     }
 
     private int executeModifyEntityTemp(CommandSourceStack source, Collection<? extends Entity> entities, Temperature.Trait attribute,
