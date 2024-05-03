@@ -28,6 +28,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -253,7 +254,11 @@ public class TempCommand extends BaseCommand
 
         LivingEntity living = (LivingEntity) entity;
         ModifiableAttributeInstance attribute = EntityTempManager.getAttribute(trait, living);
+        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
         double lastValue = 0;
+
+        source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(TextFormatting.WHITE), false);
+        source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.debug_hover_note").append(new StringTextComponent("\n")).withStyle(TextFormatting.GRAY), false);
 
         if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
         {
@@ -266,39 +271,20 @@ public class TempCommand extends BaseCommand
         {
             double lastInput = modifier.getLastInput();
             double lastOutput = modifier.getLastOutput();
-            String unitsString = "";
-
-            if (trait == Temperature.Trait.WORLD
-            || trait == Temperature.Trait.BURNING_POINT
-            || trait == Temperature.Trait.FREEZING_POINT)
-            {
-                Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
-                lastInput = Temperature.convert(lastInput, Temperature.Units.MC, preferredUnits, true);
-                lastOutput = Temperature.convert(lastOutput, Temperature.Units.MC, preferredUnits, true);
-                unitsString = " " + preferredUnits.getFormattedName();
-            }
-
-            final String units = unitsString;
-            HoverEvent inputHover = new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    new StringTextComponent(CSMath.truncate(lastInput, 1)+units));
-            HoverEvent outputHover = new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    new StringTextComponent(CSMath.truncate(lastOutput, 1)+units));
 
             source.sendSuccess(new StringTextComponent("")
                                // Modifier input value
                        .append(new StringTextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(TextFormatting.WHITE)
-                                                              .withHoverEvent(inputHover)))
+                                                              .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits))))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
                                // Modifier name
-                       .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GOLD))
+                       .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GRAY))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
                                // Modifier output value
                        .append(new StringTextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(TextFormatting.AQUA)
-                                                              .withHoverEvent(outputHover))), false);
+                                                              .withHoverEvent(getConvertedUnitHover(trait, lastOutput, preferredUnits)))), false);
             lastValue = modifier.getLastOutput();
         }
         if (attribute != null)
@@ -307,27 +293,58 @@ public class TempCommand extends BaseCommand
                                                                                                             ? 1 : mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
                                                                                                             ? 2 : 3)).collect(Collectors.toList()))
             {
-                double lastValueStore = lastValue;
+                double newValue = lastValue;
                 switch (modifier.getOperation())
                 {
                     case ADDITION:
-                        lastValue += modifier.getAmount();
+                        newValue += modifier.getAmount();
                         break;
                     case MULTIPLY_BASE:
-                        lastValue += lastValue * modifier.getAmount();
+                        newValue += newValue * modifier.getAmount();
                         break;
                     case MULTIPLY_TOTAL:
-                        lastValue *= 1.0D + modifier.getAmount();
+                        newValue *= 1.0D + modifier.getAmount();
                         break;
                 }
-                source.sendSuccess(new StringTextComponent(CSMath.truncate(lastValueStore, 2)+"").withStyle(TextFormatting.WHITE)
-                                           .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
-                                           .append(new StringTextComponent(modifier.getName()).withStyle(TextFormatting.GOLD))
-                                           .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
-                                           .append(new StringTextComponent(CSMath.truncate(lastValue, 2)+"").withStyle(TextFormatting.AQUA)), false);
+
+                source.sendSuccess(new StringTextComponent(CSMath.truncate(lastValue, 2)+"")
+                                            .withStyle(Style.EMPTY
+                                            .withColor(TextFormatting.WHITE)
+                                            .withHoverEvent(getConvertedUnitHover(trait, lastValue, preferredUnits)))
+                           .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
+                           .append(new StringTextComponent(modifier.getName())
+                                            .withStyle(Style.EMPTY
+                                            .withColor(TextFormatting.LIGHT_PURPLE)
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(modifier.getId().toString())
+                                                                                                .append(new StringTextComponent("\n"))
+                                                                                                .append(new TranslationTextComponent("chat.copy.click").withStyle(TextFormatting.GRAY))))
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.getId().toString()))))
+                           .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
+                           .append(new StringTextComponent(CSMath.truncate(newValue, 2)+"").withStyle(Style.EMPTY.withColor(TextFormatting.AQUA)
+                                                                                                                .withHoverEvent(getConvertedUnitHover(trait, newValue, preferredUnits)))), false);
             }
         }
         return Command.SINGLE_SUCCESS;
+    }
+
+    static double getFormattedTraitValue(Temperature.Trait trait, double rawValue, Temperature.Units units)
+    {
+        double converted = rawValue;
+
+        if (trait == Temperature.Trait.WORLD
+        || trait == Temperature.Trait.BURNING_POINT
+        || trait == Temperature.Trait.FREEZING_POINT)
+        {
+            converted = Temperature.convert(converted, Temperature.Units.MC, units, true);
+        }
+        return converted;
+    }
+
+    static HoverEvent getConvertedUnitHover(Temperature.Trait trait, double value, Temperature.Units units)
+    {
+        return new HoverEvent(
+                HoverEvent.Action.SHOW_TEXT,
+                new StringTextComponent(CSMath.truncate(getFormattedTraitValue(trait, value, units), 1) + " " + units.getFormattedName()));
     }
 
     private int executeModifyEntityTemp(CommandSource source, Collection<? extends Entity> entities, Temperature.Trait attribute,
