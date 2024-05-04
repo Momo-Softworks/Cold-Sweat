@@ -72,7 +72,9 @@ public class ArmorInsulation
                         List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
                                                       .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                                                       .stream()
-                                                      .filter(pair -> ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()).test(serverPlayer, pair.getFirst()))
+                                                      .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),
+                                                                                          insulator -> insulator.test(serverPlayer, pair.getFirst()),
+                                                                                          false))
                                                       .map(pair -> pair.getSecond())
                                                       .flatMap(List::stream).collect(Collectors.toList());
 
