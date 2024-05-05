@@ -2017,9 +2017,9 @@ Technical Changes:
 - Added structure temperature offset config option
 
 Fixes:
-- Fixed TempModifiers stacking in cases where they shouldn't
-- Fixed crash when saving configs or closing the config menu
+* Fixed TempModifiers stacking in cases where they shouldn't
+* Fixed crash when saving configs or closing the config menu
 - (1.19, 1.20) Fixed special minecarts splitting into multiple items when destroyed
 
 Technical Changes:
-- Added JSON config for entity spawn biomes
+* Added JSON config for entity spawn biomes
