@@ -13,12 +13,10 @@
     "MixinItemTooltip",
     "MixinPickEntity",
     "MixinXPBar",
-    "MixinXPBar$MixinItemLabel",
-    "compat.MixinCreateOverlay"
+    "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
     "ItemSwapMixin",
-    "MixinBeaconEffects",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",
