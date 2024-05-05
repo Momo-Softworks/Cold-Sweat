@@ -1985,6 +1985,7 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.3-b03b
+- Improved the output formatting for the /temp debug command
 
 Fixes:
 - Fixed the thermometer not displaying temperature units when in an item frame
@@ -1997,14 +1998,28 @@ Fixes:
       - Some config settings defined in MC units (like min/max temp) might be slightly off now until they are reset
 - Fixed crash with certain mods that edit tooltips when advanced tooltips is enabled
 - Fixed inconsistencies between item/entity predicates (Vanilla) and item/entity requirements (Cold Sweat)
-- Removed the auto-tag-remover, as it was causing unforeseen issues with some items
+- Removed the empty tag remover, as it was causing unforeseen issues with some items
 
 Technical Changes:
-- Temperature.Type and Ability have been merged into one Enum: Trait
+- Temperature.Type and Ability have been merged together into Trait
       - These two things were functionally identical anyway, so separating them only made them more annoying to work with
       - This also means that previous Temperature.Ability types can now have TempModifiers applied to them
 - The TempModifier registration system has been slightly changed:
-      - The ID for TempModifiers is no longer retrieved from a method in the TempModifier class
+      - The ID for TempModifiers is no longer provided by a method in the TempModifier class
       - IDs are now assigned at registration via ResourceLocations like most other things
 - The Temperature.addModifier() method will now add/replace for every TempModifier instance that matches the given predicate if allowDupes is true
 - Added range field to BlockTemp JSONs
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03c
+- Removed the Insulated effect from the list of top-tier beacon effects
+- Added structure temperature offset config option
+
+Fixes:
+- Fixed TempModifiers stacking in cases where they shouldn't
+- Fixed crash when saving configs or closing the config menu
+- (1.19, 1.20) Fixed special minecarts splitting into multiple items when destroyed
+
+Technical Changes:
+- Added JSON config for entity spawn biomes
