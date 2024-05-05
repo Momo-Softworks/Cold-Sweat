@@ -6,13 +6,13 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.config.type.InsulatingMount;
-import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -211,11 +211,17 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeTemps"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
-                                                            {   Temperature.Units units = entry.getValue().getC();
+                                                            {
+                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                if (biome == null) return null;
+
+                                                                Temperature.Units units = entry.getValue().getC();
                                                                 double min = Temperature.convert(entry.getValue().getA(), Temperature.Units.MC, units, true);
                                                                 double max = Temperature.convert(entry.getValue().getB(), Temperature.Units.MC, units, true);
-                                                                return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
+
+                                                                return Arrays.asList(biome.toString(), min, max, units.toString());
                                                             })
+                                                            .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
         BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
@@ -223,11 +229,17 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeOffsets"),
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
-                                                            {   Temperature.Units units = entry.getValue().getC();
+                                                            {
+                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                if (biome == null) return null;
+
+                                                                Temperature.Units units = entry.getValue().getC();
                                                                 double min = Temperature.convert(entry.getValue().getA(), Temperature.Units.MC, units, false);
                                                                 double max = Temperature.convert(entry.getValue().getB(), Temperature.Units.MC, units, false);
-                                                                return Arrays.asList(entry.getKey().toString(), min, max, units.toString());
+
+                                                                return Arrays.asList(biome.toString(), min, max, units.toString());
                                                             })
+                                                            .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
         DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true),
@@ -235,9 +247,14 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionTemps"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
-                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                     {
+                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         if (dim == null) return null;
+
+                                                         Temperature.Units units = entry.getValue().getSecond();
                                                          double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
-                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+
+                                                         return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
 
@@ -246,9 +263,14 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionOffsets"),
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
-                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                     {
+                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         if (dim == null) return null;
+
+                                                         Temperature.Units units = entry.getValue().getSecond();
                                                          double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
-                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+
+                                                         return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
 
@@ -257,9 +279,14 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures"),
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
-                                                     {  Temperature.Units units = entry.getValue().getSecond();
+                                                     {
+                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).getKey(entry.getKey());
+                                                         if (struct == null) return null;
+
+                                                         Temperature.Units units = entry.getValue().getSecond();
                                                          double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
-                                                         return Arrays.asList(entry.getKey().toString(), temp, units.toString());
+
+                                                         return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })
                                                      .collect(Collectors.toList())));
 
