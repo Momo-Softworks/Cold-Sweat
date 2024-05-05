@@ -259,7 +259,7 @@ public class TooltipHandler
     {
         if (!TOOLTIPS.containsKey(tooltip))
         {
-            if ( TOOLTIP_REGISTRY_SIZE >= 32)
+            if (TOOLTIP_REGISTRY_SIZE >= 63)
             {   throw new RuntimeException("Too many tooltips registered!");
             }
             String code = Integer.toBinaryString(TOOLTIP_REGISTRY_SIZE);
