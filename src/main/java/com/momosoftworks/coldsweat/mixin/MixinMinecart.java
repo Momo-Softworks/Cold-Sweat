@@ -33,24 +33,13 @@ public class MixinMinecart
             {
                 if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
                 {
-                    if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
+                    ItemStack itemstack = new ItemStack(Items.MINECART);
+                    if (minecart.hasCustomName())
                     {
-                        ItemStack itemstack = new ItemStack(ModItems.INSULATED_MINECART);
-                        if (minecart.hasCustomName())
-                        {   itemstack.setHoverName(minecart.getCustomName());
-                        }
-                        minecart.spawnAtLocation(itemstack);
+                        itemstack.setHoverName(minecart.getCustomName());
                     }
-                    else
-                    {
-                        ItemStack itemstack = new ItemStack(Items.MINECART);
-                        if (minecart.hasCustomName())
-                        {
-                            itemstack.setHoverName(minecart.getCustomName());
-                        }
-                        minecart.spawnAtLocation(itemstack);
-                        minecart.spawnAtLocation(carryStack);
-                    }
+                    minecart.spawnAtLocation(itemstack);
+                    minecart.spawnAtLocation(carryStack);
                 }
                 minecart.remove();
                 ci.cancel();
