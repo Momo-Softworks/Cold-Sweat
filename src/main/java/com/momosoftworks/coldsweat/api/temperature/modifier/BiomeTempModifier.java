@@ -32,6 +32,7 @@ import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
 {
+    int text = 0;
     public BiomeTempModifier()
     {
         this(16);
@@ -46,6 +47,7 @@ public class BiomeTempModifier extends TempModifier
     {
         try
         {
+            text = 1;
             double worldTemp = 0;
             Level level = entity.level;
             BlockPos entPos = entity.blockPosition();
@@ -57,9 +59,9 @@ public class BiomeTempModifier extends TempModifier
             }
 
             // If there's a temperature structure here, ignore biome temp
-            Double structureTemp = getStructureTemp(entity.level, entity.blockPosition());
-            if (structureTemp != null)
-            {   return temp -> structureTemp;
+            Pair<Double, Double> structureTemp = getStructureTemp(entity.level, entity.blockPosition());
+            if (structureTemp.getFirst() != null)
+            {   return temp -> structureTemp.getFirst();
             }
 
             int biomeCount = 0;
@@ -109,6 +111,9 @@ public class BiomeTempModifier extends TempModifier
             {   worldTemp += dimTempOffsetConf.getFirst();
             }
 
+            // Add structure offset, if present
+            worldTemp += structureTemp.getSecond();
+
             double finalWorldTemp = worldTemp;
             return temp -> temp + finalWorldTemp;
         }
@@ -117,43 +122,15 @@ public class BiomeTempModifier extends TempModifier
         }
     }
 
-    @Nullable
-    public Double getStructureTemp(Level level, BlockPos pos)
+    public Pair<Double, Double> getStructureTemp(Level level, BlockPos pos)
     {
-        if (!(level instanceof ServerLevel serverLevel)) return null;
+        Structure structure = WorldHelper.getStructureAt(level, pos);
+        if (structure == null) return Pair.of(null, 0d);
 
-        StructureManager structureManager = serverLevel.structureManager();
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
+        Pair<Double, Temperature.Units> strucOffset = ConfigSettings.STRUCTURE_OFFSETS.get().get(structure);
 
-        // Iterate over all structures at the position (ignores Y level)
-        for (Map.Entry<Structure, LongSet> entry : structureManager.getAllStructuresAt(pos).entrySet())
-        {
-            Structure structure = entry.getKey();
-            LongSet strucCoordinates = entry.getValue();
-
-            // Iterate over all chunk coordinates within the structures
-            for (long coordinate : strucCoordinates)
-            {
-                SectionPos sectionpos = SectionPos.of(new ChunkPos(coordinate), level.getMinSection());
-                // Get the structure start
-                StructureStart structurestart = structureManager.getStartForStructure(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
-
-                if (structurestart != null && structurestart.isValid())
-                {
-                    // If the structure has a piece at the position, get the temperature
-                    if (structureManager.structureHasPieceAt(pos, structurestart))
-                    {
-                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
-
-                        if (strucTemp != null)
-                        {   return strucTemp.getFirst();
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
+        return Pair.of(strucTemp.getFirst(), strucOffset.getFirst());
     }
 
     public Pair<Double, Double> getBiomeTemp(Holder<Biome> holder)

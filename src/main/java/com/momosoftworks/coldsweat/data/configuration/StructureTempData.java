@@ -14,12 +14,13 @@ import java.util.List;
 import java.util.Optional;
 
 public record StructureTempData(List<Either<TagKey<Structure>, Structure>> structures, double temperature,
-                                Temperature.Units units, Optional<List<String>> requiredMods)
+                                Temperature.Units units, boolean offset, Optional<List<String>> requiredMods)
 {
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.createVanillaTagCodec(Registry.STRUCTURE_REGISTRY).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
+            Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::offset),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(StructureTempData::requiredMods)
     ).apply(instance, StructureTempData::new));
 }
