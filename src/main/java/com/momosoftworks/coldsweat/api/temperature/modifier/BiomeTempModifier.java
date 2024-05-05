@@ -32,7 +32,6 @@ import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
 {
-    int text = 0;
     public BiomeTempModifier()
     {
         this(16);
@@ -47,7 +46,6 @@ public class BiomeTempModifier extends TempModifier
     {
         try
         {
-            text = 1;
             double worldTemp = 0;
             Level level = entity.level;
             BlockPos entPos = entity.blockPosition();
