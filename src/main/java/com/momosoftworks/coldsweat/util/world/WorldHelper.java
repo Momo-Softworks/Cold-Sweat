@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -11,11 +13,9 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
-import net.minecraft.core.SectionPos;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -52,6 +52,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -254,7 +255,7 @@ public abstract class WorldHelper
                 // Get the structure start
                 StructureStart structurestart = structureManager.getStartForFeature(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
 
-                if (structurestart != null && structurestart.isValid())
+                if (structurestart != null && structurestart.isValid() && structureManager.structureHasPieceAt(pos, structurestart))
                 {   return structure;
                 }
             }
@@ -501,5 +502,21 @@ public abstract class WorldHelper
 
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
     {   return getServer().registryAccess().registryOrThrow(registry);
+    }
+
+    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
+    {
+        double biomeTemp = biome.value().getBaseTemperature();
+        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome.value()),
+                                                                              ObjectBuilder.build(() ->
+                                                                              {
+                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome.value());
+                                                                                  if (offset == null) return null;
+                                                                                  return new Triplet<>(biomeTemp + offset.getA(),
+                                                                                                       biomeTemp + offset.getB(),
+                                                                                                       Temperature.Units.MC);
+                                                                              }),
+                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
+        return Pair.of(tempConfig.getA(), tempConfig.getB());
     }
 }

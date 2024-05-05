@@ -20,9 +20,7 @@ import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -694,21 +692,5 @@ public class ConfigSettings
 
     public static void load()
     {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
-    }
-
-    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
-    {
-        double biomeTemp = biome.value().getBaseTemperature();
-        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome.value()),
-                                                                              ObjectBuilder.build(() ->
-                                                                              {
-                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome.value());
-                                                                                  if (offset == null) return null;
-                                                                                  return new Triplet<>(biomeTemp + offset.getA(),
-                                                                                                       biomeTemp + offset.getB(),
-                                                                                                       Temperature.Units.MC);
-                                                                              }),
-                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
-        return Pair.of(tempConfig.getA(), tempConfig.getB());
     }
 }

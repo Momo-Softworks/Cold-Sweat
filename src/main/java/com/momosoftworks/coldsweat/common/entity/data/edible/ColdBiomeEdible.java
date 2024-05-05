@@ -1,12 +1,11 @@
 package com.momosoftworks.coldsweat.common.entity.data.edible;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biome;
 
 public class ColdBiomeEdible extends BiomeSearchingEdible
 {
@@ -14,7 +13,7 @@ public class ColdBiomeEdible extends BiomeSearchingEdible
     {
         super(holder ->
         {
-            Pair<Double, Double> minMaxTemp = ConfigSettings.getBiomeTemperature(holder);
+            Pair<Double, Double> minMaxTemp = WorldHelper.getBiomeTemperature(holder);
             double biomeTemp = CSMath.averagePair(minMaxTemp);
 
             return biomeTemp <= 0.2;
