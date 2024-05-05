@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -34,24 +32,13 @@ public class MixinMinecart
             {
                 if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
                 {
-                    if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
+                    ItemStack itemstack = new ItemStack(Items.MINECART);
+                    if (minecart.hasCustomName())
                     {
-                        ItemStack itemstack = new ItemStack(ModItems.INSULATED_MINECART);
-                        if (minecart.hasCustomName())
-                        {   itemstack.setHoverName(minecart.getCustomName());
-                        }
-                        minecart.spawnAtLocation(itemstack);
+                        itemstack.setHoverName(minecart.getCustomName());
                     }
-                    else
-                    {
-                        ItemStack itemstack = new ItemStack(Items.MINECART);
-                        if (minecart.hasCustomName())
-                        {
-                            itemstack.setHoverName(minecart.getCustomName());
-                        }
-                        minecart.spawnAtLocation(itemstack);
-                        minecart.spawnAtLocation(carryStack);
-                    }
+                    minecart.spawnAtLocation(itemstack);
+                    minecart.spawnAtLocation(carryStack);
                 }
                 minecart.remove(Entity.RemovalReason.KILLED);
                 ci.cancel();
