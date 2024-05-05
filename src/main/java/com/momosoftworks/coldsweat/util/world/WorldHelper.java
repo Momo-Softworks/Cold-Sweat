@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -11,9 +13,11 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -29,16 +33,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -78,24 +86,24 @@ public abstract class WorldHelper
 
     public static ResourceLocation getBiomeID(Biome biome)
     {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
+        if (biomeID == null) biomeID = getRegistry(Registries.BIOME).getKey(biome);
 
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
     {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.BIOME).get(biomeID);
+        if (biome == null) biome = getRegistry(Registries.BIOME).get(biomeID);
 
         return biome;
     }
 
     public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getKey(dimType);
+    {   return getRegistry(Registries.DIMENSION_TYPE).getKey(dimType);
     }
 
     public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return ServerLifecycleHooks.getCurrentServer().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(dimID);
+    {   return getRegistry(Registries.DIMENSION_TYPE).get(dimID);
     }
 
 
@@ -229,6 +237,37 @@ public abstract class WorldHelper
         return sections[CSMath.clamp(chunk.getSectionIndex(y), 0, sections.length - 1)];
     }
 
+    @Nullable
+    public static Structure getStructureAt(Level level, BlockPos pos)
+    {
+        if (!(level instanceof ServerLevel serverLevel)) return null;
+
+        StructureManager structureManager = serverLevel.structureManager();
+
+        // Iterate over all structures at the position (ignores Y level)
+        for (Map.Entry<Structure, LongSet> entry : structureManager.getAllStructuresAt(pos).entrySet())
+        {
+            Structure structure = entry.getKey();
+            LongSet strucCoordinates = entry.getValue();
+
+            // Iterate over all chunk coordinates within the structures
+            for (long coordinate : strucCoordinates)
+            {
+                SectionPos sectionpos = SectionPos.of(new ChunkPos(coordinate), level.getMinSection());
+                // Get the structure start
+                StructureStart structurestart = structureManager.getStartForStructure(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
+
+                if (structurestart != null && structurestart.isValid())
+                {
+                    // If the structure has a piece at the position, get the temperature
+                    if (structureManager.structureHasPieceAt(pos, structurestart))
+                    {   return structure;
+                    }
+                }
+            }
+        }
+        return null;
+    }
     /**
      * Plays a sound for all tracking clients that follows the source entity around.<br>
      * Why this isn't in Vanilla Minecraft is beyond me
