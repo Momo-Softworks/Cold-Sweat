@@ -236,7 +236,7 @@ public class Temperature
         boolean isForward = placement.order == Placement.Order.FIRST;
 
         if (!allowDupes && !isReplacing
-        && modifiers.stream().anyMatch(mod -> mod.equals(modifier)))
+        && modifiers.stream().anyMatch(mod -> mod.getClass().equals(modifier.getClass())))
         {   return false;
         }
 
