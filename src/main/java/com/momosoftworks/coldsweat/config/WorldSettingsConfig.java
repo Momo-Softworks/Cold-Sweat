@@ -24,6 +24,7 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureOffsets;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureTemps;
 
     public static final ForgeConfigSpec.ConfigValue<Double> caveInsulation;
@@ -484,9 +485,21 @@ public class WorldSettingsConfig
 
         structureTemps = BUILDER
                 .comment("Overrides the world temperature when the player is within this structure",
-                         "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]")
+                         "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
+                         "(* = optional)")
                 .defineList("Structure Temperatures", List.of(
                         List.of("minecraft:igloo", 65, "F")
+                ), it -> it instanceof List<?> list
+                        && list.get(0) instanceof String
+                        && list.get(1) instanceof Number
+                        && (list.size() < 3 || list.get(2) instanceof String));
+
+        structureOffsets = BUILDER
+                .comment("Offsets the world temperature when the player is within this structure",
+                         "Format: [[\"structure_1\", offset1, *units], [\"structure_2\", offset2, *units]... etc]",
+                         "(* = optional)")
+                .defineList("Structure Temperature Offsets", List.of(
+                        // empty
                 ), it -> it instanceof List<?> list
                         && list.get(0) instanceof String
                         && list.get(1) instanceof Number
@@ -608,6 +621,9 @@ public class WorldSettingsConfig
     {   return dimensionTemps.get();
     }
 
+    public List<? extends List<?>> getStructureTempOffsets()
+    {   return structureOffsets.get();
+    }
     public List<? extends List<?>> getStructureTemperatures()
     {   return structureTemps.get();
     }
@@ -674,6 +690,9 @@ public class WorldSettingsConfig
 
     public void setStructureTemperatures(List<? extends List<?>> temps)
     {   structureTemps.set(temps);
+    }
+    public void setStructureTempOffsets(List<? extends List<?>> offsets)
+    {   structureOffsets.set(offsets);
     }
 
     public void setBlockTemps(List<? extends List<Object>> temps)
