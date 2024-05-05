@@ -73,6 +73,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
     public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
     public static final DynamicHolder<Map<Structure<?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
+    public static final DynamicHolder<Map<Structure<?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
@@ -281,6 +282,22 @@ public class ConfigSettings
 
                                                          Temperature.Units units = entry.getValue().getSecond();
                                                          double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
+
+                                                         return Arrays.asList(struct.toString(), temp, units.toString());
+                                                     })
+                                                     .collect(Collectors.toList())));
+
+        STRUCTURE_OFFSETS = addSyncedSetting("structure_offsets", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false),
+        encoder -> ConfigHelper.serializeStructureTemps(encoder, "StructureOffsets"),
+        decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureOffsets"),
+        saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
+                                                     .map(entry ->
+                                                     {
+                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         if (struct == null) return null;
+
+                                                         Temperature.Units units = entry.getValue().getSecond();
+                                                         double temp = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
 
                                                          return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })

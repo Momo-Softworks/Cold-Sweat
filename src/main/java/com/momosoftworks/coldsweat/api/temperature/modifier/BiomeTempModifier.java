@@ -53,9 +53,9 @@ public class BiomeTempModifier extends TempModifier
             }
 
             // If there's a temperature structure here, ignore biome temp
-            Double structureTemp = getStructureTemp(entity.level, entity.blockPosition());
-            if (structureTemp != null)
-            {   return temp -> structureTemp;
+            Pair<Double, Double> structureTemp = getStructureTemp(entity.level, entity.blockPosition());
+            if (structureTemp.getFirst() != null)
+            {   return temp -> structureTemp.getFirst();
             }
 
             int biomeCount = 0;
@@ -103,6 +103,9 @@ public class BiomeTempModifier extends TempModifier
             {   worldTemp += dimTempOffsetConf.getFirst();
             }
 
+            // Add structure offset, if present
+            worldTemp += structureTemp.getSecond();
+
             double finalWorldTemp = worldTemp;
             return temp -> temp + finalWorldTemp;
         }
@@ -111,43 +114,15 @@ public class BiomeTempModifier extends TempModifier
         }
     }
 
-    @Nullable
-    public Double getStructureTemp(World level, BlockPos pos)
+    public Pair<Double, Double> getStructureTemp(World level, BlockPos pos)
     {
-        if (!(level instanceof ServerWorld)) return null;
+        Structure<?> structure = WorldHelper.getStructureAt(level, pos);
+        if (structure == null) return Pair.of(null, 0d);
 
-        ServerWorld serverLevel = ((ServerWorld) level);
-        StructureManager structureManager = serverLevel.structureFeatureManager();
+        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
+        Pair<Double, Temperature.Units> strucOffset = ConfigSettings.STRUCTURE_OFFSETS.get().get(structure);
 
-        // Iterate over all structures at the position (ignores Y level)
-        for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
-        {
-            Structure<?> structure = entry.getKey();
-            LongSet strucCoordinates = entry.getValue();
-
-            // Iterate over all chunk coordinates within the structures
-            for (long coordinate : strucCoordinates)
-            {
-                SectionPos sectionpos = SectionPos.of(new ChunkPos(coordinate), SectionPos.blockToSectionCoord(0));
-                // Get the structure start
-                StructureStart<?> structurestart = structureManager.getStartForFeature(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
-
-                if (structurestart != null && structurestart.isValid() && structurestart.getBoundingBox().isInside(pos))
-                {
-                    // If the structure has a piece at the position, get the temperature
-                    if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
-                    {
-                        Pair<Double, Temperature.Units> strucTemp = ConfigSettings.STRUCTURE_TEMPS.get().get(structure);
-
-                        if (strucTemp != null)
-                        {   return strucTemp.getFirst();
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
+        return Pair.of(strucTemp.getFirst(), strucOffset.getFirst());
     }
 
     public Pair<Double, Double> getBiomeTemp(Biome biome)
