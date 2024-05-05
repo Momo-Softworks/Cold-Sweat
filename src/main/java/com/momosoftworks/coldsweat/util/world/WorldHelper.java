@@ -485,16 +485,18 @@ public abstract class WorldHelper
     public static Pair<Double, Double> getBiomeTemperature(Biome biome)
     {
         double biomeTemp = biome.getBaseTemperature();
-        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome),
-                                                                              ObjectBuilder.build(() ->
-                                                                                                  {
-                                                                                                      Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome);
-                                                                                                      if (offset == null) return null;
-                                                                                                      return new Triplet<>(biomeTemp + offset.getFirst(),
-                                                                                                                           biomeTemp + offset.getSecond(),
-                                                                                                                           Temperature.Units.MC);
-                                                                                                  }),
-                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> tempConfig =
+            CSMath.orElse(
+            ConfigSettings.BIOME_TEMPS.get().get(biome),
+            ObjectBuilder.build(() ->
+            {
+                Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome);
+                if (offset == null) return null;
+                return new Triplet<>(biomeTemp + offset.getFirst(),
+                                     biomeTemp + offset.getSecond(),
+                                     Temperature.Units.MC);
+            }),
+            new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
         return Pair.of(tempConfig.getFirst(), tempConfig.getSecond());
     }
 
