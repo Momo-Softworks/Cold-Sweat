@@ -18,7 +18,6 @@
     "compat.MixinCreateOverlay"
   ],
   "mixins": [
-    "MixinBeaconEffects",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",
