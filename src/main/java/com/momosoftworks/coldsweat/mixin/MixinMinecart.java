@@ -1,9 +1,11 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -25,22 +27,35 @@ public class MixinMinecart
             ), cancellable = true)
     public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
     {
-        ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
-        if (!carryStack.isEmpty())
+        if (minecart instanceof Minecart)
         {
-            if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
+            ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
+            if (!carryStack.isEmpty())
             {
-                ItemStack itemstack = new ItemStack(Items.MINECART);
-                if (minecart.hasCustomName())
+                if (minecart.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
                 {
-                    itemstack.setHoverName(minecart.getCustomName());
+                    if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
+                    {
+                        ItemStack itemstack = new ItemStack(ModItems.INSULATED_MINECART);
+                        if (minecart.hasCustomName())
+                        {   itemstack.setHoverName(minecart.getCustomName());
+                        }
+                        minecart.spawnAtLocation(itemstack);
+                    }
+                    else
+                    {
+                        ItemStack itemstack = new ItemStack(Items.MINECART);
+                        if (minecart.hasCustomName())
+                        {
+                            itemstack.setHoverName(minecart.getCustomName());
+                        }
+                        minecart.spawnAtLocation(itemstack);
+                        minecart.spawnAtLocation(carryStack);
+                    }
                 }
-
-                minecart.spawnAtLocation(itemstack);
-                minecart.spawnAtLocation(carryStack);
+                minecart.remove(Entity.RemovalReason.KILLED);
+                ci.cancel();
             }
-            minecart.remove(Entity.RemovalReason.KILLED);
-            ci.cancel();
         }
     }
 }
