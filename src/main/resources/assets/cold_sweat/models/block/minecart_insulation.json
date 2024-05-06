@@ -2,9 +2,9 @@
   "parent": "",
   "textures":
   {
-    "all": "cold_sweat:blocks/minecart_insulation",
-    "particle": "cold_sweat:blocks/minecart_insulation",
-    "minecart_insulation": "cold_sweat:blocks/minecart_insulation"
+    "all": "cold_sweat:block/minecart_insulation",
+    "particle": "cold_sweat:block/minecart_insulation",
+    "minecart_insulation": "cold_sweat:block/minecart_insulation"
   },
   "display": {
     "gui": {
