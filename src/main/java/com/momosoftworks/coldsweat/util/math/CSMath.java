@@ -11,6 +11,7 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -570,6 +571,19 @@ public class CSMath
         return Math.abs(pos1.getX() - pos2.getX()) <= maxDistance
             && Math.abs(pos1.getY() - pos2.getY()) <= maxDistance
             && Math.abs(pos1.getZ() - pos2.getZ()) <= maxDistance;
+    }
+
+    /**
+     * Finds the first non-null value out of the given ones.
+     * @return The first non-null value, or null if all values are null.
+     */
+    @SafeVarargs
+    @Nullable
+    public static <T> T orElse(T... values)
+    {   for (T value : values)
+    {   if (value != null) return value;
+    }
+        return null;
     }
 
     /**
