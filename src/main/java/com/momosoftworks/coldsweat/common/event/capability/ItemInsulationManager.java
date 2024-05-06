@@ -1,6 +1,7 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;

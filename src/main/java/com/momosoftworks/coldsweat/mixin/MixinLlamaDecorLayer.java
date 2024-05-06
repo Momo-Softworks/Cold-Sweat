@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.mixin;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ModLlamaModel;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
-import com.momosoftworks.coldsweat.common.capability.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.event.capability.ShearableFurManager;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.LlamaDecorLayer;
 import net.minecraft.client.renderer.entity.model.LlamaModel;

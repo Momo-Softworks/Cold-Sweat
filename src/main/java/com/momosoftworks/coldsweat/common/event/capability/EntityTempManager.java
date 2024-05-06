@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.capability;
+package com.momosoftworks.coldsweat.common.event.capability;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Mode;
 import com.momosoftworks.coldsweat.api.util.Temperature.Addition.Order;
+import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;

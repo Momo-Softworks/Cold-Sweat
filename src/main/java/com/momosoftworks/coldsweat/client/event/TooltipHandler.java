@@ -2,14 +2,13 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.InsulationType;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.Tooltip;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.ItemInsulationManager;
+import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.util.ItemData;

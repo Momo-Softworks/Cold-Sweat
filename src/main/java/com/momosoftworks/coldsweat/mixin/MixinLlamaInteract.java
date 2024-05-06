@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.common.capability.ShearableFurManager;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.momosoftworks.coldsweat.common.event.capability.ShearableFurManager;
 import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;

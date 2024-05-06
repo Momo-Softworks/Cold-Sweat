@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.api.event.common.GatherDefaultTempModifiersEv
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.common.capability.EntityTempManager;
+import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
