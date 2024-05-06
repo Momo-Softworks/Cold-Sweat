@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
@@ -19,7 +19,7 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
     {   return this.menu.te;
     }
 
-    public IceboxScreen(IceboxContainer screenContainer, PlayerInventory inv, IFormattableTextComponent titleIn)
+    public IceboxScreen(IceboxContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;

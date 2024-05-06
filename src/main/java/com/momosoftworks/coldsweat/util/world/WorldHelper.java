@@ -61,9 +61,9 @@ public abstract class WorldHelper
     {   // If Minecraft's height calculation is good enough, use that
         int seaLevel = level.getSeaLevel();
         // If chunk isn't loaded, return sea level
-        if (!world.isLoaded(pos)) return seaLevel;
+        if (!level.isLoaded(pos)) return seaLevel;
 
-        IChunk chunk = getChunk(world, pos);
+        IChunk chunk = getChunk(level, pos);
         if (chunk == null) return seaLevel;
 
         return chunk.getHeight(Heightmap.Type.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
@@ -146,7 +146,7 @@ public abstract class WorldHelper
         for (int i = 0; i < iterations; i++)
         {
             BlockState state = chunk.getBlockState(pos2);
-            VoxelShape shape = state.getShape(world, pos, ISelectionContext.empty());
+            VoxelShape shape = state.getShape(level, pos, ISelectionContext.empty());
             if (Block.isShapeFullBlock(shape)) return false;
 
             if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
@@ -244,10 +244,10 @@ public abstract class WorldHelper
     }
 
     public static boolean isRainingAt(World level, BlockPos pos)
-    {   var biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos).value());
+    {   DynamicHolder<Biome> biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos));
 
-        return level.isRaining() && biome.get().getPrecipitation() == Biome.Precipitation.RAIN
-            && biome.get().warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
+        return level.isRaining() && biome.get().getPrecipitation() == Biome.RainType.RAIN
+            && biome.get().getTemperature(pos) >= 0.15F && canSeeSky(level, pos.above(), 256)
             || CompatManager.isWeather2RainingAt(level, pos);
     }
 
@@ -258,7 +258,7 @@ public abstract class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vector3d from, Vector3d to, World world, IChunk chunk, Map<BlockPos, BlockState> stateCache, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vector3d from, Vector3d to, World level, IChunk chunk, Map<BlockPos, BlockState> stateCache, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))

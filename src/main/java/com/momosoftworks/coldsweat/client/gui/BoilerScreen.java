@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
@@ -19,7 +19,7 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
     {   return this.menu.te;
     }
 
-    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, IFormattableTextComponent titleIn)
+    public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;

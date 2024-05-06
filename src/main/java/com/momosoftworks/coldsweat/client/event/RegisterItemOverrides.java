@@ -67,7 +67,8 @@ public class RegisterItemOverrides
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ConfigSettings.CELSIUS.get();
-                            TextFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
+                            TextFormatting tempColor;
+                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp, 0, 0))
                             {
                                 case 0 : tempColor = TextFormatting.WHITE; break;
                                 case 2 : case 3 : tempColor = TextFormatting.GOLD; break;

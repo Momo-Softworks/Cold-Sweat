@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulatorTooltip;
@@ -107,26 +108,9 @@ public class TooltipHandler
 
         Pair<Double, Double> itemInsul = null;
         Pair<Double, Double> emptyInsul = Pair.of(0d, 0d);
-        // Add the armor insulation tooltip if the armor has insulation
+
         if (stack.getItem() instanceof SoulspringLampItem)
-        {   if (!Screen.hasShiftDown())
-            {   event.getTooltipElements().add(tooltipIndex, Either.left(new TextComponent("? ").withStyle(ChatFormatting.BLUE).append(new TextComponent("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
-            }
-            event.getTooltipElements().add(tooltipIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
-        }
-        else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
-        {
-            ConfigSettings.FOOD_TEMPERATURES.get().computeIfPresent(event.getItemStack().getItem(), (item, temp) ->
-            {
-                int index = Minecraft.getInstance().options.advancedItemTooltips ? event.getTooltipElements().size() - 1 : event.getTooltipElements().size();
-                event.getTooltipElements().add(index, Either.left(
-                        temp > 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + temp).withStyle(HOT)
-                                 : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", temp).withStyle(COLD)
-                        ));
-                event.getTooltipElements().add(index, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                event.getTooltipElements().add(index, Either.left(new TextComponent("")));
-                return temp;
-            });
+        {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())) != null && !itemInsul.equals(emptyInsul))

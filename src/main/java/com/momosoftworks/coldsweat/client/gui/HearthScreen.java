@@ -34,7 +34,7 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     {   return this.menu.te;
     }
 
-    public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, IFormattableTextComponent titleIn)
+    public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.leftPos = 0;

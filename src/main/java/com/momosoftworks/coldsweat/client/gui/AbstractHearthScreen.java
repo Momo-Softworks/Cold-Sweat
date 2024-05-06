@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -35,7 +36,7 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
 
     abstract HearthBlockEntity getBlockEntity();
 
-    public AbstractHearthScreen(T screenContainer, PlayerInventory inv, IFormattableTextComponent title)
+    public AbstractHearthScreen(T screenContainer, PlayerInventory inv, ITextComponent title)
     {   super(screenContainer, inv, title);
         this.leftPos = 0;
         this.topPos = 0;

@@ -148,7 +148,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     public void onBlockUpdate(BlockStateChangedEvent event)
     {
         BlockPos pos = event.getPosition();
-        Level level = event.getWorld();
+        World level = event.getWorld();
         if (level == this.level
         && CSMath.withinCubeDistance(pos, this.getBlockPos(), this.getMaxRange())
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
@@ -834,8 +834,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   super.save(tag);
         ItemStackHelper.saveAllItems(tag, this.items);
         saveEffects(tag);
-        tag.put("ColdFuel", this.coldFuel.writeToNBT(new CompoundTag()));
-        tag.put("HotFuel", this.hotFuel.writeToNBT(new CompoundTag()));
+        tag.put("ColdFuel", this.coldFuel.writeToNBT(new CompoundNBT()));
+        tag.put("HotFuel", this.hotFuel.writeToNBT(new CompoundNBT()));
         tag.putInt("InsulationLevel", this.insulationLevel);
 
         return tag;

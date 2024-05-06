@@ -20,7 +20,7 @@ public class SystemMessageHandler
     @SubscribeEvent
     public static void onPlayerEnterCreative(TickEvent.PlayerTickEvent event)
     {
-        if (event.player instanceof ClientPlayerEntity player && Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative()
+        if (event.player instanceof ClientPlayerEntity && Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative()
         && ConfigSettings.SHOW_CREATIVE_WARNING.get() && !Minecraft.getInstance().isLocalServer())
         {
             event.player.displayClientMessage(getSystemPrefix()

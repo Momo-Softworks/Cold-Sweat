@@ -181,7 +181,7 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player)
+    public boolean canAttackBlock(BlockState state, World level, BlockPos blockPos, PlayerEntity player)
     {   return !player.isCreative();
     }
 
@@ -202,7 +202,7 @@ public class SoulspringLampItem extends Item
     public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
         if (advanced.isAdvanced())
-        {   tooltip.add(new TextComponent("Fuel: " + (int) stack.getOrCreateTag().getDouble("Fuel") + " / " + 64));
+        {   tooltip.add(new StringTextComponent("Fuel: " + (int) stack.getOrCreateTag().getDouble("Fuel") + " / " + 64));
         }
         super.appendHoverText(stack, level, tooltip, advanced);
     }

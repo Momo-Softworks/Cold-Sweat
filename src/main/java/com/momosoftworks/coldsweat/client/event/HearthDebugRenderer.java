@@ -189,10 +189,10 @@ public class HearthDebugRenderer
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
             {
-                if (!world.dimension().location().equals(entry.getSecond())) continue;
+                if (!level.dimension().location().equals(entry.getSecond())) continue;
 
                 BlockPos pos = entry.getFirst();
-                TileEntity blockEntity = world.getBlockEntity(pos);
+                TileEntity blockEntity = level.getBlockEntity(pos);
                 if (blockEntity instanceof HearthBlockEntity)
                 {
                     HearthBlockEntity hearth = (HearthBlockEntity) blockEntity;

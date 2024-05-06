@@ -44,7 +44,9 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Either<Temperatur
     {
         String name = reader.readUnquotedString();
         try
-        {   return CSMath.orElse(Temperature.Type.fromID(name), Temperature.Ability.fromID(name));
+        {   return Temperature.Type.fromID(name) != null
+                   ? Either.left(Temperature.Type.fromID(name))
+                   : Either.right(Temperature.Ability.fromID(name));
         }
         catch (IllegalArgumentException e)
         {   throw INVALID_ENUM.createWithContext(reader, name, Arrays.toString(this.getExamples().toArray()));
