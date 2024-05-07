@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FuelData implements NbtSerializable
+public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
 {
     public final List<Either<ITag<Item>, Item>> items;
     public final Double fuel;
@@ -114,5 +114,24 @@ public class FuelData implements NbtSerializable
             return mods1;
         });
         return new FuelData(items, fuel, nbtRequirement, requiredMods);
+    }
+
+    @Override
+    public FuelData setRegistryName(ResourceLocation name)
+    {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName()
+    {
+        return null;
+    }
+
+    @Override
+    public Class<FuelData> getRegistryType()
+    {
+        return null;
     }
 }

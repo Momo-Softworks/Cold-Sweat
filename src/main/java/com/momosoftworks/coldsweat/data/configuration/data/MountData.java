@@ -4,25 +4,38 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.entity.EntityType;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ITag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public record MountData(List<Either<TagKey<EntityType<?>>, ResourceLocation>> entities, double coldInsulation, double heatInsulation,
-                        EntityRequirement requirement, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<MountData>
+public class MountData implements IForgeRegistryEntry<MountData>
 {
+    public List<Either<ITag<EntityType<?>>, ResourceLocation>> entities;
+    public double coldInsulation;
+    public double heatInsulation;
+    public EntityRequirement requirement;
+    public Optional<List<String>> requiredMods;
+
+    public MountData(List<Either<ITag<EntityType<?>>, ResourceLocation>> entities, double coldInsulation, double heatInsulation,
+                     EntityRequirement requirement, Optional<List<String>> requiredMods)
+    {   this.entities = entities;
+        this.coldInsulation = coldInsulation;
+        this.heatInsulation = heatInsulation;
+        this.requirement = requirement;
+        this.requiredMods = requiredMods;
+    }
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registry.ENTITY_TYPE_REGISTRY), ResourceLocation.CODEC).listOf().fieldOf("entities").forGetter(MountData::entities),
-            Codec.DOUBLE.fieldOf("cold_insulation").forGetter(MountData::coldInsulation),
-            Codec.DOUBLE.fieldOf("heat_insulation").forGetter(MountData::heatInsulation),
-            EntityRequirement.getCodec().fieldOf("requirement").forGetter(MountData::requirement),
-            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(MountData::requiredMods)
+            Codec.either(ITag.codec(EntityTypeTags::getAllTags), ResourceLocation.CODEC).listOf().fieldOf("entities").forGetter(data -> data.entities),
+            Codec.DOUBLE.fieldOf("cold_insulation").forGetter(data -> data.coldInsulation),
+            Codec.DOUBLE.fieldOf("heat_insulation").forGetter(data -> data.heatInsulation),
+            EntityRequirement.getCodec().fieldOf("requirement").forGetter(data -> data.requirement),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, MountData::new));
 
     @Override
@@ -41,6 +54,6 @@ public record MountData(List<Either<TagKey<EntityType<?>>, ResourceLocation>> en
     @Override
     public Class<MountData> getRegistryType()
     {
-        return MountData.class;
+        return null;
     }
 }

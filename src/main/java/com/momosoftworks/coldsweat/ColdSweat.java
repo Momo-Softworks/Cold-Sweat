@@ -80,14 +80,14 @@ public class ColdSweat
 
         // Setup JSON data-driven handlers
         bus.addListener((RegistryEvent.NewRegistry event) -> {
-            ModRegistries.INSULATOR_DATA = new RegistryBuilder<InsulatorData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "insulator")).setType(InsulatorData.class).create();
-            event.create(new RegistryBuilder<FuelData>().setType(FuelData.class).setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
-            event.create(new RegistryBuilder<ItemData>().setType(ItemData.class).setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(ItemData.CODEC));
-            ModRegistries.BLOCK_TEMP_DATA = new RegistryBuilder<BlockTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "block_temp")).setType(BlockTempData.class).create();
-            ModRegistries.BIOME_TEMP_DATA = new RegistryBuilder<BiomeTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "biome_temp")).setType(BiomeTempData.class).create();
-            ModRegistries.DIMENSION_TEMP_DATA = new RegistryBuilder<DimensionTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "dimension_temp")).setType(DimensionTempData.class).create();
-            event.create(new RegistryBuilder<StructureTempData>().setType(StructureTempData.class).setName(ModRegistries.STRUCTURE_TEMP_DATA.location()).dataPackRegistry(StructureTempData.CODEC));
-            event.create(new RegistryBuilder<MountData>().setType(MountData.class).setName(ModRegistries.MOUNT_DATA.location()).dataPackRegistry(MountData.CODEC));
+            ModRegistries.INSULATOR_DATA = new RegistryBuilder<InsulatorData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator")).setType(InsulatorData.class).create();
+            ModRegistries.FUEL_DATA = new RegistryBuilder<FuelData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel")).setType(FuelData.class).create();
+            ModRegistries.FOOD_DATA = new RegistryBuilder<ItemData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "item/food")).setType(ItemData.class).create();
+            ModRegistries.BLOCK_TEMP_DATA = new RegistryBuilder<BlockTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp")).setType(BlockTempData.class).create();
+            ModRegistries.BIOME_TEMP_DATA = new RegistryBuilder<BiomeTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "world/biome_temp")).setType(BiomeTempData.class).create();
+            ModRegistries.DIMENSION_TEMP_DATA = new RegistryBuilder<DimensionTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "world/dimension_temp")).setType(DimensionTempData.class).create();
+            ModRegistries.STRUCTURE_TEMP_DATA = new RegistryBuilder<StructureTempData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "world/structure_temp")).setType(StructureTempData.class).create();
+            ModRegistries.MOUNT_DATA = new RegistryBuilder<MountData>().setName(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount")).setType(MountData.class).create();
         });
     }
 
