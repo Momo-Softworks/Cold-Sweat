@@ -463,7 +463,7 @@ public class LoadConfigSettings
                             .ifPresent(insulator -> output.add(Holder.direct(insulator)));
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
+                {   ColdSweat.LOGGER.error(String.format("Failed to parse JSON config setting in %s: %s", registry.location(), file.getName()), e);
                 }
             }
         }

@@ -46,14 +46,14 @@ public class TempModifierInit
         catch (Exception e)
         {
             ColdSweat.LOGGER.error("Registering TempModifiers failed!");
-            e.printStackTrace();
+            throw e;
         }
 
         try { MinecraftForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
         catch (Exception e)
         {
             ColdSweat.LOGGER.error("Registering BlockTemps failed!");
-            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -139,8 +139,7 @@ public class TempModifierInit
                 });
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps in config file \"main.toml\"");
-                e.printStackTrace();
+            {   ColdSweat.LOGGER.error("Invalid configuration for BlockTemps", e);
                 break;
             }
         }
@@ -151,7 +150,7 @@ public class TempModifierInit
         event.register(new IceboxBlockTemp());
         event.register(new BoilerBlockTemp());
         event.register(new NetherPortalBlockTemp());
-        ColdSweat.LOGGER.debug("Registered BlockTemps in " + (System.currentTimeMillis() - startMS) + "ms");
+        ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 
     // Register TempModifiers
@@ -196,6 +195,6 @@ public class TempModifierInit
         {   event.registerByClassName(new ResourceLocation("curios", "curios"), curios);
         }
 
-        ColdSweat.LOGGER.debug("Registered TempModifiers in " + (System.currentTimeMillis() - startMS) + "ms");
+        ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);
     }
 }

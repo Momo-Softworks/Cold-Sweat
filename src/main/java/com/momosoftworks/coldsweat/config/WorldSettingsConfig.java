@@ -96,7 +96,7 @@ public class WorldSettingsConfig
                     if (it instanceof List<?> list)
                     {
                         if (list.size() == 2)
-                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting \"Biome Temperature Offsets\". Please update to the new standard!");
+                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting {} in \"Biome Temperature Offsets\". Please update to the new standard!", list.get(0));
                         }
                         return list.get(0) instanceof String && list.get(1) instanceof Number && (list.size() < 3 || list.get(2) instanceof Number) && (list.size() < 4 || list.get(3) instanceof String);
                     }
@@ -431,7 +431,7 @@ public class WorldSettingsConfig
                     if (it instanceof List<?> list)
                     {
                         if (list.size() == 2)
-                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting \"Biome Temperatures\". Please update to the new standard!");
+                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting {} in \"Biome Temperatures\". Please update to the new standard!", list.get(0));
                         }
                         return list.get(0) instanceof String && list.get(1) instanceof Number && (list.size() < 3 || list.get(2) instanceof Number) && (list.size() < 4 || list.get(3) instanceof String);
                     }
