@@ -542,7 +542,7 @@ public class EntityTempManager
             case HEAT_DAMPENING  -> entity.getAttribute(ModAttributes.HEAT_DAMPENING);
             case COLD_DAMPENING  -> entity.getAttribute(ModAttributes.COLD_DAMPENING);
 
-            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.getAttribute(): \"" + trait + "\" is not a valid trait!"));
+            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         };
     }
 
@@ -575,7 +575,7 @@ public class EntityTempManager
             case COLD_RESISTANCE -> new AttributeModifier("Cold Resistance Modifier", value, operation);
             case HEAT_DAMPENING  -> new AttributeModifier("Heat Dampening Modifier", value, operation);
             case COLD_DAMPENING  -> new AttributeModifier("Cold Dampening Modifier", value, operation);
-            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("EntityTempManager.makeAttributeModifier(): \"" + trait + "\" is not a valid type!"));
+            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         };
     }
 

@@ -159,7 +159,9 @@ public class NBTHelper
         {   return TagParser.parseTag(tag);
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error parsing compound tag \"" + tag + "\": " + e.getMessage());
+        {
+            ColdSweat.LOGGER.error("Error parsing compound tag \"{}\": {}", tag, e.getMessage());
+            e.printStackTrace();
             return new CompoundTag();
         }
     }

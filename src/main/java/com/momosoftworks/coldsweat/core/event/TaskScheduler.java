@@ -34,7 +34,7 @@ public class TaskScheduler
                     }
                     catch (Exception e)
                     {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
-                        e.printStackTrace();
+                        throw e;
                     }
                     return true;
                 }
