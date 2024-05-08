@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
@@ -486,8 +487,12 @@ public class ConfigSettings
             return entries;
         })
         .flatMap(List::stream)
+        .distinct()
         .filter(entry -> entry.getKey() != null)
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
+            ColdSweat.LOGGER.warn(Warnings.dupConfigKeys(EntityType.class, "Insulated Entities", a.entityType().toString()));
+            return a;
+        })));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
         encoder -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),

@@ -36,13 +36,12 @@ public class BlockTempRegistry
                     for (BlockTemp temp : blockTemps)
                     {
                         if (temp instanceof BlockTempConfig cfg2)
+                        {   if (cfg2.comparePredicates(cfg))
                         {
-                            //If this BlockTemp has different predicates, it is allowed to be added
-                            if (cfg2.comparePredicates(cfg))
-                            {   ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"" + block.getName().getString() + "\" as it already has one with the same predicates: \n"
-                                                               + cfg2.getPredicates());
-                                return;
-                            }
+                            ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"{}\" as it already has one with the same predicates: \n{}",
+                                                   block.getName().getString(), cfg2.getPredicates());
+                            return;
+                        }
                         }
                     }
                 }

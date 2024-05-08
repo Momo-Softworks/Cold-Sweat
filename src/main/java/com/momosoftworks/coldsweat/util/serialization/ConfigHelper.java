@@ -60,9 +60,13 @@ public class ConfigHelper
             }
             else
             {
-                Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
-                if (block != Blocks.AIR)
-                    blocks.add(block);
+                ResourceLocation blockId = new ResourceLocation(id);
+                if (ForgeRegistries.BLOCKS.containsKey(blockId))
+                {   blocks.add(ForgeRegistries.BLOCKS.getValue(blockId));
+                }
+                else
+                {   ColdSweat.LOGGER.error("Error parsing block config: block \"{}\" does not exist", id);
+                }
             }
         }
         return blocks;
@@ -111,11 +115,14 @@ public class ConfigHelper
                 });
             }
             else
-            {   Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-                if (item != null && item != Items.AIR)
-                {   items.add(item);
+            {
+                ResourceLocation itemID = new ResourceLocation(itemId);
+                if (ForgeRegistries.ITEMS.containsKey(itemID))
+                {   items.add(ForgeRegistries.ITEMS.getValue(itemID));
                 }
-                else ColdSweat.LOGGER.error("Error parsing item config: item \"{}\" does not exist", itemId);
+                else
+                {   ColdSweat.LOGGER.error("Error parsing item config: item \"{}\" does not exist", itemId);
+                }
             }
         }
         return items;
@@ -130,7 +137,10 @@ public class ConfigHelper
             {
                 ResourceLocation biomeId = new ResourceLocation((String) entry.get(0));
                 Biome biome = WorldHelper.getBiome(biomeId);
-                if (biome == null) continue;
+                if (biome == null)
+                {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet", biomeId);
+                    continue;
+                }
 
                 double min;
                 double max;
@@ -151,11 +161,11 @@ public class ConfigHelper
                 }
 
                 // Maps the biome ID to the temperature (and variance if present)
-                map.put(ForgeRegistries.BIOMES.getValue(biomeId), new Triplet<>(min, max, units));
+                map.put(biome, new Triplet<>(min, max, units));
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet.", entry.toString());
+                ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet.", entry.get(0));
             }
         }
         return map;
@@ -171,11 +181,17 @@ public class ConfigHelper
                 ResourceLocation dimensionId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                map.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                DimensionType dimension = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
+                if (dimension != null)
+                {   map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                }
+                else
+                {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist", dimensionId);
+                }
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", entry.toString());
+                ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", entry.get(0));
             }
         }
         return map;
@@ -249,9 +265,9 @@ public class ConfigHelper
             }
             else
             {
-                Biome newBiome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biome));
-                if (newBiome != null)
-                {   biomeList.add(newBiome);
+                ResourceLocation biomeId = new ResourceLocation(biome);
+                if (ForgeRegistries.BIOMES.containsKey(biomeId))
+                {   biomeList.add(ForgeRegistries.BIOMES.getValue(biomeId));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
@@ -277,9 +293,9 @@ public class ConfigHelper
             }
             else
             {
-                EntityType<?> newEntity = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entity));
-                if (newEntity != null)
-                {   entityList.add(newEntity);
+                ResourceLocation entityId = new ResourceLocation(entity);
+                if (ForgeRegistries.ENTITIES.containsKey(entityId))
+                {   entityList.add(ForgeRegistries.ENTITIES.getValue(entityId));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing entity config: entity \"{}\" does not exist", entity);

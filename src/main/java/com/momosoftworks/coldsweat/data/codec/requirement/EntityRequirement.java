@@ -138,7 +138,9 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
             return tag;
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error serializing entity requirement: " + e.getMessage());
+        {
+            ColdSweat.LOGGER.error("Error serializing entity requirement: {}", e.getMessage());
+            e.printStackTrace();
             return new CompoundTag();
         }
     }
@@ -161,7 +163,9 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
             return new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error deserializing entity requirement: " + e.getMessage());
+        {
+            ColdSweat.LOGGER.error("Error deserializing entity requirement: {}", e.getMessage());
+            e.printStackTrace();
             return NONE;
         }
     }
