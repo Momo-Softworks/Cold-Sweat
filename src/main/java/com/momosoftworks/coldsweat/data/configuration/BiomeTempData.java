@@ -14,12 +14,12 @@ import java.util.Optional;
 
 public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
 {
-    List<Biome> biomes;
-    double min;
-    double max;
-    Temperature.Units units;
-    boolean isOffset;
-    Optional<List<String>> requiredMods;
+    public final List<Biome> biomes;
+    public final double min;
+    public final double max;
+    public final Temperature.Units units;
+    public final boolean isOffset;
+    public final Optional<List<String>> requiredMods;
 
     public BiomeTempData(List<Biome> biomes, double min, double max, Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {

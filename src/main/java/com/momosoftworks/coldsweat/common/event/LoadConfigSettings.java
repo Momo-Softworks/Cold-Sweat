@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
@@ -25,69 +24,67 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import corgitaco.betterweather.mixin.access.RegistryAccess;
+import com.momosoftworks.coldsweat.util.serialization.Triplet;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.JSONUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
-import oshi.util.tuples.Triplet;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.xml.ws.Holder;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class LoadConfigSettings
 {
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event)
+    public static void onServerStarted(FMLServerStartingEvent event)
     {
         ConfigSettings.load();
-
-        RegistryAccess registries = event.getServer().registryAccess();
 
         /*
          Add blocks from tags to configs
          */
-        ConfigSettings.HEARTH_SPREAD_WHITELIST.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
-                                                            .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
-                                                            .stream().map(Holder::value).toList());
-        ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
-                                                            .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
-                                                            .stream().map(Holder::value).toList());
-        ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().addAll(registries.registryOrThrow(Registry.BLOCK_REGISTRY)
-                                                              .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
-                                                              .stream().map(Holder::value).toList());
-        ConfigSettings.LAMP_DIMENSIONS.get().addAll(registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
-                                                    .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
-                                                    .stream().map(holder -> holder.value()).toList());
-        ConfigSettings.INSULATION_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.ITEM_REGISTRY)
-                                                        .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
-                                                        .stream().map(Holder::value).toList());
-        ConfigSettings.HEARTH_POTION_BLACKLIST.get().addAll(registries.registryOrThrow(Registry.MOB_EFFECT_REGISTRY)
-                                                           .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
-                                                           .stream().map(Holder::value).toList());
+        ConfigSettings.HEARTH_SPREAD_WHITELIST.get().addAll(ModBlockTags.HEARTH_SPREAD_WHITELIST.getValues());
+        ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().addAll(ModBlockTags.HEARTH_SPREAD_BLACKLIST.getValues());
+        ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().addAll(ModBlockTags.IGNORE_SLEEP_CHECK.getValues());
+        ConfigSettings.INSULATION_BLACKLIST.get().addAll(ModItemTags.NOT_INSULATABLE.getValues());
+        ConfigSettings.HEARTH_POTION_BLACKLIST.get().addAll(ModEffectTags.HEARTH_BLACKLISTED.getValues());
 
         /*
          Fetch JSON registries
         */
-        Set<Holder<InsulatorData>> insulators = registries.registryOrThrow(ModRegistries.INSULATOR_DATA).holders().collect(Collectors.toSet());
-        Set<Holder< FuelData>> fuels = registries.registryOrThrow(ModRegistries.FUEL_DATA).holders().collect(Collectors.toSet());
-        Set<Holder<ItemData>> foods = registries.registryOrThrow(ModRegistries.FOOD_DATA).holders().collect(Collectors.toSet());
+        Set<InsulatorData> insulators = new HashSet<>(ModRegistries.INSULATOR_DATA.getValues());
+        Set<FuelData> fuels = new HashSet<>(ModRegistries.FUEL_DATA.getValues());
+        Set<ItemData> foods = new HashSet<>(ModRegistries.FOOD_DATA.getValues());
 
-        Set<Holder<BlockTempData>> blockTemps = registries.registryOrThrow(ModRegistries.BLOCK_TEMP_DATA).holders().collect(Collectors.toSet());
-        Set<Holder<BiomeTempData>> biomeTemps = registries.registryOrThrow(ModRegistries.BIOME_TEMP_DATA).holders().collect(Collectors.toSet());
-        Set<Holder<DimensionTempData>> dimensionTemps = registries.registryOrThrow(ModRegistries.DIMENSION_TEMP_DATA).holders().collect(Collectors.toSet());
-        Set<Holder<StructureTempData>> structureTemps = registries.registryOrThrow(ModRegistries.STRUCTURE_TEMP_DATA).holders().collect(Collectors.toSet());
+        Set<BlockTempData> blockTemps = new HashSet<>(ModRegistries.BLOCK_TEMP_DATA.getValues());
+        Set<BiomeTempData> biomeTemps = new HashSet<>(ModRegistries.BIOME_TEMP_DATA.getValues());
+        Set<DimensionTempData> dimensionTemps = new HashSet<>(ModRegistries.DIMENSION_TEMP_DATA.getValues());
+        Set<StructureTempData> structureTemps = new HashSet<>(ModRegistries.STRUCTURE_TEMP_DATA.getValues());
 
-        Set<Holder<MountData>> mounts = registries.registryOrThrow(ModRegistries.MOUNT_DATA).holders().collect(Collectors.toSet());
-        Set<Holder<SpawnBiomeData>> spawnBiomes = registries.registryOrThrow(ModRegistries.ENTITY_SPAWN_BIOME_DATA).holders().collect(Collectors.toSet());
+        Set<MountData> mounts = new HashSet<>(ModRegistries.MOUNT_DATA.getValues());
+        Set<SpawnBiomeData> spawnBiomes = new HashSet<>(ModRegistries.ENTITY_SPAWN_BIOME_DATA.getValues());
 
         /*
          Parse user-defined JSON data from the configs folder
@@ -129,42 +126,35 @@ public class LoadConfigSettings
         addSpawnBiomeConfigs(spawnBiomes);
     }
 
-    private static void addInsulatorConfigs(Set<Holder<InsulatorData>> insulators)
+    private static void addInsulatorConfigs(Set<InsulatorData> insulators)
     {
-        insulators.forEach(holder ->
+        insulators.forEach(insulatorData ->
         {
-            InsulatorData insulatorData = holder.value();
             // Check if the required mods are loaded
-            if (insulatorData.requiredMods().isPresent())
+            if (insulatorData.requiredMods.isPresent())
             {
-                List<String> requiredMods = insulatorData.requiredMods().get();
+                List<String> requiredMods = insulatorData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            Insulation insulation = insulatorData.insulation();
-            ItemRequirement data = insulatorData.data();
-            EntityRequirement predicate = insulatorData.predicate();
-            AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
+            Insulation insulation = insulatorData.insulation;
+            ItemRequirement data = insulatorData.data;
+            EntityRequirement predicate = insulatorData.predicate;
+            AttributeModifierMap attributeModifiers = insulatorData.attributes.orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
-            for (Either<TagKey<Item>, Item> either : insulatorData.data().items())
+            for (Item item : ConfigHelper.mapTaggedEntryList(insulatorData.data.items))
             {
-                Insulator insulator = new Insulator(insulation, insulatorData.slot(), data, predicate, attributeModifiers);
-                for (Item item : either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY)
-                                                                .getTag(tagKey).orElseThrow()
-                                                                .stream().map(Holder::value).toList(),
-                                            item -> List.of(item)))
+                Insulator insulator = new Insulator(insulation, insulatorData.slot, data, predicate, attributeModifiers);
+                switch (insulatorData.slot)
                 {
-                    switch (insulatorData.slot())
+                    case ITEM : ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
+                    case ARMOR : ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
+                    case CURIO :
                     {
-                        case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
-                        case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
-                        case CURIO ->
-                        {
-                            if (CompatManager.isCuriosLoaded())
-                            {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
-                            }
+                        if (CompatManager.isCuriosLoaded())
+                        {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
                         }
                     }
                 }
@@ -172,110 +162,97 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addFuelConfigs(Set<Holder<FuelData>> fuels)
+    private static void addFuelConfigs(Set<FuelData> fuels)
     {
-        fuels.forEach(holder ->
+        fuels.forEach(fuelData ->
         {
-            FuelData fuelData = holder.value();
             // Check if the required mods are loaded
-            if (fuelData.requiredMods().isPresent())
+            if (fuelData.requiredMods.isPresent())
             {
-                List<String> requiredMods = fuelData.requiredMods().get();
+                List<String> requiredMods = fuelData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
 
-            FuelData.FuelType type = fuelData.type();
-            ItemRequirement data = fuelData.data();
-            double fuel = fuelData.fuel();
+            FuelData.FuelType type = fuelData.type;
+            ItemRequirement data = fuelData.data;
+            double fuel = fuelData.fuel;
             PredicateItem predicateItem = new PredicateItem(fuel, data, EntityRequirement.NONE);
 
-            for (Either<TagKey<Item>, Item> either : fuelData.data().items())
+            for (Item item : ConfigHelper.mapTaggedEntryList(fuelData.data.items))
             {
-                either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
-                           item -> List.of(item).stream())
-                .forEach(item ->
+                switch (type)
                 {
-                    switch (type)
-                    {
-                        case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, predicateItem);
-                        case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, predicateItem);
-                        case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, predicateItem);
-                        case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, predicateItem);
-                    }
-                });
+                    case BOILER : ConfigSettings.BOILER_FUEL.get().put(item, predicateItem); break;
+                    case ICEBOX : ConfigSettings.ICEBOX_FUEL.get().put(item, predicateItem); break;
+                    case HEARTH : ConfigSettings.HEARTH_FUEL.get().put(item, predicateItem); break;
+                    case SOUL_LAMP : ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, predicateItem); break;
+                }
             }
         });
     }
 
-    private static void addFoodConfigs(Set<Holder<ItemData>> foods)
+    private static void addFoodConfigs(Set<ItemData> foods)
     {
-        foods.forEach(holder ->
+        foods.forEach(foodData ->
         {
-            ItemData foodData = holder.value();
             // Check if the required mods are loaded
-            if (foodData.requiredMods().isPresent())
+            if (foodData.requiredMods.isPresent())
             {
-                List<String> requiredMods = foodData.requiredMods().get();
+                List<String> requiredMods = foodData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            ItemRequirement data = foodData.data();
-            EntityRequirement predicate = foodData.entityRequirement().orElse(null);
-            double food = foodData.value();
+            ItemRequirement data = foodData.data;
+            EntityRequirement predicate = foodData.entityRequirement.orElse(null);
+            double food = foodData.value;
             PredicateItem predicateItem = new PredicateItem(food, data, predicate);
-            for (Either<TagKey<Item>, Item> either : foodData.data().items())
+            for (Item item : ConfigHelper.mapTaggedEntryList(foodData.data.items))
             {
-                either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
-                           item -> List.of(item).stream())
-                .forEach(item ->
-                {
-                    ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
-                });
+                ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }
         });
     }
 
-    private static void addBlockTempConfigs(Set<Holder<BlockTempData>> blockTemps)
+    private static void addBlockTempConfigs(Set<BlockTempData> blockTemps)
     {
-        blockTemps.forEach(holder ->
+        blockTemps.forEach(blockTempData ->
         {
-            BlockTempData blockTempData = holder.value();
             // Check if the required mods are loaded
-            if (blockTempData.requiredMods().isPresent())
+            if (blockTempData.requiredMods.isPresent())
             {
-                List<String> requiredMods = blockTempData.requiredMods().get();
+                List<String> requiredMods = blockTempData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            Block[] blocks = ConfigHelper.mapTaggedEntryList(ForgeRegistries.BLOCKS, blockTempData.blocks()).toArray(Block[]::new);
+            Block[] blocks = ConfigHelper.mapTaggedEntryList(blockTempData.blocks).toArray(new Block[0]);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {
-                final double temperature = blockTempData.temperature();
-                final double maxEffect = blockTempData.maxEffect();
-                final boolean fade = blockTempData.fade();
-                final BlockPredicate condition = blockTempData.condition();
-                final CompoundTag tag = blockTempData.nbt().orElse(null);
-                final double range = blockTempData.range();
+                final double temperature = blockTempData.temperature;
+                final double maxEffect = blockTempData.maxEffect;
+                final boolean fade = blockTempData.fade;
+                final List<BlockState> conditions = blockTempData.conditions;
+                final CompoundNBT tag = blockTempData.tag.orElse(null);
+                final double range = blockTempData.range;
 
                 @Override
-                public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
+                public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
-                    if (level instanceof ServerLevel serverLevel)
+                    if (level instanceof ServerWorld)
                     {
-                        if (!condition.test(serverLevel, pos))
+                        if (conditions.stream().noneMatch(condition -> condition.equals(state)))
                         {   return 0;
                         }
                     }
                     if (tag != null)
                     {
-                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        TileEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity != null)
                         {
-                            CompoundTag blockTag = blockEntity.saveWithFullMetadata();
+                            CompoundNBT blockTag = blockEntity.save(new CompoundNBT());
                             for (String key : tag.getAllKeys())
                             {
                                 if (!NbtRequirement.compareNbt(tag.get(key), blockTag.get(key), true))
@@ -304,128 +281,123 @@ public class LoadConfigSettings
         });
     }
 
-    private static void addBiomeTempConfigs(Set<Holder<BiomeTempData>> biomeTemps)
+    private static void addBiomeTempConfigs(Set<BiomeTempData> biomeTemps)
     {
-        biomeTemps.forEach(holder ->
+        biomeTemps.forEach(biomeTempData ->
         {
-            BiomeTempData biomeTempData = holder.value();
             // Check if the required mods are loaded
-            if (biomeTempData.requiredMods().isPresent())
+            if (biomeTempData.requiredMods.isPresent())
             {
-                List<String> requiredMods = biomeTempData.requiredMods().get();
+                List<String> requiredMods = biomeTempData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            for (Biome biome : ConfigHelper.mapTaggedEntryList(ForgeRegistries.BIOMES, biomeTempData.biomes()))
+            for (Biome biome : biomeTempData.biomes)
             {
-                Temperature.Units units = biomeTempData.units();
-                if (biomeTempData.isOffset())
-                {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                                Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
-                                                                                biomeTempData.units()));
+                Temperature.Units units = biomeTempData.units;
+                if (biomeTempData.isOffset)
+                {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
+                                                                                Temperature.convert(biomeTempData.max, units, Temperature.Units.MC, true),
+                                                                                biomeTempData.units));
                 }
                 else
-                {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
-                                                                              Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
-                                                                              biomeTempData.units()));
+                {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
+                                                                              Temperature.convert(biomeTempData.max, units, Temperature.Units.MC, true),
+                                                                              biomeTempData.units));
                 }
             }
         });
     }
 
-    private static void addDimensionTempConfigs(Set<Holder<DimensionTempData>> dimensionTemps)
+    private static void addDimensionTempConfigs(Set<DimensionTempData> dimensionTemps)
     {
-        dimensionTemps.forEach(holder ->
+        dimensionTemps.forEach(dimensionTempData ->
         {
-            DimensionTempData dimensionTempData = holder.value();
             // Check if the required mods are loaded
-            if (dimensionTempData.requiredMods().isPresent())
+            if (dimensionTempData.requiredMods.isPresent())
             {
-                List<String> requiredMods = dimensionTempData.requiredMods().get();
+                List<String> requiredMods = dimensionTempData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            for (DimensionType dimension : ConfigHelper.mapVanillaRegistryTagList(Registry.DIMENSION_TYPE_REGISTRY, dimensionTempData.dimensions()))
+            for (DimensionType dimension : dimensionTempData.dimensions)
             {
-                Temperature.Units units = dimensionTempData.units();
-                if (dimensionTempData.isOffset())
-                {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
-                                                                                  dimensionTempData.units()));
+                Temperature.Units units = dimensionTempData.units;
+                if (dimensionTempData.isOffset)
+                {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
+                                                                                  dimensionTempData.units));
                 }
                 else
-                {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
-                                                                                dimensionTempData.units()));
+                {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
+                                                                                dimensionTempData.units));
                 }
             }
         });
     }
 
-    private static void addStructureTempConfigs(Set<Holder<StructureTempData>> structureTemps)
+    private static void addStructureTempConfigs(Set<StructureTempData> structureTemps)
     {
-        structureTemps.forEach(holder ->
+        structureTemps.forEach(structureTempData ->
         {
-            StructureTempData structureTempData = holder.value();
             // Check if the required mods are loaded
-            if (structureTempData.requiredMods().isPresent())
+            if (structureTempData.requiredMods.isPresent())
             {
-                List<String> requiredMods = structureTempData.requiredMods().get();
+                List<String> requiredMods = structureTempData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            for (ConfiguredStructureFeature<?,?> structure : ConfigHelper.mapVanillaRegistryTagList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, structureTempData.structures()))
+            for (Structure<?> structure : structureTempData.structures.stream().map(feature -> feature.feature).collect(Collectors.toSet()))
             {
-                double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, true);
-                ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units()));
+                double temperature = Temperature.convert(structureTempData.temperature, structureTempData.units, Temperature.Units.MC, true);
+                ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units));
             }
         });
     }
 
-    private static void addMountConfigs(Set<Holder<MountData>> mounts)
+    private static void addMountConfigs(Set<MountData> mounts)
     {
-        mounts.forEach(holder ->
+        mounts.forEach(mountData ->
         {
-            MountData mountData = holder.value();
             // Check if the required mods are loaded
-            if (mountData.requiredMods().isPresent())
+            if (mountData.requiredMods.isPresent())
             {
-                List<String> requiredMods = mountData.requiredMods().get();
+                List<String> requiredMods = mountData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            for (EntityType<?> entity : ConfigHelper.mapTaggedEntryList(ForgeRegistries.ENTITIES, mountData.entities()))
-            {   ConfigSettings.INSULATED_ENTITIES.get().put(entity, new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
+            for (EntityType<?> entity : ConfigHelper.mapTaggedEntryList(mountData.entities))
+            {   ConfigSettings.INSULATED_ENTITIES.get().put(entity, new InsulatingMount(entity, mountData.coldInsulation, mountData.heatInsulation, mountData.requirement));
             }
         });
     }
 
-    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes)
+    private static void addSpawnBiomeConfigs(Set<SpawnBiomeData> spawnBiomes)
     {
-        spawnBiomes.forEach(holder ->
+        spawnBiomes.forEach(spawnBiomeData ->
         {
-            SpawnBiomeData spawnBiomeData = holder.value();
             // Check if the required mods are loaded
-            if (spawnBiomeData.requiredMods().isPresent())
+            if (spawnBiomeData.requiredMods.isPresent())
             {
-                List<String> requiredMods = spawnBiomeData.requiredMods().get();
+                List<String> requiredMods = spawnBiomeData.requiredMods.get();
                 if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
                 {   return;
                 }
             }
-            for (Biome biome : ConfigHelper.mapTaggedEntryList(ForgeRegistries.BIOMES, spawnBiomeData.biomes()))
+            for (Biome biome : spawnBiomeData.biomes)
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
             }
         });
     }
 
-    private static <T> Set<Holder<T>> parseConfigData(ResourceKey<Registry<T>> registry, Codec<T> codec)
+    private static <T extends IForgeRegistryEntry<T>> Set<T> parseConfigData(IForgeRegistry<T> registry, Codec<T> codec)
     {
-        Set<Holder<T>> output = new HashSet<>();
+        Set<T> output = new HashSet<>();
 
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve("coldsweat/data").resolve(registry.location().getPath());
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve("coldsweat/data").resolve(registry.getRegistryName().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
@@ -437,12 +409,12 @@ public class LoadConfigSettings
             {
                 try (FileReader reader = new FileReader(file))
                 {
-                    codec.parse(JsonOps.INSTANCE, GsonHelper.parse(reader))
+                    codec.parse(JsonOps.INSTANCE, JSONUtils.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
-                            .ifPresent(insulator -> output.add(Holder.direct(insulator)));
+                            .ifPresent(insulator -> output.add(insulator));
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
+                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.getRegistryName(), file.getName(), e);
                 }
             }
         }

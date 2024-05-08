@@ -29,12 +29,12 @@ import java.util.*;
 
 public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<InsulatorData>
 {
-    Insulation.Slot slot;
-    Insulation insulation;
-    ItemRequirement data;
-    EntityRequirement predicate;
-    Optional<AttributeModifierMap> attributes;
-    Optional<List<String>> requiredMods;
+    public final Insulation.Slot slot;
+    public final Insulation insulation;
+    public final ItemRequirement data;
+    public final EntityRequirement predicate;
+    public final Optional<AttributeModifierMap> attributes;
+    public final Optional<List<String>> requiredMods;
 
     public InsulatorData(Insulation.Slot slot,
                          Insulation insulation, ItemRequirement data,
@@ -42,6 +42,7 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
                          Optional<List<String>> requiredMods)
     {
         this.slot = slot;
+        this.insulation = insulation;
         this.data = data;
         this.predicate = predicate;
         this.attributes = attributes;

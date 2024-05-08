@@ -1,11 +1,9 @@
 package com.momosoftworks.coldsweat.data.configuration;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -14,11 +12,11 @@ import java.util.Optional;
 
 public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
 {
-    List<DimensionType> dimensions;
-    double temperature;
-    Temperature.Units units;
-    boolean isOffset;
-    Optional<List<String>> requiredMods;
+    public final List<DimensionType> dimensions;
+    public final double temperature;
+    public final Temperature.Units units;
+    public final boolean isOffset;
+    public final Optional<List<String>> requiredMods;
 
     public DimensionTempData(List<DimensionType> dimensions, double temperature,
                              Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)

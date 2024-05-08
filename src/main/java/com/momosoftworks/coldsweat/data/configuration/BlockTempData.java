@@ -25,14 +25,14 @@ import java.util.Optional;
 
 public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
 {
-    List<Either<ITag<Block>, Block>> blocks;
-    double temperature;
-    double range;
-    double maxEffect;
-    boolean fade;
-    List<BlockState> conditions;
-    Optional<CompoundNBT> tag;
-    Optional<List<String>> requiredMods;
+    public final List<Either<ITag<Block>, Block>> blocks;
+    public final double temperature;
+    public final double range;
+    public final double maxEffect;
+    public final boolean fade;
+    public final List<BlockState> conditions;
+    public final Optional<CompoundNBT> tag;
+    public final Optional<List<String>> requiredMods;
 
     public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range, double maxEffect, boolean fade,
                          List<BlockState> conditions, Optional<CompoundNBT> tag, Optional<List<String>> requiredMods)
