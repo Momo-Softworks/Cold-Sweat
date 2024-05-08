@@ -167,7 +167,9 @@ public class EntityRequirement
             return tag;
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error serializing entity requirement: " + e.getMessage());
+        {
+            ColdSweat.LOGGER.error("Error serializing entity requirement: {}", e.getMessage());
+            e.printStackTrace();
             return new CompoundNBT();
         }
     }
@@ -190,7 +192,9 @@ public class EntityRequirement
             return new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error("Error deserializing entity requirement: " + e.getMessage());
+        {
+            ColdSweat.LOGGER.error("Error deserializing entity requirement: {}", e.getMessage());
+            e.printStackTrace();
             return NONE;
         }
     }
