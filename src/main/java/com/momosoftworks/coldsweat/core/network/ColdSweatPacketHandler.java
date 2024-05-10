@@ -32,5 +32,6 @@ public class ColdSweatPacketHandler
         INSTANCE.registerMessage(11, SyncForgeDataMessage.class, SyncForgeDataMessage::encode, SyncForgeDataMessage::decode, SyncForgeDataMessage::handle);
         INSTANCE.registerMessage(12, UseFilledWaterskinMessage.class, UseFilledWaterskinMessage::encode, UseFilledWaterskinMessage::decode, UseFilledWaterskinMessage::handle);
         INSTANCE.registerMessage(13, SyncPreferredUnitsMessage.class, SyncPreferredUnitsMessage::encode, SyncPreferredUnitsMessage::decode, SyncPreferredUnitsMessage::handle);
+        INSTANCE.registerMessage(14, SyncContainerSlotMessage.class, SyncContainerSlotMessage::encode, SyncContainerSlotMessage::decode, SyncContainerSlotMessage::handle);
     }
 }
