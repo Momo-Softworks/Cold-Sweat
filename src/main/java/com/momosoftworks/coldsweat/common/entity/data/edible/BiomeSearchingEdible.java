@@ -35,7 +35,6 @@ public abstract class BiomeSearchingEdible extends Edible
             {
                 // Search for a cold biome
                 Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findClosestBiome3d(this.biomePredicate, entity.blockPosition(), 2000, 32, 64);
-                System.out.println("Biome pair: " + biomePair);
 
                 if (biomePair != null)
                 {
