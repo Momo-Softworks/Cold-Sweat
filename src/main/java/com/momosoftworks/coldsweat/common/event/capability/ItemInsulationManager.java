@@ -15,14 +15,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -30,12 +31,12 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.event.ContainerListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,43 @@ public class ItemInsulationManager
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {
         event.getPlayer().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+    }
+
+    static IContainerListener INSULATION_LISTENER = new IContainerListener()
+    {
+        @Override
+        public void slotChanged(Container sendingContainer, int slot, ItemStack stack)
+        {
+            ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
+            getInsulationCap(containerStack).ifPresent(cap ->
+            {
+                containerStack.getOrCreateTag().merge(cap.serializeNBT());
+            });
+        }
+
+        @Override
+        public void refreshContainer(Container pContainerToSend, NonNullList<ItemStack> pItemsList)
+        {
+
+        }
+
+        @Override
+        public void setContainerData(Container pContainer, int pVarToUpdate, int pNewValue)
+        {
+
+        }
+    };
+
+    @SubscribeEvent
+    public static void onContainerOpen(PlayerContainerEvent.Open event)
+    {
+        event.getContainer().addSlotListener(INSULATION_LISTENER);
+    }
+
+    @SubscribeEvent
+    public static void onContainerClose(PlayerContainerEvent.Close event)
+    {
+        event.getContainer().removeSlotListener(INSULATION_LISTENER);
     }
 
     public static int getInsulationSlots(ItemStack item)

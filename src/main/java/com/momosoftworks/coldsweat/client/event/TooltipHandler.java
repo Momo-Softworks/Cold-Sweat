@@ -2,13 +2,13 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
-import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.ClientInsulationTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.Tooltip;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -41,6 +41,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -60,6 +61,9 @@ public class TooltipHandler
             {   tooltipStartIndex++;
                 break;
             }
+        }
+        if (tooltipStartIndex == -1)
+        {   tooltipStartIndex = 0;
         }
         return tooltipStartIndex;
     }
@@ -164,7 +168,7 @@ public class TooltipHandler
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
             {   elements.add(tooltipStartIndex, new StringTextComponent(""));
             }
-            elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
+            elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientSoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
@@ -186,7 +190,7 @@ public class TooltipHandler
         && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+            {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientInsulationTooltip.class)).withStyle(TextFormatting.BLACK));
             }
         }
         // Has insulation (armor)
@@ -197,7 +201,7 @@ public class TooltipHandler
             {
                 IInsulatableCap cap = iCap.orElseThrow(NullPointerException::new);
                 if (cap.getInsulation().stream().allMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst().getItem()).test(player, stack)))
-                {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+                {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientInsulationTooltip.class)).withStyle(TextFormatting.BLACK));
                 }
             }
         }
@@ -211,26 +215,26 @@ public class TooltipHandler
         Item item = stack.getItem();
         if (stack.isEmpty()) return;
 
-        Tooltip tooltip = null;
+        AtomicReference<Tooltip> tooltip = new AtomicReference<>();
         PlayerEntity player = Minecraft.getInstance().player;
 
         Insulator itemInsul = null;
 
         if (stack.getItem() instanceof SoulspringLampItem)
-        {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"));
+        {   tooltip.set(new ClientSoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel")));
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.ITEM);
+            {   tooltip.set(new ClientInsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.ITEM, stack));
             }
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   tooltip = new InsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.CURIO);
+            {   tooltip.set(new ClientInsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.CURIO, stack));
             }
         }
 
@@ -238,41 +242,35 @@ public class TooltipHandler
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
         if (stack.getItem() instanceof IArmorVanishable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
-            ItemInsulationManager.getInsulationCap(stack).orElse(new ItemInsulationCap()).deserializeNBT(stack.getOrCreateTag());
-            // Create the list of insulation pairs from NBT
-            List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
-                                          // Get insulation values
-                                          .map(cap -> cap.getInsulation().stream()
-                                          // Filter out insulation that doesn't match the player's predicate
-                                          .filter(pair ->
-                                          {
-                                              ItemStack stack1 = pair.getFirst();
-                                              return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                         insulator -> insulator.test(player, stack1),
-                                                                         false);
-                                          })
-                                          // Flat map the insulation values
-                                          .map(pair -> pair.getSecond()).reduce(new ArrayList<>(), (list, insul) ->
-                                          {
-                                              list.addAll(insul);
-                                              return list;
-                                          }))
-                                          .orElse(new ArrayList<>());
-            // If the armor has intrinsic insulation due to configs, add it to the list
-            if (armorInsulator != null)
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                if (armorInsulator.test(player, stack))
+                cap.deserializeNBT(stack.getOrCreateTag());
+                // Create the list of insulation pairs from NBT
+                List<Insulation> insulation = new ArrayList<>(cap.getInsulation().stream()
+                                              // Filter out insulation that doesn't match the player's predicate
+                                              .filter(pair ->
+                                              {
+                                                  ItemStack stack1 = pair.getFirst();
+                                                  return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                                             insulator -> insulator.test(player, stack),
+                                                                             true);
+                                              })
+                                              .map(Pair::getSecond).flatMap(List::stream).collect(Collectors.toList()));
+                // If the armor has intrinsic insulation due to configs, add it to the list
+                if (armorInsulator != null)
                 {
-                    insulation.addAll(armorInsulator.insulation.split());
+                    if (armorInsulator.test(player, stack))
+                    {   insulation.addAll(armorInsulator.insulation.split());
+                    }
                 }
-            }
 
-            if (!insulation.isEmpty())
-            {   tooltip = new InsulationTooltip(insulation, Insulation.Slot.ARMOR);
-            }
+                if (!insulation.isEmpty())
+                {   tooltip.set(new ClientInsulationTooltip(insulation, Insulation.Slot.ARMOR, stack));
+                }
+            });
         }
         // Find the empty line that this tooltip should fill
-        if (tooltip != null)
+        if (tooltip.get() != null)
         {
             String lineToReplace = TOOLTIPS.get(tooltip.getClass());
 
@@ -288,8 +286,8 @@ public class TooltipHandler
                     y += 10;
                 }
             }
-            tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-            tooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+            tooltip.get().renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+            tooltip.get().renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
         }
     }
 
@@ -329,7 +327,7 @@ public class TooltipHandler
                     RenderSystem.defaultBlendFunc();
 
                     // Render background
-                    Minecraft.getInstance().textureManager.bind(SoulspringTooltip.TOOLTIP_LOCATION.get());
+                    Minecraft.getInstance().textureManager.bind(ClientSoulspringTooltip.TOOLTIP_LOCATION.get());
                     AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 0, 30, 8, 34, 30);
 
                     // Render ghost overlay
@@ -377,7 +375,7 @@ public class TooltipHandler
 
     static
     {
-        registerTooltip(InsulationTooltip.class);
-        registerTooltip(SoulspringTooltip.class);
+        registerTooltip(ClientInsulationTooltip.class);
+        registerTooltip(ClientSoulspringTooltip.class);
     }
 }

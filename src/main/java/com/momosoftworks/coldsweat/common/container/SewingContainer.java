@@ -9,6 +9,8 @@ import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTrigge
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -29,6 +31,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -207,6 +210,18 @@ public class SewingContainer extends Container
         }
         this.sewingInventory.setItem(index, stack);
     }
+    public void syncSlot(int index)
+    {   if (this.playerInventory.player instanceof ServerPlayerEntity)
+        {
+            ServerPlayerEntity serverPlayer = ((ServerPlayerEntity) this.playerInventory.player);
+            TaskScheduler.scheduleServer(() -> {
+                // Send the new item to the client
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                                                     new SyncContainerSlotMessage(index, this.getItem(index), this));
+            }, 0);
+
+        }
+    }
 
     public void growItem(int index, int amount)
     {   ItemStack stack = this.sewingInventory.getItem(index);
@@ -221,8 +236,10 @@ public class SewingContainer extends Container
     private void takeInput()
     {   this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
+
     private void takeOutput(ItemStack stack)
-    {   PlayerEntity player = this.playerInventory.player;
+    {
+        PlayerEntity player = this.playerInventory.player;
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
@@ -324,8 +341,8 @@ public class SewingContainer extends Container
                     return false;
                 });
 
-                processed.getOrCreateTag().merge(insulCap.serializeNBT());
                 this.setItem(2, processed);
+                this.syncSlot(2);
             }
         }
         this.broadcastChanges();

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class InsulationTooltip extends Tooltip
+public class ClientInsulationTooltip extends Tooltip
 {
     private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
     private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
@@ -54,7 +54,7 @@ public class InsulationTooltip extends Tooltip
     {   innerBlit(poseStack, x, x + width, y, y + height, zOffset, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
     }
 
-    public InsulationTooltip(List<Insulation> insulation, Insulation.Slot slot)
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot)
     {   this.insulation = insulation;
         this.slot = slot;
     }

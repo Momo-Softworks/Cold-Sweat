@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class SoulspringTooltip extends Tooltip
+public class ClientSoulspringTooltip extends Tooltip
 {
     private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
     private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png");
@@ -30,7 +30,7 @@ public class SoulspringTooltip extends Tooltip
 
     double fuel;
 
-    public SoulspringTooltip(double fuel)
+    public ClientSoulspringTooltip(double fuel)
     {
         this.fuel = fuel;
     }
