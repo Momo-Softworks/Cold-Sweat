@@ -150,13 +150,14 @@ public class LoadConfigSettings
                 Insulator insulator = new Insulator(insulation, insulatorData.slot, data, predicate, attributeModifiers);
                 switch (insulatorData.slot)
                 {
-                    case ITEM : ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
-                    case ARMOR : ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
+                    case ITEM  : ConfigSettings.INSULATION_ITEMS.get().put(item, insulator); break;
+                    case ARMOR : ConfigSettings.INSULATING_ARMORS.get().put(item, insulator); break;
                     case CURIO :
                     {
                         if (CompatManager.isCuriosLoaded())
                         {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
                         }
+                        break;
                     }
                 }
             }
