@@ -173,23 +173,17 @@ public class LoadConfigSettings
             AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
-            for (Either<TagKey<Item>, Item> either : insulatorData.data().items())
+            for (Item item : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulatorData.data().items()))
             {
                 Insulator insulator = new Insulator(insulation, insulatorData.slot(), data, predicate, attributeModifiers);
-                for (Item item : either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY)
-                                                                .getTag(tagKey).orElseThrow()
-                                                                .stream().map(Holder::value).toList(),
-                                            item -> List.of(item)))
+                switch (insulatorData.slot())
                 {
-                    switch (insulatorData.slot())
+                    case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
+                    case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
+                    case CURIO ->
                     {
-                        case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
-                        case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
-                        case CURIO ->
-                        {
-                            if (CompatManager.isCuriosLoaded())
-                            {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
-                            }
+                        if (CompatManager.isCuriosLoaded())
+                        {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
                         }
                     }
                 }
@@ -251,14 +245,9 @@ public class LoadConfigSettings
             EntityRequirement predicate = foodData.entityRequirement().orElse(null);
             double food = foodData.value();
             PredicateItem predicateItem = new PredicateItem(food, data, predicate);
-            for (Either<TagKey<Item>, Item> either : foodData.data().items())
+            for (Item item : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.data().items()))
             {
-                either.map(tagKey -> WorldHelper.getRegistry(Registry.ITEM_REGISTRY).getTag(tagKey).orElseThrow().stream().map(Holder::value),
-                           item -> List.of(item).stream())
-                .forEach(item ->
-                {
-                    ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
-                });
+                ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }
         });
     }
