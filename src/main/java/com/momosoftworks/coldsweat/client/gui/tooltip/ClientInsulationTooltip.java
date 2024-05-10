@@ -6,11 +6,14 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -33,6 +36,7 @@ public class ClientInsulationTooltip extends Tooltip
     List<Insulation> insulation;
     Insulation.Slot slot;
     int width = 0;
+    ItemStack stack;
 
     private static final Method INNER_BLIT = ObfuscationReflectionHelper.findMethod(AbstractGui.class, "func_238469_a_",
                                                                                     MatrixStack.class, int.class, int.class, int.class,
@@ -54,9 +58,11 @@ public class ClientInsulationTooltip extends Tooltip
     {   innerBlit(poseStack, x, x + width, y, y + height, zOffset, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
     }
 
-    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot)
+
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack)
     {   this.insulation = insulation;
         this.slot = slot;
+        this.stack = stack;
     }
 
     @Override
@@ -70,7 +76,7 @@ public class ClientInsulationTooltip extends Tooltip
     }
 
     @Override
-    public void renderImage(FontRenderer font, int x, int y, MatrixStack matrixStack, ItemRenderer itemRenderer, int depth)
+    public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
         y += 12;
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
@@ -119,22 +125,22 @@ public class ClientInsulationTooltip extends Tooltip
         }
 
         /* Render Bars */
-        matrixStack.pushPose();
+        poseStack.pushPose();
         width = 0;
 
         // Positive insulation bar
         if (!posInsulation.isEmpty())
-        {   renderBar(matrixStack, x, y, posInsulation, slot, !negInsulation.isEmpty(), false);
-            matrixStack.translate(posInsulation.size() * 6 + 12, 0, 0);
+        {   renderBar(poseStack, x, y, posInsulation, slot, !negInsulation.isEmpty(), false, stack);
+            poseStack.translate(posInsulation.size() * 6 + 12, 0, 0);
             width += posInsulation.size() * 6 + 12;
         }
 
         // Negative insulation bar
         if (!negInsulation.isEmpty())
-        {   renderBar(matrixStack, x + width, y, negInsulation, slot, true, true);
+        {   renderBar(poseStack, x + width, y, negInsulation, slot, true, true, stack);
             width += negInsulation.size() * 6 + 12;
         }
-        matrixStack.popPose();
+        poseStack.popPose();
     }
 
     static void renderCell(MatrixStack poseStack, int x, int y, double insulation, int uvX, boolean isAdaptive)
@@ -180,15 +186,19 @@ public class ClientInsulationTooltip extends Tooltip
         return 12 + font.width(text);
     }
 
-    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative)
+    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative, ItemStack stack)
     {
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         FontRenderer font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
+        int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
+                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - MobEntity.getEquipmentSlotForItem(stack).getIndex()]
+                                  : 0,
+                                  insulations.size());
 
         // background
-        for (int i = 0; i < insulations.size() && !overflow; i++)
+        for (int i = 0; i < insulSlotCount && !overflow; i++)
         {   AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 24, 32);
         }
 
@@ -311,9 +321,9 @@ public class ClientInsulationTooltip extends Tooltip
         poseStack.popPose();
 
         // border
-        for (int i = 0; i < insulations.size() && !overflow; i++)
+        for (int i = 0; i < insulSlotCount && !overflow; i++)
         {
-            boolean end = i == insulations.size() - 1;
+            boolean end = i == insulSlotCount - 1;
             if (end)
             {
                 blit(poseStack,
