@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.util.compat;
 
+import com.anthonyhilyard.iceberg.util.Tooltips;
+import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -16,9 +18,12 @@ import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
@@ -33,6 +38,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
+
+import java.util.List;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -187,6 +194,14 @@ public class CompatManager
         {   return WaterPurity.addPurity(item, pos, level);
         }
         return item;
+    }
+
+    public static int getLegendaryTTStartIndex(List<Either<FormattedText, TooltipComponent>> tooltip)
+    {
+        if (isIcebergLoaded())
+        {   return CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+        }
+        return -1;
     }
 
     @SubscribeEvent

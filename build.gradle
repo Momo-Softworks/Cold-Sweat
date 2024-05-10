@@ -135,7 +135,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:smooth-boot-633412:4162940")
     runtimeOnly fg.deobf("curse.maven:modernfix-790626:4728399")
     //runtimeOnly fg.deobf("curse.maven:legendary-tooltips-532127:4278509")
-    //runtimeOnly fg.deobf("curse.maven:iceberg-520110:4300529")
+    compileOnly fg.deobf("curse.maven:iceberg-520110:4300529")
     //runtimeOnly fg.deobf("curse.maven:prism-lib-638111:3993293")
 
     //runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180227")
