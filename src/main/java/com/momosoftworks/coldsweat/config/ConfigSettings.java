@@ -34,6 +34,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -74,8 +75,8 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_OFFSETS;
     public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_TEMPS;
     public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
-    public static final DynamicHolder<Map<ConfiguredStructureFeature<?,?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
-    public static final DynamicHolder<Map<ConfiguredStructureFeature<?,?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
+    public static final DynamicHolder<Map<StructureFeature<?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
+    public static final DynamicHolder<Map<StructureFeature<?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
@@ -280,7 +281,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -296,7 +297,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -450,9 +451,17 @@ public class ConfigSettings
                 {
                     String biomeId = ((String) entry.get(0));
                     List<Biome> biomes = ConfigHelper.getBiomes(biomeId);
-                    Either<TagKey<Biome>, Biome> biomeEither = biomeId.charAt(0) == '#'
-                                                               ? Either.left(TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeId.substring(1))))
-                                                               : Either.right(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeId)));
+                    Either<TagKey<Biome>, Biome> biomeEither;
+                    if (biomeId.charAt(0) == '#')
+                    {   biomeEither = Either.left(TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeId.substring(1))));
+                    }
+                    else
+                    {   Biome biome = ConfigHelper.getBiome(new ResourceLocation(biomeId));
+                        if (biome != null)
+                            biomeEither = Either.right(biome);
+                        else
+                            continue;
+                    }
                     for (Biome biome : biomes)
                     {
                         SpawnBiomeData spawnData = new SpawnBiomeData(List.of(biomeEither), MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
