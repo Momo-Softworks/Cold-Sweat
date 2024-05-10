@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.config.util;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.nbt.CompoundTag;
 
@@ -80,7 +81,8 @@ public class DynamicHolder<T>
         {   return encoder.apply(this.get());
         }
         catch (Exception e)
-        {   throw new RuntimeException("Failed to encode DynamicHolder for type " + this.value.getClass(), e);
+        {   ColdSweat.LOGGER.error(String.format("Failed to encode DynamicHolder for type %s", this.value.getClass().getSimpleName()), e);
+            throw e;
         }
     }
 
@@ -92,7 +94,8 @@ public class DynamicHolder<T>
         {   this.value = decoder.apply(tag);
         }
         catch (Exception e)
-        {   throw new RuntimeException("Failed to decode DynamicHolder for type " + this.value.getClass(), e);
+        {   ColdSweat.LOGGER.error(String.format("Failed to decode DynamicHolder for type %s", this.value.getClass().getSimpleName()), e);
+            throw e;
         }
     }
 

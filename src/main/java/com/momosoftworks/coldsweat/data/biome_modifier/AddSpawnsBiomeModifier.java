@@ -24,7 +24,6 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
         if (phase == Phase.ADD && useConfigs)
         {
             Collection<SpawnBiomeData> spawns = ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(biome.value());
-            if (!spawns.isEmpty()) System.out.println("Adding spawns to " + biome.unwrapKey().get().location());
             for (SpawnBiomeData spawn : spawns)
             {
                 ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, spawn.entities())

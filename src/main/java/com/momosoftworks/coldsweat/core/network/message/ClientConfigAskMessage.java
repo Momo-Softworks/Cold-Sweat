@@ -36,7 +36,8 @@ public class ClientConfigAskMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isServer())
+            if (context.getDirection().getReceptionSide().isServer()
+            && context.getSender() != null)
             {
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new SyncConfigSettingsMessage(message.openerUUID));
             }

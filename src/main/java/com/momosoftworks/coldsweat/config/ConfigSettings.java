@@ -453,9 +453,17 @@ public class ConfigSettings
                 {
                     String biomeId = ((String) entry.get(0));
                     List<Biome> biomes = ConfigHelper.getBiomes(biomeId);
-                    Either<TagKey<Biome>, Biome> biomeEither = biomeId.charAt(0) == '#'
-                                                               ? Either.left(TagKey.create(Registries.BIOME, new ResourceLocation(biomeId.substring(1))))
-                                                               : Either.right(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeId)));
+                    Either<TagKey<Biome>, Biome> biomeEither;
+                    if (biomeId.charAt(0) == '#')
+                    {   biomeEither = Either.left(TagKey.create(Registries.BIOME, new ResourceLocation(biomeId.substring(1))));
+                    }
+                    else
+                    {   Biome biome = ConfigHelper.getBiome(new ResourceLocation(biomeId));
+                        if (biome != null)
+                            biomeEither = Either.right(biome);
+                        else
+                            continue;
+                    }
                     for (Biome biome : biomes)
                     {
                         SpawnBiomeData spawnData = new SpawnBiomeData(List.of(biomeEither), MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
