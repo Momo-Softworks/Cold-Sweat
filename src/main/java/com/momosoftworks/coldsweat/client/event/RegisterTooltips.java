@@ -13,6 +13,6 @@ public class RegisterTooltips
     public static void registerTooltips(RegisterClientTooltipComponentFactoriesEvent event)
     {
         event.register(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
-        event.register(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getSlot()));
+        event.register(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getSlot(), tooltip.getItem()));
     }
 }

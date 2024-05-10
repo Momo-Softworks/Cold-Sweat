@@ -12,6 +12,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -31,10 +33,13 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     List<Insulation> insulation;
     Insulation.Slot type;
     int width = 0;
+    ItemStack stack;
 
-    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot type)
-    {   this.insulation = insulation;
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot type, ItemStack stack)
+    {
+        this.insulation = insulation;
         this.type = type;
+        this.stack = stack;
     }
 
     @Override
@@ -98,14 +103,14 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         // Positive insulation bar
         if (!posInsulation.isEmpty())
-        {   renderBar(graphics, x, y, posInsulation, type, !negInsulation.isEmpty(), false);
+        {   renderBar(graphics, x, y, posInsulation, type, !negInsulation.isEmpty(), false, stack);
             poseStack.translate(posInsulation.size() * 6 + 12, 0, 0);
             width += posInsulation.size() * 6 + 12;
         }
 
         // Negative insulation bar
         if (!negInsulation.isEmpty())
-        {   renderBar(graphics, x + width, y, negInsulation, type, true, true);
+        {   renderBar(graphics, x + width, y, negInsulation, type, true, true, stack);
             width += negInsulation.size() * 6 + 12;
         }
         poseStack.popPose();
@@ -145,15 +150,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return 12 + font.width(text);
     }
 
-    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative)
+    static void renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative, ItemStack stack)
     {
         PoseStack poseStack = graphics.pose();
         Font font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
+        int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
+                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()]
+                                  : 0,
+                                  insulations.size());
 
         // background
-        for (int i = 0; i < insulations.size() && !overflow; i++)
+        for (int i = 0; i < insulSlotCount && !overflow; i++)
         {   graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 32, 24);
         }
 
@@ -272,9 +281,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         poseStack.popPose();
 
         // border
-        for (int i = 0; i < insulations.size() && !overflow; i++)
+        for (int i = 0; i < insulSlotCount && !overflow; i++)
         {
-            boolean end = i == insulations.size() - 1;
+            boolean end = i == insulSlotCount - 1;
             if (end)
             {
                 graphics.blit(TOOLTIP_LOCATION.get(),
