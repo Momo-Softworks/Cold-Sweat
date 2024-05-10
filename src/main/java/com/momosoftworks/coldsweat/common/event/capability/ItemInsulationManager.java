@@ -18,6 +18,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
@@ -108,6 +110,37 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+    }
+
+    static ContainerListener INSULATION_LISTENER = new ContainerListener()
+    {
+        @Override
+        public void slotChanged(AbstractContainerMenu sendingContainer, int slot, ItemStack stack)
+        {
+            ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
+            getInsulationCap(containerStack).ifPresent(cap ->
+            {
+                containerStack.getOrCreateTag().merge(cap.serializeNBT());
+            });
+        }
+
+        @Override
+        public void dataChanged(AbstractContainerMenu sendingContainer, int slot, int value)
+        {
+
+        }
+    };
+
+    @SubscribeEvent
+    public static void onContainerOpen(PlayerContainerEvent.Open event)
+    {
+        event.getContainer().addSlotListener(INSULATION_LISTENER);
+    }
+
+    @SubscribeEvent
+    public static void onContainerClose(PlayerContainerEvent.Close event)
+    {
+        event.getContainer().removeSlotListener(INSULATION_LISTENER);
     }
 
     public static int getInsulationSlots(ItemStack item)

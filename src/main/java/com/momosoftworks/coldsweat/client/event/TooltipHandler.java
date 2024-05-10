@@ -3,12 +3,12 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.event.capability.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,6 +31,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
@@ -61,7 +64,7 @@ public class TooltipHandler
         String hoverName = stack.getHoverName().getString();
 
         if (CompatManager.isIcebergLoaded())
-        {   tooltipStartIndex = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component.getClass().getName().equals("com.anthonyhilyard.iceberg.util.Tooltips$TitleBreakComponent")).orElse(false)) + 1;
+        {   tooltipStartIndex = CompatManager.getLegendaryTTStartIndex(tooltip) + 1;
         }
         else for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
         {
@@ -69,6 +72,9 @@ public class TooltipHandler
             {   tooltipStartIndex++;
                 break;
             }
+        }
+        if (tooltipStartIndex == -1)
+        {   tooltipStartIndex = 0;
         }
         return tooltipStartIndex;
     }
@@ -192,52 +198,48 @@ public class TooltipHandler
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.ITEM)));
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.ITEM, stack)));
             }
         }
         // If the item is an insulating curio, add the tooltip
         else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.CURIO)));
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.CURIO, stack)));
             }
         }
         // If the item is insulated armor
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
         if (stack.getItem() instanceof Equipable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
-            ItemInsulationManager.getInsulationCap(stack).orElse(new ItemInsulationCap()).deserializeNBT(stack.getOrCreateTag());
-            // Create the list of insulation pairs from NBT
-            List<Insulation> insulation = ItemInsulationManager.getInsulationCap(stack)
-                                          // Get insulation values
-                                          .map(cap -> cap.getInsulation().stream()
-                                          // Filter out insulation that doesn't match the player's predicate
-                                          .filter(pair ->
-                                          {
-                                              ItemStack stack1 = pair.getFirst();
-                                              return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                         insulator -> insulator.test(player, stack1),
-                                                                         false);
-                                          })
-                                          // Flat map the insulation values
-                                          .map(pair -> pair.getSecond()).reduce(new ArrayList<>(), (list, insul) ->
-                                          {
-                                              list.addAll(insul);
-                                              return list;
-                                          }))
-                                          .orElse(new ArrayList<>());
-            // If the armor has intrinsic insulation due to configs, add it to the list
-            if (armorInsulator != null)
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                if (armorInsulator.test(player, stack))
-                {
-                    insulation.addAll(armorInsulator.insulation().split());
-                }
-            }
+                cap.deserializeNBT(stack.getOrCreateTag());
 
-            if (!insulation.isEmpty())
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR)));
-            }
+                // Create the list of insulation pairs from NBT
+                List<Insulation> insulation = new ArrayList<>(cap.getInsulation().stream()
+                                                              // Filter out insulation that doesn't match the player's predicate
+                                                              .filter(pair ->
+                                                              {
+                                                                  ItemStack stack1 = pair.getFirst();
+                                                                  return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                                                             insulator -> insulator.test(player, stack),
+                                                                                             true);
+                                                              })
+                                                              .map(Pair::getSecond).flatMap(List::stream).toList());
+
+                // If the armor has intrinsic insulation due to configs, add it to the list
+                if (armorInsulator != null)
+                {
+                    if (armorInsulator.test(player, stack))
+                    {   insulation.addAll(armorInsulator.insulation().split());
+                    }
+                }
+
+                if (!insulation.isEmpty())
+                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR, stack)));
+                }
+            });
         }
     }
 

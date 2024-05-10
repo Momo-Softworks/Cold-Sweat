@@ -8,6 +8,8 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
+import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -32,6 +34,7 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -207,6 +210,17 @@ public class SewingContainer extends AbstractContainerMenu
     {   this.sewingInventory.setItem(index, stack);
         this.setRemoteSlot(index, stack);
     }
+    public void syncSlot(int index)
+    {   if (this.playerInventory.player instanceof ServerPlayer serverPlayer)
+        {
+            TaskScheduler.scheduleServer(() -> {
+                // Send the new item to the client
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                                                     new SyncContainerSlotMessage(index, this.getItem(index), this));
+            }, 0);
+
+        }
+    }
 
     public void growItem(int index, int amount)
     {   ItemStack stack = this.sewingInventory.getItem(index);
@@ -222,8 +236,10 @@ public class SewingContainer extends AbstractContainerMenu
     private void takeInput()
     {   this.sewingInventory.setItem(2, ItemStack.EMPTY);
     }
+
     private void takeOutput(ItemStack stack)
-    {   Player player = this.playerInventory.player;
+    {
+        Player player = this.playerInventory.player;
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
@@ -323,8 +339,17 @@ public class SewingContainer extends AbstractContainerMenu
                     return false;
                 });
 
-                processed.getOrCreateTag().merge(insulCap.serializeNBT());
+                if (this.playerInventory.player instanceof ServerPlayer serverPlayer)
+                {
+                    TaskScheduler.scheduleServer(() -> {
+                        // Send the new item to the client
+                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                                                             new SyncContainerSlotMessage(2, processed, this));
+                    }, 1);
+
+                }
                 this.setItem(2, processed);
+                this.syncSlot(2);
                 this.sendAllDataToRemote();
             }
         }
