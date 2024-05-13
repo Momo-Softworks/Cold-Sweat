@@ -42,6 +42,7 @@ import oshi.util.tuples.Triplet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -312,7 +313,7 @@ public class ConfigSettings
                                            decoder -> decoder.getDouble("CaveInsulation"),
                                            saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
-        Function<List<?>, PredicateItem> fuelMapper = args ->
+        BiFunction<Item, List<?>, PredicateItem> fuelMapper = (item, args) ->
         {
             double fuel = ((Number) args.get(0)).doubleValue();
             NbtRequirement nbtRequirement;
@@ -390,8 +391,9 @@ public class ConfigSettings
 
         SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), args ->
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
+            double value = ((Number) args.get(0)).doubleValue();
             NbtRequirement nbtRequirement = args.size() > 2
                                             ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
                                             : new NbtRequirement(new CompoundTag());
@@ -399,7 +401,7 @@ public class ConfigSettings
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   nbtRequirement);
-            return new PredicateItem(((Number) args.get(0)).doubleValue(), itemRequirement, EntityRequirement.NONE);
+            return new PredicateItem(value, itemRequirement, EntityRequirement.NONE);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
