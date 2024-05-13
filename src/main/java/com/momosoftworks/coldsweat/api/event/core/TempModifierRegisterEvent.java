@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,14 +40,18 @@ public class TempModifierRegisterEvent extends Event
         try
         {
             Constructor<?> clazz = Class.forName(className).getConstructor();
-            this.register(id, () -> {
+            this.register(id, () ->
+            {
                 try
-                {
-                    return (TempModifier) clazz.newInstance();
-                } catch (Exception e)
-                {   throw new RuntimeException(e);
+                {   return (TempModifier) clazz.newInstance();
+                }
+                catch (Exception e)
+                {   throw new RegistryFailureException(id, "TempModifier", "Failed to instantiate class " + className, e);
                 }
             });
-        } catch (Exception e) { throw new RuntimeException(e); }
+        }
+        catch (Exception e)
+        {   throw new RegistryFailureException(id, "TempModifier", e.getMessage(), e);
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.exceptions.SerializationException;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
@@ -64,7 +65,7 @@ public class DynamicHolder<T>
     public void set(Object value)
     {
         if (!this.value.getClass().isInstance(value))
-        {   throw new RuntimeException(String.format("Cannot cast value of type %s to DynamicHolder of type %s", value.getClass(), this.value.getClass()));
+        {   throw new ClassCastException(String.format("Cannot cast value of type %s to DynamicHolder of type %s", value.getClass(), this.value.getClass()));
         }
         this.value = (T) value;
     }
@@ -74,40 +75,41 @@ public class DynamicHolder<T>
     }
 
     public CompoundTag encode()
-    {   if (!synced)
-        {  throw new RuntimeException("Tried to encode non-synced DynamicHolder for type " + this.value.getClass());
+    {
+        if (!synced)
+        {  throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Tried to encode non-synced DynamicHolder", null));
         }
         try
         {   return encoder.apply(this.get());
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error(String.format("Failed to encode DynamicHolder for type %s", this.value.getClass().getSimpleName()), e);
-            throw e;
+        {   throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Failed to encode DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
         }
     }
 
     public void decode(CompoundTag tag)
-    {   if (!synced)
-        {  throw new RuntimeException("Tried to decode non-synced DynamicHolder for type " + this.value.getClass());
+    {
+        if (!synced)
+        {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to decode non-synced DynamicHolder", null));
         }
         try
         {   this.value = decoder.apply(tag);
         }
         catch (Exception e)
-        {   ColdSweat.LOGGER.error(String.format("Failed to decode DynamicHolder for type %s", this.value.getClass().getSimpleName()), e);
-            throw e;
+        {   throw ColdSweat.LOGGER.throwing(new SerializationException("Failed to decode DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
         }
     }
 
     public void save()
-    {   if (!synced)
-        {  throw new RuntimeException("Tried to save non-synced DynamicHolder for type " + this.value.getClass());
+    {
+        if (!synced)
+        {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to save non-synced DynamicHolder", null));
         }
         try
         {   saver.accept(this.get());
         }
         catch (Exception e)
-        {   throw new RuntimeException("Failed to save DynamicHolder for type " + this.value.getClass(), e);
+        {   throw ColdSweat.LOGGER.throwing(new SerializationException("Failed to save DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
         }
     }
 

@@ -468,7 +468,7 @@ public class CSMath
 
     public static double round(double value, int places)
     {
-        if (places < 0) throw new IllegalArgumentException();
+        if (places < 0) throw new IllegalArgumentException("Places must be a positive integer.");
         if (isInteger(value)) return value;
 
         BigDecimal bd = new BigDecimal(Double.toString(value));

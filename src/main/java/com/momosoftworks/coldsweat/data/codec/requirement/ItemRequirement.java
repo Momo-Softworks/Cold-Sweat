@@ -40,14 +40,11 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                 return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));
             },
             // Convert from a TagKey to a string
-            tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
-                String result = tag.left().isPresent()
-                                ? "#" + tag.left().get().location()
-                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+            either ->
+            {   return either.left().isPresent()
+                       ? "#" + either.left().get().location()
+                       : either.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
 
-                return result;
             })
             .listOf()
             .fieldOf("items").forGetter(ItemRequirement::items),
@@ -130,7 +127,6 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                                                      {
                                                            String string = tg.getAsString();
                                                            ResourceLocation location = new ResourceLocation(string.replace("#", ""));
-                                                           if (location == null) throw new IllegalArgumentException("Item tag or ID is null");
                                                            if (!string.contains("#"))
                                                            {   return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
                                                            }

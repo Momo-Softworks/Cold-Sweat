@@ -75,7 +75,7 @@ public class BlockTempModifier extends TempModifier
                         if (state.isAir()) continue;
 
                         // Get the BlockTemp associated with the block
-                        List<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
+                        Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
 
                         if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
 
@@ -121,9 +121,8 @@ public class BlockTempModifier extends TempModifier
                             // Get the temperature of the block given the player's distance
                             double distance = CSMath.getDistance(playerClosest, pos);
 
-                            for (int i = 0; i < blockTemps.size(); i++)
+                            for (BlockTemp blockTemp : blockTemps)
                             {
-                                BlockTemp blockTemp = blockTemps.get(i);
                                 double tempToAdd = blockTemp.getTemperature(level, entity, state, blockpos, distance);
 
                                 // Store this block type's total effect on the player
