@@ -17,6 +17,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigator;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class EatObjectsGoal extends Goal
     public void start()
     {
         // Scan for ItemEntity in a 5-block range
-        List<Entity> items = this.entity.level.getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
+        List<Entity> items = this.entity.level.getEntities(this.entity, new AxisAlignedBB(this.entity.blockPosition()).inflate(5));
         for (Entity ent : items)
         {
             if (ent instanceof ItemEntity && ((ItemEntity) ent).getThrower() != null
@@ -60,7 +61,8 @@ public class EatObjectsGoal extends Goal
                 if (edible.isPresent()
                 && NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString()))
                 {
-                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity))
+                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
+                    || isBreedingItem(itemEntity.getItem()))
                     {
                         this.target = ent;
                         this.lookPos = ent.position();
@@ -169,5 +171,10 @@ public class EatObjectsGoal extends Goal
     public boolean canUse()
     {
         return this.entity.getLastHurtByMob() == null;
+    }
+
+    private boolean isBreedingItem(ItemStack stack)
+    {
+        return this.entity.canFallInLove() && this.entity.isFood(stack);
     }
 }
