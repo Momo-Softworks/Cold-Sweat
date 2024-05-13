@@ -41,8 +41,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
@@ -109,7 +111,8 @@ public class Chameleon extends Animal
     protected void registerGoals()
     {   this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
-        this.goalSelector.addGoal(2, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
+        this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(3, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
         this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES
                                                                                      .stream()
                                                                                      .map(edible -> new Ingredient.TagValue(edible.associatedItems()))
@@ -184,10 +187,11 @@ public class Chameleon extends Animal
     {
         ItemStack stack = player.getItemInHand(hand);
         Edible edible = ChameleonEdibles.getEdible(stack).orElse(null);
+
         if (edible != null)
         {
-            if (this.feedCooldown <= 0 && (this.isPlayerTrusted(player) ^ this.isTamingItem(stack))
-            && this.getCooldown(edible) <= 0)
+            if (this.feedCooldown <= 0 && ((this.isPlayerTrusted(player) ^ this.isTamingItem(stack))
+            && this.getCooldown(edible) <= 0) || this.canFallInLove() && this.isFood(stack))
             {
                 if (!player.level.isClientSide)
                 {
@@ -213,6 +217,22 @@ public class Chameleon extends Animal
         }
 
         return InteractionResult.PASS;
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack)
+    {   return pStack.is(ModItemTags.CHAMELEON_TAMING);
+    }
+
+    @Override
+    public boolean canFallInLove()
+    {   return super.canFallInLove() && !this.getPersistentData().getBoolean("HasEverBred");
+    }
+
+    @Override
+    public void setInLove(@Nullable Player pPlayer)
+    {   super.setInLove(pPlayer);
+        this.getPersistentData().putBoolean("HasEverBred", true);
     }
 
     @Override
@@ -334,7 +354,9 @@ public class Chameleon extends Animal
         if (!this.level.isClientSide)
         {
             boolean shedding = this.isShedding();
-            if (this.tickCount % 20 == 0 && this.getAgeSecs() * 20 - this.getLastShed() > 24000 && !shedding && this.random.nextInt(30) == 1)
+            if (this.tickCount % 20 == 0 && !shedding
+            && (this.random.nextInt(30) == 1 && this.getAgeSecs() * 20 - this.getLastShed() > 24000
+                || (this.isBaby() && this.getAge() > -this.getTimeToShed())))
             {
                 this.setShedding(true);
                 this.setLastShed(this.getAgeSecs() * 20);
@@ -465,22 +487,32 @@ public class Chameleon extends Animal
         {
             if (entity instanceof ItemEntity itemEntity)
             {
-                if (this.isTamingItem(itemEntity.getItem()))
+                ItemStack item = itemEntity.getItem();
+                if (this.isTamingItem(item))
                 {
                     Player player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
-                    if (player != null && !this.isPlayerTrusted(player))
+                    if (player != null)
                     {
-                        if (player.isCreative() || Math.random() < 0.3)
-                        {   this.setPersistenceRequired();
-                            this.addTrustedPlayer(itemEntity.getThrower());
-                            WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                        // For taming
+                        if (!this.isPlayerTrusted(player))
+                        {
+                            if ((player.isCreative() || Math.random() < 0.3))
+                            {
+                                this.setPersistenceRequired();
+                                this.addTrustedPlayer(itemEntity.getThrower());
+                                WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                            }
+                            else
+                            {   WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                            }
                         }
-                        else
-                        {   WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
+                        // For breeding
+                        else if (this.canFallInLove())
+                        {   this.setInLove(player);
                         }
                     }
                 }
-                ChameleonEdibles.getEdible(itemEntity.getItem()).ifPresent(edible ->
+                ChameleonEdibles.getEdible(item).ifPresent(edible ->
                 {
                     if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
                     {   this.setCooldown(edible, edible.getCooldown());
