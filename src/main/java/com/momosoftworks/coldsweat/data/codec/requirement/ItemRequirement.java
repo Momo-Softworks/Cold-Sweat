@@ -60,14 +60,11 @@ public class ItemRequirement
                 return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(itemLocation));
             },
             // Convert from a TagKey to a string
-            tag ->
-            {   if (tag == null) throw new IllegalArgumentException("Biome tag is null");
-                String result = tag.left().isPresent()
-                                ? "#" + ItemTags.getAllTags().getId(tag.left().get())
-                                : tag.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-                if (result.isEmpty()) throw new IllegalArgumentException("Biome field is not a tag or valid ID");
+            either ->
+            {   return either.left().isPresent()
+                       ? "#" + ItemTags.getAllTags().getId(either.left().get())
+                       : either.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
 
-                return result;
             })
             .listOf()
             .fieldOf("items").forGetter(predicate -> predicate.items),

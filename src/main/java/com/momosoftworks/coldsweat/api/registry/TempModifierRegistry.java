@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.registry;
 import com.google.common.collect.ImmutableMap;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
@@ -23,10 +24,8 @@ public class TempModifierRegistry
         TempModifier modifier = supplier.get();
         if (TEMP_MODIFIERS.containsKey(id))
         {
-            String modifierId = getKey(modifier).toString();
-            ColdSweat.LOGGER.error(" Found duplicate TempModifier entries: {} ({}) {} ({})", modifier.getClass().getName(), modifierId,
-                                   TEMP_MODIFIERS.get(modifierId).getClass().getName(), modifierId);
-            throw new RuntimeException("A TempModifier with the ID \"" + modifierId + "\" already exists!");
+            throw new RegistryFailureException(id, "TempModifier", String.format("Found duplicate TempModifier entries: %s (%s) %s (%s)", supplier.get().getClass().getName(), id,
+                                                             TEMP_MODIFIERS.get(id).getClass().getName(), id), null);
         }
         TEMP_MODIFIERS.put(id, supplier);
     }

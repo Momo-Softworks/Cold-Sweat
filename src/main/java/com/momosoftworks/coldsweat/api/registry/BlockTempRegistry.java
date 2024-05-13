@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.api.registry;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
 public class BlockTempRegistry
 {
     public static final LinkedList<BlockTemp> BLOCK_TEMPS = new LinkedList<>();
-    public static final HashMap<Block, List<BlockTemp>> MAPPED_BLOCKS = new HashMap<>();
+    public static final Multimap<Block, BlockTemp> MAPPED_BLOCKS = HashMultimap.create();
     public static final BlockTemp DEFAULT_BLOCK_TEMP = new BlockTemp()
     {
         @Override
@@ -28,9 +30,8 @@ public class BlockTempRegistry
     {
         blockTemp.getAffectedBlocks().forEach(block ->
         {
-            // Get if this block is already registered
-            List<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
-            if (blockTemps != null)
+            Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
+            if (!blockTemps.isEmpty())
             {
                 if (blockTemp instanceof BlockTempConfig)
                 {
@@ -52,7 +53,7 @@ public class BlockTempRegistry
                 blockTemps.add(blockTemp);
             }
             else
-            {   MAPPED_BLOCKS.put(block, new ArrayList<>(Arrays.asList(blockTemp)));
+            {   blockTemps.addAll(new ArrayList<>(Arrays.asList(blockTemp)));
             }
         });
         BLOCK_TEMPS.add(blockTemp);
@@ -63,15 +64,15 @@ public class BlockTempRegistry
         MAPPED_BLOCKS.clear();
     }
 
-    public static List<BlockTemp> getBlockTempsFor(BlockState blockstate)
+    public static Collection<BlockTemp> getBlockTempsFor(BlockState blockstate)
     {
         if (blockstate.isAir()) return Arrays.asList(DEFAULT_BLOCK_TEMP);
 
         Block block = blockstate.getBlock();
-        List<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
-        if (blockTemps == null)
+        Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
+        if (blockTemps.isEmpty())
         {   blockTemps = new ArrayList<>(BLOCK_TEMPS.stream().filter(bt -> bt.hasBlock(block)).collect(Collectors.toList()));
-            MAPPED_BLOCKS.put(block, blockTemps);
+            MAPPED_BLOCKS.putAll(block, blockTemps);
             return blockTemps;
         }
         return blockTemps;
