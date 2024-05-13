@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Registry;
@@ -22,10 +23,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -37,6 +36,7 @@ import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -480,7 +480,7 @@ public class ConfigHelper
         return map;
     }
 
-    public static <T> Map<Item, T> readItemMap(List<? extends List<?>> source, Function<List<?>, T> valueParser)
+    public static <T> Map<Item, T> readItemMap(List<? extends List<?>> source, BiFunction<Item, List<?>, T> valueParser)
     {
         Map<Item, T> map = new HashMap<>();
         for (List<?> entry : source)
@@ -488,7 +488,7 @@ public class ConfigHelper
             String itemId = (String) entry.get(0);
             for (Item item : getItems(itemId))
             {
-                map.put(item, valueParser.apply(entry.subList(1, entry.size())));
+                map.put(item, valueParser.apply(item, entry.subList(1, entry.size())));
             }
         }
         return map;
@@ -554,8 +554,11 @@ public class ConfigHelper
 
     public static Map<Item, Insulator> readItemInsulations(List<? extends List<?>> items, Insulation.Slot slot)
     {
-        return readItemMap(items, args ->
+        return readItemMap(items, (item, args) ->
         {
+            if (args.size() < 2)
+            {   throw ColdSweat.LOGGER.throwing(new ArgumentCountException(args.size(), 2, String.format("Error parsing insulation config for item %s", item)));
+            }
             double value1 = ((Number) args.get(0)).doubleValue();
             double value2 = ((Number) args.get(1)).doubleValue();
             String type = args.size() > 2 ? (String) args.get(2) : "static";
@@ -566,6 +569,7 @@ public class ConfigHelper
             ItemRequirement requirement = new ItemRequirement(List.of(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
+
             return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap());
         });
     }
