@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.config.util;
+package com.momosoftworks.coldsweat.util.serialization;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
