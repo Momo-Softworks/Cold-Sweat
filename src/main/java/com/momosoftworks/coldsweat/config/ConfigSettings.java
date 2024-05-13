@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.util.Warnings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
@@ -503,7 +502,7 @@ public class ConfigSettings
         .distinct()
         .filter(entry -> entry.getKey() != null)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
-            ColdSweat.LOGGER.warn(Warnings.dupConfigKeys(EntityType.class, "Insulated Entities", a.entityType().toString()));
+            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", ForgeRegistries.ENTITY_TYPES.getKey(a.entityType()).toString());
             return a;
         })));
 
