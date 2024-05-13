@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class EatObjectsGoal extends Goal
     public void start()
     {
         // Scan for ItemEntity in a 5-block range
-        List<Entity> items = this.entity.level().getEntities(this.entity, this.entity.getBoundingBox().inflate(5));
+        List<Entity> items = this.entity.level().getEntities(this.entity, new AABB(this.entity.blockPosition()).inflate(5));
         for (Entity ent : items)
         {
             if (ent instanceof ItemEntity itemEntity && itemEntity.getOwner() != null
@@ -60,7 +61,8 @@ public class EatObjectsGoal extends Goal
                 if (edible.isPresent()
                 && NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString()))
                 {
-                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity))
+                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
+                    || isBreedingItem(itemEntity.getItem()))
                     {
                         this.target = ent;
                         this.lookPos = ent.position();
@@ -173,5 +175,10 @@ public class EatObjectsGoal extends Goal
     public boolean canUse()
     {
         return this.entity.getLastHurtByMob() == null;
+    }
+
+    private boolean isBreedingItem(ItemStack stack)
+    {
+        return this.entity.canFallInLove() && this.entity.isFood(stack);
     }
 }
