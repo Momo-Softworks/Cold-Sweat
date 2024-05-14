@@ -407,7 +407,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
                                 // If the BlockState is a pipe, check if the new path is following the direction of the pipe
                                 if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
-                                        && this.isValidPipeAt(tryPos, state, newPath, direction))
+                                && this.isValidPipeAt(tryPos, state, newPath, direction))
                                 {   // Add the new path to the list
                                     paths.add(newPath);
                                 }

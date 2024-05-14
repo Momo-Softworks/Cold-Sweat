@@ -193,7 +193,7 @@ public class EntityTempManager
                 {   ModifiableAttributeInstance attribute = getAttribute(trait, ((LivingEntity) entity));
                     if (attribute == null) continue;
                     attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
-                    attribute.removeModifiers();
+                    attribute.getModifiers().forEach(attribute::removeModifier);
                 }
                 entity.getPersistentData().put("PersistentAttributes", new CompoundNBT());
             }, 1);
