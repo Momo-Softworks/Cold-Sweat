@@ -177,7 +177,7 @@ public class ConfigHelper
                 ResourceLocation dimensionId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                DimensionType dimension = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
+                DimensionType dimension = WorldHelper.getDimensionType(dimensionId);
                 if (dimension != null)
                 {   map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
                 }
@@ -203,7 +203,7 @@ public class ConfigHelper
                 ResourceLocation structureId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                map.put(WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).get(structureId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                map.put(WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, structureId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
             {
@@ -353,7 +353,7 @@ public class ConfigHelper
             CompoundNBT dimensionTag = new CompoundNBT();
             dimensionTag.putDouble("Temp", entry.getValue().getFirst());
             dimensionTag.putString("Units", entry.getValue().getSecond().toString());
-            mapTag.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey()).toString(), dimensionTag);
+            mapTag.put(WorldHelper.getDimensionTypeID(entry.getKey()).toString(), dimensionTag);
         }
         tag.put(key, mapTag);
         return tag;
@@ -366,7 +366,7 @@ public class ConfigHelper
         for (String dimensionId : mapTag.getAllKeys())
         {
             CompoundNBT biomeTag = mapTag.getCompound(dimensionId);
-            map.put(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(dimensionId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            map.put(WorldHelper.getDimensionType(new ResourceLocation(dimensionId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -380,7 +380,10 @@ public class ConfigHelper
             CompoundNBT structureTag = new CompoundNBT();
             structureTag.putDouble("Temp", entry.getValue().getFirst());
             structureTag.putString("Units", entry.getValue().getSecond().toString());
-            mapTag.put(WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey()).toString(), structureTag);
+            ResourceLocation structureId = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
+            if (structureId != null)
+            {   mapTag.put(structureTag.toString(), structureTag);
+            }
         }
         tag.put(key, mapTag);
 
@@ -394,7 +397,7 @@ public class ConfigHelper
         for (String structureId : mapTag.getAllKeys())
         {
             CompoundNBT biomeTag = mapTag.getCompound(structureId);
-            map.put(WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).get(new ResourceLocation(structureId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            map.put(WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, new ResourceLocation(structureId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }

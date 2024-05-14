@@ -48,13 +48,14 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import javax.xml.ws.Holder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,24 +85,24 @@ public abstract class WorldHelper
 
     public static ResourceLocation getBiomeID(Biome biome)
     {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = getRegistry(Registry.BIOME_REGISTRY).getKey(biome);
+        if (biomeID == null) biomeID = getFromRegistry(Registry.BIOME_REGISTRY, biome);
 
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
     {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = getRegistry(Registry.BIOME_REGISTRY).get(biomeID);
+        if (biome == null) biome = getFromRegistry(Registry.BIOME_REGISTRY, biomeID);
 
         return biome;
     }
 
     public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimType);
+    {   return getFromRegistry(Registry.DIMENSION_TYPE_REGISTRY, dimType);
     }
 
     public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimID);
+    {   return getFromRegistry(Registry.DIMENSION_TYPE_REGISTRY, dimID);
     }
 
 
@@ -506,8 +507,31 @@ public abstract class WorldHelper
 
     public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
     {
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {   return ClientOnlyHelper.getRegistryAccess().registryOrThrow(registry);
+        }
         return getServer()
-              .registryAccess()
-              .registryOrThrow(registry);
+                .registryAccess()
+                .registryOrThrow(registry);
+    }
+
+    public static <T> T getFromRegistry(RegistryKey<Registry<T>> registry, ResourceLocation id)
+    {
+        try
+        {   return getRegistry(registry).get(id);
+        }
+        catch (Exception e)
+        {   return null;
+        }
+    }
+
+    public static <T> ResourceLocation getFromRegistry(RegistryKey<Registry<T>> registry, T value)
+    {
+        try
+        {   return getRegistry(registry).getKey(value);
+        }
+        catch (Exception e)
+        {   return null;
+        }
     }
 }

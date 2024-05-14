@@ -247,7 +247,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation dim = WorldHelper.getDimensionTypeID(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -255,6 +255,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false),
@@ -263,7 +264,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation dim = WorldHelper.getDimensionTypeID(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -271,6 +272,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
@@ -279,7 +281,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -287,6 +289,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         STRUCTURE_OFFSETS = addSyncedSetting("structure_offsets", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false),
@@ -295,7 +298,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -303,6 +306,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),

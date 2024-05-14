@@ -2,14 +2,16 @@ package com.momosoftworks.coldsweat.util;
 
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
-import net.minecraft.client.multiplayer.PlayerController;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 
@@ -47,5 +49,10 @@ public class ClientOnlyHelper
 
     public static GameType getGameMode()
     {   return Minecraft.getInstance().gameMode.getPlayerMode();
+    }
+
+    public static DynamicRegistries getRegistryAccess()
+    {   return CSMath.orElse(CSMath.getIfNotNull(Minecraft.getInstance().getConnection(), ClientPlayNetHandler::registryAccess,  null),
+                             CSMath.getIfNotNull(Minecraft.getInstance().level, World::registryAccess, null));
     }
 }
