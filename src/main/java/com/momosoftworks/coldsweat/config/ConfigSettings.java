@@ -501,7 +501,7 @@ public class ConfigSettings
         .distinct()
         .filter(entry -> entry.getKey() != null)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
-            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", ForgeRegistries.ENTITY_TYPES.getKey(a.entityType()).toString());
+            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", ForgeRegistries.ENTITIES.getKey(a.entityType()).toString());
             return a;
         })));
 
