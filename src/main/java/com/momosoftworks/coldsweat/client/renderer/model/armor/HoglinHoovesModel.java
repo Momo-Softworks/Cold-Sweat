@@ -39,7 +39,7 @@ public class HoglinHoovesModel<T extends LivingEntity> extends BipedModel<T>
 	{
 		matrixStack.pushPose();
 		matrixStack.translate(rightLeg.x / 16, rightLeg.y / 16, rightLeg.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(rightLeg.xRot, rightLeg.yRot, rightLeg.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(rightLeg.xRot, rightLeg.yRot, rightLeg.zRot));
 		matrixStack.scale(1.3f, 1.25f, 1.3f);
 		matrixStack.translate(0, -0.125, 0);
 		rightBoot.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
@@ -48,7 +48,7 @@ public class HoglinHoovesModel<T extends LivingEntity> extends BipedModel<T>
 		// left boot
 		matrixStack.pushPose();
 		matrixStack.translate(leftLeg.x / 16, leftLeg.y / 16, leftLeg.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(leftLeg.xRot, leftLeg.yRot, leftLeg.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(leftLeg.xRot, leftLeg.yRot, leftLeg.zRot));
 		matrixStack.scale(1.3f, 1.25f, 1.3f);
 		matrixStack.translate(0, -0.125, 0);
 		leftBoot.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);

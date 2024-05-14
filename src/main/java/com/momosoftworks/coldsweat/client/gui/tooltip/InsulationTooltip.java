@@ -84,7 +84,7 @@ public class InsulationTooltip extends Tooltip
             {
                 StaticInsulation insul = (StaticInsulation) ins;
                 double cold = insul.getCold();
-                double hot = insul.getHot();
+                double hot = insul.getHeat();
 
                 if (CSMath.sign(cold) == CSMath.sign(hot))
                 {
@@ -145,7 +145,7 @@ public class InsulationTooltip extends Tooltip
                   // If the amount of insulation in this cell is greater than 2, use the full cell texture, otherwise use the half cell texture
                   ? (rounded >= 2 ? 16 : 20)
                   : (rounded >= 2 ? 8 : 12);
-        AbstractGui.blit(poseStack, x, y, 401, uvX, uvY, 6, 4, 32, 24);
+        AbstractGui.blit(poseStack, x, y, 401, uvX, uvY, 6, 4, 24, 32);
     }
 
     static int renderOverloadCell(MatrixStack poseStack, FontRenderer font, int x, int y, double insulation, int textColor, Insulation.Type type)
@@ -170,7 +170,7 @@ public class InsulationTooltip extends Tooltip
                           401, /*z*/
                           11 /*u*/, 0 /*v*/,
                           8 /*uWidth*/, 6 /*vHeight*/,
-                          32, 24);
+                          24, 32);
         //set the shader texture to the font atlas
         poseStack.translate(0, 0, 400);
         font.drawShadow(poseStack, text, x + 15, y - 1, textColor);
@@ -189,7 +189,7 @@ public class InsulationTooltip extends Tooltip
 
         // background
         for (int i = 0; i < insulations.size() && !overflow; i++)
-        {   AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 32, 24);
+        {   AbstractGui.blit(poseStack, x + 7 + i * 6, y + 1, 401, 0, 0, 6, 4, 24, 32);
         }
 
         // slots
@@ -208,10 +208,10 @@ public class InsulationTooltip extends Tooltip
                 if (insulation instanceof StaticInsulation)
                 {
                     StaticInsulation staticInsulation = (StaticInsulation) insulation;
-                    if (staticInsulation.getCold() > staticInsulation.getHot())
+                    if (staticInsulation.getCold() > staticInsulation.getHeat())
                         cold += staticInsulation.getCold();
-                    else if (staticInsulation.getHot() > staticInsulation.getCold())
-                        hot += staticInsulation.getHot();
+                    else if (staticInsulation.getHeat() > staticInsulation.getCold())
+                        hot += staticInsulation.getHeat();
                     else
                         neutral += staticInsulation.getCold() * 2;
                 }
@@ -279,7 +279,7 @@ public class InsulationTooltip extends Tooltip
             {
                 StaticInsulation staticInsulation = (StaticInsulation) insulation;
                 double cold = staticInsulation.getCold();
-                double hot = staticInsulation.getHot();
+                double hot = staticInsulation.getHeat();
                 double neutral = cold > 0 == hot > 0
                                  ? CSMath.minAbs(cold, hot)
                                  : 0;
@@ -361,20 +361,20 @@ public class InsulationTooltip extends Tooltip
         // icon
         switch (type)
         {
-            case CURIO : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 32, 24); break;
-            case ITEM  : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 32, 24); break;
-            case ARMOR : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 32, 24); break;
+            case CURIO : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 24, 32); break;
+            case ITEM  : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 24, 32); break;
+            case ARMOR : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 8, 8, 8, 24, 32); break;
         }
 
         if (showSign)
         {
             if (isNegative)
             {   // negative sign
-                AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 32, 24);
+                AbstractGui.blit(poseStack, x + 3, y + 3, 401, 19, 5, 5, 3, 24, 32);
             }
             else
             {   // positive sign
-                AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 32, 24);
+                AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
             }
         }
     }

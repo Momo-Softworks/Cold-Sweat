@@ -2,7 +2,7 @@
   "required": true,
   "compatibilityLevel": "JAVA_8",
   "package": "com.momosoftworks.coldsweat.mixin",
-  "minVersion": "0.8.5",
+  "minVersion": "0.8",
   "client": [
     "MixinChatClicked",
     "MixinEffectsScreen",

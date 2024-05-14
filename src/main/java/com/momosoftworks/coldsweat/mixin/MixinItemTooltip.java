@@ -26,9 +26,10 @@ import java.util.*;
 @Mixin(ItemStack.class)
 public class MixinItemTooltip
 {
-    @Inject(method = "getTooltipLines", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/ItemStack$TooltipPart;MODIFIERS:Lnet/minecraft/world/item/ItemStack$TooltipPart;", shift = At.Shift.AFTER),
+    @Inject(method = "getTooltipLines", at = @At(value = "FIELD", target = "Lnet/minecraft/item/ItemStack$TooltipDisplayFlags;MODIFIERS:Lnet/minecraft/item/ItemStack$TooltipDisplayFlags;", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void injectBeforeAttributes(PlayerEntity player, ITooltipFlag.TooltipFlags advanced, CallbackInfoReturnable<List<ITextComponent>> cir,
+    private void injectBeforeAttributes(PlayerEntity player, ITooltipFlag advanced, CallbackInfoReturnable<List<ITextComponent>> cir,
+                                        // local variables
                                         List<ITextComponent> tooltip)
     {
         ItemStack stack = (ItemStack) (Object) this;
@@ -46,7 +47,7 @@ public class MixinItemTooltip
         });
     }
 
-    @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getAttributeModifiers(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;"))
+    @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
     private Multimap<Attribute, AttributeModifier> getItemAttributes(ItemStack stack, EquipmentSlotType slot)
     {
         if (MobEntity.getEquipmentSlotForItem(stack) != slot)
@@ -87,7 +88,7 @@ public class MixinItemTooltip
                             to = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 9)
                     ),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void setupCustomAttributeDisplay(PlayerEntity pPlayer, ITooltipFlag.TooltipFlags pIsAdvanced, CallbackInfoReturnable<List<ITextComponent>> cir,
+    private void setupCustomAttributeDisplay(PlayerEntity pPlayer, ITooltipFlag pIsAdvanced, CallbackInfoReturnable<List<ITextComponent>> cir,
                                              // Locals
                                              List<ITextComponent> tooltip, IFormattableTextComponent name, int hideFlags, EquipmentSlotType[] var6, int var7, int var8,
                                              EquipmentSlotType equipmentslot, Multimap<Attribute, AttributeModifier> attributeMap, Iterator<AttributeModifier> entryIterator,

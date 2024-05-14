@@ -47,7 +47,7 @@ public class LlamaParkaModel<T extends LivingEntity> extends BipedModel<T>
 		// chestplate
 		matrixStack.pushPose();
 		matrixStack.translate(body.x / 16f, body.y / 16f, body.z / 16f);
-		matrixStack.mulPose(CSMath.getQuaternion(body.xRot, body.yRot, body.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(body.xRot, body.yRot, body.zRot));
 		matrixStack.scale(1.25f, 1.1f, 1.25f);
 		chestplate.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.scale(0.95f, 1f, 0.9f);
@@ -58,7 +58,7 @@ public class LlamaParkaModel<T extends LivingEntity> extends BipedModel<T>
 		// right sleeve
 		matrixStack.pushPose();
 		matrixStack.translate(rightArm.x / 16f, rightArm.y / 16f, rightArm.z / 16f);
-		matrixStack.mulPose(CSMath.getQuaternion(rightArm.xRot, rightArm.yRot, rightArm.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(rightArm.xRot, rightArm.yRot, rightArm.zRot));
 		matrixStack.scale(1.25f, 1.1f, 1.25f);
 		rightSleeve.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
@@ -66,7 +66,7 @@ public class LlamaParkaModel<T extends LivingEntity> extends BipedModel<T>
 		// left sleeve
 		matrixStack.pushPose();
 		matrixStack.translate(leftArm.x / 16f, leftArm.y / 16f, leftArm.z / 16f);
-		matrixStack.mulPose(CSMath.getQuaternion(leftArm.xRot, leftArm.yRot, leftArm.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(leftArm.xRot, leftArm.yRot, leftArm.zRot));
 		matrixStack.scale(1.25f, 1.1f, 1.25f);
 		leftSleeve.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();

@@ -34,7 +34,7 @@ public class LlamaCapModel<T extends LivingEntity> extends BipedModel<T>
 	{
 		matrixStack.pushPose();
 		matrixStack.translate(head.x / 16, head.y / 16, head.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(head.xRot, head.yRot, head.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(head.xRot, head.yRot, head.zRot));
 		matrixStack.scale(1.25f, 1.25f, 1.25f);
 		matrixStack.translate(0, 0.047f, 0);
 		helmet.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);

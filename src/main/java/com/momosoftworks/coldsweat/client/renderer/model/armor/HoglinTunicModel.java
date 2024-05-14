@@ -59,7 +59,7 @@ public class HoglinTunicModel<T extends LivingEntity> extends BipedModel<T>
 		// body
 		matrixStack.pushPose();
 		matrixStack.translate(body.x / 16.0, body.y / 16.0, body.z / 16.0);
-		matrixStack.mulPose(CSMath.getQuaternion(body.xRot, body.yRot, body.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(body.xRot, body.yRot, body.zRot));
 		matrixStack.scale(1.25f, 1.1f, 1.25f);
 		bodyBase.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
@@ -67,7 +67,7 @@ public class HoglinTunicModel<T extends LivingEntity> extends BipedModel<T>
 		// right arm
 		matrixStack.pushPose();
 		matrixStack.translate(rightArm.x / 16.0, rightArm.y / 16.0, rightArm.z / 16.0);
-		matrixStack.mulPose(CSMath.getQuaternion(rightArm.xRot, rightArm.yRot, rightArm.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(rightArm.xRot, rightArm.yRot, rightArm.zRot));
 		matrixStack.scale(1.35f, 1.15f, 1.35f);
 		rightArmBase.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
@@ -75,7 +75,7 @@ public class HoglinTunicModel<T extends LivingEntity> extends BipedModel<T>
 		// left arm
 		matrixStack.pushPose();
 		matrixStack.translate(leftArm.x / 16.0, leftArm.y / 16.0, leftArm.z / 16.0);
-		matrixStack.mulPose(CSMath.getQuaternion(leftArm.xRot, leftArm.yRot, leftArm.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(leftArm.xRot, leftArm.yRot, leftArm.zRot));
 		matrixStack.scale(1.35f, 1.15f, 1.35f);
 		leftArmBase.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();

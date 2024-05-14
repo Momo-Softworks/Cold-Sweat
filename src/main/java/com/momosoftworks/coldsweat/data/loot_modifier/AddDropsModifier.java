@@ -34,7 +34,7 @@ public class AddDropsModifier extends LootModifier
         int countMax = count.getSecond();
         int countRange = countMax - countMin + 1;
         generatedLoot.add(new ItemStack(addition,
-                                        context.getRandom().nextInt(countMin, countMax + 1)
+                                        context.getRandom().nextInt(countRange) + countMin
                                         + context.getRandom().nextInt(countRange * context.getLootingModifier() + 1)));
         return generatedLoot;
     }

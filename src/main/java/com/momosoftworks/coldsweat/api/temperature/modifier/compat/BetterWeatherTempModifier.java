@@ -16,7 +16,7 @@ public class BetterWeatherTempModifier extends TempModifier
     public BetterWeatherTempModifier() {}
 
     @Override
-    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Type type)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         Season season;
         if (entity.level.dimensionType().natural() && (season = Season.getSeason(entity.level)) != null)
@@ -75,10 +75,5 @@ public class BetterWeatherTempModifier extends TempModifier
         else
         {   return temp -> temp;
         }
-    }
-
-    @Override
-    public String getID() {
-        return "sereneseasons:season";
     }
 }

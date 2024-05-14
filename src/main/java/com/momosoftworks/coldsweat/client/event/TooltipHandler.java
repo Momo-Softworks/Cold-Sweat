@@ -162,8 +162,8 @@ public class TooltipHandler
             {   elements.add(tooltipStartIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
-                 {   elements.add(tooltipStartIndex, new StringTextComponent(""));
-                 }
+            {   elements.add(tooltipStartIndex, new StringTextComponent(""));
+            }
             elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(SoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
@@ -196,7 +196,7 @@ public class TooltipHandler
             if (iCap.isPresent())
             {
                 IInsulatableCap cap = iCap.orElseThrow(NullPointerException::new);
-                if (cap.getInsulation().stream().allMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst()).test(player, stack)))
+                if (cap.getInsulation().stream().allMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst().getItem()).test(player, stack)))
                 {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(InsulationTooltip.class)).withStyle(TextFormatting.BLACK));
                 }
             }
@@ -217,7 +217,7 @@ public class TooltipHandler
         Insulator itemInsul = null;
 
         if (stack.getItem() instanceof SoulspringLampItem)
-        {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("fuel"));
+        {   tooltip = new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"));
         }
         // If the item is an insulation ingredient, add the tooltip
         else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
@@ -276,16 +276,16 @@ public class TooltipHandler
         {
             String lineToReplace = TOOLTIPS.get(tooltip.getClass());
 
-            int y = event.getY();
+            int y = event.getY() - 10;
             if (lineToReplace != null)
             {
                 List<? extends ITextProperties> tooltipLines = event.getLines();
-                for (int i = 0; i < tooltipLines.size(); i++)
+                for (ITextProperties tooltipLine : tooltipLines)
                 {
-                    if (lineToReplace.equals(TextFormatting.stripFormatting(tooltipLines.get(i).getString())))
-                    {   y += 10 * (i - 1) + 1;
-                        break;
+                    if (lineToReplace.equals(tooltipLine.getString()))
+                    {   break;
                     }
+                    y += 10;
                 }
             }
             tooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);

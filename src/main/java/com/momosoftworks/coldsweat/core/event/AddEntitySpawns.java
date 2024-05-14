@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.event;
 
+import com.momosoftworks.coldsweat.common.event.LoadConfigSettings;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.math.CSMath;

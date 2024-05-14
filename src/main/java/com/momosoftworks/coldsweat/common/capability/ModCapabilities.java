@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability;
 
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import net.minecraftforge.common.capabilities.Capability;
@@ -15,7 +14,7 @@ public class ModCapabilities
     @CapabilityInject(ITemperatureCap.class)
     public static final Capability<ITemperatureCap> ENTITY_TEMPERATURE = null;
 
-    @CapabilityInject(ItemInsulationCap.class)
+    @CapabilityInject(IInsulatableCap.class)
     public static final Capability<IInsulatableCap> ITEM_INSULATION = null;
 
     @CapabilityInject(IShearableCap.class)

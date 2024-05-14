@@ -356,11 +356,10 @@ public abstract class AbstractConfigPage extends Screen
                 if (setsCustomDifficulty)
                 {   ConfigSettings.DIFFICULTY.set(4);
                 }
-                setImageX((ImageButton) button, hide.get());
-                button.changeFocus(false);
+                setButtonImageX((ImageButton) button, hide.get() ? 68 : 88);
             });
             hide.get();
-            setImageX(hideButton, hide.get());
+            setButtonImageX(hideButton, hide.get() ? 68 : 88);
             hideButton.active = shouldBeActive;
             widgetBatch.add(hideButton);
         }
@@ -491,11 +490,6 @@ public abstract class AbstractConfigPage extends Screen
                 break;
             }
         }
-        this.children().forEach(child ->
-        {
-            if (!(child instanceof TextFieldWidget))
-                child.changeFocus(false);
-        });
     }
 
     @Override
@@ -547,12 +541,12 @@ public abstract class AbstractConfigPage extends Screen
         this.tooltips.put(id, wrappedTooltip);
     }
 
-    public static void setImageX(ImageButton button, boolean enabled)
+    public static void setButtonImageX(ImageButton button, int x)
     {
-        Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
+        Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "field_191747_p");
         imageX.setAccessible(true);
         try
-        {   imageX.set(button, enabled ? 68 : 88);
+        {   imageX.set(button, x);
         }
         catch (Exception ignored) {}
     }

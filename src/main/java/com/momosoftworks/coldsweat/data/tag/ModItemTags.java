@@ -9,7 +9,6 @@ import net.minecraft.util.ResourceLocation;
 public class ModItemTags
 {
     public static final ITag.INamedTag<Item> BOILER_VALID = createTag("boiler_valid");
-    public static final ITag.INamedTag<Item> BOILER_PURIFIABLE = createTag("compat/boiler_purifiable");
     public static final ITag.INamedTag<Item> ICEBOX_VALID = createTag("icebox_valid");
 
     public static final ITag.INamedTag<Item> NOT_INSULATABLE = createTag("not_insulatable");

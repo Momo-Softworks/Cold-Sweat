@@ -45,7 +45,7 @@ public class LlamaPantsModel<T extends LivingEntity> extends BipedModel<T>
 		// waist
 		matrixStack.pushPose();
 		matrixStack.translate(body.x / 16, body.y / 16, body.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(body.xRot, body.yRot, body.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(body.xRot, body.yRot, body.zRot));
 		matrixStack.scale(1.1f, 1.1f, 1.2f);
 		waist.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
@@ -53,7 +53,7 @@ public class LlamaPantsModel<T extends LivingEntity> extends BipedModel<T>
 		// right legging
 		matrixStack.pushPose();
 		matrixStack.translate(rightLeg.x / 16, rightLeg.y / 16, rightLeg.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(rightLeg.xRot, rightLeg.yRot, rightLeg.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(rightLeg.xRot, rightLeg.yRot, rightLeg.zRot));
 		matrixStack.scale(1.25f, 1.15f, 1.25f);
 		rightLegging.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();
@@ -61,7 +61,7 @@ public class LlamaPantsModel<T extends LivingEntity> extends BipedModel<T>
 		// left legging
 		matrixStack.pushPose();
 		matrixStack.translate(leftLeg.x / 16, leftLeg.y / 16, leftLeg.z / 16);
-		matrixStack.mulPose(CSMath.getQuaternion(leftLeg.xRot, leftLeg.yRot, leftLeg.zRot));
+		matrixStack.mulPose(CSMath.toQuaternion(leftLeg.xRot, leftLeg.yRot, leftLeg.zRot));
 		matrixStack.scale(1.25f, 1.15f, 1.25f);
 		leftLegging.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 		matrixStack.popPose();

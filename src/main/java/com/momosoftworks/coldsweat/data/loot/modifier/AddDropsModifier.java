@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.data.codec.LootEntry;
 import com.momosoftworks.coldsweat.util.serialization.JsonHelper;
-import com.sun.istack.internal.NotNull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.conditions.ILootCondition;
@@ -28,7 +27,6 @@ public class AddDropsModifier extends LootModifier
         this.additions = additions;
     }
 
-    @NotNull
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {

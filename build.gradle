@@ -120,6 +120,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:tinkers-construct-74072:3695126")
     runtimeOnly fg.deobf("curse.maven:mantle-74924:3631982")
     runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
+    runtimeOnly fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
 
     implementation fg.deobf("curse.maven:caves-and-cliffs-417430:3592876")
     runtimeOnly fg.deobf("curse.maven:cavebiomeapi-441706:3519248")

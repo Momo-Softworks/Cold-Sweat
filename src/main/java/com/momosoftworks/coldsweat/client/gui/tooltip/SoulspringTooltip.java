@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -15,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
@@ -46,16 +48,19 @@ public class SoulspringTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
+        y += 11;
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
-        AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 30, 34);
-        AbstractGui.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 30, 34);
+        AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 34, 30);
+        AbstractGui.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
         if (Screen.hasShiftDown())
         {
-            AbstractGui.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 30, 34);
+            AbstractGui.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 34, 30);
 
             int i = 0;
-            for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
-            {   itemRenderer.renderGuiItem(new ItemStack(item, 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).nbt.tag),
+            Minecraft.getInstance().getItemRenderer().blitOffset += 401;
+            for (Map.Entry<Item, PredicateItem> item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().entrySet())
+            {
+                itemRenderer.renderGuiItem(new ItemStack(item.getKey(), 1, item.getValue().data.nbt.tag),
                                            x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }

@@ -228,7 +228,19 @@ public class ConfigHelper
     }
 
     public static List<Biome> getBiomes(List<? extends String> ids)
-    {   return ids.stream().map(id -> WorldHelper.getBiome(new ResourceLocation(id))).collect(Collectors.toList());
+    {
+        List<Biome> biomeList = new ArrayList<>();
+        for (String biome : ids)
+        {
+            Biome newBiome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biome));
+            if (newBiome != null)
+            {   biomeList.add(newBiome);
+            }
+            else
+            {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
+            }
+        }
+        return biomeList;
     }
     
     public static List<EntityType<?>> getEntityTypes(String... entities)

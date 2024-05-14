@@ -59,7 +59,7 @@ public class EntityHelper
                ? ObjectBuilder.build((() ->
                  {
                      ServerPlayerEntity serverPlayer = ((ServerPlayerEntity) player);
-                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayerEntity.class, "f_8941_");
+                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayerEntity.class, "field_71134_c");
                      gameMode.setAccessible(true);
                      try
                      {   return (GameType) gameMode.get(serverPlayer);
