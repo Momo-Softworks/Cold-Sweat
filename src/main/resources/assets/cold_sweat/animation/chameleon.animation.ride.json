@@ -8,24 +8,7 @@
 			"bones": {
 				"Body": {
 					"position": {
-						"0.0": {
-							"vector": [0, 0.2, 0]
-						},
-						"0.1667": {
-							"vector": [0, 0, 0],
-							"easing": "easeInQuad"
-						},
-						"0.5": {
-							"vector": [0, 0.2, 0],
-							"easing": "easeInOutQuad"
-						},
-						"0.7083": {
-							"vector": [0, 0, 0],
-							"easing": "easeInQuad"
-						},
-						"1.0": {
-							"vector": [0, 0.2, 0]
-						}
+						"vector": [0, 0.2, 0]
 					}
 				},
 				"Head": {
