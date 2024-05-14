@@ -274,7 +274,7 @@ public class TooltipHandler
         {
             String lineToReplace = TOOLTIPS.get(tooltip.getClass());
 
-            int y = event.getY() - 10;
+            int y = event.getY();
             if (lineToReplace != null)
             {
                 List<? extends ITextProperties> tooltipLines = event.getLines();
@@ -302,7 +302,7 @@ public class TooltipHandler
             PlayerEntity player = Minecraft.getInstance().player;
 
             if (player != null && inventoryScreen.getSlotUnderMouse() != null
-                    && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
+            && inventoryScreen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
             {
                 double fuel = inventoryScreen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
                 ItemStack carriedStack = player.inventory.getCarried();
