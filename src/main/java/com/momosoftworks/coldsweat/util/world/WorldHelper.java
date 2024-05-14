@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
