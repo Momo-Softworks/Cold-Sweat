@@ -60,18 +60,15 @@ public class TooltipHandler
         int tooltipStartIndex;
         String hoverName = stack.getHoverName().getString();
 
-        if (CompatManager.isIcebergLoaded())
-        {   tooltipStartIndex = CompatManager.getLegendaryTTStartIndex(tooltip) + 1;
-        }
-        else for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
+        for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
         {
             if (tooltip.get(tooltipStartIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
             {   tooltipStartIndex++;
                 break;
             }
         }
-        if (tooltipStartIndex == -1)
-        {   tooltipStartIndex = 0;
+        if (tooltipStartIndex == tooltip.size())
+        {   tooltipStartIndex = 1;
         }
         return tooltipStartIndex;
     }
