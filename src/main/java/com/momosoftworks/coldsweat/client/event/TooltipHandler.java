@@ -62,8 +62,8 @@ public class TooltipHandler
                 break;
             }
         }
-        if (tooltipStartIndex == -1)
-        {   tooltipStartIndex = 0;
+        if (tooltipStartIndex == tooltip.size())
+        {   tooltipStartIndex = 1;
         }
         return tooltipStartIndex;
     }
