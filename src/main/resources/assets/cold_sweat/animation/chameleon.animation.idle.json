@@ -140,7 +140,7 @@
 				},
 				"Body": {
 					"position": {
-						"vector": [0, 0, 0]
+						"vector": [0, 0.2, 0]
 					}
 				},
 				"LeftFrontFoot1": {
