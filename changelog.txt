@@ -1869,6 +1869,7 @@ Technical Changes:
 - The inside of naturally-generated igloos is now habitable
 - Increased hoglin hide drop rate to 1-3 per hoglin killed
 - Changed the hearth item texture to better match the block texture
+- Chameleon molt dropped from chameleons now lasts 20 minutes before despawning
 
 Fixes:
 - Fixed invalid fuel item configs defaulting to "air"
@@ -1884,10 +1885,10 @@ Technical Changes:
       - These are a more modular way of configuring things, without having to add them to the config files
       - These can be defined by developers or via datapacks:
             - Insulation: resources/data/<yourmod>/cold_sweat/insulatorData
-            - Block Temps: resources/data/<yourmod>/cold_sweat/block_temp
-            - Biome Temps: resources/data/<yourmod>/cold_sweat/biome_temp
-            - Dimension Temps: resources/data/<yourmod>/cold_sweat/dimension_temp
-            - Documentation on this feature will be available soon
+            - Block Temps: .../block_temp
+            - Biome Temps: .../biome_temp
+            - Dimension Temps: .../dimension_temp
+            - More datapack support is planned for future versions.
 - Added config option for setting the temperature of natural structures
       - This controls the world temperature when the player is inside the structure
 - Added config option to allow certain blocks to be slept on regardless of the outside temperature
@@ -2016,9 +2017,27 @@ Technical Changes:
 - Added structure temperature offset config option
 
 Fixes:
-- Fixed TempModifiers stacking in cases where they shouldn't
-- Fixed crash when saving configs or closing the config menu
+* Fixed TempModifiers stacking in cases where they shouldn't
+* Fixed crash when saving configs or closing the config menu
 - (1.19, 1.20) Fixed special minecarts splitting into multiple items when destroyed
 
 Technical Changes:
-- Added JSON config for entity spawn biomes
+* Added JSON config for entity spawn biomes
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03d
+* Chameleons can now be bred using their normal taming items (fish, spider eye), but only once
+      - This is to make chameleons slightly easier to obtain, and help with scarcity on larger servers
+      - Baby chameleons only shed chameleon molt upon growing up, then shed normally as an adult
+- Chameleons now drop 1 chameleon molt when killed, except if they are a baby
+- Made baby chameleons slightly smaller
+
+Fixes:
+* Fixed server configs not syncing to clients in many cases
+* Fixed the temperature inside generated structures being freezing cold if not defined in the configs
+* Fixed crash when displaying item tooltips in some cases
+- Fixed armor insulation tooltip not displaying the correct amount of insulation in some cases
+
+Technical Changes:
+* Config settings for biomes, dimensions, structures, and items have much more robust logging and are less prone to failure in cases where the option is malformed
