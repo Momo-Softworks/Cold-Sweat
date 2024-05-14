@@ -2023,3 +2023,21 @@ Fixes:
 
 Technical Changes:
 * Added JSON config for entity spawn biomes
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03d
+* Chameleons can now be bred using their normal taming items (fish, spider eye), but only once
+      - This is to make chameleons slightly easier to obtain, and help with scarcity on larger servers
+      - Baby chameleons only shed chameleon molt upon growing up, then shed normally as an adult
+- Chameleons now drop 1 chameleon molt when killed, except if they are a baby
+- Made baby chameleons slightly smaller
+
+Fixes:
+* Fixed server configs not syncing to clients in many cases
+* Fixed the temperature inside generated structures being freezing cold if not defined in the configs
+* Fixed crash when displaying item tooltips in some cases
+- Fixed armor insulation tooltip not displaying the correct amount of insulation in some cases
+
+Technical Changes:
+* Config settings for biomes, dimensions, structures, and items have much more robust logging and are less prone to failure in cases where the option is malformed
