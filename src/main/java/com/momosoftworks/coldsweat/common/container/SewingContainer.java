@@ -343,6 +343,7 @@ public class SewingContainer extends Container
 
                 this.setItem(2, processed);
                 this.syncSlot(2);
+                this.slotsChanged(this.sewingInventory);
             }
         }
         this.broadcastChanges();

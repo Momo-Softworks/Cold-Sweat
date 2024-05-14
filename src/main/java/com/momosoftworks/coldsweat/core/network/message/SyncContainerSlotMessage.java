@@ -31,14 +31,14 @@ public class SyncContainerSlotMessage
     public static void encode(SyncContainerSlotMessage msg, PacketBuffer buffer)
     {
         buffer.writeInt(msg.slot);
-        buffer.writeItemStack(ItemStack.of(msg.stack.save(new CompoundNBT())), false);
+        buffer.writeNbt(msg.stack.save(new CompoundNBT()));
         buffer.writeVarInt(msg.containerId);
     }
 
     public static SyncContainerSlotMessage decode(PacketBuffer buffer)
     {
         int slot = buffer.readInt();
-        ItemStack stack = buffer.readItem();
+        ItemStack stack = ItemStack.of(buffer.readNbt());
         int containerId = buffer.readVarInt();
         return new SyncContainerSlotMessage(slot, stack, containerId);
     }

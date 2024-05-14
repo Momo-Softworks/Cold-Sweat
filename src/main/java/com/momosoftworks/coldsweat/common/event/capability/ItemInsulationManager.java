@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
+import com.momosoftworks.coldsweat.util.TypedField;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.IArmorVanishable;
@@ -33,10 +34,10 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.event.ContainerListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -149,10 +150,16 @@ public class ItemInsulationManager
         event.getContainer().addSlotListener(INSULATION_LISTENER);
     }
 
+    static final TypedField<List<IContainerListener>> SLOT_LISTENERS = TypedField.of(ObfuscationReflectionHelper.findField(Container.class, "field_75149_d"));
+    static
+    {   SLOT_LISTENERS.field().setAccessible(true);
+    }
+
     @SubscribeEvent
     public static void onContainerClose(PlayerContainerEvent.Close event)
     {
-        event.getContainer().removeSlotListener(INSULATION_LISTENER);
+        SLOT_LISTENERS.get(event.getContainer()).remove(INSULATION_LISTENER);
+        event.getContainer().broadcastChanges();
     }
 
     public static int getInsulationSlots(ItemStack item)

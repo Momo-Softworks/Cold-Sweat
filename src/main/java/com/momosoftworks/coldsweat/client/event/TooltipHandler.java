@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -49,6 +50,8 @@ public class TooltipHandler
 {
     public static final TextFormatting COLD = TextFormatting.BLUE;
     public static final TextFormatting HOT  = TextFormatting.RED;
+
+    private static int TOOLTIP_BACKGROUND_COLOR = 0;
 
     public static int getTooltipTitleIndex(List<ITextComponent> tooltip, ItemStack stack)
     {
@@ -146,6 +149,11 @@ public class TooltipHandler
     }
 
     @SubscribeEvent
+    public static void trackTooltipColor(RenderTooltipEvent.Color event)
+    {   TOOLTIP_BACKGROUND_COLOR = event.getBackground();
+    }
+
+    @SubscribeEvent
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
         ItemStack stack = event.getItemStack();
@@ -168,7 +176,7 @@ public class TooltipHandler
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
             {   elements.add(tooltipStartIndex, new StringTextComponent(""));
             }
-            elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientSoulspringTooltip.class)).withStyle(TextFormatting.BLACK));
+            elements.add(tooltipStartIndex, getTooltipCode(ClientSoulspringTooltip.class));
         }
         else if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
@@ -190,7 +198,7 @@ public class TooltipHandler
         && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientInsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+            {   elements.add(tooltipStartIndex, getTooltipCode(ClientInsulationTooltip.class));
             }
         }
         // Has insulation (armor)
@@ -200,8 +208,8 @@ public class TooltipHandler
             if (iCap.isPresent())
             {
                 IInsulatableCap cap = iCap.orElseThrow(NullPointerException::new);
-                if (cap.getInsulation().stream().allMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst().getItem()).test(player, stack)))
-                {   elements.add(tooltipStartIndex, new StringTextComponent(TOOLTIPS.get(ClientInsulationTooltip.class)).withStyle(TextFormatting.BLACK));
+                if (cap.getInsulation().stream().anyMatch(ins -> ConfigSettings.INSULATION_ITEMS.get().get(ins.getFirst().getItem()).test(player, stack)))
+                {   elements.add(tooltipStartIndex, getTooltipCode(ClientInsulationTooltip.class));
                 }
             }
         }
@@ -272,9 +280,9 @@ public class TooltipHandler
         // Find the empty line that this tooltip should fill
         if (tooltip.get() != null)
         {
-            String lineToReplace = TOOLTIPS.get(tooltip.getClass());
+            String lineToReplace = TOOLTIPS.get(tooltip.get().getClass());
 
-            int y = event.getY();
+            int y = event.getY() - 10;
             if (lineToReplace != null)
             {
                 List<? extends ITextProperties> tooltipLines = event.getLines();
@@ -285,9 +293,9 @@ public class TooltipHandler
                     }
                     y += 10;
                 }
+                tooltip.get().renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+                tooltip.get().renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             }
-            tooltip.get().renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-            tooltip.get().renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
         }
     }
 
@@ -371,6 +379,15 @@ public class TooltipHandler
             TOOLTIPS.put(tooltip, code);
             TOOLTIP_REGISTRY_SIZE++;
         }
+        else
+        {
+            throw new RegistryFailureException(tooltip, "Tooltips", "Tooltip already registered!", null);
+        }
+    }
+
+    private static ITextComponent getTooltipCode(Class<? extends Tooltip> tooltip)
+    {
+        return new StringTextComponent(TOOLTIPS.get(tooltip)).withStyle(Style.EMPTY.withColor(Color.fromRgb(TOOLTIP_BACKGROUND_COLOR)));
     }
 
     static
