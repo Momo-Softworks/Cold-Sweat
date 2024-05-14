@@ -107,6 +107,7 @@ public class ChameleonEntity extends AnimalEntity
         this.goalSelector.addGoal(3, new EatObjectsGoal(this, Arrays.asList(EntityType.SILVERFISH)));
         this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream)
                                                                                      .map(item -> (IItemProvider) () -> item).toArray(IItemProvider[]::new)), false));
+        this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6.0F));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
@@ -216,13 +217,31 @@ public class ChameleonEntity extends AnimalEntity
 
     @Override
     public boolean canFallInLove()
-    {   return super.canFallInLove() && !this.getPersistentData().getBoolean("HasEverBred");
+    {   return super.canFallInLove() && !this.getPersistentData().getBoolean("HasBred");
     }
 
     @Override
     public void setInLove(@Nullable PlayerEntity pPlayer)
     {   super.setInLove(pPlayer);
-        this.getPersistentData().putBoolean("HasEverBred", true);
+        this.getPersistentData().putBoolean("HasBred", true);
+    }
+
+    @Override
+    protected void ageBoundaryReached()
+    {
+        super.ageBoundaryReached();
+        if (!this.isBaby() && !this.getPersistentData().getBoolean("HasGrown"))
+        {   this.shedItems();
+            this.getPersistentData().putBoolean("HasGrown", true);
+        }
+    }
+
+    private void shedItems()
+    {
+        for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
+        {   WorldHelper.entityDropItem(this, stack, 40000);
+        }
+        WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
     }
 
     @Override
@@ -346,8 +365,7 @@ public class ChameleonEntity extends AnimalEntity
         {
             boolean shedding = this.isShedding();
             if (this.tickCount % 20 == 0 && !shedding
-            && (this.random.nextInt(30) == 1 && this.getAgeSecs() * 20 - this.getLastShed() > 24000
-                || (this.isBaby() && this.getAge() > -this.getTimeToShed())))
+            && this.random.nextInt(30) == 1 && this.getAgeSecs() * 20 - this.getLastShed() > 24000)
             {
                 this.setShedding(true);
                 this.setLastShed(this.getAgeSecs() * 20);
@@ -355,10 +373,7 @@ public class ChameleonEntity extends AnimalEntity
 
             if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
             {
-                for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
-                {   WorldHelper.entityDropItem(this, stack, 40000);
-                }
-                WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
+                this.shedItems();
                 this.setLastShed(this.getAgeSecs() * 20);
                 this.setShedding(false);
             }
