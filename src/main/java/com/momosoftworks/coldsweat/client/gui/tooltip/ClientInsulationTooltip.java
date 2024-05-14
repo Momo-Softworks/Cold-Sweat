@@ -34,7 +34,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                                                : TOOLTIP;
 
     List<Insulation> insulation;
-    Insulation.Slot type;
+    Insulation.Slot slot;
     int width = 0;
     ItemStack stack;
 
@@ -59,9 +59,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
 
 
-    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot type, ItemStack stack)
+    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack)
     {   this.insulation = insulation;
-        this.type = type;
+        this.slot = slot;
         this.stack = stack;
     }
 
@@ -127,14 +127,14 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         // Positive insulation bar
         if (!posInsulation.isEmpty())
-        {   renderBar(poseStack, x, y, posInsulation, type, !negInsulation.isEmpty(), false, stack);
+        {   renderBar(poseStack, x, y, posInsulation, slot, !negInsulation.isEmpty(), false, stack);
             poseStack.translate(posInsulation.size() * 6 + 12, 0, 0);
             width += posInsulation.size() * 6 + 12;
         }
 
         // Negative insulation bar
         if (!negInsulation.isEmpty())
-        {   renderBar(poseStack, x + width, y, negInsulation, type, true, true, stack);
+        {   renderBar(poseStack, x + width, y, negInsulation, slot, true, true, stack);
             width += negInsulation.size() * 6 + 12;
         }
         poseStack.popPose();
@@ -183,13 +183,13 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return 12 + font.width(text);
     }
 
-    static void renderBar(PoseStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative, ItemStack stack)
+    static void renderBar(PoseStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot slot, boolean showSign, boolean isNegative, ItemStack stack)
     {
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
         Font font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
-        int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
+        int insulSlotCount = Math.max(slot == Insulation.Slot.ARMOR
                                   ? ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()]
                                   : 0,
                                   insulations.size());
@@ -359,7 +359,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
 
         // icon
-        switch (type)
+        switch (slot)
         {
             case CURIO -> GuiComponent.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 32, 24);
             case ITEM -> GuiComponent.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 32, 24);
