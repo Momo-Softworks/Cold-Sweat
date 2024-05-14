@@ -6,6 +6,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Screw you Microsoft & Mojang for disabling multiplayer
+ */
 @Mixin(Minecraft.class)
 public class MixinMultiplayerHack
 {

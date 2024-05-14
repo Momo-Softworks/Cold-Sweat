@@ -11,6 +11,7 @@
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
     "MixinItemTooltip",
+    "MixinMultiplayerHack",
     "MixinPickEntity",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
