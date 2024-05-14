@@ -400,7 +400,7 @@ public class LoadConfigSettings
                 {   return;
                 }
             }
-            for (ConfiguredStructureFeature<?,?> structure : ConfigHelper.mapVanillaRegistryTagList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, structureTempData.structures()))
+            for (StructureFeature<?> structure : ConfigHelper.mapVanillaRegistryTagList(Registry.STRUCTURE_FEATURE_REGISTRY, structureTempData.structures()))
             {
                 double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, true);
                 ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units()));
