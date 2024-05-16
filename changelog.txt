@@ -2027,16 +2027,20 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.3-b03d
-* Chameleons can now be bred using their normal taming items (fish, spider eye), but only once
-      - This is to make chameleons slightly easier to obtain, and help with scarcity on larger servers
-      - Baby chameleons only shed chameleon molt upon growing up, then shed normally as an adult
+* Tamed chameleons can now be bred using their normal taming items (fish, spider eye), but only once
+      - This is to make chameleons slightly easier to obtain, and help with potential scarcity on large servers
+      - Baby chameleons shed chameleon molt immediately upon turning in to an adult, but otherwise don't
 - Chameleons now drop 1 chameleon molt when killed, except if they are a baby
 - Made baby chameleons slightly smaller
 
 Fixes:
+* Fixed crash when displaying item tooltips in some cases
 * Fixed server configs not syncing to clients in many cases
 * Fixed the temperature inside generated structures being freezing cold if not defined in the configs
-* Fixed crash when displaying item tooltips in some cases
+* Fixed fuel items not working properly in the icebox
+- Fixed the hearth not insulating in some cases in which it should
+- Fixed adaptive insulation not adapting or protecting properly
+- Fixed the icebox and boiler not draining fuel when equipped with a smokestack
 - Fixed armor insulation tooltip not displaying the correct amount of insulation in some cases
 
 Technical Changes:
