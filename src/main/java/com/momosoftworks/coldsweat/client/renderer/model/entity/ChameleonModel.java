@@ -212,7 +212,7 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 			else if (entity.isWalking())
 			{
 				float walkSpeed = Math.min(0.15f, new Vec2((float) entity.getDeltaMovement().x, (float) entity.getDeltaMovement().z).length());
-				animTime += (frameTime * walkSpeed * 30);
+				animTime += (frameTime * walkSpeed * (young ? 50 : 30));
 
 				ChameleonAnimations.WALK.animateAll(animatedParts, animTime, true);
 				if (!chameleon.isTracking())
