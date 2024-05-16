@@ -21,11 +21,8 @@ public class ItemInsulationCap implements IInsulatableCap
     {   return this.insulation;
     }
 
-    public void calcAdaptiveInsulation(double worldTemp, double minShift, double maxShift)
+    public void calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
-        double minTemp = ConfigSettings.MIN_TEMP.get() + minShift;
-        double maxTemp = ConfigSettings.MAX_TEMP.get() + maxShift;
-
         for (Pair<ItemStack, List<Insulation>> entry : insulation)
         {
             List<Insulation> list = entry.getSecond();
