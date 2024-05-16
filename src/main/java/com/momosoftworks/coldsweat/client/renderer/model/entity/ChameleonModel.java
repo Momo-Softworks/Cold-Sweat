@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.renderer.model.entity;
 
+import com.jozufozu.flywheel.core.model.ModelPart;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -11,8 +12,10 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.IHasHead;
+import net.minecraft.client.renderer.entity.model.QuadrupedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,10 +23,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> implements IHasHead
+public class ChameleonModel<T extends ChameleonEntity> extends AgeableModel<T> implements IHasHead
 {
 	ChameleonEntity chameleon;
 	boolean tongueVisible = false;
@@ -59,7 +65,10 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 	private final ModelRenderer tail2;
 	private final ModelRenderer tail3;
 
-	public ChameleonModel() {
+	public ChameleonModel()
+	{
+		super(RenderType::entityTranslucent, true, 4.75f, 0.75f, 1.8F, 1.6F, 14.0F);
+
 		texWidth = 48;
 		texHeight = 32;
 
@@ -203,6 +212,8 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 		tail2.addChild(tail3);
 		tail3.texOffs(0, 17).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 4.0F, 4.0F, 0.0F, false);
 
+		head.y = 19.2f;
+
 		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
 	}
 
@@ -273,8 +284,6 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 		AnimationManager.saveAnimationStates(entity, modelParts);
 
-		applyBodyTransforms();
-
 		AnimationManager.animateEntity(entity, (animTime, frameTime) ->
 		{
 			float prevAnimTime = animTime;
@@ -282,9 +291,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 			animatedParts.remove("Head");
 			animatedParts.remove("LeftEye");
 			animatedParts.remove("RightEye");
-            ModelRenderer tail  = animatedParts.remove("Tail");
-            ModelRenderer tail2 = animatedParts.remove("Tail2");
-            ModelRenderer tail3 = animatedParts.remove("Tail3");
+            animatedParts.remove("Tail");
+            animatedParts.remove("Tail2");
+            animatedParts.remove("Tail3");
 
 			// Riding player animation
 			if (this.riding && entity.getVehicle() instanceof PlayerEntity)
@@ -298,12 +307,18 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				// Free up the tail if the chameleon is pointing toward a biome
 				if (!chameleon.isTracking())
 				{
-					ChameleonAnimations.RIDE.animate("Tail",  tail,  0, false);
+					ChameleonAnimations.RIDE.animate("Tail",  tail1,  0, false);
 					ChameleonAnimations.RIDE.animate("Tail2", tail2, 0, false);
 					ChameleonAnimations.RIDE.animate("Tail3", tail3, 0, false);
 				}
 
 				body.y -= (player.getBbHeight() / 2) * 16 - 4;
+				if (young)
+				{
+					body.y -= 14;
+					head.y -= 4;
+				}
+				head.y -= (player.getBbHeight() / 2) * 16 + 11;
 				body.yRot = CSMath.toRadians(playerYaw) - CSMath.toRadians(CSMath.blend(player.yBodyRotO, player.yBodyRot, partialTick, 0, 1));
 				head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick)) + 0.2f;
 				head.xRot = CSMath.clamp(CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick)) + 0.2f, -1f, 1f);
@@ -317,7 +332,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				ChameleonAnimations.WALK.animateAll(animatedParts, animTime, true);
 				if (!chameleon.isTracking())
 				{
-					ChameleonAnimations.WALK.animate("Tail",  tail,  animTime, true);
+					ChameleonAnimations.WALK.animate("Tail",  tail1,  animTime, true);
 					ChameleonAnimations.WALK.animate("Tail2", tail2, animTime, true);
 					ChameleonAnimations.WALK.animate("Tail3", tail3, animTime, true);
 				}
@@ -331,7 +346,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				// Free up the tail if the chameleon is pointing toward a biome
 				if (!chameleon.isTracking())
 				{
-					ChameleonAnimations.WALK.animate("Tail",  tail,  0, true);
+					ChameleonAnimations.WALK.animate("Tail",  tail1,  0, true);
 					ChameleonAnimations.WALK.animate("Tail2", tail2, 0, true);
 					ChameleonAnimations.WALK.animate("Tail3", tail3, 0, true);
 				}
@@ -361,13 +376,13 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 				// Side-to-side tail movement
 				tail2.yRot = (float) Math.sin(desiredTailRot) / 1.3f;
-				tail.yRot  = tail2.yRot;
+				tail1.yRot  = tail2.yRot;
 				tail3.yRot = tail2.yRot;
 
 				// Up-and-down tail movement
 				tail2.xRot = Math.max(0, (float) Math.sin(desiredTailRot - Math.PI / 2) + 0.2f);
 				tail3.xRot = tail2.xRot / 1.5f;
-				tail.xRot = tail3.xRot - CSMath.toRadians(playerRotX) / 1.25f + 0.1f;
+				tail1.xRot = tail3.xRot - CSMath.toRadians(playerRotX) / 1.25f + 0.1f;
 			}
 
 			// Eat animation (applied on top of other anims)
@@ -403,9 +418,9 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 				float tailRot2 = (float) Math.sin(chameleon.tailPhase - 1) / speedStraightFactor;
 				float tailRot3 = (float) Math.sin(chameleon.tailPhase - 2) / speedStraightFactor;
 
-				float tailRotation = (1 + Math.abs(tail.xRot - 0.2f) * 1);
+				float tailRotation = (1 + Math.abs(tail1.xRot - 0.2f) * 1);
 
-				tail.yRot  = tailRot1 / tailRotation;
+				tail1.yRot  = tailRot1 / tailRotation;
 				tail2.yRot = tailRot2 / tailRotation;
 				tail3.yRot = tailRot3 / tailRotation;
 			}
@@ -413,8 +428,8 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 			// Up/down tail movement (takes into account player head rotation)
 			float playerYVel = (float) velocity.y;
 			float tailRot = entity.xRotTail += (CSMath.clamp(playerYVel, -0.5, 0.5) - entity.xRotTail) * frameTime * 8;
-			tailRot *= CSMath.clamp(Math.abs(tail.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
-			tail.xRot += tailRot;
+			tailRot *= CSMath.clamp(Math.abs(tail1.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
+			tail1.xRot += tailRot;
 			tail2.xRot += tailRot;
 			tail3.xRot += tailRot;
 
@@ -426,6 +441,18 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
 	{	renderToBuffer(matrixStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha, false);
 	}
+
+    @Override
+    protected Iterable<ModelRenderer> headParts()
+    {
+        return Arrays.asList(head);
+    }
+
+    @Override
+    protected Iterable<ModelRenderer> bodyParts()
+    {
+        return Arrays.asList(body);
+    }
 
 	public void renderToBuffer(MatrixStack poseStack, IVertexBuilder vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
 	{
@@ -451,47 +478,23 @@ public class ChameleonModel<T extends ChameleonEntity> extends EntityModel<T> im
 
 		tongue1.visible = false;
 
-		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 
-        // Render the tongue with a different VertexConsumer that culls backfaces
-        if (tongueVisible && !isOverlay)
-        {
-            poseStack.pushPose();
-            ModelRenderer jaw = modelParts.get("Jaw");
-
-            // vertex consumer for entityTranslucentCull
-            IVertexBuilder tongueConsumer = Minecraft.getInstance().renderBuffers().bufferSource()
-                                                     .getBuffer(RenderType.entityCutout(ChameleonEntityRenderer.CHAMELEON_GREEN));
-            tongue1.visible = true;
-            poseStack.translate(0, 1.1555, -0.18755);
-            tongue1.xRot = head.xRot + jaw.xRot / 2;
-            tongue1.yRot = head.yRot;
-            tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
-            poseStack.popPose();
-        }
-        RenderSystem.disableBlend();
-	}
-
-	private void applyBodyTransforms()
-	{
-		ModelRenderer head = body.getChild("Head");
-		if (young)
+		// Render the tongue with a different VertexConsumer that culls backfaces
+		if (tongueVisible && !isOverlay)
 		{
-			head.y = -5.8f;
-			head.z = -3f;
-			head.xScale = 1.2f;
-			head.yScale = 1.2f;
-			head.zScale = 1.2f;
-			body.xScale = 0.6f;
-			body.yScale = 0.6f;
-			body.zScale = 0.6f;
-			body.y = 23.3f;
+			poseStack.pushPose();
+
+			// vertex consumer for entityTranslucentCull
+			IVertexBuilder tongueConsumer = Minecraft.getInstance().renderBuffers().bufferSource()
+					.getBuffer(RenderType.entityCutout(ChameleonEntityRenderer.CHAMELEON_GREEN));
+			tongue1.visible = true;
+			poseStack.translate(0, 1.1555, -0.18755);
+			tongue1.xRot = head.xRot + jaw.xRot / 2;
+			tongue1.yRot = head.yRot;
+			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
+			poseStack.popPose();
 		}
-		else
-		{
-			head.y = -5f;
-			head.z = -3f;
-			body.y = 23f;
-		}
+		RenderSystem.disableBlend();
 	}
 }
