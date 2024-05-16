@@ -59,7 +59,7 @@ public class EatObjectsGoal extends Goal
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
                 if (edible.isPresent()
-                && NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString()))
+                && (!NBTHelper.getTagOrEmpty(item).contains("Recipient") || NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString())))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
                     || isBreedingItem(itemEntity.getItem()))
