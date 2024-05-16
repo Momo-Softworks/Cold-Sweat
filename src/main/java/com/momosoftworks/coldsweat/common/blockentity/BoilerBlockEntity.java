@@ -224,21 +224,18 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    public void checkConsumeFuel()
+    protected void storeFuel(ItemStack stack, int amount)
     {
-        ItemStack fuelStack = this.getItem(0);
-        int itemFuel = getItemFuel(fuelStack);
-
-        if (itemFuel != 0 && this.getFuel() < this.getMaxFuel() - itemFuel / 2)
+        if (this.getFuel() < this.getMaxFuel() - Math.abs(amount) * 0.75)
         {
-            if (fuelStack.hasContainerItem() && fuelStack.getCount() == 1)
-            {   this.setItem(0, fuelStack.getContainerItem());
-                this.setFuel(this.getFuel() + itemFuel);
+            if (!stack.hasContainerItem() || stack.getCount() > 1)
+            {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - this.getFuel()) / (double) Math.abs(amount)), stack.getCount());
+                stack.shrink(consumeCount);
+                addFuel(amount * consumeCount);
             }
             else
-            {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - this.getFuel()) / (double) Math.abs(itemFuel)), fuelStack.getCount());
-                fuelStack.shrink(consumeCount);
-                this.setFuel(this.getFuel() + itemFuel * consumeCount);
+            {   this.setItem(0, stack.getContainerItem());
+                addFuel(amount);
             }
         }
     }
@@ -258,13 +255,19 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
+    public void addFuel(int amount)
+    {   this.setHotFuelAndUpdate(this.getHotFuel() + amount);
+    }
+
+    @Override
     protected boolean isFuelChanged()
     {   return this.ticksExisted % 10 == 0;
     }
 
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
-    {   // Track the players using this block
+    {
+        // Track the players using this block
         if (playerInv.player instanceof ServerPlayer serverPlayer)
         {   usingPlayers.add(serverPlayer);
         }
