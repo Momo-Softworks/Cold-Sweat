@@ -207,7 +207,14 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 					ChameleonAnimations.RIDE.animate("Tail3", tail3, 0, false);
 				}
 
+				if (young)
+				{
+					body.y -= 14;
+					head.y -= 4;
+				}
 				body.y -= (player.getBbHeight() / 2) * 16 - 4;
+				head.y -= (player.getBbHeight() / 2) * 16 + 11;
+				head.z += 1.5f;
 				body.yRot = CSMath.toRadians(playerYaw) - CSMath.toRadians(CSMath.blend(player.yBodyRotO, player.yBodyRot, partialTick, 0, 1));
 				head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick)) + 0.2f;
 				head.xRot = CSMath.clamp(CSMath.toRadians(entity.getViewXRot(partialTick) - player.getViewXRot(partialTick)) + 0.2f, -1f, 1f);
