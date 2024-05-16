@@ -425,7 +425,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                                 // If the BlockState is a pipe, check if the new path is following the direction of the pipe
                                 if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
-                                        && this.isValidPipeAt(tryPos, state, newPath, direction))
+                                && this.isValidPipeAt(tryPos, state, newPath, direction))
                                 {   // Add the new path to the list
                                     paths.add(newPath);
                                 }
@@ -501,19 +501,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 int itemFuel = getItemFuel(fuelStack);
                 if (itemFuel != 0)
                 {
-                    int fuel = itemFuel > 0 ? this.getHotFuel() : this.getColdFuel();
-                    if (fuel < this.getMaxFuel() - Math.abs(itemFuel) * 0.75)
-                    {
-                        if (!fuelStack.hasCraftingRemainingItem() || fuelStack.getCount() > 1)
-                        {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - fuel) / (double) Math.abs(itemFuel)), fuelStack.getCount());
-                            fuelStack.shrink(consumeCount);
-                            addFuel(itemFuel * consumeCount);
-                        }
-                        else
-                        {   this.setItem(0, fuelStack.getCraftingRemainingItem());
-                            addFuel(itemFuel);
-                        }
-                    }
+                    this.storeFuel(fuelStack, itemFuel);
                 }
             }
         }
@@ -522,7 +510,24 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     protected boolean isFuelChanged()
     {
         return Math.abs(this.getColdFuel() - lastColdFuel) >= this.getMaxFuel()/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= this.getMaxFuel()/36
-            || this.ticksExisted % 20 == 0;
+            || this.ticksExisted % 5 == 0;
+    }
+
+    protected void storeFuel(ItemStack stack, int amount)
+    {
+        int fuel = amount > 0 ? this.getHotFuel() : this.getColdFuel();
+        if (fuel < this.getMaxFuel() - Math.abs(amount) * 0.75)
+        {
+            if (!stack.hasCraftingRemainingItem() || stack.getCount() > 1)
+            {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - fuel) / (double) Math.abs(amount)), stack.getCount());
+                stack.shrink(consumeCount);
+                addFuel(amount * consumeCount);
+            }
+            else
+            {   this.setItem(0, stack.getCraftingRemainingItem());
+                addFuel(amount);
+            }
+        }
     }
 
     protected void drainFuel()
@@ -557,8 +562,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {
             double temp = cap.getTrait(Temperature.Trait.WORLD);
-            double min = ConfigSettings.MIN_TEMP.get() + cap.getTrait(Temperature.Trait.FREEZING_POINT);
-            double max = ConfigSettings.MAX_TEMP.get() + cap.getTrait(Temperature.Trait.BURNING_POINT);
+            double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
+            double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
 
             // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
             if (CSMath.betweenInclusive(temp, min, max))
@@ -597,12 +602,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     protected boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
     {
+        if (!isPipe(fromState)) return true;
         if (CompatManager.isCreateLoaded())
         {
             Block block = fromState.getBlock();
-            if (!(block instanceof FluidPipeBlock || block instanceof GlassFluidPipeBlock || block instanceof EncasedPipeBlock))
-            {   return true;
-            }
             if ((block instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction)))
             || (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis())
             || (block instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction))))
@@ -620,7 +623,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                                                || state.getBlock() instanceof EncasedPipeBlock);
     }
     
-    protected void registerLocation()
+    private void registerLocation()
     {
         if (!this.registeredLocation)
         {   levelPos = Pair.of(this.getBlockPos(), level.dimension().location());
