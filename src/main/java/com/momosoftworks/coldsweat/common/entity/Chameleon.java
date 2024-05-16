@@ -238,9 +238,8 @@ public class Chameleon extends Animal
     protected void ageBoundaryReached()
     {
         super.ageBoundaryReached();
-        if (!this.isBaby() && !this.getPersistentData().getBoolean("HasGrown"))
+        if (!this.isBaby())
         {   this.shedItems();
-            this.getPersistentData().putBoolean("HasGrown", true);
         }
     }
 
@@ -281,29 +280,25 @@ public class Chameleon extends Animal
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob parent)
-    {
-        return EntityInit.CHAMELEON.get().create(level);
+    {   return EntityInit.CHAMELEON.get().create(level);
     }
 
     @Nullable
     @Override
     protected SoundEvent getAmbientSound()
-    {
-        return ModSounds.CHAMELEON_AMBIENT;
+    {   return ModSounds.CHAMELEON_AMBIENT;
     }
 
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource source)
-    {
-        return ModSounds.CHAMELEON_HURT;
+    {   return ModSounds.CHAMELEON_HURT;
     }
 
     @Nullable
     @Override
     protected SoundEvent getDeathSound()
-    {
-        return ModSounds.CHAMELEON_DEATH;
+    {   return ModSounds.CHAMELEON_DEATH;
     }
 
     @Override
@@ -311,8 +306,7 @@ public class Chameleon extends Animal
     {
         SoundEvent soundevent = this.getAmbientSound();
         if (!this.level.isClientSide && soundevent != null && !this.isSearching())
-        {
-            // This method plays a sound that actually follows the entity
+        {   // This method plays a sound that actually follows the entity
             WorldHelper.playEntitySound(soundevent, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
         }
     }
