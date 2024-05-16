@@ -312,12 +312,12 @@ public class ChameleonModel<T extends ChameleonEntity> extends AgeableModel<T> i
 					ChameleonAnimations.RIDE.animate("Tail3", tail3, 0, false);
 				}
 
-				body.y -= (player.getBbHeight() / 2) * 16 - 4;
 				if (young)
 				{
 					body.y -= 14;
 					head.y -= 4;
 				}
+				body.y -= (player.getBbHeight() / 2) * 16 - 4;
 				head.y -= (player.getBbHeight() / 2) * 16 + 11;
 				body.yRot = CSMath.toRadians(playerYaw) - CSMath.toRadians(CSMath.blend(player.yBodyRotO, player.yBodyRot, partialTick, 0, 1));
 				head.yRot = CSMath.toRadians(entity.getViewYRot(partialTick) - player.getViewYRot(partialTick)) + 0.2f;
