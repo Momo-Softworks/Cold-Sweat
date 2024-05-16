@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -23,25 +23,31 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
+public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "chameleon"), "main");
 
 	final Map<String, ModelPart> modelParts;
 	final ModelPart body;
+	final ModelPart head;
 	Chameleon chameleon;
 	boolean tongueVisible = false;
 
 	public ChameleonModel(ModelPart root)
 	{
-		super(RenderType::entityTranslucent);
+		super(RenderType::entityTranslucent, true, 4.75f, 0.75f, 1.8F, 1.6F, 14.0F);
 		this.body = root.getChild("Body");
+		this.head = root.getChild("Head");
+		head.y = 19.2f;
 		modelParts = AnimationManager.getChildrenMap(root);
 
 		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
@@ -54,7 +60,7 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 
 		PartDefinition Body = partdefinition.addOrReplaceChild("Body", CubeListBuilder.create().texOffs(1, 16).addBox(-2.0F, -8.0F, -3.0F, 4.0F, 7.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		PartDefinition Head = Body.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -5.0F, -3.0F));
+		PartDefinition Head = partdefinition.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -5.0F, -3.0F));
 
 		PartDefinition TopFrill = Head.addOrReplaceChild("TopFrill", CubeListBuilder.create().texOffs(30, 0).addBox(-1.0F, 1.4F, 0.05F, 2.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, -5.0F, 0.7418F, 0.0F, 0.0F));
 
@@ -173,8 +179,6 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 		leftEye.zRot = entity.xRotLeftEye;
 
 		AnimationManager.saveAnimationStates(entity, modelParts);
-
-		applyBodyTransforms();
 
 		AnimationManager.animateEntity(entity, (animTime, frameTime) ->
 		{
@@ -326,6 +330,18 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha, false);
 	}
 
+	@Override
+	protected Iterable<ModelPart> headParts()
+	{
+		return List.of(head);
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts()
+	{
+		return List.of(body);
+	}
+
 	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
 	{
 		if (chameleon == null) return;
@@ -349,11 +365,9 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 		}
 
 		ModelPart tongue1 = modelParts.get("Tongue1");
-		ModelPart head = body.getChild("Head");
-
 		tongue1.visible = false;
 
-		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
 
 		// Render the tongue with a different VertexConsumer that culls backfaces
 		if (tongueVisible && !isOverlay)
@@ -372,28 +386,5 @@ public class ChameleonModel<T extends Chameleon> extends EntityModel<T>
 			poseStack.popPose();
 		}
 		RenderSystem.disableBlend();
-	}
-
-	private void applyBodyTransforms()
-	{
-		ModelPart head = body.getChild("Head");
-		if (young)
-		{
-			head.y = -5.8f;
-			head.z = -3f;
-			head.xScale = 1.2f;
-			head.yScale = 1.2f;
-			head.zScale = 1.2f;
-			body.xScale = 0.6f;
-			body.yScale = 0.6f;
-			body.zScale = 0.6f;
-			body.y = 23.3f;
-		}
-		else
-		{
-			head.y = -5f;
-			head.z = -3f;
-			body.y = 23f;
-		}
 	}
 }
