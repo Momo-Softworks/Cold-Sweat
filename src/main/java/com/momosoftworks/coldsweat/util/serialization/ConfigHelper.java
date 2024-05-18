@@ -558,7 +558,8 @@ public class ConfigHelper
         return readItemMap(items, (item, args) ->
         {
             if (args.size() < 2)
-            {   throw ColdSweat.LOGGER.throwing(new ArgumentCountException(args.size(), 2, String.format("Error parsing insulation config for item %s", item)));
+            {   ColdSweat.LOGGER.error(new ArgumentCountException(args.size(), 2, String.format("Error parsing insulation config for item %s", item)).getMessage());
+                return null;
             }
             double value1 = ((Number) args.get(0)).doubleValue();
             double value2 = ((Number) args.get(1)).doubleValue();
