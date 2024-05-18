@@ -153,60 +153,60 @@ public class ConfigSettings
     // Makes the settings instantiation collapsible & easier to read
     static
     {
-        DIFFICULTY = addSyncedSetting("difficulty", () -> ColdSweatConfig.getInstance().getDifficulty(),
+        DIFFICULTY = addSyncedSetting("difficulty", () -> MainSettingsConfig.getInstance().getDifficulty(),
         encoder -> ConfigHelper.serializeNbtInt(encoder, "Difficulty"),
         decoder -> decoder.getInt("Difficulty"),
-        saver -> ColdSweatConfig.getInstance().setDifficulty(saver));
+        saver -> MainSettingsConfig.getInstance().setDifficulty(saver));
 
-        MAX_TEMP = addSyncedSetting("max_temp", () -> ColdSweatConfig.getInstance().getMaxTempHabitable(),
+        MAX_TEMP = addSyncedSetting("max_temp", () -> MainSettingsConfig.getInstance().getMaxTempHabitable(),
         encoder -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
         decoder -> decoder.getDouble("MaxTemp"),
-        saver -> ColdSweatConfig.getInstance().setMaxHabitable(saver));
+        saver -> MainSettingsConfig.getInstance().setMaxHabitable(saver));
 
-        MIN_TEMP = addSyncedSetting("min_temp", () -> ColdSweatConfig.getInstance().getMinTempHabitable(),
+        MIN_TEMP = addSyncedSetting("min_temp", () -> MainSettingsConfig.getInstance().getMinTempHabitable(),
         encoder -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
         decoder -> decoder.getDouble("MinTemp"),
-        saver -> ColdSweatConfig.getInstance().setMinHabitable(saver));
+        saver -> MainSettingsConfig.getInstance().setMinHabitable(saver));
 
-        TEMP_RATE = addSyncedSetting("temp_rate", () -> ColdSweatConfig.getInstance().getRateMultiplier(),
+        TEMP_RATE = addSyncedSetting("temp_rate", () -> MainSettingsConfig.getInstance().getRateMultiplier(),
         encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
         decoder -> decoder.getDouble("TempRate"),
-        saver -> ColdSweatConfig.getInstance().setRateMultiplier(saver));
+        saver -> MainSettingsConfig.getInstance().setRateMultiplier(saver));
 
-        TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> ColdSweatConfig.getInstance().getTempDamage(),
+        TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> MainSettingsConfig.getInstance().getTempDamage(),
         encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
         decoder -> decoder.getDouble("TempDamage"),
-        saver -> ColdSweatConfig.getInstance().setTempDamage(saver));
+        saver -> MainSettingsConfig.getInstance().setTempDamage(saver));
 
-        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> ColdSweatConfig.getInstance().isFireResistanceEnabled(),
+        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> MainSettingsConfig.getInstance().isFireResistanceEnabled(),
         encoder -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
         decoder -> decoder.getBoolean("FireResistanceEnabled"),
-        saver -> ColdSweatConfig.getInstance().setFireResistanceEnabled(saver));
+        saver -> MainSettingsConfig.getInstance().setFireResistanceEnabled(saver));
 
-        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> ColdSweatConfig.getInstance().isIceResistanceEnabled(),
+        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> MainSettingsConfig.getInstance().isIceResistanceEnabled(),
         encoder -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
         decoder -> decoder.getBoolean("IceResistanceEnabled"),
-        saver -> ColdSweatConfig.getInstance().setIceResistanceEnabled(saver));
+        saver -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
 
-        DAMAGE_SCALING = addSyncedSetting("damage_scaling", () -> ColdSweatConfig.getInstance().doDamageScaling(),
+        DAMAGE_SCALING = addSyncedSetting("damage_scaling", () -> MainSettingsConfig.getInstance().doDamageScaling(),
         encoder -> ConfigHelper.serializeNbtBool(encoder, "DamageScaling"),
         decoder -> decoder.getBoolean("DamageScaling"),
-        saver -> ColdSweatConfig.getInstance().setDamageScaling(saver));
+        saver -> MainSettingsConfig.getInstance().setDamageScaling(saver));
 
-        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> ColdSweatConfig.getInstance().thermometerRequired(),
+        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> MainSettingsConfig.getInstance().thermometerRequired(),
         encoder -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
         decoder -> decoder.getBoolean("RequireThermometer"),
-        saver -> ColdSweatConfig.getInstance().setRequireThermometer(saver));
+        saver -> MainSettingsConfig.getInstance().setRequireThermometer(saver));
 
-        GRACE_LENGTH = addSyncedSetting("grace_length", () -> ColdSweatConfig.getInstance().getGracePeriodLength(),
+        GRACE_LENGTH = addSyncedSetting("grace_length", () -> MainSettingsConfig.getInstance().getGracePeriodLength(),
         encoder -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
         decoder -> decoder.getInt("GraceLength"),
-        saver -> ColdSweatConfig.getInstance().setGracePeriodLength(saver));
+        saver -> MainSettingsConfig.getInstance().setGracePeriodLength(saver));
 
-        GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> ColdSweatConfig.getInstance().isGracePeriodEnabled(),
+        GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> MainSettingsConfig.getInstance().isGracePeriodEnabled(),
         encoder -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
         decoder -> decoder.getBoolean("GraceEnabled"),
-        saver -> ColdSweatConfig.getInstance().setGracePeriodEnabled(saver));
+        saver -> MainSettingsConfig.getInstance().setGracePeriodEnabled(saver));
 
 
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
@@ -709,6 +709,7 @@ public class ConfigSettings
 
     public static void load()
     {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
+        ConfigRegistryLoader.collectConfigRegistries();
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)

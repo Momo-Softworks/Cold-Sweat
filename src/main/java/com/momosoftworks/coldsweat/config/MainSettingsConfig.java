@@ -10,10 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ColdSweatConfig
+public class MainSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
-    private static final ColdSweatConfig INSTANCE = new ColdSweatConfig();
+    private static final MainSettingsConfig INSTANCE = new MainSettingsConfig();
     public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<Integer> difficulty;
@@ -160,7 +160,7 @@ public class ColdSweatConfig
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
     }
 
-    public static ColdSweatConfig getInstance()
+    public static MainSettingsConfig getInstance()
     {   return INSTANCE;
     }
 
