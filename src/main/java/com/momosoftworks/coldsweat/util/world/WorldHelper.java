@@ -48,6 +48,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -502,6 +504,16 @@ public abstract class WorldHelper
 
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
     {   return getServer().registryAccess().registryOrThrow(registry);
+    }
+
+    @Nullable
+    public static RegistryAccess getRegistryAccess()
+    {
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {   return ClientOnlyHelper.getClientLevel().registryAccess();
+        }
+        MinecraftServer server = getServer();
+        return server != null ? server.registryAccess() : null;
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
