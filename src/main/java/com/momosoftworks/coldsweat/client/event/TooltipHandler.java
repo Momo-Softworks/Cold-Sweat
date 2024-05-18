@@ -60,6 +60,8 @@ public class TooltipHandler
 
     public static int getTooltipTitleIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
     {
+        if (tooltip.isEmpty()) return 0;
+
         int tooltipStartIndex;
         String hoverName = stack.getHoverName().getString();
 
@@ -81,6 +83,8 @@ public class TooltipHandler
 
     public static int getTooltipEndIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
     {
+        if (tooltip.isEmpty()) return 0;
+
         int tooltipEndIndex = tooltip.size();
         if (Minecraft.getInstance().options.advancedItemTooltips)
         {
