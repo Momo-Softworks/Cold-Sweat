@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
-import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -132,7 +132,7 @@ public class TempEffectsClient
         if (!(event instanceof EntityViewRenderEvent.FogDensity || event instanceof EntityViewRenderEvent.FogColors)) return;
 
         PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && BLEND_TEMP >= 50 && ColdSweatConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
+        if (player != null && BLEND_TEMP >= 50 && MainSettingsConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
         {
             float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof EntityViewRenderEvent.FogDensity)

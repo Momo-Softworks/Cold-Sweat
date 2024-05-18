@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.MainSettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -24,7 +24,7 @@ public class TempEffectsCommon
     public static void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
         PlayerEntity player = event.getPlayer();
-        if (!ColdSweatConfig.getInstance().coldMining() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+        if (!MainSettingsConfig.getInstance().coldMining() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
         // Get the player's temperature
         float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
@@ -48,7 +48,7 @@ public class TempEffectsCommon
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
-                if (!ColdSweatConfig.getInstance().coldMovement()
+                if (!MainSettingsConfig.getInstance().coldMovement()
                 || player.hasEffect(ModEffects.ICE_RESISTANCE)
                 || player.hasEffect(ModEffects.GRACE)) return;
 
@@ -73,7 +73,7 @@ public class TempEffectsCommon
         if (event.getEntityLiving().getLastHurtByMob() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving().getLastHurtByMob();
-            if (!ColdSweatConfig.getInstance().coldKnockback() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+            if (!MainSettingsConfig.getInstance().coldKnockback() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
@@ -94,7 +94,7 @@ public class TempEffectsCommon
         if (event.getEntityLiving() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-            if (!ColdSweatConfig.getInstance().freezingHearts() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+            if (!MainSettingsConfig.getInstance().freezingHearts() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
             float healing = event.getAmount();
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);

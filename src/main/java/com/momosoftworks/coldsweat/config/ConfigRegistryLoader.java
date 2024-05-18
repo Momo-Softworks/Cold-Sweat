@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event;
+package com.momosoftworks.coldsweat.config;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
@@ -25,6 +24,7 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
@@ -56,12 +56,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class LoadConfigSettings
+public class ConfigRegistryLoader
 {
     @SubscribeEvent
-    public static void onServerStarted(FMLServerAboutToStartEvent event)
+    public static void loadOnServerStart(FMLServerStartingEvent event)
+    {   ConfigSettings.load();
+    }
+
+    public static void collectConfigRegistries()
     {
-        ConfigSettings.load();
+        DynamicRegistries registries = WorldHelper.getRegistryAccess();
+        if (registries == null)
+        {   ColdSweat.LOGGER.error("Failed to load registries");
+            return;
+        }
 
         /*
          Add blocks from tags to configs

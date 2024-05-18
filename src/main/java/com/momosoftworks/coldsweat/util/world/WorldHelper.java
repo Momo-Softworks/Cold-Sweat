@@ -34,6 +34,7 @@ import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -481,6 +482,16 @@ public abstract class WorldHelper
      */
     public static Vector3d centerOf(BlockPos pos)
     {   return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    }
+
+    @Nullable
+    public static DynamicRegistries getRegistryAccess()
+    {
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {   return ClientOnlyHelper.getClientWorld().registryAccess();
+        }
+        MinecraftServer server = getServer();
+        return server != null ? server.registryAccess() : null;
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Biome biome)

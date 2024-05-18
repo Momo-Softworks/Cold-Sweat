@@ -77,7 +77,7 @@ public class ColdSweat
         // Setup configs
         WorldSettingsConfig.setup();
         ItemSettingsConfig.setup();
-        ColdSweatConfig.setup();
+        MainSettingsConfig.setup();
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
 

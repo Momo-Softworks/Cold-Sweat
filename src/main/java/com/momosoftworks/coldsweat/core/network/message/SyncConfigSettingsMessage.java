@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
-import com.momosoftworks.coldsweat.config.ColdSweatConfig;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.MainSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -72,7 +71,7 @@ public class SyncConfigSettingsMessage
             {
                 if (context.getSender() != null && context.getSender().hasPermissions(2))
                 {   ConfigSettings.saveValues();
-                    ColdSweatConfig.getInstance().save();
+                    MainSettingsConfig.getInstance().save();
                 }
 
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID));
