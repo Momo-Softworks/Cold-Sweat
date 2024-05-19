@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration;
+package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;

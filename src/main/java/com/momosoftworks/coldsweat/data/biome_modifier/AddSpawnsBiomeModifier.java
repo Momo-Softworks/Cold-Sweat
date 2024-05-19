@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.data.biome_modifier;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BiomeCodecInit;
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
+import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.MobCategory;
