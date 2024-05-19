@@ -13,11 +13,11 @@ import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -80,7 +80,7 @@ public class ConfigRegistryLoader
         }
 
         /*
-         Add blocks from tags to configs
+         Read mod-related tags for config settings
          */
         ConfigSettings.HEARTH_SPREAD_WHITELIST.get().addAll(registries.registryOrThrow(Registries.BLOCK)
                                                             .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()

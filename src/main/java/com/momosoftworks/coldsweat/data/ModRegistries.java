@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.data;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.data.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

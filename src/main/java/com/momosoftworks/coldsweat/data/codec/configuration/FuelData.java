@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.data.configuration;
+package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
