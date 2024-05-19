@@ -13,11 +13,11 @@ import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.configuration.*;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -104,7 +104,7 @@ public class ConfigRegistryLoader
          Fetch JSON registries
         */
         Set<Holder<InsulatorData>> insulators = registries.registryOrThrow(ModRegistries.INSULATOR_DATA).holders().collect(Collectors.toSet());
-        Set<Holder< FuelData>> fuels = registries.registryOrThrow(ModRegistries.FUEL_DATA).holders().collect(Collectors.toSet());
+        Set<Holder<FuelData>> fuels = registries.registryOrThrow(ModRegistries.FUEL_DATA).holders().collect(Collectors.toSet());
         Set<Holder<ItemData>> foods = registries.registryOrThrow(ModRegistries.FOOD_DATA).holders().collect(Collectors.toSet());
 
         Set<Holder<BlockTempData>> blockTemps = registries.registryOrThrow(ModRegistries.BLOCK_TEMP_DATA).holders().collect(Collectors.toSet());
