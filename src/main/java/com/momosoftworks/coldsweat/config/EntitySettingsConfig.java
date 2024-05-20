@@ -20,9 +20,10 @@ public class EntitySettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
     private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
+    private static final ForgeConfigSpec.ConfigValue<List<?>> chameleonShedTimings;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
-    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
 
     static
     {
@@ -50,6 +51,14 @@ public class EntitySettingsConfig
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", List.of(
                         1200, 2400, 0.20
+                ),
+                it -> it instanceof Number);
+
+        chameleonShedTimings = BUILDER
+                .comment("Defines how often a chameleon will try to shed its skin, the cooldown after shedding, and the chance of it succeeding",
+                        "Format: [ticks, cooldown, chance]")
+                .defineList("Chameleon Shedding Timings", List.of(
+                        100, 36000, 0.10
                 ),
                 it -> it instanceof Number);
 
@@ -174,6 +183,13 @@ public class EntitySettingsConfig
     }
     public void setGoatFurStats(List<? extends Number> list)
     {   goatFurGrowth.set(list);
+    }
+
+    public List<?> getChameleonShedStats()
+    {   return chameleonShedTimings.get();
+    }
+    public void setChameleonShedStats(List<? extends Number> list)
+    {   chameleonShedTimings.set(list);
     }
 
     public List<? extends List<?>> getChameleonSpawnBiomes()
