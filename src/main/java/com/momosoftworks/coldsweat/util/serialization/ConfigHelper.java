@@ -165,7 +165,8 @@ public class ConfigHelper
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet.", entry.get(0));
+                ColdSweat.LOGGER.error("Error parsing biome config for \"{}\"", entry.toString());
+                e.printStackTrace();
             }
         }
         return map;
@@ -186,12 +187,13 @@ public class ConfigHelper
                 {   map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
                 }
                 else
-                {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist", dimensionId);
+                {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", dimensionId);
                 }
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", entry.get(0));
+                ColdSweat.LOGGER.error("Error parsing dimension config for \"{}\"", entry.toString());
+                e.printStackTrace();
             }
         }
         return map;
@@ -207,11 +209,18 @@ public class ConfigHelper
                 ResourceLocation structureId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                Structure structure = WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).get(structureId);
+                if (structure != null)
+                {   map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                }
+                else
+                {   ColdSweat.LOGGER.error("Error parsing structure config: structure \"{}\" does not exist or is not loaded yet", structureId);
+                }
                 map.put(WorldHelper.getRegistry(Registry.STRUCTURE_REGISTRY).get(structureId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
-            {
-                ColdSweat.LOGGER.error("Error parsing structure config: dimension \"{}\" does not exist or is not loaded yet", entry.toString());
+            {   ColdSweat.LOGGER.error("Error parsing structure config for \"{}\"", entry.toString());
+                e.printStackTrace();
             }
         }
         return map;
