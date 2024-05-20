@@ -145,7 +145,7 @@ public record NbtRequirement(CompoundTag tag)
     @Override
     public String toString()
     {
-        return "Nbt{" +
+        return "NbtRequirement{" +
                 "tag=" + tag +
                 '}';
     }

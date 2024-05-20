@@ -22,4 +22,25 @@ public record MountData(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entit
             EntityRequirement.getCodec().fieldOf("requirement").forGetter(MountData::requirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(MountData::requiredMods)
     ).apply(instance, MountData::new));
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MountData{entities=[");
+        for (Either<TagKey<EntityType<?>>, EntityType<?>> entity : entities)
+        {
+            if (entity.left().isPresent())
+            {   builder.append("#").append(entity.left().get().toString());
+            }
+            else
+            {   builder.append(entity.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], coldInsulation=").append(coldInsulation).append(", heatInsulation=").append(heatInsulation).append(", requirement=").append(requirement);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
+    }
 }

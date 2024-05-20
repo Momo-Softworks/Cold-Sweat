@@ -68,9 +68,10 @@ public record EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBo
     @Override
     public String toString()
     {
-        return "Enchantment" +
-                "enchantment=" + enchantment +
-                ", level=" + level +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append(ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString());
+        level.ifPresent(bounds -> builder.append(bounds.toString()));
+
+        return builder.toString();
     }
 }

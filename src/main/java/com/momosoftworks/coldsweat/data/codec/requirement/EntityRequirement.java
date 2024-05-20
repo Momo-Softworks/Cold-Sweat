@@ -198,18 +198,21 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     @Override
     public String toString()
     {
-        return "Entity{" +
-                "type=" + type +
-                ", location=" + location +
-                ", standingOn=" + steppingOn +
-                ", effects=" + effects +
-                ", nbt=" + nbt +
-                ", flags=" + flags +
-                ", equipment=" + equipment +
-                ", playerData=" + playerData +
-                ", vehicle=" + vehicle +
-                ", passenger=" + passenger +
-                ", target=" + target +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("EntityRequirement{");
+        type.ifPresent(type -> builder.append("type=").append(type).append(", "));
+        location.ifPresent(location -> builder.append("location=").append(location).append(", "));
+        steppingOn.ifPresent(standingOn -> builder.append("standing_on=").append(standingOn).append(", "));
+        effects.ifPresent(effects -> builder.append("effects=").append(effects).append(", "));
+        nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt).append(", "));
+        flags.ifPresent(flags -> builder.append("flags=").append(flags).append(", "));
+        equipment.ifPresent(equipment -> builder.append("equipment=").append(equipment).append(", "));
+        playerData.ifPresent(playerData -> builder.append("player_data=").append(playerData).append(", "));
+        vehicle.ifPresent(vehicle -> builder.append("vehicle=").append(vehicle).append(", "));
+        passenger.ifPresent(passenger -> builder.append("passenger=").append(passenger).append(", "));
+        target.ifPresent(target -> builder.append("target=").append(target).append(", "));
+        builder.append('}');
+
+        return builder.toString();
     }
 }

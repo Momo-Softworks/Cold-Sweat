@@ -112,4 +112,15 @@ public record InsulatorData(Insulation.Slot slot,
 
         return new InsulatorData(slot, insulation, requirement, predicate, attributes, mods);
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("InsulatorData{slot=").append(slot).append(", insulation=").append(insulation).append(", data=").append(data).append(", predicate=").append(predicate);
+        attributes.ifPresent(attributeModifierMap -> builder.append(", attributes=").append(attributeModifierMap));
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append('}');
+        return builder.toString();
+    }
 }
