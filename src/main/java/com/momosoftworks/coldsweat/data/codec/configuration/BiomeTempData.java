@@ -60,4 +60,26 @@ public record BiomeTempData(List<Either<TagKey<Biome>, Biome>> biomes, double mi
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("BiomeTempData{biomes=[");
+        for (Either<TagKey<Biome>, Biome> biome : biomes)
+        {
+            if (biome.left().isPresent())
+            {   builder.append("#").append(biome.left().get().toString());
+            }
+            else
+            {   builder.append(biome.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], min=").append(min).append(", max=").append(max).append(", units=").append(units).append(", isOffset=").append(isOffset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+
+        return builder.toString();
+    }
 }

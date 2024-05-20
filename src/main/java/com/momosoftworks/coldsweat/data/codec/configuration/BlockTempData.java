@@ -47,4 +47,26 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
     {
         return BlockTempData.class;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("BlockTempData{blocks=[");
+        for (Either<TagKey<Block>, Block> block : blocks)
+        {
+            if (block.left().isPresent())
+            {   builder.append("#").append(block.left().get().toString());
+            }
+            else
+            {   builder.append(block.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], temperature=").append(temperature).append(", range=").append(range).append(", maxEffect=").append(maxEffect).append(", fade=").append(fade).append(", condition=").append(condition);
+        nbt.ifPresent(tag -> builder.append(", nbt=").append(tag));
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
+    }
 }

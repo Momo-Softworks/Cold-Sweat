@@ -287,4 +287,18 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
             return max.equals(that.max);
         }
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("BlockRequirement{");
+        blocks.ifPresent(blocks -> builder.append("blocks=").append(blocks));
+        tag.ifPresent(tag -> builder.append("tag=").append(tag));
+        state.ifPresent(state -> builder.append("state=").append(state));
+        nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt));
+        builder.append("}");
+
+        return builder.toString();
+    }
 }

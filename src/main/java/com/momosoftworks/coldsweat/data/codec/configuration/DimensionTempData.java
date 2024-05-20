@@ -44,4 +44,25 @@ public record DimensionTempData(List<Either<TagKey<DimensionType>, DimensionType
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DimensionTempData{dimensions=[");
+        for (Either<TagKey<DimensionType>, DimensionType> dimension : dimensions)
+        {
+            if (dimension.left().isPresent())
+            {   builder.append("#").append(dimension.left().get().toString());
+            }
+            else
+            {   builder.append(dimension.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", isOffset=").append(isOffset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
+    }
 }

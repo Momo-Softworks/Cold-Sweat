@@ -44,4 +44,25 @@ public record StructureTempData(List<Either<TagKey<StructureFeature<?>>, Structu
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("StructureTempData{structures=[");
+        for (Either<TagKey<StructureFeature<?>>, StructureFeature<?>> structure : structures)
+        {
+            if (structure.left().isPresent())
+            {   builder.append("#").append(structure.left().get().toString());
+            }
+            else
+            {   builder.append(structure.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", offset=").append(offset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
+    }
 }

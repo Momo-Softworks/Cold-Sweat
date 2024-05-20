@@ -23,6 +23,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -116,6 +117,7 @@ public class ConfigSettings
 
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
+    public static final DynamicHolder<Triplet<Integer, Integer, Double>> SHED_TIMINGS;
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
 
@@ -442,6 +444,31 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
+        SHED_TIMINGS = addSyncedSetting("shed_timings", () ->
+        {   List<?> entry = EntitySettingsConfig.getInstance().getChameleonShedStats();
+            return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
+        },
+        encoder ->
+        {   CompoundTag tag = new CompoundTag();
+            tag.put("Interval", IntTag.valueOf(encoder.getA()));
+            tag.put("Cooldown", IntTag.valueOf(encoder.getB()));
+            tag.put("Chance", DoubleTag.valueOf(encoder.getC()));
+            return tag;
+        },
+        decoder ->
+        {   int interval = decoder.getInt("Interval");
+            int cooldown = decoder.getInt("Cooldown");
+            double chance = decoder.getDouble("Chance");
+            return new Triplet<>(interval, cooldown, chance);
+        },
+        saver ->
+        {   List<Number> list = new ArrayList<>();
+            list.add(saver.getA());
+            list.add(saver.getB());
+            list.add(saver.getC());
+            EntitySettingsConfig.getInstance().setChameleonShedStats(list);
+        });
+
         ENTITY_SPAWN_BIOMES = addSetting("entity_spawn_biomes", () ->
         {
             Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
@@ -705,8 +732,13 @@ public class ConfigSettings
         });
     }
 
-    public static void load()
+    public static void load(RegistryAccess registryAccess)
     {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
-        ConfigRegistryLoader.collectConfigRegistries();
+        if (registryAccess != null)
+        {   ConfigRegistryLoader.collectConfigRegistries(registryAccess);
+        }
+        else
+        {   ColdSweat.LOGGER.warn("Loading Cold Sweat config settings without loading registries. This is normal during startup.");
+        }
     }
 }

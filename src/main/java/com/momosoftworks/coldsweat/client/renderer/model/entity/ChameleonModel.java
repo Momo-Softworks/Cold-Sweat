@@ -48,6 +48,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		this.body = root.getChild("Body");
 		this.head = root.getChild("Head");
 		head.y = 19.2f;
+		body.y -= 0.5f;
 		modelParts = AnimationManager.getChildrenMap(root);
 
 		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
@@ -208,8 +209,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 				}
 
 				if (young)
-				{
-					body.y -= 14;
+				{   body.y -= 14;
 					head.y -= 4;
 				}
 				body.y -= (player.getBbHeight() / 2) * 16 - 4;

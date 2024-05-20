@@ -46,4 +46,36 @@ public record SpawnBiomeData(List<Either<TagKey<Biome>, Biome>> biomes, MobCateg
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SpawnBiomeData{biomes=[");
+        for (Either<TagKey<Biome>, Biome> biome : biomes)
+        {
+            if (biome.left().isPresent())
+            {   builder.append("#").append(biome.left().get().toString());
+            }
+            else
+            {   builder.append(biome.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("], category=").append(category).append(", weight=").append(weight).append(", entities=[");
+        for (Either<TagKey<EntityType<?>>, EntityType<?>> entity : entities)
+        {
+            if (entity.left().isPresent())
+            {   builder.append("#").append(entity.left().get().toString());
+            }
+            else
+            {   builder.append(entity.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("]");
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
+    }
 }
