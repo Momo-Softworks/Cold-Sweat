@@ -3,8 +3,11 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
@@ -52,5 +55,21 @@ public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
     public Class<DimensionTempData> getRegistryType()
     {
         return DimensionTempData.class;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DimensionTempData{dimensions=[");
+        for (DimensionType dimension : dimensions)
+        {
+            builder.append(WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimension).toString());
+            builder.append(", ");
+        }
+        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", isOffset=").append(isOffset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
     }
 }

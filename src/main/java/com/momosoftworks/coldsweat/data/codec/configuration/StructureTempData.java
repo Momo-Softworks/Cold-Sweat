@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -51,5 +53,21 @@ public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
     public Class<StructureTempData> getRegistryType()
     {
         return null;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("StructureTempData{structures=[");
+        for (StructureFeature<?,?> structure : structures)
+        {
+            builder.append(WorldHelper.getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).getKey(structure).toString());
+            builder.append(", ");
+        }
+        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", offset=").append(offset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
     }
 }

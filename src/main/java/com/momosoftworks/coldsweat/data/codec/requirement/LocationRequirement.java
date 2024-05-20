@@ -156,16 +156,19 @@ public class LocationRequirement
     @Override
     public String toString()
     {
-        return "Location{" +
-                "x=" + x +
-                ", y=" + y +
-                ", z=" + z +
-                ", biome=" + biome +
-                ", structure=" + structure +
-                ", dimension=" + dimension +
-                ", light=" + light +
-                ", block=" + block +
-                ", fluid=" + fluid +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("LocationRequirement{");
+        x.ifPresent(value -> builder.append("x=").append(value).append(", "));
+        y.ifPresent(value -> builder.append("y=").append(value).append(", "));
+        z.ifPresent(value -> builder.append("z=").append(value).append(", "));
+        biome.ifPresent(value -> builder.append("biome=").append(value.location()).append(", "));
+        structure.ifPresent(value -> builder.append("structure=").append(value.location()).append(", "));
+        dimension.ifPresent(value -> builder.append("dimension=").append(value.location()).append(", "));
+        light.ifPresent(value -> builder.append("light=").append(value).append(", "));
+        block.ifPresent(value -> builder.append("block=").append(value).append(", "));
+        fluid.ifPresent(value -> builder.append("fluid=").append(value).append(", "));
+        builder.append("}");
+
+        return builder.toString();
     }
 }

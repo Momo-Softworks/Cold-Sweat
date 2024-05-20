@@ -153,7 +153,7 @@ public class NbtRequirement
     @Override
     public String toString()
     {
-        return "Nbt{" +
+        return "NbtRequirement{" +
                 "tag=" + tag +
                 '}';
     }

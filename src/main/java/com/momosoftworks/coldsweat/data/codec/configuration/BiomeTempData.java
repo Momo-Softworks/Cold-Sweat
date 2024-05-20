@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
@@ -69,5 +70,22 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
     public Class<BiomeTempData> getRegistryType()
     {
         return BiomeTempData.class;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("BiomeTempData{biomes=[");
+        for (Biome biome : biomes)
+        {
+            builder.append(ForgeRegistries.BIOMES.getKey(biome).toString());
+            builder.append(", ");
+        }
+        builder.append("], min=").append(min).append(", max=").append(max).append(", units=").append(units).append(", isOffset=").append(isOffset);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+
+        return builder.toString();
     }
 }

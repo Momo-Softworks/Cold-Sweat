@@ -85,4 +85,16 @@ public class ItemData implements NbtSerializable, IForgeRegistryEntry<ItemData>
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ItemData{data=").append(data).append(", value=").append(value);
+        entityRequirement.ifPresent(entityRequirement1 -> builder.append(", entityRequirement=").append(entityRequirement1));
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+
+        return builder.toString();
+    }
 }

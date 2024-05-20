@@ -111,4 +111,15 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FuelData{type=").append(type).append(", fuel=").append(fuel).append(", data=").append(data);
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+
+        return builder.toString();
+    }
 }

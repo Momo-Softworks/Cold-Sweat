@@ -213,6 +213,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends AgeableModel<T> i
 		tail3.texOffs(0, 17).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 4.0F, 4.0F, 0.0F, false);
 
 		head.y = 19.2f;
+        body.y -= 0.5f;
 
 		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
 	}
@@ -313,8 +314,7 @@ public class ChameleonModel<T extends ChameleonEntity> extends AgeableModel<T> i
 				}
 
 				if (young)
-				{
-					body.y -= 14;
+				{   body.y -= 14;
 					head.y -= 4;
 				}
 				body.y -= (player.getBbHeight() / 2) * 16 - 4;

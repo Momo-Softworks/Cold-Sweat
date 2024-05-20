@@ -10,6 +10,7 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
@@ -59,5 +60,32 @@ public class SpawnBiomeData implements IForgeRegistryEntry<SpawnBiomeData>
     public Class<SpawnBiomeData> getRegistryType()
     {
         return null;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SpawnBiomeData{biomes=[");
+        for (Biome biome : biomes)
+        {
+            builder.append(ForgeRegistries.BIOMES.getKey(biome).toString());
+            builder.append(", ");
+        }
+        builder.append("], category=").append(category).append(", weight=").append(weight).append(", entities=[");
+        for (Either<ITag<EntityType<?>>, EntityType<?>> entity : entities)
+        {
+            if (entity.left().isPresent())
+            {   builder.append("#").append(entity.left().get().toString());
+            }
+            else
+            {   builder.append(entity.right().get().toString());
+            }
+            builder.append(", ");
+        }
+        builder.append("]");
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+        return builder.toString();
     }
 }

@@ -111,11 +111,12 @@ public class FluidRequirement
     @Override
     public String toString()
     {
-        return "Fluid{" +
-                "fluids=" + fluids +
-                ", tag=" + tag +
-                ", state=" + state +
-                ", nbt=" + nbt +
-                '}';
+        StringBuilder lBuilder = new StringBuilder();
+        this.fluids.ifPresent(fluids -> lBuilder.append("Fluids: ").append(fluids.toString()));
+        this.tag.ifPresent(tag -> lBuilder.append("Tag: ").append(tag.toString()));
+        this.state.ifPresent(state -> lBuilder.append("State: ").append(state.toString()));
+        this.nbt.ifPresent(nbt -> lBuilder.append("NBT: ").append(nbt.toString()));
+
+        return lBuilder.toString();
     }
 }

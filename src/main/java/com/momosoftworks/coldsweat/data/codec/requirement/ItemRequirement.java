@@ -218,14 +218,18 @@ public class ItemRequirement
     @Override
     public String toString()
     {
-        return "Item{" +
-                ", items=" + items +
-                ", count=" + count +
-                ", durability=" + durability +
-                ", enchantments=" + enchantments +
-                ", storedEnchantments=" + storedEnchantments +
-                ", potion=" + potion +
-                ", nbt=" + nbt +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("ItemRequirement{");
+        items.forEach(either -> builder.append(either.map(tag -> "#" + tag.toString(),
+                                                          item -> ForgeRegistries.ITEMS.getKey(item)).toString()).append(", "));
+        count.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
+        durability.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
+        enchantments.ifPresent(enchantments -> builder.append("Enchantments: {").append(enchantments.stream().map(EnchantmentRequirement::toString).collect(Collectors.joining(", "))).append("}, "));
+        storedEnchantments.ifPresent(enchantments -> builder.append("Stored Enchantments: {").append(enchantments.stream().map(EnchantmentRequirement::toString).collect(Collectors.joining(", "))).append("}, "));
+        potion.ifPresent(potion -> builder.append("Potion: ").append(ForgeRegistries.POTION_TYPES.getKey(potion).toString()));
+        builder.append("NBT: ").append(nbt.toString()).append(", ");
+        builder.append("}");
+
+        return builder.toString();
     }
 }

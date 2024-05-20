@@ -93,13 +93,14 @@ public class EquipmentRequirement
     @Override
     public String toString()
     {
-        return "Equipment{" +
-                "head=" + head +
-                ", chest=" + chest +
-                ", legs=" + legs +
-                ", feet=" + feet +
-                ", mainHand=" + mainHand +
-                ", offHand=" + offHand +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        head.ifPresent(requirement  -> builder.append("Head: ").append(requirement.toString()));
+        chest.ifPresent(requirement -> builder.append("Chest: ").append(requirement.toString()));
+        legs.ifPresent(requirement  -> builder.append("Legs: ").append(requirement.toString()));
+        feet.ifPresent(requirement  -> builder.append("Feet: ").append(requirement.toString()));
+        mainHand.ifPresent(requirement -> builder.append("Main Hand: ").append(requirement.toString()));
+        offHand.ifPresent(requirement  -> builder.append("Off Hand: ").append(requirement.toString()));
+
+        return builder.toString();
     }
 }

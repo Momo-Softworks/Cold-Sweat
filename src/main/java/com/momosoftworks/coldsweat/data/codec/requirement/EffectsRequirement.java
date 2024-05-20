@@ -180,12 +180,14 @@ public class EffectsRequirement
         @Override
         public String toString()
         {
-            return "Effect{" +
-                   "amplifier=" + amplifier +
-                   ", duration=" + duration +
-                   ", ambient=" + ambient +
-                   ", visible=" + visible +
-                   '}';
+            StringBuilder builder = new StringBuilder();
+            builder.append("Instance{amplifier=").append(amplifier);
+            builder.append(", duration=").append(duration);
+            ambient.ifPresent(value -> builder.append(", ambient=").append(value));
+            visible.ifPresent(value -> builder.append(", visible=").append(value));
+            builder.append('}');
+
+            return builder.toString();
         }
     }
 

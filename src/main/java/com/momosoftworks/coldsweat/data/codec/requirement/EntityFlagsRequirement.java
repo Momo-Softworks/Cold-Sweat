@@ -101,14 +101,15 @@ public class EntityFlagsRequirement
     @Override
     public String toString()
     {
-        return "EntityFlags{" +
-                "onFire=" + onFire +
-                ", sneaking=" + sneaking +
-                ", sprinting=" + sprinting +
-                ", swimming=" + swimming +
-                ", invisible=" + invisible +
-                ", glowing=" + glowing +
-                ", baby=" + baby +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        onFire.ifPresent(value -> builder.append("is_on_fire=").append(value));
+        sneaking.ifPresent(value -> builder.append(", is_sneaking=").append(value));
+        sprinting.ifPresent(value -> builder.append(", is_sprinting=").append(value));
+        swimming.ifPresent(value -> builder.append(", is_swimming=").append(value));
+        invisible.ifPresent(value -> builder.append(", is_invisible=").append(value));
+        glowing.ifPresent(value -> builder.append(", is_glowing=").append(value));
+        baby.ifPresent(value -> builder.append(", is_baby=").append(value));
+
+        return builder.toString();
     }
 }

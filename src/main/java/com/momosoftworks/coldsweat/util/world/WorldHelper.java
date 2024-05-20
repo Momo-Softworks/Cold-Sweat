@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -477,21 +478,26 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 
-    /**
-     * @return A Vec3 at the center of the given BlockPos.
-     */
-    public static Vector3d centerOf(BlockPos pos)
-    {   return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-    }
-
     @Nullable
     public static DynamicRegistries getRegistryAccess()
     {
+        DynamicRegistries access;
         if (FMLEnvironment.dist == Dist.CLIENT)
-        {   return ClientOnlyHelper.getClientWorld().registryAccess();
+        {
+            access = Minecraft.getInstance().getConnection() != null
+                     ? Minecraft.getInstance().getConnection().registryAccess()
+                     : Minecraft.getInstance().level != null
+                       ? Minecraft.getInstance().level.registryAccess()
+                       : null;
         }
-        MinecraftServer server = getServer();
-        return server != null ? server.registryAccess() : null;
+        else
+        {
+            MinecraftServer server = getServer();
+            access = server != null
+                     ? server.registryAccess()
+                     : null;
+        }
+        return access;
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Biome biome)
