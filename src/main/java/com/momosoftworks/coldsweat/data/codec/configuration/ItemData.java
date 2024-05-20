@@ -54,4 +54,16 @@ public record ItemData(ItemRequirement data, Double value, Optional<EntityRequir
         });
         return new ItemData(items, value, entityRequirement, requiredMods);
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ItemData{data=").append(data).append(", value=").append(value);
+        entityRequirement.ifPresent(entityRequirement1 -> builder.append(", entityRequirement=").append(entityRequirement1));
+        requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
+        builder.append("}");
+
+        return builder.toString();
+    }
 }

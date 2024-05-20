@@ -349,7 +349,7 @@ public class SewingContainer extends AbstractContainerMenu
 
                 }
                 this.setItem(2, processed);
-                this.syncSlot(2);
+                //this.syncSlot(2);
                 this.sendAllDataToRemote();
             }
         }

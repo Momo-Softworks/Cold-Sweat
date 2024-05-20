@@ -68,14 +68,13 @@ public class ConfigRegistryLoader
 {
     @SubscribeEvent
     public static void loadOnServerStart(ServerStartingEvent event)
-    {   ConfigSettings.load();
+    {   ConfigSettings.load(event.getServer().registryAccess());
     }
 
-    public static void collectConfigRegistries()
+    public static void collectConfigRegistries(RegistryAccess registries)
     {
-        RegistryAccess registries = WorldHelper.getRegistryAccess();
         if (registries == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries");
+        {   ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
             return;
         }
 
@@ -84,28 +83,47 @@ public class ConfigRegistryLoader
          */
         ConfigSettings.HEARTH_SPREAD_WHITELIST.get().addAll(registries.registryOrThrow(Registries.BLOCK)
                                                             .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
-                                                            .stream().map(Holder::get).toList());
+                                                            .stream().map(holder ->
+                                                            {   ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.get());
+                                                                return holder.get();
+                                                            }).toList());
         ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().addAll(registries.registryOrThrow(Registries.BLOCK)
                                                             .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
-                                                            .stream().map(Holder::get).toList());
+                                                            .stream().map(holder ->
+                                                            {
+                                                                ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.get());
+                                                                return holder.get();
+                                                            }).toList());
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().addAll(registries.registryOrThrow(Registries.BLOCK)
                                                               .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
-                                                              .stream().map(Holder::get).toList());
+                                                              .stream().map(holder ->
+                                                              {   ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.get());
+                                                                  return holder.get();
+                                                              }).toList());
         ConfigSettings.LAMP_DIMENSIONS.get().addAll(registries.registryOrThrow(Registries.DIMENSION_TYPE)
                                                     .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
-                                                    .stream().map(holder -> holder.get()).toList());
+                                                    .stream().map(holder ->
+                                                    {   ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.get());
+                                                        return holder.get();
+                                                    }).toList());
         ConfigSettings.INSULATION_BLACKLIST.get().addAll(registries.registryOrThrow(Registries.ITEM)
                                                         .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
-                                                        .stream().map(Holder::get).toList());
+                                                        .stream().map(holder ->
+                                                        {   ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.get());
+                                                            return holder.get();
+                                                        }).toList());
         ConfigSettings.HEARTH_POTION_BLACKLIST.get().addAll(registries.registryOrThrow(Registries.MOB_EFFECT)
                                                            .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
-                                                           .stream().map(Holder::get).toList());
+                                                           .stream().map(holder ->
+                                                           {   ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.get());
+                                                               return holder.get();
+                                                           }).toList());
 
         /*
          Fetch JSON registries
         */
         Set<Holder<InsulatorData>> insulators = registries.registryOrThrow(ModRegistries.INSULATOR_DATA).holders().collect(Collectors.toSet());
-        Set<Holder< FuelData>> fuels = registries.registryOrThrow(ModRegistries.FUEL_DATA).holders().collect(Collectors.toSet());
+        Set<Holder<FuelData>> fuels = registries.registryOrThrow(ModRegistries.FUEL_DATA).holders().collect(Collectors.toSet());
         Set<Holder<ItemData>> foods = registries.registryOrThrow(ModRegistries.FOOD_DATA).holders().collect(Collectors.toSet());
 
         Set<Holder<BlockTempData>> blockTemps = registries.registryOrThrow(ModRegistries.BLOCK_TEMP_DATA).holders().collect(Collectors.toSet());
@@ -136,24 +154,54 @@ public class ConfigRegistryLoader
          */
         // insulators
         addInsulatorConfigs(insulators);
+        logRegistryLoaded(String.format("Loaded %s insulators", insulators.size()), insulators);
         // fuels
         addFuelConfigs(fuels);
+        logRegistryLoaded(String.format("Loaded %s fuels", fuels.size()), fuels);
         // foods
         addFoodConfigs(foods);
+        logRegistryLoaded(String.format("Loaded %s foods", foods.size()), foods);
 
         // block temperatures
         addBlockTempConfigs(blockTemps);
+        logRegistryLoaded(String.format("Loaded %s block temperatures", blockTemps.size()), blockTemps);
         // biome temperatures
         addBiomeTempConfigs(biomeTemps);
+        logRegistryLoaded(String.format("Loaded %s biome temperatures", biomeTemps.size()), biomeTemps);
         // dimension temperatures
         addDimensionTempConfigs(dimensionTemps);
+        logRegistryLoaded(String.format("Loaded %s dimension temperatures", dimensionTemps.size()), dimensionTemps);
         // structure temperatures
         addStructureTempConfigs(structureTemps);
+        logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
 
         // mounts
         addMountConfigs(mounts);
+        logRegistryLoaded(String.format("Loaded %s insulated mounts", mounts.size()), mounts);
         // spawn biomes
         addSpawnBiomeConfigs(spawnBiomes);
+        logRegistryLoaded(String.format("Loaded %s entity spawn biomes", spawnBiomes.size()), spawnBiomes);
+    }
+
+    private static void logRegistryLoaded(String message, Set<?> registry)
+    {
+        if (registry.isEmpty())
+        {   message += ".";
+        }
+        else message += ":";
+        ColdSweat.LOGGER.info(message, registry.size());
+        if (registry.isEmpty())
+        {   return;
+        }
+        for (Object entry : registry)
+        {
+            if (entry instanceof Holder<?> holder)
+            {   ColdSweat.LOGGER.info("{}", holder.get());
+            }
+            else
+            {   ColdSweat.LOGGER.info("{}", entry);
+            }
+        }
     }
 
     private static void addInsulatorConfigs(Set<Holder<InsulatorData>> insulators)

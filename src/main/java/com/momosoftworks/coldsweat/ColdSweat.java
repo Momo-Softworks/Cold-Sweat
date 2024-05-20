@@ -92,7 +92,7 @@ public class ColdSweat
         });
 
         // Load configs to memory
-        ConfigSettings.load();
+        ConfigSettings.load(null);
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)

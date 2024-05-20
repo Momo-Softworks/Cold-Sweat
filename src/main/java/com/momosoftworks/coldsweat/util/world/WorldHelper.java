@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
@@ -52,6 +53,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -476,16 +478,31 @@ public abstract class WorldHelper
     }
 
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
-    {   return getServer().registryAccess().registryOrThrow(registry);
+    {   return getRegistryAccess().registryOrThrow(registry);
     }
 
     @Nullable
     public static RegistryAccess getRegistryAccess()
     {
+        RegistryAccess access;
         if (FMLEnvironment.dist == Dist.CLIENT)
-        {   return ClientOnlyHelper.getClientLevel().registryAccess();
+        {
+            access = Minecraft.getInstance().getConnection() != null
+                     ? Minecraft.getInstance().getConnection().registryAccess()
+                     : Minecraft.getInstance().level != null
+                       ? Minecraft.getInstance().level.registryAccess()
+                       : null;
         }
         MinecraftServer server = getServer();
         return server != null ? server.registryAccess() : null;
+        else
+        {
+            MinecraftServer server = getServer();
+            access = server != null
+                     ? server.registryAccess()
+                     : null;
+        }
+        return access;
+    }
     }
 }
