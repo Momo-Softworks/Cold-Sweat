@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.data;
 
-import com.momosoftworks.coldsweat.data.configuration.SpawnBiomeData;
-import com.momosoftworks.coldsweat.data.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ModRegistries
