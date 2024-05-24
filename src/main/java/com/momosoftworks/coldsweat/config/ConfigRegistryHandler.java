@@ -44,7 +44,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -437,14 +437,14 @@ public class ConfigRegistryHandler
                 {   return;
                 }
             }
-            for (StructureFeature<?> structure : RegistryHelper.mapVanillaRegistryTagList(Registry.STRUCTURE_FEATURE_REGISTRY, structureTempData.structures(), registryAccess))
+            for (ConfiguredStructureFeature<?, ?> structure : RegistryHelper.mapVanillaRegistryTagList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, structureTempData.structures(), registryAccess))
             {
                 double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, !structureTempData.isOffset());
                 if (structureTempData.isOffset())
-                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure, Pair.of(temperature, structureTempData.units()));
+                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure.feature, Pair.of(temperature, structureTempData.units()));
                 }
                 else
-                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units()));
+                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure.feature, Pair.of(temperature, structureTempData.units()));
                 }
             }
         });
