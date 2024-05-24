@@ -18,7 +18,7 @@ public record SpawnBiomeData(List<Either<TagKey<Biome>, Biome>> biomes, MobCateg
                              int weight, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities, Optional<List<String>> requiredMods)
 {
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createForgeTagCodec(ForgeRegistries.BIOMES, Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
+            RegistryHelper.createVanillaTagCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
             MobCategory.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             Codec.either(TagKey.codec(Registry.ENTITY_TYPE_REGISTRY), ForgeRegistries.ENTITY_TYPES.getCodec()).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
