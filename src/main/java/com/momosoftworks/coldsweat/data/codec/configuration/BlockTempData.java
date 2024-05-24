@@ -3,12 +3,13 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -41,21 +42,7 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.xmap(
-            rl ->
-            {
-                if (rl.toString().charAt(0) == '#')
-                {   return Either.<ITag<Block>, Block>left(BlockTags.getAllTags().getTag(rl));
-                }
-                return Either.<ITag<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(rl));
-            },
-            either ->
-            {
-                return either.left().isPresent()
-                       ? BlockTags.getAllTags().getId(either.left().get())
-                       : ForgeRegistries.BLOCKS.getKey(either.right().get());
-            })
-            .listOf().fieldOf("blocks").forGetter(data -> data.blocks),
+            RegistryHelper.createForgeTagCodec(ForgeRegistries.BLOCKS, Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),

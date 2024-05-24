@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
@@ -17,10 +16,8 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.Property;
 import net.minecraft.tags.*;
@@ -178,7 +175,7 @@ public class ConfigHelper
                 ResourceLocation dimensionId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                DimensionType dimension = WorldHelper.getDimensionType(dimensionId);
+                DimensionType dimension = RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
                 if (dimension != null)
                 {   map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
                 }
@@ -205,14 +202,14 @@ public class ConfigHelper
                 ResourceLocation structureId = new ResourceLocation((String) entry.get(0));
                 double temp = ((Number) entry.get(1)).doubleValue();
                 Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                Structure<?> structure = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).get(structureId);
+                Structure<?> structure = RegistryHelper.getStructure(structureId);
                 if (structure != null)
                 {   map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing structure config: structure \"{}\" does not exist or is not loaded yet", structureId);
                 }
-                map.put(WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).get(structureId), Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
             {   ColdSweat.LOGGER.error("Error parsing structure config for \"{}\"", entry.toString());
@@ -332,10 +329,15 @@ public class ConfigHelper
         for (Map.Entry<Biome, Triplet<Double, Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundNBT biomeTag = new CompoundNBT();
+            ResourceLocation biomeId = RegistryHelper.getBiomeId(entry.getKey());
+            if (biomeId == null)
+            {   ColdSweat.LOGGER.error("Error serializing biome temperatures: biome \"{}\" does not exist", entry.getKey());
+                continue;
+            }
             biomeTag.putDouble("Min", entry.getValue().getFirst());
             biomeTag.putDouble("Max", entry.getValue().getSecond());
             biomeTag.putString("Units", entry.getValue().getThird().toString());
-            mapTag.put(ForgeRegistries.BIOMES.getKey(entry.getKey()).toString(), biomeTag);
+            mapTag.put(biomeId.toString(), biomeTag);
         }
         tag.put(key, mapTag);
         return tag;
@@ -348,7 +350,12 @@ public class ConfigHelper
         for (String biomeID : mapTag.getAllKeys())
         {
             CompoundNBT biomeTag = mapTag.getCompound(biomeID);
-            map.put(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeID)), new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeID));
+            if (biome == null)
+            {   ColdSweat.LOGGER.error("Error deserializing biome temperatures: biome \"{}\" does not exist", biomeID);
+                continue;
+            }
+            map.put(biome, new Triplet<>(biomeTag.getDouble("Min"), biomeTag.getDouble("Max"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -360,6 +367,12 @@ public class ConfigHelper
         for (Map.Entry<DimensionType, Pair<Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundNBT dimensionTag = new CompoundNBT();
+            ResourceLocation dimensionId = RegistryHelper.getDimensionId(entry.getKey());
+            if (dimensionId == null)
+            {   ColdSweat.LOGGER.error("Error serializing dimension temperatures: dimension \"{}\" does not exist", entry.getKey());
+                continue;
+            }
+            mapTag.put(dimensionId.toString(), dimensionTag);
             dimensionTag.putDouble("Temp", entry.getValue().getFirst());
             dimensionTag.putString("Units", entry.getValue().getSecond().toString());
             mapTag.put(WorldHelper.getDimensionTypeID(entry.getKey()).toString(), dimensionTag);
@@ -375,7 +388,12 @@ public class ConfigHelper
         for (String dimensionId : mapTag.getAllKeys())
         {
             CompoundNBT biomeTag = mapTag.getCompound(dimensionId);
-            map.put(WorldHelper.getDimensionType(new ResourceLocation(dimensionId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            DimensionType dimension = RegistryHelper.getDimension(new ResourceLocation(dimensionId));
+            if (dimension == null)
+            {   ColdSweat.LOGGER.error("Error deserializing dimension temperatures: dimension \"{}\" does not exist", dimensionId);
+                continue;
+            }
+            map.put(dimension, Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -387,12 +405,15 @@ public class ConfigHelper
         for (Map.Entry<Structure<?>, Pair<Double, Temperature.Units>> entry : map.entrySet())
         {
             CompoundNBT structureTag = new CompoundNBT();
+            ResourceLocation structureId = RegistryHelper.getStructureId(entry.getKey());
+            if (structureId == null)
+            {   ColdSweat.LOGGER.error("Error serializing structure temperatures: structure \"{}\" does not exist", entry.getKey());
+                continue;
+            }
+            mapTag.put(structureId.toString(), structureTag);
             structureTag.putDouble("Temp", entry.getValue().getFirst());
             structureTag.putString("Units", entry.getValue().getSecond().toString());
-            ResourceLocation structureId = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
-            if (structureId != null)
-            {   mapTag.put(structureId.toString(), structureTag);
-            }
+            mapTag.put(structureId.toString(), structureTag);
         }
         tag.put(key, mapTag);
 
@@ -406,7 +427,12 @@ public class ConfigHelper
         for (String structureId : mapTag.getAllKeys())
         {
             CompoundNBT biomeTag = mapTag.getCompound(structureId);
-            map.put(WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, new ResourceLocation(structureId)), Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
+            Structure<?> structure = RegistryHelper.getStructure(new ResourceLocation(structureId));
+            if (structure == null)
+            {   ColdSweat.LOGGER.error("Error deserializing structure temperatures: structure \"{}\" does not exist", structureId);
+                continue;
+            }
+            map.put(structure, Pair.of(biomeTag.getDouble("Temp"), Temperature.Units.valueOf(biomeTag.getString("Units"))));
         }
         return map;
     }
@@ -540,16 +566,5 @@ public class ConfigHelper
 
             return itemData;
         });
-    }
-
-    public static <T> List<T> mapTaggedEntryList(List<Either<ITag<T>, T>> eitherList)
-    {
-        List<T> list = new ArrayList<>();
-        for (Either<ITag<T>, T> either : eitherList)
-        {
-            either.ifLeft(tagKey -> list.addAll(tagKey.getValues()));
-            either.ifRight(object -> list.add(object));
-        }
-        return list;
     }
 }

@@ -22,7 +22,7 @@ import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -183,7 +183,7 @@ public class ConfigRegistryLoader
             AttributeModifierMap attributeModifiers = insulatorData.attributes.orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
-            for (Item item : ConfigHelper.mapTaggedEntryList(insulatorData.data.items))
+            for (Item item : RegistryHelper.mapTaggableList(insulatorData.data.items))
             {
                 Insulator insulator = new Insulator(insulation, insulatorData.slot, data, predicate, attributeModifiers);
                 switch (insulatorData.slot)
@@ -220,7 +220,7 @@ public class ConfigRegistryLoader
             double fuel = fuelData.fuel;
             PredicateItem predicateItem = new PredicateItem(fuel, data, EntityRequirement.NONE);
 
-            for (Item item : ConfigHelper.mapTaggedEntryList(fuelData.data.items))
+            for (Item item : RegistryHelper.mapTaggableList(fuelData.data.items))
             {
                 switch (type)
                 {
@@ -249,7 +249,7 @@ public class ConfigRegistryLoader
             EntityRequirement predicate = foodData.entityRequirement.orElse(null);
             double food = foodData.value;
             PredicateItem predicateItem = new PredicateItem(food, data, predicate);
-            for (Item item : ConfigHelper.mapTaggedEntryList(foodData.data.items))
+            for (Item item : RegistryHelper.mapTaggableList(foodData.data.items))
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }
@@ -268,7 +268,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            Block[] blocks = ConfigHelper.mapTaggedEntryList(blockTempData.blocks).toArray(new Block[0]);
+            Block[] blocks = RegistryHelper.mapTaggableList(blockTempData.blocks).toArray(new Block[0]);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature;
@@ -414,7 +414,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (EntityType<?> entity : ConfigHelper.mapTaggedEntryList(mountData.entities))
+            for (EntityType<?> entity : RegistryHelper.mapTaggableList(mountData.entities))
             {   ConfigSettings.INSULATED_ENTITIES.get().put(entity, new InsulatingMount(entity, mountData.coldInsulation, mountData.heatInsulation, mountData.requirement));
             }
         });

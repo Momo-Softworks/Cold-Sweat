@@ -14,12 +14,12 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -35,7 +35,6 @@ import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -50,9 +49,7 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -87,24 +84,24 @@ public abstract class WorldHelper
 
     public static ResourceLocation getBiomeID(Biome biome)
     {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = getFromRegistry(Registry.BIOME_REGISTRY, biome);
+        if (biomeID == null) biomeID = RegistryHelper.getRegistry(Registry.BIOME_REGISTRY).getKey(biome);
 
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
     {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = getFromRegistry(Registry.BIOME_REGISTRY, biomeID);
+        if (biome == null) biome = RegistryHelper.getRegistry(Registry.BIOME_REGISTRY).get(biomeID);
 
         return biome;
     }
 
     public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return getFromRegistry(Registry.DIMENSION_TYPE_REGISTRY, dimType);
+    {   return RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimType);
     }
 
     public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return getFromRegistry(Registry.DIMENSION_TYPE_REGISTRY, dimID);
+    {   return RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimID);
     }
 
 
@@ -478,26 +475,8 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 
-    @Nullable
-    public static DynamicRegistries getRegistryAccess()
-    {
-        DynamicRegistries access;
-        if (FMLEnvironment.dist == Dist.CLIENT)
-        {
-            access = Minecraft.getInstance().getConnection() != null
-                     ? Minecraft.getInstance().getConnection().registryAccess()
-                     : Minecraft.getInstance().level != null
-                       ? Minecraft.getInstance().level.registryAccess()
-                       : null;
-        }
-        else
-        {
-            MinecraftServer server = getServer();
-            access = server != null
-                     ? server.registryAccess()
-                     : null;
-        }
-        return access;
+    public static MinecraftServer getServer()
+    {   return ServerLifecycleHooks.getCurrentServer();
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Biome biome)
@@ -516,39 +495,5 @@ public abstract class WorldHelper
             }),
             new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
         return Pair.of(tempConfig.getFirst(), tempConfig.getSecond());
-    }
-
-    public static MinecraftServer getServer()
-    {   return ServerLifecycleHooks.getCurrentServer();
-    }
-
-    public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
-    {
-        if (FMLEnvironment.dist == Dist.CLIENT)
-        {   return ClientOnlyHelper.getRegistryAccess().registryOrThrow(registry);
-        }
-        return getServer()
-                .registryAccess()
-                .registryOrThrow(registry);
-    }
-
-    public static <T> T getFromRegistry(RegistryKey<Registry<T>> registry, ResourceLocation id)
-    {
-        try
-        {   return getRegistry(registry).get(id);
-        }
-        catch (Exception e)
-        {   return null;
-        }
-    }
-
-    public static <T> ResourceLocation getFromRegistry(RegistryKey<Registry<T>> registry, T value)
-    {
-        try
-        {   return getRegistry(registry).getKey(value);
-        }
-        catch (Exception e)
-        {   return null;
-        }
     }
 }

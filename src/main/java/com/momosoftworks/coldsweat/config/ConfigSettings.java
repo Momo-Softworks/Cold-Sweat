@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
@@ -249,7 +250,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getDimensionTypeID(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -266,7 +267,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getDimensionTypeID(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -283,7 +284,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -300,7 +301,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
