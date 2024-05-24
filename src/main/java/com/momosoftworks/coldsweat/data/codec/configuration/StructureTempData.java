@@ -3,10 +3,9 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
@@ -14,26 +13,27 @@ import java.util.Optional;
 
 public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
 {
-    public final List<StructureFeature<?,?>> structures;
+    public final List<Structure<?>> structures;
     public final double temperature;
     public final Temperature.Units units;
-    public final boolean offset;
+    public final boolean isOffset;
     public final Optional<List<String>> requiredMods;
 
-    public StructureTempData(List<StructureFeature<?,?>> structures, double temperature,
-                             Temperature.Units units, boolean offset, Optional<List<String>> requiredMods)
+    public StructureTempData(List<Structure<?>> structures, double temperature,
+                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
     {
         this.structures = structures;
         this.temperature = temperature;
         this.units = units;
-        this.offset = offset;
+        this.isOffset = isOffset;
         this.requiredMods = requiredMods;
     }
+
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            StructureFeature.DIRECT_CODEC.listOf().fieldOf("structures").forGetter(data -> data.structures),
+            ResourceLocation.CODEC.<Structure<?>>xmap(ForgeRegistries.STRUCTURE_FEATURES::getValue, ForgeRegistries.STRUCTURE_FEATURES::getKey).listOf().fieldOf("structures").forGetter(data -> data.structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("offset", false).forGetter(data -> data.offset),
+            Codec.BOOL.optionalFieldOf("offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, StructureTempData::new));
 
@@ -60,12 +60,12 @@ public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
     {
         StringBuilder builder = new StringBuilder();
         builder.append("StructureTempData{structures=[");
-        for (StructureFeature<?,?> structure : structures)
+        for (Structure<?> structure : structures)
         {
-            builder.append(WorldHelper.getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).getKey(structure).toString());
+            builder.append(structure.toString());
             builder.append(", ");
         }
-        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", offset=").append(offset);
+        builder.append("], temperature=").append(temperature).append(", units=").append(units).append(", offset=").append(isOffset);
         requiredMods.ifPresent(mods -> builder.append(", requiredMods=").append(mods));
         builder.append("}");
         return builder.toString();

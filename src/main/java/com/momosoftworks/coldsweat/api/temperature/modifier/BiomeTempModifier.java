@@ -7,23 +7,13 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.server.ServerWorld;
 
-import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier

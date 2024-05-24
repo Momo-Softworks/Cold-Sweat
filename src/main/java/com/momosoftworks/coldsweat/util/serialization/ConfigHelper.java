@@ -391,7 +391,7 @@ public class ConfigHelper
             structureTag.putString("Units", entry.getValue().getSecond().toString());
             ResourceLocation structureId = WorldHelper.getFromRegistry(Registry.STRUCTURE_FEATURE_REGISTRY, entry.getKey());
             if (structureId != null)
-            {   mapTag.put(structureTag.toString(), structureTag);
+            {   mapTag.put(structureId.toString(), structureTag);
             }
         }
         tag.put(key, mapTag);

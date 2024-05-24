@@ -24,7 +24,6 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
@@ -47,7 +46,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.xml.ws.Holder;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
@@ -391,10 +389,15 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (Structure<?> structure : structureTempData.structures.stream().map(feature -> feature.feature).collect(Collectors.toSet()))
+            for (Structure<?> structure : structureTempData.structures)
             {
-                double temperature = Temperature.convert(structureTempData.temperature, structureTempData.units, Temperature.Units.MC, true);
-                ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units));
+                double temperature = Temperature.convert(structureTempData.temperature, structureTempData.units, Temperature.Units.MC, !structureTempData.isOffset);
+                if (structureTempData.isOffset)
+                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure, Pair.of(temperature, structureTempData.units));
+                }
+                else
+                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units));
+                }
             }
         });
     }
