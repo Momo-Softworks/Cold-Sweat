@@ -13,10 +13,13 @@ import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -26,7 +29,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
@@ -39,6 +41,32 @@ import java.util.function.Predicate;
 public class ConfigHelper
 {
     private ConfigHelper() {}
+
+    public static <T> List<T> parseRegistryItems(ResourceKey<Registry<T>> registry, String... objects)
+    {
+        List<T> biomeList = new ArrayList<>();
+        for (String biome : objects)
+        {
+            if (biome.startsWith("#"))
+            {
+                final String tagID = biome.replace("#", "");
+                Optional<HolderSet.Named<T>> tag = RegistryHelper.getRegistry(registry).getTag(TagKey.create(registry, new ResourceLocation(tagID)));
+                tag.ifPresent(tg -> biomeList.addAll(tg.stream().map(Holder::value).toList()));
+            }
+            else
+            {
+                ResourceLocation biomeId = new ResourceLocation(biome);
+                Optional<T> biomeObj = RegistryHelper.getVanillaRegistryValue(registry, biomeId);
+                if (!biomeObj.isPresent())
+                {
+                    ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
+                    continue;
+                }
+                biomeList.add(biomeObj.get());
+            }
+        }
+        return biomeList;
+    }
 
     public static List<Block> getBlocks(String... ids)
     {
@@ -65,35 +93,6 @@ public class ConfigHelper
             }
         }
         return blocks;
-    }
-
-    public static Map<Block, Number> getBlocksWithValues(List<? extends List<?>> source)
-    {
-        Map<Block, Number> map = new HashMap<>();
-        for (List<?> entry : source)
-        {
-            String id = (String) entry.get(0);
-
-            if (id.startsWith("#"))
-            {
-                final String tagID = id.replace("#", "");
-                CSMath.doIfNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
-                {
-                    Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
-
-                    optionalTag.ifPresent(itemITag ->
-                    {   for (Block block : optionalTag.get().stream().toList())
-                        {   map.put(block, (Number) entry.get(1));
-                        }
-                    });
-                });
-            }
-            else
-            {   Block newBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
-                if (newBlock != null) map.put(newBlock, (Number) entry.get(1));
-            }
-        }
-        return map;
     }
 
     public static List<Item> getItems(String... ids)
@@ -130,33 +129,35 @@ public class ConfigHelper
         {
             try
             {
-                ResourceLocation biomeId = new ResourceLocation((String) entry.get(0));
-                Biome biome = WorldHelper.getBiome(biomeId);
-                if (biome == null)
-                {   ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist or is not loaded yet", biomeId);
-                    continue;
-                }
+                String biomeIdString = (String) entry.get(0);
+                for (Biome biome : parseRegistryItems(Registry.BIOME_REGISTRY, biomeIdString))
+                {
+                    if (biome == null)
+                    {   ColdSweat.LOGGER.error("Error parsing biome config: string \"{}\" contains a biome that does not exist or is not loaded yet", biomeIdString);
+                        continue;
+                    }
 
-                double min;
-                double max;
-                Temperature.Units units;
-                // The config defines a min and max value, with optional unit conversion
-                if (entry.size() > 2)
-                {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
-                    min = Temperature.convert(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
-                    max = Temperature.convert(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
-                }
-                // The config only defines a mid-temperature
-                else
-                {   double mid = ((Number) entry.get(1)).doubleValue();
-                    double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-                    min = mid - variance;
-                    max = mid + variance;
-                    units = Temperature.Units.MC;
-                }
+                    double min;
+                    double max;
+                    Temperature.Units units;
+                    // The config defines a min and max value, with optional unit conversion
+                    if (entry.size() > 2)
+                    {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+                        min = Temperature.convert(((Number) entry.get(1)).doubleValue(), units, Temperature.Units.MC, absolute);
+                        max = Temperature.convert(((Number) entry.get(2)).doubleValue(), units, Temperature.Units.MC, absolute);
+                    }
+                    // The config only defines a mid-temperature
+                    else
+                    {   double mid = ((Number) entry.get(1)).doubleValue();
+                        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+                        min = mid - variance;
+                        max = mid + variance;
+                        units = Temperature.Units.MC;
+                    }
 
-                // Maps the biome ID to the temperature (and variance if present)
-                map.put(biome, new Triplet<>(min, max, units));
+                    // Maps the biome ID to the temperature (and variance if present)
+                    map.put(biome, new Triplet<>(min, max, units));
+                }
             }
             catch (Exception e)
             {
@@ -174,15 +175,17 @@ public class ConfigHelper
         {
             try
             {
-                ResourceLocation dimensionId = new ResourceLocation((String) entry.get(0));
-                double temp = ((Number) entry.get(1)).doubleValue();
-                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                DimensionType dimension = RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
-                if (dimension != null)
-                {   map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
-                }
-                else
-                {   ColdSweat.LOGGER.error("Error parsing dimension config: dimension \"{}\" does not exist or is not loaded yet", dimensionId);
+                String dimensionIdString = (String) entry.get(0);
+                for (DimensionType dimension : parseRegistryItems(Registry.DIMENSION_TYPE_REGISTRY, dimensionIdString))
+                {
+                    if (dimension == null)
+                    {   ColdSweat.LOGGER.error("Error parsing dimension config: string \"{}\" contains a dimension that does not exist or is not loaded yet", dimensionIdString);
+                        continue;
+                    }
+                    double temp = ((Number) entry.get(1)).doubleValue();
+                    Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                    map.put(dimension, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+
                 }
             }
             catch (Exception e)
@@ -201,17 +204,17 @@ public class ConfigHelper
         {
             try
             {
-                ResourceLocation structureId = new ResourceLocation((String) entry.get(0));
-                double temp = ((Number) entry.get(1)).doubleValue();
-                Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-                StructureFeature<?> structure = RegistryHelper.getStructure(structureId);
-                if (structure != null)
-                {   map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
+                String structureIdString = (String) entry.get(0);
+                for (StructureFeature<?> structure : parseRegistryItems(Registry.STRUCTURE_FEATURE_REGISTRY, structureIdString))
+                {
+                    if (structure == null)
+                    {   ColdSweat.LOGGER.error("Error parsing structure config: string \"{}\" contains a structure that does not exist or is not loaded yet", structureIdString);
+                        continue;
+                    }
+                    double temp = ((Number) entry.get(1)).doubleValue();
+                    Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
+                    map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
                 }
-                else
-                {   ColdSweat.LOGGER.error("Error parsing structure config: structure \"{}\" does not exist or is not loaded yet", structureId);
-                }
-                map.put(structure, Pair.of(Temperature.convert(temp, units, Temperature.Units.MC, absolute), units));
             }
             catch (Exception e)
             {   ColdSweat.LOGGER.error("Error parsing structure config for \"{}\"", entry.toString());
@@ -251,35 +254,6 @@ public class ConfigHelper
             }
         }
         return blockPredicates;
-    }
-
-    public static List<Biome> getBiomes(String... biomes)
-    {
-        List<Biome> biomeList = new ArrayList<>();
-        for (String biome : biomes)
-        {
-            if (biome.startsWith("#"))
-            {
-                final String tagID = biome.replace("#", "");
-                CSMath.doIfNotNull(ForgeRegistries.BIOMES.tags(), tags ->
-                {
-                    Optional<ITag<Biome>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
-                    optionalTag.ifPresent(biomeITag -> biomeList.addAll(biomeITag.stream().toList()));
-                });
-            }
-            else
-            {
-                ResourceLocation biomeId = new ResourceLocation(biome);
-                Biome biomeObj = RegistryHelper.getBiome(biomeId);
-                if (biomeObj == null)
-                {
-                    ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
-                    continue;
-                }
-                biomeList.add(biomeObj);
-            }
-        }
-        return biomeList;
     }
 
     public static List<EntityType<?>> getEntityTypes(String... entities)

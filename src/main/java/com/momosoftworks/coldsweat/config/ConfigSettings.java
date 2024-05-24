@@ -220,7 +220,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getC();
@@ -238,7 +238,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getC();
@@ -483,7 +483,7 @@ public class ConfigSettings
                 for (List<?> entry : configBiomes)
                 {
                     String biomeId = ((String) entry.get(0));
-                    List<Biome> biomes = ConfigHelper.getBiomes(biomeId);
+                    List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, biomeId);
                     Either<TagKey<Biome>, Biome> biomeEither;
                     if (biomeId.charAt(0) == '#')
                     {   biomeEither = Either.left(TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeId.substring(1))));

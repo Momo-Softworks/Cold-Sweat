@@ -14,7 +14,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.common.Tags;
-import oshi.util.tuples.Triplet;
 
 import java.util.function.Function;
 
@@ -64,7 +63,7 @@ public class BiomeTempModifier extends TempModifier
                 biomeCount++;
 
                 // Get min/max temperature of the biome
-                Pair<Double, Double> configTemp = getBiomeTemp(holder);
+                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperature(holder.value());
 
                 // Biome temp at midnight (bottom of the sine wave)
                 double min = configTemp.getFirst();
@@ -117,20 +116,5 @@ public class BiomeTempModifier extends TempModifier
         Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure.feature), Pair::getFirst, 0d);
 
         return Pair.of(strucTemp, strucOffset);
-    }
-
-    public Pair<Double, Double> getBiomeTemp(Holder<Biome> holder)
-    {
-        Biome biome = holder.value();
-        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-        double baseTemp = biome.getBaseTemperature();
-
-        // Get the biome's temperature, either overridden by config or calculated
-        // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
-                                                           new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
-                                                             new Triplet<>(0d, 0d, Temperature.Units.MC));
-        return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }
 }

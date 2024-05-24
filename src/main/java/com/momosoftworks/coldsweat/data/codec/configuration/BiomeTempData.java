@@ -20,7 +20,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, Biome>> biomes, double mi
                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<BiomeTempData>
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createForgeTagCodec(ForgeRegistries.BIOMES, Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            RegistryHelper.createVanillaTagCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
             either ->
             {

@@ -19,7 +19,7 @@ public class AddEntitySpawns
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBiomeLoading(BiomeLoadingEvent event)
     {
-        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(ForgeRegistries.BIOMES.getValue(event.getName())), spawns ->
+        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(RegistryHelper.getBiome(event.getName())), spawns ->
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
