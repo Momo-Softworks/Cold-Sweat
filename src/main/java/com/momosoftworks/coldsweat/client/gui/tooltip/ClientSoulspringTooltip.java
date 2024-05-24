@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -24,9 +23,9 @@ public class ClientSoulspringTooltip extends Tooltip
 {
     private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel.png");
     private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/soulspring_lamp_fuel_hc.png");
-    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ClientSettingsConfig.getInstance().isHighContrast() ? TOOLTIP_HC
-                                                                : TOOLTIP;
+    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () -> ConfigSettings.HIGH_CONTRAST.get()
+                                                                            ? TOOLTIP_HC
+                                                                            : TOOLTIP;
 
     double fuel;
 

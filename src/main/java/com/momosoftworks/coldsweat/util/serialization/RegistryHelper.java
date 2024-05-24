@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tags.*;
@@ -16,7 +15,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -131,16 +129,12 @@ public class RegistryHelper
 
     @Nullable
     public static Biome getBiome(ResourceLocation biomeId)
-    {
-        return CSMath.orElse(ForgeRegistries.BIOMES.getValue(biomeId),
-                             getVanillaRegistryValue(Registry.BIOME_REGISTRY, biomeId).orElse(null));
+    {   return getVanillaRegistryValue(Registry.BIOME_REGISTRY, biomeId).orElse(null);
     }
 
     @Nullable
     public static ResourceLocation getBiomeId(Biome biome)
-    {
-        return CSMath.orElse(ForgeRegistries.BIOMES.getKey(biome),
-                             getVanillaRegistryKey(Registry.BIOME_REGISTRY, biome).orElse(null));
+    {   return getVanillaRegistryKey(Registry.BIOME_REGISTRY, biome).orElse(null);
     }
 
     @Nullable

@@ -60,7 +60,7 @@ public class BiomeTempModifier extends TempModifier
                 biomeCount++;
 
                 // Get min/max temperature of the biome
-                Pair<Double, Double> configTemp = getBiomeTemp(biome);
+                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperature(biome);
 
                 // Biome temp at midnight (bottom of the sine wave)
                 double min = configTemp.getFirst();
@@ -113,19 +113,5 @@ public class BiomeTempModifier extends TempModifier
         Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure), Pair::getFirst, 0d);
 
         return Pair.of(strucTemp, strucOffset);
-    }
-
-    public Pair<Double, Double> getBiomeTemp(Biome biome)
-    {
-        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
-        double baseTemp = biome.getBaseTemperature();
-
-        // Get the biome's temperature, either overridden by config or calculated
-        // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
-                                                           new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
-                                                             new Triplet<>(0d, 0d, Temperature.Units.MC));
-        return CSMath.addPairs(Pair.of(configTemp.getFirst(), configTemp.getSecond()), Pair.of(configOffset.getFirst(), configOffset.getSecond()));
     }
 }

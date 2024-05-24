@@ -218,7 +218,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getThird();
@@ -236,7 +236,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = ForgeRegistries.BIOMES.getKey(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getThird();
@@ -485,7 +485,7 @@ public class ConfigSettings
                 for (List<?> entry : configBiomes)
                 {
                     String biomeId = ((String) entry.get(0));
-                    List<Biome> biomes = ConfigHelper.getBiomes(Arrays.asList(biomeId));
+                    List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, biomeId);
                     for (Biome biome : biomes)
                     {
                         SpawnBiomeData spawnData = new SpawnBiomeData(biomes, EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),

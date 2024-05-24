@@ -82,29 +82,6 @@ public abstract class WorldHelper
         return chunk.getHeight(Heightmap.Type.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
     }
 
-    public static ResourceLocation getBiomeID(Biome biome)
-    {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = RegistryHelper.getRegistry(Registry.BIOME_REGISTRY).getKey(biome);
-
-        return biomeID;
-    }
-
-    public static Biome getBiome(ResourceLocation biomeID)
-    {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = RegistryHelper.getRegistry(Registry.BIOME_REGISTRY).get(biomeID);
-
-        return biome;
-    }
-
-    public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimType);
-    }
-
-    public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return RegistryHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).get(dimID);
-    }
-
-
     /**
      * Returns all block positions in a grid of the specified size<br>
      * Search area scales with the number of samples
