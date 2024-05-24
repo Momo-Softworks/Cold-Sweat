@@ -140,16 +140,12 @@ public class RegistryHelper
 
     @Nullable
     public static Biome getBiome(ResourceLocation biomeId)
-    {
-        return CSMath.orElse(ForgeRegistries.BIOMES.getValue(biomeId),
-                             getVanillaRegistryValue(Registries.BIOME, biomeId).orElse(null));
+    {   return getVanillaRegistryValue(Registries.BIOME, biomeId).orElse(null);
     }
 
     @Nullable
     public static ResourceLocation getBiomeId(Biome biome)
-    {
-        return CSMath.orElse(ForgeRegistries.BIOMES.getKey(biome),
-                             getVanillaRegistryKey(Registries.BIOME, biome).orElse(null));
+    {   return getVanillaRegistryKey(Registries.BIOME, biome).orElse(null);
     }
 
     @Nullable

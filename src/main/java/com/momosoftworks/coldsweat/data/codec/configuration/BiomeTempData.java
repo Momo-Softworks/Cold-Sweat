@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +16,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, Biome>> biomes, double mi
                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createForgeTagCodec(ForgeRegistries.BIOMES, Registries.BIOME).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            RegistryHelper.createVanillaTagCodec(Registries.BIOME).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
             either ->
             {

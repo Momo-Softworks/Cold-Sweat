@@ -83,29 +83,6 @@ public abstract class WorldHelper
         return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
     }
 
-    public static ResourceLocation getBiomeID(Biome biome)
-    {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = RegistryHelper.getRegistry(Registries.BIOME).getKey(biome);
-
-        return biomeID;
-    }
-
-    public static Biome getBiome(ResourceLocation biomeID)
-    {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = RegistryHelper.getRegistry(Registries.BIOME).get(biomeID);
-
-        return biome;
-    }
-
-    public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return RegistryHelper.getRegistry(Registries.DIMENSION_TYPE).getKey(dimType);
-    }
-
-    public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return RegistryHelper.getRegistry(Registries.DIMENSION_TYPE).get(dimID);
-    }
-
-
     /**
      * Returns all block positions in a grid of the specified size<br>
      * Search area scales with the number of samples
@@ -477,10 +454,9 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> holder)
+    public static Pair<Double, Double> getBiomeTemperature(Biome biome)
     {
-        Biome biome = holder.value();
-        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+        double variance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
