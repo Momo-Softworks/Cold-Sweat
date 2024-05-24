@@ -500,19 +500,18 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)
+    public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> holder)
     {
-        double biomeTemp = biome.value().getBaseTemperature();
-        Triplet<Double, Double, Temperature.Units> tempConfig = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get().get(biome.value()),
-                                                                              ObjectBuilder.build(() ->
-                                                                              {
-                                                                                  Triplet<Double, Double, Temperature.Units> offset = ConfigSettings.BIOME_OFFSETS.get().get(biome.value());
-                                                                                  if (offset == null) return null;
-                                                                                  return new Triplet<>(biomeTemp + offset.getA(),
-                                                                                                       biomeTemp + offset.getB(),
-                                                                                                       Temperature.Units.MC);
-                                                                              }),
-                                                                              new Triplet<>(biomeTemp, biomeTemp, Temperature.Units.MC));
-        return Pair.of(tempConfig.getA(), tempConfig.getB());
+        Biome biome = holder.value();
+        double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
+        double baseTemp = biome.getBaseTemperature();
+
+        // Get the biome's temperature, either overridden by config or calculated
+        // Start with biome override
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
+                                                                new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
+                                                                  new Triplet<>(0d, 0d, Temperature.Units.MC));
+        return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }
 }
