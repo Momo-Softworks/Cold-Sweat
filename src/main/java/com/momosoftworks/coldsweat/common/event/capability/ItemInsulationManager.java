@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Direction;
@@ -146,13 +146,13 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
+        Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
         return switch (LivingEntity.getEquipmentSlotForItem(item))
         {
-            case HEAD  -> slots.get(0).intValue();
-            case CHEST -> slots.get(1).intValue();
-            case LEGS  -> slots.get(2).intValue();
-            case FEET  -> slots.get(3).intValue();
+            case HEAD  -> slots[0];
+            case CHEST -> slots[1];
+            case LEGS  -> slots[2];
+            case FEET  -> slots[3];
             default -> 0;
         };
     }

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgu
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TemperatureTypeArgument;
 import com.momosoftworks.coldsweat.config.*;
+import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;

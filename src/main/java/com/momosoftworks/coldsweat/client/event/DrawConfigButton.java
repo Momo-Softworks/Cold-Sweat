@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -21,7 +20,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -34,12 +32,12 @@ public class DrawConfigButton
     @SubscribeEvent
     public static void eventHandler(ScreenEvent.InitScreenEvent event)
     {
-        if (event.getScreen() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
+        if (event.getScreen() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();
-            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().get(0));
-            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().get(1));
+            Supplier<Vec2i> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().x());
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().y());
             int buttonX = event.getScreen().width / 2 - 183;
             int buttonY = event.getScreen().height / 6 + 110;
             int screenWidth = event.getScreen().width;

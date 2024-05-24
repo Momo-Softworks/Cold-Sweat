@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
@@ -22,7 +23,7 @@ public class AddEntitySpawns
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
-                ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, spawnBiomeData.entities())
+                RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, spawnBiomeData.entities())
                 .forEach(entityType ->
                 {
                     event.getSpawns().getSpawner(MobCategory.CREATURE).removeIf(spawnerData -> spawnerData.type == entityType);

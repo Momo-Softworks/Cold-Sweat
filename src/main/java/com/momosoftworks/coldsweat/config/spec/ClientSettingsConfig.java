@@ -1,5 +1,6 @@
-package com.momosoftworks.coldsweat.config;
+package com.momosoftworks.coldsweat.config.spec;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;

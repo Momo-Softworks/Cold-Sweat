@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.config;
+package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;

@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
