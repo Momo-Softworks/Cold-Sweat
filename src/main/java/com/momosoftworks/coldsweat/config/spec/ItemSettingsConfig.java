@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.config;
+package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public final class ItemSettingsConfig
+public class ItemSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();

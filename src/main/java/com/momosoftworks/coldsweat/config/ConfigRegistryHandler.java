@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class ConfigRegistryLoader
+public class ConfigRegistryHandler
 {
     @SubscribeEvent
     public static void loadOnServerStart(FMLServerStartingEvent event)

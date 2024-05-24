@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
-import com.momosoftworks.coldsweat.config.MainSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.config.ConfigSettings;

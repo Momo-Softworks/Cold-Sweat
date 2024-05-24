@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.block.BlockState;
@@ -29,7 +29,7 @@ public class MixinSoulCampfire
     public void entityInside(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci)
     {
         if (state.getBlock() == Blocks.SOUL_CAMPFIRE && state.getValue(CampfireBlock.LIT)
-        && WorldSettingsConfig.getInstance().isSoulFireCold() && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
+        && ConfigSettings.COLD_SOUL_FIRE.get() && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
         {
             entity.hurt(ModDamageSources.COLD, this.fireDamage);
             entity.clearFire();

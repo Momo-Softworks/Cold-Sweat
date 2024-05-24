@@ -7,8 +7,8 @@ import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.util.TypedField;
+import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.IArmorVanishable;
@@ -164,14 +164,13 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        List<? extends Number> slots = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
-        EquipmentSlotType slot = MobEntity.getEquipmentSlotForItem(item);
-
-        switch (slot)
-        {   case HEAD  : return slots.get(0).intValue();
-            case CHEST : return slots.get(1).intValue();
-            case LEGS  : return slots.get(2).intValue();
-            case FEET  : return slots.get(3).intValue();
+        Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
+        switch (MobEntity.getEquipmentSlotForItem(item))
+        {
+            case HEAD  : return slots[0];
+            case CHEST : return slots[1];
+            case LEGS  : return slots[2];
+            case FEET  : return slots[3];
             default : return 0;
         }
     }

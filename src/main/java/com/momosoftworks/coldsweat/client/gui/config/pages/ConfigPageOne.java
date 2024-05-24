@@ -5,7 +5,6 @@ import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -44,27 +43,26 @@ public class ConfigPageOne extends AbstractConfigPage
     {
         super.init();
 
-        ClientSettingsConfig clientConfig = ClientSettingsConfig.getInstance();
-        Temperature.Units[] properUnits = {clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F};
+        Temperature.Units[] properUnits = {ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F};
 
         /*
          The Options
         */
 
         // Celsius
-        this.addButton("units", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.units.name").append(": ").append(clientConfig.isCelsius()
+        this.addButton("units", Side.LEFT, () -> new TranslationTextComponent("cold_sweat.config.units.name").append(": ").append(ConfigSettings.CELSIUS.get()
                                                    ? new TranslationTextComponent("cold_sweat.config.celsius.name")
                                                    : new TranslationTextComponent("cold_sweat.config.fahrenheit.name")),
         button ->
         {
             PlayerEntity player = Minecraft.getInstance().player;
 
-            clientConfig.setCelsius(!clientConfig.isCelsius());
+            ConfigSettings.CELSIUS.set(!ConfigSettings.CELSIUS.get());
             // Update the world temp. gauge when the button is pressed
             if (player != null)
                 Overlays.WORLD_TEMP = Temperature.convert(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
-            properUnits[0] = clientConfig.isCelsius() ? Temperature.Units.C : Temperature.Units.F;
+            properUnits[0] = ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F;
 
             // Change the max & min temps to reflect the new setting
             ((TextFieldWidget) this.widgetBatches.get("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(

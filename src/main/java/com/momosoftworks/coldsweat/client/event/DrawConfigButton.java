@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -35,15 +34,15 @@ public class DrawConfigButton
     @SubscribeEvent
     public static void eventHandler(GuiScreenEvent.InitGuiEvent event)
     {
-        if (event.getGui() instanceof OptionsScreen && ClientSettingsConfig.getInstance().isConfigButtonEnabled())
+        if (event.getGui() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<List<? extends Integer>> buttonPos = () -> ClientSettingsConfig.getInstance().getConfigButtonPos();
-            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().get(0));
-            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().get(1));
+            Supplier<Vec2i> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            AtomicInteger xOffset = new AtomicInteger(buttonPos.get().x());
+            AtomicInteger yOffset = new AtomicInteger(buttonPos.get().y());
             int buttonX = event.getGui().width / 2 - 183;
             int buttonY = event.getGui().height / 6 + 110;
-            int screenWidth  = event.getGui().width;
+            int screenWidth = event.getGui().width;
             int screenHeight = event.getGui().height;
 
             if (xOffset.get() + buttonX < -1 || yOffset.get() + buttonY < -1)
