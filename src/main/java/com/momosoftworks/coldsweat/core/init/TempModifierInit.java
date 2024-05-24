@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.*;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
-import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;

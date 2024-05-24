@@ -63,7 +63,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class ConfigRegistryLoader
+public class ConfigRegistryHandler
 {
     @SubscribeEvent
     public static void loadOnServerStart(ServerStartedEvent event)

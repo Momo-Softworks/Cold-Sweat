@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.config;
+package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
