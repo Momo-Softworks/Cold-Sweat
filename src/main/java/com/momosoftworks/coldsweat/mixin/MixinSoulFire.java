@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +21,7 @@ public class MixinSoulFire
     at = @At("HEAD"), cancellable = true)
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, CallbackInfo ci)
     {
-        if (state.getBlock() instanceof SoulFireBlock && WorldSettingsConfig.getInstance().isSoulFireCold()
+        if (state.getBlock() instanceof SoulFireBlock && ConfigSettings.COLD_SOUL_FIRE.get()
         && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
         {
             entity.setIsInPowderSnow(true);

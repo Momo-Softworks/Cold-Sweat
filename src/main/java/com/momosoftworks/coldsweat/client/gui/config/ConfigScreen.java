@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageThree;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageTwo;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;

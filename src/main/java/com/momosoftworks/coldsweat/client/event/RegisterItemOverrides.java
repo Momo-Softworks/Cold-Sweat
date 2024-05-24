@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
-import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -77,7 +76,7 @@ public class RegisterItemOverrides
                                 case -4 -> ChatFormatting.BLUE;
                                 default -> ChatFormatting.RESET;
                             };
-                            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ClientSettingsConfig.getInstance().getTempOffset();
+                            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ConfigSettings.TEMP_OFFSET.get();
                             frame.getItem().setHoverName(Component.literal(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
                                                                                                           : Temperature.Units.F.getFormattedName())).withStyle(tempColor));
                         }

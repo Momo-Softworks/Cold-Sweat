@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
@@ -72,6 +73,9 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> REQUIRE_THERMOMETER;
     public static final DynamicHolder<Integer> GRACE_LENGTH;
     public static final DynamicHolder<Boolean> GRACE_ENABLED;
+
+    // Other Difficulty Settings
+
 
     // World Settings
     public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
@@ -595,7 +599,7 @@ public class ConfigSettings
         BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
 
         BODY_READOUT_POS = addClientSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
-                                                                      ClientSettingsConfig.getInstance().getBodyReadoutY()));
+                                                                                ClientSettingsConfig.getInstance().getBodyReadoutY()));
         BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", () -> ClientSettingsConfig.getInstance().isBodyReadoutEnabled());
 
         WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
@@ -737,7 +741,7 @@ public class ConfigSettings
     public static void load(RegistryAccess registryAccess)
     {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
         if (registryAccess != null)
-        {   ConfigRegistryLoader.collectConfigRegistries(registryAccess);
+        {   ConfigRegistryHandler.collectConfigRegistries(registryAccess);
         }
         else
         {   ColdSweat.LOGGER.warn("Loading Cold Sweat config settings without loading registries. This is normal during startup.");
