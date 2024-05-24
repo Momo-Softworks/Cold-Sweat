@@ -14,12 +14,11 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -50,8 +49,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -88,24 +85,24 @@ public abstract class WorldHelper
 
     public static ResourceLocation getBiomeID(Biome biome)
     {   ResourceLocation biomeID = ForgeRegistries.BIOMES.getKey(biome);
-        if (biomeID == null) biomeID = getRegistry(Registries.BIOME).getKey(biome);
+        if (biomeID == null) biomeID = RegistryHelper.getRegistry(Registries.BIOME).getKey(biome);
 
         return biomeID;
     }
 
     public static Biome getBiome(ResourceLocation biomeID)
     {   Biome biome = ForgeRegistries.BIOMES.getValue(biomeID);
-        if (biome == null) biome = getRegistry(Registries.BIOME).get(biomeID);
+        if (biome == null) biome = RegistryHelper.getRegistry(Registries.BIOME).get(biomeID);
 
         return biome;
     }
 
     public static ResourceLocation getDimensionTypeID(DimensionType dimType)
-    {   return getRegistry(Registries.DIMENSION_TYPE).getKey(dimType);
+    {   return RegistryHelper.getRegistry(Registries.DIMENSION_TYPE).getKey(dimType);
     }
 
     public static DimensionType getDimensionType(ResourceLocation dimID)
-    {   return getRegistry(Registries.DIMENSION_TYPE).get(dimID);
+    {   return RegistryHelper.getRegistry(Registries.DIMENSION_TYPE).get(dimID);
     }
 
 
@@ -478,32 +475,6 @@ public abstract class WorldHelper
 
     public static MinecraftServer getServer()
     {   return ServerLifecycleHooks.getCurrentServer();
-    }
-
-    public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
-    {   return getRegistryAccess().registryOrThrow(registry);
-    }
-
-    @Nullable
-    public static RegistryAccess getRegistryAccess()
-    {
-        RegistryAccess access;
-        if (FMLEnvironment.dist == Dist.CLIENT)
-        {
-            access = Minecraft.getInstance().getConnection() != null
-                     ? Minecraft.getInstance().getConnection().registryAccess()
-                     : Minecraft.getInstance().level != null
-                       ? Minecraft.getInstance().level.registryAccess()
-                       : null;
-        }
-        else
-        {
-            MinecraftServer server = getServer();
-            access = server != null
-                     ? server.registryAccess()
-                     : null;
-        }
-        return access;
     }
 
     public static Pair<Double, Double> getBiomeTemperature(Holder<Biome> biome)

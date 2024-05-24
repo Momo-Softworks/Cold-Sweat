@@ -6,28 +6,17 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.Tags;
-import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Triplet;
 
-import java.util.Map;
 import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
@@ -125,8 +114,8 @@ public class BiomeTempModifier extends TempModifier
         Structure structure = WorldHelper.getStructureAt(level, pos);
         if (structure == null) return Pair.of(null, 0d);
 
-        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get().get(structure), Pair::getFirst, null);
-        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure), Pair::getFirst, 0d);
+        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get().get(structure.type()), Pair::getFirst, null);
+        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure.type()), Pair::getFirst, 0d);
 
         return Pair.of(strucTemp, strucOffset);
     }

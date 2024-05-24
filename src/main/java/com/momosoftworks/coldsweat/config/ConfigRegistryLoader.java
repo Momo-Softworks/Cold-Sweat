@@ -24,8 +24,7 @@ import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -47,7 +46,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -67,7 +66,7 @@ import java.util.stream.Collectors;
 public class ConfigRegistryLoader
 {
     @SubscribeEvent
-    public static void loadOnServerStart(ServerStartingEvent event)
+    public static void loadOnServerStart(ServerStartedEvent event)
     {   ConfigSettings.load(event.getServer().registryAccess());
     }
 
@@ -166,20 +165,20 @@ public class ConfigRegistryLoader
         addBlockTempConfigs(blockTemps);
         logRegistryLoaded(String.format("Loaded %s block temperatures", blockTemps.size()), blockTemps);
         // biome temperatures
-        addBiomeTempConfigs(biomeTemps);
+        addBiomeTempConfigs(biomeTemps, registries);
         logRegistryLoaded(String.format("Loaded %s biome temperatures", biomeTemps.size()), biomeTemps);
         // dimension temperatures
-        addDimensionTempConfigs(dimensionTemps);
+        addDimensionTempConfigs(dimensionTemps, registries);
         logRegistryLoaded(String.format("Loaded %s dimension temperatures", dimensionTemps.size()), dimensionTemps);
         // structure temperatures
-        addStructureTempConfigs(structureTemps);
+        addStructureTempConfigs(structureTemps, registries);
         logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
 
         // mounts
         addMountConfigs(mounts);
         logRegistryLoaded(String.format("Loaded %s insulated mounts", mounts.size()), mounts);
         // spawn biomes
-        addSpawnBiomeConfigs(spawnBiomes);
+        addSpawnBiomeConfigs(spawnBiomes, registries);
         logRegistryLoaded(String.format("Loaded %s entity spawn biomes", spawnBiomes.size()), spawnBiomes);
     }
 
@@ -223,7 +222,7 @@ public class ConfigRegistryLoader
             AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
-            for (Item item : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulatorData.data().items()))
+            for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulatorData.data().items()))
             {
                 Insulator insulator = new Insulator(insulation, insulatorData.slot(), data, predicate, attributeModifiers);
                 switch (insulatorData.slot())
@@ -262,7 +261,7 @@ public class ConfigRegistryLoader
 
             for (Either<TagKey<Item>, Item> either : fuelData.data().items())
             {
-                either.map(tagKey -> WorldHelper.getRegistry(Registries.ITEM).getTag(tagKey).orElseThrow().stream().map(Holder::get),
+                either.map(tagKey -> RegistryHelper.getRegistry(Registries.ITEM).getTag(tagKey).orElseThrow().stream().map(Holder::get),
                            item -> List.of(item).stream())
                 .forEach(item ->
                 {
@@ -295,7 +294,7 @@ public class ConfigRegistryLoader
             EntityRequirement predicate = foodData.entityRequirement().orElse(null);
             double food = foodData.value();
             PredicateItem predicateItem = new PredicateItem(food, data, predicate);
-            for (Item item : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.data().items()))
+            for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.data().items()))
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }
@@ -315,7 +314,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            Block[] blocks = ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blockTempData.blocks()).toArray(Block[]::new);
+            Block[] blocks = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blockTempData.blocks()).toArray(Block[]::new);
             BlockTemp blockTemp = new BlockTemp(blocks)
             {
                 final double temperature = blockTempData.temperature();
@@ -368,7 +367,7 @@ public class ConfigRegistryLoader
         });
     }
 
-    private static void addBiomeTempConfigs(Set<Holder<BiomeTempData>> biomeTemps)
+    private static void addBiomeTempConfigs(Set<Holder<BiomeTempData>> biomeTemps, RegistryAccess registryAccess)
     {
         biomeTemps.forEach(holder ->
         {
@@ -381,7 +380,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (Biome biome : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BIOMES, biomeTempData.biomes()))
+            for (Biome biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
             {
                 Temperature.Units units = biomeTempData.units();
                 if (biomeTempData.isOffset())
@@ -398,7 +397,7 @@ public class ConfigRegistryLoader
         });
     }
 
-    private static void addDimensionTempConfigs(Set<Holder<DimensionTempData>> dimensionTemps)
+    private static void addDimensionTempConfigs(Set<Holder<DimensionTempData>> dimensionTemps, RegistryAccess registryAccess)
     {
         dimensionTemps.forEach(holder ->
         {
@@ -411,7 +410,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (DimensionType dimension : ConfigHelper.mapVanillaRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions()))
+            for (DimensionType dimension : RegistryHelper.mapVanillaRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
             {
                 Temperature.Units units = dimensionTempData.units();
                 if (dimensionTempData.isOffset())
@@ -426,7 +425,7 @@ public class ConfigRegistryLoader
         });
     }
 
-    private static void addStructureTempConfigs(Set<Holder<StructureTempData>> structureTemps)
+    private static void addStructureTempConfigs(Set<Holder<StructureTempData>> structureTemps, RegistryAccess registryAccess)
     {
         structureTemps.forEach(holder ->
         {
@@ -439,10 +438,15 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (Structure structure : ConfigHelper.mapVanillaRegistryTagList(Registries.STRUCTURE, structureTempData.structures()))
+            for (Structure structure : RegistryHelper.mapVanillaRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
             {
-                double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, true);
-                ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units()));
+                double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, !structureTempData.isOffset());
+                if (structureTempData.isOffset())
+                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure.type(), Pair.of(temperature, structureTempData.units()));
+                }
+                else
+                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure.type(), Pair.of(temperature, structureTempData.units()));
+                }
             }
         });
     }
@@ -460,13 +464,13 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (EntityType<?> entity : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entities()))
+            for (EntityType<?> entity : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entities()))
             {   ConfigSettings.INSULATED_ENTITIES.get().put(entity, new InsulatingMount(entity, mountData.coldInsulation(), mountData.heatInsulation(), mountData.requirement()));
             }
         });
     }
 
-    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes)
+    private static void addSpawnBiomeConfigs(Set<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registryAccess)
     {
         spawnBiomes.forEach(holder ->
         {
@@ -479,7 +483,7 @@ public class ConfigRegistryLoader
                 {   return;
                 }
             }
-            for (Biome biome : ConfigHelper.mapForgeRegistryTagList(ForgeRegistries.BIOMES, spawnBiomeData.biomes()))
+            for (Biome biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
             }
         });
