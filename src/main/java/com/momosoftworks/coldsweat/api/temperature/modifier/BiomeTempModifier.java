@@ -113,8 +113,8 @@ public class BiomeTempModifier extends TempModifier
         ConfiguredStructureFeature<?, ?> structure = WorldHelper.getStructureAt(level, pos);
         if (structure == null) return Pair.of(null, 0d);
 
-        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get().get(structure), Pair::getFirst, null);
-        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure), Pair::getFirst, 0d);
+        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get().get(structure.feature), Pair::getFirst, null);
+        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get().get(structure.feature), Pair::getFirst, 0d);
 
         return Pair.of(strucTemp, strucOffset);
     }

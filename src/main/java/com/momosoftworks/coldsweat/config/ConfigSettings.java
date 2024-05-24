@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -251,7 +252,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -267,7 +268,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = WorldHelper.getRegistry(Registry.DIMENSION_TYPE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -283,7 +284,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -299,7 +300,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = WorldHelper.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -484,7 +485,7 @@ public class ConfigSettings
                     {   biomeEither = Either.left(TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeId.substring(1))));
                     }
                     else
-                    {   Biome biome = ConfigHelper.getBiome(new ResourceLocation(biomeId));
+                    {   Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId));
                         if (biome != null)
                             biomeEither = Either.right(biome);
                         else
