@@ -162,7 +162,7 @@ public class ConfigHelper
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing biome config for \"{}\"", entry.toString());
+                ColdSweat.LOGGER.error("Error parsing biome config \"{}\"", entry.toString());
                 e.printStackTrace();
             }
         }
@@ -191,7 +191,7 @@ public class ConfigHelper
             }
             catch (Exception e)
             {
-                ColdSweat.LOGGER.error("Error parsing dimension config for \"{}\"", entry.toString());
+                ColdSweat.LOGGER.error("Error parsing dimension config \"{}\"", entry.toString());
                 e.printStackTrace();
             }
         }
@@ -218,7 +218,7 @@ public class ConfigHelper
                 }
             }
             catch (Exception e)
-            {   ColdSweat.LOGGER.error("Error parsing structure config for \"{}\"", entry.toString());
+            {   ColdSweat.LOGGER.error("Error parsing structure config \"{}\"", entry.toString());
                 e.printStackTrace();
             }
         }
