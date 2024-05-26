@@ -45,27 +45,27 @@ public class ConfigHelper
 {
     private ConfigHelper() {}
 
-    public static <T> List<T> parseRegistryItems(ResourceKey<Registry<T>> registry, String... objects)
+    public static <T> List<T> parseRegistryItems(ResourceKey<Registry<T>> registry, String objects)
     {
         List<T> biomeList = new ArrayList<>();
-        for (String biome : objects)
+        for (String objString : objects.split(","))
         {
-            if (biome.startsWith("#"))
+            if (objString.startsWith("#"))
             {
-                final String tagID = biome.replace("#", "");
+                final String tagID = objString.replace("#", "");
                 Optional<HolderSet.Named<T>> tag = RegistryHelper.getRegistry(registry).getTag(TagKey.create(registry, new ResourceLocation(tagID)));
                 tag.ifPresent(tg -> biomeList.addAll(tg.stream().map(Holder::value).toList()));
             }
             else
             {
-                ResourceLocation biomeId = new ResourceLocation(biome);
-                Optional<T> biomeObj = RegistryHelper.getVanillaRegistryValue(registry, biomeId);
-                if (!biomeObj.isPresent())
+                ResourceLocation id = new ResourceLocation(objString);
+                Optional<T> obj = RegistryHelper.getVanillaRegistryValue(registry, id);
+                if (obj.isEmpty())
                 {
-                    ColdSweat.LOGGER.error("Error parsing biome config: biome \"{}\" does not exist", biome);
+                    ColdSweat.LOGGER.error("Error parsing config: \"{}\" does not exist", objString);
                     continue;
                 }
-                biomeList.add(biomeObj.get());
+                biomeList.add(obj.get());
             }
         }
         return biomeList;
