@@ -73,21 +73,21 @@ public class ClientSettingsConfig
                     .defineList("Body Temperature Icon Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyIconEnabled = BUILDER
                     .comment("Enables the body temperature icon")
-                    .define("Body Temperature Icon Enabled", true);
+                    .define("Show Body Temperature Icon", true);
 
             bodyReadoutPos = BUILDER
                     .comment("The position of the body temperature readout relative to default")
                     .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyReadoutEnabled = BUILDER
                     .comment("Enables the body temperature readout")
-                    .define("Body Temperature Readout Enabled", false);
+                    .define("Show Body Temperature Readout", false);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
                     .defineList("World Temperature UI Offset", List.of(0, 0), it -> it instanceof Integer);
             worldGaugeEnabled = BUILDER
                     .comment("Enables the world temperature gauge")
-                    .define("World Temperature UI Enabled", true);
+                    .define("Show World Temperature Gauge", true);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
