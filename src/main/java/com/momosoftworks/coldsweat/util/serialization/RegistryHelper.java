@@ -165,26 +165,26 @@ public class RegistryHelper
     @Nullable
     public static Structure<?> getStructure(ResourceLocation structureId)
     {
-        Optional<MutableRegistry<StructureFeature<?,?>>> registry = getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-        if (registry.isPresent())
-        {
-            return registry.get().entrySet().stream()
-                             .filter(entry -> entry.getKey().location().equals(structureId))
-                             .map(Map.Entry::getValue)
-                             .map(reg -> reg.feature)
-                             .findFirst().orElse(null);
-        }
-        else return getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
-                                     .map(reg -> reg.get(structureId)).orElse(null);
+        return getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
+                                  .flatMap(reg -> reg.entrySet().stream()
+                                  .filter(entry -> entry.getKey().equals(structureId))
+                                  .map(Map.Entry::getValue).map(str -> (Structure) str.feature).findFirst())
+                                  // If the configured structure registry isn't present, use the structure feature registry
+                                  .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
+                                                             .map(reg -> reg.get(structureId))
+                                                             .orElse(null));
     }
 
     @Nullable
     public static ResourceLocation getStructureId(Structure<?> structure)
     {
         return getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
-                             .flatMap(reg -> reg.entrySet().stream()
-                             .filter(entry -> entry.getValue().feature == structure)
-                             .map(Map.Entry::getKey).map(RegistryKey::location).findFirst())
-                             .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY).map(reg -> reg.getKey(structure)).orElse(null));
+                                  .flatMap(reg -> reg.entrySet().stream()
+                                  .filter(entry -> entry.getValue().feature == structure)
+                                  .map(Map.Entry::getKey).map(RegistryKey::location).findFirst())
+                                  // If the configured structure registry isn't present, use the structure feature registry
+                                  .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
+                                                             .map(reg -> reg.getKey(structure))
+                                                             .orElse(null));
     }
 }
