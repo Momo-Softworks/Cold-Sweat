@@ -13,6 +13,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -26,7 +27,6 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RegistryHelper
 {
@@ -165,16 +165,26 @@ public class RegistryHelper
     @Nullable
     public static Structure<?> getStructure(ResourceLocation structureId)
     {
-        StructureFeature<?, ?> feature = getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(structureId);
-        return feature != null ? feature.feature : null;
+        Optional<MutableRegistry<StructureFeature<?,?>>> registry = getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+        if (registry.isPresent())
+        {
+            return registry.get().entrySet().stream()
+                             .filter(entry -> entry.getKey().location().equals(structureId))
+                             .map(Map.Entry::getValue)
+                             .map(reg -> reg.feature)
+                             .findFirst().orElse(null);
+        }
+        else return getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
+                                     .map(reg -> reg.get(structureId)).orElse(null);
     }
 
     @Nullable
     public static ResourceLocation getStructureId(Structure<?> structure)
     {
-        return getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).entrySet().stream()
-                                                                   .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().feature))
-                                                                   .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)).get(structure).location();
-
+        return getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
+                             .flatMap(reg -> reg.entrySet().stream()
+                             .filter(entry -> entry.getValue().feature == structure)
+                             .map(Map.Entry::getKey).map(RegistryKey::location).findFirst())
+                             .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY).map(reg -> reg.getKey(structure)).orElse(null));
     }
 }
