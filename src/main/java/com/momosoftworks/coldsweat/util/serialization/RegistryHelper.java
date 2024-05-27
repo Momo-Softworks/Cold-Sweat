@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -12,7 +13,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -35,22 +38,31 @@ public class RegistryHelper
     @Nullable
     public static RegistryAccess getRegistryAccess()
     {
-        RegistryAccess access;
-        if (FMLEnvironment.dist == Dist.CLIENT)
+        RegistryAccess access = null;
+
+        MinecraftServer server = WorldHelper.getServer();
+
+        if (server != null)
         {
-            access = Minecraft.getInstance().getConnection() != null
-                     ? Minecraft.getInstance().getConnection().registryAccess()
-                     : Minecraft.getInstance().level != null
-                       ? Minecraft.getInstance().level.registryAccess()
-                       : WorldHelper.getServer() != null
-                         ? WorldHelper.getServer().registryAccess()
-                         : null;
+            Level level = server.getLevel(Level.OVERWORLD);
+            if (level != null)
+            {   access = level.registryAccess();
+            }
+            else access = server.registryAccess();
         }
-        else
+
+        if (access == null && FMLEnvironment.dist == Dist.CLIENT)
         {
-            access = WorldHelper.getServer() != null
-                     ? WorldHelper.getServer().registryAccess()
-                     : null;
+            if (Minecraft.getInstance().level != null)
+            {   access = Minecraft.getInstance().level.registryAccess();
+            }
+            else
+            {
+                ClientPacketListener connection = Minecraft.getInstance().getConnection();
+                if (connection != null)
+                {   access = connection.registryAccess();
+                }
+            }
         }
         return access;
     }
