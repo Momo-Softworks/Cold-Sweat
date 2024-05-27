@@ -80,7 +80,7 @@ public class ClientSettingsConfig
                     .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyReadoutEnabled = BUILDER
                     .comment("Enables the body temperature readout")
-                    .define("Body Temperature Readout Enabled", true);
+                    .define("Body Temperature Readout Enabled", false);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
