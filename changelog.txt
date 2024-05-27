@@ -2045,3 +2045,25 @@ Fixes:
 
 Technical Changes:
 * Config settings for biomes, dimensions, structures, and items have much more robust logging and are less prone to failure in cases where the option is malformed
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03e
+- Added config setting to change the drop rate of chameleon molt
+- Slightly decreased the rate at which chameleons shed
+
+Fixes:
+* Fixed another crash related to item tooltips
+- Fixed some config settings for things like biomes, dimensions, and structures not loading or working properly in some cases
+- Fixed the "offset" field of structure temperature JSONs not working
+- Fixed tags not working for dimension or structure-related config settings
+
+Technical Changes:
+- Changed the order of precedence for config settings:
+      - user datapacks (in config folder) > datapacks (from mods or worlds) > traditional configs (.toml files)
+- Config settings can now accept a comma-separated list of biomes, dimensions, or structures to apply the same settings to multiple things
+- (1.16) 3rd party mods can now define datapack configs for Cold Sweat, as has been possible in other versions
+      - This is done with a custom data loading system, which means there are a couple minor differences in folder structure:
+            - Data files are kept in data/cold_sweat/config/* instead of data/<yourmod>/cold_sweat/*
+            - Otherwise, the internal structure is the same
+            - Datapacks in world folders still can't be read by this system. The alternative is to put datapack configs in configs/coldsweat/data/*
