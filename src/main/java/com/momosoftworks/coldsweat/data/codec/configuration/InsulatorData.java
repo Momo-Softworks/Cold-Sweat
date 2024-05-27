@@ -22,11 +22,10 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.*;
 
-public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<InsulatorData>
+public class InsulatorData implements NbtSerializable
 {
     public final Insulation.Slot slot;
     public final Insulation insulation;
@@ -133,24 +132,6 @@ public class InsulatorData implements NbtSerializable, IForgeRegistryEntry<Insul
         });
 
         return new InsulatorData(slot, insulation, requirement, predicate, attributes, mods);
-    }
-
-    @Override
-    public InsulatorData setRegistryName(ResourceLocation name)
-    {
-        return this;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return new ResourceLocation("coldsweat", "insulators");
-    }
-
-    @Override
-    public Class<InsulatorData> getRegistryType()
-    {
-        return InsulatorData.class;
     }
 
     @Override

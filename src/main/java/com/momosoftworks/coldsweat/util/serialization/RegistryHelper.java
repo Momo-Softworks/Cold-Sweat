@@ -4,14 +4,20 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.tags.*;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.ITag;
+import net.minecraft.tags.TagRegistry;
+import net.minecraft.tags.TagRegistryManager;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -19,35 +25,44 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RegistryHelper
 {
     public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
-    {   return getRegistryAccess().registryOrThrow(registry);
+    {
+        return getRegistryAccess().registryOrThrow(registry);
     }
 
     @Nullable
     public static DynamicRegistries getRegistryAccess()
     {
-        DynamicRegistries access;
-        if (FMLEnvironment.dist == Dist.CLIENT)
+        DynamicRegistries access = null;
+
+        MinecraftServer server = WorldHelper.getServer();
+
+        if (server != null)
         {
-            access = Minecraft.getInstance().getConnection() != null
-                     ? Minecraft.getInstance().getConnection().registryAccess()
-                     : Minecraft.getInstance().level != null
-                       ? Minecraft.getInstance().level.registryAccess()
-                       : WorldHelper.getServer() != null
-                         ? WorldHelper.getServer().registryAccess()
-                         : null;
+            World level = server.getLevel(World.OVERWORLD);
+            if (level != null)
+            {   access = level.registryAccess();
+            }
+            else access = server.registryAccess();
         }
-        else
+
+        if (access == null && FMLEnvironment.dist == Dist.CLIENT)
         {
-            access = WorldHelper.getServer() != null
-                     ? WorldHelper.getServer().registryAccess()
-                     : null;
+            if (Minecraft.getInstance().level != null)
+            {   access = Minecraft.getInstance().level.registryAccess();
+            }
+            else
+            {
+                ClientPlayNetHandler connection = Minecraft.getInstance().getConnection();
+                if (connection != null)
+                {   access = connection.registryAccess();
+                }
+            }
         }
         return access;
     }
@@ -149,11 +164,17 @@ public class RegistryHelper
 
     @Nullable
     public static Structure<?> getStructure(ResourceLocation structureId)
-    {   return getVanillaRegistryValue(Registry.STRUCTURE_FEATURE_REGISTRY, structureId).orElse(null);
+    {
+        StructureFeature<?, ?> feature = getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(structureId);
+        return feature != null ? feature.feature : null;
     }
 
     @Nullable
     public static ResourceLocation getStructureId(Structure<?> structure)
-    {   return getVanillaRegistryKey(Registry.STRUCTURE_FEATURE_REGISTRY, structure).orElse(null);
+    {
+        return getRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).entrySet().stream()
+                                                                   .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().feature))
+                                                                   .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)).get(structure).location();
+
     }
 }

@@ -7,15 +7,13 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Optional;
 
-public class MountData implements IForgeRegistryEntry<MountData>
+public class MountData
 {
     public List<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
     public double coldInsulation;
@@ -38,24 +36,6 @@ public class MountData implements IForgeRegistryEntry<MountData>
             EntityRequirement.getCodec().fieldOf("requirement").forGetter(data -> data.requirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, MountData::new));
-
-    @Override
-    public MountData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<MountData> getRegistryType()
-    {
-        return null;
-    }
 
     @Override
     public String toString()

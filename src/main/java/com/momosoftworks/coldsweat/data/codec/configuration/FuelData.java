@@ -8,14 +8,12 @@ import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
+public class FuelData implements NbtSerializable
 {
     public final FuelType type;
     public final Double fuel;
@@ -92,24 +90,6 @@ public class FuelData implements NbtSerializable, IForgeRegistryEntry<FuelData>
             }
             return null;
         }
-    }
-
-    @Override
-    public FuelData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<FuelData> getRegistryType()
-    {
-        return null;
     }
 
     @Override

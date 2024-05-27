@@ -3,17 +3,12 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Optional;
 
-public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
+public class DimensionTempData
 {
     public final List<DimensionType> dimensions;
     public final double temperature;
@@ -38,24 +33,6 @@ public class DimensionTempData implements IForgeRegistryEntry<DimensionTempData>
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, DimensionTempData::new));
-
-    @Override
-    public DimensionTempData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<DimensionTempData> getRegistryType()
-    {
-        return DimensionTempData.class;
-    }
 
     @Override
     public String toString()

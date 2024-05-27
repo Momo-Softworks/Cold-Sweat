@@ -4,15 +4,13 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Optional;
 
-public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
+public class BiomeTempData
 {
     public final List<Biome> biomes;
     public final double min;
@@ -53,24 +51,6 @@ public class BiomeTempData implements IForgeRegistryEntry<BiomeTempData>
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, BiomeTempData::new));
-
-    @Override
-    public BiomeTempData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<BiomeTempData> getRegistryType()
-    {
-        return BiomeTempData.class;
-    }
 
     @Override
     public String toString()

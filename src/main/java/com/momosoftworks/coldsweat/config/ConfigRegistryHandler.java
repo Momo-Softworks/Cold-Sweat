@@ -24,14 +24,18 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.DimensionType;
@@ -43,11 +47,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,6 +90,31 @@ public class ConfigRegistryHandler
         /*
          Fetch JSON registries
         */
+        // Create config entries from JSON files
+        for (ModRegistries.CodecRegistry<?> registry : ModRegistries.getAllRegistries())
+        {
+            registry.flush();
+            try
+            {
+                ResourceLocation registryPath = new ResourceLocation(ColdSweat.MOD_ID, "config/" + registry.getRegistryName().getPath());
+                for (ResourceLocation resourceLocation : ModRegistries.getResourceManager().listResources(registryPath.getPath(), file -> file.endsWith(".json")))
+                {
+                    IResource resource = ModRegistries.getResourceManager().getResource(resourceLocation);
+                    try (InputStream inputStream = resource.getInputStream())
+                    {
+                        // Create a reader from the input stream
+                        registry.getCodec().parse(JsonOps.INSTANCE, JSONUtils.parse(new InputStreamReader(inputStream)))
+                                .resultOrPartial(ColdSweat.LOGGER::error)
+                                .ifPresent(insulator -> registry.register(insulator));
+                    }
+                    catch (Exception e)
+                    {   ColdSweat.LOGGER.error("Failed to load JSON registry: {}", registry.getRegistryName(), e);
+                    }
+                }
+            }
+            catch (IOException ignored) {}
+        }
+
         Set<InsulatorData> insulators = new HashSet<>(ModRegistries.INSULATOR_DATA.getValues());
         Set<FuelData> fuels = new HashSet<>(ModRegistries.FUEL_DATA.getValues());
         Set<ItemData> foods = new HashSet<>(ModRegistries.FOOD_DATA.getValues());
@@ -438,7 +464,7 @@ public class ConfigRegistryHandler
         });
     }
 
-    private static <T extends IForgeRegistryEntry<T>> Set<T> parseConfigData(IForgeRegistry<T> registry, Codec<T> codec)
+    private static <T> Set<T> parseConfigData(ModRegistries.CodecRegistry<T> registry, Codec<T> codec)
     {
         Set<T> output = new HashSet<>();
 

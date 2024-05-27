@@ -8,14 +8,12 @@ import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemData implements NbtSerializable, IForgeRegistryEntry<ItemData>
+public class ItemData implements NbtSerializable
 {
     public final ItemRequirement data;
     public final Double value;
@@ -66,24 +64,6 @@ public class ItemData implements NbtSerializable, IForgeRegistryEntry<ItemData>
             return mods1;
         });
         return new ItemData(items, value, entityRequirement, requiredMods);
-    }
-
-    @Override
-    public ItemData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<ItemData> getRegistryType()
-    {
-        return null;
     }
 
     @Override

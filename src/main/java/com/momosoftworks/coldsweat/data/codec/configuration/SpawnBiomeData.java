@@ -7,17 +7,14 @@ import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class SpawnBiomeData implements IForgeRegistryEntry<SpawnBiomeData>
+public class SpawnBiomeData
 {
     public final List<Biome> biomes;
     public final EntityClassification category;
@@ -42,25 +39,6 @@ public class SpawnBiomeData implements IForgeRegistryEntry<SpawnBiomeData>
             Codec.either(ITag.codec(EntityTypeTags::getAllTags), Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(data -> data.entities),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, SpawnBiomeData::new));
-
-    @Override
-    public SpawnBiomeData setRegistryName(ResourceLocation resourceLocation)
-    {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<SpawnBiomeData> getRegistryType()
-    {
-        return null;
-    }
 
     @Override
     public String toString()

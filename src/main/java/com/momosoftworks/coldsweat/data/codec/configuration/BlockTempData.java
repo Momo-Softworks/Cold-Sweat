@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,13 +12,13 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
+public class BlockTempData
 {
     public final List<Either<ITag<Block>, Block>> blocks;
     public final double temperature;
@@ -27,6 +28,8 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
     public final List<BlockState> conditions;
     public final Optional<CompoundNBT> tag;
     public final Optional<List<String>> requiredMods;
+
+    private ResourceLocation registryName = new ResourceLocation(ColdSweat.MOD_ID, UUID.randomUUID().toString());
 
     public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range, double maxEffect, boolean fade,
                          List<BlockState> conditions, Optional<CompoundNBT> tag, Optional<List<String>> requiredMods)
@@ -51,24 +54,6 @@ public class BlockTempData implements IForgeRegistryEntry<BlockTempData>
             CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, BlockTempData::new));
-
-    @Override
-    public BlockTempData setRegistryName(ResourceLocation name)
-    {
-        return this;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<BlockTempData> getRegistryType()
-    {
-        return BlockTempData.class;
-    }
 
     @Override
     public String toString()

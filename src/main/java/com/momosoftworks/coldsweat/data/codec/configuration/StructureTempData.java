@@ -6,12 +6,11 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Optional;
 
-public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
+public class StructureTempData
 {
     public final List<Structure<?>> structures;
     public final double temperature;
@@ -36,24 +35,6 @@ public class StructureTempData implements IForgeRegistryEntry<StructureTempData>
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, StructureTempData::new));
-
-    @Override
-    public StructureTempData setRegistryName(ResourceLocation name)
-    {
-        return null;
-    }
-
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<StructureTempData> getRegistryType()
-    {
-        return null;
-    }
 
     @Override
     public String toString()
