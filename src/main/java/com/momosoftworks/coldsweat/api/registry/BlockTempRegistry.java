@@ -71,7 +71,12 @@ public class BlockTempRegistry
         Block block = blockstate.getBlock();
         Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
         if (blockTemps.isEmpty())
-        {   blockTemps = new ArrayList<>(BLOCK_TEMPS.stream().filter(bt -> bt.hasBlock(block)).collect(Collectors.toList()));
+        {
+            blockTemps = new ArrayList<>(BLOCK_TEMPS.stream().filter(bt -> bt.hasBlock(block)).collect(Collectors.toList()));
+            // If this block has no associated BlockTemps, give default implementation
+            if (blockTemps.isEmpty())
+            {   blockTemps.add(DEFAULT_BLOCK_TEMP);
+            }
             MAPPED_BLOCKS.putAll(block, blockTemps);
             return blockTemps;
         }
