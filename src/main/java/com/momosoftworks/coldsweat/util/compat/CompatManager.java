@@ -168,16 +168,11 @@ public class CompatManager
     {   return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
-    public static boolean isRainingAt(Level level, BlockPos pos)
+    public static boolean isRainstormAt(Level level, BlockPos pos)
     {
-        // Get if it's raining from serene seasons
-        if (SEASONS_LOADED && SeasonHooks.isRainingAtHook(level, pos)
-        && !SeasonHooks.shouldSnowHook(level.getBiome(pos).get(), level, pos))
-        {   return true;
-        }
-        // Get if it's raining from weather2
         if (WEATHER_LOADED)
-        {   WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+        {
+            WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
             if (weatherManager == null) return false;
             StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
             if (rainStorm == null) return false;
@@ -187,8 +182,12 @@ public class CompatManager
             {   return true;
             }
         }
-        // No mods are adding custom rain conditions
         return false;
+    }
+
+    public static boolean isColdEnoughToSnow(Level level, BlockPos pos)
+    {
+        return SEASONS_LOADED && SeasonHooks.coldEnoughToSnowSeasonal(level, level.getBiome(pos), pos);
     }
 
     public static int getWaterPurity(ItemStack stack)
