@@ -43,9 +43,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
@@ -53,14 +50,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber
 public class ConfigRegistryHandler
 {
-    @SubscribeEvent
-    public static void loadOnServerStart(FMLServerStartingEvent event)
-    {   ConfigSettings.load(event.getServer().registryAccess());
-    }
-
     public static void collectConfigRegistries(DynamicRegistries registries)
     {
         if (registries == null)
