@@ -74,7 +74,7 @@ public class EntitySettingsConfig
                                 List.of("minecraft:desert", 1))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> List.of("biomesoplenty:lush_desert", 3),
-                                () -> List.of("biomesoplenty:rainforest", 40),
+                                () -> List.of("biomesoplenty:rainforest", 20),
                                 () -> List.of("biomesoplenty:rocky_rainforest", 15),
                                 () -> List.of("biomesoplenty:fungal_jungle", 10),
                                 () -> List.of("biomesoplenty:tropics", 8),
@@ -93,7 +93,7 @@ public class EntitySettingsConfig
                                 () -> List.of("atmospheric:flourishing_dunes", 1.5),
                                 () -> List.of("atmospheric:rocky_dunes", 0.75),
                                 () -> List.of("atmospheric:petrified_dunes", 0.5),
-                                () -> List.of("atmospheric:rainforest", 70),
+                                () -> List.of("atmospheric:rainforest", 50),
                                 () -> List.of("atmospheric:sparse_rainforest", 40),
                                 () -> List.of("atmospheric:rainforest_basin", 50),
                                 () -> List.of("atmospheric:sparse_rainforest_basin", 30))
