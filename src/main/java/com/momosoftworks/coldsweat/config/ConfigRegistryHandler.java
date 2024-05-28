@@ -45,9 +45,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
@@ -61,14 +58,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber
 public class ConfigRegistryHandler
 {
-    @SubscribeEvent
-    public static void loadOnServerStart(ServerStartedEvent event)
-    {   ConfigSettings.load(event.getServer().registryAccess());
-    }
-
     public static void collectConfigRegistries(RegistryAccess registries)
     {
         if (registries == null)

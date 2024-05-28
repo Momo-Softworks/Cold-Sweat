@@ -18,6 +18,7 @@
     "compat.MixinCreateOverlay"
   ],
   "mixins": [
+    "MixinBeforeServerStart",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",
