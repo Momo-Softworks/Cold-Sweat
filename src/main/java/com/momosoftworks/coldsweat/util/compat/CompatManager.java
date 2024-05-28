@@ -23,7 +23,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
@@ -161,15 +160,9 @@ public class CompatManager
         return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
-    public static boolean isRainingAt(Level level, BlockPos pos)
+    public static boolean isColdEnoughToSnow(Level level, BlockPos pos)
     {
-        // Get if it's raining from serene seasons
-        if (SEASONS_LOADED && SeasonHooks.isRainingAtHook(level, pos)
-        && !SeasonHooks.shouldSnowHook(level.getBiome(pos).get(), level, pos))
-        {   return true;
-        }
-        // No mods are adding custom rain conditions
-        return false;
+        return SEASONS_LOADED && SeasonHooks.coldEnoughToSnowHook(level.getBiome(pos).get(), pos, level);
     }
 
     public static int getWaterPurity(ItemStack stack)
