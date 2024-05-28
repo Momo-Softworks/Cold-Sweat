@@ -13,8 +13,6 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
@@ -40,7 +38,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -272,9 +269,8 @@ public abstract class WorldHelper
     public static boolean isRainingAt(Level level, BlockPos pos)
     {   var biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos).value());
 
-        return level.isRaining() && biome.get().getPrecipitation() == Biome.Precipitation.RAIN
-            && biome.get().warmEnoughToRain(pos) && canSeeSky(level, pos.above(), 256)
-            || CompatManager.isRainingAt(level, pos);
+        return (level.isRaining() && biome.get().getPrecipitation() == Biome.Precipitation.RAIN || CompatManager.isRainstormAt(level, pos))
+            && biome.get().warmEnoughToRain(pos) && canSeeSky(level, pos.above(), level.getMaxBuildHeight());
     }
 
     /**
