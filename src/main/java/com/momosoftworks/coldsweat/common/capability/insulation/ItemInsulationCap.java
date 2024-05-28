@@ -73,13 +73,14 @@ public class ItemInsulationCap implements IInsulatableCap
         // Save the insulation items
         ListNBT insulNBT = new ListNBT();
         // Iterate over insulation items
-        for (Pair<ItemStack, List<Insulation>> entry : insulation)
+        for (int i = 0; i < insulation.size(); i++)
         {
+            Pair<ItemStack, List<Insulation>> entry = insulation.get(i);
             CompoundNBT entryNBT = new CompoundNBT();
             List<Insulation> pairList = entry.getSecond();
             // Store ItemStack data
             entryNBT.put("Item", entry.getFirst().save(new CompoundNBT()));
-
+            // Store insulation data
             ListNBT pairListNBT = serializeInsulation(pairList);
             entryNBT.put("Values", pairListNBT);
             // Add the item to the list
@@ -96,9 +97,8 @@ public class ItemInsulationCap implements IInsulatableCap
     {
         ListNBT insulList = new ListNBT();
         // Store insulation values for the item
-        for (Insulation insulation : pairList)
-        {
-            insulList.add(insulation.serialize());
+        for (int i = 0; i < pairList.size(); i++)
+        {   insulList.add(pairList.get(i).serialize());
         }
         return insulList;
     }
