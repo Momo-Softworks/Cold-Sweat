@@ -279,9 +279,8 @@ public abstract class WorldHelper
     public static boolean isRainingAt(World level, BlockPos pos)
     {   DynamicHolder<Biome> biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos));
 
-        return level.isRaining() && biome.get().getPrecipitation() == Biome.RainType.RAIN
-            && biome.get().getTemperature(pos) >= 0.15F && canSeeSky(level, pos.above(), 256)
-            || CompatManager.isRainingAt(level, pos);
+        return (level.isRaining() && biome.get().getPrecipitation() == Biome.RainType.RAIN || CompatManager.isRainstormAt(level, pos))
+            && biome.get().getTemperature(pos) >= 0.15F && canSeeSky(level, pos.above(), level.getMaxBuildHeight());
     }
 
     /**
