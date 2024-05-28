@@ -31,7 +31,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -46,9 +45,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
@@ -58,16 +54,9 @@ import java.io.FileReader;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@Mod.EventBusSubscriber
 public class ConfigRegistryHandler
 {
-    @SubscribeEvent
-    public static void loadOnServerStart(ServerStartedEvent event)
-    {   ConfigSettings.load(event.getServer().registryAccess());
-    }
-
     public static void collectConfigRegistries(RegistryAccess registries)
     {
         if (registries == null)
