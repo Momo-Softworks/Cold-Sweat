@@ -40,19 +40,24 @@ public class ChangelogGenerator
             for (int i = lastDashIndex + 1; i < lines.size(); i++)
             {
                 line = lines.get(i);
+                String lineText = line.trim();
+                boolean isWarning = lineText.startsWith("!");
+                boolean isImportant = lineText.startsWith("*");
+                boolean isListElement = lineText.startsWith("-") || isImportant || isWarning;
+                boolean isSectionTitle = !isListElement && lineText.endsWith(":");
 
                 if (isFirstLine)
                 {
                     line = "<span style=\"font-size: 18px; color: #ffffff; font-weight: bold;\">" + line + "</span>";
                     isFirstLine = false;
                 }
-                else if (line.trim().endsWith(":"))
+                else if (isSectionTitle)
                 {   line = "<u><strong style=\"font-size: 14px; color: #ffffff;\">" + line + "</strong></u>";
                 }
-                else if (line.trim().startsWith("!"))
+                else if (isWarning)
                 {   line = "<span style=\"color: #ff9900;\">" + line + "</span>";
                 }
-                else if (line.trim().startsWith("*"))
+                else if (isImportant)
                 {   line = "<strong style=\"color: #ffffff;\">" + line + "</strong>";
                 }
 
