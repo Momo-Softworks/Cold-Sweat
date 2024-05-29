@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event.capability;
+package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
