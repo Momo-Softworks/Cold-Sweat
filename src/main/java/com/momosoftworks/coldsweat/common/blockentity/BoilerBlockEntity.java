@@ -122,7 +122,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                         // If item is a filled waterskin not at max temp yet
                         if (itemTemp < 50 && stack.getItem() == ModItems.FILLED_WATERSKIN)
                         {   hasItemStacks = true;
-                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
+                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
                         }
                     }
                 }
