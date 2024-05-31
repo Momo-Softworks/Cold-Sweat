@@ -83,19 +83,17 @@ public class TooltipHandler
 
     public static int getTooltipEndIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
     {
-        if (tooltip.isEmpty()) return 0;
-
         int tooltipEndIndex = tooltip.size();
         if (Minecraft.getInstance().options.advancedItemTooltips)
         {
-            while (tooltip.get(tooltipEndIndex - 1).left().map(text -> !text.getString().equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString())).orElse(false))
-            {   tooltipEndIndex--;
+            for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
+            {
+                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString())).orElse(false))
+                {   break;
+                }
             }
-            tooltipEndIndex--;
         }
-        if (tooltipEndIndex == -1)
-        {   tooltipEndIndex = tooltip.size();
-        }
+        tooltipEndIndex = CSMath.clamp(tooltipEndIndex, 0, tooltip.size() - 1);
         return tooltipEndIndex;
     }
 
@@ -190,12 +188,13 @@ public class TooltipHandler
             if (temp != null && temp.test(player, stack))
             {
                 elements.add(tooltipEndIndex, Either.left(
-                        temp.value() > 0
-                        ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())).withStyle(HOT)
-                        : Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD)
-                ));
+                             temp.value() > 0
+                             ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())).withStyle(HOT) :
+                             temp.value() == 0
+                             ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())) :
+                             Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD)));
                 elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                elements.add(tooltipEndIndex, Either.left(                           Component.empty()));
+                elements.add(tooltipEndIndex, Either.left(Component.empty()));
             }
         }
         // If the item is an insulation ingredient, add the tooltip
