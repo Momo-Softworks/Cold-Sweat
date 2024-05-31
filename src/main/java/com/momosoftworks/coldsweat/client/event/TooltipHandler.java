@@ -74,9 +74,7 @@ public class TooltipHandler
                 break;
             }
         }
-        if (tooltipStartIndex == -1)
-        {   tooltipStartIndex = 0;
-        }
+        tooltipStartIndex = CSMath.clamp(tooltipStartIndex, 0, tooltip.size());
         return tooltipStartIndex;
     }
 
@@ -92,7 +90,7 @@ public class TooltipHandler
                 }
             }
         }
-        tooltipEndIndex = CSMath.clamp(tooltipEndIndex, 0, tooltip.size() - 1);
+        tooltipEndIndex = CSMath.clamp(tooltipEndIndex, 0, tooltip.size());
         return tooltipEndIndex;
     }
 
