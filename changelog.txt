@@ -2059,11 +2059,24 @@ Fixes:
 - Fixed tags not working for dimension or structure-related config settings
 
 Technical Changes:
-- Changed the order of precedence for config settings:
+* Changed the order of precedence for config settings:
       - user datapacks (in config folder) > datapacks (from mods or worlds) > traditional configs (.toml files)
 - Config settings can now accept a comma-separated list of biomes, dimensions, or structures to apply the same settings to multiple things
-- (1.16) 3rd party mods can now define datapack configs for Cold Sweat, as has been possible in other versions
+* (1.16) 3rd party mods can now define datapack configs for Cold Sweat, as has been possible in other versions
       - This is done with a custom data loading system, which means there are a couple minor differences in folder structure:
             - Data files are kept in data/cold_sweat/config/* instead of data/<yourmod>/cold_sweat/*
             - Otherwise, the internal structure is the same
-            - Datapacks in world folders still can't be read by this system. The alternative is to put datapack configs in configs/coldsweat/data/*
+            ! Datapacks in world folders still can't be read by this system. The alternative is to put datapack configs in configs/coldsweat/data/*
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b03f
+- Added more info about the filled waterskin's uses to its tooltip
+
+Fixes:
+- Fixed config settings for chameleon spawn biomes being loaded too late, preventing them from spawning at all
+- Fixed error in determining whether it was snowing or raining if Serene Seasons was installed
+- Fixed crash when combining items in the sewing table in some cases
+- Fixed crash that rarely occurs when equipping armor items
+- Fixed crash when hovering an item with advanced tooltips enabled
+- Fixed the icebox GUI background being darker than normal
