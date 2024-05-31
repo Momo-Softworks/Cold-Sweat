@@ -176,7 +176,7 @@ public class ItemInsulationManager
             {
                 CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulator ->
                 {
-                    if (owner == null || insulator.test(owner, pair.getFirst()))
+                    if (insulator.test(owner, pair.getFirst()))
                     {
                         modifiers.addAll(insulator.attributes().get(attribute)
                                                   .stream()
@@ -188,7 +188,7 @@ public class ItemInsulationManager
         });
         CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulator ->
         {
-            if (owner == null || insulator.test(owner, stack))
+            if (insulator.test(owner, stack))
             {
                 modifiers.addAll(insulator.attributes().get(attribute)
                                           .stream()
