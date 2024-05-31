@@ -77,19 +77,17 @@ public class TooltipHandler
 
     public static int getTooltipEndIndex(List<ITextComponent> tooltip, ItemStack stack)
     {
-        if (tooltip.isEmpty()) return 0;
-
         int tooltipEndIndex = tooltip.size();
         if (Minecraft.getInstance().options.advancedItemTooltips)
         {
-            while (tooltip.get(tooltipEndIndex - 1).getString().equals(stack.getItem().getRegistryName().toString()))
-            {   tooltipEndIndex--;
+            for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
+            {
+                if (tooltip.get(tooltipEndIndex).getString().equals(stack.getItem().getRegistryName().toString()))
+                {   break;
+                }
             }
-            tooltipEndIndex--;
         }
-        if (tooltipEndIndex == -1)
-        {   tooltipEndIndex = tooltip.size();
-        }
+        tooltipEndIndex = CSMath.clamp(tooltipEndIndex, 0, tooltip.size() - 1);
         return tooltipEndIndex;
     }
 
@@ -190,10 +188,12 @@ public class TooltipHandler
             PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
             if (temp != null && temp.test(player, stack))
             {
-                elements.add(tooltipEndIndex, temp.value > 0
-                        ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT)
-                        : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD)
-                );
+                elements.add(tooltipEndIndex,
+                             temp.value > 0
+                             ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT) :
+                             temp.value == 0
+                             ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)) :
+                             new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD));
                 elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
                 elements.add(tooltipEndIndex, new StringTextComponent(""));
             }
