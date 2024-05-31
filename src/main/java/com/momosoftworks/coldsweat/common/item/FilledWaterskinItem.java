@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -27,10 +28,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
@@ -284,18 +282,47 @@ public class FilledWaterskinItem extends Item
     @Override
     public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
-        double temp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
-        // Info tooltip for hotbar functionality
-        tooltip.add(new StringTextComponent(""));
-        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
-        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.temperature_effect",
-                                           (CSMath.sign(temp) >= 0 ? "+" : "-")
-                                           + (temp != 0 ? CSMath.truncate(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2) : 0))
-                            .withStyle(temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : TextFormatting.WHITE));
+        double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
+        if (Screen.hasShiftDown())
+        {
+            // Info tooltip for hotbar functionality
+            String perSecond = new TranslationTextComponent("tooltip.cold_sweat.per_second").getString();
+
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
+            IFormattableTextComponent tempEffectText =
+                        (temp > 0
+                        ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2)).withStyle(TooltipHandler.HOT) :
+                        temp == 0
+                        ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+0") :
+                        new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.round(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2)).withStyle(TooltipHandler.COLD))
+                        .append(perSecond);
+            tooltip.add(tempEffectText);
+
+            IFormattableTextComponent tempText =
+                                 temp > 0
+                                 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.HOT) :
+                                 temp == 0
+                                 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
+                                 new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
+
+            // Info tooltip for drinking functionality
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+            tooltip.add(tempText);
+
+            // Info tooltip for pouring functionality
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.swing").withStyle(TextFormatting.GRAY));
+            tooltip.add(tempText);
+        }
+        else
+        {   tooltip.add(TooltipHandler.EXPAND_TOOLTIP);
+        }
 
         // Tooltip to display temperature
         boolean celsius = ConfigSettings.CELSIUS.get();
-        TextFormatting color = temp == 0 ? TextFormatting.GRAY : (temp < 0 ? TextFormatting.BLUE : TextFormatting.RED);
+        Style color = temp == 0 ? Style.EMPTY : (temp < 0 ? TooltipHandler.COLD : TooltipHandler.HOT);
         String tempUnits = celsius ? "C" : "F";
         temp = temp / 2 + 95;
         if (celsius) temp = Temperature.convert(temp, Temperature.Units.F, Temperature.Units.C, true);

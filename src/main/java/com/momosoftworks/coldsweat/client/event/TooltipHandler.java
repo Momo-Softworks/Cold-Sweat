@@ -48,8 +48,10 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
-    public static final TextFormatting COLD = TextFormatting.BLUE;
-    public static final TextFormatting HOT  = TextFormatting.RED;
+    public static final Style COLD = Style.EMPTY.withColor(Color.fromRgb(3767039));
+    public static final Style HOT = Style.EMPTY.withColor(Color.fromRgb(16736574));
+    public static final IFormattableTextComponent EXPAND_TOOLTIP = new StringTextComponent("?").withStyle(Style.EMPTY.withColor(TextFormatting.BLUE).withUnderlined(true))
+                                           .append(new StringTextComponent(" 'Shift'").withStyle(Style.EMPTY.withColor(TextFormatting.GRAY).withUnderlined(false)));
 
     private static int TOOLTIP_BACKGROUND_COLOR = 0;
 
@@ -172,10 +174,11 @@ public class TooltipHandler
 
         Insulator itemInsul = null;
         PlayerEntity player = Minecraft.getInstance().player;
-        if (stack.getItem() == ModItems.SOULSPRING_LAMP)
-        {
-            if (!Screen.hasShiftDown())
-            {   elements.add(tooltipStartIndex, new StringTextComponent("? ").withStyle(TextFormatting.BLUE).append(new StringTextComponent("'Shift'").withStyle(TextFormatting.DARK_GRAY)));
+
+        // If the item is a Soulspring Lamp
+        if (stack.getItem() instanceof SoulspringLampItem)
+        {   if (!Screen.hasShiftDown())
+            {   elements.add(tooltipStartIndex, EXPAND_TOOLTIP);
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
             {   elements.add(tooltipStartIndex, new StringTextComponent(""));
