@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event.capability;
+package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
@@ -9,7 +9,6 @@ import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.AgeableEntity;

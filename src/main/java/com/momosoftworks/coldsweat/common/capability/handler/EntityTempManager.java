@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.event.capability;
+package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableSet;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -64,7 +64,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
 public class EntityTempManager

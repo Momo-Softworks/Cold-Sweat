@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ModLlamaModel;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
-import com.momosoftworks.coldsweat.common.event.capability.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.LlamaRenderer;

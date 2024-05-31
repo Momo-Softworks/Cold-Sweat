@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.blackgear.cavesandcliffs.client.renderer.entity.model.GoatModel;
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
-import com.momosoftworks.coldsweat.common.event.capability.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,14 +3,13 @@ package com.momosoftworks.coldsweat.common.capability.temperature;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
-import com.momosoftworks.coldsweat.common.event.capability.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -29,8 +28,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.momosoftworks.coldsweat.common.event.capability.EntityTempManager.VALID_MODIFIER_TRAITS;
-import static com.momosoftworks.coldsweat.common.event.capability.EntityTempManager.VALID_TEMPERATURE_TRAITS;
+import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_MODIFIER_TRAITS;
+import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_TEMPERATURE_TRAITS;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
