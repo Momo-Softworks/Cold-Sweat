@@ -25,6 +25,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -49,8 +50,10 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
-    public static final ChatFormatting COLD = ChatFormatting.BLUE;
-    public static final ChatFormatting HOT = ChatFormatting.RED;
+    public static final Style COLD = Style.EMPTY.withColor(3767039);
+    public static final Style HOT = Style.EMPTY.withColor(16736574);
+    public static final Component EXPAND_TOOLTIP = new TextComponent("?").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE).withUnderlined(true))
+                                           .append(new TextComponent(" 'Shift'").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withUnderlined(false)));
 
     public static int getTooltipTitleIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
     {
@@ -170,7 +173,7 @@ public class TooltipHandler
         // If the item is a Soulspring Lamp
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
-            {   elements.add(tooltipStartIndex, Either.left(new TextComponent("? ").withStyle(ChatFormatting.BLUE).append(new TextComponent("'Shift'").withStyle(ChatFormatting.DARK_GRAY))));
+            {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
             }
             elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
         }
