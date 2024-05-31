@@ -129,7 +129,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                         // If item is a filled waterskin not at max temp yet
                         if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
                         {   hasItemStacks = true;
-                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, itemTemp + 1);
+                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
                         }
                         // If item is valid for the boiler, but doesn't need to be heated and can be purified
                         else if (ticksExisted % (200 / ConfigSettings.TEMP_RATE.get()) == 0
