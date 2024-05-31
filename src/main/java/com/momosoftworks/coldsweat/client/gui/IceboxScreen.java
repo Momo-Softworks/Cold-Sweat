@@ -33,9 +33,7 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
     @Override
     public void render(MatrixStack ps, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(ps);
         super.render(ps, mouseX, mouseY, partialTicks);
-        this.renderTooltip(ps, mouseX, mouseY);
     }
 
     @Override
