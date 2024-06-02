@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -70,6 +71,17 @@ public class SoulspringLampItem extends Item
                     double radius = 5d;
                     AABB bb = new AABB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
                                        player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
+
+                    if (Math.random() < 0.6)
+                    {
+                        AABB bb2 = bb.inflate(-3);
+                        double x = bb2.minX + (bb2.maxX - bb2.minX) * Math.random();
+                        double y = bb2.minY + (bb2.maxY - bb2.minY) * Math.random();
+                        double z = bb2.minZ + (bb2.maxZ - bb2.minZ) * Math.random();
+                        double xSpeed = (Math.random() - 0.5) * 0.02;
+                        double zSpeed = (Math.random() - 0.5) * 0.02;
+                        WorldHelper.spawnParticle(level, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                    }
 
                     for (Player entity : level.getEntitiesOfClass(Player.class, bb))
                     {
