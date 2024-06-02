@@ -23,7 +23,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
 import net.minecraft.item.UseAction;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
@@ -37,16 +36,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Mod.EventBusSubscriber
 public class FilledWaterskinItem extends Item
 {
     public static final double EFFECT_RATE = 0.4;
@@ -164,34 +160,6 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    @SubscribeEvent
-    public static void onLeftClick(PlayerInteractEvent.LeftClickEmpty event)
-    {
-        if (event.getItemStack().getItem() instanceof FilledWaterskinItem)
-        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.SERVER.noArg(), new UseFilledWaterskinMessage());
-            performPourAction(event.getItemStack(), event.getEntityLiving());
-        }
-    }
-
-    @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
-    {
-        if (event.getItemStack().getItem() instanceof FilledWaterskinItem)
-        {   performPourAction(event.getItemStack(), event.getEntityLiving());
-            event.setCanceled(true);
-        }
-    }
-
-    @Override
-    public boolean canAttackBlock(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer)
-    {   return false;
-    }
-
-    @Override
-    public boolean onLeftClickEntity(ItemStack stack, PlayerEntity player, Entity entity)
-    {   return performPourAction(stack, player);
-    }
-
     public static boolean performPourAction(ItemStack stack, LivingEntity entity)
     {
         if (!(entity instanceof PlayerEntity && stack.getItem() == ModItems.FILLED_WATERSKIN)) return false;
@@ -243,7 +211,14 @@ public class FilledWaterskinItem extends Item
     }
 
     public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand)
-    {   return DrinkHelper.useDrink(level, player, hand);
+    {
+        if (player.isCrouching())
+        {   return DrinkHelper.useDrink(level, player, hand);
+        }
+        else if (performPourAction(player.getItemInHand(hand), player))
+        {   return ActionResult.consume(player.getItemInHand(hand));
+        }
+        return ActionResult.pass(player.getItemInHand(hand));
     }
 
     @Override
@@ -307,14 +282,9 @@ public class FilledWaterskinItem extends Item
                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
                                  new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
 
-            // Info tooltip for drinking functionality
+            // Info tooltip for drinking/pouring functionality
             tooltip.add(new StringTextComponent(""));
             tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-            tooltip.add(tempText);
-
-            // Info tooltip for pouring functionality
-            tooltip.add(new StringTextComponent(""));
-            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.swing").withStyle(TextFormatting.GRAY));
             tooltip.add(tempText);
         }
         else
