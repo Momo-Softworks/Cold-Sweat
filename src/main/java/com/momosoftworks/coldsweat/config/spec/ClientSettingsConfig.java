@@ -23,9 +23,6 @@ public class ClientSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
     private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
-    private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
-
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
     private static final ForgeConfigSpec.BooleanValue worldGaugeEnabled;
 
@@ -74,13 +71,6 @@ public class ClientSettingsConfig
             bodyIconEnabled = BUILDER
                     .comment("Enables the body temperature icon above the hotbar")
                     .define("Show Body Temperature Icon", true);
-
-            bodyReadoutPos = BUILDER
-                    .comment("The position of the body temperature readout relative to default")
-                    .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
-            bodyReadoutEnabled = BUILDER
-                    .comment("Enables the body temperature readout above the hotbar")
-                    .define("Show Body Temperature Readout", false);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
@@ -162,13 +152,6 @@ public class ClientSettingsConfig
     {   return bodyIconPos.get().get(1);
     }
 
-    public int getBodyReadoutX()
-    {   return bodyReadoutPos.get().get(0);
-    }
-    public int getBodyReadoutY()
-    {   return bodyReadoutPos.get().get(1);
-    }
-
     public int getWorldGaugeX()
     {   return worldGaugePos.get().get(0);
     }
@@ -199,9 +182,6 @@ public class ClientSettingsConfig
     public boolean isBodyIconEnabled()
     {   return bodyIconEnabled.get();
     }
-    public boolean isBodyReadoutEnabled()
-    {   return bodyReadoutEnabled.get();
-    }
     public boolean isWorldGaugeEnabled()
     {   return worldGaugeEnabled.get();
     }
@@ -223,13 +203,6 @@ public class ClientSettingsConfig
     }
     public void setBodyIconY(int pos)
     {   bodyIconPos.set(List.of(getBodyIconX(), pos));
-    }
-
-    public void setBodyReadoutX(int pos)
-    {   bodyReadoutPos.set(List.of(pos, getBodyReadoutY()));
-    }
-    public void setBodyReadoutY(int pos)
-    {   bodyReadoutPos.set(List.of(getBodyReadoutX(), pos));
     }
 
     public void setWorldGaugeX(int pos)
@@ -275,9 +248,6 @@ public class ClientSettingsConfig
     public void setBodyIconEnabled(boolean enabled)
     {   bodyIconEnabled.set(enabled);
     }
-    public void setBodyReadoutEnabled(boolean enabled)
-    {   bodyReadoutEnabled.set(enabled);
-    }
     public void setWorldGaugeEnabled(boolean enabled)
     {   worldGaugeEnabled.set(enabled);
     }
@@ -292,8 +262,6 @@ public class ClientSettingsConfig
         this.setTempSmoothing(ConfigSettings.TEMP_SMOOTHING.get());
         this.setBodyIconX(ConfigSettings.BODY_ICON_POS.get().x());
         this.setBodyIconY(ConfigSettings.BODY_ICON_POS.get().y());
-        this.setBodyReadoutX(ConfigSettings.BODY_READOUT_POS.get().x());
-        this.setBodyReadoutY(ConfigSettings.BODY_READOUT_POS.get().y());
         this.setWorldGaugeX(ConfigSettings.WORLD_GAUGE_POS.get().x());
         this.setWorldGaugeY(ConfigSettings.WORLD_GAUGE_POS.get().y());
         this.setCustomHotbar(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get());
@@ -301,7 +269,6 @@ public class ClientSettingsConfig
         this.setHearthDebug(ConfigSettings.HEARTH_DEBUG.get());
         this.setCreativeWarningEnabled(ConfigSettings.SHOW_CREATIVE_WARNING.get());
         this.setBodyIconEnabled(ConfigSettings.BODY_ICON_ENABLED.get());
-        this.setBodyReadoutEnabled(ConfigSettings.BODY_READOUT_ENABLED.get());
         this.setWorldGaugeEnabled(ConfigSettings.WORLD_GAUGE_ENABLED.get());
         this.setDistortionsEnabled(ConfigSettings.DISTORTION_EFFECTS.get());
         this.setHighContrast(ConfigSettings.HIGH_CONTRAST.get());
