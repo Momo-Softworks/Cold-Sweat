@@ -287,20 +287,19 @@ public class AbstractTempCap implements ITemperatureCap
         // If base attribute is unset
         else
         {
-            double value = CSMath.safeDouble(attribute.getValue()).orElse(defaultValue.get());
-            Collection<AttributeModifier> modifiers = EntityTempManager.getAttributeModifiers(entity, attribute, null);
+            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultValue.get());
 
-            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION).collect(Collectors.toList()))
-            {   value += mod.getAmount();
+            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION))
+            {   base += mod.getAmount();
             }
-            double base = value;
-            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE).collect(Collectors.toList()))
-            {   base += value * mod.getAmount();
+            double value = base;
+            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_BASE))
+            {   value += base * mod.getAmount();
             }
-            for (AttributeModifier mod : modifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL).collect(Collectors.toList()))
-            {   base *= 1.0D + mod.getAmount();
+            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
+            {   value *= 1.0D + mod.getAmount();
             }
-            return base;
+            return value;
         }
     }
 
