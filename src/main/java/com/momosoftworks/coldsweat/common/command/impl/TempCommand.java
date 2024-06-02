@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
 import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -254,10 +255,11 @@ public class TempCommand extends BaseCommand
         LivingEntity living = (LivingEntity) entity;
         AttributeInstance attribute = EntityTempManager.getAttribute(trait, living);
         Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
-        double lastValue = 0;
+        double lastValue = trait == Temperature.Trait.BURNING_POINT ? ConfigSettings.MAX_TEMP.get()
+                         : trait == Temperature.Trait.FREEZING_POINT ? ConfigSettings.MIN_TEMP.get()
+                         : 0;
 
         source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(ChatFormatting.WHITE), false);
-        source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.debug_hover_note").append(new TextComponent("\n")).withStyle(ChatFormatting.GRAY), false);
 
         if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
         {
@@ -271,59 +273,59 @@ public class TempCommand extends BaseCommand
             double lastInput = modifier.getLastInput();
             double lastOutput = modifier.getLastOutput();
 
-            source.sendSuccess(new TextComponent("")
-                               // Modifier input value
-                       .append(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
+            source.sendSuccess(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)
-                                                              .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits))))
+                                        .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits)))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                               // Modifier name
                        .append(new TextComponent(modifier.toString()).withStyle(ChatFormatting.GRAY))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                               // Modifier output value
                        .append(new TextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
-                                                              .withHoverEvent(getConvertedUnitHover(trait, lastOutput, preferredUnits)))), false);
+                                        .withHoverEvent(getConvertedUnitHover(trait, lastOutput, preferredUnits)))), false);
             lastValue = modifier.getLastOutput();
         }
+        // Print attributes affecting the trait
         if (attribute != null)
         {
-            for (AttributeModifier modifier : attribute.getModifiers().stream().sorted(Comparator.comparing(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION
-                                                                                                            ? 1 : mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
-                                                                                                            ? 2 : 3)).toList())
+            double newBase = lastValue;
+            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
             {
-                double newValue = lastValue;
-                switch (modifier.getOperation())
-                {
-                    case ADDITION:
-                        newValue += modifier.getAmount();
-                        break;
-                    case MULTIPLY_BASE:
-                        newValue += newValue * modifier.getAmount();
-                        break;
-                    case MULTIPLY_TOTAL:
-                        newValue *= 1.0D + modifier.getAmount();
-                        break;
-                }
-
-                source.sendSuccess(new TextComponent(CSMath.truncate(lastValue, 2)+"")
-                                            .withStyle(Style.EMPTY
-                                            .withColor(ChatFormatting.WHITE)
-                                            .withHoverEvent(getConvertedUnitHover(trait, lastValue, preferredUnits)))
-                           .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                           .append(new TextComponent(modifier.getName())
-                                            .withStyle(Style.EMPTY
-                                            .withColor(ChatFormatting.LIGHT_PURPLE)
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(modifier.getId().toString())
-                                                                                                .append(new TextComponent("\n"))
-                                                                                                .append(new TranslatableComponent("chat.copy.click").withStyle(ChatFormatting.GRAY))))
-                                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.getId().toString()))))
-                           .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
-                           .append(new TextComponent(CSMath.truncate(newValue, 2)+"").withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
-                                                                                                                .withHoverEvent(getConvertedUnitHover(trait, newValue, preferredUnits)))), false);
+                newBase += modifier.getAmount();
+                printAttributeModifierLine(source, modifier, lastValue, newBase, trait, preferredUnits);
+            }
+            double newValue = newBase;
+            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE))
+            {
+                newValue += newBase * modifier.getAmount();
+                printAttributeModifierLine(source, modifier, lastValue, newValue, trait, preferredUnits);
+            }
+            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))
+            {
+                newValue *= 1.0D + modifier.getAmount();
+                printAttributeModifierLine(source, modifier, lastValue, newValue, trait, preferredUnits);
             }
         }
         return Command.SINGLE_SUCCESS;
+    }
+
+    static void printAttributeModifierLine(CommandSourceStack source, AttributeModifier modifier, double lastValueStore, double newValueStore, Temperature.Trait trait, Temperature.Units preferredUnits)
+    {
+        source.sendSuccess(new TextComponent(CSMath.truncate(lastValueStore, 2)+"")
+                                    .withStyle(Style.EMPTY
+                                    .withColor(ChatFormatting.WHITE)
+                                    .withHoverEvent(getConvertedUnitHover(trait, lastValueStore, preferredUnits)))
+                   .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
+                   .append(new TextComponent(modifier.getName())
+                                    .withStyle(Style.EMPTY
+                                    .withColor(ChatFormatting.LIGHT_PURPLE)
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(modifier.getId().toString())
+                                    .append(new TextComponent("\n"))
+                                    .append(new TranslatableComponent("chat.copy.click").withStyle(ChatFormatting.GRAY))))
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.getId().toString()))))
+                   .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
+                   .append(new TextComponent(CSMath.truncate(newValueStore, 2)+"")
+                                    .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                    .withHoverEvent(getConvertedUnitHover(trait, newValueStore, preferredUnits)))), false);
     }
 
     static double getFormattedTraitValue(Temperature.Trait trait, double rawValue, Temperature.Units units)
