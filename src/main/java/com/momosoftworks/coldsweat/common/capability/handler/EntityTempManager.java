@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -25,6 +26,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -268,38 +270,38 @@ public class EntityTempManager
         // Default TempModifiers for players
         if (event.getEntity() instanceof Player && event.getTrait() == Temperature.Trait.WORLD)
         {
-            event.addModifier(new BiomeTempModifier(25).tickRate(10), false, Placement.BEFORE_FIRST);
-            event.addModifier(new UndergroundTempModifier().tickRate(10), false, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-            event.addModifier(new BlockTempModifier().tickRate(4), false, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+            event.addModifier(new BiomeTempModifier(25).tickRate(10), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+            event.addModifier(new UndergroundTempModifier().tickRate(10), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier().tickRate(4), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
             // Serene Seasons compat
             if (CompatManager.isSereneSeasonsLoaded())
             {
-                TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Placement.of(Mode.BEFORE, Order.FIRST,
+                TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                                  mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
             // Weather2 Compat
             if (CompatManager.isWeather2Loaded())
             {
-                TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Placement.of(Mode.BEFORE, Order.FIRST,
+                TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                            mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
         }
         // Default TempModifiers for other temperature-enabled entities
         else if (event.getTrait() == Temperature.Trait.WORLD && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
         {   // Basic modifiers
-            event.addModifier(new BiomeTempModifier(16).tickRate(40), false, Placement.BEFORE_FIRST);
-            event.addModifier(new UndergroundTempModifier().tickRate(40), false, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-            event.addModifier(new BlockTempModifier(4).tickRate(20), false, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+            event.addModifier(new BiomeTempModifier(16).tickRate(40), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+            event.addModifier(new UndergroundTempModifier().tickRate(40), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier(4).tickRate(20), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
             // Serene Seasons compat
             if (CompatManager.isSereneSeasonsLoaded())
-            {   TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Placement.of(Mode.BEFORE, Order.FIRST,
+            {   TempModifierRegistry.getValue(new ResourceLocation("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                           mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
             // Weather2 Compat
             if (CompatManager.isWeather2Loaded())
-            {   TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), false, Placement.of(Mode.BEFORE, Order.FIRST,
+            {   TempModifierRegistry.getValue(new ResourceLocation("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
                                                                                                                                     mod2 -> mod2 instanceof UndergroundTempModifier)));
             }
         }
@@ -344,15 +346,15 @@ public class EntityTempManager
             {
                 if (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                 && WorldHelper.isRainingAt(player.level(), player.blockPosition()))
-                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, false);
+                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isFreezing())
-                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Trait.BASE);
+                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isOnFire())
-                {   Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Trait.BASE);
+                {   Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
                 }
             }
 
@@ -400,7 +402,7 @@ public class EntityTempManager
             {   MobEffectInstance effect = event.getEffectInstance();
                 // New HearthTempModifier
                 TempModifier newMod = new BlockInsulationTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
-                Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD);
+                Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
             }
             // Remove TempModifier on potion effect removed
             else if (event instanceof MobEffectEvent.Remove)
@@ -447,14 +449,14 @@ public class EntityTempManager
                 Entity mount = player.getVehicle();
                 // If insulated minecart
                 if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
-                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Trait.RATE);
+                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
                 }
                 // If insulated entity (defined in config)
                 else
                 {
                     InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(mount.getType());
                     if (entityInsul != null && entityInsul.test(mount))
-                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE);
+                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
                     }
                 }
             }
@@ -472,15 +474,25 @@ public class EntityTempManager
         && !event.getEntity().level().isClientSide)
         {
             // If food item defined in config
-            float foodTemp = CSMath.getIfNotNull(ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()),
-                                                 food -> food.test(player, event.getItem()) ? food.value() : 0,
-                                                 0d).floatValue();
-            if (foodTemp != 0)
-            {   Temperature.addModifier(player, new FoodTempModifier(foodTemp).expires(0), Temperature.Trait.CORE, true);
-            }
-            // Soul sprout
-            else if (event.getItem().getItem() == ModItems.SOUL_SPROUT)
-            {   Temperature.addOrReplaceModifier(player, new SoulSproutTempModifier().expires(900), Temperature.Trait.BASE);
+            PredicateItem foodData = ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem());
+            if (foodData != null && foodData.test(event.getItem()))
+            {
+                double effect = foodData.value();
+                if (foodData.extraData().contains("duration", Tag.TAG_INT))
+                {
+                    int duration = foodData.extraData().getInt("duration");
+                    // Special case for soul sprouts
+                    FoodTempModifier foodModifier = event.getItem().getItem() == ModItems.SOUL_SPROUT
+                                                    ? new SoulSproutTempModifier(effect)
+                                                    : new FoodTempModifier(effect);
+                    // Store the duration of the TempModifier
+                    foodModifier.getNBT().put("extraData", foodData.extraData());
+                    // Add the TempModifier
+                    Temperature.addModifier(player, foodModifier.expires(duration), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                }
+                else
+                {   Temperature.addModifier(player, new FoodTempModifier(effect).expires(0), Temperature.Trait.CORE, Placement.Duplicates.EXACT);
+                }
             }
         }
     }

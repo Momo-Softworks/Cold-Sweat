@@ -69,7 +69,7 @@ public class ColdSweat
         // Setup JSON data-driven handlers
         bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
         {   event.dataPackRegistry(ModRegistries.FUEL_DATA, FuelData.CODEC);
-            event.dataPackRegistry(ModRegistries.FOOD_DATA, ItemData.CODEC);
+            event.dataPackRegistry(ModRegistries.FOOD_DATA, FoodData.CODEC);
             event.dataPackRegistry(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC);
             event.dataPackRegistry(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC);
             event.dataPackRegistry(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC);

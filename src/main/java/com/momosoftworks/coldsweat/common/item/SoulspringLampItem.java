@@ -79,7 +79,7 @@ public class SoulspringLampItem extends Item
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD);
+                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                         }
                     }
                     shouldBeOn = true;

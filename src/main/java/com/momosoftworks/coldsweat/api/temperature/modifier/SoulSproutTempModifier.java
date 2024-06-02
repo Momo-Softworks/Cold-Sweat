@@ -7,17 +7,24 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Function;
 
-public class SoulSproutTempModifier extends TempModifier
+public class SoulSproutTempModifier extends FoodTempModifier
 {
+    public SoulSproutTempModifier()
+    {   this(0);
+    }
+
+    public SoulSproutTempModifier(double effect)
+    {   super(effect);
+    }
 
     @Override
-    protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
+    public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         if (Math.random() < 0.3 && entity.tickCount % 5 == 0)
         {
             WorldHelper.spawnParticleBatch(entity.level(), ParticleTypes.SOUL, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(),
-                    entity.getBbWidth() / 2, entity.getBbHeight() / 2, entity.getBbWidth() / 2, 1, 0.02);
+                                           entity.getBbWidth() / 2, entity.getBbHeight() / 2, entity.getBbWidth() / 2, 1, 0.02);
         }
-        return temp -> temp - 20;
+        return super.calculate(entity, trait);
     }
 }

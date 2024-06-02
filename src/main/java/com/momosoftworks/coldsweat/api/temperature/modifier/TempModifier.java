@@ -147,7 +147,7 @@ public abstract class TempModifier
     public boolean equals(Object obj)
     {
         return obj instanceof TempModifier mod
-            && TempModifierRegistry.getKey(mod).equals(TempModifierRegistry.getKey(this))
+            && this.getClass().equals(mod.getClass())
             && mod.getNBT().equals(this.getNBT());
     }
 }

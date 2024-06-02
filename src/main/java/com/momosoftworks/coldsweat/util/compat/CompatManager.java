@@ -4,6 +4,7 @@ import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
@@ -329,7 +330,7 @@ public class CompatManager
 
                             double cold = insulator.insulation().getCold();
                             double heat = insulator.insulation().getHeat();
-                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, heat).expires(20), Temperature.Trait.RATE);
+                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, heat).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
                         }
                     }
                 });
