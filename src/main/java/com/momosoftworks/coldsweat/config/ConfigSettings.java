@@ -133,9 +133,6 @@ public class ConfigSettings
     public static final DynamicHolder<Vec2i> BODY_ICON_POS;
     public static final DynamicHolder<Boolean> BODY_ICON_ENABLED;
 
-    public static final DynamicHolder<Vec2i> BODY_READOUT_POS;
-    public static final DynamicHolder<Boolean> BODY_READOUT_ENABLED;
-
     public static final DynamicHolder<Vec2i> WORLD_GAUGE_POS;
     public static final DynamicHolder<Boolean> WORLD_GAUGE_ENABLED;
 
@@ -592,10 +589,6 @@ public class ConfigSettings
         BODY_ICON_POS = addClientSetting("body_icon_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
                                                                   ClientSettingsConfig.getInstance().getBodyIconY()));
         BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
-
-        BODY_READOUT_POS = addClientSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
-                                                                                ClientSettingsConfig.getInstance().getBodyReadoutY()));
-        BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", () -> ClientSettingsConfig.getInstance().isBodyReadoutEnabled());
 
         WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
                                                                     ClientSettingsConfig.getInstance().getWorldGaugeY()));

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.config.spec;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -22,9 +23,6 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
     private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
-
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
-    private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
     private static final ForgeConfigSpec.BooleanValue worldGaugeEnabled;
@@ -74,13 +72,6 @@ public class ClientSettingsConfig
             bodyIconEnabled = BUILDER
                     .comment("Enables the body temperature icon")
                     .define("Show Body Temperature Icon", true);
-
-            bodyReadoutPos = BUILDER
-                    .comment("The position of the body temperature readout relative to default")
-                    .defineList("Body Temperature Readout Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
-            bodyReadoutEnabled = BUILDER
-                    .comment("Enables the body temperature readout")
-                    .define("Show Body Temperature Readout", false);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
@@ -162,13 +153,6 @@ public class ClientSettingsConfig
     {   return bodyIconPos.get().get(1);
     }
 
-    public int getBodyReadoutX()
-    {   return bodyReadoutPos.get().get(0);
-    }
-    public int getBodyReadoutY()
-    {   return bodyReadoutPos.get().get(1);
-    }
-
     public int getWorldGaugeX()
     {   return worldGaugePos.get().get(0);
     }
@@ -199,9 +183,6 @@ public class ClientSettingsConfig
     public boolean isBodyIconEnabled()
     {   return bodyIconEnabled.get();
     }
-    public boolean isBodyReadoutEnabled()
-    {   return bodyReadoutEnabled.get();
-    }
     public boolean isWorldGaugeEnabled()
     {   return worldGaugeEnabled.get();
     }
@@ -223,13 +204,6 @@ public class ClientSettingsConfig
     }
     public void setBodyIconY(int pos)
     {   bodyIconPos.set(Arrays.asList(getBodyIconX(), pos));
-    }
-
-    public void setBodyReadoutX(int pos)
-    {   bodyReadoutPos.set(Arrays.asList(pos, getBodyReadoutY()));
-    }
-    public void setBodyReadoutY(int pos)
-    {   bodyReadoutPos.set(Arrays.asList(getBodyReadoutX(), pos));
     }
 
     public void setWorldGaugeX(int pos)
@@ -275,9 +249,6 @@ public class ClientSettingsConfig
     public void setBodyIconEnabled(boolean enabled)
     {   bodyIconEnabled.set(enabled);
     }
-    public void setBodyReadoutEnabled(boolean enabled)
-    {   bodyReadoutEnabled.set(enabled);
-    }
     public void setWorldGaugeEnabled(boolean enabled)
     {   worldGaugeEnabled.set(enabled);
     }
@@ -286,6 +257,26 @@ public class ClientSettingsConfig
     {   tempSmoothing.set(smoothing);
     }
 
+    public synchronized void writeAndSave()
+    {   this.setCelsius(ConfigSettings.CELSIUS.get());
+        this.setTempOffset(ConfigSettings.TEMP_OFFSET.get());
+        this.setTempSmoothing(ConfigSettings.TEMP_SMOOTHING.get());
+        this.setBodyIconX(ConfigSettings.BODY_ICON_POS.get().x());
+        this.setBodyIconY(ConfigSettings.BODY_ICON_POS.get().y());
+        this.setWorldGaugeX(ConfigSettings.WORLD_GAUGE_POS.get().x());
+        this.setWorldGaugeY(ConfigSettings.WORLD_GAUGE_POS.get().y());
+        this.setCustomHotbar(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get());
+        this.setIconBobbing(ConfigSettings.ICON_BOBBING.get());
+        this.setHearthDebug(ConfigSettings.HEARTH_DEBUG.get());
+        this.setCreativeWarningEnabled(ConfigSettings.SHOW_CREATIVE_WARNING.get());
+        this.setBodyIconEnabled(ConfigSettings.BODY_ICON_ENABLED.get());
+        this.setWorldGaugeEnabled(ConfigSettings.WORLD_GAUGE_ENABLED.get());
+        this.setDistortionsEnabled(ConfigSettings.DISTORTION_EFFECTS.get());
+        this.setHighContrast(ConfigSettings.HIGH_CONTRAST.get());
+        this.setConfigButtonPos(Arrays.asList(ConfigSettings.CONFIG_BUTTON_POS.get().x(),
+                                              ConfigSettings.CONFIG_BUTTON_POS.get().y()));
+        this.save();
+    }
 
     public void save()
     {   SPEC.save();
