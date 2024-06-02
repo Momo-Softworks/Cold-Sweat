@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -8,7 +9,6 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.core.network.message.UseFilledWaterskinMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -35,9 +35,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Mod.EventBusSubscriber
 public class FilledWaterskinItem extends Item
 {
     public static final double EFFECT_RATE = 0.4;
@@ -162,34 +159,6 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    @SubscribeEvent
-    public static void onLeftClick(PlayerInteractEvent.LeftClickEmpty event)
-    {
-        if (event.getItemStack().getItem() instanceof FilledWaterskinItem)
-        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.SERVER.noArg(), new UseFilledWaterskinMessage());
-            performPourAction(event.getItemStack(), event.getEntity());
-        }
-    }
-
-    @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
-    {
-        if (event.getItemStack().getItem() instanceof FilledWaterskinItem)
-        {   performPourAction(event.getItemStack(), event.getEntity());
-            event.setCanceled(true);
-        }
-    }
-
-    @Override
-    public boolean canAttackBlock(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer)
-    {   return false;
-    }
-
-    @Override
-    public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity)
-    {   return performPourAction(stack, player);
-    }
-
     public static boolean performPourAction(ItemStack stack, LivingEntity entity)
     {
         if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN))) return false;
@@ -240,7 +209,14 @@ public class FilledWaterskinItem extends Item
     }
 
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
-    {   return ItemUtils.startUsingInstantly(level, player, hand);
+    {
+        if (player.isCrouching())
+        {   return ItemUtils.startUsingInstantly(level, player, hand);
+        }
+        else if (performPourAction(player.getItemInHand(hand), player))
+        {   return InteractionResultHolder.consume(player.getItemInHand(hand));
+        }
+        return InteractionResultHolder.pass(player.getItemInHand(hand));
     }
 
     @Override
@@ -301,14 +277,9 @@ public class FilledWaterskinItem extends Item
                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
                                  Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
 
-            // Info tooltip for drinking functionality
+            // Info tooltip for drinking/pouring functionality
             tooltip.add(Component.empty());
             tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
-            tooltip.add(tempText);
-
-            // Info tooltip for pouring functionality
-            tooltip.add(Component.empty());
-            tooltip.add(Component.translatable("tooltip.cold_sweat.swing").withStyle(ChatFormatting.GRAY));
             tooltip.add(tempText);
         }
         else
