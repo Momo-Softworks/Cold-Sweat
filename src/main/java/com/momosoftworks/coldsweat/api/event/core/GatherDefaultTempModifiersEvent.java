@@ -42,7 +42,17 @@ public class GatherDefaultTempModifiersEvent extends Event
     {   this.modifiers.addAll(modifiers);
     }
 
+    public void addModifier(TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
+    {   Temperature.addModifier(modifiers, modifier, duplicatePolicy, 1, params);
+    }
+
+    @Deprecated()
     public void addModifier(TempModifier modifier, boolean allowDupes, Placement params)
-    {   Temperature.addModifier(modifiers, modifier, allowDupes, 1, params);
+    {   Temperature.addModifier(modifiers, modifier, allowDupes ? Placement.Duplicates.ALLOW : Placement.Duplicates.BY_CLASS, 1, params);
+    }
+
+    @Deprecated()
+    public void addModifier(TempModifier modifier, boolean allowDupes, int maxDupes, Placement params)
+    {   Temperature.addModifier(modifiers, modifier, allowDupes ? Placement.Duplicates.ALLOW : Placement.Duplicates.BY_CLASS, maxDupes, params);
     }
 }

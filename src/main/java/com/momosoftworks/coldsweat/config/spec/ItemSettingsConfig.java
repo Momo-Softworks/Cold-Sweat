@@ -297,10 +297,12 @@ public class ItemSettingsConfig
         BUILDER.push("Consumables");
         temperatureFoods = BUILDER
                 .comment("Defines items that affect the player's temperature when consumed",
-                        "Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
-                        "Negative values are cold foods, positive values are hot foods")
+                        "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
+                        "Negative values are cold foods, positive values are hot foods",
+                        "nbt: Optional. If set, the item will only affect the player's temperature if it has the specified NBT tag.",
+                        "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time.")
                 .defineListAllowEmpty(Arrays.asList("Temperature-Affecting Foods"), () -> Arrays.asList(
-                        // Nothing defined
+                        Arrays.asList("cold_sweat:soul_sprout", -20, "{}", 1200)
                 ),
                 it ->
                 {
@@ -310,7 +312,8 @@ public class ItemSettingsConfig
                         return list.size() >= 2
                             && list.get(0) instanceof String
                             && list.get(1) instanceof Number
-                            && (list.size() < 3 || list.get(2) instanceof String);
+                            && (list.size() < 3 || list.get(2) instanceof String)
+                            && (list.size() < 4 || list.get(3) instanceof Integer);
                     }
                     return false;
                 });

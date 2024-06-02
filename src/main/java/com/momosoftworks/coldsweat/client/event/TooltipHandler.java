@@ -31,6 +31,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -186,12 +187,16 @@ public class TooltipHandler
             PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
             if (temp != null && temp.test(player, stack))
             {
-                elements.add(tooltipEndIndex,
-                             temp.value > 0
-                             ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT) :
-                             temp.value == 0
-                             ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)) :
-                             new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD));
+                IFormattableTextComponent consumeEffects = 
+                                                  temp.value > 0
+                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT) :
+                                                  temp.value == 0
+                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)) :
+                                                  new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD);
+                if (temp.extraData.contains("duration", 3))
+                {   consumeEffects.append(" (" + StringUtils.formatTickDuration(temp.extraData.getInt("duration")) + ")");
+                }
+                elements.add(tooltipEndIndex, consumeEffects);
                 elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
                 elements.add(tooltipEndIndex, new StringTextComponent(""));
             }

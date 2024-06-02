@@ -108,7 +108,7 @@ public class ConfigRegistryHandler
 
         Set<InsulatorData> insulators = new HashSet<>(ModRegistries.INSULATOR_DATA.getValues());
         Set<FuelData> fuels = new HashSet<>(ModRegistries.FUEL_DATA.getValues());
-        Set<ItemData> foods = new HashSet<>(ModRegistries.FOOD_DATA.getValues());
+        Set<FoodData> foods = new HashSet<>(ModRegistries.FOOD_DATA.getValues());
 
         Set<BlockTempData> blockTemps = new HashSet<>(ModRegistries.BLOCK_TEMP_DATA.getValues());
         Set<BiomeTempData> biomeTemps = new HashSet<>(ModRegistries.BIOME_TEMP_DATA.getValues());
@@ -123,7 +123,7 @@ public class ConfigRegistryHandler
         */
         insulators.addAll(parseConfigData(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC));
         fuels.addAll(parseConfigData(ModRegistries.FUEL_DATA, FuelData.CODEC));
-        foods.addAll(parseConfigData(ModRegistries.FOOD_DATA, ItemData.CODEC));
+        foods.addAll(parseConfigData(ModRegistries.FOOD_DATA, FoodData.CODEC));
 
         blockTemps.addAll(parseConfigData(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC));
         biomeTemps.addAll(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
@@ -250,7 +250,7 @@ public class ConfigRegistryHandler
         });
     }
 
-    private static void addFoodConfigs(Set<ItemData> foods)
+    private static void addFoodConfigs(Set<FoodData> foods)
     {
         foods.forEach(foodData ->
         {
@@ -262,10 +262,17 @@ public class ConfigRegistryHandler
                 {   return;
                 }
             }
-            ItemRequirement data = foodData.data;
-            EntityRequirement predicate = foodData.entityRequirement.orElse(null);
-            double food = foodData.value;
-            PredicateItem predicateItem = new PredicateItem(food, data, predicate);
+
+            EntityRequirement predicate = foodData.entityRequirement.orElse(EntityRequirement.NONE);
+            CompoundNBT extraData = null;
+            if (foodData.duration.isPresent())
+            {
+                extraData = new CompoundNBT();
+                extraData.putInt("duration", foodData.duration.get());
+            }
+
+            PredicateItem predicateItem = new PredicateItem(foodData.value, foodData.data, predicate, extraData);
+
             for (Item item : RegistryHelper.mapTaggableList(foodData.data.items))
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);

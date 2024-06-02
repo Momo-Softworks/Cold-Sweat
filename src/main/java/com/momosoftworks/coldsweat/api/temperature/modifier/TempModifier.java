@@ -150,7 +150,7 @@ public abstract class TempModifier
         if (obj instanceof TempModifier)
         {
             TempModifier mod = ((TempModifier) obj);
-            return TempModifierRegistry.getKey(mod).equals(TempModifierRegistry.getKey(this))
+            return this.getClass().equals(mod.getClass())
                 && mod.getNBT().equals(this.getNBT());
         }
         return false;

@@ -131,7 +131,7 @@ public class Temperature
             // Use default player modifiers to determine the temperature
             GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Trait.WORLD);
             MinecraftForge.EVENT_BUS.post(event);
-            addModifiers(dummy, event.getModifiers(), Trait.WORLD, true);
+            addModifiers(dummy, event.getModifiers(), Trait.WORLD, Placement.Duplicates.BY_CLASS);
         }
         // Move the dummy to the position being tested
         Vector3d centerPos = CSMath.getCenterPos(pos);
@@ -174,6 +174,26 @@ public class Temperature
         return null;
     }
 
+    @Deprecated()
+    public static void addOrReplaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes)
+    {   addOrReplaceModifier(entity, modifier, trait, allowDupes ? Placement.Duplicates.ALLOW : Placement.Duplicates.BY_CLASS);
+    }
+
+    @Deprecated()
+    public static void replaceModifier(LivingEntity entity, TempModifier modifier, Trait trait)
+    {   replaceModifier(entity, modifier, trait, Placement.Duplicates.BY_CLASS);
+    }
+
+    @Deprecated()
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes, int times, Placement placement)
+    {   addModifier(entity, modifier, trait, allowDupes ? Placement.Duplicates.ALLOW : Placement.Duplicates.BY_CLASS, times, placement);
+    }
+
+    @Deprecated()
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes)
+    {   addModifier(entity, modifier, trait, allowDupes ? Placement.Duplicates.ALLOW : Placement.Duplicates.BY_CLASS);
+    }
+
     /**
      * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
      * Otherwise, it will add the modifier.<br>
@@ -181,8 +201,8 @@ public class Temperature
      * @param modifier The modifier to apply
      * @param trait The type of temperature to apply the modifier to
      */
-    public static void addOrReplaceModifier(LivingEntity entity, TempModifier modifier, Trait trait)
-    {   addModifier(entity, modifier, trait, false, 1, Placement.of(Placement.Mode.REPLACE_OR_ADD, Placement.Order.FIRST, mod -> mod.equals(modifier)));
+    public static void addOrReplaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicatePolicy)
+    {   addModifier(entity, modifier, trait, duplicatePolicy, 1, Placement.of(Placement.Mode.REPLACE_OR_ADD, Placement.Order.FIRST, mod -> mod.equals(modifier)));
     }
 
     /**
@@ -192,24 +212,24 @@ public class Temperature
      * @param modifier The modifier to apply
      * @param trait The type of temperature to apply the modifier to
      */
-    public static void replaceModifier(LivingEntity entity, TempModifier modifier, Trait trait)
-    {   addModifier(entity, modifier, trait, false, 1, Placement.of(Placement.Mode.REPLACE, Placement.Order.FIRST, mod -> mod.equals(modifier)));
+    public static void replaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicates)
+    {   addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE, Placement.Order.FIRST, mod -> Placement.Duplicates.check(duplicates, modifier, mod)));
     }
 
     /**
      * Adds the given modifier to the entity.<br>
      * If duplicates are disabled and the modifier already exists, this action will fail.
-     * @param allowDupes allows or disallows duplicate TempModifiers to be applied
+     * @param duplicatePolicy allows or disallows duplicate TempModifiers to be applied
      * (You might use this for things that have stacking effects, for example)
      */
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes)
-    {   addModifier(entity, modifier, trait, allowDupes, 1, Placement.AFTER_LAST);
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicatePolicy)
+    {   addModifier(entity, modifier, trait, duplicatePolicy, 1, Placement.AFTER_LAST);
     }
 
     /**
      * Adds the given modifier to the entity, with a custom placement.<br>
      */
-    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, boolean allowDupes, int times, Placement placement)
+    public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicatePolicy, int times, Placement placement)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, trait);
         MinecraftForge.EVENT_BUS.post(event);
@@ -217,14 +237,14 @@ public class Temperature
         {
             EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
             {
-                if (addModifier(cap.getModifiers(trait), event.getModifier(), allowDupes, times, placement))
+                if (addModifier(cap.getModifiers(trait), event.getModifier(), duplicatePolicy, times, placement))
                 {   updateModifiers(entity, cap);
                 }
             });
         }
     }
 
-    public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, boolean allowDupes, int maxCount, Placement placement)
+    public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, Placement.Duplicates duplicatePolicy, int maxCount, Placement placement)
     {
         boolean changed = false;
         Predicate<TempModifier> predicate = placement.predicate;
@@ -233,8 +253,8 @@ public class Temperature
         boolean isReplacing = placement.mode  == Placement.Mode.REPLACE || placement.mode == Placement.Mode.REPLACE_OR_ADD;
         boolean isForward = placement.order == Placement.Order.FIRST;
 
-        if (!allowDupes && !isReplacing
-        && modifiers.stream().anyMatch(mod -> mod.getClass().equals(modifier.getClass())))
+        if (!isReplacing
+        && modifiers.stream().anyMatch(mod -> Placement.Duplicates.check(duplicatePolicy, modifier, mod)))
         {   return false;
         }
 
@@ -258,7 +278,7 @@ public class Temperature
                 hits++;
                 changed = true;
                 // If duplicates are not allowed, break the loop
-                if (!allowDupes || hits >= maxCount)
+                if (duplicatePolicy != Placement.Duplicates.ALLOW || hits >= maxCount)
                 {   return true;
                 }
             }
@@ -272,12 +292,12 @@ public class Temperature
         return changed;
     }
 
-    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Trait trait, boolean duplicates)
+    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Trait trait, Placement.Duplicates duplicatePolicy)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             for (TempModifier modifier : modifiers)
-            {   addModifier(entity, modifier, trait, duplicates);
+            {   addModifier(entity, modifier, trait, duplicatePolicy);
             }
             updateModifiers(entity, cap);
         });

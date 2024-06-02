@@ -43,4 +43,25 @@ public class Placement
         // Targets the last modifier that passes the predicate
         LAST
     }
+
+    public enum Duplicates
+    {
+        // Allow duplicate TempModifiers
+        ALLOW,
+        // Disallow duplicate TempModifiers (ignores NBT)
+        BY_CLASS,
+        // Disallow duplicate TempModifiers only if they have the same NBT
+        EXACT;
+
+        public static boolean check(Duplicates policy, TempModifier modA, TempModifier modB)
+        {
+            switch (policy)
+            {
+                case ALLOW    : return false;
+                case BY_CLASS : return modA.getClass().equals(modB.getClass());
+                case EXACT    : return modA.equals(modB);
+                default       : return false;
+            }
+        }
+    }
 }

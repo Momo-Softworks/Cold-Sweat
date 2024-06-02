@@ -26,7 +26,7 @@ public class ModRegistries
     // Item Registries
     public static CodecRegistry<InsulatorData> INSULATOR_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"), InsulatorData.CODEC);
     public static CodecRegistry<FuelData> FUEL_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel"), FuelData.CODEC);
-    public static CodecRegistry<ItemData> FOOD_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/food"), ItemData.CODEC);
+    public static CodecRegistry<FoodData> FOOD_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/food"), FoodData.CODEC);
 
     // World Registries
     public static CodecRegistry<BlockTempData> BLOCK_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp"), BlockTempData.CODEC);

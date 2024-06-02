@@ -14,12 +14,18 @@ public class PredicateItem implements NbtSerializable
     public Double value;
     public ItemRequirement data;
     public EntityRequirement requirement;
+    public CompoundNBT extraData;
 
-    public PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement)
+    public PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement, CompoundNBT extraData)
     {
         this.value = value;
         this.data = data;
         this.requirement = requirement;
+        this.extraData = extraData;
+    }
+
+    public PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement)
+    {   this(value, data, requirement, new CompoundNBT());
     }
 
     public boolean test(ItemStack stack)
@@ -37,6 +43,9 @@ public class PredicateItem implements NbtSerializable
         tag.putDouble("value", value);
         tag.put("data", data.serialize());
         tag.put("requirement", requirement.serialize());
+        if (extraData != null)
+        {   tag.put("extraData", extraData);
+        }
         return tag;
     }
 
@@ -44,6 +53,7 @@ public class PredicateItem implements NbtSerializable
     {
         return new PredicateItem(tag.getDouble("value"),
                                  ItemRequirement.deserialize(tag.getCompound("data")),
-                                 EntityRequirement.deserialize(tag.getCompound("requirement")));
+                                 EntityRequirement.deserialize(tag.getCompound("requirement")),
+                                 tag.contains("extraData") ? tag.getCompound("extraData") : new CompoundNBT());
     }
 }

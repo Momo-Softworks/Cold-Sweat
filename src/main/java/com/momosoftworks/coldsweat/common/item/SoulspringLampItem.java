@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.event.util.ClickAction;
 import com.momosoftworks.coldsweat.api.event.common.ItemSwappedInInventoryEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -85,12 +86,12 @@ public class SoulspringLampItem extends Item
                     for (PlayerEntity playerEnt : world.getEntitiesOfClass(PlayerEntity.class, bb))
                     {
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(((PlayerEntity) entity), Temperature.Trait.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(playerEnt, Temperature.Trait.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(((PlayerEntity) entity), new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD);
+                        {   Temperature.addOrReplaceModifier(playerEnt, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                         }
                     }
                     shouldBeOn = true;

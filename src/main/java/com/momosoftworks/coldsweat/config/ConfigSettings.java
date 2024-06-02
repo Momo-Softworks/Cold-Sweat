@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
+import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -402,14 +402,19 @@ public class ConfigSettings
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
             double value = ((Number) args.get(0)).doubleValue();
-            NbtRequirement nbtRequirement = args.size() > 2
-                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
+            NbtRequirement nbtRequirement = args.size() > 1
+                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)))
                                             : new NbtRequirement(new CompoundNBT());
+            Integer duration = args.size() > 2 ? ((Number) args.get(2)).intValue() : null;
             ItemRequirement itemRequirement = new ItemRequirement(Arrays.asList(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   nbtRequirement);
-            return new PredicateItem(value, itemRequirement, EntityRequirement.NONE);
+            CompoundNBT tag = new CompoundNBT();
+            if (duration != null)
+            {   tag.putInt("duration", duration);
+            }
+            return new PredicateItem(value, itemRequirement, EntityRequirement.NONE, tag);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
