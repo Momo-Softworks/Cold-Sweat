@@ -8,8 +8,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
 
-public record PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement) implements NbtSerializable
+public record PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement, CompoundTag extraData) implements NbtSerializable
 {
+    public PredicateItem(Double value, ItemRequirement data, EntityRequirement requirement)
+    {   this(value, data, requirement, new CompoundTag());
+    }
+
     public boolean test(ItemStack stack)
     {   return data.test(stack, true);
     }
@@ -17,7 +21,7 @@ public record PredicateItem(Double value, ItemRequirement data, EntityRequiremen
     public boolean test(Entity entity, ItemStack stack)
     {   return data.test(stack, true) && requirement.test(entity);
     }
-
+ 
     @Override
     public CompoundTag serialize()
     {
@@ -25,6 +29,9 @@ public record PredicateItem(Double value, ItemRequirement data, EntityRequiremen
         tag.putDouble("value", value);
         tag.put("data", data.serialize());
         tag.put("requirement", requirement.serialize());
+        if (extraData != null)
+        {   tag.put("extraData", extraData);
+        }
         return tag;
     }
 
@@ -32,6 +39,7 @@ public record PredicateItem(Double value, ItemRequirement data, EntityRequiremen
     {
         return new PredicateItem(tag.getDouble("value"),
                                  ItemRequirement.deserialize(tag.getCompound("data")),
-                                 EntityRequirement.deserialize(tag.getCompound("requirement")));
+                                 EntityRequirement.deserialize(tag.getCompound("requirement")),
+                                 tag.contains("extraData") ? tag.getCompound("extraData") : new CompoundTag());
     }
 }

@@ -33,4 +33,24 @@ public record Placement(Mode mode, Order order, Predicate<TempModifier> predicat
         // Targets the last modifier that passes the predicate
         LAST
     }
+
+    public enum Duplicates
+    {
+        // Allow duplicate TempModifiers
+        ALLOW,
+        // Disallow duplicate TempModifiers (ignores NBT)
+        BY_CLASS,
+        // Disallow duplicate TempModifiers only if they have the same NBT
+        EXACT;
+
+        public static boolean check(Duplicates policy, TempModifier modA, TempModifier modB)
+        {
+            return switch (policy)
+            {
+                case ALLOW    -> false;
+                case BY_CLASS -> modA.getClass().equals(modB.getClass());
+                case EXACT    -> modA.equals(modB);
+            };
+        }
+    }
 }

@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
+import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -20,9 +20,6 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -33,6 +30,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -400,14 +398,19 @@ public class ConfigSettings
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
             double value = ((Number) args.get(0)).doubleValue();
-            NbtRequirement nbtRequirement = args.size() > 2
-                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)))
+            NbtRequirement nbtRequirement = args.size() > 1
+                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)))
                                             : new NbtRequirement(new CompoundTag());
+            Integer duration = args.size() > 2 ? ((Number) args.get(2)).intValue() : null;
             ItemRequirement itemRequirement = new ItemRequirement(List.of(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   nbtRequirement);
-            return new PredicateItem(value, itemRequirement, EntityRequirement.NONE);
+            CompoundTag tag = new CompoundTag();
+            if (duration != null)
+            {   tag.putInt("duration", duration);
+            }
+            return new PredicateItem(value, itemRequirement, EntityRequirement.NONE, tag);
         }),
         encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
