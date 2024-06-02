@@ -40,7 +40,6 @@
   "tooltip.cold_sweat.insulated": "Insulated",
   "tooltip.cold_sweat.hotbar": "When in Hotbar:",
   "tooltip.cold_sweat.consumed": "When Consumed:",
-  "tooltip.cold_sweat.swing": "When Swung:",
   "tooltip.cold_sweat.temperature_effect": "%d Temperature",
   "tooltip.cold_sweat.per_second": "/sec",
 
