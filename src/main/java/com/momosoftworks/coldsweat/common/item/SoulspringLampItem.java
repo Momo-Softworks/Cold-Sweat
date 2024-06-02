@@ -77,6 +77,17 @@ public class SoulspringLampItem extends Item
                     AABB bb = new AABB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
                                        player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
 
+                    if (Math.random() < 0.6)
+                    {
+                        AABB bb2 = bb.inflate(-3);
+                        double x = bb2.minX + (bb2.maxX - bb2.minX) * Math.random();
+                        double y = bb2.minY + (bb2.maxY - bb2.minY) * Math.random();
+                        double z = bb2.minZ + (bb2.maxZ - bb2.minZ) * Math.random();
+                        double xSpeed = (Math.random() - 0.5) * 0.02;
+                        double zSpeed = (Math.random() - 0.5) * 0.02;
+                        WorldHelper.spawnParticle(level, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                    }
+
                     for (Player entity : level.getEntitiesOfClass(Player.class, bb))
                     {
                         // Extend modifier time if it is present
