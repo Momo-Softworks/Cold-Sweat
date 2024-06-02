@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -83,7 +84,7 @@ public class SoulspringLampItem extends Item
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD);
+                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                         }
                     }
                     shouldBeOn = true;

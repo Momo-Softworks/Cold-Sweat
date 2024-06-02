@@ -24,10 +24,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -184,12 +186,15 @@ public class TooltipHandler
             PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
             if (temp != null && temp.test(player, stack))
             {
-                elements.add(tooltipEndIndex, Either.left(
-                             temp.value() > 0
-                             ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())).withStyle(HOT) :
-                             temp.value() == 0
-                             ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())) :
-                             Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD)));
+                MutableComponent consumeEffects = temp.value() > 0
+                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())).withStyle(HOT) :
+                                                  temp.value() == 0
+                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())) :
+                                                  Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD);
+                if (temp.extraData().contains("duration", Tag.TAG_INT))
+                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(temp.extraData().getInt("duration")) + ")");
+                }
+                elements.add(tooltipEndIndex, Either.left(consumeEffects));
                 elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
                 elements.add(tooltipEndIndex, Either.left(Component.empty()));
             }

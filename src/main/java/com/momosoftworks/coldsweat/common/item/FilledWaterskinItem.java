@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -125,7 +126,7 @@ public class FilledWaterskinItem extends Item
                         {
                             if (!affectedPlayers.contains(player))
                             {   // Apply the effect and store the player
-                                Temperature.addModifier(player, new WaterskinTempModifier(waterTemp).expires(0), Temperature.Trait.CORE, true);
+                                Temperature.addModifier(player, new WaterskinTempModifier(waterTemp).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
                                 affectedPlayers.add(player);
                             }
                         });
@@ -160,7 +161,7 @@ public class FilledWaterskinItem extends Item
                 double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
                 itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
-                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, true);
+                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             }
         }
     }
@@ -199,7 +200,7 @@ public class FilledWaterskinItem extends Item
 
         Level level = player.level;
         double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
-        Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, true);
+        Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
 
         // Play empty sound
         level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
@@ -259,7 +260,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
-        Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, true);
+        Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
         return entity instanceof Player player && player.isCreative()
                ? stack
                : this.getCraftingRemainingItem(stack);

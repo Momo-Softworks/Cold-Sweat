@@ -11,7 +11,7 @@ public class ModRegistries
     // Item Registries
     public static final ResourceKey<Registry<InsulatorData>> INSULATOR_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"));
     public static final ResourceKey<Registry<FuelData>> FUEL_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel"));
-    public static final ResourceKey<Registry<ItemData>> FOOD_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/food"));
+    public static final ResourceKey<Registry<FoodData>> FOOD_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/food"));
 
     // World Registries
     public static final ResourceKey<Registry<BlockTempData>> BLOCK_TEMP_DATA = ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp"));

@@ -78,7 +78,7 @@ public class ColdSweat
         bus.addListener((NewRegistryEvent event) ->
         {   event.create(new RegistryBuilder<InsulatorData>().setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
             event.create(new RegistryBuilder<FuelData>().setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
-            event.create(new RegistryBuilder<ItemData>().setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(ItemData.CODEC));
+            event.create(new RegistryBuilder<FoodData>().setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(FoodData.CODEC));
             event.create(new RegistryBuilder<BlockTempData>().setName(ModRegistries.BLOCK_TEMP_DATA.location()).dataPackRegistry(BlockTempData.CODEC));
             event.create(new RegistryBuilder<BiomeTempData>().setName(ModRegistries.BIOME_TEMP_DATA.location()).dataPackRegistry(BiomeTempData.CODEC));
             event.create(new RegistryBuilder<DimensionTempData>().setName(ModRegistries.DIMENSION_TEMP_DATA.location()).dataPackRegistry(DimensionTempData.CODEC));
