@@ -177,29 +177,8 @@ public class Overlays
                                       10, CSMath.ceil(blend), 10, 90);
                 }
             }
-
-            // Render Readout
-            if (ConfigSettings.BODY_READOUT_ENABLED.get())
-            {
-                Font font = mc.font;
-                int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                int scaledHeight = mc.getWindow().getGuiScaledHeight();
-
-                String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
-                int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
-                int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
-
-                    // Draw the outline
-                    font.draw(poseStack, s, x + 1, y, colorBG);
-                    font.draw(poseStack, s, x - 1, y, colorBG);
-                    font.draw(poseStack, s, x, y + 1, colorBG);
-                    font.draw(poseStack, s, x, y - 1, colorBG);
-
-                    // Draw the readout
-                    font.draw(poseStack, s, x, y, color);
-                }
-            }
-        };
+        }
+    };
 
     public static IIngameOverlay VAGUE_TEMP_OVERLAY = (gui, poseStack, partialTick, width, height) ->
     {
