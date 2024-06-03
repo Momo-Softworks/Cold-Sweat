@@ -99,18 +99,17 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
         BlockPos pos = this.getBlockPos();
         BlockState state = this.getBlockState();
 
-        if (getFuel() > 0)
+        if (this.getFuel() > 0)
         {
             // Set state to lit
             if (!state.getValue(BoilerBlock.LIT))
             {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
             }
+            boolean hasItemStacks = false;
 
             // Warm up waterskins
-            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
-                boolean hasItemStacks = false;
-
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
@@ -126,8 +125,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                         }
                     }
                 }
-                if (hasItemStacks) setFuel(getFuel() - 1);
             }
+            if (hasItemStacks) setFuel(getFuel() - 1);
         }
         // if no fuel, set state to unlit
         else if (state.getValue(BoilerBlock.LIT))
