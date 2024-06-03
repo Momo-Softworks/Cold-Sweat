@@ -508,6 +508,10 @@ public class ConfigHelper
             {   ColdSweat.LOGGER.error("Error serializing item insulations: item \"{}\" does not exist", item);
                 continue;
             }
+            if (insulator == null)
+            {   ColdSweat.LOGGER.error("Error serializing item insulations: insulation value for item \"{}\" is null", item);
+                continue;
+            }
             mapTag.put(itemID.toString(), insulator.serialize());
         }
         tag.put(key, mapTag);
@@ -560,6 +564,10 @@ public class ConfigHelper
     {
         writeItemMap(items, saver, insulator ->
         {
+            if (insulator == null)
+            {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
+                return List.of();
+            }
             if (insulator.predicate().equals(EntityRequirement.NONE))
             {   return List.of();
             }
