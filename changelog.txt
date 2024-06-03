@@ -2095,10 +2095,15 @@ Fixes:
       - The pour function has returned to being the default right-click action
       - Removed the extra "When Swung" tooltip, as both actions can be considered "consuming" the item
 - The soulspring lamp now emits particles while in use to help signify its area of effect
+- Removed the body temperature readout (number displaying body temperature) completely
+- Updated the high-contrast variants of the body and vague world temperature icons
 
 Fixes:
 - Fixed the tooltip for temperature-affecting foods sometimes being in the wrong place
 - Fixed the /temp debug command sometimes misreporting the player's temperature and how it is being affected
+- Fixed the config settings for body and world temperature gauge position overlapping their label if the text is too long
+- (1.16) Fixed the body temperature icon rendering in front of the vague world temperature (frame around the body icon)
+- (1.16) Fixed the soulspring lamp not affecting nearby players
 
 Technical Changes:
 - All methods that add/remove/replace TempModifiers now have more advanced options for handling duplicates:
