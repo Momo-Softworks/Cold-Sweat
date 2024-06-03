@@ -477,7 +477,16 @@ public class ConfigHelper
         {
             Item item = entry.getKey();
             Insulator insulator = entry.getValue();
-            mapTag.put(ForgeRegistries.ITEMS.getKey(item).toString(), insulator.serialize());
+            ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
+            if (itemID == null)
+            {   ColdSweat.LOGGER.error("Error serializing item insulations: item \"{}\" does not exist", item);
+                continue;
+            }
+            if (insulator == null)
+            {   ColdSweat.LOGGER.error("Error serializing item insulations: insulation value for item \"{}\" is null", item);
+                continue;
+            }
+            mapTag.put(itemID.toString(), insulator.serialize());
         }
         tag.put(key, mapTag);
 
@@ -525,8 +534,12 @@ public class ConfigHelper
     {
         writeItemMap(items, saver, insulator ->
         {
+            if (insulator == null)
+            {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
+                return new ArrayList<>();
+            }
             if (insulator.predicate.equals(EntityRequirement.NONE))
-            {   return Arrays.asList();
+            {   return new ArrayList<>();
             }
             List<Object> itemData = new ArrayList<>();
             itemData.add(insulator.insulation instanceof StaticInsulation
