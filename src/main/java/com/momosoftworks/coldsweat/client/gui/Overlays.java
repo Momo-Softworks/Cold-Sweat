@@ -8,9 +8,7 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.GameType;
@@ -57,14 +55,19 @@ public class Overlays
     static double BODY_TEMP_SEVERITY = 0;
 
     @SubscribeEvent
-    public static void onWorldTempRender(RenderGameOverlayEvent.Post event)
+    public static void onRenderHUD(RenderGameOverlayEvent.Post event)
     {
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
         {
-            ClientPlayerEntity player = Minecraft.getInstance().player;
+            Minecraft mc = Minecraft.getInstance();
+            PlayerEntity player = mc.player;
             MatrixStack poseStack = event.getMatrixStack();
             int width = event.getWindow().getGuiScaledWidth();
             int height = event.getWindow().getGuiScaledHeight();
+
+            /*
+             World Temperature
+             */
 
             if (player != null && (ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
             && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get()
@@ -87,8 +90,7 @@ public class Overlays
                 default : color = 14737376; break;
             }
 
-            /* Render gauge */
-
+            // Render Gauge
             poseStack.pushPose();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -114,18 +116,10 @@ public class Overlays
                         /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color);
                 poseStack.popPose();
             }
-        }
-    }
 
-    @SubscribeEvent
-    public static void onBodyTempRender(RenderGameOverlayEvent.Post event)
-    {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
-        {
-            Minecraft mc = Minecraft.getInstance();
-            MatrixStack poseStack = event.getMatrixStack();
-            int width = event.getWindow().getGuiScaledWidth();
-            int height = event.getWindow().getGuiScaledHeight();
+            /*
+             Body Temperature
+             */
 
             if (mc.gameMode.canHurtPlayer() && mc.getCameraEntity() instanceof PlayerEntity && !Minecraft.getInstance().options.hideGui)
             {
@@ -133,10 +127,11 @@ public class Overlays
                 BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
                 int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
-                int threatOffset = !ConfigSettings.ICON_BOBBING.get() ? 0
-                                 : bobLevel == 2 ? ICON_BOB
-                                 : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                                 : 0;
+                int threatOffset = !ConfigSettings.ICON_BOBBING.get()
+                                   ? 0
+                                   : bobLevel == 2 ? ICON_BOB
+                                   : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                   : 0;
 
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
@@ -145,12 +140,11 @@ public class Overlays
                 if (ConfigSettings.BODY_ICON_ENABLED.get())
                 {
                     int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
-                    int newIcon = CSMath.ceil(BODY_TEMP_SEVERITY);
 
                     // Render icon
                     AbstractGui.blit(poseStack,
-                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                      height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
+                                     (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                     height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
 
                     // Render new icon if temperature changing
                     if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
@@ -169,19 +163,10 @@ public class Overlays
                     }
                 }
             }
-        }
-    }
 
-    @SubscribeEvent
-    public static void onVagueTempRender(RenderGameOverlayEvent.Post event)
-    {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
-        {
-            Minecraft mc = Minecraft.getInstance();
-            PlayerEntity player = mc.player;
-            MatrixStack poseStack = event.getMatrixStack();
-            int width = event.getWindow().getGuiScaledWidth();
-            int height = event.getWindow().getGuiScaledHeight();
+            /*
+             Vague Temperature
+             */
 
             if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
             && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && Minecraft.getInstance().gameMode.canHurtPlayer())
@@ -209,11 +194,11 @@ public class Overlays
                 // Set gauge texture
                 mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
 
-            // Render frame
-            AbstractGui.blit(poseStack,
-                              (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
-                              height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
-                              0, 64 - severity * 16, 16, 16, 16, 144);
+                // Render frame
+                AbstractGui.blit(poseStack,
+                                 (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                 height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
+                                 0, 64 - severity * 16, 16, 16, 16, 144);
 
                 poseStack.popPose();
             }
