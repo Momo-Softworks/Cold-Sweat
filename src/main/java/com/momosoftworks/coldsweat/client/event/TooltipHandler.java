@@ -193,12 +193,23 @@ public class TooltipHandler
                                                   temp.value == 0
                                                   ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)) :
                                                   new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD);
+                // Add a duration to the tooltip if it exists
                 if (temp.extraData.contains("duration", 3))
                 {   consumeEffects.append(" (" + StringUtils.formatTickDuration(temp.extraData.getInt("duration")) + ")");
                 }
-                elements.add(tooltipEndIndex, consumeEffects);
-                elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-                elements.add(tooltipEndIndex, new StringTextComponent(""));
+                // Check if Diet has their own tooltip already
+                int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.getString().equalsIgnoreCase(new TranslationTextComponent("tooltip.diet.eaten").getString()));
+                int index = dietTooltipSectionIndex != -1
+                            ? dietTooltipSectionIndex + 1
+                            : tooltipEndIndex;
+                // If the section already exists, add it under that section
+                elements.add(index, consumeEffects);
+                // Don't add our own section title if one already exists
+                if (dietTooltipSectionIndex == -1)
+                {
+                    elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+                    elements.add(tooltipEndIndex, new StringTextComponent(""));
+                }
             }
         }
         // Is insulation item
@@ -265,7 +276,7 @@ public class TooltipHandler
                 cap.deserializeNBT(stack.getOrCreateTag());
                 // Create the list of insulation pairs from NBT
                 List<Insulation> insulation = new ArrayList<>(cap.getInsulation().stream()
-                                              // Filter out insulation that doesn't match the player's predicate
+                                              // Filter out insulation that doesn't match the predicate
                                               .filter(pair ->
                                               {
                                                   ItemStack stack1 = pair.getFirst();
