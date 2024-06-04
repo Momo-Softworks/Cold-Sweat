@@ -186,12 +186,23 @@ public class TooltipHandler
                                                   temp.value() == 0
                                                   ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())) :
                                                   new TranslatableComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD);
+                // Add a duration to the tooltip if it exists
                 if (temp.extraData().contains("duration", Tag.TAG_INT))
                 {   consumeEffects.append(" (" + StringUtil.formatTickDuration(temp.extraData().getInt("duration")) + ")");
                 }
-                elements.add(tooltipEndIndex, Either.left(consumeEffects));
-                elements.add(tooltipEndIndex, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                elements.add(tooltipEndIndex, Either.left(new TextComponent("")));
+                // Check if Diet has their own tooltip already
+                int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.left().map(text -> text.getString().equalsIgnoreCase(new TranslatableComponent("tooltip.diet.eaten").getString())).orElse(false));
+                int index = dietTooltipSectionIndex != -1
+                            ? dietTooltipSectionIndex + 1
+                            : tooltipEndIndex;
+                // If the section already exists, add it under that section
+                elements.add(index, Either.left(consumeEffects));
+                // Don't add our own section title if one already exists
+                if (dietTooltipSectionIndex == -1)
+                {
+                    elements.add(tooltipEndIndex, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
+                    elements.add(tooltipEndIndex, Either.left(new TextComponent("")));
+                }
             }
         }
         // If the item is an insulation ingredient, add the tooltip
@@ -218,7 +229,7 @@ public class TooltipHandler
 
                 // Create the list of insulation pairs from NBT
                 List<Insulation> insulation = new ArrayList<>(cap.getInsulation().stream()
-                                                              // Filter out insulation that doesn't match the player's predicate
+                                                              // Filter out insulation that doesn't match the predicate
                                                               .filter(pair ->
                                                               {
                                                                   ItemStack stack1 = pair.getFirst();
