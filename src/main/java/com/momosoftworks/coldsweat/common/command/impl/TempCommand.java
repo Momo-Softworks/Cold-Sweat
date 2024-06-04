@@ -34,6 +34,7 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -254,7 +255,9 @@ public class TempCommand extends BaseCommand
         }
 
         LivingEntity living = (LivingEntity) entity;
-        ModifiableAttributeInstance attribute = EntityTempManager.getAttribute(trait, living);
+        ModifiableAttributeInstance attribute = Arrays.asList(EntityTempManager.VALID_ATTRIBUTE_TYPES).contains(trait)
+                                                ? EntityTempManager.getAttribute(trait, living)
+                                                : null;
         Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
         double lastValue = trait == Temperature.Trait.BURNING_POINT ? ConfigSettings.MAX_TEMP.get()
                          : trait == Temperature.Trait.FREEZING_POINT ? ConfigSettings.MIN_TEMP.get()
