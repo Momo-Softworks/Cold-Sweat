@@ -50,12 +50,12 @@ public class PotionRecipes
 
         @Override
         public boolean isInput(ItemStack input)
-        {   return Arrays.stream(potionIn.getItems()).anyMatch(ingredient -> ItemStack.isSameItemSameTags(ingredient, input));
+        {   return Arrays.stream(potionIn.getItems()).anyMatch(ingredient -> ItemStack.matches(ingredient, input));
         }
 
         @Override
         public boolean isIngredient(ItemStack ingredient)
-        {   return Arrays.stream(reagent.getItems()).anyMatch(ing -> ItemStack.isSameItemSameTags(ing, ingredient));
+        {   return Arrays.stream(reagent.getItems()).anyMatch(ing -> ItemStack.matches(ing, ingredient));
         }
 
         @Override
