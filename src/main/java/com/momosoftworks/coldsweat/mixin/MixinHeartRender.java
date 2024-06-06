@@ -33,8 +33,7 @@ public class MixinHeartRender
         Player player = Minecraft.getInstance().player;
         // This check ensures that this only gets called once per heart
         if (heartType == Gui.HeartType.CONTAINER)
-        {   int playerHearts = ((int) Math.ceil(player.getAbsorptionAmount() / 2d) + (int) Math.ceil(player.getMaxHealth() / 2d));
-            HEART_INDEX = (HEART_INDEX + 1) % playerHearts;
+        {   HEART_INDEX += 1;
         }
 
         if (player != null)
@@ -61,5 +60,10 @@ public class MixinHeartRender
             {   guiGraphics.blit(HEART_TEXTURE, x + 1, y + 1, u, 7, 7, 7, 30, 14);
             }
         }
+    }
+
+    @Inject(method = "renderHearts", at = @At("HEAD"))
+    private void renderHearts(GuiGraphics pGuiGraphics, Player pPlayer, int pX, int pY, int pHeight, int pOffsetHeartIndex, float pMaxHealth, int pCurrentHealth, int pDisplayHealth, int pAbsorptionAmount, boolean pRenderHighlight, CallbackInfo ci)
+    {   HEART_INDEX = 0;
     }
 }
