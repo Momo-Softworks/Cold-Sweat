@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
+import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
@@ -30,6 +31,8 @@ public class MixinHeartRender
     @Inject(method = "renderHeart(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Gui$HeartType;IIIZZ)V", at = @At("TAIL"), cancellable = true)
     private void renderHeart(PoseStack ps, Gui.HeartType heartType, int x, int y, int texV, boolean blink, boolean half, CallbackInfo ci)
     {
+        if (!MainSettingsConfig.getInstance().freezingHearts()) return;
+
         Player player = Minecraft.getInstance().player;
 
         if (heartType == Gui.HeartType.CONTAINER)
