@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.mixin;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
+import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
@@ -30,6 +31,8 @@ public class MixinHeartRender
     @Inject(method = "renderHeart", at = @At("TAIL"), cancellable = true)
     private void renderHeart(GuiGraphics guiGraphics, Gui.HeartType heartType, int x, int y, int yOffset, boolean blink, boolean halfHeart, CallbackInfo ci)
     {
+        if (!MainSettingsConfig.getInstance().freezingHearts()) return;
+
         Player player = Minecraft.getInstance().player;
         // This check ensures that this only gets called once per heart
         if (heartType == Gui.HeartType.CONTAINER)
