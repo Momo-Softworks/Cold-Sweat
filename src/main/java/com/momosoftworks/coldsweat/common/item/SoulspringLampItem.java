@@ -200,7 +200,7 @@ public class SoulspringLampItem extends Item
         if (this.allowedIn(tab))
         {
             ItemStack stack = new ItemStack(this);
-            stack.getOrCreateTag().putBoolean("IsOn", true);
+            stack.getOrCreateTag().putBoolean("Lit", true);
             stack.getOrCreateTag().putDouble("Fuel", 64);
             itemList.add(stack);
         }
