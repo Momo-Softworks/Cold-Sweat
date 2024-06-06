@@ -49,7 +49,7 @@ public class BiomeTempModifier extends TempModifier
             }
 
             int biomeCount = 0;
-            for (BlockPos blockPos : WorldHelper.getPositionGrid(entPos, 36, 10))
+            for (BlockPos blockPos : WorldHelper.getPositionGrid(entPos, 64, 10))
             {
                 // Check if this position is valid
                 if (!World.isInWorldBounds(blockPos) || blockPos.distSqr(entPos) > 30*30) continue;
