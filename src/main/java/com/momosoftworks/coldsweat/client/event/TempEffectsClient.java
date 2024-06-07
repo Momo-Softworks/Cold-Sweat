@@ -2,10 +2,10 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.client.RenderFogEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
-import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -73,14 +73,14 @@ public class TempEffectsClient
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
                 {
                     float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-                    float factor = CSMath.blend(0, 8, immunityModifier, 50, 100);
+                    float factor = CSMath.blend(0, 20, immunityModifier, 50, 100);
 
                     // Set random sway speed every once in a while
                     if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
                     {
                         TIME_SINCE_NEW_SWAY = 0;
-                        X_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
-                        Y_SWAY_SPEED = (float) (Math.random() * 0.01f + 0.01f);
+                        X_SWAY_SPEED = (float) (Math.random() * 0.005f + 0.005f);
+                        Y_SWAY_SPEED = (float) (Math.random() * 0.005f + 0.005f);
                     }
                     TIME_SINCE_NEW_SWAY += frameTime;
 
@@ -90,7 +90,7 @@ public class TempEffectsClient
 
                     // Apply the sway speed to a sin function
                     float xOffs = (float) (Math.sin(X_SWAY_PHASE) * factor);
-                    float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * factor);
+                    float yOffs = (float) (Math.sin(Y_SWAY_PHASE) * factor * 2);
 
                     // Apply the sway
                     player.xRot = player.xRot + xOffs - PREV_X_SWAY;
@@ -120,8 +120,8 @@ public class TempEffectsClient
                 if (player.hasEffect(Effects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
                 else HOT_IMMUNITY = 0;
 
-                if (COLD_IMMUNITY != 4) COLD_IMMUNITY = TempEffectsCommon.getTempResistance(player, true);
-                if (HOT_IMMUNITY  != 4) HOT_IMMUNITY  = TempEffectsCommon.getTempResistance(player, false);
+                if (COLD_IMMUNITY != 4) COLD_IMMUNITY = TempEffectsCommon.getColdResistance(player);
+                if (HOT_IMMUNITY  != 4) HOT_IMMUNITY  = TempEffectsCommon.getHeatResistance(player);
             }
         }
     }
@@ -129,25 +129,25 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void renderFog(EntityViewRenderEvent event)
     {
-        if (!(event instanceof EntityViewRenderEvent.FogDensity || event instanceof EntityViewRenderEvent.FogColors)) return;
+        if (!(event instanceof RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
 
         PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && BLEND_TEMP >= 50 && MainSettingsConfig.getInstance().heatstrokeFog() && HOT_IMMUNITY < 4)
+        double fogDistance = Math.max(0.01, ConfigSettings.HEATSTROKE_FOG_DISTANCE.get());
+        if (fogDistance >= 64) return;
+        if (fogDistance < Double.POSITIVE_INFINITY && player != null && BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
         {
             float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-            if (event instanceof EntityViewRenderEvent.FogDensity)
+            if (event instanceof RenderFogEvent)
             {
-                EntityViewRenderEvent.FogDensity fog = (EntityViewRenderEvent.FogDensity) event;
-                float density = CSMath.betweenInclusive(tempWithResistance, 50, 55)
-                                ? CSMath.blend(-1, 0f, tempWithResistance, 50f, 55f)
-                                : CSMath.betweenInclusive(tempWithResistance, 55, 80)
-                                ? CSMath.blend(0f, 0.1f, tempWithResistance, 55f, 80f)
-                                : CSMath.blend(0.1f, 0.3f, tempWithResistance, 80f, 90f);
-                ((EntityViewRenderEvent.FogDensity) event).setDensity(density);
+                RenderFogEvent fog = (RenderFogEvent) event;
+                if (fogDistance > (fog.getFarPlaneDistance())) return;
+                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), (float) fogDistance, tempWithResistance, 50f, 90f));
+                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), (float) (fogDistance * 0.3), tempWithResistance, 50f, 90f));
                 fog.setCanceled(true);
             }
-            else
-            {   EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
+            else if (event instanceof EntityViewRenderEvent.FogColors)
+            {
+                EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
                 fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithResistance, 50, 90));
                 fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithResistance, 50, 90));
                 fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithResistance, 50, 90));

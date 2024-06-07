@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -24,15 +24,20 @@ public class TempEffectsCommon
     public static void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
         PlayerEntity player = event.getPlayer();
-        if (!MainSettingsConfig.getInstance().coldMining() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+        double miningSpeedReduction = ConfigSettings.COLD_MINING_IMPAIRMENT.get();
+
+        if (miningSpeedReduction <= 0
+        || player.hasEffect(ModEffects.ICE_RESISTANCE)
+        || player.hasEffect(ModEffects.GRACE)) return;
 
         // Get the player's temperature
         float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
+        float miningSpeed = (float) (1d - miningSpeedReduction);
 
         // If the player is too cold, slow down their mining speed
         if (temp < -50)
         {
-            float minMiningSpeed = CSMath.blend(0.25f, 1f, getTempResistance(player, true), 0, 4);
+            float minMiningSpeed = CSMath.blend(miningSpeed, 1f, getTempResistance(player, true), 0, 4);
             // Get protection from armor underwear
             event.setNewSpeed(event.getNewSpeed() * CSMath.blend(minMiningSpeed, 1f, temp, -100, -50));
         }
@@ -48,7 +53,10 @@ public class TempEffectsCommon
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
-                if (!MainSettingsConfig.getInstance().coldMovement()
+                double movementReduction = ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get();
+                double movementSpeed = 1 - movementReduction;
+
+                if (movementSpeed == 1
                 || player.hasEffect(ModEffects.ICE_RESISTANCE)
                 || player.hasEffect(ModEffects.GRACE)) return;
 
@@ -56,7 +64,7 @@ public class TempEffectsCommon
                 if (!player.isFallFlying())
                 {
                     // Get protection from armor underwear
-                    float minMoveMultiplier = CSMath.blend(player.isOnGround() ? 0.5f : 0.8f, 1, getTempResistance(player, true), 0, 4);
+                    float minMoveMultiplier = (float) CSMath.blend(player.isOnGround() ? movementSpeed : movementSpeed * 1.25, 1d, getColdResistance(player), 0d, 4d);
                     if (minMoveMultiplier != 1)
                     {
                         float moveSpeed = CSMath.blend(minMoveMultiplier, 1, temp, -100, -50);
@@ -73,15 +81,16 @@ public class TempEffectsCommon
         if (event.getEntityLiving().getLastHurtByMob() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving().getLastHurtByMob();
-            if (!MainSettingsConfig.getInstance().coldKnockback() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+            double knockbackReduction = ConfigSettings.COLD_KNOCKBACK_REDUCTION.get();
+            if (knockbackReduction <= 0 || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
-            if (temp < -50)
+            if (temp < -50f)
             {
                 // Get protection from armor underwear
-                float liningProtFactor = CSMath.blend(0.5f, 1, getTempResistance(player, true), 0, 4);
-                if (liningProtFactor != 1)
-                {   event.setStrength(event.getStrength() * CSMath.blend(liningProtFactor, 1, temp, -100, -50));
+                float liningProtFactor = (float) CSMath.blend(1d - knockbackReduction, 1d, getColdResistance(player), 0d, 4d);
+                if (liningProtFactor != 1f)
+                {   event.setStrength(event.getStrength() * CSMath.blend(liningProtFactor, 1f, temp, -100f, -50f));
                 }
             }
         }
@@ -94,19 +103,31 @@ public class TempEffectsCommon
         if (event.getEntityLiving() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-            if (!MainSettingsConfig.getInstance().freezingHearts() || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
+            double frozenHeartsPercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
+
+            if (frozenHeartsPercentage <= 0
+            || player.hasEffect(ModEffects.ICE_RESISTANCE)
+            || player.hasEffect(ModEffects.GRACE)) return;
 
             float healing = event.getAmount();
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             if (temp < -50)
             {
                 // Get protection from armor underwear
-                float minFrozenHealth = CSMath.blend(0.5f, 1, getTempResistance(player, true), 0, 4);
-                if (minFrozenHealth != 1)
-                {   event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(player.getMaxHealth() * CSMath.blend(minFrozenHealth, 1, temp, -100, -50)) - player.getHealth()));
+                float unfrozenHealth = (float) CSMath.blend(frozenHeartsPercentage, 1d, getColdResistance(player), 0d, 4d);
+                if (unfrozenHealth != 1)
+                {   event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(player.getMaxHealth() * CSMath.blend(unfrozenHealth, 1f, temp, -100f, -50f)) - player.getHealth()));
                 }
             }
         }
+    }
+
+    public static int getColdResistance(PlayerEntity player)
+    {   return getTempResistance(player, true);
+    }
+
+    public static int getHeatResistance(PlayerEntity player)
+    {   return getTempResistance(player, false);
     }
 
     public static int getTempResistance(PlayerEntity player, boolean cold)

@@ -33,7 +33,7 @@ public class ConfigPageOne extends AbstractConfigPage
 
     @Override
     public ITextComponent sectionTwoTitle()
-    {   return new TranslationTextComponent("cold_sweat.config.section.difficulty.name");
+    {   return new TranslationTextComponent("cold_sweat.config.section.difficulty");
     }
 
     @Override

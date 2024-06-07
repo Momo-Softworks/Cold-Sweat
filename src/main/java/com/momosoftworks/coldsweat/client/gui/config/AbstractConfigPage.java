@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -389,6 +390,61 @@ public abstract class AbstractConfigPage extends Screen
             this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
     }
 
+    protected void addSliderButton(String id, Side side, IFormattableTextComponent label, double minVal, double maxVal,
+                                   BiConsumer<Double, ConfigSliderButton> onChanged, Consumer<ConfigSliderButton> onInit,
+                                   boolean requireOP, boolean clientside,
+                                   IFormattableTextComponent... tooltip)
+    {
+        boolean shouldBeActive = !requireOP || mc.player == null || mc.player.hasPermissions(2);
+        int buttonX = this.width / 2;
+        int xOffset = side == Side.LEFT ? -179 : 56;
+        int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+
+        // Make the input
+        ConfigSliderButton sliderButton = new ConfigSliderButton(buttonX + xOffset, buttonY, label, 0, 1, 0,
+                                                                 button -> {},
+                                                                 slider -> onChanged.accept(CSMath.blend(minVal, maxVal, CSMath.truncate(slider.sliderValue, 2), 0, 1), ((ConfigSliderButton) slider)))
+        {
+            @Override
+            public void updateSlider()
+            {
+                super.updateSlider();
+                if (!AbstractConfigPage.this.isDragging())
+                {   this.dragging = false;
+                }
+            }
+        };
+
+        // Disable the input if the player is not OP
+        sliderButton.active = shouldBeActive;
+
+        // Set the initial value
+        onInit.accept(sliderButton);
+
+        // Add the clientside indicator
+        if (clientside)
+        {   this.addWidget(new ImageWidget(TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
+        }
+
+        List<IFormattableTextComponent> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+        // Add the client disclaimer if the setting is marked clientside
+        if (clientside)
+        {   tooltipList.add(new TranslationTextComponent("cold_sweat.config.clientside_warning").withStyle(TextFormatting.DARK_GRAY));
+        }
+        // Assign the tooltip
+        this.setTooltip(id, tooltipList);
+
+        // Add the widget
+        this.addWidgetBatch(id, Arrays.asList(sliderButton));
+
+        // Mark this space as used
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE;
+
+    }
+
     @Override
     protected void init()
     {
@@ -458,7 +514,11 @@ public abstract class AbstractConfigPage extends Screen
         });
 
         // Render tooltip
-        if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
+        if (this.isDragging())
+        {   MOUSE_STILL_TIMER = 0;
+        }
+        if (MOUSE_STILL_TIMER < TOOLTIP_DELAY) return;
+
         for (Map.Entry<String, List<IGuiEventListener>> entry : widgetBatches.entrySet())
         {
             String id = entry.getKey();

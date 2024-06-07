@@ -51,7 +51,7 @@
 
 
   "cold_sweat.config.title":                        "차가운 땀 설정",
-  "cold_sweat.config.section.difficulty.name":      "난이도 설정",
+  "cold_sweat.config.section.difficulty":      "난이도 설정",
   "cold_sweat.config.section.hud_settings":         "HUD 설정",
   "cold_sweat.config.section.other":                "기타 온도 설정",
   "cold_sweat.config.section.temperature_details":  "온도 관리",

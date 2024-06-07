@@ -73,7 +73,11 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> GRACE_ENABLED;
 
     // Other Difficulty Settings
-
+    public static final DynamicHolder<Double> HEARTS_FREEZING_PERCENTAGE;
+    public static final DynamicHolder<Double> COLD_MINING_IMPAIRMENT;
+    public static final DynamicHolder<Double> COLD_MOVEMENT_SLOWDOWN;
+    public static final DynamicHolder<Double> COLD_KNOCKBACK_REDUCTION;
+    public static final DynamicHolder<Double> HEATSTROKE_FOG_DISTANCE;
 
     // World Settings
     public static final DynamicHolder<Map<Biome, Triplet<Double, Double, Temperature.Units>>> BIOME_TEMPS;
@@ -125,13 +129,15 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
 
-    // Client Settings **NULL ON THE SERVER**
+    // Client Settings
+    /* NULL ON THE SERVER */
     public static final DynamicHolder<Boolean> CELSIUS;
     public static final DynamicHolder<Integer> TEMP_OFFSET;
     public static final DynamicHolder<Double> TEMP_SMOOTHING;
 
     public static final DynamicHolder<Vec2i> BODY_ICON_POS;
     public static final DynamicHolder<Boolean> BODY_ICON_ENABLED;
+    public static final DynamicHolder<Boolean> MOVE_BODY_ICON_WHEN_ADVANCED;
 
     public static final DynamicHolder<Vec2i> BODY_READOUT_POS;
     public static final DynamicHolder<Boolean> BODY_READOUT_ENABLED;
@@ -211,6 +217,33 @@ public class ConfigSettings
         encoder -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
         decoder -> decoder.getBoolean("GraceEnabled"),
         saver -> MainSettingsConfig.getInstance().setGracePeriodEnabled(saver));
+
+
+        HEARTS_FREEZING_PERCENTAGE = addSyncedSetting("hearts_freezing_percentage", () -> MainSettingsConfig.getInstance().getHeartsFreezingPercentage(),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "HeartsFreezingPercentage"),
+        decoder -> decoder.getDouble("HeartsFreezingPercentage"),
+        saver -> MainSettingsConfig.getInstance().setHeartsFreezingPercentage(saver));
+
+        COLD_MINING_IMPAIRMENT = addSyncedSetting("cold_mining_slowdown", () -> MainSettingsConfig.getInstance().getColdMiningImpairment(),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdMiningImpairment"),
+        decoder -> decoder.getDouble("ColdMiningImpairment"),
+        saver -> MainSettingsConfig.getInstance().setColdMiningImpairment(saver));
+
+        COLD_MOVEMENT_SLOWDOWN = addSyncedSetting("cold_movement_slowdown", () -> MainSettingsConfig.getInstance().getColdMovementSlowdown(),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdMovementSlowdown"),
+        decoder -> decoder.getDouble("ColdMovementSlowdown"),
+        saver -> MainSettingsConfig.getInstance().setColdMovementSlowdown(saver));
+
+        COLD_KNOCKBACK_REDUCTION = addSyncedSetting("cold_knockback_reduction", () -> MainSettingsConfig.getInstance().getColdKnockbackReduction(),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdKnockbackReduction"),
+        decoder -> decoder.getDouble("ColdKnockbackReduction"),
+        saver -> MainSettingsConfig.getInstance().setColdKnockbackReduction(saver));
+
+        HEATSTROKE_FOG_DISTANCE = addSyncedSetting("heatstroke_fog_distance", () -> MainSettingsConfig.getInstance().getHeatstrokeFogDistance(),
+        encoder -> ConfigHelper.serializeNbtDouble(encoder, "HeatstrokeFogDistance"),
+        decoder -> decoder.getDouble("HeatstrokeFogDistance"),
+        saver -> MainSettingsConfig.getInstance().setHeatstrokeFogDistance(saver));
+
 
         BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
         encoder -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeTemps"),
@@ -592,6 +625,8 @@ public class ConfigSettings
         BODY_ICON_POS = addClientSetting("body_icon_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
                                                                   ClientSettingsConfig.getInstance().getBodyIconY()));
         BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
+
+        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting("move_body_icon_for_advanced", () -> ClientSettingsConfig.getInstance().moveBodyIconWhenAdvanced());
 
         BODY_READOUT_POS = addClientSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
                                                                                 ClientSettingsConfig.getInstance().getBodyReadoutY()));

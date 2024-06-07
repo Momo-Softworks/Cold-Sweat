@@ -6,6 +6,7 @@
   "client": [
     "MixinChatClicked",
     "MixinEffectsScreen",
+    "MixinFogRender",
     "MixinGoatModel",
     "MixinHeartRender",
     "MixinHumanoidModel",
