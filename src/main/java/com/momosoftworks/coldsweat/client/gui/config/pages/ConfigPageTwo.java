@@ -66,14 +66,6 @@ public class ConfigPageTwo extends AbstractConfigPage
         // Config Button Repositioning Screen
         this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
                        button ->
-                       {    DrawConfigButton.EDIT_MODE = true;
-                            this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-                       },
-                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
-
-        // Config Button Repositioning Screen
-        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
-                       button ->
                        {
                            DrawConfigButton.EDIT_MODE = true;
                            this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
