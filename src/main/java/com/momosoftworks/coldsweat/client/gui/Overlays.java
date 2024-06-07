@@ -126,6 +126,28 @@ public class Overlays
                 // Blend body temperature (per frame)
                 BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
+                // Get text color
+                int color;
+                switch (((int) BODY_TEMP_SEVERITY))
+                {   case  7 : case -7 : color = 16777215; break;
+                    case  6 : color = 16777132; break;
+                    case  5 : color = 16767856; break;
+                    case  4 : color = 16759634; break;
+                    case  3 : color = 16751174; break;
+                    case -3 : color = 6078975; break;
+                    case -4 : color = 7528447; break;
+                    case -5 : color = 8713471; break;
+                    case -6 : color = 11599871; break;
+                    default : color = BLEND_BODY_TEMP > 0 ? 16744509
+                             : BLEND_BODY_TEMP < 0 ? 4233468
+                             : 11513775; break;
+                }
+
+                // Get the outer border color when readout is > 100
+                int colorBG = BLEND_BODY_TEMP < 0 ? 1122643
+                            : BLEND_BODY_TEMP > 0 ? 5376516
+                            : 0;
+
                 int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
                 int threatOffset = !ConfigSettings.ICON_BOBBING.get()
                                    ? 0
@@ -146,21 +168,42 @@ public class Overlays
                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
                                      height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
 
-                    // Render new icon if temperature changing
-                    if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
-                    {
-                        // Map current temp severity to filling up the icon
-                        double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
-                        AbstractGui.blit(poseStack,
-                                         // X position
-                                         (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                         // Y position
-                                         height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
-                                         0,
-                                         // UV Y-coordinate for the icon in this stage
-                                         40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
-                                         10, CSMath.ceil(blend), 10, 90);
-                    }
+                // Render new icon if temperature changing
+                if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
+                {
+                    // Map current temp severity to filling up the icon
+                    double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
+                    AbstractGui.blit(poseStack,
+                                      // X position
+                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                      // Y position
+                                      height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
+                                      0,
+                                      // UV Y-coordinate for the icon in this stage
+                                      40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
+                                      10, CSMath.ceil(blend), 10, 90);
+                }
+            }
+
+                // Render Readout
+                if (ConfigSettings.BODY_READOUT_ENABLED.get())
+                {
+                    FontRenderer font = mc.font;
+                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
+
+                    String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                    int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
+                    int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
+
+                    // Draw the outline
+                    font.draw(poseStack, s, x + 1, y, colorBG);
+                    font.draw(poseStack, s, x - 1, y, colorBG);
+                    font.draw(poseStack, s, x, y + 1, colorBG);
+                    font.draw(poseStack, s, x, y - 1, colorBG);
+
+                    // Draw the readout
+                    font.draw(poseStack, s, x, y, color);
                 }
             }
 
