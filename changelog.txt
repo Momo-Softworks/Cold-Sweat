@@ -2097,17 +2097,20 @@ Fixes:
 - The soulspring lamp now emits particles while in use to help signify its area of effect
 - Removed the body temperature readout (number displaying body temperature) completely
 - Updated the high-contrast variants of the body and vague world temperature icons
-``
+
 Fixes:
+* Fixed the boiler not heating up waterskins if the temperature rate isn't set to a multiple of 1
 - Fixed the tooltip for temperature-affecting foods sometimes being in the wrong place
 - Fixed the /temp debug command sometimes misreporting the player's temperature and how it is being affected
+- Fixed the /temp debug command giving an error for any trait that doesn't have a corresponding attribute type
 - Fixed the config settings for body and world temperature gauge position overlapping their label if the text is too long
 - Fixed the ice resistance potion recipe accepting any potion as input instead of just awkward potions
-- Fixed the boiler not heating up waterskins if the temperature rate isn't set to a multiple of 1
 - Fixed uncommon crash when closing the config menu
-- Fixed the /temp debug command giving an error for any trait that doesn't have a corresponding attribute type
+- Fixed visual bug with frozen hearts if the player's max health is not 20
+- Fixed frozen-over hearts still rendering when the config setting was disabled
 - (1.16) Fixed the body temperature icon rendering in front of the vague world temperature (frame around the body icon)
 - (1.16) Fixed the soulspring lamp not affecting nearby players
+- (1.16) Fixed frozen-over hearts not rendering
 
 Technical Changes:
 - All methods that add/remove/replace TempModifiers now have more advanced options for handling duplicates:
