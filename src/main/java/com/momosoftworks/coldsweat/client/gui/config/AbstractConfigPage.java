@@ -298,8 +298,8 @@ public abstract class AbstractConfigPage extends Screen
         boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
 
         int labelWidth = font.width(label.getString());
-        int labelOffset = labelWidth > 75
-                        ? labelWidth - 75
+        int labelOffset = labelWidth > 84
+                        ? labelWidth - 84
                         : 0;
 
         List<GuiEventListener> widgetBatch = new ArrayList<>();
