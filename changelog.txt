@@ -2087,15 +2087,17 @@ Fixes:
 * (1.20) Added Origins integration as a standalone mod:
       - Allows for users to modify the attribute values that players spawn with for origins via datapacks or config files
       - This could already be done for your own origins via attribute modifiers, but this addon is useful for modpack devs
-- Added the option for food items to change the player's temperature for a set duration, like soul sprouts
-      ! The soul sprout will lose this effect until item-settings.toml is reset
-- Increased the duration of the soul sprout's effect to 1 minute
-- Changed the functionality of waterskins slightly:
+* Changed the functionality of waterskins slightly:
       - The drink function is now performed by crouching and right-clicking
       - The pour function has returned to being the default right-click action
       - Removed the extra "When Swung" tooltip, as both actions can be considered "consuming" the item
+* The body temperature readout is now re-implemented as a feature of the thermometer
+      - It is hidden by default, and shows when the player has a thermometer or "Require Thermometer" is disabled
+      - The body temperature icon now moves out of the way when the readout is displayed (configurable)
+- Added the option for food items to change the player's temperature for a period of time, like soul sprouts
+      ! The soul sprout will lose this effect until item-settings.toml is reset
+- Increased the duration of the soul sprout's effect to 1 minute
 - The soulspring lamp now emits particles while in use to help signify its area of effect
-- Removed the body temperature readout (number displaying body temperature) completely
 - Updated the high-contrast variants of the body and vague world temperature icons
 
 Fixes:
