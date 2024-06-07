@@ -2099,6 +2099,14 @@ Fixes:
 - Increased the duration of the soul sprout's effect to 1 minute
 - The soulspring lamp now emits particles while in use to help signify its area of effect
 - Updated the high-contrast variants of the body and vague world temperature icons
+* The following config settings are now configurable for a range, instead of just on/off:
+      - Freezing hearts: Ranges from 0 to 1, with 1 freezing all hearts
+      - Chilled mining speed: Ranges from 0 to 1, with 1 preventing the player from mining completely
+      - Chilled movement speed: Ranges from 0 to 1, with 1 preventing the player from moving completely
+      - Chilled knockback reduction: Ranges from 0 to 1, with 1 nullifying the player's knockback to other entities
+      - Heatstroke fog: Ranges from 0 to infinity; Controls the distance of the fog, with infinity disabling it altogether
+      * These settings now have entries in the config menu as well
+- Made heatstroke camera swaying more aggressive
 
 Fixes:
 - Fixed the tooltip for temperature-affecting foods sometimes being in the wrong place
