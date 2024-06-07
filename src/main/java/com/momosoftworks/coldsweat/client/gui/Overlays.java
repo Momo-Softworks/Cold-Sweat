@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.GameType;
@@ -168,22 +169,22 @@ public class Overlays
                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
                                      height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
 
-                // Render new icon if temperature changing
-                if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
-                {
-                    // Map current temp severity to filling up the icon
-                    double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
-                    AbstractGui.blit(poseStack,
-                                      // X position
-                                      (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                      // Y position
-                                      height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
-                                      0,
-                                      // UV Y-coordinate for the icon in this stage
-                                      40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
-                                      10, CSMath.ceil(blend), 10, 90);
+                    // Render new icon if temperature changing
+                    if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
+                    {
+                        // Map current temp severity to filling up the icon
+                        double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
+                        AbstractGui.blit(poseStack,
+                                          // X position
+                                          (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
+                                          // Y position
+                                          height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
+                                          0,
+                                          // UV Y-coordinate for the icon in this stage
+                                          40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
+                                          10, CSMath.ceil(blend), 10, 90);
+                    }
                 }
-            }
 
                 // Render Readout
                 if (ConfigSettings.BODY_READOUT_ENABLED.get())
