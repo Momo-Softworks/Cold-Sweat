@@ -160,38 +160,35 @@ public class Overlays
                 RenderSystem.defaultBlendFunc();
                 Minecraft.getInstance().textureManager.bind(BODY_TEMP_GAUGE_LOCATION.get());
 
-                if (ConfigSettings.BODY_ICON_ENABLED.get())
+            if (ConfigSettings.BODY_ICON_ENABLED.get())
+            {
+                int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
+                int iconX = (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x();
+                int iconYOffset = ADVANCED_WORLD_TEMP && ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()
+                                  ? 54
+                                  : 47;
+                int iconY = height - iconYOffset - threatOffset + ConfigSettings.BODY_ICON_POS.get().y();
+                // Render icon
+                AbstractGui.blit(poseStack, iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
+
+                // Render new icon if temperature changing
+                if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
                 {
-                    int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
-
-                    // Render icon
-                    AbstractGui.blit(poseStack,
-                                     (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                     height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y(), 0, 40 - icon * 10, 10, 10, 10, 90);
-
-                    // Render new icon if temperature changing
-                    if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
-                    {
-                        // Map current temp severity to filling up the icon
-                        double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
-                        AbstractGui.blit(poseStack,
-                                          // X position
-                                          (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                          // Y position
-                                          height - 47 - threatOffset + ConfigSettings.BODY_ICON_POS.get().y() + 10 - CSMath.ceil(blend),
-                                          0,
-                                          // UV Y-coordinate for the icon in this stage
-                                          40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
-                                          10, CSMath.ceil(blend), 10, 90);
-                    }
+                    // Map current temp severity to filling up the icon
+                    double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
+                    AbstractGui.blit(poseStack, iconX, iconY + 10 - CSMath.ceil(blend), 0,
+                                     // UV Y-coordinate for the icon in this stage
+                                     40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
+                                     10, CSMath.ceil(blend), 10, 90);
                 }
+            }
 
-                // Render Readout
-                if (ConfigSettings.BODY_READOUT_ENABLED.get())
-                {
-                    FontRenderer font = mc.font;
-                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
+            // Render Readout
+            if (ConfigSettings.BODY_READOUT_ENABLED.get() && ADVANCED_WORLD_TEMP)
+            {
+                FontRenderer font = mc.font;
+                int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
                     String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
                     int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();

@@ -22,6 +22,7 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
     private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
+    private static final ForgeConfigSpec.BooleanValue moveBodyIconWhenAdvanced;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
     private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
@@ -74,13 +75,16 @@ public class ClientSettingsConfig
             bodyIconEnabled = BUILDER
                     .comment("Enables the body temperature icon")
                     .define("Show Body Temperature Icon", true);
+            moveBodyIconWhenAdvanced = BUILDER
+                    .comment("Moves the body temperature icon to make way for the advanced readout when a thermometer is equipped")
+                    .define("Move Body Icon For Advanced Info", true);
 
             bodyReadoutPos = BUILDER
                     .comment("The position of the body temperature readout relative to default")
                     .defineList("Body Temperature Readout Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
             bodyReadoutEnabled = BUILDER
                     .comment("Enables the body temperature readout")
-                    .define("Show Body Temperature Readout", false);
+                    .define("Show Body Temperature Readout", true);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
@@ -204,6 +208,10 @@ public class ClientSettingsConfig
     }
     public boolean isWorldGaugeEnabled()
     {   return worldGaugeEnabled.get();
+    }
+
+    public boolean moveBodyIconWhenAdvanced()
+    {   return moveBodyIconWhenAdvanced.get();
     }
 
     /*
