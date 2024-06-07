@@ -248,5 +248,5 @@
   "message.cold_sweat.warning": "Warning!",
   "message.cold_sweat.disable": "click to disable",
   "message.cold_sweat.disable_feedback": "Message disabled.",
-  "message.cold_sweat.creative_warning_message": "Entering the creative inventory on a server will clear insulation from all armor items!"
+  "message.cold_sweat.creative_warning_message": "Due to a Minecraft bug, entering the creative inventory on a server will delete insulation from your armor items!"
 }
