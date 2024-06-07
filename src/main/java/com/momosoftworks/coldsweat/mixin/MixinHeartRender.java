@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
@@ -31,7 +31,8 @@ public class MixinHeartRender
     @Inject(method = "renderHeart(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/gui/Gui$HeartType;IIIZZ)V", at = @At("TAIL"), cancellable = true)
     private void renderHeart(PoseStack ps, Gui.HeartType heartType, int x, int y, int texV, boolean blink, boolean half, CallbackInfo ci)
     {
-        if (!MainSettingsConfig.getInstance().freezingHearts()) return;
+        double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
+        if (heartsFreezePercentage == 0) return;
 
         Player player = Minecraft.getInstance().player;
 
@@ -45,10 +46,10 @@ public class MixinHeartRender
             double temp = Overlays.BODY_TEMP;
 
             // Get protection from armor underwear
-            float coldLiningFactor = CSMath.blend(0.5f, 1, TempEffectsCommon.getTempResistance(player, true), 0, 4);
-            if (coldLiningFactor == 1) return;
+            float unfrozenHealth = CSMath.blend((float) (1 - heartsFreezePercentage), 1, TempEffectsCommon.getColdResistance(player), 0, 4);
+            if (unfrozenHealth == 1) return;
 
-            int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(coldLiningFactor, 1, temp, -100, -50));
+            int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(unfrozenHealth, 1, temp, -100, -50));
             int frozenHearts = frozenHealth / 2;
             int u = blink || heartType == Gui.HeartType.CONTAINER ? 14 : half ? 7 : 0;
 

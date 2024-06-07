@@ -35,7 +35,7 @@ public class ConfigPageOne extends AbstractConfigPage
 
     @Override
     public @Nullable MutableComponent sectionTwoTitle()
-    {   return new TranslatableComponent("cold_sweat.config.section.difficulty.name");
+    {   return new TranslatableComponent("cold_sweat.config.section.difficulty");
     }
 
     @Override

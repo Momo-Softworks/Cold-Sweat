@@ -77,7 +77,7 @@
 
 
   "cold_sweat.config.title":                        "Cold Sweat Config",
-  "cold_sweat.config.section.difficulty.name":      "Impostazione di difficoltà",
+  "cold_sweat.config.section.difficulty":      "Impostazione di difficoltà",
   "cold_sweat.config.section.hud_settings":         "Impostazioni HUD",
   "cold_sweat.config.section.other":                "Impostazioni temperatura extra",
   "cold_sweat.config.section.temperature_details":  "Tolleranza temperatura",

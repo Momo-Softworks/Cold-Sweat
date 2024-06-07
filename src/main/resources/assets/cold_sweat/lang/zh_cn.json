@@ -77,7 +77,7 @@
 
 
   "cold_sweat.config.title":                        "冷汗配置",
-  "cold_sweat.config.section.difficulty.name":      "温度配置",
+  "cold_sweat.config.section.difficulty":      "温度配置",
   "cold_sweat.config.section.hud_settings":         "HUD设置",
   "cold_sweat.config.section.other":                "其他温度设置",
   "cold_sweat.config.section.temperature_details":  "温度配置",

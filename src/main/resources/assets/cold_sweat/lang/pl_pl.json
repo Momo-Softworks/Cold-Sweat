@@ -35,7 +35,7 @@
   "cold_sweat.config.section.temperature_details":  "Menedżer temperatur",
   "cold_sweat.config.section.other":                "Inne ustawienia temperatur",
   "cold_sweat.config.section.hud_settings":         "Ustawienia HUD",
-  "cold_sweat.config.section.difficulty.name":      "Ustawienia poziomu trudności",
+  "cold_sweat.config.section.difficulty":      "Ustawienia poziomu trudności",
 
   "cold_sweat.config.difficulty.name":              "Poziom trudności",
   "cold_sweat.config.difficulty.super_easy.name":   "Bardzo Łatwy",
