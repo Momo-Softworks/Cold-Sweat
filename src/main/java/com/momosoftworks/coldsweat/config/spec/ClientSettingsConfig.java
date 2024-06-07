@@ -22,6 +22,7 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
     private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
+    private static final ForgeConfigSpec.BooleanValue moveBodyIconWhenAdvanced;
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
     private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
@@ -72,21 +73,24 @@ public class ClientSettingsConfig
                     .comment("The position of the body temperature icon relative to default")
                     .defineList("Body Temperature Icon Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyIconEnabled = BUILDER
-                    .comment("Enables the body temperature icon")
+                    .comment("Enables the body temperature icon above the hotbar")
                     .define("Show Body Temperature Icon", true);
+            moveBodyIconWhenAdvanced = BUILDER
+                    .comment("Moves the body temperature icon to make way for the advanced readout when a thermometer is equipped")
+                    .define("Move Body Icon For Advanced Info", true);
 
             bodyReadoutPos = BUILDER
                     .comment("The position of the body temperature readout relative to default")
                     .defineList("Body Temperature Readout Offset", List.of(0, 0), it -> it instanceof Integer);
             bodyReadoutEnabled = BUILDER
-                    .comment("Enables the body temperature readout")
-                    .define("Show Body Temperature Readout", false);
+                    .comment("Enables the body temperature readout above the hotbar")
+                    .define("Show Body Temperature Readout", true);
 
             worldGaugePos = BUILDER
                     .comment("The position of the world temperature gauge relative to default")
                     .defineList("World Temperature UI Offset", List.of(0, 0), it -> it instanceof Integer);
             worldGaugeEnabled = BUILDER
-                    .comment("Enables the world temperature gauge")
+                    .comment("Enables the world temperature gauge next to the hotbar")
                     .define("Show World Temperature Gauge", true);
         BUILDER.pop();
 
@@ -204,6 +208,10 @@ public class ClientSettingsConfig
     }
     public boolean isWorldGaugeEnabled()
     {   return worldGaugeEnabled.get();
+    }
+
+    public boolean moveBodyIconWhenAdvanced()
+    {   return moveBodyIconWhenAdvanced.get();
     }
 
     /*
