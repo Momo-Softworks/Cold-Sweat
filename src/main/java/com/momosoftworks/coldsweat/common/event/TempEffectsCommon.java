@@ -114,7 +114,7 @@ public class TempEffectsCommon
             if (temp < -50)
             {
                 // Get protection from armor underwear
-                float unfrozenHealth = (float) CSMath.blend(frozenHeartsPercentage, 1d, getColdResistance(player), 0d, 4d);
+                float unfrozenHealth = (float) (CSMath.blend(1 - frozenHeartsPercentage, 1d, getColdResistance(player), 0d, 4d));
                 if (unfrozenHealth != 1)
                 {   event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(player.getMaxHealth() * CSMath.blend(unfrozenHealth, 1f, temp, -100f, -50f)) - player.getHealth()));
                 }
