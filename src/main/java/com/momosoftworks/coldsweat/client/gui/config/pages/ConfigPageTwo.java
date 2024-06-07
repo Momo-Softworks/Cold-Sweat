@@ -71,6 +71,15 @@ public class ConfigPageTwo extends AbstractConfigPage
                        },
                        false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
 
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
+                       button ->
+                       {
+                           DrawConfigButton.EDIT_MODE = true;
+                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                       },
+                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
+
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
                 amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
@@ -123,9 +132,16 @@ public class ConfigPageTwo extends AbstractConfigPage
                 button -> ConfigSettings.CUSTOM_HOTBAR_LAYOUT.set(!ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get()),
                 false, false, true, Component.translatable("cold_sweat.config.custom_hotbar.desc"));
 
-        // Hearth Debug
-        this.addButton("hearth_debug", Side.RIGHT, () -> Component.translatable("cold_sweat.config.hearth_debug.name").append(": ").append(ConfigSettings.HEARTH_DEBUG.get() ? ON : OFF),
-                       button -> ConfigSettings.HEARTH_DEBUG.set(!ConfigSettings.HEARTH_DEBUG.get()),
-                       false, false, true, Component.translatable("cold_sweat.config.hearth_debug.desc"));
+        // Move body temp icon
+        this.addButton("move_body_icon", Side.RIGHT, () -> Component.translatable("cold_sweat.config.move_body_icon.name").append(": ").append(ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get() ? ON : OFF),
+                button -> ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.set(!ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()),
+                false, false, true, Component.translatable("cold_sweat.config.move_body_icon.desc"));
+    }
+
+    @Override
+    public void onClose()
+    {
+        super.onClose();
+        ConfigScreen.saveConfig();
     }
 }

@@ -46,7 +46,7 @@ public class ConfigPageDifficulty extends Screen
 
     public ConfigPageDifficulty(Screen parentScreen)
     {
-        super(Component.translatable("cold_sweat.config.section.difficulty.name"));
+        super(Component.translatable("cold_sweat.config.section.difficulty"));
         this.parentScreen = parentScreen;
     }
 

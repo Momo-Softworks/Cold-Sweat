@@ -73,7 +73,7 @@
 
 
   "cold_sweat.config.title":                        "Настройки Cold Sweat",
-  "cold_sweat.config.section.difficulty.name":      "Настройки сложности",
+  "cold_sweat.config.section.difficulty":      "Настройки сложности",
   "cold_sweat.config.section.hud_settings":         "Настройки интерфейса",
   "cold_sweat.config.section.other":                "Другие настройки температуры",
   "cold_sweat.config.section.temperature_details":  "Управление температурой",
