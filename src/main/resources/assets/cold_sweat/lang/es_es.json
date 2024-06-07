@@ -44,7 +44,7 @@
   "cold_sweat.config.section.temperature_details":  "Gestión de temperatura",
   "cold_sweat.config.section.other":                "Otros ajustes de temperatura",
   "cold_sweat.config.section.hud_settings":         "Ajustes de HUD",
-  "cold_sweat.config.section.difficulty.name":      "Ajustes de dificultad",
+  "cold_sweat.config.section.difficulty":      "Ajustes de dificultad",
 
   "cold_sweat.config.difficulty.super_easy.name":   "Muy fácil",
   "cold_sweat.config.difficulty.easy.name":         "Fácil",

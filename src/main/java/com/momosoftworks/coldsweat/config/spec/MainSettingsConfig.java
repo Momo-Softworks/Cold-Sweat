@@ -33,11 +33,11 @@ public class MainSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<Integer> gracePeriodLength;
     public static final ForgeConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> heatstrokeFog;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> freezingHearts;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldKnockback;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldMining;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldMovement;
+    public static final ForgeConfigSpec.ConfigValue<Double> heatstrokeFog;
+    public static final ForgeConfigSpec.ConfigValue<Double> freezingHearts;
+    public static final ForgeConfigSpec.ConfigValue<Double> coldKnockback;
+    public static final ForgeConfigSpec.ConfigValue<Double> coldMining;
+    public static final ForgeConfigSpec.ConfigValue<Double> coldMovement;
 
     static 
     {
@@ -106,27 +106,31 @@ public class MainSettingsConfig
 
             heatstrokeFog = BUILDER
                 .comment("When set to true, the player's view distance will decrease when they are too hot")
-                .define("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", true));
+                .defineInRange("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", 6.0), 0, Double.POSITIVE_INFINITY);
 
             BUILDER.pop();
 
             BUILDER.push("Cold");
 
             freezingHearts = BUILDER
-                .comment("When set to true, some of the player's hearts will freeze when they are too cold, preventing regeneration")
-                .define("Freezing Hearts", defaultDiff.getOrDefault("freezing_hearts", true));
+                .comment("When set to true, this percentage of the player's hearts will freeze over when they are too cold, preventing regeneration",
+                         "Represented as a percentage")
+                .defineInRange("Freezing Hearts Percentage", defaultDiff.getOrDefault("freezing_hearts", 0.5), 0, 1);
 
             coldKnockback = BUILDER
-                .comment("When set to true, the player's attack knockback will be reduced when they are too cold")
-                .define("Cold Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", true));
+                .comment("When set to true, the player's attack knockback will be reduced by this amount when they are too cold",
+                         "Represented as a percentage")
+                .defineInRange("Chilled Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", 0.5), 0, 1);
 
             coldMovement = BUILDER
-                .comment("When set to true, the player's movement speed will be reduced when they are too cold")
-                .define("Cold Slowness", defaultDiff.getOrDefault("cold_slowness", true));
+                .comment("When set to true, the player's movement speed will be reduced by this amount when they are too cold",
+                         "Represented as a percentage")
+                .defineInRange("Chilled Movement Slowdown", defaultDiff.getOrDefault("cold_slowness", 0.5), 0, 1);
 
             coldMining = BUILDER
-                .comment("When set to true, the player's mining speed will be reduced when they are too cold")
-                .define("Cold Mining Fatigue", defaultDiff.getOrDefault("cold_break_speed", true));
+                .comment("When set to true, the player's mining speed will be reduced by this amount when they are too cold",
+                         "Represented as a percentage")
+                .defineInRange("Chilled Mining Speed Reduction", defaultDiff.getOrDefault("cold_break_speed", 0.5), 0, 1);
 
             BUILDER.pop();
         BUILDER.pop();
@@ -211,20 +215,20 @@ public class MainSettingsConfig
     {   return gracePeriodEnabled.get();
     }
 
-    public boolean heatstrokeFog()
+    public double getHeatstrokeFogDistance()
     {   return heatstrokeFog.get();
     }
 
-    public boolean freezingHearts()
+    public double getHeartsFreezingPercentage()
     {   return freezingHearts.get();
     }
-    public boolean coldKnockback()
+    public double getColdKnockbackReduction()
     {   return coldKnockback.get();
     }
-    public boolean coldMining()
+    public double getColdMiningImpairment()
     {   return coldMining.get();
     }
-    public boolean coldMovement()
+    public double getColdMovementSlowdown()
     {   return coldMovement.get();
     }
 
@@ -275,29 +279,33 @@ public class MainSettingsConfig
     {   gracePeriodEnabled.set(enabled);
     }
 
-    public synchronized void setHeatstrokeFog(boolean fog)
-    {   heatstrokeFog.set(fog);
+    public synchronized void setHeatstrokeFogDistance(double distance)
+    {   synchronized (heatstrokeFog)
+        {   heatstrokeFog.set(distance);
+        }
     }
 
-    public synchronized void setFreezingHearts(boolean hearts)
-    {   freezingHearts.set(hearts);
+    public synchronized void setHeartsFreezingPercentage(double percent)
+    {   synchronized (freezingHearts)
+        {   freezingHearts.set(percent);
+        }
     }
 
-    public synchronized void setColdKnockback(boolean knockback)
+    public synchronized void setColdKnockbackReduction(double amount)
     {   synchronized (coldKnockback)
-        {   coldKnockback.set(knockback);
+        {   coldKnockback.set(amount);
         }
     }
 
-    public synchronized void setColdMining(boolean mining)
+    public synchronized void setColdMiningImpairment(double amount)
     {   synchronized (coldMining)
-        {   coldMining.set(mining);
+        {   coldMining.set(amount);
         }
     }
 
-    public synchronized void setColdMovement(boolean movement)
+    public synchronized void setColdMovementSlowdown(double amount)
     {   synchronized (coldMovement)
-        {   coldMovement.set(movement);
+        {   coldMovement.set(amount);
         }
     }
 

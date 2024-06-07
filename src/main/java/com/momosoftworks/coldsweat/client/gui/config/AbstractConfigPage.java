@@ -22,6 +22,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -400,6 +401,61 @@ public abstract class AbstractConfigPage extends Screen
             this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
     }
 
+    protected void addSliderButton(String id, Side side, Component label, double minVal, double maxVal,
+                                   BiConsumer<Double, ConfigSliderButton> onChanged, Consumer<ConfigSliderButton> onInit,
+                                   boolean requireOP, boolean clientside,
+                                   Component... tooltip)
+    {
+        boolean shouldBeActive = !requireOP || this.minecraft.player == null || this.minecraft.player.hasPermissions(2);
+        int buttonX = this.width / 2;
+        int xOffset = side == Side.LEFT ? -179 : 56;
+        int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
+
+        // Make the input
+        ConfigSliderButton sliderButton = new ConfigSliderButton(buttonX + xOffset, buttonY, buttonWidth, 20, label, 0d)
+        {
+            @Override
+            protected void updateMessage()
+            {   onChanged.accept(CSMath.blend(minVal, maxVal, CSMath.truncate(this.value, 2), 0, 1), this);
+            }
+
+            @Override
+            protected void applyValue()
+            {   this.updateMessage();
+            }
+        };
+
+        // Disable the input if the player is not OP
+        sliderButton.active = shouldBeActive;
+
+        // Set the initial value
+        onInit.accept(sliderButton);
+
+        // Add the clientside indicator
+        if (clientside)
+        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
+        }
+
+        List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
+        // Add the client disclaimer if the setting is marked clientside
+        if (clientside)
+        {   tooltipList.add(Component.translatable("cold_sweat.config.clientside_warning").withStyle(ChatFormatting.DARK_GRAY));
+        }
+        // Assign the tooltip
+        this.setTooltip(id, tooltipList);
+
+        // Add the widget
+        this.addWidgetBatch(id, List.of(sliderButton));
+
+        // Mark this space as used
+        if (side == Side.LEFT)
+            this.leftSideLength += ConfigScreen.OPTION_SIZE;
+        else
+            this.rightSideLength += ConfigScreen.OPTION_SIZE;
+
+    }
+
     @Override
     protected void init()
     {
@@ -462,7 +518,11 @@ public abstract class AbstractConfigPage extends Screen
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render tooltip
-        if (MOUSE_STILL_TIMER >= TOOLTIP_DELAY)
+        if (this.isDragging())
+        {   MOUSE_STILL_TIMER = 0;
+        }
+        if (MOUSE_STILL_TIMER < TOOLTIP_DELAY) return;
+
         for (Map.Entry<String, List<GuiEventListener>> entry : widgetBatches.entrySet())
         {
             String id = entry.getKey();
