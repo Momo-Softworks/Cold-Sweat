@@ -169,9 +169,7 @@ public class MainSettingsConfig
     {   return INSTANCE;
     }
 
-    /*
-     * Non-private values for use elsewhere
-     */
+    /* Getters */
 
     public int getDifficulty()
     {   return difficulty.get();
@@ -232,52 +230,74 @@ public class MainSettingsConfig
     {   return coldMovement.get();
     }
 
-    /*
-     * Safe set methods for config values
-     */
+    /* Setters */
+
     public synchronized void setDifficulty(int value)
-    {   difficulty.set(value);
+    {   synchronized (difficulty)
+        {   difficulty.set(value);
+        }
     }
 
     public synchronized void setMaxHabitable(double temp)
-    {   maxHabitable.set(temp);
+    {   synchronized (maxHabitable)
+        {   maxHabitable.set(temp);
+        }
     }
 
     public synchronized void setMinHabitable(double temp)
-    {   minHabitable.set(temp);
+    {   synchronized (minHabitable)
+        {   minHabitable.set(temp);
+        }
     }
 
     public synchronized void setRateMultiplier(double rate)
-    {   rateMultiplier.set(rate);
+    {   synchronized (rateMultiplier)
+        {   rateMultiplier.set(rate);
+        }
     }
 
     public synchronized void setFireResistanceEnabled(boolean isEffective)
-    {   fireResistanceEffect.set(isEffective);
+    {   synchronized (fireResistanceEffect)
+        {   fireResistanceEffect.set(isEffective);
+        }
     }
 
     public synchronized void setIceResistanceEnabled(boolean isEffective)
-    {   iceResistanceEffect.set(isEffective);
+    {   synchronized (iceResistanceEffect)
+        {   iceResistanceEffect.set(isEffective);
+        }
     }
 
     public synchronized void setRequireThermometer(boolean required)
-    {   requireThermometer.set(required);
+    {   synchronized (requireThermometer)
+        {   requireThermometer.set(required);
+        }
     }
 
     public synchronized void setDamageScaling(boolean enabled)
-    {   damageScaling.set(enabled);
+    {   synchronized (damageScaling)
+        {   damageScaling.set(enabled);
+        }
     }
 
     public synchronized void setTempDamage(double damage)
-    {   tempDamage.set(damage);
+    {   synchronized (tempDamage)
+        {   tempDamage.set(damage);
+        }
     }
 
     public synchronized void setGracePeriodLength(int ticks)
-    {   gracePeriodLength.set(ticks);
+    {   synchronized (gracePeriodLength)
+        {   gracePeriodLength.set(ticks);
+        }
     }
 
     public synchronized void setGracePeriodEnabled(boolean enabled)
-    {   gracePeriodEnabled.set(enabled);
+    {   synchronized (gracePeriodEnabled)
+        {   gracePeriodEnabled.set(enabled);
+        }
     }
+
 
     public synchronized void setHeatstrokeFogDistance(double distance)
     {   synchronized (heatstrokeFog)

@@ -169,9 +169,7 @@ public class EntitySettingsConfig
     {   return INSTANCE;
     }
 
-    /*
-     * Non-private values for use elsewhere
-     */
+    /* Getters */
 
     public List<? extends List<?>> getInsulatedEntities()
     {   return insulatedEntities.get();
@@ -180,15 +178,9 @@ public class EntitySettingsConfig
     public List<?> getGoatFurStats()
     {   return goatFurGrowth.get();
     }
-    public void setGoatFurStats(List<? extends Number> list)
-    {   goatFurGrowth.set(list);
-    }
 
     public List<?> getChameleonShedStats()
     {   return chameleonShedTimings.get();
-    }
-    public void setChameleonShedStats(List<? extends Number> list)
-    {   chameleonShedTimings.set(list);
     }
 
     public List<? extends List<?>> getChameleonSpawnBiomes()
@@ -197,5 +189,15 @@ public class EntitySettingsConfig
 
     public List<? extends List<?>> getGoatSpawnBiomes()
     {   return goatBiomes.get();
+    }
+
+    /* Setters */
+
+    public void setGoatFurStats(List<? extends Number> list)
+    {   goatFurGrowth.set(list);
+    }
+
+    public void setChameleonShedStats(List<? extends Number> list)
+    {   chameleonShedTimings.set(list);
     }
 }

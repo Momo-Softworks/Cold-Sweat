@@ -605,9 +605,8 @@ public class WorldSettingsConfig
     {   return INSTANCE;
     }
 
-    /*
-     * Non-private values for use elsewhere
-     */
+    /* Getters */
+
     public List<? extends List<?>> getBiomeTempOffsets()
     {   return biomeOffsets.get();
     }
@@ -671,46 +670,75 @@ public class WorldSettingsConfig
     {   return checkSleep.get();
     }
 
-    public List<? extends String> getSleepOverrideBlocks()
+    public synchronized List<? extends String> getSleepOverrideBlocks()
     {   return sleepingOverrideBlocks.get();
     }
 
-    public void setBiomeTemperatures(List<? extends List<?>> temps)
-    {   biomeTemps.set(temps);
-    }
-    public void setBiomeTempOffsets(List<? extends List<?>> offsets)
-    {   biomeOffsets.set(offsets);
+    /* Setters */
+
+    public synchronized void setBiomeTemperatures(List<? extends List<?>> temps)
+    {   synchronized (biomeTemps)
+        {   biomeTemps.set(temps);
+        }
     }
 
-    public void setDimensionTemperatures(List<? extends List<?>> temps)
-    {   dimensionTemps.set(temps);
-    }
-    public void setDimensionTempOffsets(List<? extends List<?>> offsets)
-    {   dimensionOffsets.set(offsets);
-    }
-
-    public void setStructureTemperatures(List<? extends List<?>> temps)
-    {   structureTemps.set(temps);
-    }
-    public void setStructureTempOffsets(List<? extends List<?>> offsets)
-    {   structureOffsets.set(offsets);
+    public synchronized void setBiomeTempOffsets(List<? extends List<?>> offsets)
+    {   synchronized (biomeOffsets)
+        {   biomeOffsets.set(offsets);
+        }
     }
 
-    public void setBlockTemps(List<? extends List<Object>> temps)
-    {   blockTemps.set(temps);
-    }
-    public void setBlockRange(int range)
-    {   blockRange.set(range);
+    public synchronized void setDimensionTemperatures(List<? extends List<?>> temps)
+    {   synchronized (dimensionTemps)
+        {   dimensionTemps.set(temps);
+        }
     }
 
-    public void setCaveInsulation(double insulation)
-    {   caveInsulation.set(insulation);
+    public synchronized void setDimensionTempOffsets(List<? extends List<?>> offsets)
+    {   synchronized (dimensionOffsets)
+        {   dimensionOffsets.set(offsets);
+        }
+    }
+
+    public synchronized void setStructureTemperatures(List<? extends List<?>> temps)
+    {   synchronized (structureTemps)
+        {   structureTemps.set(temps);
+        }
+    }
+
+    public synchronized void setStructureTempOffsets(List<? extends List<?>> offsets)
+    {   synchronized (structureOffsets)
+        {   structureOffsets.set(offsets);
+        }
+    }
+
+    public synchronized void setBlockTemps(List<? extends List<Object>> temps)
+    {   synchronized (blockTemps)
+        {   blockTemps.set(temps);
+        }
+    }
+
+    public synchronized void setBlockRange(int range)
+    {   synchronized (blockRange)
+        {   blockRange.set(range);
+        }
+    }
+
+    public synchronized void setCaveInsulation(double insulation)
+    {   synchronized (caveInsulation)
+        {   caveInsulation.set(insulation);
+        }
     }
 
     public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (hearthSpreadWhitelist)
+        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
+
     public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (hearthSpreadBlacklist)
+        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        }
     }
 }
