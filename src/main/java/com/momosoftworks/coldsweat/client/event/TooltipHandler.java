@@ -223,34 +223,36 @@ public class TooltipHandler
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
         if (stack.getItem() instanceof Wearable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
+            List<Insulation> insulation = new ArrayList<>();
+
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
                 cap.deserializeNBT(stack.getOrCreateTag());
 
                 // Create the list of insulation pairs from NBT
-                List<Insulation> insulation = new ArrayList<>(cap.getInsulation().stream()
-                                                              // Filter out insulation that doesn't match the predicate
-                                                              .filter(pair ->
-                                                              {
-                                                                  ItemStack stack1 = pair.getFirst();
-                                                                  return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                                             insulator -> insulator.test(player, stack),
-                                                                                             true);
-                                                              })
-                                                              .map(Pair::getSecond).flatMap(List::stream).toList());
-
-                // If the armor has intrinsic insulation due to configs, add it to the list
-                if (armorInsulator != null)
-                {
-                    if (armorInsulator.test(player, stack))
-                    {   insulation.addAll(armorInsulator.insulation().split());
-                    }
-                }
-
-                if (!insulation.isEmpty())
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR, stack)));
-                }
+                insulation.addAll(cap.getInsulation().stream()
+                                  // Filter out insulation that doesn't match the predicate
+                                  .filter(pair ->
+                                  {
+                                      ItemStack stack1 = pair.getFirst();
+                                      return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                                 insulator -> insulator.test(player, stack),
+                                                                 true);
+                                  })
+                                  .map(Pair::getSecond).flatMap(List::stream).toList());
             });
+
+            // If the armor has intrinsic insulation due to configs, add it to the list
+            if (armorInsulator != null)
+            {
+                if (armorInsulator.test(player, stack))
+                {   insulation.addAll(armorInsulator.insulation().split());
+                }
+            }
+
+            if (!insulation.isEmpty())
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR, stack)));
+            }
         }
     }
 
