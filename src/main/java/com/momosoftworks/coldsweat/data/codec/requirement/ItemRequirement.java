@@ -78,6 +78,9 @@ public class ItemRequirement
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
+        if (this.nbt.tag().isEmpty())
+        {   return true;
+        }
         for (int i = 0; i < items.size(); i++)
         {
             Either<ITag<Item>, Item> either = items.get(i);
