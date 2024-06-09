@@ -538,7 +538,7 @@ public class ConfigHelper
             {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
                 return new ArrayList<>();
             }
-            if (insulator.predicate.equals(EntityRequirement.NONE))
+            if (!insulator.predicate.equals(EntityRequirement.NONE) || !insulator.attributes.getMap().isEmpty())
             {   return new ArrayList<>();
             }
             List<Object> itemData = new ArrayList<>();
