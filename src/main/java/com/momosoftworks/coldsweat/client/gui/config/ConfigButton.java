@@ -33,7 +33,7 @@ public class ConfigButton extends Button
                 ConfigPageOne page = (ConfigPageOne) Minecraft.getInstance().screen;
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
                         new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.name").getString() +
-                                " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()) + ")..."));
+                                " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."));
             }
         }
 
