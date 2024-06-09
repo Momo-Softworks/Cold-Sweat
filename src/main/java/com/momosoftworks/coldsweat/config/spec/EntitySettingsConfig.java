@@ -168,9 +168,7 @@ public class EntitySettingsConfig
     {   return INSTANCE;
     }
 
-    /*
-     * Non-private values for use elsewhere
-     */
+    /* Getters */
 
     public List<? extends List<?>> getInsulatedEntities()
     {   return insulatedEntities.get();
@@ -179,15 +177,9 @@ public class EntitySettingsConfig
     public List<?> getLlamaFurStats()
     {   return llamaFurGrowth.get();
     }
-    public void setLlamaFurStats(List<? extends Number> list)
-    {   llamaFurGrowth.set(list);
-    }
 
     public List<?> getChameleonShedStats()
     {   return chameleonShedTimings.get();
-    }
-    public void setChameleonShedStats(List<? extends Number> list)
-    {   chameleonShedTimings.set(list);
     }
 
     public List<? extends List<?>> getChameleonSpawnBiomes()
@@ -196,5 +188,19 @@ public class EntitySettingsConfig
 
     public List<? extends List<?>> getLlamaSpawnBiomes()
     {   return llamaBiomes.get();
+    }
+
+    /* Setters */
+
+    public void setLlamaFurStats(List<? extends Number> list)
+    {   synchronized (llamaFurGrowth)
+        {   llamaFurGrowth.set(list);
+        }
+    }
+
+    public void setChameleonShedStats(List<? extends Number> list)
+    {   synchronized (chameleonShedTimings)
+        {   chameleonShedTimings.set(list);
+        }
     }
 }
