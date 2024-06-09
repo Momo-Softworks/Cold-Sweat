@@ -220,6 +220,8 @@ public class CSMath
      */
     public static double blend(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
+        if (rangeMin > rangeMax) return blend(blendTo, blendFrom, factor, rangeMax, rangeMin);
+
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
@@ -230,6 +232,8 @@ public class CSMath
      */
     public static float blend(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
     {
+        if (rangeMin > rangeMax) return blend(blendTo, blendFrom, factor, rangeMax, rangeMin);
+
         if (factor <= rangeMin) return blendFrom;
         if (factor >= rangeMax) return blendTo;
         return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
