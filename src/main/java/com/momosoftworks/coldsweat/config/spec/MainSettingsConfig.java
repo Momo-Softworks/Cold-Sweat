@@ -169,9 +169,7 @@ public class MainSettingsConfig
     {   return INSTANCE;
     }
 
-    /*
-     * Non-private values for use elsewhere
-     */
+    /* Getters */
 
     public int getDifficulty()
     {   return difficulty.get();
@@ -232,9 +230,8 @@ public class MainSettingsConfig
     {   return coldMovement.get();
     }
 
-    /*
-     * Safe set methods for config values
-     */
+    /* Setters */
+
     public synchronized void setDifficulty(int value)
     {   synchronized (difficulty)
         {   difficulty.set(value);
@@ -300,6 +297,7 @@ public class MainSettingsConfig
         {   gracePeriodEnabled.set(enabled);
         }
     }
+
 
     public synchronized void setHeatstrokeFogDistance(double distance)
     {   synchronized (heatstrokeFog)
