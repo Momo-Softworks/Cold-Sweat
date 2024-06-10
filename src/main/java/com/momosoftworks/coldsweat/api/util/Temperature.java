@@ -98,7 +98,7 @@ public class Temperature
         {
             if (modifier == null) continue;
 
-            double newTemp = entity.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
+            double newTemp = entity.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0 || entity.tickCount <= 1
                     ? modifier.update(temp2, entity, trait)
                     : modifier.getResult(temp2);
             if (!Double.isNaN(newTemp))
