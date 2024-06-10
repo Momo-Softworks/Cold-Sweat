@@ -183,26 +183,6 @@ public class EntityTempManager
         }
     }
 
-    @SubscribeEvent
-    public static void initAttributesFromOldCap(EntityJoinLevelEvent event)
-    {
-        if (event.getEntity() instanceof LivingEntity living
-        && getEntitiesWithTemperature().contains(living.getType())
-        && !living.getPersistentData().contains("PersistentAttributes"))
-        {
-            TaskScheduler.schedule(() ->
-            {
-                for (Temperature.Trait trait : VALID_ATTRIBUTE_TYPES)
-                {   AttributeInstance attribute = getAttribute(trait, living);
-                    if (attribute == null) continue;
-                    attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
-                    attribute.removeModifiers();
-                }
-                living.getPersistentData().put("PersistentAttributes", new CompoundTag());
-            }, 1);
-        }
-    }
-
     /**
      * Tick TempModifiers and update temperature for living entities
      */
