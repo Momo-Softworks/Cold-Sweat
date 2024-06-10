@@ -174,17 +174,17 @@ public class AbstractTempCap implements ITemperatureCap
     public void tick(LivingEntity entity)
     {
         // Tick TempModifiers and pre-attribute-bases
-        double newWorldTemp = this.modifyFromAttribute(entity, Trait.WORLD, () -> Temperature.apply(0, entity, Trait.WORLD, getModifiers(Trait.WORLD)));
-        double newBaseTemp  = this.modifyFromAttribute(entity, Trait.BASE, () -> Temperature.apply(0, entity, Trait.BASE, getModifiers(Trait.BASE)));
+        double newWorldTemp = this.modifyFromAttribute(entity, Trait.WORLD, 0);
+        double newBaseTemp  = this.modifyFromAttribute(entity, Trait.BASE, 0);
         double newCoreTemp  = Temperature.apply(getTrait(Trait.CORE), entity, Trait.CORE, getModifiers(Trait.CORE));
 
         // Get abilities
-        double maxTemp = this.modifyFromAttribute(entity, Trait.BURNING_POINT, () -> Temperature.apply(ConfigSettings.MAX_TEMP.get(), entity, Trait.BURNING_POINT, getModifiers(Trait.BURNING_POINT)));
-        double minTemp = this.modifyFromAttribute(entity, Trait.FREEZING_POINT, () -> Temperature.apply(ConfigSettings.MIN_TEMP.get(), entity, Trait.FREEZING_POINT, getModifiers(Trait.FREEZING_POINT)));
-        double coldDampening   = this.modifyFromAttribute(entity, Trait.COLD_DAMPENING, () -> Temperature.apply(0d, entity, Trait.COLD_DAMPENING, getModifiers(Trait.COLD_DAMPENING)));
-        double heatDampening   = this.modifyFromAttribute(entity, Trait.HEAT_DAMPENING, () -> Temperature.apply(0d, entity, Trait.HEAT_DAMPENING, getModifiers(Trait.HEAT_DAMPENING)));
-        double coldResistance  = this.modifyFromAttribute(entity, Trait.COLD_RESISTANCE, () -> Temperature.apply(0d, entity, Trait.COLD_RESISTANCE, getModifiers(Trait.COLD_RESISTANCE)));
-        double heatResistance  = this.modifyFromAttribute(entity, Trait.HEAT_RESISTANCE, () -> Temperature.apply(0d, entity, Trait.HEAT_RESISTANCE, getModifiers(Trait.HEAT_RESISTANCE)));
+        double maxTemp = this.modifyFromAttribute(entity, Trait.BURNING_POINT, ConfigSettings.MAX_TEMP.get());
+        double minTemp = this.modifyFromAttribute(entity, Trait.FREEZING_POINT, ConfigSettings.MIN_TEMP.get());
+        double coldDampening   = this.modifyFromAttribute(entity, Trait.COLD_DAMPENING, 0);
+        double heatDampening   = this.modifyFromAttribute(entity, Trait.HEAT_DAMPENING, 0);
+        double coldResistance  = this.modifyFromAttribute(entity, Trait.COLD_RESISTANCE, 0);
+        double heatResistance  = this.modifyFromAttribute(entity, Trait.HEAT_RESISTANCE, 0);
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.signForRange(newWorldTemp, minTemp, maxTemp);
@@ -276,17 +276,18 @@ public class AbstractTempCap implements ITemperatureCap
         this.tickHurting(entity, heatResistance, coldResistance);
     }
 
-    private double modifyFromAttribute(LivingEntity entity, Temperature.Trait type, Supplier<Double> defaultValue)
+    private double modifyFromAttribute(LivingEntity entity, Temperature.Trait type, double baseValue)
     {
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
         ModifiableAttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
         // If the attribute is null, return the default value
         if (attribute == null)
-        {   return defaultValue.get();
+        {   return defaultSupplier.get();
         }
         // If base attribute is unset
         else
         {
-            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultValue.get());
+            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
 
             for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION))
             {   base += mod.getAmount();
