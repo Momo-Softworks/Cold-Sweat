@@ -130,7 +130,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     {
         Number insul = CSMath.truncate(insulation / 2, 2);
         if (CSMath.isInteger(insul)) insul = insul.intValue();
-        String text = "x" + insul;
+        String text = (insulation > 999) ? "∞" : "x" + insul;
         int uvX = switch (type)
         {   case COLD -> 12;
             case HEAT -> 18;
