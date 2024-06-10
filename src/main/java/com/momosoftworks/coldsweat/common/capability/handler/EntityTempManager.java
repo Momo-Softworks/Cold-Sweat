@@ -163,39 +163,22 @@ public class EntityTempManager
         if (event.getEntity() instanceof LivingEntity living && !living.level().isClientSide()
         && TEMPERATURE_ENABLED_ENTITIES.contains(living.getType()))
         {
-            if (living.getServer() != null) living.getServer().execute(() ->
+            getTemperatureCap(living).ifPresent(cap ->
             {
-                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                // If entity has never been initialized, add default modifiers
+                if (!event.getEntity().getPersistentData().getBoolean("InitializedModifiers"))
                 {
-                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
-                    MinecraftForge.EVENT_BUS.post(gatherEvent);
+                    for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                    {
+                        GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
+                        MinecraftForge.EVENT_BUS.post(gatherEvent);
 
-                    getTemperatureCap(living).ifPresent(cap ->
-                    {   cap.clearModifiers(trait);
+                        cap.clearModifiers(trait);
                         cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
-                    });
+                    }
+                    living.getPersistentData().putBoolean("InitializedModifiers", true);
                 }
             });
-        }
-    }
-
-    @SubscribeEvent
-    public static void initAttributesFromOldCap(EntityJoinLevelEvent event)
-    {
-        if (event.getEntity() instanceof LivingEntity living
-        && getEntitiesWithTemperature().contains(living.getType())
-        && !living.getPersistentData().contains("PersistentAttributes"))
-        {
-            TaskScheduler.schedule(() ->
-            {
-                for (Temperature.Trait trait : VALID_ATTRIBUTE_TYPES)
-                {   AttributeInstance attribute = getAttribute(trait, living);
-                    if (attribute == null) continue;
-                    attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
-                    attribute.removeModifiers();
-                }
-                living.getPersistentData().put("PersistentAttributes", new CompoundTag());
-            }, 1);
         }
     }
 

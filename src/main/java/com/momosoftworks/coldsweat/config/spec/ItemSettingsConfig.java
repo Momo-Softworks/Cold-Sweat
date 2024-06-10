@@ -282,6 +282,8 @@ public class ItemSettingsConfig
     {   return INSTANCE;
     }
 
+    /* Getters */
+
     public List<? extends List<?>> getBoilerFuelItems()
     {   return boilerItems.get();
     }
@@ -338,62 +340,91 @@ public class ItemSettingsConfig
     {   return CompatManager.isCuriosLoaded() ? insulatingCurios.get() : List.of();
     }
 
+    /* Setters */
+
     public synchronized void setBoilerFuelItems(List<? extends List<?>> itemMap)
-    {   boilerItems.set(itemMap);
+    {   synchronized (boilerItems)
+        {   boilerItems.set(itemMap);
+        }
     }
 
     public synchronized void setIceboxFuelItems(List<? extends List<?>> itemMap)
-    {   iceboxItems.set(itemMap);
+    {   synchronized (iceboxItems)
+        {   iceboxItems.set(itemMap);
+        }
     }
 
     public synchronized void setHearthFuelItems(List<? extends List<?>> itemMap)
-    {   hearthItems.set(itemMap);
+    {   synchronized (hearthItems)
+        {   hearthItems.set(itemMap);
+        }
     }
 
     public synchronized void setInsulationItems(List<? extends List<?>> items)
-    {   insulatingItems.set(items);
+    {   synchronized (insulatingItems)
+        {   insulatingItems.set(items);
+        }
     }
 
     public synchronized void setInsulatingArmorItems(List<? extends List<?>> itemMap)
-    {   insulatingArmor.set(itemMap);
+    {   synchronized (insulatingArmor)
+        {   insulatingArmor.set(itemMap);
+        }
     }
 
     public synchronized void setArmorInsulationSlots(List<? extends Number> slots)
-    {   insulationSlots.set(slots);
+    {   synchronized (insulationSlots)
+        {   insulationSlots.set(slots);
+        }
     }
 
     public synchronized void setSoulLampFuelItems(List<? extends List<?>> items)
-    {   soulLampItems.set(items);
+    {   synchronized (soulLampItems)
+        {   soulLampItems.set(items);
+        }
     }
 
     public synchronized void setFoodTemperatures(List<? extends List<?>> itemMap)
-    {   temperatureFoods.set(itemMap);
+    {   synchronized (temperatureFoods)
+        {   temperatureFoods.set(itemMap);
+        }
     }
 
     public synchronized void setValidSoulLampDimensions(List<? extends String> items)
-    {   soulLampDimensions.set(items);
+    {   synchronized (soulLampDimensions)
+        {   soulLampDimensions.set(items);
+        }
     }
 
     public synchronized void setWaterskinStrength(int strength)
-    {   waterskinStrength.set(strength);
+    {   synchronized (waterskinStrength)
+        {   waterskinStrength.set(strength);
+        }
     }
 
     public synchronized void setPotionsEnabled(Boolean saver)
-    {   allowPotionsInHearth.set(saver);
+    {   synchronized (allowPotionsInHearth)
+        {   allowPotionsInHearth.set(saver);
+        }
     }
 
     public synchronized void setPotionBlacklist(List<String> saver)
-    {   blacklistedPotions.set(saver);
+    {   synchronized (blacklistedPotions)
+        {   blacklistedPotions.set(saver);
+        }
     }
 
     public synchronized void setInsulationBlacklist(List<String> blacklist)
-    {   insulationBlacklist.set(blacklist);
+    {   synchronized (insulationBlacklist)
+        {   insulationBlacklist.set(blacklist);
+        }
     }
 
     public synchronized void setInsulatingCurios(List<? extends List<?>> items)
-    {
-        if (CompatManager.isCuriosLoaded())
-        {   insulatingCurios.set(items);
+    {   if (CompatManager.isCuriosLoaded())
+        {   synchronized (insulatingCurios)
+            {   insulatingCurios.set(items);
+            }
         }
     }
 }
