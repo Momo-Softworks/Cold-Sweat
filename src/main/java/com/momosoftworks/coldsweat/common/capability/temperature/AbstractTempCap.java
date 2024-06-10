@@ -28,8 +28,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_MODIFIER_TRAITS;
-import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_TEMPERATURE_TRAITS;
+import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.*;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
@@ -93,10 +92,10 @@ public class AbstractTempCap implements ITemperatureCap
     public void setTrait(Trait trait, double value, LivingEntity entity)
     {
         double oldTemp = this.getTrait(trait);
+        this.setTrait(trait, value);
         if (oldTemp != value && entity instanceof ServerPlayerEntity)
         {   ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(((ServerPlayerEntity) entity), this.getTraits());
         }
-        this.setTrait(trait, value);
     }
 
     @Override
