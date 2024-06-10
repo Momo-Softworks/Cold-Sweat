@@ -5,12 +5,12 @@
   "type": "armor",
   "data": {
     "items": [
-      "create:netherite_diving_helmet"
+      "minecraft:netherite_boots"
     ]
   },
   "insulation": {
     "heat": 1998,
-    "cold": 0
+    "cold": 1998
   },
   "predicate": {
     "equipment": {
