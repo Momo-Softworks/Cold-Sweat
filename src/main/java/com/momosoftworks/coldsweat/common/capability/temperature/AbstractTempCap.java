@@ -27,8 +27,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_MODIFIER_TRAITS;
-import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.VALID_TEMPERATURE_TRAITS;
+import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.*;
 
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
@@ -76,7 +75,6 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void setTrait(Trait trait, double value)
     {
-
         changed |= switch (trait)
         {
             case CORE  -> ((int) value) != ((int) getTrait(Trait.CORE));
@@ -92,12 +90,11 @@ public class AbstractTempCap implements ITemperatureCap
 
     public void setTrait(Trait trait, double value, LivingEntity entity)
     {
-
         double oldTemp = this.getTrait(trait);
+        this.setTrait(trait, value);
         if (oldTemp != value && entity instanceof ServerPlayer player)
         {   ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, this.getTraits());
         }
-        this.setTrait(trait, value);
     }
 
     @Override
