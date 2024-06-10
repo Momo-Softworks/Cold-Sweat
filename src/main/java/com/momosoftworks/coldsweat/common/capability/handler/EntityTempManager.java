@@ -163,17 +163,20 @@ public class EntityTempManager
         && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
         {
             LivingEntity living = ((LivingEntity) event.getEntity());
-            if (living.getServer() != null) living.getServer().execute(() ->
+            getTemperatureCap(living).ifPresent(cap ->
             {
-                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                // If entity has never been initialized, add default modifiers
+                if (!event.getEntity().getPersistentData().getBoolean("InitializedModifiers"))
                 {
-                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
-                    MinecraftForge.EVENT_BUS.post(gatherEvent);
+                    for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                    {
+                        GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
+                        MinecraftForge.EVENT_BUS.post(gatherEvent);
 
-                    getTemperatureCap(living).ifPresent(cap ->
-                    {   cap.clearModifiers(trait);
+                        cap.clearModifiers(trait);
                         cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
-                    });
+                    }
+                    living.getPersistentData().putBoolean("InitializedModifiers", true);
                 }
             });
         }
