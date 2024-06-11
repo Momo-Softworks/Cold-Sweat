@@ -24,6 +24,7 @@
     "MixinEntityRiding",
     "MixinInventoryOpenServer",
     "MixinMinecart",
+    "MixinPrePlayerRespawn",
     "MixinSoulCampfire",
     "MixinSoulFire"
   ],
