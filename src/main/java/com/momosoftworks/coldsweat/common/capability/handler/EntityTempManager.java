@@ -1,7 +1,10 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.common.PlayerAboutToRespawnEvent;
+import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
@@ -15,8 +18,8 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -52,9 +55,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.PotionEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -65,6 +67,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Mod.EventBusSubscriber
 public class EntityTempManager
@@ -102,7 +108,11 @@ public class EntityTempManager
         Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level.isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
         return cache.computeIfAbsent(entity, e ->
         {   LazyOptional<ITemperatureCap> cap = e.getCapability(entity instanceof PlayerEntity ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE);
-            cap.addListener((opt) -> cache.remove(e));
+            cap.addListener((opt) ->
+            {
+                SERVER_CAP_CACHE.remove(entity);
+                CLIENT_CAP_CACHE.remove(entity);
+            });
             return cap;
         });
     }
@@ -173,13 +183,19 @@ public class EntityTempManager
                         GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
                         MinecraftForge.EVENT_BUS.post(gatherEvent);
 
-                        cap.clearModifiers(trait);
                         cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                     }
                     living.getPersistentData().putBoolean("InitializedModifiers", true);
                 }
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void invalidateDespawnedEntity(EntityLeaveWorldEvent event)
+    {
+        SERVER_CAP_CACHE.remove(event.getEntity());
+        CLIENT_CAP_CACHE.remove(event.getEntity());
     }
 
     /**
@@ -319,6 +335,30 @@ public class EntityTempManager
         }
     }
 
+    @SubscribeEvent
+    public static void cancelImmuneModifiers(TempModifierEvent.Calculate.Modify event)
+    {
+        if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).toList().contains(event.getTrait())) return;
+        TempModifier mod = event.getModifier();
+        ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
+
+        getTemperatureCap(event.getEntity()).ifPresent(cap ->
+        {
+            for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(event.getEntity()).entrySet())
+            {
+                Insulator insulator = entry.getValue();
+                ItemStack stack = entry.getKey();
+
+                Double immunity = insulator.immuneTempModifiers().get(modifierKey);
+                if (immunity != null && insulator.test(event.getEntity(), stack))
+                {
+                    Function<Double, Double> func = event.getFunction();
+                    event.setFunction(temp -> CSMath.blend(func.apply(temp), mod.getLastInput(), immunity, 0, 1));
+                }
+            }
+        });
+    }
+
     /**
      * Handle modifiers for freezing, burning, and being wet
      */
@@ -332,13 +372,67 @@ public class EntityTempManager
         {
             if (player.tickCount % 5 == 0)
             {
-                if (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
+                if (!player.isSpectator() && WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                 && WorldHelper.isRainingAt(player.level, player.blockPosition()))
                 {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isOnFire())
                 {   Temperature.addOrReplaceModifier(player, new FireTempModifier().expires(5), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void updateModifiersPeriodically(LivingEvent.LivingUpdateEvent event)
+    {
+        LivingEntity entity = event.getEntityLiving();
+
+        if (entity.tickCount % 60 == 0)
+        {   updateInsulationAttributeModifiers(entity);
+        }
+    }
+
+    @SubscribeEvent
+    public static void updateAttributeModifiersOnSlotChange(LivingEquipmentChangeEvent event)
+    {
+        updateInsulationAttributeModifiers(event.getEntityLiving());
+    }
+
+    public static void updateInsulationAttributeModifiers(LivingEntity entity)
+    {
+        Stream.of(ConfigSettings.INSULATION_ITEMS.get().values(),
+                  ConfigSettings.INSULATING_ARMORS.get().values(),
+                  ConfigSettings.INSULATING_CURIOS.get().values())
+        .flatMap(Collection::stream)
+        .forEach(insulator ->
+        {
+            for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes.getMap().entries())
+            {
+                Attribute attribute = entry.getKey();
+                AttributeModifier modifier = entry.getValue();
+                ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+                if (instance != null)
+                {   instance.removeModifier(modifier);
+                }
+            }
+        });
+
+        for (Map.Entry<ItemStack, Insulator> insulationItem : getInsulatorsOnEntity(entity).entrySet())
+        {
+            Insulator insulator = insulationItem.getValue();
+            ItemStack stack = insulationItem.getKey();
+            if (insulator.test(entity, stack))
+            {
+                for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes.getMap().entries())
+                {
+                    Attribute attribute = entry.getKey();
+                    AttributeModifier modifier = entry.getValue();
+                    ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+                    if (instance != null)
+                    {   instance.addTransientModifier(modifier);
+                    }
                 }
             }
         }
@@ -459,20 +553,48 @@ public class EntityTempManager
      * Reset the player's temperature upon respawning
      */
     @SubscribeEvent
-    public static void resetTempOnRespawn(PlayerEvent.PlayerRespawnEvent event)
+    public static void resetTempOnRespawn(PlayerAboutToRespawnEvent event)
     {
-        if (!event.isEndConquered())
-        getTemperatureCap(event.getEntity()).ifPresent(cap ->
+        SERVER_CAP_CACHE.remove(event.getNewPlayer());
+        CLIENT_CAP_CACHE.remove(event.getNewPlayer());
+        getTemperatureCap(event.getNewPlayer()).ifPresent(cap ->
         {
-            cap.copy(new PlayerTempCap());
-            if (!event.getEntity().level.isClientSide)
-            {   Temperature.updateTemperature(event.getEntityLiving(), cap, true);
+            if (event.isReturningFromEnd())
+            {   getTemperatureCap(event.getOldPlayer()).ifPresent(cap::copy);
+            }
+            if (!event.getNewPlayer().level.isClientSide)
+            {   Temperature.updateTemperature(event.getNewPlayer(), cap, true);
             }
         });
     }
 
     public static Set<EntityType<? extends LivingEntity>> getEntitiesWithTemperature()
     {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
+    }
+
+    public static Map<ItemStack, Insulator> getInsulatorsOnEntity(LivingEntity entity)
+    {
+        Map<ItemStack, Insulator> insulators = new HashMap<>();
+        for (EquipmentSlotType slot : EquipmentSlotType.values())
+        {
+            if (slot.getType() != EquipmentSlotType.Group.ARMOR) continue;
+            ItemStack stack = entity.getItemBySlot(slot);
+            if (!stack.isEmpty())
+            {
+                Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insul -> insulators.put(stack, insul));
+                ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+                {
+                    cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
+                    {
+                        Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insul -> insulators.put(item, insul));
+                    });
+                });
+            }
+        }
+        for (ItemStack curio : CompatManager.getCurios(entity))
+        {   Optional.ofNullable(ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem())).ifPresent(insul -> insulators.put(curio, insul));
+        }
+        return insulators;
     }
 
     /**
@@ -516,17 +638,26 @@ public class EntityTempManager
         }
     }
 
-    public static Collection<AttributeModifier> getAttributeModifiers(LivingEntity entity, ModifiableAttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
+    public static Collection<AttributeModifier> getAllAttributeModifiers(LivingEntity entity, ModifiableAttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
     {
         Collection<AttributeModifier> modifiers = new ArrayList<>(operation == null
                                                                   ? attribute.getModifiers()
                                                                   : attribute.getModifiers(operation));
+        modifiers.addAll(getAllEquipmentAttributeModifiers(entity, attribute, operation));
+
+        return modifiers;
+    }
+
+    public static Collection<AttributeModifier> getAllEquipmentAttributeModifiers(LivingEntity entity, ModifiableAttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
+    {
+        Collection<AttributeModifier> modifiers = new ArrayList<>();
+
         for (EquipmentSlotType slot : EquipmentSlotType.values())
         {
             if (slot.getType() != EquipmentSlotType.Group.ARMOR) continue;
             ItemStack stack = entity.getItemBySlot(slot);
             if (!stack.isEmpty())
-            {   modifiers.addAll(ItemInsulationManager.getAttributeModifiers(stack, attribute.getAttribute(), slot, operation, entity));
+            {   modifiers.addAll(ItemInsulationManager.getAttributeModifiersForSlot(stack, attribute.getAttribute(), slot, operation, entity));
             }
         }
         return modifiers;

@@ -4,6 +4,7 @@ import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
@@ -11,11 +12,14 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -27,6 +31,13 @@ import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.Armory;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.event.CurioChangeEvent;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -135,6 +146,26 @@ public class CompatManager
     {   return ICEBERG_LOADED;
     }
 
+    public static boolean hasCurio(PlayerEntity player, Item curio)
+    {   return CURIOS_LOADED && getCurios(player).stream().map(ItemStack::getItem).anyMatch(item -> item == curio);
+    }
+
+    public static List<ItemStack> getCurios(LivingEntity entity)
+    {
+        if (!CURIOS_LOADED) return new ArrayList<>();
+        return entity.getCapability(CuriosCapability.INVENTORY)
+                     .map(handler -> handler.getCurios().values()).map(handlers -> handlers.stream()
+                     .map(ICurioStacksHandler::getStacks)
+                     .map(stacks ->
+                     {
+                         List<ItemStack> list = new ArrayList<>();
+                         for (int i = 0; i < stacks.getSlots(); i++)
+                         {   list.add(stacks.getStackInSlot(i));
+                         }
+                         return list;
+                     }).flatMap(List::stream).collect(Collectors.toList())).orElse(new ArrayList<>());
+    }
+
     public static boolean hasOzzyLiner(ItemStack stack)
     {
         return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.TEMPERATURE_REGULATOR);
@@ -174,6 +205,23 @@ public class CompatManager
     {   return isCavesAndCliffsLoaded() && entity instanceof GoatEntity;
     }
 
+    /* Compat Events */
+
+    static
+    {
+        if (CURIOS_LOADED)
+        {
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void onCurioChange(CurioChangeEvent event)
+                {
+                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntityLiving());
+                }
+            });
+        }
+    }
+
     @SubscribeEvent
     public static void onLivingTempDamage(LivingEvent event)
     {
@@ -207,33 +255,6 @@ public class CompatManager
                     damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
                 }
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void tickCurios(TickEvent.PlayerTickEvent event)
-    {
-        if (event.phase == TickEvent.Phase.END && CURIOS_LOADED && event.player.tickCount % 20 == 0)
-        {
-            CuriosApi.getCuriosHelper().getCuriosHandler(event.player).ifPresent(curiosInv ->
-            {
-                curiosInv.getCurios().forEach((identifier, curioStackHandler) ->
-                {
-                    for (int i = 0; i < curioStackHandler.getStacks().getSlots(); i++)
-                    {
-                        ItemStack stack = curioStackHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty())
-                        {
-                            Insulator insulator = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
-                            if (insulator == null) continue;
-
-                            double cold = insulator.insulation.getCold();
-                            double heat = insulator.insulation.getHeat();
-                            Temperature.addOrReplaceModifier(event.player, new CuriosTempModifier(cold, heat).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
-                        }
-                    }
-                });
-            });
         }
     }
 }

@@ -289,14 +289,14 @@ public class AbstractTempCap implements ITemperatureCap
         {
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
 
-            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION))
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION))
             {   base += mod.getAmount();
             }
             double value = base;
-            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_BASE))
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_BASE))
             {   value += base * mod.getAmount();
             }
-            for (AttributeModifier mod : EntityTempManager.getAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
             {   value *= 1.0D + mod.getAmount();
             }
             return value;
@@ -347,6 +347,13 @@ public class AbstractTempCap implements ITemperatureCap
         {   this.getModifiers(trait).clear();
             this.getModifiers(trait).addAll(cap.getModifiers(trait));
         }
+
+        // Copy persistent attributes
+        this.persistentAttributes.clear();
+        this.persistentAttributes.addAll(cap.getPersistentAttributes());
+
+        // Copy preferred units
+        this.setPreferredUnits(cap.getPreferredUnits());
     }
 
     @Override
