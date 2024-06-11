@@ -82,7 +82,7 @@ public class ItemRequirement
         {   return false;
         }
 
-        if (this.nbt.tag().isEmpty())
+        if (this.nbt.tag.isEmpty())
         {   return true;
         }
         for (int i = 0; i < items.size(); i++)

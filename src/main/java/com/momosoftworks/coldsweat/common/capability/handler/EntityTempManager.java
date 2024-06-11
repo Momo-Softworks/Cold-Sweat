@@ -67,10 +67,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Mod.EventBusSubscriber
 public class EntityTempManager
@@ -338,7 +337,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void cancelImmuneModifiers(TempModifierEvent.Calculate.Modify event)
     {
-        if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).toList().contains(event.getTrait())) return;
+        if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).collect(Collectors.toList()).contains(event.getTrait())) return;
         TempModifier mod = event.getModifier();
         ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
 
@@ -349,7 +348,7 @@ public class EntityTempManager
                 Insulator insulator = entry.getValue();
                 ItemStack stack = entry.getKey();
 
-                Double immunity = insulator.immuneTempModifiers().get(modifierKey);
+                Double immunity = insulator.immuneTempModifiers.get(modifierKey);
                 if (immunity != null && insulator.test(event.getEntity(), stack))
                 {
                     Function<Double, Double> func = event.getFunction();
