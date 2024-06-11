@@ -26,6 +26,7 @@
     "MixinInventoryOpenServer",
     "MixinLlamaInteract",
     "MixinMinecart",
+    "MixinPrePlayerRespawn",
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTriggerBounds$MixinFloatBound"
