@@ -78,6 +78,10 @@ public class ItemRequirement
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
+        if (stack.isEmpty() && !items.isEmpty())
+        {   return false;
+        }
+
         if (this.nbt.tag().isEmpty())
         {   return true;
         }
