@@ -46,7 +46,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
         {   return false;
         }
         else
-        {   return this.state.isPresent() && state.get().matches(pState);
+        {   return this.state.isEmpty() || state.get().matches(pState);
         }
     }
 
@@ -54,7 +54,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
     {
         CompoundTag lTag = new CompoundTag();
         this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(ForgeRegistries.FLUIDS::getKey).map(Object::toString).collect(Collectors.toList()))));
-        this.tag.ifPresent(tag -> lTag.putString("tag", tag.toString()));
+        this.tag.ifPresent(tag -> lTag.putString("tag", tag.location().toString()));
         this.state.ifPresent(state -> lTag.put("state", state.serialize()));
         this.nbt.ifPresent(nbt -> lTag.put("nbt", nbt.serialize()));
         return lTag;

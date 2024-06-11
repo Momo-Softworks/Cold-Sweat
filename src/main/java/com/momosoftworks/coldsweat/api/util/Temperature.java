@@ -98,7 +98,7 @@ public class Temperature
 
             double newTemp = entity.tickCount % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0 || entity.tickCount <= 1
                     ? modifier.update(temp2, entity, trait)
-                    : modifier.getResult(temp2);
+                    : modifier.process(temp2);
             if (!Double.isNaN(newTemp))
             {   temp2 = newTemp;
             }
@@ -228,7 +228,7 @@ public class Temperature
      */
     public static void addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicatePolicy, int times, Placement placement)
     {
-        TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, trait);
+        TempModifierEvent.Add event = new TempModifierEvent.Add(entity, trait, modifier);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
@@ -320,16 +320,18 @@ public class Temperature
                 if (removed < maxCount)
                 {
                     TempModifier modifier = modifiers.get(i);
-                    TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, trait, maxCount, condition);
-                    MinecraftForge.EVENT_BUS.post(event);
-                    if (!event.isCanceled())
+                    if (condition.test(modifier))
                     {
-                        if (event.getCondition().test(modifier))
-                        {   removed++;
+                        TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, trait, maxCount, modifier);
+                        MinecraftForge.EVENT_BUS.post(event);
+                        if (!event.isCanceled())
+                        {
+                            removed++;
                             modifiers.remove(i);
                             i += forwardOrder ? -1 : 1;
                         }
                     }
+
                 }
                 else break;
             }

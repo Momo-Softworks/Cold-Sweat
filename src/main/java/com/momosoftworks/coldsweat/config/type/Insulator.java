@@ -5,13 +5,17 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public record Insulator(Insulation insulation, Insulation.Slot slot, ItemRequirement data,
-                        EntityRequirement predicate, AttributeModifierMap attributes) implements NbtSerializable
+                        EntityRequirement predicate, AttributeModifierMap attributes,
+                        Map<ResourceLocation, Double> immuneTempModifiers) implements NbtSerializable
 {
     public boolean test(Entity entity, ItemStack stack)
     {   return predicate.test(entity) && data.test(stack, true);
@@ -26,6 +30,9 @@ public record Insulator(Insulation insulation, Insulation.Slot slot, ItemRequire
         tag.put("data", data.serialize());
         tag.put("predicate", predicate.serialize());
         tag.put("attributes", attributes.serialize());
+        CompoundTag immuneTempModifiersTag = new CompoundTag();
+        immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
+        tag.put("immune_temp_modifiers", immuneTempModifiersTag);
 
         return tag;
     }
@@ -37,8 +44,11 @@ public record Insulator(Insulation insulation, Insulation.Slot slot, ItemRequire
         ItemRequirement data = ItemRequirement.deserialize(tag.getCompound("data"));
         EntityRequirement predicate = EntityRequirement.deserialize(tag.getCompound("predicate"));
         AttributeModifierMap attributes = AttributeModifierMap.deserialize(tag.getCompound("attributes"));
+        CompoundTag immuneTempModifiersTag = tag.getCompound("immune_temp_modifiers");
+        Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
+        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(new ResourceLocation(key), immuneTempModifiersTag.getDouble(key)));
 
-        return new Insulator(insulation, slot, data, predicate, attributes);
+        return new Insulator(insulation, slot, data, predicate, attributes, immuneTempModifiers);
     }
 
     @Override
