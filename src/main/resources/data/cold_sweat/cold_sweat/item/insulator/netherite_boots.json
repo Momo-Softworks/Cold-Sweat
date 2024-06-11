@@ -9,8 +9,8 @@
     ]
   },
   "insulation": {
-    "heat": 1998,
-    "cold": 1998
+    "heat": 0,
+    "cold": 0
   },
   "predicate": {
     "equipment": {
@@ -39,5 +39,21 @@
         ]
       }
     }
+  },
+  "attributes": {
+    "cold_sweat:heat_resistance": [
+      {
+        "name": "Netherite Diving Set Bonus",
+        "amount": 0.25,
+        "operation": "addition"
+      }
+    ],
+    "cold_sweat:cold_resistance": [
+      {
+        "name": "Netherite Diving Set Bonus",
+        "amount": 0.25,
+        "operation": "addition"
+      }
+    ]
   }
 }
