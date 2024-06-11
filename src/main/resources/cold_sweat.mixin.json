@@ -23,6 +23,7 @@
     "MixinCampfire",
     "MixinInventoryOpenServer",
     "MixinMinecart",
+    "MixinPrePlayerRespawn",
     "MixinSoulCampfire",
     "MixinSoulFire"
   ],
