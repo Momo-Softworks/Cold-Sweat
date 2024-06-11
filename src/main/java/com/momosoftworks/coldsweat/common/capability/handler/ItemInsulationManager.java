@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Direction;
@@ -162,31 +163,30 @@ public class ItemInsulationManager
             && !ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem());
     }
 
-    public static List<AttributeModifier> getAttributeModifiers(ItemStack stack, Attribute attribute, EquipmentSlot slot, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    public static List<Insulator> getInsulatorsForStack(ItemStack stack)
     {
-        List<AttributeModifier> modifiers = new ArrayList<>(operation != null
-                                                  ? stack.getAttributeModifiers(slot).get(attribute)
-                                                         .stream()
-                                                         .filter(mod -> mod.getOperation() == operation)
-                                                         .toList()
-                                                  : stack.getAttributeModifiers(slot).get(attribute));
-        getInsulationCap(stack).ifPresent(cap ->
+        List<Insulator> insulators = new ArrayList<>();
+        if (isInsulatable(stack))
         {
-            for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
+            getInsulationCap(stack).ifPresent(cap ->
             {
-                CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulator ->
+                for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
                 {
-                    if (insulator.test(owner, pair.getFirst()))
-                    {
-                        modifiers.addAll(insulator.attributes().get(attribute)
-                                                  .stream()
-                                                  .filter(mod -> operation == null || mod.getOperation() == operation)
-                                                  .toList());
-                    }
-                });
-            }
-        });
-        CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulator ->
+                    CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
+                }
+            });
+        }
+
+        CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulators::add);
+        CSMath.doIfNotNull(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), insulators::add);
+
+        return insulators;
+    }
+
+    public static List<AttributeModifier> getInsulationAttributeModifiers(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    {
+        List<AttributeModifier> modifiers = new ArrayList<>();
+        for (Insulator insulator : getInsulatorsForStack(stack))
         {
             if (insulator.test(owner, stack))
             {
@@ -195,11 +195,23 @@ public class ItemInsulationManager
                                           .filter(mod -> operation == null || mod.getOperation() == operation)
                                           .toList());
             }
-        });
+        }
         return modifiers;
     }
 
-    public static List<AttributeModifier> getAttributeModifiers(ItemStack stack, Attribute attribute, EquipmentSlot slot)
-    {   return getAttributeModifiers(stack, attribute, slot, null, null);
+    public static List<AttributeModifier> getAttributeModifiersForSlot(ItemStack stack, Attribute attribute, EquipmentSlot slot, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    {
+        List<AttributeModifier> modifiers = new ArrayList<>(operation != null
+                                                  ? stack.getAttributeModifiers(slot).get(attribute)
+                                                         .stream()
+                                                         .filter(mod -> mod.getOperation() == operation)
+                                                         .toList()
+                                                  : stack.getAttributeModifiers(slot).get(attribute));
+        modifiers.addAll(getInsulationAttributeModifiers(stack, attribute, operation, owner));
+        return modifiers;
+    }
+
+    public static List<AttributeModifier> getAttributeModifiersForSlot(ItemStack stack, Attribute attribute, EquipmentSlot slot)
+    {   return getAttributeModifiersForSlot(stack, attribute, slot, null, null);
     }
 }

@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
@@ -42,7 +43,7 @@ public class ArmorInsulation
         if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer
         && player.tickCount % 20 == 0 && !player.level.isClientSide)
         {
-            int fullyInsulated = 0;
+            int fullyInsulatedSlots = 0;
             double cold = 0;
             double heat = 0;
 
@@ -93,7 +94,7 @@ public class ArmorInsulation
 
                         // Used for tracking "fully_insulated" advancement
                         if ((cold + heat) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
-                        {   fullyInsulated++;
+                        {   fullyInsulatedSlots++;
                         }
 
                         if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
@@ -112,10 +113,22 @@ public class ArmorInsulation
                 }
             }
 
+            /* Get insulation from curios */
+
+            for (ItemStack stack : CompatManager.getCurios(player))
+            {
+                Insulator insulator = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
+                if (insulator != null && insulator.test(player, stack))
+                {
+                    cold += insulator.insulation().getCold();
+                    heat += insulator.insulation().getHeat();
+                }
+            }
+
             Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
 
             // Award advancement for full insulation
-            if (fullyInsulated >= 4)
+            if (fullyInsulatedSlots >= 4)
             {
                 if (serverPlayer.getServer() != null)
                 {
