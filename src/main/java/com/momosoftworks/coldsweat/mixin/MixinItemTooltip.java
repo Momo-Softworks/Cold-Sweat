@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -50,10 +50,12 @@ public class MixinItemTooltip
     @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
     private Multimap<Attribute, AttributeModifier> getItemAttributes(ItemStack stack, EquipmentSlotType slot)
     {
+        // We don't care if the item is not equipped in the correct slot
         if (MobEntity.getEquipmentSlotForItem(stack) != slot)
         {   return stack.getAttributeModifiers(slot);
         }
-        Multimap<Attribute, AttributeModifier> map = HashMultimap.create(stack.getAttributeModifiers(slot));
+
+        Multimap<Attribute, AttributeModifier> map = MultimapBuilder.linkedHashKeys().arrayListValues().build(stack.getAttributeModifiers(slot));
 
         Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insulator ->
         {
@@ -106,7 +108,7 @@ public class MixinItemTooltip
                    from = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 7),
                    to = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 9)
                ))
-    private <E> E stopCustomAttributeVanilla(E obj)
+    private <E> E customAttributeFormatting(E obj)
     {
         if (obj instanceof IFormattableTextComponent)
         {
