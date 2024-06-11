@@ -7,7 +7,7 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 /**
  * These events are fired when dealing with {@link TempModifier}s. <br>
@@ -15,6 +15,29 @@ import java.util.function.Predicate;
  */
 public class TempModifierEvent extends Event
 {
+    protected LivingEntity entity;
+    protected Temperature.Trait trait;
+    protected TempModifier modifier;
+
+    protected TempModifierEvent(LivingEntity entity, Temperature.Trait trait, TempModifier modifier)
+    {
+        this.entity = entity;
+        this.trait = trait;
+        this.modifier = modifier;
+    }
+
+    public final LivingEntity getEntity()
+    {   return entity;
+    }
+
+    public final Temperature.Trait getTrait()
+    {   return trait;
+    }
+
+    public final TempModifier getModifier()
+    {   return modifier;
+    }
+
     /**
      * Fired when a {@link TempModifier} is about to be added to an entity. <br>
      * <br>
@@ -29,34 +52,18 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Add extends TempModifierEvent
     {
-        private final LivingEntity entity;
-        private TempModifier modifier;
-        public Temperature.Trait trait;
-
-        public void setModifierType(Temperature.Trait newTrait) {
-            this.trait = newTrait;
+        public Add(LivingEntity entity, Temperature.Trait trait, TempModifier modifier)
+        {   super(entity, trait, modifier);
         }
 
-        public final TempModifier getModifier() {
-            return modifier;
+        public void setTrait(Temperature.Trait newTrait)
+        {   this.trait = newTrait;
         }
 
-        public void setModifier(TempModifier modifier) {
-            this.modifier = modifier;
-        }
-
-        public final LivingEntity getEntity() {
-            return entity;
-        }
-
-        public Add(TempModifier modifier, LivingEntity entity, Temperature.Trait trait)
-        {
-            this.entity = entity;
-            this.trait = trait;
-            this.modifier = modifier;
+        public void setModifier(TempModifier modifier)
+        {   this.modifier = modifier;
         }
     }
-
 
     /**
      * Fired when a {@link TempModifier} is about to be removed from an entity. <br>
@@ -64,7 +71,7 @@ public class TempModifierEvent extends Event
      * {@link #entity} is the player the TempModifier is being removed from. <br>
      * {@link #trait} is the modifier's {@link Temperature.Trait}. It will never be {@link Temperature.Trait#BODY}. <br>
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
-     * {@link #condition} is the predicate used to determine which TempModifiers are being removed. <br>
+     * {@link #modifier} is the TempModifier being removed. <br>
      * <br>
      * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
      * Canceling this event will prevent the TempModifier from being removed. <br>
@@ -74,36 +81,20 @@ public class TempModifierEvent extends Event
     @Cancelable
     public static class Remove extends TempModifierEvent
     {
-        public final LivingEntity entity;
-        public final Temperature.Trait trait;
         int count;
-        Predicate<TempModifier> condition;
 
-        public Remove(LivingEntity entity, Temperature.Trait trait, int count, Predicate<TempModifier> condition)
+        public Remove(LivingEntity entity, Temperature.Trait trait, int count, TempModifier modifier)
         {
-            this.entity = entity;
-            this.trait = trait;
-            this.count = count;
-            this.condition = condition;
-        }
-        public void setCount(int count) {
+            super(entity, trait, modifier);
             this.count = count;
         }
 
-        public void setCondition(Predicate<TempModifier> condition) {
-            this.condition = condition;
+        public void setCount(int count)
+        {   this.count = count;
         }
 
-        public int getCount() {
-            return count;
-        }
-
-        public final LivingEntity getEntity() {
-            return entity;
-        }
-
-        public Predicate<TempModifier> getCondition() {
-            return condition;
+        public int getCount()
+        {   return count;
         }
     }
 
@@ -114,22 +105,20 @@ public class TempModifierEvent extends Event
      */
     public static class Calculate extends TempModifierEvent
     {
-        public LivingEntity entity;
-        public TempModifier modifier;
-        public double temperature;
+        protected double temperature;
 
-        public Calculate(TempModifier modifier, LivingEntity entity, double temperature)
+        public Calculate(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
         {
-            this.entity = entity;
-            this.modifier = modifier;
+            super(entity, trait, modifier);
             this.temperature = temperature;
         }
 
-        public TempModifier getModifier() {
-            return modifier;
+        public double getTemperature()
+        {   return temperature;
         }
-        public double getTemperature() {
-            return temperature;
+
+        public void setTemperature(double temperature)
+        {   this.temperature = temperature;
         }
 
         /**
@@ -143,10 +132,10 @@ public class TempModifierEvent extends Event
          * Cancelling this event results in the modifier not being processed, remaining unchanged. <br>
          */
         @Cancelable
-        public static class Pre extends Calculate
+        public static class Override extends Calculate
         {
-            public Pre(TempModifier modifier, LivingEntity entity, double temperature)
-            {   super(modifier, entity, temperature);
+            public Override(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
+            {   super(modifier, entity, temperature, trait);
             }
         }
 
@@ -159,10 +148,28 @@ public class TempModifierEvent extends Event
          * <br>
          * This event is NOT {@link Cancelable}. <br>
          */
-        public static class Post extends Calculate
+        public static class Modify extends Calculate
         {
-            public Post(TempModifier modifier, LivingEntity entity, double temperature)
-            {   super(modifier, entity, temperature);
+            private Function<Double, Double> newFunction;
+
+            public Modify(TempModifier modifier, LivingEntity entity, double temp, Function<Double, Double> newFunction, Temperature.Trait trait)
+            {   super(modifier, entity, temp, trait);
+                this.newFunction = newFunction;
+            }
+
+            public Function<Double, Double> getFunction()
+            {   return newFunction;
+            }
+
+            public void setFunction(Function<Double, Double> newFunction)
+            {   this.newFunction = newFunction;
+            }
+        }
+
+        public static class Process extends Calculate
+        {
+            public Process(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
+            {   super(modifier, entity, temperature, trait);
             }
         }
     }
