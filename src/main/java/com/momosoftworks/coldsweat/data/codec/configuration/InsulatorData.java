@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
@@ -12,10 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -26,6 +24,7 @@ import java.util.*;
 public record InsulatorData(Insulation.Slot slot,
                             Insulation insulation, ItemRequirement data,
                             EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
+                            Map<ResourceLocation, Double> immuneTempModifiers,
                             Optional<List<String>> requiredMods) implements NbtSerializable
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -48,6 +47,7 @@ public record InsulatorData(Insulation.Slot slot,
             ItemRequirement.CODEC.fieldOf("data").forGetter(InsulatorData::data),
             EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(InsulatorData::attributes),
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
@@ -74,9 +74,12 @@ public record InsulatorData(Insulation.Slot slot,
             });
             tag.put("attributes", attributesTag);
         }
-        ListTag mods = new ListTag();
-        requiredMods.ifPresent(mods1 -> mods1.forEach(mod -> mods.add(StringTag.valueOf(mod))));
-        tag.put("required_mods", mods);
+        CompoundTag immuneTempModifiersTag = new CompoundTag();
+        immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
+        tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        if (requiredMods.isPresent())
+        {   tag.put("required_mods", NbtOps.INSTANCE.createList(requiredMods.orElseGet(ArrayList::new).stream().map(StringTag::valueOf)));
+        }
         return tag;
     }
 
@@ -99,17 +102,13 @@ public record InsulatorData(Insulation.Slot slot,
             return attributes1;
         }).map(AttributeModifierMap::new);
 
-        Optional<List<String>> mods = Optional.of(nbt.getList("required_mods", 8)).map(listTag ->
-        {
-            List<String> mods1 = new ArrayList<>();
-            for (int i = 0; i < listTag.size(); i++)
-            {
-                mods1.add(listTag.getString(i));
-            }
-            return mods1;
-        });
+        CompoundTag immuneTempModifiersTag = nbt.getCompound("immune_temp_modifiers");
+        Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
+        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(new ResourceLocation(key), immuneTempModifiersTag.getDouble(key)));
 
-        return new InsulatorData(slot, insulation, requirement, predicate, attributes, mods);
+        Optional<List<String>> mods = Optional.of(nbt.getList("required_mods", 8).stream().map(Tag::getAsString).toList());
+
+        return new InsulatorData(slot, insulation, requirement, predicate, attributes, immuneTempModifiers, mods);
     }
 
     @Override
