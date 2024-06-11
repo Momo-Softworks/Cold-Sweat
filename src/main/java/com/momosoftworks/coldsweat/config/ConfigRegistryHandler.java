@@ -194,15 +194,13 @@ public class ConfigRegistryHandler
                 {   return;
                 }
             }
-            Insulation insulation = insulatorData.insulation;
-            ItemRequirement data = insulatorData.data;
-            EntityRequirement predicate = insulatorData.predicate;
             AttributeModifierMap attributeModifiers = insulatorData.attributes.orElse(new AttributeModifierMap());
 
             // Add listed items as insulators
             for (Item item : RegistryHelper.mapTaggableList(insulatorData.data.items))
             {
-                Insulator insulator = new Insulator(insulation, insulatorData.slot, data, predicate, attributeModifiers);
+                Insulator insulator = new Insulator(insulatorData.insulation, insulatorData.slot, insulatorData.data,
+                                                    insulatorData.predicate, attributeModifiers, insulatorData.immuneTempModifiers);
                 switch (insulatorData.slot)
                 {
                     case ITEM  : ConfigSettings.INSULATION_ITEMS.get().put(item, insulator); break;

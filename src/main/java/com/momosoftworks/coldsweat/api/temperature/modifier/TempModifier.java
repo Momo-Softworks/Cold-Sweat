@@ -53,22 +53,27 @@ public abstract class TempModifier
      */
     public final double update(double temp, LivingEntity entity, Temperature.Trait trait)
     {
-        TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp);
-        MinecraftForge.EVENT_BUS.post(pre);
-        if (pre.isCanceled()) return pre.getTemperature();
+        TempModifierEvent.Calculate.Override override = new TempModifierEvent.Calculate.Override(this, entity, temp, trait);
+        MinecraftForge.EVENT_BUS.post(override);
+        if (override.isCanceled())
+        {
+            this.function = t -> override.getTemperature();
+            return override.getTemperature();
+        }
 
-        this.function = this.calculate(entity, trait);
+        TempModifierEvent.Calculate.Modify modify = new TempModifierEvent.Calculate.Modify(this, entity, override.getTemperature(), this.calculate(entity, trait), trait);
+        MinecraftForge.EVENT_BUS.post(modify);
 
-        TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, this.getResult(pre.getTemperature()));
-        MinecraftForge.EVENT_BUS.post(post);
-        return post.getTemperature();
+        this.function = modify.getFunction();
+
+        return this.process(modify.getTemperature());
     }
 
     /**
      * @param temp the Temperature to calculate with
      * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public final double getResult(double temp)
+    public final double process(double temp)
     {
         lastInput = temp;
         return lastOutput = function.apply(temp);

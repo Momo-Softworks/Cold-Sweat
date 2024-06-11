@@ -15,15 +15,13 @@ import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.*;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InsulatorData implements NbtSerializable
 {
@@ -32,11 +30,13 @@ public class InsulatorData implements NbtSerializable
     public final ItemRequirement data;
     public final EntityRequirement predicate;
     public final Optional<AttributeModifierMap> attributes;
+    public Map<ResourceLocation, Double> immuneTempModifiers;
     public final Optional<List<String>> requiredMods;
 
     public InsulatorData(Insulation.Slot slot,
                          Insulation insulation, ItemRequirement data,
                          EntityRequirement predicate, Optional<AttributeModifierMap> attributes,
+                         Map<ResourceLocation, Double> immuneTempModifiers,
                          Optional<List<String>> requiredMods)
     {
         this.slot = slot;
@@ -45,6 +45,7 @@ public class InsulatorData implements NbtSerializable
         this.predicate = predicate;
         this.attributes = attributes;
         this.requiredMods = requiredMods;
+        this.immuneTempModifiers = immuneTempModifiers;
     }
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -67,6 +68,7 @@ public class InsulatorData implements NbtSerializable
             ItemRequirement.CODEC.fieldOf("data").forGetter(data -> data.data),
             EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(data -> data.predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(data -> data.attributes),
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(data -> data.immuneTempModifiers),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, InsulatorData::new));
 
@@ -93,9 +95,12 @@ public class InsulatorData implements NbtSerializable
             });
             tag.put("attributes", attributesTag);
         }
-        ListNBT mods = new ListNBT();
-        requiredMods.ifPresent(mods1 -> mods1.forEach(mod -> mods.add(StringNBT.valueOf(mod))));
-        tag.put("required_mods", mods);
+        CompoundNBT immuneTempModifiersTag = new CompoundNBT();
+        immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
+        tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        if (requiredMods.isPresent())
+        {   tag.put("required_mods", NBTDynamicOps.INSTANCE.createList(requiredMods.orElseGet(ArrayList::new).stream().map(StringNBT::valueOf)));
+        }
         return tag;
     }
 
@@ -121,17 +126,13 @@ public class InsulatorData implements NbtSerializable
             return attributes1;
         }).map(AttributeModifierMap::new);
 
-        Optional<List<String>> mods = Optional.of(nbt.getList("required_mods", 8)).map(ListNBT ->
-        {
-            List<String> mods1 = new ArrayList<>();
-            for (int i = 0; i < ListNBT.size(); i++)
-            {
-                mods1.add(ListNBT.getString(i));
-            }
-            return mods1;
-        });
+        CompoundNBT immuneTempModifiersTag = nbt.getCompound("immune_temp_modifiers");
+        Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
+        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(new ResourceLocation(key), immuneTempModifiersTag.getDouble(key)));
 
-        return new InsulatorData(slot, insulation, requirement, predicate, attributes, mods);
+        Optional<List<String>> mods = Optional.of(nbt.getList("required_mods", 8).stream().map(INBT::getAsString).collect(Collectors.toList()));
+
+        return new InsulatorData(slot, insulation, requirement, predicate, attributes, immuneTempModifiers, mods);
     }
 
     @Override
