@@ -20,7 +20,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nullable;
@@ -30,8 +29,9 @@ import java.util.Optional;
 
 public class RegistryHelper
 {
+    @Nullable
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
-    {   return getRegistryAccess().registryOrThrow(registry);
+    {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.registryOrThrow(registry), null);
     }
 
     @Nullable
@@ -79,10 +79,12 @@ public class RegistryHelper
 
     public static <T> List<T> mapVanillaRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, T>> eitherList, @Nullable RegistryAccess registryAccess)
     {
+        Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
         List<T> list = new ArrayList<>();
+        if (reg == null) return list;
+
         for (Either<TagKey<T>, T> either : eitherList)
         {
-            Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
             either.ifLeft(tagKey ->
             {
                 Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
@@ -132,7 +134,7 @@ public class RegistryHelper
     public static <T> Optional<T> getVanillaRegistryValue(ResourceKey< Registry<T>> registry, ResourceLocation id)
     {
         try
-        {   return Optional.ofNullable(getRegistry(registry).get(id));
+        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
         }
         catch (Exception e)
         {   return Optional.empty();
@@ -142,7 +144,7 @@ public class RegistryHelper
     public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<Registry<T>> registry, T value)
     {
         try
-        {   return Optional.ofNullable(getRegistry(registry).getKey(value));
+        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();

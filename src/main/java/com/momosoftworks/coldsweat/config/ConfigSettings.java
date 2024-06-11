@@ -294,6 +294,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false),
@@ -310,6 +311,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(dim.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
@@ -326,6 +328,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         STRUCTURE_OFFSETS = addSyncedSetting("structure_offsets", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false),
@@ -342,6 +345,7 @@ public class ConfigSettings
 
                                                          return Arrays.asList(struct.toString(), temp, units.toString());
                                                      })
+                                                     .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),

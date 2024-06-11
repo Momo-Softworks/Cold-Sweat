@@ -46,12 +46,15 @@ public class ConfigHelper
     public static <T> List<T> parseRegistryItems(ResourceKey<Registry<T>> registry, String objects)
     {
         List<T> biomeList = new ArrayList<>();
+        Registry<T> reg = RegistryHelper.getRegistry(registry);
+        if (reg == null) return biomeList;
+
         for (String objString : objects.split(","))
         {
             if (objString.startsWith("#"))
             {
                 final String tagID = objString.replace("#", "");
-                Optional<HolderSet.Named<T>> tag = RegistryHelper.getRegistry(registry).getTag(TagKey.create(registry, new ResourceLocation(tagID)));
+                Optional<HolderSet.Named<T>> tag = reg.getTag(TagKey.create(registry, new ResourceLocation(tagID)));
                 tag.ifPresent(tg -> biomeList.addAll(tg.stream().map(Holder::value).toList()));
             }
             else
@@ -554,7 +557,7 @@ public class ConfigHelper
                                                               Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
 
-            return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap());
+            return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
         });
     }
 
