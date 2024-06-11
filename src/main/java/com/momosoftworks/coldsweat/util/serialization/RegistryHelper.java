@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
@@ -30,9 +31,9 @@ import java.util.*;
 
 public class RegistryHelper
 {
+    @Nullable
     public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
-    {
-        return getRegistryAccess().registryOrThrow(registry);
+    {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.registryOrThrow(registry), null);
     }
 
     @Nullable
@@ -125,7 +126,7 @@ public class RegistryHelper
     public static <T> Optional<T> getVanillaRegistryValue(RegistryKey<Registry<T>> registry, ResourceLocation id)
     {
         try
-        {   return Optional.ofNullable(getRegistry(registry).get(id));
+        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
         }
         catch (Exception e)
         {   return Optional.empty();
@@ -135,7 +136,7 @@ public class RegistryHelper
     public static <T> Optional<ResourceLocation> getVanillaRegistryKey(RegistryKey<Registry<T>> registry, T value)
     {
         try
-        {   return Optional.ofNullable(getRegistry(registry).getKey(value));
+        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();

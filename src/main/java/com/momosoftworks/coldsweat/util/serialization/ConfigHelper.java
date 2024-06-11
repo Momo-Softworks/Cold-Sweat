@@ -41,6 +41,9 @@ public class ConfigHelper
     public static <T> List<T> parseRegistryItems(RegistryKey<Registry<T>> registry, String objects)
     {
         List<T> biomeList = new ArrayList<>();
+        Registry<T> reg = RegistryHelper.getRegistry(registry);
+        if (reg == null) return biomeList;
+
         for (String objString : objects.split(","))
         {
             ResourceLocation id = new ResourceLocation(objString);
@@ -526,7 +529,7 @@ public class ConfigHelper
                                                               Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
 
-            return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap());
+            return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
         });
     }
 
