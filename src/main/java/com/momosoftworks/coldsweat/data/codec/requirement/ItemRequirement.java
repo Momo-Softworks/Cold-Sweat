@@ -59,6 +59,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
+        if (stack.isEmpty() && !items.isEmpty())
+        {   return false;
+        }
+
         if (this.nbt.tag().isEmpty())
         {   return true;
         }
