@@ -586,7 +586,7 @@ public class EntityTempManager
                 getTemperatureCap(event.getOldPlayer()).ifPresent(cap::copy);
                 event.getOldPlayer().invalidateCaps();
             }
-            if (!event.getNewPlayer().level().isClientSide)
+            if (!event.getNewPlayer().level.isClientSide)
             {   Temperature.updateTemperature(event.getNewPlayer(), cap, true);
             }
         });
@@ -601,7 +601,7 @@ public class EntityTempManager
         Map<ItemStack, Insulator> insulators = new HashMap<>();
         for (EquipmentSlot slot : EquipmentSlot.values())
         {
-            if (!slot.isArmor()) continue;
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
             ItemStack stack = entity.getItemBySlot(slot);
             if (!stack.isEmpty())
             {
