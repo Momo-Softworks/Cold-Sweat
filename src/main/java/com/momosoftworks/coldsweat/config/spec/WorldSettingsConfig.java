@@ -441,7 +441,7 @@ public class WorldSettingsConfig
         BUILDER.pop();
 
 
-        BUILDER.push("Block Temperature");
+        BUILDER.push("Blocks");
 
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
@@ -456,15 +456,16 @@ public class WorldSettingsConfig
                          "max effect: the maximum temperature change this block can cause to a player (even with multiple blocks)",
                          "predicates: the state that the block has to be in for the temperature to be applied (lit=true for a campfire, for example).",
                          "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
-                .defineList("BlockTemps", Arrays.asList
+                .defineList("Block Temperatures", Arrays.asList
                                     (
                                             Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:magma_block",      0.5, 3, true, 0.6),
-                                            Arrays.asList("minecraft:soul_campfire", -0.476, 3, true, 0.6, "lit=true"),
+                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true"),
                                             Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
                                             Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
-                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
+                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0),
+                                            Arrays.asList("minecraft:lava_cauldron",    0.5, 7, true, 1.5)
                                     ),
                             it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
