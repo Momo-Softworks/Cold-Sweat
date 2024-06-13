@@ -231,7 +231,7 @@ public class WorldSettingsConfig
                          "max effect: the maximum temperature change this block can cause to a player (even with multiple blocks)",
                          "predicates: the state that the block has to be in for the temperature to be applied (lit=true for a campfire, for example).",
                          "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
-                .defineList("Block Temperatures", Arrays.asList
+                .defineList("Block Temperatures", ListBuilder.<List<Object>>begin
                                     (
                                             Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
@@ -239,9 +239,10 @@ public class WorldSettingsConfig
                                             Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true"),
                                             Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
                                             Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
-                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0),
-                                            Arrays.asList("minecraft:lava_cauldron",    0.5, 7, true, 1.5)
-                                    ),
+                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
+                                    ).addIf(CompatManager.isCavesAndCliffsLoaded(),
+                                            () -> Arrays.asList("cavesandcliffs:lava_cauldron",    0.5, 7, true, 1.5))
+                                    .build(),
                             it ->
                             {
                                 if (it instanceof List<?>)
