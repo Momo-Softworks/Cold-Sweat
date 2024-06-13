@@ -12,6 +12,8 @@
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
     "MixinItemTooltip",
+    "MixinLlamaRender$ChangeTexture",
+    "MixinLlamaRender$RemapModel",
     "MixinMultiplayerHack",
     "MixinPickEntity",
     "MixinXPBar",
