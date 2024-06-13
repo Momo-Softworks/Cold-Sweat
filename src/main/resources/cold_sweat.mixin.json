@@ -7,7 +7,7 @@
     "MixinChatClicked",
     "MixinEffectsScreen",
     "MixinFogRender",
-    "MixinGoatModel",
+    "MixinGoatRenderer",
     "MixinHeartRender",
     "MixinHumanoidModel",
     "MixinInventoryOpenClient",
