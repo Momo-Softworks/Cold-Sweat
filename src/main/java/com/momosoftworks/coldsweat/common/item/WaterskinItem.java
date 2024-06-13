@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -43,6 +44,11 @@ public class WaterskinItem extends Item
         BlockState state = level.getBlockState(pos);
         Player player = context.getPlayer();
 
+        if (player == null)
+        {   WorldHelper.dropItem(level, pos, getFilledItem(context.getItemInHand(), level, pos));
+            return super.useOn(context);
+        }
+
         if (player.getAbilities().mayBuild && state.getBlock() == Blocks.WATER_CAULDRON
         && state.getValue(BlockStateProperties.LEVEL_CAULDRON) > 0)
         {
@@ -77,7 +83,7 @@ public class WaterskinItem extends Item
         }
     }
 
-    public static ItemStack getFilledVersion(ItemStack stack, Level level, BlockPos pos)
+    public static ItemStack getFilledItem(ItemStack stack, Level level, BlockPos pos)
     {
         ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
         // copy NBT to new item
@@ -96,7 +102,7 @@ public class WaterskinItem extends Item
     public static void fillWaterskinItem(Player player, ItemStack thisStack, InteractionHand usedHand, BlockPos filledAtPos)
     {
         Level level = player.level;
-        ItemStack filledWaterskin = getFilledVersion(thisStack, level, filledAtPos);
+        ItemStack filledWaterskin = getFilledItem(thisStack, level, filledAtPos);
 
         //Replace 1 of the stack with a FilledWaterskinItem
         if (thisStack.getCount() > 1)
