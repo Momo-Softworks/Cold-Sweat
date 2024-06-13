@@ -405,6 +405,27 @@ public abstract class WorldHelper
         }
     }
 
+    public static ItemEntity dropItem(World level, BlockPos pos, ItemStack stack)
+    {   return dropItem(level, pos, stack, 6000);
+    }
+
+    public static ItemEntity dropItem(World level, BlockPos pos, ItemStack stack, int lifeTime)
+    {
+        Random rand = new Random();
+        ItemEntity item = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+
+        item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+        Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+        age.setAccessible(true);
+        try
+        {   age.set(item, 6000 - lifeTime);
+        }
+        catch (Exception e)
+        {   e.printStackTrace();
+        }
+        return item;
+    }
+
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
     {   return entityDropItem(entity, stack, 6000);
     }

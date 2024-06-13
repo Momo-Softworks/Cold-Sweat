@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.item.ItemEntity;
@@ -36,6 +37,11 @@ public class WaterskinItem extends Item
         World level = context.getLevel();
         BlockState state = level.getBlockState(pos);
         PlayerEntity player = context.getPlayer();
+
+        if (player == null)
+        {   WorldHelper.dropItem(level, pos, getFilledItem(context.getItemInHand(), level, pos));
+            return super.useOn(context);
+        }
 
         if (player.abilities.mayBuild && state.getBlock() == Blocks.CAULDRON
         && state.getValue(BlockStateProperties.LEVEL_CAULDRON) > 0)
@@ -72,7 +78,7 @@ public class WaterskinItem extends Item
         }
     }
 
-    public static ItemStack getFilledVersion(ItemStack stack, World level, BlockPos pos)
+    public static ItemStack getFilledItem(ItemStack stack, World level, BlockPos pos)
     {
         ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
         // copy NBT to new item
@@ -87,7 +93,7 @@ public class WaterskinItem extends Item
     public static void fillWaterskinItem(PlayerEntity player, ItemStack thisStack, Hand usedHand, BlockPos filledAtPos)
     {
         World level = player.level;
-        ItemStack filledWaterskin = getFilledVersion(thisStack, level, filledAtPos);
+        ItemStack filledWaterskin = getFilledItem(thisStack, level, filledAtPos);
 
         //Replace 1 of the stack with a FilledWaterskinItem
         if (thisStack.getCount() > 1)
