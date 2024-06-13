@@ -7,12 +7,10 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.LlamaRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.entity.model.LlamaModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.LazyOptional;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinLlamaRender<T extends LivingEntity, M extends EntityModel<T>>
 {
 
-    @Mixin(value = LivingRenderer.class)
+    @Mixin(LivingRenderer.class)
     public static class RemapModel<T extends LivingEntity, M extends EntityModel<T>>
     {
         LivingRenderer<T, M> self = (LivingRenderer<T, M>)(Object)this;
@@ -41,7 +39,7 @@ public class MixinLlamaRender<T extends LivingEntity, M extends EntityModel<T>>
         }
     }
 
-    @Mixin(value = LlamaRenderer.class)
+    @Mixin(LlamaRenderer.class)
     public static class ChangeTexture
     {
         private static final ResourceLocation[] SHAVED_TEXTURES = new ResourceLocation[]{new ResourceLocation("textures/entity/llama/creamy_shaven.png"), new ResourceLocation("textures/entity/llama/white_shaven.png"),
