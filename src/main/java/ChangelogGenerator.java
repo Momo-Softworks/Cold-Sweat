@@ -36,23 +36,25 @@ public class ChangelogGenerator
             writer.write("<div style=\"background-color: #212121; color: #aaafb6; font-family: 'JetBrains Mono', monospace; font-size: 9.8pt;\">");
             writer.write("<pre>");
 
-            boolean isFirstLine = true;
             for (int i = lastDashIndex + 1; i < lines.size(); i++)
             {
                 line = lines.get(i);
                 String lineText = line.trim();
-                boolean isWarning = lineText.startsWith("!");
+                boolean isMajorWarning = lineText.startsWith("!!");
+                boolean isWarning = !isMajorWarning && lineText.startsWith("!");
                 boolean isImportant = lineText.startsWith("*");
-                boolean isListElement = lineText.startsWith("-") || isImportant || isWarning;
+                boolean isListElement = lineText.startsWith("-") || isImportant || isMajorWarning || isWarning;
                 boolean isSectionTitle = !isListElement && lineText.endsWith(":");
+                boolean isTitleLine = !isListElement && !isSectionTitle;
 
-                if (isFirstLine)
-                {
-                    line = "<span style=\"font-size: 18px; color: #ffffff; font-weight: bold;\">" + line + "</span>";
-                    isFirstLine = false;
+                if (isTitleLine)
+                {   line = "<span style=\"font-size: 18px; color: #ffffff; font-weight: bold;\">" + line + "</span>";
                 }
                 else if (isSectionTitle)
                 {   line = "<u><strong style=\"font-size: 14px; color: #ffffff;\">" + line + "</strong></u>";
+                }
+                else if (isMajorWarning)
+                {   line = "<span style=\"color: #ff4d49;\">" + line + "</span>";
                 }
                 else if (isWarning)
                 {   line = "<span style=\"color: #ff9900;\">" + line + "</span>";
