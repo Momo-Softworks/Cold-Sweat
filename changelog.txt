@@ -2135,6 +2135,9 @@ Technical Changes:
 !! Config settings for blocks will be reset in this version due to restructuring
 
 2.3-b04b
+- A complete netherite diving suit (Create) now provides complete resistance to block-related temperature (like lava!)
+      - It also gives 100% resistance to overheating, so your temperature will not increase
+      - These effects last until the backtank is empty
 - Waterskins are now fillable from cauldrons
 - Lava cauldrons now emit heat by default
       ! This will not take effect until the config setting for block temperatures is reset
