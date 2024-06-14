@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -21,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -228,6 +228,8 @@ public class SoulspringLampItem extends Item
     public static void onItemClickedInGUI(ItemSwappedInInventoryEvent event)
     {
         ItemStack thisStack = event.getSlotItem();
+        if (thisStack.getItem() != ModItems.SOULSPRING_LAMP) return;
+
         ItemStack fuelStack = event.getHeldItem();
         PlayerEntity player = event.getPlayer();
         ClickAction action = event.getClickAction();
