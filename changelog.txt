@@ -868,7 +868,7 @@ Technical Changes:
       - Crafted with a minecart and minecart insulation
 - Retextured minecart insulation
 - Reorganized the Cold Sweat creative tab to group items more logically
- 
+
 Fixes:
 - Fixed crash related to goats' stored data
 - Fixed performance issue caused by extreme amounts of block updates
@@ -2129,3 +2129,47 @@ Technical Changes:
       - BY_CLASS: Adding/replacing a TempModifier fails if one of the same class is already present
       - EXACT: Adding/replacing a TempModifier fails if there is an instance of the same class and matching NBT present
       ! The old methods with the "allowDupes" parameter are still present, but are now deprecated and marked for removal in a future version
+
+
+------------------------------------------------------------------------------------------------------------------------
+!! Config settings for blocks will be reset in this version due to restructuring
+
+2.3-b04b
+- Waterskins are now fillable from cauldrons
+- Lava cauldrons now emit heat by default
+      ! This will not take effect until the config setting for block temperatures is reset
+
+Fixes:
+* Fixed the armor insulation tooltip not showing when it should if the item is is also an insulator itself
+- Fixed the text for the "Difficulty" button in the config menu not showing correctly after changing a setting
+* Fixed crash when exiting the config menu sometimes
+* Fixed the charm slot not being available for the thermometer unless it is added by another mod
+- Fixed the "Inhospitable" advancement being made immediately upon spawning
+* Fixed the player's TempModifiers being reset to default when rejoining the world
+- Fixed players being made wet by water and rain while in spectator mode
+- Fixed crash caused by goat model mixin
+- Fixed data-driven insulator files being added to the TOML configs when saving the game or closing the config menu
+* Fixed attribute modifiers on insulation items only working for Cold Sweat attributes
+- Fixed attributes added by insulation items being in a random order in the item's tooltip
+* Fixed data-driven insulator features like predicates, attribute modifiers, etc. not working for curios
+- Fixed item requirements for insulation items being satisfied by an empty slots
+- (1.16) Fixed incorrect loot table breaking drops for llamas
+- (1.16) Fixed texture inconsistencies between sheared and unsheared llamas
+- (1.16) Fixed soul sprouts being consumed when placed into the same slot as any other item
+
+Translation Updates:
+* Added Dutch translation (thank Nerbzzz/Nikki!)
+
+Technical Changes:
+* Insulation items can now affect non-player entities
+      - If an insulation item has special properties, like attribute modifiers, it will now apply to any entity, not just players
+* Insulation items can now make entities immune to certain TempModifiers
+      - This reduces the efficacy of the specified TempModifiers on the entity
+      - The the entity requirement must be met for immunity to be applied
+- Replaced TempModifierEvent.Calculate.Pre and Post with more useful events:
+      - Override: Fires before the TempModifier is calculated, and allows the incoming temperature to be changed
+            - If the event is canceled, the TempModifier's output will be overridden with the event's temperature until it is calculated again
+            - Otherwise, the event's temperature is passed into the TempModifier for calculation
+      - Modify: Fires after the TempModifier is calculated, and allows the resulting function to be modified
+            - The event is not cancelable
+
