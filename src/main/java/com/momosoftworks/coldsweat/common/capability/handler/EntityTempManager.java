@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.common.capability.handler;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.common.PlayerAboutToRespawnEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -27,9 +26,11 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -68,7 +69,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Mod.EventBusSubscriber
 public class EntityTempManager
@@ -187,13 +187,6 @@ public class EntityTempManager
         }
     }
 
-    @SubscribeEvent
-    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
-    {
-        SERVER_CAP_CACHE.remove(event.getEntity());
-        CLIENT_CAP_CACHE.remove(event.getEntity());
-    }
-
     /**
      * Tick TempModifiers and update temperature for living entities
      */
@@ -202,6 +195,9 @@ public class EntityTempManager
     {
         LivingEntity entity = event.getEntity();
         if (!TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
+
+        if (entity instanceof Player player && !player.level.isClientSide)
+            player.displayClientMessage(Component.literal(entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE) + " " + getTemperatureCap(entity)), true);
 
         getTemperatureCap(entity).ifPresent(cap ->
         {
@@ -233,27 +229,54 @@ public class EntityTempManager
      * Transfer the player's capability when traveling from the End
      */
     @SubscribeEvent
-    public static void returnFromEnd(PlayerEvent.Clone event)
+    public static void carryOverPersistentAttributes(PlayerEvent.Clone event)
     {
-        if (!event.getEntity().level.isClientSide)
+        Player oldPlayer = event.getOriginal();
+        Player newPlayer = event.getEntity();
+
+        if (!newPlayer.level.isClientSide)
         {
             // Get the old player's capability
-            Player oldPlayer = event.getOriginal();
             oldPlayer.reviveCaps();
-
-            if (!event.isWasDeath())
-            {
-                // Copy the capability to the new player
-                getTemperatureCap(event.getEntity()).ifPresent(cap ->
-                {   getTemperatureCap(oldPlayer).ifPresent(cap::copy);
-                });
-            }
             getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
             .forEach(attr ->
-            {   event.getEntity().getAttribute(attr).setBaseValue(oldPlayer.getAttribute(attr).getBaseValue());
+            {   newPlayer.getAttribute(attr).setBaseValue(oldPlayer.getAttribute(attr).getBaseValue());
             });
             oldPlayer.invalidateCaps();
         }
+    }
+
+    /**
+     * Reset the player's temperature upon respawning
+     */
+    @SubscribeEvent
+    public static void handlePlayerReset(PlayerEvent.Clone event)
+    {
+        Player oldPlayer = event.getOriginal();
+        Player newPlayer = event.getEntity();
+
+        SERVER_CAP_CACHE.remove(oldPlayer);
+        CLIENT_CAP_CACHE.remove(oldPlayer);
+
+        getTemperatureCap(newPlayer).ifPresent(cap ->
+        {
+            if (!event.isWasDeath())
+            {
+                oldPlayer.reviveCaps();
+                getTemperatureCap(oldPlayer).ifPresent(cap::copy);
+                oldPlayer.invalidateCaps();
+            }
+            if (!newPlayer.level.isClientSide)
+            {   Temperature.updateTemperature(newPlayer, cap, true);
+            }
+        });
+    }
+
+    @SubscribeEvent
+    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
+    {
+        SERVER_CAP_CACHE.remove(event.getEntity());
+        CLIENT_CAP_CACHE.remove(event.getEntity());
     }
 
     /**
@@ -568,28 +591,6 @@ public class EntityTempManager
                 }
             }
         }
-    }
-
-    /**
-     * Reset the player's temperature upon respawning
-     */
-    @SubscribeEvent
-    public static void resetTempOnRespawn(PlayerAboutToRespawnEvent event)
-    {
-        SERVER_CAP_CACHE.remove(event.getNewPlayer());
-        CLIENT_CAP_CACHE.remove(event.getNewPlayer());
-        getTemperatureCap(event.getNewPlayer()).ifPresent(cap ->
-        {
-            if (event.isReturningFromEnd())
-            {
-                event.getOldPlayer().reviveCaps();
-                getTemperatureCap(event.getOldPlayer()).ifPresent(cap::copy);
-                event.getOldPlayer().invalidateCaps();
-            }
-            if (!event.getNewPlayer().level.isClientSide)
-            {   Temperature.updateTemperature(event.getNewPlayer(), cap, true);
-            }
-        });
     }
 
     public static Set<EntityType<? extends LivingEntity>> getEntitiesWithTemperature()
