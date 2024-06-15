@@ -31,6 +31,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
@@ -149,30 +150,22 @@ public class EntityTempManager
         }
     }
 
-    @SubscribeEvent
-    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
-    {
-        SERVER_CAP_CACHE.remove(event.getEntity());
-        CLIENT_CAP_CACHE.remove(event.getEntity());
-    }
-
     /**
      * Tick TempModifiers and update temperature for living entities
      */
     @SubscribeEvent
     public static void onLivingTick(EntityTickEvent event)
     {
-        Entity entity = event.getEntity();
-        if (!(entity instanceof LivingEntity living) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
+        if (!(event.getEntity() instanceof LivingEntity entity) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
-        ITemperatureCap cap = getTemperatureCap(living);
+        ITemperatureCap cap = getTemperatureCap(entity);
         if (!entity.level().isClientSide)
         {   // Tick modifiers serverside
-            cap.tick(living);
+            cap.tick(entity);
         }
         else
         {   // Tick modifiers clientside
-            cap.tickDummy(living);
+            cap.tickDummy(entity);
         }
 
         // Remove expired modifiers
@@ -185,7 +178,7 @@ public class EntityTempManager
         }
 
         if (entity instanceof Player && entity.tickCount % 60 == 0)
-        {   Temperature.updateModifiers(living, cap);
+        {   Temperature.updateModifiers(entity, cap);
         }
     }
 
@@ -193,21 +186,49 @@ public class EntityTempManager
      * Transfer the player's capability when traveling from the End
      */
     @SubscribeEvent
-    public static void returnFromEnd(PlayerEvent.Clone event)
+    public static void carryOverPersistentAttributes(PlayerEvent.Clone event)
     {
-        if (!event.getEntity().level().isClientSide)
+        Player oldPlayer = event.getOriginal();
+        Player newPlayer = event.getEntity();
+
+        if (!newPlayer.level().isClientSide)
         {
             // Get the old player's capability
-            Player oldPlayer = event.getOriginal();
-
-            if (!event.isWasDeath())
-            {   // Copy the capability to the new player
-                getTemperatureCap(event.getEntity()).copy(getTemperatureCap(oldPlayer));
-            }
-            getTemperatureCap(oldPlayer).getPersistentAttributes().forEach(attr ->
-            {   event.getEntity().getAttribute(Holder.direct(attr)).setBaseValue(oldPlayer.getAttribute(Holder.direct(attr)).getBaseValue());
+            getTemperatureCap(oldPlayer).getPersistentAttributes()
+            .forEach(attr ->
+            {   newPlayer.getAttribute(Holder.direct(attr)).setBaseValue(oldPlayer.getAttribute(Holder.direct(attr)).getBaseValue());
             });
         }
+    }
+
+    /**
+     * Reset the player's temperature upon respawning
+     */
+    @SubscribeEvent
+    public static void handlePlayerReset(PlayerEvent.Clone event)
+    {
+        Player oldPlayer = event.getOriginal();
+        Player newPlayer = event.getEntity();
+
+        SERVER_CAP_CACHE.remove(oldPlayer);
+        CLIENT_CAP_CACHE.remove(oldPlayer);
+
+        ITemperatureCap cap = getTemperatureCap(newPlayer);
+        {
+            if (!event.isWasDeath())
+            {   cap.copy(getTemperatureCap(oldPlayer));
+            }
+            if (!newPlayer.level().isClientSide)
+            {   Temperature.updateTemperature(newPlayer, cap, true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
+    {
+        SERVER_CAP_CACHE.remove(event.getEntity());
+        CLIENT_CAP_CACHE.remove(event.getEntity());
     }
 
     /**
