@@ -195,9 +195,6 @@ public class EntityTempManager
         LivingEntity entity = event.getEntity();
         if (!TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
-        if (entity instanceof Player player && !player.level().isClientSide)
-            player.displayClientMessage(Component.literal(entity.getCapability(ModCapabilities.PLAYER_TEMPERATURE) + " " + getTemperatureCap(entity)), true);
-
         getTemperatureCap(entity).ifPresent(cap ->
         {
             if (!entity.level().isClientSide)
