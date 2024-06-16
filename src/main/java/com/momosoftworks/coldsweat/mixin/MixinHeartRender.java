@@ -49,22 +49,21 @@ public abstract class MixinHeartRender
                              float absorbRemaining, int i, int row, int x, int y)
     {
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
-        if (heartsFreezePercentage == 0) return;
-
         int hearts = CSMath.ceil(health / 2d);
         int lastHeartIndex = (int) (healthMax / 2 - hearts);
         boolean half = HEART_INDEX == lastHeartIndex + 1 && health % 2 == 1;
-
-        if (player.hasEffect(ModEffects.ICE_RESISTANCE)) return;
         double temp = Overlays.BODY_TEMP;
 
-            // Get protection from armor underwear
-            float unfrozenHealth = CSMath.blend((float) (1 - heartsFreezePercentage), 1, TempEffectsCommon.getColdResistance(player), 0, 4);
-            if (unfrozenHealth == 1) return;
+        if (heartsFreezePercentage == 0
+        || player.hasEffect(ModEffects.GRACE)) return;
 
-            int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(unfrozenHealth, 1, temp, -100, -50));
-            int frozenHearts = frozenHealth / 2;
-            int u = blink || IS_CONTAINER ? 14 : half ? 7 : 0;
+        // Get protection from armor underwear
+        float unfrozenHealth = CSMath.blend((float) (1 - heartsFreezePercentage), 1, TempEffectsCommon.getColdResistance(player), 0, 4);
+        if (unfrozenHealth == 1) return;
+
+        int frozenHealth = (int) (player.getMaxHealth() - player.getMaxHealth() * CSMath.blend(unfrozenHealth, 1, temp, -100, -50));
+        int frozenHearts = frozenHealth / 2;
+        int u = blink || IS_CONTAINER ? 14 : half ? 7 : 0;
 
         // Render frozen hearts
         bind(HEART_TEXTURE);
