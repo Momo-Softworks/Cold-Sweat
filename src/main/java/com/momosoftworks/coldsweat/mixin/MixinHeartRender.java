@@ -32,9 +32,11 @@ public class MixinHeartRender
     private void renderHeart(GuiGraphics guiGraphics, Gui.HeartType heartType, int x, int y, int yOffset, boolean blink, boolean halfHeart, CallbackInfo ci)
     {
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
-        if (heartsFreezePercentage == 0) return;
-
         Player player = Minecraft.getInstance().player;
+
+        if (heartsFreezePercentage == 0
+        || player.hasEffect(ModEffects.GRACE)) return;
+
         // This check ensures that this only gets called once per heart
         if (heartType == Gui.HeartType.CONTAINER)
         {   HEART_INDEX += 1;
