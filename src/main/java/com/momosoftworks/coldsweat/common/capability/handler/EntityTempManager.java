@@ -398,16 +398,6 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void updateModifiersPeriodically(LivingEvent.LivingUpdateEvent event)
-    {
-        LivingEntity entity = event.getEntityLiving();
-
-        if (entity.tickCount % 60 == 0)
-        {   updateInsulationAttributeModifiers(entity);
-        }
-    }
-
-    @SubscribeEvent
     public static void updateAttributeModifiersOnSlotChange(LivingEquipmentChangeEvent event)
     {
         updateInsulationAttributeModifiers(event.getEntityLiving());
