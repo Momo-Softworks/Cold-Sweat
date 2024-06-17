@@ -26,21 +26,6 @@ import java.lang.reflect.Method;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
-    static Method RENDER_ITEM = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "m_109371_",
-                                                               AbstractClientPlayer.class, float.class, float.class,
-                                                               InteractionHand.class, float.class, ItemStack.class,
-                                                               float.class, PoseStack.class, MultiBufferSource.class, int.class);
-    static Method RENDER_ITEM_IN_HAND = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "m_117184_",
-                                                                               AbstractClientPlayer.class, float.class,
-                                                                               float.class, InteractionHand.class, float.class, ItemStack.class,
-                                                                               float.class, PoseStack.class,
-                                                                               MultiBufferSource.class, int.class);
-    static
-    {
-        RENDER_ITEM.setAccessible(true);
-        RENDER_ITEM_IN_HAND.setAccessible(true);
-    }
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHandRender(RenderHandEvent event)
     {
