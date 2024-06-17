@@ -4,103 +4,87 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.renderer.FirstPersonRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHandRender(RenderHandEvent event)
     {
         if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP)
         {
-            MatrixStack ms = event.getMatrixStack();
-            AbstractClientPlayerEntity player = Minecraft.getInstance().player;
-            boolean isRightHand = EntityHelper.getHandSide(event.getHand(), player) == HandSide.RIGHT;
-
             event.setCanceled(true);
 
+            MatrixStack ms = event.getMatrixStack();
+            ClientPlayerEntity player = Minecraft.getInstance().player;
+            if (player == null) return;
+
+            boolean isRightHand = EntityHelper.getArmFromHand(event.getHand(), player) == HandSide.RIGHT;
+            PlayerRenderer playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+            FirstPersonRenderer handRenderer = Minecraft.getInstance().gameRenderer.itemInHandRenderer;
+
             ms.pushPose();
-            ms.mulPose(Vector3f.YP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 5 - 5)));
-            ms.mulPose(Vector3f.ZP.rotationDegrees(-((float) Math.cos(Math.min(event.getSwingProgress() * 1.3, 1) * Math.PI * 2) * 10 - 10)));
-
-            ms.translate
-            (
-                    0.0d,
-                    Math.cos(Math.min(event.getSwingProgress() * 1.1, 1) * Math.PI * 2 - Math.PI * 0.5) * 0.1
-                            + (event.getEquipProgress() == 0 ? (Math.cos(event.getSwingProgress() * Math.PI * 2) - 1) * 0.2 : 0),
-                    Math.cos(Math.min(event.getSwingProgress() * 1.1, 1) * Math.PI * 2) * -0.0 - 0
-            );
-
-            /*
-             Render the hand itself
-             */
-            ms.pushPose();
-
-            if (isRightHand)
-            {   ms.translate(0.75, -0.3, -0.31);
-            }
-            else
-            {   ms.translate(-0.75, -0.3, -0.31);
-            }
-
-            ms.scale(0.75f, 0.8f, 0.72f);
-
-            PlayerRenderer handRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
-            if (isRightHand)
-            {
-                ms.mulPose(Vector3f.ZP.rotationDegrees(100));
-                ms.mulPose(Vector3f.YP.rotationDegrees(170.0F));
-                ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                ms.translate(event.getEquipProgress() * 1.5, -event.getEquipProgress() * 0.5, -event.getEquipProgress() * 0.2);
-                handRenderer.renderRightHand(ms, event.getBuffers(), event.getLight(), player);
-            }
-            else
-            {
-                ms.mulPose(Vector3f.ZP.rotationDegrees(-100));
-                ms.mulPose(Vector3f.YP.rotationDegrees(190.0F));
-                ms.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                ms.translate(-event.getEquipProgress() * 1.5, -event.getEquipProgress() * 0.5, -event.getEquipProgress() * 0.2);
-                handRenderer.renderLeftHand(ms, event.getBuffers(), event.getLight(), player);
-            }
-            ms.popPose();
-
-            /*
-             Render the lamp
-             */
-            ms.pushPose();
-            ms.translate(event.getEquipProgress() * 0.05, -event.getEquipProgress() * 0.575, event.getEquipProgress() * 0.25);
-            if (isRightHand)
-            {   ms.translate(0.77, -0.54, -0.755);
-                ms.mulPose(Vector3f.YP.rotationDegrees(20));
-            }
-            else
-            {   ms.translate(-0.53, -0.62, -0.715);
-            }
-            try
-            {
-                Minecraft.getInstance().getItemInHandRenderer().renderItem(
-                                   Minecraft.getInstance().player,
-                                   event.getItemStack(),
-                                   isRightHand
-                                        ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
-                                        : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
-                                   true,
-                                   event.getMatrixStack(),
-                                   event.getBuffers(),
-                                   event.getLight());
-            }
-            catch (Exception ignored) {}
-            ms.popPose();
+            // Idle position on the screen
+            ms.translate(isRightHand ? 0.5 : -1.2, 0.2, -0.3);
+            // Move for equip progress
+            ms.translate(event.getEquipProgress() * (isRightHand ? -0.2 : 0.2), -event.getEquipProgress(), 0);
+            // Apply rotations
+            ms.mulPose(Vector3f.XP.rotationDegrees(90));
+            ms.mulPose(Vector3f.ZP.rotationDegrees(180));
+            // Swing animation
+            ms.translate(0,
+                         Math.sin(event.getSwingProgress()*Math.PI) * 0.3,
+                         Math.sin(event.getSwingProgress()*event.getSwingProgress()*Math.PI) * 0.4);
+            ms.mulPose(Vector3f.YP.rotationDegrees((float) Math.sin(event.getSwingProgress()*Math.PI) * (isRightHand ? -30 : 30)));
+            ms.mulPose(Vector3f.ZP.rotationDegrees((float) Math.sin(event.getSwingProgress()*Math.PI) * (isRightHand ? -30 : 30)));
+            // Render the item/hand
+            renderHand(ms, event.getBuffers(), event.getLight(), player, isRightHand, handRenderer, playerRenderer, event.getItemStack());
             ms.popPose();
         }
+    }
+
+    private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, ClientPlayerEntity player, boolean isRightHand, FirstPersonRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
+    {
+        // Render arm
+        ms.pushPose();
+        ms.pushPose();
+        ms.scale(1, 1.2f, 1);
+        ms.mulPose(Vector3f.XP.rotationDegrees(-25));
+        ms.translate(0, -0.2, 0.25);
+        if (isRightHand)
+        {   playerRenderer.renderRightHand(ms, bufferSource, light, player);
+        }
+        else
+        {   ms.translate(-0.7, 0, 0);
+            playerRenderer.renderLeftHand(ms, bufferSource, light, player);
+        }
+        ms.popPose();
+
+        // Render lamp item
+        ms.pushPose();
+        ms.mulPose(Vector3f.XP.rotationDegrees(-90));
+        ms.translate(-0.35, 0.1, 0.625);
+        ms.scale(1, 1, 0.8f);
+        if (isRightHand)
+        {   handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
+        }
+        else
+        {   handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
+        }
+        ms.popPose();
+        ms.popPose();
     }
 }
