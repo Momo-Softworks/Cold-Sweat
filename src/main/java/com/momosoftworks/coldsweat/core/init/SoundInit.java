@@ -19,6 +19,11 @@ public class SoundInit
     public static final RegistryObject<SoundEvent> SOUL_LAMP_OFF_SOUND_REGISTRY = SOUNDS.register("item.soulspring_lamp.off",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.soulspring_lamp.off")));
 
+    public static final RegistryObject<SoundEvent> WATERSKIN_POUR_SOUND_REGISTRY = SOUNDS.register("item.waterskin.pour",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.waterskin.pour")));
+    public static final RegistryObject<SoundEvent> WATERSKIN_FILL_SOUND_REGISTRY = SOUNDS.register("item.waterskin.fill",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.waterskin.fill")));
+
     public static final RegistryObject<SoundEvent> HEARTH_FUEL_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel")));
 
