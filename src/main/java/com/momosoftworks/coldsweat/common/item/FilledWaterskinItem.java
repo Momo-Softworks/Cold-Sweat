@@ -176,7 +176,7 @@ public class FilledWaterskinItem extends Item
         Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
 
         // Play empty sound
-        if (!player.level().isClientSide)
+        if (!player.level.isClientSide)
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
