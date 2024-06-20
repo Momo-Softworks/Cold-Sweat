@@ -6,9 +6,10 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -56,6 +57,8 @@ public class WaterskinItem extends Item
             {   LayeredCauldronBlock.lowerFillLevel(state, level, pos);
             }
             fillWaterskinItem(player, context.getItemInHand(), context.getHand(), pos);
+            WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
+            level.playSound(null, pos, ModSounds.WATERSKIN_FILL, SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
 
             return InteractionResult.SUCCESS;
         }
@@ -69,7 +72,8 @@ public class WaterskinItem extends Item
         ItemStack itemstack = ar.getObject();
 
         BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-        BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
+        BlockPos hitPos = blockhitresult.getBlockPos();
+        BlockState lookingAt = level.getBlockState(hitPos);
 
         if (blockhitresult.getType() != HitResult.Type.BLOCK)
         {   return InteractionResultHolder.pass(itemstack);
@@ -77,7 +81,10 @@ public class WaterskinItem extends Item
         else
         {
             if (lookingAt.getFluidState().isSource() && lookingAt.getFluidState().getType().isSame(Fluids.WATER))
-            {   fillWaterskinItem(player, itemstack, hand, blockhitresult.getBlockPos());
+            {
+                fillWaterskinItem(player, itemstack, hand, hitPos);
+                level.playSound(null, hitPos, ModSounds.WATERSKIN_FILL, SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
+                WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, hitPos.getX() + 0.5, hitPos.getY() + 1, hitPos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
             }
             return ar;
         }
@@ -120,8 +127,6 @@ public class WaterskinItem extends Item
         else
         {   player.setItemInHand(usedHand, filledWaterskin);
         }
-        //Play filling sound
-        level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
         player.swing(usedHand);
         player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
         player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
