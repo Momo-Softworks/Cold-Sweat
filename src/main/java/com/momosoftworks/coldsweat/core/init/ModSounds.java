@@ -19,6 +19,11 @@ public class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> SOUL_LAMP_OFF = SOUNDS.register("item.soulspring_lamp.off",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.soulspring_lamp.off")));
 
+    public static final DeferredHolder<SoundEvent, SoundEvent> WATERSKIN_POUR = SOUNDS.register("item.waterskin.pour",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.waterskin.pour")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> WATERSKIN_FILL = SOUNDS.register("item.waterskin.fill",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.waterskin.fill")));
+
     public static final DeferredHolder<SoundEvent, SoundEvent> HEARTH_FUEL = SOUNDS.register("block.hearth.fuel",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block.hearth.fuel")));
 
