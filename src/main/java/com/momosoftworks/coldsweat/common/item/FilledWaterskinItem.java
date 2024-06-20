@@ -179,7 +179,7 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, player.getUsedItemHand());
-        player.swing(Hand.MAIN_HAND);
+        player.swing(player.getUsedItemHand());
 
         // spawn falling water particles
         Random rand = new Random();
