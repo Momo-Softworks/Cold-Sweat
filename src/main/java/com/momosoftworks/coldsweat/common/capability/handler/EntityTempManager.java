@@ -136,7 +136,11 @@ public class EntityTempManager
         {
             ITemperatureCap cap = getTemperatureCap(living);
             // If entity has never been initialized, add default modifiers
-            if (!event.getEntity().getPersistentData().getBoolean("InitializedModifiers"))
+            List<TempModifier> allModifiers = new ArrayList<>();
+            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            {   allModifiers.addAll(cap.getModifiers(trait));
+            }
+            if (allModifiers.isEmpty())
             {
                 for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
                 {
