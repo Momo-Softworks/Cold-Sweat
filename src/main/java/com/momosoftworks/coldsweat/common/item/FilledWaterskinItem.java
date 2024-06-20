@@ -177,7 +177,7 @@ public class FilledWaterskinItem extends Item
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
-        consumeWaterskin(stack, player);
+        consumeWaterskin(stack, player, player.getUsedItemHand());
         player.swing(InteractionHand.MAIN_HAND);
 
         // spawn falling water particles
@@ -202,7 +202,7 @@ public class FilledWaterskinItem extends Item
         return true;
     }
 
-    public static void consumeWaterskin(ItemStack stack, Player player)
+    public static void consumeWaterskin(ItemStack stack, Player player, InteractionHand usedHand)
     {
         // Create empty waterskin item
         ItemStack emptyStack = getEmpty(stack);
@@ -211,10 +211,10 @@ public class FilledWaterskinItem extends Item
         // Add the item to the player's inventory
         if (player.getInventory().contains(emptyStack))
         {   player.addItem(emptyStack);
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(usedHand, ItemStack.EMPTY);
         }
         else
-        {   player.setItemInHand(InteractionHand.MAIN_HAND, emptyStack);
+        {   player.setItemInHand(usedHand, emptyStack);
         }
     }
 
@@ -254,7 +254,7 @@ public class FilledWaterskinItem extends Item
             }
             // Consume waterskin
             if (player != null)
-            {   consumeWaterskin(context.getItemInHand(), player);
+            {   consumeWaterskin(context.getItemInHand(), player, player.getUsedItemHand());
                 player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
             }
             return InteractionResult.SUCCESS;
