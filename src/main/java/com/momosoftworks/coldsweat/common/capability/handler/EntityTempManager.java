@@ -174,9 +174,13 @@ public class EntityTempManager
             getTemperatureCap(living).ifPresent(cap ->
             {
                 // If entity has never been initialized, add default modifiers
+                List<TempModifier> allModifiers = new ArrayList<>();
                 for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                {   allModifiers.addAll(cap.getModifiers(trait));
+                }
+                if (allModifiers.isEmpty())
                 {
-                    if (cap.getModifiers(trait).isEmpty())
+                    for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
                     {
                         GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
                         MinecraftForge.EVENT_BUS.post(gatherEvent);
