@@ -2176,3 +2176,15 @@ Technical Changes:
       - Modify: Fires after the TempModifier is calculated, and allows the resulting function to be modified
             - The event is not cancelable
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04c
+- Added custom filling and pouring sounds for the waterskin
+- Waterskins can now be used to fill a cauldron
+
+Fixes:
+- Fixed hearts appearing to be frozen-over when the player is cold and Grace is active
+- Fixed mixin conflict with ModernFix
+- Fixed performance issue with updating the player's equipped insulation items
+- Fixed hacky soulspring lamp rendering in 1st-person
+- Fixed temperature sometimes not working when updating existing worlds
